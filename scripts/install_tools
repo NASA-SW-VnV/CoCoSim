@@ -1,0 +1,1450 @@
+#!/bin/bash
+
+################################################################################
+#
+# Installation script for cocosim dependencies (lustrec, zustre, kind2).
+#
+# Author: Maxime Arthaud <maxime.arthaud@nasa.gov>
+#
+# Copyright (c) 2017 United States Government as represented by the
+# Administrator of the National Aeronautics and Space Administration.
+# All Rights Reserved.
+#
+################################################################################
+#
+# This script assumes the operating system provides:
+#   bash, basename, dirname, mkdir, touch, sed, date
+#
+################################################################################
+
+progname=$(basename "$0")
+
+# Version settings
+cmake_required_version="2.8.11"
+cmake_install_version="3.7.2"
+m4_install_version="1.4.18"
+python_required_version="2.7"
+python_install_version="2.7.13"
+ocaml_required_version="4.03.0"
+ocaml_install_version="4.04.0"
+ocamlfind_install_version="1.7.1"
+ocamlbuild_install_version="0.9.3"
+ocamlgraph_install_version="1.8.7"
+menhir_install_version="20170101"
+
+# Default parameters
+install_dir=""
+build_dir="/tmp/cocosim-build"
+verbose=0
+force=0
+use_colors=1
+if command -v nproc >/dev/null 2>&1; then
+    njobs=$(nproc)
+else
+    njobs=1
+fi
+lustrec_url="https://github.com/coco-team/lustrec.git"
+lustrec_branch="master"
+zustre_url="https://github.com/coco-team/zustre.git"
+zustre_branch="master"
+kind2_url="https://github.com/kind2-mc/kind2.git"
+kind2_branch="master"
+
+#####################
+# General functions #
+#####################
+
+function init_colors() {
+    if (( use_colors )); then
+        coff="\033[0m"
+        cbold="\033[1m"
+        cred="\033[31m"
+        cgreen="\033[32m"
+        cyellow="\033[33m"
+        cblue="\033[34m"
+        cpurple="\033[35m"
+        ccyan="\033[36m"
+        cwhite="\033[37m"
+    else
+        coff=""
+        cbold=""
+        cred=""
+        cgreen=""
+        cyellow=""
+        cblue=""
+        cpurple=""
+        ccyan=""
+        cwhite=""
+    fi
+}
+
+function usage() {
+    echo "usage: $progname [OPTION]..."
+    echo ""
+    echo "Build and install cocosim dependencies without root access."
+    echo ""
+    echo "Defaults for the options are specified in brackets."
+    echo ""
+    echo "Configuration:"
+    echo "  --prefix=PREFIX      install files in PREFIX"
+    echo "  --builddir=BUILDDIR  configure for building on BUILDDIR [$build_dir]"
+    echo ""
+    echo "Optional arguments:"
+    echo "  -h, --help           display this help and exit"
+    echo "  -v, --verbose        make this script more verbose"
+    echo "  -f, --force          force"
+    echo "  --no-colors          disable colors"
+    echo "  --jobs=N             allow N jobs at once [$njobs]"
+    echo "  --lustrec-url=URL    lustrec git repository url [$lustrec_url]"
+    echo "  --lustrec-branch=BR  lustrec branch [$lustrec_branch]"
+    echo "  --zustre-url=URL     zustre git repository url [$zustre_url]"
+    echo "  --zustre-branch=BR   zustre branch [$zustre_branch]"
+    echo "  --kind2-url=URL      kind2 git repository url [$kind2_url]"
+    echo "  --kind2-branch=BR    kind2 branch [$kind2_branch]"
+}
+
+function short_help() {
+    echo "Try '$progname -h' for more information." >&2
+}
+
+function error() {
+    echo "$progname: error: $1" >&2
+}
+
+# Split command line arguments, i.e:
+#   -ab -> -a -b
+#   --foo=bar -> --foo bar
+#
+# Split arguments are stored in the ARGS array
+#
+# Parameters:
+#   $1,$2,$3,...,$n: arguments to split
+function explode_args() {
+    unset ARGS
+    local arg=$1 key value
+
+    while [[ $arg ]]; do
+        [[ $arg = "--" ]] && ARGS+=("$@") && break
+
+        # Short options
+        if [[ ${arg:0:1} = "-" && ${arg:1:1} != "-" ]]; then
+            ARGS+=("-${arg:1:1}")
+            (( ${#arg} > 2 )) && arg="-${arg:2}" || { shift; arg=$1; }
+        # Long options
+        elif [[ ${arg:0:2} = "--" ]]; then
+            # Split argument at '=':
+            # e.g --foo=bar -> key=--foo, value=bar
+            key=${arg%%=*}; value=${arg#*=}
+            ARGS+=("$key")
+            [[ "$key" != "$value" ]] && ARGS+=("$value")
+            shift; arg=$1
+        else
+            ARGS+=("$arg"); shift; arg=$1
+        fi
+    done
+}
+
+# Return a concatenation of strings separated by a given separator, i.e:
+#   , a b c -> a,b,c
+#
+# Parameters:
+#   $1: separator
+#   $2,$2,$4,...,$n: arguments to join
+function join() {
+    local sep=$1; shift
+    echo -n "$1"; shift
+    printf "%s" "${@/#/$sep}"
+}
+
+# Check if a command exists
+function command_exists() {
+    command -v "$1" >/dev/null 2>&1
+}
+
+# Return the absolute path of the given filename
+function abs_path() {
+    local arg=${1/#\~/$HOME}
+    local dirname=$(dirname "$arg") basename=$(basename "$arg")
+
+    while [[ ! -d "$dirname" ]]; do
+        basename="$(basename "$dirname")/$basename"
+        dirname=$(dirname "$dirname")
+    done
+
+    pushd . >/dev/null
+    cd "$dirname"
+    dirname=$(pwd)
+    popd >/dev/null
+
+    if [[ "$dirname" = "/" ]]; then
+        echo -n "/$basename"
+    else
+        echo -n "$dirname/$basename"
+    fi
+}
+
+# Find a pattern within the standard input
+#
+# If found, return 0 and print the given captured group
+# Otherwise, return 1
+#
+# Parameters:
+#   $1: regular expression
+#   $2: parenthesis group number to capture
+function match() {
+    while read -r line; do
+        if [[ "$line" =~ $1 ]]; then
+            echo -n "${BASH_REMATCH[$2]}"
+            return 0
+        fi
+    done
+
+    return 1
+}
+
+# Return the name of all binaries in the PATH matching a regular expression
+function glob_binaries() {
+    local IFS=:
+    find $PATH \
+        -maxdepth 1 \
+        -regex ".*/$1" \
+        -exec basename {} \; 2>/dev/null | sort -u
+}
+
+########################
+# Download and extract #
+########################
+
+# Download a file from an URL.
+#
+# The file is stored under $download_dir and is named after the remote file
+function download() {
+    local url=$1 filename=$(basename "$1")
+
+    cd "$download_dir"
+    if [[ -f "$filename" ]]; then
+        progress "Using already downloaded $filename from $url"
+    else
+        progress "Downloading $url"
+
+        # Note: do not try to capture curl/wget output because it contains
+        # the progress bar
+        $download_agent "$url" || {
+            rm -f "$filename"; error "Error while fetching $filename"; exit 6;
+        }
+    fi
+}
+
+# Download a file from an URL.
+#
+# Parameters:
+#   $1: url
+#   $2: new name for the archive
+function download_rename() {
+    local url=$1 filename=$2
+
+    cd "$download_dir"
+    if [[ -f "$filename" ]]; then
+        progress "Using already downloaded $filename from $url"
+    else
+        progress "Downloading $url"
+
+        # Note: do not try to capture curl/wget output because it contains
+        # the progress bar
+        $download_agent "$url" || {
+            rm -f "$(basename "$1")"; error "Error while fetching $filename"; exit 6;
+        }
+
+        mv "$(basename "$1")" "$filename"
+    fi
+}
+
+# Extract an archive and move the root directory
+#
+# Parameters:
+#   $1: path to the archive
+#   $2: destination path
+function extract() {
+    local archive_path=$1 destination_path=$2
+    local archive_filename=$(basename "$archive_path")
+    local archive_directory=$(dirname "$archive_path")
+
+    progress "Extracting $archive_filename"
+
+    cd "$archive_directory"
+    run_log_debug tar xf "$archive_filename" || {
+        error "Error while extracting $archive_filename"; exit 7;
+    }
+
+    root_directory=$archive_filename
+    for ext in .gz .xz .bz2 .tar; do
+        root_directory=${root_directory%$ext}
+    done
+
+    [[ -d "$root_directory" ]] || assert_failed "$root_directory does not exist"
+
+    rm -rf "$destination_path"
+    mv "$root_directory" "$destination_path"
+}
+
+# Download an archive from an URL and extract it at the given location
+#
+# Parameters:
+#   $1: URL
+#   $2: destination path
+function download_extract() {
+    local url=$1 destination_path=$2
+    download "$url"
+    extract "$download_dir/$(basename "$url")" "$destination_path"
+}
+
+# Clone a git repository in the download directory, and copy it at the given
+# location
+#
+# Parameters:
+#   $1: URL
+#   $2: branch name (e.g, master)
+#   $3: destination path
+function git_clone() {
+    local url=$1 branch=$2 destination_path=$3 dirname=$(basename "$3")
+
+    # download
+    cd "$download_dir"
+    if [[ -d "$dirname" ]]; then
+        progress "Using already downloaded $dirname from $url branch $branch"
+    else
+        progress "Downloading $url branch $branch"
+
+        if (( verbose == 0 )); then
+            run_log_quiet git clone --depth 1 --branch "$branch" "$url" "$dirname"
+        else
+            git clone --depth 1 --branch "$branch" "$url" "$dirname"
+        fi || {
+            rm -rf "$dirname"; error "Error while fetching $dirname"; exit 6;
+        }
+    fi
+
+    # copy
+    rm -rf "$destination_path"
+    cp -r "$download_dir/$dirname" "$destination_path"
+}
+
+######################
+# Version comparison #
+######################
+
+# Compare two version numbers
+#
+# Return 0 if $1 is equal to $2,
+#        1 if $1 is greater than $2 and
+#        2 if $1 is lower than $2
+function version_compare() {
+    [[ $1 == $2 ]] && return 0
+
+    local IFS=.
+    local i ver1=($1) ver2=($2)
+
+    # fill empty fields in ver1 with zeros
+    for ((i = ${#ver1[@]}; i < ${#ver2[@]}; i++)); do
+        ver1[i]=0
+    done
+
+    for ((i = 0; i < ${#ver1[@]}; i++)); do
+        if [[ -z ${ver2[i]} ]]; then
+            # fill empty fields in ver2 with zeros
+            ver2[i]=0
+        fi
+        if (( 10#${ver1[i]} > 10#${ver2[i]} )); then
+            return 1
+        fi
+        if (( 10#${ver1[i]} < 10#${ver2[i]} )); then
+            return 2
+        fi
+    done
+
+    return 0
+}
+
+# Compare two version numbers
+#
+# Return 0 iff $1 is greater or equal to $2
+function version_ge() {
+    version_compare "$1" "$2"; (( $? <= 1 ))
+}
+
+#####################
+# Version detection #
+#####################
+
+version_regex='[0-9]+(\.[0-9]+)*'
+
+# Parse and detect the version of cmake, given the command name
+function cmake_parse_version() {
+    local version_output=$("$1" --version 2>&1)
+
+    debug "'$1 --version':\n$version_output"
+
+    echo "$version_output" | match "^cmake version ($version_regex)$" 1
+}
+
+# Parse and detect the version of m4, given the command name
+function m4_parse_version() {
+    local version_output=$("$1" --version 2>&1)
+
+    debug "'$1 --version':\n$version_output"
+
+    echo "$version_output" | match "^((GNU M4)|(m4 \(GNU M4\))) ($version_regex)$" 4
+}
+
+# Parse and detect the version of python, given the command name
+function python_parse_version() {
+    local version_output=$("$1" --version 2>&1)
+
+    debug "'$1 --version':\n$version_output"
+
+    echo "$version_output" | match "^Python ($version_regex)$" 1
+}
+
+# Check if a python version satisfies cocosim requirements
+function python_satisfies_requirements() {
+    local version=$1
+
+    # enforce python 2
+    [[ ${version:0:1} = 2 ]] && version_ge "$version" "$python_required_version"
+}
+
+# Parse and detect the version of ocaml, given the command name
+function ocaml_parse_version() {
+    local version_output=$("$1" -version 2>&1)
+
+    debug "'$1 -version':\n$version_output"
+
+    echo "$version_output" | match "^The ((OCaml)|(Objective Caml)) toplevel, version ($version_regex)$" 4
+}
+
+# Parse and detect the version of ocamlbuild, given the command name
+function ocamlbuild_parse_version() {
+    local version_output=$("$1" -version 2>&1)
+
+    debug "'$1 -version':\n$version_output"
+
+    echo "$version_output" | match "^ocamlbuild ($version_regex)$" 1
+}
+
+# Parse and detect the version of menhir, given the command name
+function menhir_parse_version() {
+    local version_output=$("$1" --version 2>&1)
+
+    debug "'$1 --version':\n$version_output"
+
+    echo "$version_output" | match "^menhir, version ($version_regex)$" 1
+}
+
+# Parse and detect the version of spacer, given the command name
+function spacer_parse_version() {
+    local version_output=$("$1" --version 2>&1)
+
+    debug "'$1 --version':\n$version_output"
+
+    echo "$version_output" | match "^Z3 version ($version_regex)$" 1
+}
+
+# Parse and detect the version of lustrec, given the command name
+function lustrec_parse_version() {
+    local version_output=$("$1" -version 2>&1)
+
+    debug "'$1 -version':\n$version_output"
+
+    echo "$version_output" | match "^Lustrec compiler, version ($version_regex)(\-[ \n\t]*[0-9]+)? \(.+\)$" 1
+}
+
+# Parse and detect the version of kind2, given the command name
+function kind2_parse_version() {
+    local version_output=$("$1" --version 2>&1)
+
+    debug "'$1 --version':\n$version_output"
+
+    echo "$version_output" | match "^kind2 v($version_regex)(\-[0-9]+)?(\-[a-zA-Z0-9]+)?$" 1
+}
+
+################
+# Main program #
+################
+
+# Parse options
+explode_args "$@"
+set -- "${ARGS[@]}"
+unset ARGS
+
+while [[ $1 ]]; do
+    case "$1" in
+        -h|--help)        usage; exit 0;;
+        -v|--verbose)     (( verbose ++ ));;
+        -f|--force)       (( force ++ ));;
+        --no-colors)      use_colors=0;;
+        --prefix)         shift; install_dir=$1;;
+        --builddir)       shift; build_dir=$1;;
+        --jobs)           shift; njobs=$1;;
+        --lustrec-url)    shift; lustrec_url=$1;;
+        --lustrec-branch) shift; lustrec_branch=$1;;
+        --zustre-url)     shift; zustre_url=$1;;
+        --zustre-branch)  shift; zustre_branch=$1;;
+        --kind2-url)      shift; kind2_url=$1;;
+        --kind2-branch)   shift; kind2_branch=$1;;
+        *)                error "unrecognized option: $1"; short_help; exit 2;;
+    esac
+    shift
+done
+
+# Check if running as root
+if (( ! force && UID == 0 )); then
+    error "this script should NOT run as root"
+    echo "Use --force to ignore this message." >&2
+    exit 1
+fi
+
+# Check options
+if [[ -z "$install_dir" ]]; then
+    error "missing argument --prefix"; short_help; exit 2
+elif [[ -z "$build_dir" ]]; then
+    error "missing argument --builddir"; short_help; exit 2
+elif [[ ! "$njobs" =~ ^[1-9][0-9]*$ ]]; then
+    error "'$njobs' is not a positive number"; short_help; exit 2
+elif [[ -z "$lustrec_url" ]]; then
+    error "missing argument --lustrec-url"; short_help; exit 2
+elif [[ -z "$lustrec_branch" ]]; then
+    error "missing argument --lustrec-branch"; short_help; exit 2
+elif [[ -z "$zustre_url" ]]; then
+    error "missing argument --zustre-url"; short_help; exit 2
+elif [[ -z "$zustre_branch" ]]; then
+    error "missing argument --zustre-branch"; short_help; exit 2
+elif [[ -z "$kind2_url" ]]; then
+    error "missing argument --kind2-url"; short_help; exit 2
+elif [[ -z "$kind2_branch" ]]; then
+    error "missing argument --kind2-branch"; short_help; exit 2
+fi
+
+install_dir_orig=$install_dir
+install_dir=$(abs_path "$install_dir")
+build_dir_orig=$build_dir
+build_dir=$(abs_path "$build_dir")
+download_dir_orig="$build_dir_orig/downloads"
+download_dir="$build_dir/downloads"
+log_file_orig="$build_dir_orig/bootstrap.log"
+log_file="$build_dir/bootstrap.log"
+
+# Initialize colors
+init_colors
+
+# Create directories
+mkdir -p "$install_dir" 2>/dev/null || { error "cannot create directory '$install_dir_orig'"; exit 2; }
+mkdir -p "$build_dir" 2>/dev/null || { error "cannot create directory '$build_dir_orig'"; exit 2; }
+mkdir -p "$download_dir" 2>/dev/null || { error "cannot create directory '$download_dir_orig'"; exit 2; }
+touch "$log_file" 2>/dev/null || { error "cannot create '$log_file_orig'"; exit 2; }
+
+######################
+# Output and logging #
+######################
+
+function strip_colors() {
+    echo -en "$1" | sed -E 's#'$(echo -en '\x1B')'\[([0-9]{1,3}((;[0-9]{1,3})*)?)?[m|K]##g'
+}
+
+function log() {
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] [$1] $(strip_colors "$2")" >> "$log_file"
+}
+
+function error() {
+    echo -e "${cbold}${cred}$1${coff}" >&2
+    log error "$1"
+}
+
+function warning() {
+    echo -e "${cbold}${cyellow}==> Warning: $1${coff}"
+    log warning "$1"
+}
+
+function success() {
+    echo -e "${cbold}${cgreen}==> ${coff}${cbold}$1${coff}"
+    log success "$1"
+}
+
+function progress() {
+    echo -e "${cbold}${cblue}==> ${coff}${cbold}$1${coff}"
+    log progress "$1"
+}
+
+function info() {
+    echo -e "$1${coff}"
+    log info "$1"
+}
+
+function debug() {
+    if (( verbose >= 1 )); then
+        echo -e "$1${coff}" >&2
+    fi
+    log debug "$1"
+}
+
+function assert_failed() {
+    error "Assertion failed: $1"; exit 3;
+}
+
+function error_parse_version() {
+    error "Unable to detect the version of '$1'"; exit 5;
+}
+
+function error_patch() {
+    error "Error while patching $1. see $log_file_orig for more details."
+    exit 8
+}
+
+function error_configure() {
+    if (( verbose == 0 )); then
+        error "Error while configuring $1. see $log_file_orig for more details."
+    else
+        error "Error while configuring $1."
+    fi
+    exit 9
+}
+
+function error_make() {
+    if (( verbose == 0 )); then
+        error "Error while building $1. see $log_file_orig for more details."
+    else
+        error "Error while building $1."
+    fi
+    exit 10
+}
+
+function error_install() {
+    if (( verbose == 0 )); then
+        error "Error while installing $1. see $log_file_orig for more details."
+    else
+        error "Error while installing $1."
+    fi
+    exit 11
+}
+
+function error_test() {
+    if (( verbose == 0 )); then
+        error "Error while testing $1. see $log_file_orig for more details."
+    else
+        error "Error while testing $1."
+    fi
+    exit 12
+}
+
+# log everything, display everything
+function run_log_debug() {
+    "$@" 2>&1 | tee -a "$log_file" >&2
+    return ${PIPESTATUS[0]}
+}
+
+# log everything, only display stderr
+function run_log_verbose() {
+    { "$@" >> "$log_file" 2>&3; } 3>&1 | tee -a "$log_file" >&2
+    return ${PIPESTATUS[0]}
+}
+
+# log everything, do not display anything
+function run_log_quiet() {
+    "$@" >> "$log_file" 2>&1
+}
+
+function progress_run() {
+    progress "$*"
+    if (( verbose >= 2 )); then
+        run_log_debug "$@"
+    elif (( verbose == 1 )); then
+        run_log_verbose "$@"
+    else
+        run_log_quiet "$@"
+    fi
+}
+
+################################
+# Check required dependencies  #
+################################
+
+progress "Checking required dependencies"
+
+if command_exists "$CC"; then
+    debug "Found CC=$CC"
+    export CC
+elif command_exists cc; then
+    debug "Found cc at $(command -v cc)"
+    export CC="cc"
+elif command_exists gcc; then
+    debug "Found gcc at $(command -v gcc)"
+    export CC="gcc"
+elif command_exists clang; then
+    debug "Found clang at $(command -v clang)"
+    export CC="clang"
+else
+    error "Unable to find a C compiler"
+    exit 4
+fi
+
+if command_exists "$CXX"; then
+    debug "Found CXX=$CXX"
+    export CXX
+elif command_exists c++; then
+    debug "Found c++ at $(command -v c++)"
+    export CXX="c++"
+elif command_exists g++; then
+    debug "Found g++ at $(command -v g++)"
+    export CXX="g++"
+elif command_exists clang++; then
+    debug "Found clang++ at $(command -v clang++)"
+    export CXX="clang++"
+else
+    error "Unable to find a C++ compiler"
+    exit 4
+fi
+
+utils_deps=('cat' 'rm' 'mv' 'cp' 'ln' 'find' 'tee' \
+            'patch' 'tar' 'gzip' 'gunzip' 'xz' \
+            'make' 'install' 'git' \
+            'autoconf' 'automake' 'aclocal' 'pkg-config')
+unset missing_deps
+
+for cmd in "${utils_deps[@]}"; do
+    if command_exists "$cmd"; then
+        debug "Found $cmd at $(command -v "$cmd")"
+    else
+        missing_deps+=("$cmd")
+    fi
+done
+
+if ! command_exists libtool && ! command_exists libtoolize &&
+        ! command_exists glibtool && ! command_exists glibtoolize; then
+    missing_deps+=("libtool")
+fi
+
+if command_exists curl; then
+    debug "Found curl at $(command -v curl)"
+    download_agent='curl -OLfC - --progress-bar --ftp-pasv --retry 3 --retry-delay 3'
+elif command_exists wget; then
+    debug "Found wget at $(command -v wget)"
+    download_agent='wget -c -q --show-progress --tries=3 --waitretry=3'
+else
+    missing_deps+=("curl")
+fi
+
+if (( ${#missing_deps[@]} > 0 )); then
+    error "Missing required utilities: $(join ", " "${missing_deps[@]}")"
+    exit 4
+fi
+
+unset utils_deps missing_deps
+
+success "Found all required utilities"
+
+#########
+# Flags #
+#########
+
+export MAKEFLAGS="-j$njobs $MAKEFLAGS"
+
+######################
+# Activation scripts #
+######################
+
+unset act_prepend_path
+unset act_prepend_manpath
+unset act_prepend_infopath
+unset act_prepend_python_path
+
+function prepend_path() {
+    PATH="$1:$PATH"
+    act_prepend_path+=("$1")
+}
+
+function prepend_manpath() {
+    export MANPATH="$1${MANPATH:+:$MANPATH}"
+    act_prepend_manpath+=("$1")
+}
+
+function prepend_infopath() {
+    export INFOPATH="$1${INFOPATH:+:$INFOPATH}"
+    act_prepend_infopath+=("$1")
+}
+
+function prepend_python_path() {
+    export PYTHONPATH="$1${PYTHONPATH:+:$PYTHONPATH}"
+    act_prepend_python_path+=("$1")
+}
+
+function generate_env_path_line() {
+    local var_name=$1; shift
+
+    if (( $# > 0 )); then
+        echo "export ${var_name}=\"$(join ':' "$@")\${${var_name}:+:\$${var_name}}\""
+    fi
+}
+
+###############
+# Check cmake #
+###############
+
+progress "Checking for CMake"
+found_cmake=0
+
+if command_exists cmake; then
+    version=$(cmake_parse_version cmake) || error_parse_version cmake
+
+    if version_ge "$version" "$cmake_required_version"; then
+        found_cmake=1
+        success "Found CMake $version"
+    else
+        progress "Found CMake $version, version too old, skipped"
+    fi
+fi
+
+##############################
+# Install cmake if necessary #
+##############################
+
+if (( ! found_cmake )); then
+    progress "Could NOT find CMake >= $cmake_required_version"
+
+    if [[ -x "$install_dir/cmake-$cmake_install_version/bin/cmake" ]]; then
+        progress "Using already built ${cgreen}cmake $cmake_install_version"
+    else
+        progress "Installing ${cgreen}cmake $cmake_install_version"
+
+        download_extract "https://cmake.org/files/v${cmake_install_version%.*}/cmake-$cmake_install_version.tar.gz" \
+            "$build_dir/cmake-$cmake_install_version"
+
+        cd "$build_dir/cmake-$cmake_install_version"
+
+        progress_run ./configure \
+            --prefix="$install_dir/cmake-$cmake_install_version" \
+            --no-system-libs || error_configure cmake
+
+        progress_run make || error_make cmake
+
+        progress_run make install || error_install cmake
+    fi
+
+    prepend_path "$install_dir/cmake-$cmake_install_version/bin"
+
+    (command_exists cmake && version=$(cmake_parse_version cmake) &&
+        [[ "$version" = "$cmake_install_version" ]]) ||
+        assert_failed "cmake is not properly installed"
+
+    success "${cgreen}cmake $cmake_install_version${coff}${cbold} successfully installed"
+fi
+
+############
+# Check m4 #
+############
+
+progress "Checking for m4"
+found_m4=0
+
+if command_exists m4; then
+    version=$(m4_parse_version m4) || error_parse_version m4
+    success "Found m4 $version"
+    found_m4=1
+fi
+
+###########################
+# Install m4 if necessary #
+###########################
+
+if (( ! found_m4 )); then
+    progress "Could NOT find m4"
+
+    if [[ -x "$install_dir/m4-$m4_install_version/bin/m4" ]]; then
+        progress "Using already built ${cgreen}m4 $m4_install_version"
+    else
+        progress "Installing ${cgreen}m4 $m4_install_version"
+
+        download_extract "https://ftp.gnu.org/gnu/m4/m4-$m4_install_version.tar.xz" \
+            "$build_dir/m4-$m4_install_version"
+        
+        cd "$build_dir/m4-$m4_install_version"
+
+        progress_run ./configure \
+            --prefix="$install_dir/m4-$m4_install_version" \
+            --disable-dependency-tracking || error_configure m4
+
+        progress_run make || error_make m4
+
+        progress_run make install || error_install m4
+    fi
+
+    prepend_path "$install_dir/m4-$m4_install_version/bin"
+    prepend_manpath "$install_dir/m4-$m4_install_version/share/man"
+    prepend_infopath "$install_dir/m4-$m4_install_version/share/info"
+
+    (command_exists m4 && version=$(m4_parse_version m4) &&
+        [[ "$version" = "$m4_install_version" ]]) ||
+        assert_failed "m4 is not properly installed"
+
+    success "${cgreen}m4 $m4_install_version${coff}${cbold} successfully installed"
+fi
+
+################
+# Check python #
+################
+
+progress "Checking for Python"
+found_python=0
+
+# Check the default python
+if command_exists python; then
+    version=$(python_parse_version python) || error_parse_version python
+
+    if python_satisfies_requirements "$version"; then
+        found_python=1
+        success "Found Python $version"
+    else
+        progress "Found Python $version, version too old, skipped"
+    fi
+fi
+
+# Check all available versions of python
+if (( ! found_python )); then
+    for cmd in $(glob_binaries "python[0-9\.\-][0-9\.\-]*"); do
+        if command_exists "$cmd"; then
+            version=$(python_parse_version "$cmd") || error_parse_version python
+
+            if python_satisfies_requirements "$version"; then
+                found_python=1
+                success "Found Python $version"
+
+                # Create symbolic links
+                progress "Using symbolic links to make it the default python"
+
+                if [[ ! -d "$install_dir/python-$version" ]]; then
+                    mkdir -p "$install_dir/python-$version/bin"
+                    cd "$install_dir/python-$version/bin"
+
+                    ln -s "$(command -v "$cmd")" python
+                    ln -s "$(command -v "$cmd")-config" python-config
+                fi
+
+                prepend_path "$install_dir/python-$version/bin"
+                break
+            else
+                progress "Found Python $version, version too old, skipped"
+            fi
+        fi
+    done
+fi
+
+# Check for python distutils (required by spacer)
+if ! python -c "import distutils" 2>/dev/null; then
+    error "Missing required python module: distutils"
+    exit 4
+fi
+
+###############################
+# Install python if necessary #
+###############################
+
+if (( ! found_python )); then
+    progress "Could NOT find Python >= $python_required_version"
+
+    if [[ -x "$install_dir/python-$python_install_version/bin/python" ]]; then
+        progress "Using already built ${cgreen}python $python_install_version"
+    else
+        progress "Installing ${cgreen}python $python_install_version"
+
+        download_extract "https://www.python.org/ftp/python/$python_install_version/Python-$python_install_version.tar.xz" \
+            "$build_dir/python-$python_install_version"
+
+        cd "$build_dir/python-$python_install_version"
+
+        progress_run ./configure \
+            --prefix="$install_dir/python-$python_install_version" || error_configure python
+
+        progress_run make || error_make python
+
+        progress_run make install || error_install python
+    fi
+
+    prepend_path "$install_dir/python-$python_install_version/bin"
+    prepend_manpath "$install_dir/python-$python_install_version/share/man"
+
+    success "${cgreen}python $python_install_version${coff}${cbold} successfully installed"
+fi
+
+(command_exists python && version=$(python_parse_version python) &&
+    python_satisfies_requirements "$version") ||
+    assert_failed "python is not properly installed"
+
+###############
+# Check ocaml #
+###############
+
+progress "Checking for OCaml"
+found_ocaml=0
+
+if command_exists ocaml; then
+    version=$(ocaml_parse_version ocaml) || error_parse_version ocaml
+
+    if version_ge "$version" "$ocaml_required_version"; then
+        found_ocaml=1
+        success "Found OCaml $version"
+    else
+        progress "Found OCaml $version, version too old, skipped"
+    fi
+fi
+
+###################
+# Check ocamlfind #
+###################
+
+found_ocamlfind=0
+
+if (( found_ocaml )); then
+    progress "Checking for ocamlfind"
+    
+    if command_exists ocamlfind; then
+        found_ocamlfind=1
+        success "Found ocamlfind"
+    fi
+fi
+
+####################
+# Check ocamlbuild #
+####################
+
+found_ocamlbuild=0
+
+if (( found_ocaml && found_ocamlfind )); then
+    progress "Checking for ocamlbuild"
+
+    if command_exists ocamlbuild; then
+        version=$(ocamlbuild_parse_version ocamlbuild) || error_parse_version ocamlbuild
+        found_ocamlbuild=1
+        success "Found ocamlbuild $version"
+    fi
+fi
+
+####################
+# Check ocamlgraph #
+####################
+
+found_ocamlgraph=0
+
+if (( found_ocaml && found_ocamlfind && found_ocamlbuild )); then
+    progress "Checking for ocamlgraph"
+
+    if ocamlgraph_dir=$(ocamlfind query ocamlgraph 2>&1) &&
+            [[ -f "$ocamlgraph_dir/graph.cmxa" ]]; then
+        found_ocamlgraph=1
+        success "Found ocamlgraph"
+    fi
+fi
+
+###########################
+# Install all ocaml tools #
+###########################
+
+if (( ! found_ocaml || ! found_ocamlfind || ! found_ocamlbuild || ! found_ocamlgraph )); then
+    progress "Could NOT find OCaml >= $ocaml_required_version, ocamlfind, ocamlbuild or ocamlgraph"
+
+    #################
+    # Install ocaml #
+    #################
+
+    if [[ -x "$install_dir/ocaml-$ocaml_install_version/bin/ocaml" ]]; then
+        progress "Using already built ${cgreen}ocaml $ocaml_install_version"
+    else
+        progress "Installing ${cgreen}ocaml $ocaml_install_version"
+
+        download_extract "https://caml.inria.fr/pub/distrib/ocaml-${ocaml_install_version%.*}/ocaml-$ocaml_install_version.tar.xz" \
+            "$build_dir/ocaml-$ocaml_install_version"
+
+        cd "$build_dir/ocaml-$ocaml_install_version"
+
+        progress_run ./configure \
+            -prefix "$install_dir/ocaml-$ocaml_install_version" \
+            -with-debug-runtime || error_configure ocaml
+
+        progress_run make world.opt -j1 || error_make ocaml
+
+        progress_run make install || error_install ocaml
+    fi
+
+    prepend_path "$install_dir/ocaml-$ocaml_install_version/bin"
+    prepend_manpath "$install_dir/ocaml-$ocaml_install_version/man"
+
+    (command_exists ocaml && version=$(ocaml_parse_version ocaml) &&
+        [[ "$version" = "$ocaml_install_version" ]]) ||
+        assert_failed "ocaml is not properly installed"
+
+    success "${cgreen}ocaml $ocaml_install_version${coff}${cbold} successfully installed"
+
+    #####################
+    # Install ocamlfind #
+    #####################
+
+    if [[ -x "$install_dir/ocamlfind-$ocamlfind_install_version/bin/ocamlfind" ]]; then
+        progress "Using already built ${cgreen}ocamlfind $ocamlfind_install_version"
+    else
+        progress "Installing ${cgreen}ocamlfind $ocamlfind_install_version"
+
+        download_extract "http://download.camlcity.org/download/findlib-$ocamlfind_install_version.tar.gz" \
+            "$build_dir/ocamlfind-$ocamlfind_install_version"
+
+        cd "$build_dir/ocamlfind-$ocamlfind_install_version"
+
+        progress_run ./configure \
+            -bindir "$install_dir/ocamlfind-$ocamlfind_install_version/bin" \
+            -mandir "$install_dir/ocamlfind-$ocamlfind_install_version/man" || error_configure ocamlfind
+
+        progress_run make all -j1 || error_make ocamlfind
+
+        progress_run make install || error_install ocamlfind
+    fi
+
+    prepend_path "$install_dir/ocamlfind-$ocamlfind_install_version/bin"
+    prepend_manpath "$install_dir/ocamlfind-$ocamlfind_install_version/man"
+
+    command_exists ocamlfind || assert_failed "ocamlfind is not properly instaled"
+
+    success "${cgreen}ocamlfind $ocamlfind_install_version${coff}${cbold} successfully installed"
+
+    ######################
+    # Install ocamlbuild #
+    ######################
+
+    if [[ -x "$install_dir/ocamlbuild-$ocamlbuild_install_version/bin/ocamlbuild" ]]; then
+        progress "Using already built ${cgreen}ocamlbuild $ocamlbuild_install_version"
+    else
+        progress "Installing ${cgreen}ocamlbuild $ocamlbuild_install_version"
+
+        download_rename "https://github.com/ocaml/ocamlbuild/archive/$ocamlbuild_install_version.tar.gz" \
+            "ocamlbuild-$ocamlbuild_install_version.tar.gz"
+        extract "$download_dir/ocamlbuild-$ocamlbuild_install_version.tar.gz" \
+            "$build_dir/ocamlbuild-$ocamlbuild_install_version"
+
+        cd "$build_dir/ocamlbuild-$ocamlbuild_install_version"
+
+        progress_run make configure \
+            OCAMLBUILD_PREFIX="$install_dir/ocamlbuild-$ocamlbuild_install_version" \
+            OCAMLBUILD_BINDIR="$install_dir/ocamlbuild-$ocamlbuild_install_version/bin" \
+            OCAMLBUILD_LIBDIR="$install_dir/ocamlbuild-$ocamlbuild_install_version/lib" \
+            OCAML_NATIVE=true  || error_configure ocamlbuild
+
+        progress_run make || error_make ocamlbuild
+
+        progress_run make install || error_install ocamlbuild
+    fi
+
+    prepend_path "$install_dir/ocamlbuild-$ocamlbuild_install_version/bin"
+    
+    (command_exists ocamlbuild && version=$(ocamlbuild_parse_version ocamlbuild) &&
+        [[ "$version" = "$ocamlbuild_install_version" ]]) ||
+        assert_failed "ocamlbuild is not properly installed"
+
+    success "${cgreen}ocamlbuild $ocamlbuild_install_version${coff}${cbold} successfully installed"
+
+    ######################
+    # Install ocamlgraph #
+    ######################
+
+    if [[ -f "$install_dir/ocaml-$ocaml_install_version/lib/ocaml/ocamlgraph/graph.cmxa" ]]; then
+        progress "Using already built ${cgreen}ocamlgraph $ocamlgraph_install_version"
+    else
+        progress "Installing ${cgreen}ocamlgraph $ocamlgraph_install_version"
+
+        download_extract "http://ocamlgraph.lri.fr/download/ocamlgraph-$ocamlgraph_install_version.tar.gz" \
+            "$build_dir/ocamlgraph-$ocamlgraph_install_version"
+
+        cd "$build_dir/ocamlgraph-$ocamlgraph_install_version"
+
+        progress_run ./configure \
+            --prefix="$install_dir/ocamlgraph-$ocamlgraph_install_version" || error_configure ocamlgraph
+
+        progress_run make || error_make ocamlgraph
+
+        progress_run make install || error_install ocamlgraph
+
+        progress_run make install-findlib || error_install ocamlgraph
+    fi
+
+    (ocamlgraph_dir=$(ocamlfind query ocamlgraph 2>&1) &&
+        [[ -f "$ocamlgraph_dir/graph.cmxa" ]]) ||
+        assert_failed "ocamlgraph is not properly installed"
+
+    success "${cgreen}ocamlgraph $ocamlgraph_install_version${coff}${cbold} successfully installed"
+fi
+
+################
+# Check menhir #
+################
+
+progress "Checking for Menhir"
+found_menhir=0
+
+if command_exists menhir; then
+    version=$(menhir_parse_version menhir) || error_parse_version menhir
+    found_menhir=1
+    success "Found Menhir $version"
+fi
+
+###############################
+# Install menhir if necessary #
+###############################
+
+if (( ! found_menhir )); then
+    progress "Could NOT find Menhir"
+
+    if [[ -x "$install_dir/menhir-$menhir_install_version/bin/menhir" ]]; then
+        progress "Using already built ${cgreen}menhir $menhir_install_version"
+    else
+        progress "Installing ${cgreen}menhir $menhir_install_version"
+
+        download_extract "http://cristal.inria.fr/~fpottier/menhir/menhir-$menhir_install_version.tar.gz" \
+            "$build_dir/menhir-$menhir_install_version"
+
+        cd "$build_dir/menhir-$menhir_install_version"
+
+        progress_run make \
+            PREFIX="$install_dir/menhir-$menhir_install_version" \
+            all -j1 || error_make menhir
+
+        progress_run make \
+            PREFIX="$install_dir/menhir-$menhir_install_version" \
+            install || error_install menhir
+    fi
+
+    prepend_path "$install_dir/menhir-$menhir_install_version/bin"
+
+    (command_exists menhir && version=$(menhir_parse_version menhir) &&
+        [[ "$version" = "$menhir_install_version" ]]) ||
+        assert_failed "menhir is not properly installed"
+
+    success "${cgreen}menhir $menhir_install_version${coff}${cbold} successfully installed"
+fi
+
+##################
+# Install spacer #
+##################
+
+if [[ -x "$install_dir/spacer/bin/z3" ]]; then
+    progress "Using already built ${cgreen}spacer"
+else
+    progress "Installing ${cgreen}spacer${coff}${cbold} from upstream repository"
+
+    git_clone "https://bitbucket.org/spacer/code.git" "spacer" \
+        "$build_dir/spacer"
+
+    cd "$build_dir/spacer"
+
+    progress_run python scripts/mk_make.py \
+        --prefix="$install_dir/spacer" || error_configure spacer
+
+    cd "$build_dir/spacer/build"
+
+    progress_run make || error_make spacer
+
+    progress_run make install || error_install spacer
+fi
+
+prepend_path "$install_dir/spacer/bin"
+prepend_python_path "$install_dir/spacer/lib/python"*"/dist-packages"
+
+command_exists z3 || assert_failed "spacer is not properly installed"
+version=$(spacer_parse_version z3) || error_parse_version spacer
+
+success "${cgreen}spacer $version${coff}${cbold} successfully installed"
+
+###################
+# Install lustrec #
+###################
+
+if [[ -x "$install_dir/lustrec/bin/lustrec" ]]; then
+    progress "Using already built ${cgreen}lustrec"
+else
+    progress "Installing ${cgreen}lustrec${coff}${cbold} from upstream repository"
+
+    git_clone "$lustrec_url" "$lustrec_branch" "$build_dir/lustrec"
+
+    cd "$build_dir/lustrec"
+
+    progress_run autoconf || error_configure lustrec
+
+    progress_run ./configure \
+        --prefix="$install_dir/lustrec" || error_configure lustrec
+
+    progress_run make || error_make spacer
+
+    progress_run make install || error_install spacer
+fi
+
+prepend_path "$install_dir/lustrec/bin"
+
+command_exists lustrec || assert_failed "lustrec is not properly installed"
+version=$(lustrec_parse_version lustrec) || error_parse_version lustrec
+
+success "${cgreen}lustrec $version${coff}${cbold} successfully installed"
+
+##################
+# Install zustre #
+##################
+
+if [[ -x "$install_dir/zustre/bin/zustre" ]]; then
+    progress "Using already built ${cgreen}zustre"
+else
+    progress "Installing ${cgreen}zustre${coff}${cbold} from upstream repository"
+
+    git_clone "$zustre_url" "$zustre_branch" "$build_dir/zustre"
+
+    cd "$build_dir/zustre"
+
+    mkdir build
+    cd build
+
+    progress_run cmake \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_PREFIX="$install_dir/zustre" \
+        -DLUSTREC_ROOT="$install_dir/lustrec" \
+        -DZ3_ROOT="$install_dir/spacer" \
+        .. || error_configure zustre
+
+    progress_run cmake --build . || error_make zustre
+
+    progress_run cmake --build . --target install || error_install zustre
+fi
+
+prepend_path "$install_dir/zustre/bin"
+
+command_exists zustre || assert_failed "zustre is not properly installed"
+
+success "${cgreen}zustre${coff}${cbold} successfully installed"
+
+if [[ -f "$build_dir/zustre/tests/two_counters.lus" ]]; then
+    progress "Testing zustre on a simple example"
+    zustre_output=$(run_log_debug zustre --xml "$build_dir/zustre/tests/two_counters.lus" 2>&1) || error_test zustre
+    (( verbose >= 1 )) && echo "$zustre_output"
+    [[ "$zustre_output" == *"<Answer>SAFE</Answer>"* ]] || error_test zustre
+fi
+
+#################
+# Install kind2 #
+#################
+
+if [[ -x "$install_dir/kind2/bin/kind2" ]]; then
+    progress "Using already built ${cgreen}kind2"
+else
+    progress "Installing ${cgreen}kind2${coff}${cbold} from upstream repository"
+
+    git_clone "$kind2_url" "$kind2_branch" "$build_dir/kind2"
+
+    cd "$build_dir/kind2"
+
+    # issue #455, fixed in 33a09c5, waiting for it to be in the master branch
+    cat > issue-455.patch <<'EOF'
+--- Makefile.in
++++ Makefile.in
+@@ -81,9 +81,11 @@
+ install:
+ 	mkdir -p ${bindir}
+ 	for i in $(install_files); do \
+-		install -m 0755 $(addprefix $(LOCAL_BINDIR)/,$$i) $(addsuffix ${bin_suffix},$(addprefix ${bindir}/,$$i)); \
+-	 done
+-	if [ -n ${bin_suffix} ]; then echo "Suffix for binaries is ${bin_suffix}"; fi
++	  if [ -f $(addprefix $(LOCAL_BINDIR)/,$$i) ]; then \
++	    install -m 0755 $(addprefix $(LOCAL_BINDIR)/,$$i) $(addsuffix ${bin_suffix},$(addprefix ${bindir}/,$$i)); \
++	  fi \
++	done
++	if [ -n "${bin_suffix}" ]; then echo "Suffix for binaries is ${bin_suffix}"; fi
+
+ test: all
+ 	./tests/run.sh $(LOCAL_REGRESSIONDIR) $(LOCAL_BINDIR)/kind2 "${ARGS}"
+EOF
+
+    progress "Applying patch issue-455.patch"
+    run_log_quiet patch -p0 < issue-455.patch
+
+    # issue #458: "undefined reference to `uuid_generate`"
+    patch_issue_458=0
+
+    if run_log_quiet pkg-config --exists --print-errors "uuid >= 0.0.0"; then
+        patch_issue_458=1
+    else
+        cat > test_uuid.c <<EOF
+#include <uuid/uuid.h>
+
+int main() {
+    uuid_t uuid;
+    uuid_generate(uuid);
+    return 0;
+}
+EOF
+        if run_log_quiet "$CC" $CPPFLAGS $CFLAGS $LDFLAGS -luuid -o test_uuid test_uuid.c; then
+            patch_issue_458=1
+        fi
+
+        rm -f test_uuid test_uuid.c
+    fi
+
+    if (( patch_issue_458 )); then
+        cat > issue-458.patch <<EOF
+--- src/Makefile.in
++++ src/Makefile.in
+@@ -1,4 +1,4 @@
+-OCAMLBUILD=@OCAMLBUILD@ -j 0 -cflags -w,@P@U@F
++OCAMLBUILD=@OCAMLBUILD@ -j 0 -cflags -w,@P@U@F -lflags="-cclib -luuid"
+
+ # Check if git is installed and use output of git describe as version
+ # number, else use version number from configure
+EOF
+        
+        progress "Applying patch issue-458.patch"
+        run_log_quiet patch -p0 < issue-458.patch
+    fi
+
+    progress_run ./autogen.sh || error_configure kind2
+
+    progress_run ./build.sh --prefix="$install_dir/kind2" || error_make kind2
+
+    progress_run make install || error_install kind2
+fi
+
+prepend_path "$install_dir/kind2/bin"
+
+command_exists kind2 || assert_failed "kind2 is not properly installed"
+version=$(kind2_parse_version kind2) || error_parse_version kind2
+
+success "${cgreen}kind2 $version${coff}${cbold} successfully installed"
+
+if [[ -f "$build_dir/zustre/tests/two_counters.lus" ]]; then
+    progress "Testing kind2 on a simple example"
+    kind2_output=$(run_log_debug kind2 "$build_dir/zustre/tests/two_counters.lus" 2>&1)
+    (( verbose >= 1 )) && echo "$kind2_output"
+    [[ $kind2_output == *"Success"* ]] || error_test kind2
+fi
+
+##################################
+# Generate the activation script #
+##################################
+
+echo '#!/bin/bash' > "$install_dir/activate"
+generate_env_path_line PATH "${act_prepend_path[@]}" >> "$install_dir/activate"
+generate_env_path_line MANPATH "${act_prepend_manpath[@]}" >> "$install_dir/activate"
+generate_env_path_line INFOPATH "${act_prepend_infopath[@]}" >> "$install_dir/activate"
+generate_env_path_line PYTHONPATH "${act_prepend_python_path[@]}" >> "$install_dir/activate"
+
+###########
+# Success #
+###########
+
+if command_exists source; then
+    source_cmd="source"
+else
+    source_cmd="."
+fi
+
+success "Cocosim dependencies have been successfully installed"
+info "To use cocosim dependencies (lustrec, zustre, kind2), first run:"
+info "$ $source_cmd $install_dir/activate"
+info "You should consider adding this in your .bashrc"

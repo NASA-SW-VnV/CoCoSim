@@ -1,0 +1,11 @@
+function schema = validationMenu(callbackInfo)
+schema = sl_container_schema;
+schema.label = 'Validate compiler';
+schema.statustip = 'Validate the translation using one of the validations process';
+schema.autoDisableWhen = 'Busy';
+
+validation_config;
+
+schema.childrenFcns = cellfun(@Utils.funPath2Handle, validation_items,...
+                    'UniformOutput', false);
+end

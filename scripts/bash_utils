@@ -1,0 +1,47 @@
+#!/bin/bash
+
+################################################################################
+#
+# Installation script for cocosim dependencies (lustrec, zustre, kind2).
+#
+# Author: Maxime Arthaud <maxime.arthaud@nasa.gov>
+#
+# Copyright (c) 2017 United States Government as represented by the
+# Administrator of the National Aeronautics and Space Administration.
+# All Rights Reserved.
+#
+################################################################################
+log_file="install_cocosim.log"
+
+function strip_colors() {
+    echo -en "$1" | sed -E 's#'$(echo -en '\x1B')'\[([0-9]{1,3}((;[0-9]{1,3})*)?)?[m|K]##g'
+}
+function log() {
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] [$1] $(strip_colors "$2")" >> "$log_file"
+}
+function success() {
+    echo -e "${cbold}${cgreen}==> ${coff}${cbold}$1${coff}"
+    log success "$1"
+}
+
+# Return the absolute path of the given filename
+function abs_path() {
+    local arg=${1/#\~/$HOME}
+    local dirname=$(dirname "$arg") basename=$(basename "$arg")
+
+    while [[ ! -d "$dirname" ]]; do
+        basename="$(basename "$dirname")/$basename"
+        dirname=$(dirname "$dirname")
+    done
+
+    pushd . >/dev/null
+    cd "$dirname"
+    dirname=$(pwd)
+    popd >/dev/null
+
+    if [[ "$dirname" = "/" ]]; then
+        echo -n "/$basename"
+    else
+        echo -n "$dirname/$basename"
+    fi
+}

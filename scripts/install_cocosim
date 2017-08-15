@@ -1,0 +1,80 @@
+#!/bin/bash
+
+################################################################################
+#
+# Installation script for cocoSim dependencies :
+# - lustrec, zustre, kind2 in the default folder /tools/verifiers.
+# - downloading standard libraries PP, IR and ME from github version of CoCoSim
+#
+# Author: Hamza BOURBOUH <hamza.bourbouh@nasa.gov>
+#
+# Copyright (c) 2017 United States Government as represented by the
+# Administrator of the National Aeronautics and Space Administration.
+# All Rights Reserved.
+#
+################################################################################
+####### Utils ###############
+source bash_utils
+
+####### Machine #############
+unameOut="$(uname -s)"
+case "${unameOut}" in
+    Darwin*)    machine="osx";;
+    *)          machine="linux"
+esac
+####### Global Variables ####
+install_dir="../tools/verifiers/$machine"
+install_dir=$(abs_path "$install_dir")
+build_dir="../tools/build"
+build_dir=$(abs_path "$build_dir")
+
+git_dir="$build_dir/github"
+
+cocosim_url="https://github.com/coco-team/cocoSim.git"
+cocosim_branch="master"
+
+IR_url="https://github.com/coco-team/IR.git"
+IR_branch="master"
+
+IR_path="../src/frontend/IR/std_IR/"
+IR_path=$(abs_path "$IR_path")
+
+std_pp_path="../src/frontend/pp/std_pp/"
+std_pp_path=$(abs_path "$std_pp_path")
+
+
+
+####### Installing Zustre, Kind2 ########
+
+if [[ -a "$install_dir/spacer/bin/z3" && -a "$install_dir/zustre/bin/zustre" && -a "$install_dir/kind2/bin/kind2" ]]; then
+    success "z3, Zustre, Kind2 successfully installed in $install_dir"
+else
+    /bin/bash install_tools --prefix=$install_dir --builddir=$build_dir
+fi
+
+####### Download standard libraries PP and IR ########
+if [ ! -d "$git_dir" ]; then
+    mkdir $git_dir
+    cd $git_dir
+    git init
+    git remote add -f origin $cocosim_url
+    git config core.sparseCheckout true
+    echo "src/pp/" >> .git/info/sparse-checkout
+    git pull origin $cocosim_branch
+else
+    cd $git_dir
+    git pull origin $cocosim_branch
+fi
+cp -vpr "$git_dir/src/pp/lib/*"  "$std_pp_path"
+
+###### IR ###########
+IR_dir="$git_dir/IR"
+if [ ! -d "$IR_dir" ]; then
+    mkdir $IR_dir
+    cd $IR_dir
+    git clone --depth 1 --branch "$IR_branch" "$IR_url" "$IR_dir" 
+else
+    cd $IR_dir
+    git pull origin $IR_branch
+fi
+cp -vpr "$IR_dir/*"  "$IR_path"
