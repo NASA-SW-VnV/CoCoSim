@@ -5,7 +5,6 @@ schema.statustip = 'Verify the current model with CoCoSim';
 schema.autoDisableWhen = 'Busy';
 
 verification_config;
-
-schema.childrenFcns = cellfun(@Utils.funPath2Handle, verification_items,...
+schema.childrenFcns = cellfun(@MenuUtils.funPath2Handle, verification_items,...
                     'UniformOutput', false);
 end

@@ -6,6 +6,6 @@ schema.autoDisableWhen = 'Busy';
 
 validation_config;
 
-schema.childrenFcns = cellfun(@Utils.funPath2Handle, validation_items,...
+schema.childrenFcns = cellfun(@MenuUtils.funPath2Handle, validation_items,...
                     'UniformOutput', false);
 end

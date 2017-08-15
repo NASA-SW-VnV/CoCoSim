@@ -14,5 +14,5 @@ end
 
 function kindCallback(callbackInfo)
 clear;
-fprintf('Kind2 on CoCoSpec compiler is in progress, come back soon!');
+msgbox('Kind2 on CoCoSpec compiler is in progress, come back soon!');
 end

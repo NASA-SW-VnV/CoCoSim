@@ -4,10 +4,14 @@
 % All Rights Reserved.
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%   In this configuration file the user can add an item to Validation
+%   menu. 
+%   the user needs to follow the same template defined in the following example.
+%   Variables:
+%   Validation_items: Cell array containing the path to Validation Menu items.
 
-
-%% Configure Verification menue: the menu and functions callbacks
+%% Configure Validation menue: the menu and functions callbacks
 %
 [validation_root, ~, ~] = fileparts(mfilename('fullpath'));
-verification_items{1} = fullfile(validation_root, 'lustreValidate', 'lusValidateMenu.m');
-verification_items{2} = fullfile(validation_root, 'cocoSpecValidate', 'cocoSpecVerifyMenu.m');
+validation_items{1} = fullfile(validation_root, 'lustreValidate', 'lusValidateMenu.m');
+validation_items{2} = fullfile(validation_root, 'cocoSpecValidate', 'cocoSpecValidateMenu.m');

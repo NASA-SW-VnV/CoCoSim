@@ -4,10 +4,14 @@
 % All Rights Reserved.
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+%   In this configuration file the user can add a menu to CoCoSim toolbar.
+%   he needs to follow the same template defined in the following example.
+%   Variables:
+%   menue_items: Cell array containing the path to CoCoSim Menu items.
 
 %% Configure CoCoSim toolbar: the menu and functions callbacks
 %
+%take the current file directory.
 [src_root, ~, ~] = fileparts(mfilename('fullpath'));
 menue_items = {};
 menue_items{numel(menue_items) + 1} = fullfile(src_root,'backend', 'verification','verificationMenu.m');

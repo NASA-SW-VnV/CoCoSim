@@ -13,7 +13,7 @@ schema.statustip = 'Automated Analysis Framework';
 schema.autoDisableWhen = 'Busy';
 
 cocoSim_menu_config;
-schema.childrenFcns = cellfun(@Utils.funPath2Handle, menue_items,...
+schema.childrenFcns = cellfun(@MenuUtils.funPath2Handle, menue_items,...
                     'UniformOutput', false);
 
 end

@@ -1,10 +1,10 @@
 function schema = lusValidateMenu(callbackInfo)
 schema = sl_container_schema;
 schema.label = 'Lustre compiler using ...';
-schema.statustip = 'Validate Liustre compiler';
+schema.statustip = 'Validate Lustre compiler';
 schema.autoDisableWhen = 'Busy';
 
-schema.childrenFcns = {@Validate1, @getKind, @getJKind};
+schema.childrenFcns = {@Validate1};%, @Validate2, @Validate3};
 end
 
 function schema = Validate1(callbackInfo)
@@ -15,5 +15,5 @@ end
 
 function V1Callback(callbackInfo)
 clear;
-fprintf('');
+msgbox('Not implemented yet');
 end
