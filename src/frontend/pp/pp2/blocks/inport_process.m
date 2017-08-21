@@ -1,6 +1,6 @@
 function inport_process( new_model_base )
 
-display_msg('Processing Inport blocks', Constants.INFO, 'PP', '');
+display_msg('Processing Inport blocks', MsgType.INFO, 'PP', '');
 
 inport_list = find_system(new_model_base,'BlockType','Inport');
 model = regexp(new_model_base,'/','split');

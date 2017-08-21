@@ -3,7 +3,7 @@ function program =  stateflow_IR( chart_path , output_dir, print_in_file)
 
 if nargin ==0 || isempty(chart_path)
     display_msg('please provide Stateflow chart path while calling stateflow_IR',...
-        Constants.ERROR, 'stateflow_IR', '');
+        MsgType.ERROR, 'stateflow_IR', '');
 end
 if nargin < 2 || isempty(output_dir)
     output_dir = pwd;

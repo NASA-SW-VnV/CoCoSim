@@ -4,7 +4,7 @@ function atomic_process( new_model_base )
 % Configure any subsystem to be treated as Atomic
 ssys_list = find_system(new_model_base,'BlockType','SubSystem');
 if not(isempty(ssys_list))
-    display_msg('Processing Subsystem blocks', Constants.INFO, 'PP', '');
+    display_msg('Processing Subsystem blocks', MsgType.INFO, 'PP', '');
     for i=1:length(ssys_list)
         %disp(ssys_list{i})
         try
@@ -12,7 +12,7 @@ if not(isempty(ssys_list))
         catch
         end
     end
-    display_msg('Done\n\n', Constants.INFO, 'PP', '');
+    display_msg('Done\n\n', MsgType.INFO, 'PP', '');
 end
 
 

@@ -10,9 +10,9 @@ code_off=sprintf('%s([], [], [], ''term'')', new_model_base);
 evalin('base',code_off);
 warning on;
 catch me
-    display_msg(['Please set your model to FixedStepDiscrete'], Constants.ERROR, 'PP', '');
-    display_msg(me.message, Constants.ERROR, 'PP', '');
-    display_msg(me.getReport(), Constants.DEBUG, 'PP', '');
+    display_msg(['Please set your model to FixedStepDiscrete'], MsgType.ERROR, 'PP', '');
+    display_msg(me.message, MsgType.ERROR, 'PP', '');
+    display_msg(me.getReport(), MsgType.DEBUG, 'PP', '');
     return
 end
 

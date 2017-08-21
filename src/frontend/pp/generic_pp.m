@@ -70,7 +70,7 @@ end
 
 %% Creating a cache copy to process
 if ~already_pp; copyfile(file_path, new_file_path); end
-display_msg(['Loading ' new_file_path ], Constants.INFO, 'PP', '');
+display_msg(['Loading ' new_file_path ], MsgType.INFO, 'PP', '');
 load_system(new_file_path);
 if ~already_pp
     add_block('built-in/Note', ...
@@ -78,14 +78,14 @@ if ~already_pp
     'MarkupType', 'markup')
 end
 
-display_msg('Loading library', Constants.INFO, 'PP', '');
+display_msg('Loading library', MsgType.INFO, 'PP', '');
 if ~bdIsLoaded('gal_lib'); load_system('gal_lib.slx'); end
 
 
 
 %% Preprocess
 %% Create supported blocks
-display_msg('Looking for CoCoSim non-supported blocks', Constants.INFO, 'PP', '');
+display_msg('Looking for CoCoSim non-supported blocks', MsgType.INFO, 'PP', '');
 handled_blocks_map = containers.Map();
 
 for i=1:numel(pp_handled_blocks)
@@ -181,11 +181,11 @@ if ~isempty(ordered_blocks) && isfield(ordered_blocks(1), 'folder')
         fh = str2func(ordered_blocks(i).name(1:end-2));
         cd(oldDir);
         try
-            display_msg(['runing ' func2str(fh)], Constants.INFO, 'PP', '');
+            display_msg(['runing ' func2str(fh)], MsgType.INFO, 'PP', '');
             fh(new_model_base);
         catch me
-            display_msg(['can not run ' func2str(fh)], Constants.ERROR, 'PP', '');
-            display_msg(me.getReport(), Constants.DEBUG, 'PP', '');
+            display_msg(['can not run ' func2str(fh)], MsgType.ERROR, 'PP', '');
+            display_msg(me.getReport(), MsgType.DEBUG, 'PP', '');
         end
         
     end
@@ -193,8 +193,8 @@ end
 %% 
 % Exporting the model to the mdl CoCoSim compatible file format
 
-display_msg('Saving simplified model', Constants.INFO, 'PP', '');
-display_msg(['Simplified model path: ' new_file_path], Constants.INFO, 'PP', '');
+display_msg('Saving simplified model', MsgType.INFO, 'PP', '');
+display_msg(['Simplified model path: ' new_file_path], MsgType.INFO, 'PP', '');
 
 
 save_system(new_model_base,new_file_path,'OverwriteIfChangedOnDisk',true);
@@ -203,5 +203,5 @@ if ~nodisplay
 end
     
 
-display_msg('Done with the simplification', Constants.INFO, 'PP', '');
+display_msg('Done with the simplification', MsgType.INFO, 'PP', '');
 end
