@@ -121,7 +121,7 @@ end
 
 end
 function [new_model_path, new_model_name] = extract_subsys(file_name, block_name, output_dir )
-block_name_adapted = BUtils.adapt_block_name(Utils.naming(LusValidateUtils.name_format(block_name)));
+block_name_adapted = BUtils.adapt_block_name(SLXUtils.naming(LusValidateUtils.name_format(block_name)));
 new_model_name = strcat(file_name,'_', block_name_adapted);
 new_model_name = BUtils.adapt_block_name(new_model_name);
 new_model_path = fullfile(output_dir, strcat(new_model_name,'.slx'));

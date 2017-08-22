@@ -117,7 +117,7 @@ numberOfInports = numel(inports);
 %% Create the input struct for the simulation
 stop_time = 1000;
 try
-    min = Utils.get_BlockDiagram_SampleTime(slx_file_name);
+    min = SLXUtils.get_BlockDiagram_SampleTime(slx_file_name);
     if  min==0 || isnan(min) || min==Inf
         simulation_step = 1;
     else

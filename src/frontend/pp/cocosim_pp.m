@@ -1,12 +1,21 @@
+function [new_file_path, err] = cocosim_pp(file_path, varargin)
+% COCOSIM_PP pre-process complexe blocks in Simulink model into basic ones. 
+% This is a generic function that use pp_config as a configuration file that decides
+% which libraries to use and in which order to call the blocks functions.
+% See pp_config for more details.
+% Inputs:
+% file_path: The full path to Simulink model.
+% varargin: User defined inputs. 
+%   'nodisplay': to disable the display mode of the model.
+%   'verif': to create a verification model that contains both the original
+%   model and pre-processed model. In order to prove the pre-processing is
+%   correct.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Copyright (c) 2017 United States Government as represented by the
 % Administrator of the National Aeronautics and Space Administration.
 % All Rights Reserved.
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-function [new_file_path, err] = cocosim_pp(file_path, varargin)
-
 
 global cocosim_pp_gen_verif  cocosim_pp_gen_verif_dir;
 global pp_order_map pp_handled_blocks pp_unhandled_blocks;

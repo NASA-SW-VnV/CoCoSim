@@ -30,19 +30,11 @@ build_dir=$(abs_path "$build_dir")
 
 git_dir="$build_dir/github"
 
-cocosim_url="https://github.com/coco-team/cocoSim.git"
+cocosim_url="https://github.com/coco-team/cocoSim2.git"
 cocosim_branch="master"
 
-IR_url="https://github.com/coco-team/IR.git"
-IR_branch="master"
 
-IR_path="../src/frontend/IR/std_IR/"
-IR_path=$(abs_path "$IR_path")
-
-std_pp_path="../src/frontend/pp/std_pp/"
-std_pp_path=$(abs_path "$std_pp_path")
-
-
+cocoSim2_dir=$(abs_path "..")
 
 ####### Installing Zustre, Kind2 ########
 
@@ -54,27 +46,53 @@ fi
 
 ####### Download standard libraries PP and IR ########
 if [ ! -d "$git_dir" ]; then
+    if [ ! -d "$build_dir" ]; then
+        mkdir "$build_dir"
+    fi
     mkdir $git_dir
     cd $git_dir
     git init
     git remote add -f origin $cocosim_url
-    git config core.sparseCheckout true
-    echo "src/pp/" >> .git/info/sparse-checkout
+    #git config core.sparseCheckout true
+    #echo "src/pp/" >> .git/info/sparse-checkout
+    #echo "src/middleEnd/lustre_compiler/" >> .git/info/sparse-checkout
     git pull origin $cocosim_branch
 else
     cd $git_dir
     git pull origin $cocosim_branch
 fi
-cp -vpr "$git_dir/src/pp/lib/*"  "$std_pp_path"
 
-###### IR ###########
-IR_dir="$git_dir/IR"
-if [ ! -d "$IR_dir" ]; then
-    mkdir $IR_dir
-    cd $IR_dir
-    git clone --depth 1 --branch "$IR_branch" "$IR_url" "$IR_dir" 
-else
-    cd $IR_dir
-    git pull origin $IR_branch
+##STD_PP
+if [ ! -d  "$cocoSim2_dir/src/frontEnd/pp/std_pp" ]; then
+	mkdir  "$cocoSim2_dir/src/frontEnd/pp/std_pp"
 fi
-cp -vpr "$IR_dir/*"  "$IR_path"
+cp -r "$git_dir/src/frontEnd/pp/"* "$cocoSim2_dir/src/frontEnd/pp/std_pp/"
+rm -f "$cocoSim2_dir/src/frontEnd/pp/std_pp/cocosim_pp.m"
+
+##STD_IR
+if [ ! -d  "$cocoSim2_dir/src/frontEnd/IR/std_IR" ]; then
+	mkdir  "$cocoSim2_dir/src/frontEnd/IR/std_IR"
+fi
+cp -r "$git_dir/src/frontEnd/IR/"* "$cocoSim2_dir/src/frontEnd/IR/std_IR/"
+
+##Lustre_compiler
+if [ ! -d  "$cocoSim2_dir/src/middleEnd/lustre_compiler" ]; then
+	mkdir  "$cocoSim2_dir/src/middleEnd/lustre_compiler"
+fi
+cp -r "$git_dir/src/middleEnd/lustre_compiler/"* "$cocoSim2_dir/src/middleEnd/lustre_compiler/"
+
+##DOC
+if [ ! -d  "$cocoSim2_dir/doc" ]; then
+	mkdir  "$cocoSim2_dir/doc"
+fi
+cp -r "$git_dir/doc/"* "$cocoSim2_dir/doc/"
+
+##libs
+if [ ! -d  "$cocoSim2_dir/libs" ]; then
+	mkdir  "$cocoSim2_dir/libs"
+fi
+cp -r "$git_dir/libs/"* "$cocoSim2_dir/libs/"
+
+##Backends
+cp -r "$git_dir/src/backEnd/"* "$cocoSim2_dir/src/backEnd/"
+
