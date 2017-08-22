@@ -50,6 +50,7 @@ ZUSTRE = fullfile(solvers_path,'zustre', 'bin', 'zustre');
 Z3 = fullfile(solvers_path,'spacer', 'bin', 'z3');
 KIND2 = fullfile(solvers_path, 'kind2', 'bin', 'kind2');
 JKIND = 'Path to Jkind binary';
+SEAHORN = 'PATH';
 
 if ~exist(LUSTREC,'file')
     warning('LUSTREC is not found in %s, configure your path in tools_config.m', LUSTREC);

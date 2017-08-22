@@ -96,3 +96,5 @@ cp -r "$git_dir/libs/"* "$cocoSim2_dir/libs/"
 ##Backends
 cp -r "$git_dir/src/backEnd/"* "$cocoSim2_dir/src/backEnd/"
 
+##Utils
+cp -r tools/build/github/src/utils/* src/Utils/
