@@ -21,3 +21,12 @@ tools_config;
 %% Second configuration Pre-processing
 % Go to src/pp/pp_config and follow instructions
 pp_config;
+
+
+%% IR config
+if exist(fullfile(cocoSim_root, 'src', 'frontend', 'IR', 'std_IR', 'utils', 'make.m'), 'file')
+    PWD = pwd;
+    cd(fullfile(cocoSim_root, 'src', 'frontend', 'IR', 'std_IR', 'utils'));
+    make
+    cd(PWD);
+end

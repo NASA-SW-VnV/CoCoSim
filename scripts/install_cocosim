@@ -97,4 +97,10 @@ cp -r "$git_dir/libs/"* "$cocoSim2_dir/libs/"
 cp -r "$git_dir/src/backEnd/"* "$cocoSim2_dir/src/backEnd/"
 
 ##Utils
-cp -r tools/build/github/src/utils/* src/Utils/
+cp -r "$git_dir/src/utils/"* "$cocoSim2_dir/src/Utils/"
+
+##GUI
+if [ ! -d  "$cocoSim2_dir/src/gui" ]; then
+	mkdir  "$cocoSim2_dir/src/gui"
+fi
+cp -r "$git_dir/src/gui/"* "$cocoSim2_dir/src/gui/"

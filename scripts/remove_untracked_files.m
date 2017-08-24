@@ -12,22 +12,19 @@ coco_dir = fileparts(script_path);
 PWD = pwd;
 
 cd(coco_dir);
-cmd = sprintf('git status');
+cmd = sprintf('git ls-files --others --exclude-standard');
 [status, git_output] = system(cmd);
 
 if status==0
-    untrackFiles = regexp(git_output, 'Untracked files', 'split');
-    untrackFiles = untrackFiles{end};
-    untrackFiles = regexprep(untrackFiles, '[\t\b]', '')
+    untrackFiles = regexprep(git_output, '[\t\b]', '');
     lines = regexp(untrackFiles, '\n', 'split');
     for i=1:numel(lines)
         l = char(lines{i});
-        if strncmp(lines{i}, 'src/', 4) || strncmp(lines{i}, 'libs/', 5) ...
-                || strncmp(lines{i}, 'test/', 5)
+        if ~strncmp(lines{i}, 'tools/', 6) 
             cmd = sprintf('rm -rf %s', lines{i});
             [status, ~] = system(cmd);
             if status == 0
-                fprintf('file/repository %s has been removed successfully.\n', lines{i});
+                fprintf('file/repository %s has been successfully removed.\n', lines{i});
             else
                 fprintf('file/repository %s could not be removed.\n', lines{i});
             end

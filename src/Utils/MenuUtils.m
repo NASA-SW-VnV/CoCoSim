@@ -5,7 +5,7 @@ classdef MenuUtils
     end
     
     methods (Static = true)
-      
+        
         
         %% get function handle from its path
         function handle = funPath2Handle(fullpath)
@@ -14,6 +14,12 @@ classdef MenuUtils
             cd(dirname);
             handle = str2func(funName);
             cd(oldDir);
+        end
+        
+        
+        function fname = get_file_name(gcs)
+            names = regexp(gcs,'/','split');
+            fname = get_param(names{1},'FileName');
         end
     end
     

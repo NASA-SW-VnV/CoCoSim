@@ -19,7 +19,7 @@ clear;
 assignin('base', 'SOLVER', 'Z');
 assignin('base', 'RUST_GEN', 0);
 assignin('base', 'C_GEN', 0);
-% runCoCoSim;
+runCoCoSim;
 end
 
 
@@ -34,7 +34,7 @@ clear;
 assignin('base', 'SOLVER', 'K');
 assignin('base', 'RUST_GEN', 0);
 assignin('base', 'C_GEN', 0);
-% runCoCoSim;
+runCoCoSim;
 end
 
 function schema = getJKind(callbackInfo)
@@ -48,5 +48,35 @@ clear;
 assignin('base', 'SOLVER', 'J');
 assignin('base', 'RUST_GEN', 0);
 assignin('base', 'C_GEN', 0);
-% runCoCoSim;
+runCoCoSim;
+end
+
+function runCoCoSim
+try
+    simulink_name = MenuUtils.get_file_name(gcs);
+    cocosim_window(simulink_name);
+    %       cocoSim(simulink_name); % run cocosim
+catch ME
+    if strcmp(ME.identifier, 'MATLAB:badsubscript')
+        msg = ['Activate debug message by running cocosim_debug=true', ...
+            ' to get more information where the model in failing'];
+        e_msg = sprintf('Error Msg: %s \n Action:\n\t %s', ME.message, msg);
+        display_msg(e_msg, Constants.ERROR, 'cocoSim', '');
+        display_msg(ME.getReport(),Constants.DEBUG,'cocoSim','');
+    elseif strcmp(ME.identifier,'MATLAB:MException:MultipleErrors')
+        msg = 'Make sure that the model can be run (i.e. most probably missing constants)';
+        d_msg = sprintf('Error Msg: %s', ME.getReport());
+        display_msg(d_msg, Constants.DEBUG, 'cocoSim', '');
+        display_msg(msg, Constants.ERROR, 'cocoSim', '');
+    elseif strcmp(ME.identifier, 'Simulink:Commands:ParamUnknown')
+        msg = 'Run CoCoSim on the most top block of the model';
+        e_msg = sprintf('Error Msg: %s \n Action:\n\t %s', ME.message, msg);
+        display_msg(e_msg, Constants.ERROR, 'cocoSim', '');
+        display_msg(ME.getReport(),Constants.DEBUG,'cocoSim','');
+    else
+        display_msg(ME.message,Constants.ERROR,'cocoSim','');
+        display_msg(ME.getReport(),Constants.DEBUG,'cocoSim','');
+    end
+    
+end
 end

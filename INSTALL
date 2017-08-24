@@ -8,7 +8,7 @@ from scratch and download all libraries.
 
 ```
 $cd "CoCoSim Path/scripts"
-$/bin/bash install_cocosim 
+$./install_cocosim 
 ```
 
 

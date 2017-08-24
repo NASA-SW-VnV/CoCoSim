@@ -14,6 +14,13 @@ schema.callback = @V1Callback;
 end
 
 function V1Callback(callbackInfo)
-clear;
-msgbox('Not implemented yet');
+try
+    [cocoSim_path, ~, ~] = fileparts(mfilename('fullpath'));
+    model_full_path = MenuUtils.get_file_name(gcs) ;
+    L = log4m.getLogger(fullfile(fileparts(model_full_path),'logfile.txt'));
+    validate_window(model_full_path,cocoSim_path,1,L);
+catch ME
+    display_msg(ME.getReport(), Constants.DEBUG,'Validate_model','');
+    display_msg(ME.message, Constants.ERROR,'Validate_model','');
+end
 end
