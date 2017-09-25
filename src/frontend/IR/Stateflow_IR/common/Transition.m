@@ -4,6 +4,7 @@ classdef Transition
     %d.
     
     properties
+        id;
         event;
         condition;
         condition_act;
@@ -12,12 +13,13 @@ classdef Transition
     end
     
     methods(Static = true)
-        function obj = Transition(e, c, c_a, t_a, d)
+        function obj = Transition(e, c, c_a, t_a, d, id)
             obj.event = e;
             obj.condition = c;
             obj.condition_act = c_a;
             obj.transition_act = t_a;
             obj.dest = d;
+            obj.id = id;
         end
         
         function t_obj = create_object(t)
@@ -31,7 +33,7 @@ classdef Transition
                 destination.type = 'State';
                 destination.name = fullfile(dest_state.Path, dest_state.Name);
             end
-            t_obj = Transition(e, c, c_a, t_a, destination);
+            t_obj = Transition(e, c, c_a, t_a, destination, t.ID);
         end
         
         function [event, condition, condition_action, transition_action] = extract_transition_fields(transition_label)
@@ -44,6 +46,10 @@ classdef Transition
             % change == to =
             expression = '={2}';
             replace = '=';
+            label_mod = regexprep(label_mod,expression,replace);
+            
+            expression = '(\[)(\w+\s*(,\s*\w+)+)(\])';
+            replace = '($2)';
             label_mod = regexprep(label_mod,expression,replace);
             
             expression = '(!|~)([^=]\w*)';
@@ -65,20 +71,20 @@ classdef Transition
             pattern = Transition.transition_pattern();
             operands = regexp(label_mod,pattern,'tokens','once');
             
-            if ~isempty(operands)                    
-                    event =operands{1};
-                    condition =operands{2};
-                    if ~isempty(condition)
-                        condition = SFIRUtils.to_lustre_syntax(condition(2:end-1));
-                    end
-                    condition_action =operands{3};
-                    if ~isempty(condition_action)
-                        condition_action = SFIRUtils.split_actions(condition_action(2:end-1));
-                    end
-                    transition_action =operands{4};
-                    if ~isempty(transition_action)
-                        transition_action = SFIRUtils.split_actions(transition_action(2:end));
-                    end
+            if ~isempty(operands)
+                event =operands{1};
+                condition =operands{2};
+                if ~isempty(condition)
+                    condition = SFIRUtils.to_lustre_syntax(condition(2:end-1));
+                end
+                condition_action =operands{3};
+                if ~isempty(condition_action)
+                    condition_action = SFIRUtils.split_actions(condition_action(2:end-1));
+                end
+                transition_action =operands{4};
+                if ~isempty(transition_action)
+                    transition_action = SFIRUtils.split_actions(transition_action(2:end));
+                end
             else
                 event ='';
                 condition ='';
@@ -96,6 +102,7 @@ classdef Transition
             po = '\s*[\(]*\s*' ;
             number = '([-+]?\d*\.?\d+)'; %i.e 2.3, -2, +3.2
             ident = '([a-zA-Z][a-zA-Z_0-9]*)';
+            multiple_ident = '(\[|\()(\w+(,\w+)+)(\]|\))';
             event_exp    =  strcat(ident,'?\s*');
             
             negation_exp = '(~|!|not)?'; % "!" is changed to "not" by section above
@@ -116,13 +123,15 @@ classdef Transition
             
             assignement_op = '\s*[+\-*/]?=\s*';%'\s*(=|+=|-=|*=|/=)\s*';
             inc_dec = '+{2}|-{2}';
-            affectation = strcat('(',ident,'(',assignement_op,exp,'|',inc_dec,')',')');
+            affectation = strcat('(','(',ident,'|', multiple_ident, ')','(',assignement_op,exp,'|',inc_dec,')',')');
             aff_or_fun = strcat('(',affectation,'|',function_call,')');
             multiple_aff_or_fun = strcat('(','(',aff_or_fun ,';?\s*)*',')');
             cond_action_exp = strcat('({',multiple_aff_or_fun,'})?\s*');
             trans_action_exp= strcat('(/',multiple_aff_or_fun,')?\s*');
             pattern = strcat(event_exp,condition_exp,cond_action_exp,trans_action_exp);
         end
+        
+       
     end
     
 end

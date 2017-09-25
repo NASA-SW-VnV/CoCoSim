@@ -14,6 +14,7 @@ classdef GUIUtils
                 h.String = status;
                 drawnow limitrate
             catch
+                assignin('base','cocosim_status',status)
             end
         end
         

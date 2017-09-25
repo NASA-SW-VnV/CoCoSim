@@ -64,7 +64,7 @@ classdef LusValidateUtils
         end
         
         function vector = construct_random_booleans(nb_iterations, IMIN, IMAX, dim)
-            vector = boolean(Utils.construct_random_integers(nb_iterations, IMIN, IMAX, 'uint8',dim));
+            vector = boolean(LusValidateUtils.construct_random_integers(nb_iterations, IMIN, IMAX, 'uint8',dim));
         end
         
         function vector = construct_random_doubles(nb_iterations, IMIN, IMAX,dim)
@@ -81,7 +81,7 @@ classdef LusValidateUtils
         %% from Simulink dataType to Lustre DataType
         function [ Lustre_type, initial_value ] = get_lustre_dt( stateflow_Type, data_name )
             if strcmp(stateflow_Type, 'real') || strcmp(stateflow_Type, 'int') || strcmp(stateflow_Type, 'bool')
-                Lustre_type = simulink_dt;
+                Lustre_type = stateflow_Type;
             else
                 if strcmp(stateflow_Type, 'logical') || strcmp(stateflow_Type, 'boolean')
                     Lustre_type = 'bool';

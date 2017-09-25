@@ -93,9 +93,6 @@ if [ ! -d  "$cocoSim2_dir/libs" ]; then
 fi
 cp -r "$git_dir/libs/"* "$cocoSim2_dir/libs/"
 
-##Backends
-cp -r "$git_dir/src/backEnd/"* "$cocoSim2_dir/src/backEnd/"
-
 ##Utils
 cp -r "$git_dir/src/utils/"* "$cocoSim2_dir/src/Utils/"
 
@@ -104,3 +101,6 @@ if [ ! -d  "$cocoSim2_dir/src/gui" ]; then
 	mkdir  "$cocoSim2_dir/src/gui"
 fi
 cp -r "$git_dir/src/gui/"* "$cocoSim2_dir/src/gui/"
+
+##Backends
+cp -r "$git_dir/src/backEnd/verification/"* "$cocoSim2_dir/src/backEnd/verification/"

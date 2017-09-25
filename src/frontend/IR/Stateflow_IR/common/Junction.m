@@ -19,15 +19,17 @@ classdef Junction
             fullpath = fullfile(j.Path, strcat('Junction',num2str(j.Id)));
             j_obj = Junction(fullpath, j_type, To);
         end
-       
+        
         %% Get outer transitions
         function [To] = get_transitions(chart, s)
             outer_transitions = SFIRUtils.sort_transitions(chart.find('-isa', 'Stateflow.Transition', '-and', 'Source', s));
-            To = []; 
+            To = [];
             for i=1:numel(outer_transitions)
                 To = [To; Transition.create_object(outer_transitions(i))];
             end
         end
+        
+       
     end
     
 end

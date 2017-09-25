@@ -80,6 +80,8 @@ classdef State_def
         function [To, Ti] = get_transitions(chart, s)
             outer_transitions = SFIRUtils.sort_transitions(chart.find('-isa', 'Stateflow.Transition', '-and', 'Source', s));
             inner_transitions = SFIRUtils.sort_transitions(s.innerTransitions());
+            outer_transitions = setdiff(outer_transitions,inner_transitions);
+
             To = []; Ti =[];
             for i=1:numel(outer_transitions)
                 To = [To; Transition.create_object(outer_transitions(i))];
@@ -88,6 +90,8 @@ classdef State_def
                 Ti = [Ti; Transition.create_object(inner_transitions(i))];
             end            
         end
+        
+        
     end
     
 end

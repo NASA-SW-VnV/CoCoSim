@@ -1,12 +1,19 @@
-function new_model_path = view_EMF(model_path, contract_path)
-%new_model_path = view_cocospec(model_path, contract_path)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Copyright (c) 2017 United States Government as represented by the
+% Administrator of the National Aeronautics and Space Administration.
+% All Rights Reserved.
+% Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%new_model_path = generate_invariants_Zustre(model_path, contract_path)
 % Inputs:
 % model_path : the path of Simulink model
 % contract_path : the Json that contains information about the Simulink
 % model contract
 % Outputs:
-% new_model_path: the path of the new Simulink model that has cocospec
-% contract of the associated model.
+% new_model_path: the path of the new Simulink model that has the generated
+% invariants of the associated model.
+
+function new_model_path = generate_invariants_Zustre(model_path, contract_path)
 
 try
     bdclose('all')
@@ -47,10 +54,6 @@ try
     close_system(new_name,0)
     save_system(model_path,new_name);
     load_system(new_name);
-    
-    %this is related with the position of the blocks inside the COCOSPEC
-    %subsytem
-    y2= 100;
     
     %get tracability
     trace_file_name = fullfile(coco_dir,strcat(base_name,'.cocosim.trace.xml'));

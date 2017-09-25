@@ -16,21 +16,33 @@ classdef Composition
             obj.substates = sl;
         end
         
-        function c_obj = create_object(state)
-            t = state.Decomposition;
+        function c_obj = create_object(state, isFunction)
+            if nargin < 2
+                isFunction = 0;
+            end
+            if isFunction
+                t = 'EXCLUSIVE_OR';
+            else
+                t = state.Decomposition;
+            end
             default_transitions = SFIRUtils.sort_transitions(state.find('-isa',...
                 'Stateflow.Transition','-and', 'Source', '',  '-depth', 1));
             t_init = [];
             for i=1:numel(default_transitions)
                 t_init = [t_init; Transition.create_object(default_transitions(i))];
             end
-            sub_states = state.find('-isa','Stateflow.State');
+            sub_states = state.find('-isa','Stateflow.State',  '-depth', 1);
             substates_names = {};
             for i=1:numel(sub_states)
-                substates_names{i} = sub_states(i).Name;
+                if ~strcmp(sub_states(i).Name, state.Name)
+                    substates_names{numel(substates_names) + 1} = sub_states(i).Name;
+                end
+                %                 substates_names{i} = fullfile(sub_states(i).Path, sub_states(i).Name);
             end
             c_obj = Composition(t, t_init, substates_names);
         end
+        
+        
     end
     
 end

@@ -9,8 +9,8 @@ if ~exist('stop_at_first_cex', 'var')
     stop_at_first_cex = 1;
 end
 OldPwd = pwd;
-% cocosim_config;
-config;
+cocosim_config;
+% config;
 
 %% generate EMF
 [lus_dir, lus_fname, ~] = fileparts(lus_file_path);
@@ -107,6 +107,8 @@ for node_idx =0:numel(nodes_names)
         add_line(new_model_name, portHandles.Outport(i), DstBlkH.Inport(1), 'autorouting', 'on');
     end
     %% Save system
+    configSet = getActiveConfigSet(model_handle);
+    set_param(configSet, 'Solver', 'FixedStepDiscrete');
     save_system(model_handle,new_name,'OverwriteIfChangedOnDisk',true);
     
     % open(new_name)

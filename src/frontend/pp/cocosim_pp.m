@@ -1,4 +1,4 @@
-function [new_file_path, err] = cocosim_pp(file_path, varargin)
+function [new_file_path] = cocosim_pp(file_path, varargin)
 % COCOSIM_PP pre-process complexe blocks in Simulink model into basic ones. 
 % This is a generic function that use pp_config as a configuration file that decides
 % which libraries to use and in which order to call the blocks functions.
@@ -29,7 +29,6 @@ end
 if isempty(pp_unhandled_blocks)
     warning('Order map ''pp_unhandled_blocks'' has not been defined. Please check pp_order.m');
 end
-err = 0;
 nodisplay = 0;
 cocosim_pp_gen_verif = 0;
 cocosim_pp_gen_verif_dir = '';

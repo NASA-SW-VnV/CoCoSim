@@ -3,12 +3,7 @@ function [valid, validation_compute,lustrec_failed, ...
 
 
 validation_start = tic;
-%% define default outputs
-lustrec_failed=0;
-lustrec_binary_failed=0;
-sim_failed=0;
-valid = 0;
-validation_compute = 0;
+
 
 %close all simulink models
 bdclose('all')
@@ -23,7 +18,7 @@ if ~exist('min_max_constraints', 'var')
 end
 
 if ~exist('deep_CEX', 'var')
-    deep_CEX = 1;
+    deep_CEX = 0;
 end
 assignin('base', 'SOLVER', 'V');
 assignin('base', 'RUST_GEN', 0);

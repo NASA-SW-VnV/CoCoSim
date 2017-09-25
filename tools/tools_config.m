@@ -21,30 +21,32 @@
 %
 % 3- Set your own paths by redefining the variables : ZUSTRE, LUSTREC,
 %   KIND2
-
+[tools_root, ~, ~] = fileparts(mfilename('fullpath'));
+cocoSim_root = fileparts(tools_root);
 if ~exist('solvers_path', 'var')
-    
     solvers_path = fullfile(cocoSim_root, 'tools', 'verifiers');
     if ismac
+        solvers_path = fullfile(solvers_path, 'osx');
         Z3Library_path = fullfile(solvers_path,'spacer', 'lib', 'libz3.dylib');
         LD_LIBRARY_PATH = 'DYLD_LIBRARY_PATH';
-        solvers_path = fullfile(solvers_path, 'osx');
+        
     elseif isunix
+        solvers_path = fullfile(solvers_path, 'linux');
         Z3Library_path = fullfile(solvers_path,'spacer', 'lib', 'libz3.so');
         LD_LIBRARY_PATH = 'LD_LIBRARY_PATH';
-        solvers_path = fullfile(solvers_path, 'linux');
     elseif ispc
         Z3Library_path = fullfile(cocosim_path, 'tools\verifiers\Z3\bin\libz3.dll');
     else
         errordlg('OS not supported yet','CoCoSim backend configuration');
     end
     OldLibPath = getenv(LD_LIBRARY_PATH);
-    if isempty(strfind(OldLibPath,'libz3.so')) && isempty(strfind(OldLibPath,'libz3.dylib'))
+    if ~contains(OldLibPath,'libz3.so') && ~contains(OldLibPath,'libz3.dylib')
         setenv(LD_LIBRARY_PATH,[OldLibPath ':' Z3Library_path]);
     end
 end
 
 LUSTREC = fullfile(solvers_path, 'lustrec', 'bin', 'lustrec');
+LUSTRET = fullfile(solvers_path, 'lustrec', 'bin', 'lustret');
 LUCTREC_INCLUDE_DIR = fullfile(solvers_path, 'lustrec', 'include', 'lustrec');
 ZUSTRE = fullfile(solvers_path,'zustre', 'bin', 'zustre');
 Z3 = fullfile(solvers_path,'spacer', 'bin', 'z3');

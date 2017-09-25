@@ -1,22 +1,23 @@
 function [valid, lustrec_failed, lustrec_binary_failed, sim_failed] = validate_lus2slx_V2( lus_file_path, main_node_name, Backend)
 %VALIDATE_LUS2SLX_V2 validate the translation using equivalent model
 %checking
+[lus_dir, lus_fname, ~] = fileparts(lus_file_path);
 if nargin < 2 || isempty(main_node_name)
-    main_node_name = 'top';
+    main_node_name = lus_fname;
 end
 if nargin < 3
     Backend = 'Z';
 end
 OldPwd = pwd;
-% cocosim_config;
-config;
+cocosim_config;
+% config;
 %% output initialisation
 valid = -1;
 lustrec_failed = -1;
 lustrec_binary_failed = -1;
 sim_failed = -1;
 %% generate EMF
-[lus_dir, lus_fname, ~] = fileparts(lus_file_path);
+
 output_dir = fullfile(lus_dir, 'tmp', strcat('tmp_',lus_fname));
 if ~exist(output_dir, 'dir'); mkdir(output_dir); end
 msg = sprintf('generating emf "%s"\n',lus_file_path);
@@ -110,6 +111,8 @@ for i=1:nb_outports
     add_line(new_model_name, portHandles.Outport(i), DstBlkH.Inport(1), 'autorouting', 'on');
 end
 %% Save system
+configSet = getActiveConfigSet(model_handle);
+set_param(configSet, 'Solver', 'FixedStepDiscrete');
 save_system(model_handle,new_name,'OverwriteIfChangedOnDisk',true);
 % open(new_name)
 

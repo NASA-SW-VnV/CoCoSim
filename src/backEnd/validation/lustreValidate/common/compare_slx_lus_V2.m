@@ -6,8 +6,8 @@ function [valid,lustrec_failed, ...
 
 
 %% define configuration variables
-% cocosim_config;
-config;
+cocosim_config;
+% config;
 assignin('base', 'SOLVER', 'V');
 assignin('base', 'RUST_GEN', 0);
 assignin('base', 'C_GEN', 0);
@@ -29,7 +29,7 @@ try
     display_msg(f_msg, MsgType.RESULT, 'compare_slx_lus_V2', '');
     GUIUtils.update_status('Runing CocoSim');
     evalin('base','nodisplay = 1;');
-    generated_lus_file_path = cocoSim(model_full_path);
+    generated_lus_file_path = lustre_compiler(model_full_path);
     [~, new_node_name, ~] = fileparts(generated_lus_file_path);
     bdclose('all');
 catch ME
@@ -41,11 +41,11 @@ catch ME
 end
 
 %% create verification file
-filetext1 = adapt_text(fileread(lus_file_path));
+filetext1 = BUtils.adapt_lustre_text(fileread(lus_file_path));
 sep_line = '--******************** second file ********************';
-filetext2 = adapt_text(fileread(generated_lus_file_path));
+filetext2 = BUtils.adapt_lustre_text(fileread(generated_lus_file_path));
 verif_line = '--******************** sVerification node ********************';
-verif_node = construct_verif_node(node_struct, node_name, new_node_name);
+verif_node = BUtils.construct_verif_node(node_struct, node_name, new_node_name);
 
 verif_lus_text = sprintf('%s\n%s\n%s\n%s\n%s', filetext1, sep_line, filetext2, verif_line, verif_node);
 
@@ -69,7 +69,7 @@ end
 [status, solver_out] = system(command);
 display_msg(solver_out, MsgType.RESULT, 'compare_slx_lus_V2', '');
 if status == 0
-    if strfind(solver_out,'<Answer>SAFE</Answer>') || strfind(solver_out,'>valid</Answer>')
+    if ~isempty(strfind(solver_out,'<Answer>SAFE</Answer>')) || ~isempty(strfind(solver_out,'>valid</Answer>'))
         valid = 1;
     else
         valid=0;
@@ -85,64 +85,5 @@ display_msg(f_msg, MsgType.RESULT, 'validation', '');
 
 cd(OldPwd)
 
-
-end
-
-
-%%
-function t = adapt_text(t)
-t = regexprep(t, '''', '''''');
-t = regexprep(t, '%', '%%');
-t = regexprep(t, '\\', '\\\');
-end
-
-
-%%
-function verif_node = construct_verif_node(node_struct, node_name, new_node_name)
-%inputs
-node_inputs = node_struct.inputs;
-nb_in = numel(node_inputs);
-inputs_with_type = cell(nb_in,1);
-inputs = cell(nb_in,1);
-for i=1:nb_in
-    dt = LusValidateUtils.get_lustre_dt(node_inputs(i).datatype);
-    inputs_with_type{i} = sprintf('%s: %s',node_inputs(i).name, dt);
-    inputs{i} = node_inputs(i).name;
-end
-inputs_with_type = strjoin(inputs_with_type, ';');
-inputs = strjoin(inputs, ',');
-
-%outputs
-node_outputs = node_struct.outputs;
-nb_out = numel(node_outputs);
-vars_type = cell(nb_out,1);
-outputs_1 = cell(nb_out,1);
-outputs_2 = cell(nb_out,1);
-
-for i=1:nb_out
-    dt = LusValidateUtils.get_lustre_dt(node_outputs(i).datatype);
-    vars_type{i} = sprintf('%s_1, %s_2: %s;',node_outputs(i).name, ...
-        node_outputs(i).name, dt);
-    outputs_1{i} = strcat(node_outputs(i).name, '_1');
-    outputs_2{i} = strcat(node_outputs(i).name, '_2');
-    ok_exp{i} = sprintf('%s = %s',outputs_1{i}, outputs_2{i});
-end
-vars_type = strjoin(vars_type, '\n');
-outputs_1 = ['(' strjoin(outputs_1, ',') ')'];
-outputs_2 = ['(' strjoin(outputs_2, ',') ')'];
-ok_exp = strjoin(ok_exp, ' and ');
-
-outputs = 'OK:bool';
-header_format = 'node top_verif(%s)\nreturns(%s);\nvar %s\nlet\n';
-header = sprintf(header_format,inputs_with_type, outputs, vars_type);
-
-functions_call_fmt =  '%s = %s(%s);\n%s = %s(%s);\n';
-functions_call = sprintf(functions_call_fmt, outputs_1, node_name, inputs, outputs_2, new_node_name, inputs);
-
-Ok_def = sprintf('OK = %s;\n', ok_exp);
-
-Prop = '--%%PROPERTY  OK=true;';
-
-verif_node = sprintf('%s\n%s\n%s\n%s\ntel', header, functions_call, Ok_def, Prop);
 
 end

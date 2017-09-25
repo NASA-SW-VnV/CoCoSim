@@ -12,8 +12,8 @@ elseif show_models
 end
 
 %% define configuration variables
-% cocosim_config;
-config;
+cocosim_config;
+% config;
 assignin('base', 'SOLVER', 'V');
 assignin('base', 'RUST_GEN', 0);
 assignin('base', 'C_GEN', 0);
@@ -183,12 +183,12 @@ if numberOfInports>=1
                 lustre_input_values(index+1:index2) = input_struct.signals(j).values(i+1,:)';
             else
                 index2 = index + (dim(1) * dim(2));
-                yout_values = [];
+                signal_values = [];
                 y = input_struct.signals(j).values(:,:,i+1);
                 for idr=1:dim(1)
-                    yout_values = [yout_values; y(idr,:)'];
+                    signal_values = [signal_values; y(idr,:)'];
                 end
-                lustre_input_values(index+1:index2) = yout_values;
+                lustre_input_values(index+1:index2) = signal_values;
             end
             
             index = index2;
@@ -213,7 +213,7 @@ fclose(fid);
 %% Simulate the model
 msg = sprintf('Simulating model "%s"\n',slx_file_name);
 display_msg(msg, MsgType.INFO, 'validation', '');
-GUIGUIUtils.update_status('Simulating model');
+GUIUtils.update_status('Simulating model');
 try
     configSet = Simulink.ConfigSet;%copy(getActiveConfigSet(file_name));
     set_param(configSet, 'Solver', 'FixedStepDiscrete');

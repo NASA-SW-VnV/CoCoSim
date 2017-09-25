@@ -76,6 +76,8 @@ end
 
 % Write traceability informations
 xml_trace.write();
+configSet = getActiveConfigSet(model_handle);
+set_param(configSet, 'Solver', 'FixedStepDiscrete');
 save_system(model_handle,new_name,'OverwriteIfChangedOnDisk',true);
 % open_system(model_handle);
 end
