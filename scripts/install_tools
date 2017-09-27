@@ -4,7 +4,7 @@
 #
 # Installation script for cocosim dependencies (lustrec, zustre, kind2).
 #
-# Author: Maxime Arthaud <maxime.arthaud@nasa.gov>
+# Author: Maxime Arthaud <maxime.arthaud@nasa.gov>, Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 #
 # Copyright (c) 2017 United States Government as represented by the
 # Administrator of the National Aeronautics and Space Administration.
@@ -27,6 +27,8 @@ python_required_version="2.7"
 python_install_version="2.7.13"
 ocaml_required_version="4.03.0"
 ocaml_install_version="4.04.0"
+autoconf_install_version="2.69"
+automake_install_version="1.15"
 ocamlfind_install_version="1.7.1"
 ocamlbuild_install_version="0.9.3"
 ocamlgraph_install_version="1.8.7"
@@ -413,6 +415,15 @@ function python_satisfies_requirements() {
     [[ ${version:0:1} = 2 ]] && version_ge "$version" "$python_required_version"
 }
 
+# Parse and detect the version of autoconf, given the command name
+function autoconf_parse_version() {
+    local version_output=$("$1" --version 2>&1)
+
+    debug "'$1 --version':\n$version_output"
+
+    echo "$version_output" | match "^autoconf ((GNU Autoconf)) ($version_regex)$" 4
+}
+
 # Parse and detect the version of ocaml, given the command name
 function ocaml_parse_version() {
     local version_output=$("$1" -version 2>&1)
@@ -541,7 +552,8 @@ mkdir -p "$install_dir" 2>/dev/null || { error "cannot create directory '$instal
 mkdir -p "$build_dir" 2>/dev/null || { error "cannot create directory '$build_dir_orig'"; exit 2; }
 mkdir -p "$download_dir" 2>/dev/null || { error "cannot create directory '$download_dir_orig'"; exit 2; }
 touch "$log_file" 2>/dev/null || { error "cannot create '$log_file_orig'"; exit 2; }
-
+#initialize the log file
+echo "" > "$log_file"
 ######################
 # Output and logging #
 ######################
@@ -663,6 +675,43 @@ function progress_run() {
     fi
 }
 
+######################
+# Activation scripts #
+######################
+
+unset act_prepend_path
+unset act_prepend_manpath
+unset act_prepend_infopath
+unset act_prepend_python_path
+
+function prepend_path() {
+    PATH="$1:$PATH"
+    act_prepend_path+=("$1")
+}
+
+function prepend_manpath() {
+    export MANPATH="$1${MANPATH:+:$MANPATH}"
+    act_prepend_manpath+=("$1")
+}
+
+function prepend_infopath() {
+    export INFOPATH="$1${INFOPATH:+:$INFOPATH}"
+    act_prepend_infopath+=("$1")
+}
+
+function prepend_python_path() {
+    export PYTHONPATH="$1${PYTHONPATH:+:$PYTHONPATH}"
+    act_prepend_python_path+=("$1")
+}
+
+function generate_env_path_line() {
+    local var_name=$1; shift
+
+    if (( $# > 0 )); then
+        echo "export ${var_name}=\"$(join ':' "$@")\${${var_name}:+:\$${var_name}}\""
+    fi
+}
+
 ################################
 # Check required dependencies  #
 ################################
@@ -708,7 +757,69 @@ utils_deps=('cat' 'rm' 'mv' 'cp' 'ln' 'find' 'tee' \
             'make' 'install' 'git' \
             'autoconf' 'automake' 'aclocal' 'pkg-config')
 unset missing_deps
+###################
+# install autoconf#
+###################
+if ! command_exists autoconf; then
+    if [[ -x "$install_dir/autoconf-$autoconf_install_version/bin/autoconf" ]]; then
+        progress "Using already built ${cgreen}autoconf $autoconf_install_version"
+    else
+        progress "Installing ${cgreen}autoconf $autoconf_install_version"
 
+        cd "$build_dir"
+        curl -O -L "http://ftpmirror.gnu.org/autoconf/autoconf-2.69.tar.gz" 
+        tar -xzf  autoconf-2.69.tar.gz
+
+        cd "$build_dir/autoconf-$autoconf_install_version"
+
+        progress_run ./configure \
+            -prefix "$install_dir/autoconf-$autoconf_install_version" \
+            -with-debug-runtime || error_configure autoconf
+
+        progress_run make || error_make autoconf
+
+        progress_run make install || error_install autoconf
+
+        success "${cgreen}autoconf $autoconf_install_version${coff}${cbold} successfully installed"
+    fi
+
+    prepend_path "$install_dir/autoconf-$autoconf_install_version/bin"
+
+
+    
+fi
+###################
+# install automake#
+###################
+if ! command_exists automake; then
+    if [[ -x "$install_dir/automake-$automake_install_version/bin/automake" ]]; then
+        progress "Using already built ${cgreen}automake $autoconf_install_version"
+    else
+        progress "Installing ${cgreen}automake $automake_install_version"
+
+        cd "$build_dir"
+        curl -O -L "http://ftpmirror.gnu.org/automake/automake-1.15.tar.gz" 
+        tar -xzf  automake-1.15.tar.gz
+
+        cd "$build_dir/automake-$automake_install_version"
+
+        progress_run ./configure \
+            -prefix "$install_dir/automake-$automake_install_version" \
+            -with-debug-runtime || error_configure automake
+
+        progress_run make || error_make automake
+
+        progress_run make install || error_install automake
+
+        success "${cgreen}automake $automake_install_version${coff}${cbold} successfully installed"
+    fi
+
+    prepend_path "$install_dir/automake-$automake_install_version/bin"
+
+
+    
+fi
+###########
 for cmd in "${utils_deps[@]}"; do
     if command_exists "$cmd"; then
         debug "Found $cmd at $(command -v "$cmd")"
@@ -734,6 +845,7 @@ fi
 
 if (( ${#missing_deps[@]} > 0 )); then
     error "Missing required utilities: $(join ", " "${missing_deps[@]}")"
+    error "Please install the previous required utilities before running this script."
     exit 4
 fi
 
@@ -747,42 +859,6 @@ success "Found all required utilities"
 
 export MAKEFLAGS="-j$njobs $MAKEFLAGS"
 
-######################
-# Activation scripts #
-######################
-
-unset act_prepend_path
-unset act_prepend_manpath
-unset act_prepend_infopath
-unset act_prepend_python_path
-
-function prepend_path() {
-    PATH="$1:$PATH"
-    act_prepend_path+=("$1")
-}
-
-function prepend_manpath() {
-    export MANPATH="$1${MANPATH:+:$MANPATH}"
-    act_prepend_manpath+=("$1")
-}
-
-function prepend_infopath() {
-    export INFOPATH="$1${INFOPATH:+:$INFOPATH}"
-    act_prepend_infopath+=("$1")
-}
-
-function prepend_python_path() {
-    export PYTHONPATH="$1${PYTHONPATH:+:$PYTHONPATH}"
-    act_prepend_python_path+=("$1")
-}
-
-function generate_env_path_line() {
-    local var_name=$1; shift
-
-    if (( $# > 0 )); then
-        echo "export ${var_name}=\"$(join ':' "$@")\${${var_name}:+:\$${var_name}}\""
-    fi
-}
 
 ###############
 # Check cmake #
@@ -1275,15 +1351,18 @@ else
     progress_run ./configure \
         --prefix="$install_dir/lustrec" || error_configure lustrec
 
-    progress_run make || error_make spacer
-
-    progress_run make install || error_install spacer
+    progress_run make || error_make lustrec
+    # this hack because lustrec was broken
+    #mkdir "$install_dir/lustrec/include/"
+    #mkdir "$install_dir/lustrec/include/lustrec/"
+    #cp -r "$build_dir/lustrec/include/"* "$install_dir/lustrec/include/lustrec/"
+    progress_run make install || error_install lustrec
 fi
 
 prepend_path "$install_dir/lustrec/bin"
 
 command_exists lustrec || assert_failed "lustrec is not properly installed"
-version=$(lustrec_parse_version lustrec) || error_parse_version lustrec
+version=$(lustrec_parse_version lustrec) #|| error_parse_version lustrec
 
 success "${cgreen}lustrec $version${coff}${cbold} successfully installed"
 
@@ -1307,6 +1386,7 @@ else
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX="$install_dir/zustre" \
         -DLUSTREC_ROOT="$install_dir/lustrec" \
+        -DLUSTREC_INCLUDE_DIR="$install_dir/lustrec/include/lustrec" \
         -DZ3_ROOT="$install_dir/spacer" \
         .. || error_configure zustre
 
@@ -1445,6 +1525,6 @@ else
 fi
 
 success "Cocosim dependencies have been successfully installed"
-info "To use cocosim dependencies (lustrec, zustre, kind2), first run:"
+info "To use cocosim dependencies lustrec, zustre, kind2. first run:"
 info "$ $source_cmd $install_dir/activate"
 info "You should consider adding this in your .bashrc"

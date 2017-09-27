@@ -27,6 +27,8 @@ install_dir="../tools/verifiers/$machine"
 install_dir=$(abs_path "$install_dir")
 build_dir="../tools/build"
 build_dir=$(abs_path "$build_dir")
+lustrec_url="https://cavale.enseeiht.fr/git/lustrec"
+lustrec_branch="master"
 
 git_dir="$build_dir/github"
 
@@ -41,7 +43,7 @@ cocoSim2_dir=$(abs_path "..")
 if [[ -a "$install_dir/spacer/bin/z3" && -a "$install_dir/zustre/bin/zustre" && -a "$install_dir/kind2/bin/kind2" ]]; then
     success "z3, Zustre, Kind2 successfully installed in $install_dir"
 else
-    /bin/bash install_tools --prefix=$install_dir --builddir=$build_dir
+    /bin/bash install_tools --prefix=$install_dir --builddir=$build_dir  #--lustrec-url=$lustrec_url --lustrec-branch=$lustrec_branch
 fi
 
 ####### Download standard libraries PP and IR ########
