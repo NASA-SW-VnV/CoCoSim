@@ -760,65 +760,65 @@ unset missing_deps
 ###################
 # install autoconf#
 ###################
-if ! command_exists autoconf; then
-    if [[ -x "$install_dir/autoconf-$autoconf_install_version/bin/autoconf" ]]; then
-        progress "Using already built ${cgreen}autoconf $autoconf_install_version"
-    else
-        progress "Installing ${cgreen}autoconf $autoconf_install_version"
+# if ! command_exists autoconf; then
+#     if [[ -x "$install_dir/autoconf-$autoconf_install_version/bin/autoconf" ]]; then
+#         progress "Using already built ${cgreen}autoconf $autoconf_install_version"
+#     else
+#         progress "Installing ${cgreen}autoconf $autoconf_install_version"
 
-        cd "$build_dir"
-        curl -O -L "http://ftpmirror.gnu.org/autoconf/autoconf-2.69.tar.gz" 
-        tar -xzf  autoconf-2.69.tar.gz
+#         cd "$build_dir"
+#         curl -O -L "http://ftpmirror.gnu.org/autoconf/autoconf-2.69.tar.gz" 
+#         tar -xzf  autoconf-2.69.tar.gz
 
-        cd "$build_dir/autoconf-$autoconf_install_version"
+#         cd "$build_dir/autoconf-$autoconf_install_version"
 
-        progress_run ./configure \
-            -prefix "$install_dir/autoconf-$autoconf_install_version" \
-            -with-debug-runtime || error_configure autoconf
+#         progress_run ./configure \
+#             -prefix "$install_dir/autoconf-$autoconf_install_version" \
+#             -with-debug-runtime || error_configure autoconf
 
-        progress_run make || error_make autoconf
+#         progress_run make || error_make autoconf
 
-        progress_run make install || error_install autoconf
+#         progress_run make install || error_install autoconf
 
-        success "${cgreen}autoconf $autoconf_install_version${coff}${cbold} successfully installed"
-    fi
+#         success "${cgreen}autoconf $autoconf_install_version${coff}${cbold} successfully installed"
+#     fi
 
-    prepend_path "$install_dir/autoconf-$autoconf_install_version/bin"
+#     prepend_path "$install_dir/autoconf-$autoconf_install_version/bin"
 
 
     
-fi
+# fi
 ###################
 # install automake#
 ###################
-if ! command_exists automake; then
-    if [[ -x "$install_dir/automake-$automake_install_version/bin/automake" ]]; then
-        progress "Using already built ${cgreen}automake $autoconf_install_version"
-    else
-        progress "Installing ${cgreen}automake $automake_install_version"
+# if ! command_exists automake; then
+#     if [[ -x "$install_dir/automake-$automake_install_version/bin/automake" ]]; then
+#         progress "Using already built ${cgreen}automake $autoconf_install_version"
+#     else
+#         progress "Installing ${cgreen}automake $automake_install_version"
 
-        cd "$build_dir"
-        curl -O -L "http://ftpmirror.gnu.org/automake/automake-1.15.tar.gz" 
-        tar -xzf  automake-1.15.tar.gz
+#         cd "$build_dir"
+#         curl -O -L "http://ftpmirror.gnu.org/automake/automake-1.15.tar.gz" 
+#         tar -xzf  automake-1.15.tar.gz
 
-        cd "$build_dir/automake-$automake_install_version"
+#         cd "$build_dir/automake-$automake_install_version"
 
-        progress_run ./configure \
-            -prefix "$install_dir/automake-$automake_install_version" \
-            -with-debug-runtime || error_configure automake
+#         progress_run ./configure \
+#             -prefix "$install_dir/automake-$automake_install_version" \
+#             -with-debug-runtime || error_configure automake
 
-        progress_run make || error_make automake
+#         progress_run make || error_make automake
 
-        progress_run make install || error_install automake
+#         progress_run make install || error_install automake
 
-        success "${cgreen}automake $automake_install_version${coff}${cbold} successfully installed"
-    fi
+#         success "${cgreen}automake $automake_install_version${coff}${cbold} successfully installed"
+#     fi
 
-    prepend_path "$install_dir/automake-$automake_install_version/bin"
+#     prepend_path "$install_dir/automake-$automake_install_version/bin"
 
 
     
-fi
+# fi
 ###########
 for cmd in "${utils_deps[@]}"; do
     if command_exists "$cmd"; then

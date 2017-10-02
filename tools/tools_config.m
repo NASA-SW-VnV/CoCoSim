@@ -43,6 +43,9 @@ if ~exist('solvers_path', 'var')
     if ~contains(OldLibPath,'libz3.so') && ~contains(OldLibPath,'libz3.dylib')
         setenv(LD_LIBRARY_PATH,[OldLibPath ':' Z3Library_path]);
     end
+    oldPythonPath = getenv('PYTHONPATH');
+    z3PythonPath = fullfile(solvers_path,'spacer', 'lib', 'python2.7','dist-packages');
+    setenv('PYTHONPATH', [z3PythonPath ':' oldPythonPath]);
 end
 
 LUSTREC = fullfile(solvers_path, 'lustrec', 'bin', 'lustrec');
