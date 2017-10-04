@@ -17,7 +17,7 @@ xml_trace.init();
 %%
 
 base_name = regexp(cocospec_name,'\.','split');
-new_model_name = strcat(base_name{1}, '_emf');
+new_model_name = BUtils.adapt_block_name(strcat(base_name{1}, '_emf'));
 new_name = fullfile(output_dir,strcat(new_model_name,'.slx'));
 if exist(new_name,'file')
     if bdIsLoaded(new_model_name)
@@ -412,7 +412,7 @@ switch operator
     case 'mod'
         add_block('simulink/Math Operations/Math Function',...
             op_path,...
-            'Operator', 'mod',...
+            'Operator', 'rem',...
             'OutDataTypeStr', dt, ...
             'Position',[(x+200) y2 (x+250) (y2+50)]);
     case {'&&', '||', 'xor', 'not'}

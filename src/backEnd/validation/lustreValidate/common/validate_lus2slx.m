@@ -1,21 +1,28 @@
 function [valid, lustrec_failed, lustrec_binary_failed, sim_failed] = validate_lus2slx( lus_file_path, main_node, stop_at_first_cex)
 %VALIDATE_LUS2SLX validate the translation lustre 2 simulink by generating
 %random inputs
-
-if nargin < 2
-    main_node = 'top';
+[lus_dir, lus_fname, ~] = fileparts(lus_file_path);
+if nargin < 2 || isempty(main_node)
+    main_node = BUtils.adapt_block_name(lus_fname);
 end
+
 if ~exist('stop_at_first_cex', 'var')
     stop_at_first_cex = 1;
 end
 OldPwd = pwd;
-cocosim_config;
+tools_config;
 % config;
 
+
+%%
+valid = -1;
+lustrec_failed = -1;
+lustrec_binary_failed = -1;
+sim_failed = -1;
 %% generate EMF
-[lus_dir, lus_fname, ~] = fileparts(lus_file_path);
 output_dir = fullfile(lus_dir, 'tmp', strcat('tmp_',lus_fname));
 if ~exist(output_dir, 'dir'); mkdir(output_dir); end
+
 msg = sprintf('generating emf "%s"\n',lus_file_path);
 display_msg(msg, MsgType.INFO, 'validation', '');
 command = sprintf('%s -I "%s" -d "%s" -emf  "%s"',...
@@ -31,10 +38,30 @@ if status
     cd(OldPwd);
     return
 end
-
 contract_path = fullfile(output_dir,strcat(lus_fname, '.emf'));
 
+%% generate Lusi file
+msg = sprintf('generating lusi for "%s"\n',lus_file_path);
+display_msg(msg, MsgType.INFO, 'validation', '');
+command = sprintf('%s -I "%s"  -lusi  "%s"',...
+    LUSTREC,LUCTREC_INCLUDE_DIR, lus_file_path);
+msg = sprintf('LUSI_LUSTREC_COMMAND : %s\n',command);
+display_msg(msg, MsgType.INFO, 'validation', '');
+[status, lusi_out] = system(command);
+if status
+    err = sprintf('generation of lusi file failed for file "%s" ',lus_fname);
+    display_msg(err, MsgType.ERROR, 'validation', '');
+    display_msg(err, MsgType.DEBUG, 'validation', '');
+    display_msg(lusi_out, MsgType.DEBUG, 'validation', '');
+    cd(OldPwd);
+    return
+end
+
+lusi_path = fullfile(lus_dir,strcat(lus_fname, '.lusi'));
+
+
 %% extract SLX for all nodes
+display_msg('Runing Lus2SLX on EMF file', MsgType.INFO, 'validation', '');
 try
     translated_nodes_path  = lus2slx(contract_path, output_dir);
 catch ME
@@ -49,19 +76,33 @@ load_system(translated_nodes);
 
 data = BUtils.read_EMF(contract_path);
 nodes = data.nodes;
-nodes_names = fieldnames(nodes)';
+emf_nodes_names = fieldnames(nodes)';
+lusi_text = fileread(lusi_path);
+nodes_names = {};
+for node_idx =1:numel(emf_nodes_names) 
+    name = emf_nodes_names{node_idx};
+    pattern = strcat('(node|function)\s+',name,'\s*\(');
+    tokens = regexp(lusi_text, pattern,'match');
+    if ~isempty(tokens) && ~(endsWith(name, '_unless') || endsWith(name, '_handler_until'))
+        nodes_names{numel(nodes_names) + 1} = name;
+    end
+end
 for node_idx =0:numel(nodes_names) 
-    if node_idx==0
-        node_name = main_node;
+    if node_idx==0 
+        if ismember(main_node, nodes_names)
+            node_name = main_node;
+        else
+            continue;
+        end
     else
-        node_name = nodes_names{node_idx};
+        node_name = BUtils.adapt_block_name(nodes_names{node_idx});
         if strcmp(node_name, main_node)
             continue;
         end
     end
     %% extract the main node Subsystem
     base_name = regexp(lus_fname,'\.','split');
-    new_model_name = strcat(base_name{1},'_', node_name);
+    new_model_name = BUtils.adapt_block_name(strcat(base_name{1},'_', node_name));
     new_name = fullfile(output_dir, strcat(new_model_name,'.slx'));
     if exist(new_name,'file')
         if bdIsLoaded(new_model_name)
@@ -108,7 +149,7 @@ for node_idx =0:numel(nodes_names)
     end
     %% Save system
     configSet = getActiveConfigSet(model_handle);
-    set_param(configSet, 'Solver', 'FixedStepDiscrete');
+    set_param(configSet, 'Solver', 'FixedStepDiscrete', 'FixedStep', '1');
     save_system(model_handle,new_name,'OverwriteIfChangedOnDisk',true);
     
     % open(new_name)
@@ -121,6 +162,9 @@ for node_idx =0:numel(nodes_names)
             output_dir);
         if ~valid
                 display_msg(['Node ' node_name ' is not valid (see Counter example above)'], MsgType.RESULT, 'validation', '');
+                if stop_at_first_cex
+                    break;
+                end
         end
         if node_idx==0 && (valid || stop_at_first_cex)
             break;
@@ -137,6 +181,11 @@ for node_idx =0:numel(nodes_names)
 end
 cd(OldPwd);
 close_system(translated_nodes,0);
+
+%% clean tmp files
+system(['rm ' lusi_path]);
+
+
 % if ~lustrec_failed && ~sim_failed && ~lustrec_binary_failed && ~valid && ~stop_at_first_cex
 %     %get tracability
 %     trace_file_name = fullfile(output_dir,strcat(lus_fname,'.emf.trace.xml'));

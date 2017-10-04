@@ -12,7 +12,7 @@ elseif show_models
 end
 
 %% define configuration variables
-cocosim_config;
+tools_config;
 % config;
 assignin('base', 'SOLVER', 'V');
 assignin('base', 'RUST_GEN', 0);
@@ -115,7 +115,7 @@ warning on;
 numberOfInports = numel(inports);
 
 %% Create the input struct for the simulation
-stop_time = 1000;
+stop_time = 100;
 try
     min = SLXUtils.get_BlockDiagram_SampleTime(slx_file_name);
     if  min==0 || isnan(min) || min==Inf

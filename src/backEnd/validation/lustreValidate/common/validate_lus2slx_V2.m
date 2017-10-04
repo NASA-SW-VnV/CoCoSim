@@ -9,7 +9,7 @@ if nargin < 3
     Backend = 'Z';
 end
 OldPwd = pwd;
-cocosim_config;
+tools_config;
 % config;
 %% output initialisation
 valid = -1;
@@ -65,7 +65,7 @@ main_node_struct = nodes.(nodes_names{idx_main_node});
 
 %% extract the main node Subsystem
 base_name = regexp(lus_fname,'\.','split');
-new_model_name = strcat(base_name{1},'_', main_node_name);
+new_model_name = BUtils.adapt_block_name(strcat(base_name{1},'_', main_node_name));
 new_name = fullfile(output_dir, strcat(new_model_name,'.slx'));
 if exist(new_name,'file')
     if bdIsLoaded(new_model_name)
@@ -112,7 +112,7 @@ for i=1:nb_outports
 end
 %% Save system
 configSet = getActiveConfigSet(model_handle);
-set_param(configSet, 'Solver', 'FixedStepDiscrete');
+set_param(configSet, 'Solver', 'FixedStepDiscrete',  'FixedStep', '1');
 save_system(model_handle,new_name,'OverwriteIfChangedOnDisk',true);
 % open(new_name)
 
