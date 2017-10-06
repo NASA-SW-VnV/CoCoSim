@@ -26,7 +26,7 @@ sim_failed=0;
 valid = 0;
 %%
 [model_path, slx_file_name, ~] = fileparts(char(model_full_path));
-[~, lus_file_name, ext] = fileparts(char(lus_file_path));
+[~, lus_file_name, ~] = fileparts(char(lus_file_path));
 addpath(model_path);
 load_system(model_full_path);
 %fullfile(output_dir, strcat(lus_file_name, ext))
@@ -37,167 +37,33 @@ load_system(model_full_path);
 if ~exist(output_dir, 'dir')
     mkdir(output_dir);
 end
-cd(output_dir);
 %% Copile the lustre code to C
-command = sprintf('%s -I "%s" -node %s "%s"',...
-    LUSTREC,LUCTREC_INCLUDE_DIR, LusValidateUtils.name_format(node_name), lus_file_path);
-msg = sprintf('LUSTREC_COMMAND : %s\n',command);
-display_msg(msg, MsgType.INFO, 'validation', '');
-GUIUtils.update_status('Runing Lustrec compiler');
-[status, lustre_out] = system(command);
-if status
-    display_msg(msg, MsgType.DEBUG, 'validation', '');
-    msg = sprintf('lustrec failed for model "%s"',lus_file_name);
-    display_msg(msg, MsgType.INFO, 'validation', '');
-    display_msg(msg, MsgType.ERROR, 'validation', '');
-    display_msg(msg, MsgType.DEBUG, 'validation', '');
-    display_msg(lustre_out, MsgType.DEBUG, 'validation', '');
+err = LustrecUtils.compile_lustre_to_Cbinary(lus_file_path,...
+    LusValidateUtils.name_format(node_name), ...
+    output_dir, ...
+    LUSTREC,LUCTREC_INCLUDE_DIR);
+if err
     lustrec_failed = 1;
-    cd(OldPwd);
     return
 end
 
-%% generate binary from C code
-msg = sprintf('start compiling model "%s"\n',lus_file_name);
-display_msg(msg, MsgType.INFO, 'validation', '');
-makefile_name = fullfile(output_dir,strcat(lus_file_name,'.makefile'));
-command = sprintf('make -f "%s"', makefile_name);
-msg = sprintf('MAKE_LUSTREC_COMMAND : %s\n',command);
-display_msg(msg, MsgType.INFO, 'validation', '');
-[status, make_out] = system(command);
-if status
-    err = sprintf('Compilation failed for model "%s" ',lus_file_name);
-    display_msg(err, MsgType.ERROR, 'validation', '');
-    display_msg(err, MsgType.DEBUG, 'validation', '');
-    display_msg(make_out, MsgType.DEBUG, 'validation', '');
-    command = sprintf('rm %s.makefile %s.c %s.h %s.o %s.lusic  %s_main.* %s_alloc.h %s_sfun.mexa64',...
-        lus_file_name, lus_file_name,lus_file_name,lus_file_name,lus_file_name,lus_file_name,lus_file_name,lus_file_name);
-    system(command);
-    command = sprintf('rm *.o input_values outputs_values ');
-    system(command);
-    command = sprintf('rm -r slprj');
-    system(command);
-    cd(OldPwd);
-    return
-end
+
 
 %% Get model inports informations
-%TODO: Need to be optimized
-GUIUtils.update_status('Generating Lustrec outputs');
-load_system(model_full_path);
-
-rt = sfroot;
-m = rt.find('-isa', 'Simulink.BlockDiagram');
-events = m.find('-isa', 'Stateflow.Event');
-inputEvents = events.find('Scope', 'Input');
-inputEvents_names = inputEvents.get('Name');
-code_on=sprintf('%s([], [], [], ''compile'')', slx_file_name);
-warning off;
-evalin('base',code_on);
-block_paths = find_system(slx_file_name, 'SearchDepth',1, 'BlockType', 'Inport');
-inports = [];
-for i=1:numel(block_paths)
-    block = block_paths{i};
-    block_ports_dts = get_param(block, 'CompiledPortDataTypes');
-    DataType = block_ports_dts.Outport;
-    dimension_struct = get_param(block,'CompiledPortDimensions');
-    dimension = dimension_struct.Outport;
-    if numel(dimension)== 2 && dimension(1)==1
-        dimension = dimension(2);
-    end
-    inports = [inports, struct('Name',BUtils.naming_alone(block),...
-        'DataType', DataType, 'Dimension', dimension)];
-    
-end
-code_on=sprintf('%s([], [], [], ''term'')', slx_file_name);
-evalin('base',code_on);
-warning on;
-numberOfInports = numel(inports);
+[inports, inputEvents_names] = SLXUtils.get_model_inputs_info(model_full_path);
 
 %% Create the input struct for the simulation
-stop_time = 100;
-try
-    min = SLXUtils.get_BlockDiagram_SampleTime(slx_file_name);
-    if  min==0 || isnan(min) || min==Inf
-        simulation_step = 1;
-    else
-        simulation_step = min;
-    end
-    
-catch
-    simulation_step = 1;
-end
-nb_steps = stop_time/simulation_step +1;
-IMAX = 100; %IMAX for randi the max born for random number
-IMIN = -5;
-
-input_struct.time = (0:simulation_step:stop_time)';
-input_struct.signals = [];
-number_of_inputs = 0;
-for i=1:numberOfInports
-    input_struct.signals(i).name = inports(i).Name;
-    dim = inports(i).Dimension;
-    if exist('min_max_constraints', 'var') && ~isempty(min_max_constraints)
-        IMIN = min_max_constraints{i,2};
-        IMAX = min_max_constraints{i,3};
-    end
-    if find(strcmp(inputEvents_names,inports(i).Name))
-        input_struct.signals(i).values = square((numberOfInports-i+1)*rand(1)*input_struct.time);
-        input_struct.signals(i).dimensions = 1;%dim;
-    elseif strcmp(LusValidateUtils.get_lustre_dt(inports(i).DataType),'bool')
-        input_struct.signals(i).values = LusValidateUtils.construct_random_booleans(nb_steps, IMIN, IMAX, dim);
-        input_struct.signals(i).dimensions = dim;
-    elseif strcmp(LusValidateUtils.get_lustre_dt(inports(i).DataType),'int')
-        input_struct.signals(i).values = LusValidateUtils.construct_random_integers(nb_steps, IMIN, IMAX, inports(i).DataType, dim);
-        input_struct.signals(i).dimensions = dim;
-    elseif strcmp(inports(i).DataType,'single')
-        input_struct.signals(i).values = single(LusValidateUtils.construct_random_doubles(nb_steps, IMIN, IMAX,dim));
-        input_struct.signals(i).dimensions = dim;
-    else
-        input_struct.signals(i).values = LusValidateUtils.construct_random_doubles(nb_steps, IMIN, IMAX,dim);
-        input_struct.signals(i).dimensions = dim;
-    end
-    if numel(dim)==1
-        number_of_inputs = number_of_inputs + nb_steps*dim;
-    else
-        number_of_inputs = number_of_inputs + nb_steps*(dim(1) * dim(2));
-    end
-end
-
-%% take input struct if defined by the user
-%TODO: improve it
-try
-    input_struct = evalin('base','user_input_struct');
-catch
-end
-
-%% Translate input_stract to lustre format (inline the inputs)
-if numberOfInports>=1
-    lustre_input_values = ones(number_of_inputs,1);
-    index = 0;
-    for i=0:nb_steps-1
-        for j=1:numberOfInports
-            dim = input_struct.signals(j).dimensions;
-            if numel(dim)==1
-                index2 = index + dim;
-                lustre_input_values(index+1:index2) = input_struct.signals(j).values(i+1,:)';
-            else
-                index2 = index + (dim(1) * dim(2));
-                signal_values = [];
-                y = input_struct.signals(j).values(:,:,i+1);
-                for idr=1:dim(1)
-                    signal_values = [signal_values; y(idr,:)'];
-                end
-                lustre_input_values(index+1:index2) = signal_values;
-            end
-            
-            index = index2;
-        end
-    end
-    
+numberOfInports = numel(inports);
+nb_steps = 100;
+if exist('min_max_constraints','var') && numel(min_max_constraints) > 0
+    IMIN = min_max_constraints{:,2};
+    IMAX = min_max_constraints{:,3};
 else
-    lustre_input_values = ones(1*nb_steps,1);
+    IMIN = -100;
+    IMAX = 100;
 end
+[input_struct, lustre_input_values, simulation_step, stop_time] = SLXUtils.get_random_test(slx_file_name, inports, inputEvents_names, nb_steps,IMAX, IMIN);
+
 
 
 %% print lustre inputs in a file

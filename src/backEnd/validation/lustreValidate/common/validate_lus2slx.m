@@ -1,7 +1,7 @@
 function [valid, lustrec_failed, lustrec_binary_failed, sim_failed] = validate_lus2slx( lus_file_path, main_node, stop_at_first_cex)
 %VALIDATE_LUS2SLX validate the translation lustre 2 simulink by generating
 %random inputs
-[lus_dir, lus_fname, ~] = fileparts(lus_file_path);
+[~, lus_fname, ~] = fileparts(lus_file_path);
 if nargin < 2 || isempty(main_node)
     main_node = BUtils.adapt_block_name(lus_fname);
 end
@@ -19,51 +19,21 @@ valid = -1;
 lustrec_failed = -1;
 lustrec_binary_failed = -1;
 sim_failed = -1;
+
 %% generate EMF
-output_dir = fullfile(lus_dir, 'tmp', strcat('tmp_',lus_fname));
-if ~exist(output_dir, 'dir'); mkdir(output_dir); end
-
-msg = sprintf('generating emf "%s"\n',lus_file_path);
-display_msg(msg, MsgType.INFO, 'validation', '');
-command = sprintf('%s -I "%s" -d "%s" -emf  "%s"',...
-    LUSTREC,LUCTREC_INCLUDE_DIR, output_dir, lus_file_path);
-msg = sprintf('EMF_LUSTREC_COMMAND : %s\n',command);
-display_msg(msg, MsgType.INFO, 'validation', '');
-[status, emf_out] = system(command);
+[emf_path, status] = LustrecUtils.generate_emf(lus_file_path, LUSTREC, LUCTREC_INCLUDE_DIR);
 if status
-    err = sprintf('generation of emf failed for file "%s" ',lus_fname);
-    display_msg(err, MsgType.ERROR, 'validation', '');
-    display_msg(err, MsgType.DEBUG, 'validation', '');
-    display_msg(emf_out, MsgType.DEBUG, 'validation', '');
-    cd(OldPwd);
-    return
+    return;
 end
-contract_path = fullfile(output_dir,strcat(lus_fname, '.emf'));
-
+[output_dir, ~, ~] = fileparts(emf_path);
 %% generate Lusi file
-msg = sprintf('generating lusi for "%s"\n',lus_file_path);
-display_msg(msg, MsgType.INFO, 'validation', '');
-command = sprintf('%s -I "%s"  -lusi  "%s"',...
-    LUSTREC,LUCTREC_INCLUDE_DIR, lus_file_path);
-msg = sprintf('LUSI_LUSTREC_COMMAND : %s\n',command);
-display_msg(msg, MsgType.INFO, 'validation', '');
-[status, lusi_out] = system(command);
+[lusi_path, status] = LustrecUtils.generate_lusi(lus_file_path, LUSTREC );
 if status
-    err = sprintf('generation of lusi file failed for file "%s" ',lus_fname);
-    display_msg(err, MsgType.ERROR, 'validation', '');
-    display_msg(err, MsgType.DEBUG, 'validation', '');
-    display_msg(lusi_out, MsgType.DEBUG, 'validation', '');
-    cd(OldPwd);
-    return
+    return;
 end
-
-lusi_path = fullfile(lus_dir,strcat(lus_fname, '.lusi'));
-
-
 %% extract SLX for all nodes
-display_msg('Runing Lus2SLX on EMF file', MsgType.INFO, 'validation', '');
 try
-    translated_nodes_path  = lus2slx(contract_path, output_dir);
+    translated_nodes_path  = lus2slx(emf_path, output_dir);
 catch ME
     display_msg(ME.message, MsgType.ERROR, 'validation', '');
     display_msg(ME.getReport(), MsgType.DEBUG, 'validation', '');
@@ -74,7 +44,7 @@ end
 [~, translated_nodes, ~] = fileparts(translated_nodes_path);
 load_system(translated_nodes);
 
-data = BUtils.read_EMF(contract_path);
+data = BUtils.read_EMF(emf_path);
 nodes = data.nodes;
 emf_nodes_names = fieldnames(nodes)';
 lusi_text = fileread(lusi_path);

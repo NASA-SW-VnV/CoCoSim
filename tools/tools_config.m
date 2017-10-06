@@ -21,6 +21,7 @@
 %
 % 3- Set your own paths by redefining the variables : ZUSTRE, LUSTREC,
 %   KIND2
+
 [tools_root, ~, ~] = fileparts(mfilename('fullpath'));
 cocoSim_root = fileparts(tools_root);
 if ~exist('solvers_path', 'var')

@@ -6,7 +6,16 @@ generation_start = tic;
 
 [file_parent, file_name, ~] = fileparts(lus_full_path);
 output_dir = fullfile(file_parent, strcat(file_name,'_mutants'));
-if ~exist(output_dir, 'dir'); mkdir(output_dir); end
+if ~exist(output_dir, 'dir')
+    mkdir(output_dir);
+else
+    mutant_path = fullfile(output_dir, strcat(file_name, '.mutant.n1.lus'));
+    if BUtils.isLastModified(lus_full_path, mutant_path)
+        err = 0;
+        display_msg(['mutants have been already generated'], MsgType.DEBUG, 'Validation', '');
+        return;
+    end
+end
 
 tools_config;
 if ~exist('LUSTRET','var')
@@ -37,6 +46,6 @@ end
 
 
 generation_stop = toc(generation_start);
-fprintf('mutations has been generated in %f seconds', generation_stop);
+fprintf('mutations has been generated in %f seconds\n', generation_stop);
 end
 

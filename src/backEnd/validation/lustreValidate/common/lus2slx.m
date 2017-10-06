@@ -4,6 +4,8 @@ function new_name = lus2slx(contract_path, output_dir)
 
 
 %%
+display_msg('Runing Lus2SLX on EMF file', MsgType.INFO, 'lus2slx', '');
+
 [coco_dir, cocospec_name, ~] = fileparts(contract_path);
 if nargin < 2
     output_dir = coco_dir;
@@ -20,6 +22,9 @@ base_name = regexp(cocospec_name,'\.','split');
 new_model_name = BUtils.adapt_block_name(strcat(base_name{1}, '_emf'));
 new_name = fullfile(output_dir,strcat(new_model_name,'.slx'));
 if exist(new_name,'file')
+    if BUtils.isLastModified(contract_path, new_name)
+        return;
+    end
     if bdIsLoaded(new_model_name)
         close_system(new_model_name,0)
     end

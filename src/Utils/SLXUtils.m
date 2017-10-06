@@ -172,7 +172,141 @@ classdef SLXUtils
             end
         end
         
+        %%
+        function [model_inputs_struct, inputEvents_names] = get_model_inputs_info(model_full_path)
+            %TODO: Need to be optimized
+            model_inputs_struct = [];
+            try
+                load_system(model_full_path);
+            catch ME
+                error(ME.getReport());
+                return;
+            end
+            [~, slx_file_name, ~] = fileparts(model_full_path);
+            rt = sfroot;
+            m = rt.find('-isa', 'Simulink.BlockDiagram', 'Name', slx_file_name);
+            events = m.find('-isa', 'Stateflow.Event');
+            inputEvents = events.find('Scope', 'Input');
+            inputEvents_names = inputEvents.get('Name');
+            code_on=sprintf('%s([], [], [], ''compile'')', slx_file_name);
+            warning off;
+            evalin('base',code_on);
+            block_paths = find_system(slx_file_name, 'SearchDepth',1, 'BlockType', 'Inport');
+            for i=1:numel(block_paths)
+                block = block_paths{i};
+                block_ports_dts = get_param(block, 'CompiledPortDataTypes');
+                DataType = block_ports_dts.Outport;
+                dimension_struct = get_param(block,'CompiledPortDimensions');
+                dimension = dimension_struct.Outport;
+                if numel(dimension)== 2 && dimension(1)==1
+                    dimension = dimension(2);
+                end
+                model_inputs_struct = [model_inputs_struct, struct('name',BUtils.naming_alone(block),...
+                    'datatype', DataType, 'dimension', dimension)];
+                
+            end
+            code_off=sprintf('%s([], [], [], ''term'')', slx_file_name);
+            evalin('base',code_off);
+            warning on;
+        end
         
+        %% create random vector test
+        function [input_struct, ...
+                lustre_input_values,...
+                simulation_step, ...
+                stop_time] = get_random_test(slx_file_name, inports, inputEvents_names, nb_steps,IMAX, IMIN)
+            if ~exist('inputEvents_names', 'var')
+                inputEvents_names = {};
+            end
+            if ~exist('nb_steps', 'var')
+                nb_steps = 100;
+            end
+            if ~exist('IMAX', 'var')
+                IMAX = 100;
+            end
+            if ~exist('IMIN', 'var')
+                IMIN = -100;
+            end
+            numberOfInports = numel(inports);
+            try
+                min = SLXUtils.get_BlockDiagram_SampleTime(slx_file_name);
+                if  min==0 || isnan(min) || min==Inf
+                    simulation_step = 1;
+                else
+                    simulation_step = min;
+                end
+                
+            catch
+                simulation_step = 1;
+            end
+            stop_time = (nb_steps - 1)*simulation_step;
+            input_struct.time = (0:simulation_step:stop_time)';
+            input_struct.signals = [];
+            number_of_inputs = 0;
+            for i=1:numberOfInports
+                input_struct.signals(i).name = inports(i).name;
+                if isfield(inports(i), 'dimension')
+                    dim = inports(i).dimension;
+                else
+                    dim = 1;
+                end
+                if numel(IMIN) >= i && numel(IMAX) >= i
+                    min = IMIN(i);
+                    max = IMAX(i);
+                else
+                    min = IMIN(1);
+                    max = IMAX(1);
+                end
+                if find(strcmp(inputEvents_names,inports(i).name))
+                    input_struct.signals(i).values = square((numberOfInports-i+1)*rand(1)*input_struct.time);
+                    input_struct.signals(i).dimensions = 1;
+                elseif strcmp(LusValidateUtils.get_lustre_dt(inports(i).datatype),'bool')
+                    input_struct.signals(i).values = LusValidateUtils.construct_random_booleans(nb_steps, min, max, dim);
+                    input_struct.signals(i).dimensions = dim;
+                elseif strcmp(LusValidateUtils.get_lustre_dt(inports(i).datatype),'int')
+                    input_struct.signals(i).values = LusValidateUtils.construct_random_integers(nb_steps, min, max, inports(i).datatype, dim);
+                    input_struct.signals(i).dimensions = dim;
+                elseif strcmp(inports(i).datatype,'single')
+                    input_struct.signals(i).values = single(LusValidateUtils.construct_random_doubles(nb_steps, min, max, dim));
+                    input_struct.signals(i).dimensions = dim;
+                else
+                    input_struct.signals(i).values = LusValidateUtils.construct_random_doubles(nb_steps, min, max, dim);
+                    input_struct.signals(i).dimensions = dim;
+                end
+                if numel(dim)==1
+                    number_of_inputs = number_of_inputs + nb_steps*dim;
+                else
+                    number_of_inputs = number_of_inputs + nb_steps*(dim(1) * dim(2));
+                end
+            end
+            %% Translate input_stract to lustre format (inline the inputs)
+            if numberOfInports>=1
+                lustre_input_values = ones(number_of_inputs,1);
+                index = 0;
+                for i=0:nb_steps-1
+                    for j=1:numberOfInports
+                        dim = input_struct.signals(j).dimensions;
+                        if numel(dim)==1
+                            index2 = index + dim;
+                            lustre_input_values(index+1:index2) = input_struct.signals(j).values(i+1,:)';
+                        else
+                            index2 = index + (dim(1) * dim(2));
+                            signal_values = [];
+                            y = input_struct.signals(j).values(:,:,i+1);
+                            for idr=1:dim(1)
+                                signal_values = [signal_values; y(idr,:)'];
+                            end
+                            lustre_input_values(index+1:index2) = signal_values;
+                        end
+                        
+                        index = index2;
+                    end
+                end
+                
+            else
+                lustre_input_values = ones(1*nb_steps,1);
+            end
+        end
     end
     
 end
