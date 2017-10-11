@@ -212,7 +212,6 @@ classdef SLXUtils
         
         %% create random vector test
         function [input_struct, ...
-                lustre_input_values,...
                 simulation_step, ...
                 stop_time] = get_random_test(slx_file_name, inports, inputEvents_names, nb_steps,IMAX, IMIN)
             if ~exist('inputEvents_names', 'var')
@@ -242,7 +241,6 @@ classdef SLXUtils
             stop_time = (nb_steps - 1)*simulation_step;
             input_struct.time = (0:simulation_step:stop_time)';
             input_struct.signals = [];
-            number_of_inputs = 0;
             for i=1:numberOfInports
                 input_struct.signals(i).name = inports(i).name;
                 if isfield(inports(i), 'dimension')
@@ -273,39 +271,9 @@ classdef SLXUtils
                     input_struct.signals(i).values = LusValidateUtils.construct_random_doubles(nb_steps, min, max, dim);
                     input_struct.signals(i).dimensions = dim;
                 end
-                if numel(dim)==1
-                    number_of_inputs = number_of_inputs + nb_steps*dim;
-                else
-                    number_of_inputs = number_of_inputs + nb_steps*(dim(1) * dim(2));
-                end
-            end
-            %% Translate input_stract to lustre format (inline the inputs)
-            if numberOfInports>=1
-                lustre_input_values = ones(number_of_inputs,1);
-                index = 0;
-                for i=0:nb_steps-1
-                    for j=1:numberOfInports
-                        dim = input_struct.signals(j).dimensions;
-                        if numel(dim)==1
-                            index2 = index + dim;
-                            lustre_input_values(index+1:index2) = input_struct.signals(j).values(i+1,:)';
-                        else
-                            index2 = index + (dim(1) * dim(2));
-                            signal_values = [];
-                            y = input_struct.signals(j).values(:,:,i+1);
-                            for idr=1:dim(1)
-                                signal_values = [signal_values; y(idr,:)'];
-                            end
-                            lustre_input_values(index+1:index2) = signal_values;
-                        end
-                        
-                        index = index2;
-                    end
-                end
                 
-            else
-                lustre_input_values = ones(1*nb_steps,1);
             end
+           
         end
     end
     

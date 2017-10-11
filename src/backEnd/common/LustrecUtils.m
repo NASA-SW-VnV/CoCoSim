@@ -254,25 +254,26 @@ classdef LustrecUtils
         end
         
         %% run Zustre or kind2 on verification file
-        function [answer, CEX] = run_verif(verif_lus_path, Verif_dir, node_name, Backend)
+        
+        function [answer, IN_struct, time_max] = run_verif(verif_lus_path, inports,  output_dir, node_name, Backend)
             answer = '';
-            CEX = [];
+            IN_struct = [];
             if nargin < 1
                 status = 1;
                 error('Missing arguments to function call: LustrecUtils.run_verif')
             end
             [file_dir, file_name, ~] = fileparts(verif_lus_path);
-            if nargin < 2 || isempty(Verif_dir)
-                Verif_dir = file_dir;
+            if nargin < 3 || isempty(output_dir)
+                output_dir = file_dir;
             end
-            if nargin < 3 || isempty(node_name)
+            if nargin < 4 || isempty(node_name)
                 node_name = 'top';
             end
-            if nargin < 4 || isempty(Backend)
+            if nargin < 5 || isempty(Backend)
                 Backend = 'KIND2';
             end
             timeout = '600';
-            cd(Verif_dir);
+            cd(output_dir);
             tools_config;
             if strcmp(Backend, 'ZUSTRE') || strcmp(Backend, 'Z')
                 command = sprintf('%s "%s" --node %s --xml  --matlab --timeout %s --save ',...
@@ -287,17 +288,21 @@ classdef LustrecUtils
             end
             [~, solver_output] = system(command);
             display_msg(solver_output, MsgType.DEBUG, 'LustrecUtils.run_verif', '');
-            [answer, CEX] = LustrecUtils.extract_answer(solver_output,Backend,  file_name, node_name,  Verif_dir);
+            [answer, CEX_XML] = LustrecUtils.extract_answer(solver_output,Backend,  file_name, node_name,  output_dir);
+            if strcmp(answer, 'UNSAFE') && ~isempty(CEX_XML)
+                [IN_struct, time_max] = LustrecUtils.cexTostruct(CEX_XML, node_name, inports);
+            end
             
         end
         
-        function [answer, CEX] = extract_answer(solver_output,solver,  file_name, node_name,  output_dir)
+        function [answer, CEX_XML] = extract_answer(solver_output,solver,  file_name, node_name,  output_dir)
             answer = '';
-            CEX = [];
+            CEX_XML = [];
+            display(solver_output)
             if isempty(solver_output)
                 return
             end
-            tmp_file = fullfile(output_dir, strcat(file_name, '_', node_name));
+            tmp_file = fullfile(output_dir, strcat(file_name, '_', node_name, '.xml'));
             fid = fopen(tmp_file, 'w');
             if fid == -1
                 display_msg(['Couldn''t create file ' tmp_file],...
@@ -309,33 +314,156 @@ classdef LustrecUtils
             xDoc = xmlread(tmp_file);
             xProperties = xDoc.getElementsByTagName('Property');
             property = xProperties.item(0);
-            answer = property.getElementsByTagName('Answer').item(0).getTextContent;
+            try
+                answer = property.getElementsByTagName('Answer').item(0).getTextContent;
+            catch
+                answer = 'ERROR';
+            end
             
             if strcmp(solver, 'KIND2') || strcmp(solver, 'JKIND') ...
-                || strcmp(solver, 'K') || strcmp(solver, 'J')
+                    || strcmp(solver, 'K') || strcmp(solver, 'J')
                 if strcmp(answer, 'valid')
                     answer = 'SAFE';
                 elseif strcmp(answer, 'falsifiable')
                     answer = 'CEX';
-                else
-                    answer = 'UNKNOWN';
                 end
             end
-            if strcmp(answer, 'CEX') 
+            if strcmp(answer, 'CEX')
+                answer = 'UNSAFE';
+            end
+            if strcmp(answer, 'UNSAFE')
                 if strcmp(solver, 'JKIND') || strcmp(solver, 'J')
                     xml_cex = xDoc.getElementsByTagName('Counterexample');
                 else
                     xml_cex = xDoc.getElementsByTagName('CounterExample');
                 end
                 if xml_cex.getLength > 0
-                    CEX = xml_cex;
+                    CEX_XML = xml_cex;
                 else
                     msg = sprintf('Could not parse counter example from %s', solver_output);
                     display_msg(msg, Constants.ERROR, 'Property Checking', '');
                 end
             end
-            msg = sprintf('Solver Result of property in node %s is %s', node_name, answer);
+            msg = sprintf('Solver Result for file %s of property %s is %s', file_name, node_name, answer);
             display_msg(msg, Constants.RESULT, 'LustrecUtils.extract_answer', '');
+        end
+        
+        function [IN_struct, time_max] = cexTostruct(cex_xml, node_name, inports)
+            IN_struct = [];
+            
+            nodes = cex_xml.item(0).getElementsByTagName('Node');
+            node = [];
+            for idx=0:(nodes.getLength-1)
+                if strcmp(nodes.item(idx).getAttribute('name'), node_name)
+                    node = nodes.item(idx);
+                    break;
+                end
+            end
+            if isempty(node)
+                return;
+            end
+            streams = node.getElementsByTagName('Stream');
+            stream_names = {};
+            for i=0:(streams.getLength-1)
+                s = streams.item(i).getAttribute('name');
+                stream_names{i+1} = char(s);
+            end
+            time_max = 0;
+            for i=1:numel(inports)
+                IN_struct.signals(i).name = inports(i).name;
+                IN_struct.signals(i).datatype = inports(i).datatype;
+                if isfield(inports(i), 'dimensions')
+                    IN_struct.signals(i).dimensions = inports(i).dimensions;
+                else
+                    IN_struct.signals(i).dimensions =  1;
+                end
+                
+                stream_name = inports(i).name;
+                stream_index = find(strcmp(stream_names, stream_name), 1);
+                if isempty(stream_index)
+                    IN_struct.signals(i).values = [];
+                else
+                    [values, time_step] = LustrecUtils.extract_values(streams.item(stream_index-1), inports(i).datatype);
+                    IN_struct.signals(i).values = values';
+                    time_max = max(time_max, time_step);
+                end
+            end
+            min = -100; max_v = 100;
+            for i=1:numel(IN_struct.signals)
+                if numel(IN_struct.signals(i).values) < time_max + 1
+                    nb_steps = time_max +1 - numel(IN_struct.signals(i).values);
+                    dim = IN_struct.signals(i).dimension;
+                    if strcmp(LusValidateUtils.get_lustre_dt(IN_struct.signals(i).datatype),'bool')
+                        values = LusValidateUtils.construct_random_booleans(nb_steps, min, max_v, dim);
+                    elseif strcmp(LusValidateUtils.get_lustre_dt(IN_struct.signals(i).datatype),'int')
+                        values = LusValidateUtils.construct_random_integers(nb_steps, min, max_v, IN_struct.signals(i).datatype, dim);
+                    elseif strcmp(IN_struct.signals(i).datatype,'single')
+                        values = single(LusValidateUtils.construct_random_doubles(nb_steps, min, max_v, dim));
+                    else
+                        values = LusValidateUtils.construct_random_doubles(nb_steps, min, max_v, dim);
+                    end
+                    IN_struct.signals(i).values = [IN_struct.signals(i).values, values];
+                end
+            end
+            IN_struct.time = (0:1:time_max)';
+        end
+        
+        function [values, time_step] = extract_values( stream, dt)
+            stream_values = stream.getElementsByTagName('Value');
+            for idx=0:(stream_values.getLength-1)
+                val = char(stream_values.item(idx).getTextContent);
+                if strcmp(val, 'False') || strcmp(val, 'false')
+                    values(idx+1) = false;
+                elseif strcmp(val, 'True') || strcmp(val, 'true')
+                    values(idx+1) = true;
+                else
+                    values(idx+1) = feval(dt, str2num(val));
+                end
+            end
+            
+            time_step = idx;
+        end
+        
+        %% transform input struct to lustre format (inlining values)
+        function lustre_input_values = getLustreInputValuesFormat(input_struct, nb_steps)
+            number_of_inputs = 0;
+            
+            for i=1:numel(input_struct.signals)
+                dim = input_struct.signals(i).dimensions;
+
+                if numel(dim)==1
+                    number_of_inputs = number_of_inputs + nb_steps*dim;
+                else
+                    number_of_inputs = number_of_inputs + nb_steps*(dim(1) * dim(2));
+                end
+            end
+            % Translate input_stract to lustre format (inline the inputs)
+            if numel(input_struct.signals)>=1
+                lustre_input_values = ones(number_of_inputs,1);
+                index = 0;
+                for i=0:nb_steps-1
+                    for j=1:numel(input_struct.signals)
+                        dim = input_struct.signals(j).dimensions;
+                        if numel(dim)==1
+                            index2 = index + dim;
+                            lustre_input_values(index+1:index2) = input_struct.signals(j).values(i+1,:)';
+                        else
+                            index2 = index + (dim(1) * dim(2));
+                            signal_values = [];
+                            y = input_struct.signals(j).values(:,:,i+1);
+                            for idr=1:dim(1)
+                                signal_values = [signal_values; y(idr,:)'];
+                            end
+                            lustre_input_values(index+1:index2) = signal_values;
+                        end
+                        
+                        index = index2;
+                    end
+                end
+                
+            else
+                lustre_input_values = ones(1*nb_steps,1);
+            end
         end
     end
     

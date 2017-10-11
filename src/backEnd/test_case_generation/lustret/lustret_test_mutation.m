@@ -30,10 +30,10 @@ if ~exist('IMIN', 'var')
     IMIN = -1000;
 end
 if ~exist('MAX_nb_test', 'var')
-    MAX_nb_test = 10;
+    MAX_nb_test = 5;
 end
 if ~exist('Min_coverage', 'var')
-    Min_coverage = 90;
+    Min_coverage = 100;
 end
 if ~exist('model_checker', 'var')
     model_checker = 'KIND2';
@@ -106,8 +106,8 @@ nb_verif = numel(verification_files);
 coverage_percentage = 0;
 while (numel(verification_files) > 0 ) && (nb_test < MAX_nb_test) && (coverage_percentage < Min_coverage)
     display_msg(['running test number ' num2str(nb_test) ], MsgType.INFO, 'lustret_mutation_generation', '');
-    [input_struct, lustre_input_values, ~, ~] = SLXUtils.get_random_test(slx_file_name, inports, inputEvents_names, nb_steps,IMAX, IMIN);
-    
+    [input_struct, ~, ~] = SLXUtils.get_random_test(slx_file_name, inports, inputEvents_names, nb_steps,IMAX, IMIN);
+    lustre_input_values = LustrecUtils.getLustreInputValuesFormat(input_struct, nb_steps);
     good_test = false;
     for i=1:numel(verification_files)
         [binary_dir, verif_file_name, ~] = fileparts(verification_files{i});
@@ -133,13 +133,18 @@ while (numel(verification_files) > 0 ) && (nb_test < MAX_nb_test) && (coverage_p
 end
 
 %% Use model checker to find mutation CEX is exists
-nb_test = numel(T);
+
 file_idx = 1;
-while (numel(verification_files) > 0 ) && (nb_test < MAX_nb_test) && (coverage_percentage < Min_coverage)
+while (file_idx <= numel(verification_files))  
     display_msg(['running model checker ' model_checker ' on file ' verification_files{file_idx} ], ...
         MsgType.INFO, 'lustret_mutation_generation', '');
-    [input_struct, lustre_input_values, ~, ~] = LustrecUtils.run_verif(verification_files{file_idx},'', 'top_verif',  model_checker);
     
+    [~, input_struct, time_step] = LustrecUtils.run_verif(verification_files{file_idx}, inports, [], 'top_verif',  model_checker);
+    if isempty(input_struct)
+        file_idx = file_idx +1;
+        continue;
+    end
+    lustre_input_values = LustrecUtils.getLustreInputValuesFormat(input_struct, time_step+1);
     good_test = false;
     for i=1:numel(verification_files)
         [binary_dir, verif_file_name, ~] = fileparts(verification_files{i});
@@ -153,17 +158,17 @@ while (numel(verification_files) > 0 ) && (nb_test < MAX_nb_test) && (coverage_p
         end
     end
     nb_detected = numel(find(strcmp(verification_files, {''})));
-    display_msg(['Test number ' num2str(nb_test) ' has detected ' num2str(nb_detected) ' mutants' ], MsgType.INFO, 'lustret_mutation_generation', '');
+    display_msg(['Counter example ' num2str(file_idx) ' has detected ' num2str(nb_detected) ' mutants' ], MsgType.INFO, 'lustret_mutation_generation', '');
     verification_files = verification_files(~strcmp(verification_files, {''}));
     if good_test
         T = [T, input_struct];
     end
-    nb_test = nb_test +1;
+    file_idx = file_idx +1;
     coverage_percentage = 100*(nb_verif - numel(verification_files))/nb_verif;
     msg = sprintf('Mutants coverages is updated to %f percent', coverage_percentage);
     display_msg(msg, MsgType.INFO, 'lustret_mutation_generation', '');
 end
-
+nb_test = numel(T);
 fprintf('we generated %d random tests\n',nb_test);
 fprintf('Only %d are good tests\n',numel(T));
 fprintf('Test cases coverages %f%% of generated mutations\n', coverage_percentage);

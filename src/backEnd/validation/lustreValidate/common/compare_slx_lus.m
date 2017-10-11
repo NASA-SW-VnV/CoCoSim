@@ -62,9 +62,9 @@ else
     IMIN = -100;
     IMAX = 100;
 end
-[input_struct, lustre_input_values, simulation_step, stop_time] = SLXUtils.get_random_test(slx_file_name, inports, inputEvents_names, nb_steps,IMAX, IMIN);
+[input_struct, simulation_step, stop_time] = SLXUtils.get_random_test(slx_file_name, inports, inputEvents_names, nb_steps,IMAX, IMIN);
 
-
+lustre_input_values = LustrecUtils.getLustreInputValuesFormat(input_struct, nb_steps);
 
 %% print lustre inputs in a file
 values_file = fullfile(output_dir, 'input_values');
