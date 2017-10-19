@@ -43,9 +43,16 @@ classdef LustrecUtils
         end
         
         %%
-        function [emf_path, status] = generate_emf(lus_file_path, LUSTREC, LUCTREC_INCLUDE_DIR)
+        function [emf_path, ...
+                status] = generate_emf(lus_file_path,...
+                output_dir, ...
+                LUSTREC,...
+                LUCTREC_INCLUDE_DIR)
             [lus_dir, lus_fname, ~] = fileparts(lus_file_path);
-            output_dir = fullfile(lus_dir, 'tmp', strcat('tmp_',lus_fname));
+            if nargin < 2 || isempty(output_dir)
+                output_dir = fullfile(lus_dir, 'cocosim_tmp', lus_fname);
+            end
+            
             if ~exist(output_dir, 'dir'); mkdir(output_dir); end
             emf_path = fullfile(output_dir,strcat(lus_fname, '.emf'));
             if BUtils.isLastModified(lus_file_path, emf_path)
@@ -73,17 +80,24 @@ classdef LustrecUtils
         end
         
         %% compile_lustre_to_Cbinary
-        function err = compile_lustre_to_Cbinary(lus_file_path, node_name, output_dir, LUSTREC,LUCTREC_INCLUDE_DIR)
+        function err = compile_lustre_to_Cbinary(lus_file_path, ...
+                node_name, ...
+                output_dir, ...
+                LUSTREC,...
+                LUCTREC_INCLUDE_DIR)
             [~, file_name, ~] = fileparts(lus_file_path);
             makefile_name = fullfile(output_dir,strcat(file_name,'.makefile'));
-            binary_name = fullfile(output_dir,strcat(file_name,'_', node_name));
+            binary_name = fullfile(output_dir,...
+                strcat(file_name,'_', node_name));
             % generate C code
             if BUtils.isLastModified(lus_file_path, binary_name)
                 err = 0;
-                display_msg(['file ' binary_name ' has been already generated.'], MsgType.DEBUG, 'compile_lustre_to_Cbinary', '');
+                display_msg(['file ' binary_name ' has been already generated.'],...
+                    MsgType.DEBUG, 'compile_lustre_to_Cbinary', '');
                 return;
             end
-            command = sprintf('%s -I "%s" -d "%s" -node %s "%s"',LUSTREC,LUCTREC_INCLUDE_DIR, output_dir, node_name, lus_file_path);
+            command = sprintf('%s -I "%s" -d "%s" -node %s "%s"',...
+                LUSTREC,LUCTREC_INCLUDE_DIR, output_dir, node_name, lus_file_path);
             msg = sprintf('LUSTREC_COMMAND : %s\n',command);
             display_msg(msg, MsgType.INFO, 'compile_lustre_to_Cbinary', '');
             [status, lustre_out] = system(command);
@@ -119,12 +133,19 @@ classdef LustrecUtils
             
         end
         %% node inputs outputs
-        function [node_struct, status] = extract_node_struct(lus_file_path, node_name, LUSTREC, LUCTREC_INCLUDE_DIR)
-            [node_struct, status] = LustrecUtils.extract_node_struct_using_emf(lus_file_path, node_name, LUSTREC, LUCTREC_INCLUDE_DIR);
+        function [node_struct,...
+                status] = extract_node_struct(lus_file_path,...
+                node_name,...
+                LUSTREC,...
+                LUCTREC_INCLUDE_DIR)
+            [node_struct, status] = ...
+                LustrecUtils.extract_node_struct_using_emf(...
+                lus_file_path, node_name, LUSTREC, LUCTREC_INCLUDE_DIR);
             if status==0
                 return;
             end
-            [lusi_path, status] = LustrecUtils.generate_lusi(lus_file_path, LUSTREC );
+            [lusi_path, status] = ...
+                LustrecUtils.generate_lusi(lus_file_path, LUSTREC );
             if status
                 display_msg(sprintf('Could not extract node %s information for file %s\n', ...
                     node_name, lus_file_path), MsgType.Error, 'extract_node_struct', '');
@@ -132,12 +153,19 @@ classdef LustrecUtils
             end
             lusi_text = fileread(lusi_path);
             vars = '(\s*\w+\s*:\s*(int|real|bool);?)+';
-            pattern = strcat('(node|function)\s+',node_name,'\s*\(', vars, '\)\s*returns\s*\(', vars,'\);');
+            pattern = strcat(...
+                '(node|function)\s+',...
+                node_name,...
+                '\s*\(',...
+                vars,...
+                '\)\s*returns\s*\(',...
+                vars,'\);');
             tokens = regexp(lusi_text, pattern,'match');
             if isempty(tokens)
                 status = 1;
                 display_msg(sprintf('Could not extract node %s information for file %s\n', ...
-                    node_name, lus_file_path), MsgType.ERROR, 'extract_node_struct', '');
+                    node_name, lus_file_path),...
+                    MsgType.ERROR, 'extract_node_struct', '');
                 return;
             end
             tokens = regexp(tokens{1}, vars,'match');
@@ -156,9 +184,15 @@ classdef LustrecUtils
             end
         end
         
-        function [main_node_struct, status] = extract_node_struct_using_emf(lus_file_path, main_node_name, LUSTREC, LUCTREC_INCLUDE_DIR)
+        function [main_node_struct, ...
+                status] = extract_node_struct_using_emf(...
+                lus_file_path,...
+                main_node_name,...
+                LUSTREC, ...
+                LUCTREC_INCLUDE_DIR)
             main_node_struct = [];
-            [contract_path, status] = LustrecUtils.generate_emf(lus_file_path, LUSTREC, LUCTREC_INCLUDE_DIR);
+            [contract_path, status] = LustrecUtils.generate_emf(...
+                lus_file_path, '', LUSTREC, LUCTREC_INCLUDE_DIR);
             
             if status==0
                 % extract main node struct from EMF
@@ -167,7 +201,9 @@ classdef LustrecUtils
                 nodes_names = fieldnames(nodes)';
                 idx_main_node = find(ismember(nodes_names, main_node_name));
                 if isempty(idx_main_node)
-                    display_msg(['Node ' main_node_name ' does not exist in EMF ' contract_path], MsgType.ERROR, 'Validation', '');
+                    display_msg(...
+                        ['Node ' main_node_name ' does not exist in EMF ' contract_path], ...
+                        MsgType.ERROR, 'Validation', '');
                     status = 1;
                     return;
                 end
@@ -177,7 +213,8 @@ classdef LustrecUtils
         end
         
         %%
-        function verif_node = construct_verif_node(node_struct, node_name, new_node_name)
+        function verif_node = construct_verif_node(...
+                node_struct, node_name, new_node_name)
             %inputs
             node_inputs = node_struct.inputs;
             nb_in = numel(node_inputs);
@@ -216,36 +253,54 @@ classdef LustrecUtils
             header = sprintf(header_format,inputs_with_type, outputs, vars_type);
             
             functions_call_fmt =  '%s = %s(%s);\n%s = %s(%s);\n';
-            functions_call = sprintf(functions_call_fmt, outputs_1, node_name, inputs, outputs_2, new_node_name, inputs);
+            functions_call = sprintf(functions_call_fmt,...
+                outputs_1, node_name, inputs, outputs_2, new_node_name, inputs);
             
             Ok_def = sprintf('OK = %s;\n', ok_exp);
             
             Prop = '--%%PROPERTY  OK=true;';
             
-            verif_node = sprintf('%s\n%s\n%s\n%s\ntel', header, functions_call, Ok_def, Prop);
+            verif_node = sprintf('%s\n%s\n%s\n%s\ntel',...
+                header, functions_call, Ok_def, Prop);
             
         end
         
         %% verification file
-        function verif_lus_path = create_mutant_verif_file(lus_file_path, mutant_lus_file_path, node_struct, node_name, new_node_name)
+        function verif_lus_path = create_mutant_verif_file(...
+                lus_file_path,...
+                mutant_lus_fpath, ...
+                node_struct, ...
+                node_name, ...
+                new_node_name)
             % create verification file
-            [file_parent, mutant_lus_file_name, ~] = fileparts(mutant_lus_file_path);
-            output_dir = fullfile(file_parent, strcat(mutant_lus_file_name, '_build'));
+            [file_parent, mutant_lus_file_name, ~] = fileparts(mutant_lus_fpath);
+            output_dir = fullfile(...
+                file_parent, strcat(mutant_lus_file_name, '_build'));
             if ~exist(output_dir, 'dir'); mkdir(output_dir); end
-            verif_lus_path = fullfile(output_dir, strcat(mutant_lus_file_name, '_verif.lus'));
+            verif_lus_path = fullfile(...
+                output_dir, strcat(mutant_lus_file_name, '_verif.lus'));
             
-            if BUtils.isLastModified(mutant_lus_file_path, verif_lus_path)
-                display_msg(['file ' verif_lus_path ' has been already generated'], MsgType.DEBUG, 'Validation', '');
+            if BUtils.isLastModified(mutant_lus_fpath, verif_lus_path)
+                display_msg(...
+                    ['file ' verif_lus_path ' has been already generated'],...
+                    MsgType.DEBUG,...
+                    'Validation', '');
                 return;
             end
-            filetext1 = LustrecUtils.adapt_lustre_text(fileread(lus_file_path));
-            sep_line = '--******************** second file ********************';
-            filetext2 = LustrecUtils.adapt_lustre_text(fileread(mutant_lus_file_path));
+            filetext1 = ...
+                LustrecUtils.adapt_lustre_text(fileread(lus_file_path));
+            sep_line =...
+                '--******************** second file ********************';
+            filetext2 = ...
+                LustrecUtils.adapt_lustre_text(fileread(mutant_lus_fpath));
             filetext2 = regexprep(filetext2, '#open\s*<\w+>','');
-            verif_line = '--******************** sVerification node ********************';
-            verif_node = LustrecUtils.construct_verif_node(node_struct, node_name, new_node_name);
+            verif_line = ...
+                '--******************** sVerification node *************';
+            verif_node = LustrecUtils.construct_verif_node(...
+                node_struct, node_name, new_node_name);
             
-            verif_lus_text = sprintf('%s\n%s\n%s\n%s\n%s', filetext1, sep_line, filetext2, verif_line, verif_node);
+            verif_lus_text = sprintf('%s\n%s\n%s\n%s\n%s', ...
+                filetext1, sep_line, filetext2, verif_line, verif_node);
             
             
             fid = fopen(verif_lus_path, 'w');
@@ -255,11 +310,16 @@ classdef LustrecUtils
         
         %% run Zustre or kind2 on verification file
         
-        function [answer, IN_struct, time_max] = run_verif(verif_lus_path, inports,  output_dir, node_name, Backend)
-            answer = '';
+        function [answer, IN_struct, time_max] = run_verif(...
+                verif_lus_path,...
+                inports, ...
+                output_dir,...
+                node_name,...
+                Backend)
             IN_struct = [];
+            time_max = 0;
+            answer = '';
             if nargin < 1
-                status = 1;
                 error('Missing arguments to function call: LustrecUtils.run_verif')
             end
             [file_dir, file_name, ~] = fileparts(verif_lus_path);
@@ -275,34 +335,61 @@ classdef LustrecUtils
             timeout = '600';
             cd(output_dir);
             tools_config;
+            
             if strcmp(Backend, 'ZUSTRE') || strcmp(Backend, 'Z')
+                status = BUtils.check_files_exist(ZUSTRE);
+                if status
+                    return;
+                end
                 command = sprintf('%s "%s" --node %s --xml  --matlab --timeout %s --save ',...
                     ZUSTRE, verif_lus_path, node_name, timeout);
-                display_msg(['ZUSTRE_COMMAND ' command], MsgType.DEBUG, 'LustrecUtils.run_verif', '');
+                display_msg(['ZUSTRE_COMMAND ' command],...
+                    MsgType.DEBUG,...
+                    'LustrecUtils.run_verif',...
+                    '');
                 
             elseif strcmp(Backend, 'KIND2') || strcmp(Backend, 'K')
+                status = BUtils.check_files_exist(KIND2, Z3);
+                if status
+                    return;
+                end
                 command = sprintf('%s --z3_bin %s -xml --timeout %s --lus_main %s "%s"',...
                     KIND2, Z3, timeout, node_name, verif_lus_path);
-                display_msg(['KIND2_COMMAND ' command], MsgType.DEBUG, 'LustrecUtils.run_verif', '');
+                display_msg(['KIND2_COMMAND ' command],...
+                    MsgType.DEBUG, 'LustrecUtils.run_verif', '');
                 
             end
             [~, solver_output] = system(command);
-            display_msg(solver_output, MsgType.DEBUG, 'LustrecUtils.run_verif', '');
-            [answer, CEX_XML] = LustrecUtils.extract_answer(solver_output,Backend,  file_name, node_name,  output_dir);
+            display_msg(...
+                solver_output,...
+                MsgType.DEBUG,...
+                'LustrecUtils.run_verif',...
+                '');
+            [answer, CEX_XML] = ...
+                LustrecUtils.extract_answer(...
+                solver_output,...
+                Backend,  file_name, node_name,  output_dir);
             if strcmp(answer, 'UNSAFE') && ~isempty(CEX_XML)
-                [IN_struct, time_max] = LustrecUtils.cexTostruct(CEX_XML, node_name, inports);
+                [IN_struct, time_max] =...
+                    LustrecUtils.cexTostruct(CEX_XML, node_name, inports);
             end
             
         end
         
-        function [answer, CEX_XML] = extract_answer(solver_output,solver,  file_name, node_name,  output_dir)
+        function [answer, CEX_XML] = extract_answer(...
+                solver_output,solver, ...
+                file_name, ...
+                node_name, ...
+                output_dir)
             answer = '';
             CEX_XML = [];
             display(solver_output)
             if isempty(solver_output)
                 return
             end
-            tmp_file = fullfile(output_dir, strcat(file_name, '_', node_name, '.xml'));
+            tmp_file = fullfile(...
+                output_dir, ...
+                strcat(file_name, '_', node_name, '.xml'));
             fid = fopen(tmp_file, 'w');
             if fid == -1
                 display_msg(['Couldn''t create file ' tmp_file],...
@@ -315,7 +402,8 @@ classdef LustrecUtils
             xProperties = xDoc.getElementsByTagName('Property');
             property = xProperties.item(0);
             try
-                answer = property.getElementsByTagName('Answer').item(0).getTextContent;
+                answer = ...
+                    property.getElementsByTagName('Answer').item(0).getTextContent;
             catch
                 answer = 'ERROR';
             end
@@ -340,15 +428,20 @@ classdef LustrecUtils
                 if xml_cex.getLength > 0
                     CEX_XML = xml_cex;
                 else
-                    msg = sprintf('Could not parse counter example from %s', solver_output);
+                    msg = sprintf('Could not parse counter example from %s', ...
+                        solver_output);
                     display_msg(msg, Constants.ERROR, 'Property Checking', '');
                 end
             end
-            msg = sprintf('Solver Result for file %s of property %s is %s', file_name, node_name, answer);
+            msg = sprintf('Solver Result for file %s of property %s is %s', ...
+                file_name, node_name, answer);
             display_msg(msg, Constants.RESULT, 'LustrecUtils.extract_answer', '');
         end
         
-        function [IN_struct, time_max] = cexTostruct(cex_xml, node_name, inports)
+        function [IN_struct, time_max] = cexTostruct(...
+                cex_xml, ...
+                node_name,...
+                inports)
             IN_struct = [];
             
             nodes = cex_xml.item(0).getElementsByTagName('Node');
@@ -371,7 +464,8 @@ classdef LustrecUtils
             time_max = 0;
             for i=1:numel(inports)
                 IN_struct.signals(i).name = inports(i).name;
-                IN_struct.signals(i).datatype = inports(i).datatype;
+                IN_struct.signals(i).datatype = ...
+                    LusValidateUtils.get_slx_dt(inports(i).datatype);
                 if isfield(inports(i), 'dimensions')
                     IN_struct.signals(i).dimensions = inports(i).dimensions;
                 else
@@ -383,7 +477,9 @@ classdef LustrecUtils
                 if isempty(stream_index)
                     IN_struct.signals(i).values = [];
                 else
-                    [values, time_step] = LustrecUtils.extract_values(streams.item(stream_index-1), inports(i).datatype);
+                    [values, time_step] =...
+                        LustrecUtils.extract_values(...
+                        streams.item(stream_index-1), inports(i).datatype);
                     IN_struct.signals(i).values = values';
                     time_max = max(time_max, time_step);
                 end
@@ -392,17 +488,33 @@ classdef LustrecUtils
             for i=1:numel(IN_struct.signals)
                 if numel(IN_struct.signals(i).values) < time_max + 1
                     nb_steps = time_max +1 - numel(IN_struct.signals(i).values);
-                    dim = IN_struct.signals(i).dimension;
-                    if strcmp(LusValidateUtils.get_lustre_dt(IN_struct.signals(i).datatype),'bool')
-                        values = LusValidateUtils.construct_random_booleans(nb_steps, min, max_v, dim);
-                    elseif strcmp(LusValidateUtils.get_lustre_dt(IN_struct.signals(i).datatype),'int')
-                        values = LusValidateUtils.construct_random_integers(nb_steps, min, max_v, IN_struct.signals(i).datatype, dim);
-                    elseif strcmp(IN_struct.signals(i).datatype,'single')
-                        values = single(LusValidateUtils.construct_random_doubles(nb_steps, min, max_v, dim));
+                    dim = IN_struct.signals(i).dimensions;
+                    if strcmp(...
+                            LusValidateUtils.get_lustre_dt(IN_struct.signals(i).datatype),...
+                            'bool')
+                        values = ...
+                            LusValidateUtils.construct_random_booleans(...
+                            nb_steps, min, max_v, dim);
+                    elseif strcmp(...
+                            LusValidateUtils.get_lustre_dt(IN_struct.signals(i).datatype),...
+                            'int')
+                        values = ...
+                            LusValidateUtils.construct_random_integers(...
+                            nb_steps, min, max_v, IN_struct.signals(i).datatype, dim);
+                    elseif strcmp(...
+                            IN_struct.signals(i).datatype,...
+                            'single')
+                        values = ...
+                            single(...
+                            LusValidateUtils.construct_random_doubles(...
+                            nb_steps, min, max_v, dim));
                     else
-                        values = LusValidateUtils.construct_random_doubles(nb_steps, min, max_v, dim);
+                        values = ...
+                            LusValidateUtils.construct_random_doubles(...
+                            nb_steps, min, max_v, dim);
                     end
-                    IN_struct.signals(i).values = [IN_struct.signals(i).values, values];
+                    IN_struct.signals(i).values =...
+                        [IN_struct.signals(i).values, values];
                 end
             end
             IN_struct.time = (0:1:time_max)';
@@ -425,16 +537,19 @@ classdef LustrecUtils
         end
         
         %% transform input struct to lustre format (inlining values)
-        function lustre_input_values = getLustreInputValuesFormat(input_struct, nb_steps)
+        function lustre_input_values = getLustreInputValuesFormat(...
+                input_struct, ...
+                nb_steps)
             number_of_inputs = 0;
             
             for i=1:numel(input_struct.signals)
                 dim = input_struct.signals(i).dimensions;
-
+                
                 if numel(dim)==1
                     number_of_inputs = number_of_inputs + nb_steps*dim;
                 else
-                    number_of_inputs = number_of_inputs + nb_steps*(dim(1) * dim(2));
+                    number_of_inputs =...
+                        number_of_inputs + nb_steps*(dim(1) * dim(2));
                 end
             end
             % Translate input_stract to lustre format (inline the inputs)
@@ -446,7 +561,8 @@ classdef LustrecUtils
                         dim = input_struct.signals(j).dimensions;
                         if numel(dim)==1
                             index2 = index + dim;
-                            lustre_input_values(index+1:index2) = input_struct.signals(j).values(i+1,:)';
+                            lustre_input_values(index+1:index2) = ...
+                                input_struct.signals(j).values(i+1,:)';
                         else
                             index2 = index + (dim(1) * dim(2));
                             signal_values = [];
@@ -465,6 +581,338 @@ classdef LustrecUtils
                 lustre_input_values = ones(1*nb_steps,1);
             end
         end
+        
+        %% print input_values for lustre binary
+        function status = printLustreInputValues(...
+                lustre_input_values,...
+                output_dir, ...
+                file_name)
+            values_file = fullfile(output_dir, file_name);
+            fid = fopen(values_file, 'w');
+            status = 0;
+            if fid == -1
+                status = 1;
+                err = sprintf('can not create file "%s" in directory "%s"',file_name,output_dir);
+                display_msg(err, MsgType.ERROR, 'printLustreInputValues', '');
+                display_msg(err, MsgType.DEBUG, 'printLustreInputValues', '');
+                return;
+            end
+            for i=1:numel(lustre_input_values)
+                value = sprintf('%.60f\n',lustre_input_values(i));
+                fprintf(fid, value);
+            end
+            fclose(fid);
+        end
+        %% extract lustre outputs from lustre binary
+        function status = extract_lustre_outputs(...
+                lus_file_name,...
+                binary_dir, ...
+                node_name,...
+                input_file_name,...
+                output_file_name)
+            PWD = pwd;
+            cd(binary_dir);
+            lustre_binary = ...
+                strcat(lus_file_name,...
+                '_',...
+                LusValidateUtils.name_format(node_name));
+            command  = sprintf('./%s  < %s > %s',...
+                lustre_binary, input_file_name, output_file_name);
+            [status, binary_out] =system(command);
+            if status
+                err = sprintf('lustrec binary failed for model "%s"',...
+                    lus_file_name,binary_out);
+                display_msg(err, MsgType.ERROR, 'extract_lustre_outputs', '');
+                display_msg(err, MsgType.DEBUG, 'extract_lustre_outputs', '');
+                display_msg(binary_out, MsgType.DEBUG, 'extract_lustre_outputs', '');
+                cd(PWD);
+                return
+            end
+        end
+        %% compare Simulin outputs and Lustre outputs
+        function [valid, error_index, diff_name, diff] = ...
+                compare_Simu_outputs_with_Lus_outputs(yout_signals,...
+                outputs_array, ...
+                eps, ...
+                nb_steps)
+            diff_name = '';
+            diff = 0;
+            numberOfOutputs = numel(yout_signals);
+            valid = true;
+            error_index = 1;
+            index_out = 0;
+            for i=0:nb_steps-1
+                for k=1:numberOfOutputs
+                    dim = yout_signals(k).dimensions;
+                    if numel(dim)==2
+                        yout_values = [];
+                        y = yout_signals(k).values(:,:,i+1);
+                        for idr=1:dim(1)
+                            yout_values = [yout_values; y(idr,:)'];
+                        end
+                        dim = dim(1)*dim(2);
+                    else
+                        yout_values = yout_signals(k).values(i+1,:);
+                    end
+                    for j=1:dim
+                        index_out = index_out + 1;
+                        output_value = ...
+                            regexp(outputs_array{index_out},...
+                            '\s*:\s*',...
+                            'split');
+                        if ~isempty(output_value)
+                            output_val_str = output_value{2};
+                            output_val = str2num(output_val_str(2:end-1));
+                            if yout_values(j)==inf
+                                diff=0;
+                            else
+                                diff = abs(yout_values(j)-output_val);
+                            end
+                            valid = valid && (diff<eps);
+                            if  ~valid
+                                diff_name =  ...
+                                    BUtils.naming_alone(yout_signals(k).blockName);
+                                error_index = i+1;
+                                break
+                            end
+                        else
+                            warn = sprintf('strange behavour of output %s',...
+                                outputs_array{numberOfOutputs*i+k});
+                            display_msg(warn,...
+                                MsgType.WARNING,...
+                                'compare_Simu_outputs_with_Lus_outputs',...
+                                '');
+                            valid = false;
+                            break;
+                        end
+                    end
+                    if  ~valid
+                        break;
+                    end
+                end
+                if  ~valid
+                    break;
+                end
+            end
+        end
+        %% Show CEX
+        function show_CEX(error_index,...
+                input_struct, ...
+                yout_signals, ...
+                outputs_array )
+            numberOfInports = numel(input_struct.signals);
+            numberOfOutputs = numel(yout_signals);
+            index_out = 0;
+            for i=0:error_index-1
+                f_msg = sprintf('*****step : %d**********\n',i+1);
+                display_msg(f_msg, MsgType.RESULT, 'CEX', '');
+                f_msg = sprintf('*****inputs: \n');
+                display_msg(f_msg, MsgType.RESULT, 'CEX', '');
+                for j=1:numberOfInports
+                    dim = input_struct.signals(j).dimensions;
+                    if numel(dim)==1
+                        in = input_struct.signals(j).values(i+1,:);
+                        name = input_struct.signals(j).name;
+                        for k=1:dim
+                            f_msg = sprintf('input %s_%d: %f\n',name,k,in(k));
+                            display_msg(f_msg, MsgType.RESULT, 'CEX', '');
+                        end
+                    else
+                        in = input_struct.signals(j).values(:,:,i+1);
+                        name = input_struct.signals(j).name;
+                        for dim1=1:dim(1)
+                            for dim2=1:dim(2)
+                                f_msg = sprintf('input %s_%d_%d: %10.10f\n',...
+                                    name,dim1,dim2,in(dim1, dim2));
+                                display_msg(f_msg, MsgType.RESULT, 'CEX', '');
+                            end
+                        end
+                    end
+                end
+                f_msg = sprintf('*****outputs: \n');
+                display_msg(f_msg, MsgType.RESULT, 'CEX', '');
+                for k=1:numberOfOutputs
+                    dim = yout_signals(k).dimensions;
+                    if numel(dim)==2
+                        %                                 if dim(1)>1
+                        yout_values = [];
+                        y = yout_signals(k).values(:,:,i+1);
+                        for idr=1:dim(1)
+                            yout_values = [yout_values; y(idr,:)'];
+                        end
+                        dim = dim(1)*dim(2);
+                    else
+                        yout_values = yout_signals(k).values(i+1,:);
+                    end
+                    for j=1:dim
+                        index_out = index_out + 1;
+                        output_value = regexp(outputs_array{index_out},'\s*:\s*','split');
+                        if ~isempty(output_value)
+                            output_name = output_value{1};
+                            output_val = output_value{2};
+                            output_val = str2num(output_val(2:end-1));
+                            output_name1 =...
+                                BUtils.naming_alone(yout_signals(k).blockName);
+                            f_msg = sprintf('output %s(%d): %10.16f\n',...
+                                output_name1, j, yout_values(j));
+                            display_msg(f_msg, MsgType.RESULT, 'CEX', '');
+                            f_msg = sprintf('Lustre output %s: %10.16f\n',...
+                                output_name,output_val);
+                            display_msg(f_msg, MsgType.RESULT, 'CEX', '');
+                        else
+                            f_msg = sprintf('strang behavour of output %s',...
+                                outputs_array{numberOfOutputs*i+k});
+                            display_msg(f_msg, MsgType.WARNING, 'CEX', '');
+                            return;
+                        end
+                    end
+                end
+                
+            end
+        end
+        
+        %% run comparaison
+        function [valid,...
+                lustrec_failed, ...
+                lustrec_binary_failed,...
+                sim_failed, ...
+                done] = ...
+                run_comparaison(slx_file_name, ...
+                lus_file_path,...
+                node_name, ...
+                input_struct,...
+                output_dir,...
+                input_file_name, ...
+                output_file_name, ...
+                eps, ...
+                show_models)
+            
+            % define default outputs
+            lustrec_failed=0;
+            lustrec_binary_failed=0;
+            sim_failed=0;
+            valid = 0;
+            done = 0;
+            % define local variables
+            OldPwd = pwd;
+            if ~isfield(input_struct, 'time')
+                msg = sprintf('Variable input_struct need to have a field "time"\n');
+                display_msg(msg, MsgType.ERROR, 'validation', '');
+                return;
+            end
+            
+            nb_steps = numel(input_struct.time);
+            if nb_steps >= 2
+                simulation_step = input_struct.time(2) - input_struct.time(1);
+            else
+                simulation_step = 1;
+            end
+            stop_time = input_struct.time(end);
+            numberOfInports = numel(input_struct.signals);
+            
+            [~, lus_file_name, ~] = fileparts(char(lus_file_path));
+            
+            % Copile the lustre code to C
+            tools_config;
+            status = BUtils.check_files_exist(LUSTREC, LUCTREC_INCLUDE_DIR);
+            if status
+                return;
+            end
+            err = LustrecUtils.compile_lustre_to_Cbinary(lus_file_path,...
+                LusValidateUtils.name_format(node_name), ...
+                output_dir, ...
+                LUSTREC, LUCTREC_INCLUDE_DIR);
+            if err
+                lustrec_failed = 1;
+                return
+            end
+            
+            % transform input_struct to Lustre format
+            lustre_input_values = ...
+                LustrecUtils.getLustreInputValuesFormat(input_struct, nb_steps);
+            
+            % print lustre inputs in a file
+            status = ...
+                LustrecUtils.printLustreInputValues(...
+                lustre_input_values, output_dir,  input_file_name);
+            if status
+                lustrec_binary_failed = 1;
+                return
+            end
+            
+            
+            msg = sprintf('Simulating model "%s"\n',slx_file_name);
+            display_msg(msg, MsgType.INFO, 'validation', '');
+            GUIUtils.update_status('Simulating model');
+            try
+                % Simulate the model
+                simOut = SLXUtils.simulate_model(slx_file_name, ...
+                    input_struct, ...
+                    simulation_step,...
+                    stop_time,...
+                    numberOfInports,...
+                    show_models);
+                
+                % extract lustre outputs from lustre binary
+                status = LustrecUtils.extract_lustre_outputs(lus_file_name,...
+                    output_dir, ...
+                    node_name,...
+                    input_file_name, ...
+                    output_file_name);
+                if status
+                    lustrec_binary_failed = 1;
+                    cd(OldPwd);
+                    return
+                end
+                
+                % compare Simulin outputs and Lustre outputs
+                GUIUtils.update_status('Compare Simulink outputs and lustrec outputs');
+                
+                yout = get(simOut,'yout');
+                yout_signals = yout.signals;
+                assignin('base','yout',yout);
+                assignin('base','yout_signals',yout_signals);
+                outputs_array = importdata(output_file_name,'\n');
+                [valid, error_index, diff_name, diff] = ...
+                    LustrecUtils.compare_Simu_outputs_with_Lus_outputs(yout_signals,...
+                    outputs_array, ...
+                    eps, ...
+                    nb_steps);
+                
+                
+                
+                if ~valid
+                    %% show the counter example
+                    GUIUtils.update_status('Translation is not valid');
+                    f_msg = sprintf('translation for model "%s" is not valid \n',slx_file_name);
+                    display_msg(f_msg, MsgType.RESULT, 'validation', '');
+                    f_msg = sprintf('Here is the counter example:\n');
+                    display_msg(f_msg, MsgType.RESULT, 'validation', '');
+                    LustrecUtils.show_CEX(...
+                        error_index, input_struct, yout_signals, outputs_array );
+                    f_msg = sprintf('difference between outputs %s is :%2.10f\n',diff_name, diff);
+                    display_msg(f_msg, MsgType.RESULT, 'CEX', '');
+                else
+                    GUIUtils.update_status('Translation is valid');
+                    msg = sprintf('Translation for model "%s" is valid \n',slx_file_name);
+                    display_msg(msg, MsgType.RESULT, 'CEX', '');
+                end
+                cd(OldPwd);
+            catch ME
+                msg = sprintf('simulation failed for model "%s" :\n%s\n%s',...
+                    slx_file_name,ME.identifier,ME.message);
+                display_msg(msg, MsgType.ERROR, 'validation', '');
+                display_msg(msg, MsgType.DEBUG, 'validation', '');
+                sim_failed = 1;
+                valid = 0;
+                cd(OldPwd);
+                return
+            end
+            done = 1;
+        end
+        
+        
+        
     end
     
 end

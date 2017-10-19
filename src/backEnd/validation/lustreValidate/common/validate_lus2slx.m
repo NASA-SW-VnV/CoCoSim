@@ -1,17 +1,28 @@
-function [valid, lustrec_failed, lustrec_binary_failed, sim_failed] = validate_lus2slx( lus_file_path, main_node, stop_at_first_cex)
-%VALIDATE_LUS2SLX validate the translation lustre 2 simulink by generating
-%random inputs
-[~, lus_fname, ~] = fileparts(lus_file_path);
+function [valid, ...
+    lustrec_failed,...
+    lustrec_binary_failed,...
+    sim_failed] = validate_lus2slx( lus_file_path,...
+    main_node, ...
+    tests_method, ...
+    model_checker, ...
+    deep_CEX)
+%VALIDATE_LUS2SLX validate the translation lustre 2 simulink by equivalence
+%testing or equivalence checking.
+[lus_dir, lus_fname, ~] = fileparts(lus_file_path);
 if nargin < 2 || isempty(main_node)
     main_node = BUtils.adapt_block_name(lus_fname);
 end
-
-if ~exist('stop_at_first_cex', 'var')
-    stop_at_first_cex = 1;
+if ~exist('tests_method', 'var')
+    tests_method = 2;
 end
+if ~exist('model_checker', 'var')
+    model_checker = 'KIND2';
+end
+if ~exist('stop_at_first_cex', 'var')
+    deep_CEX = 0;
+end
+
 OldPwd = pwd;
-tools_config;
-% config;
 
 
 %%
@@ -20,36 +31,38 @@ lustrec_failed = -1;
 lustrec_binary_failed = -1;
 sim_failed = -1;
 
+output_dir = fullfile(lus_dir, 'cocosim_tmp', lus_fname);
 %% generate EMF
-[emf_path, status] = LustrecUtils.generate_emf(lus_file_path, LUSTREC, LUCTREC_INCLUDE_DIR);
+tools_config;
+status = BUtils.check_files_exist(LUSTREC, LUCTREC_INCLUDE_DIR);
 if status
     return;
 end
-[output_dir, ~, ~] = fileparts(emf_path);
+[emf_path, status] = LustrecUtils.generate_emf(lus_file_path, output_dir, LUSTREC, LUCTREC_INCLUDE_DIR);
+if status
+    return;
+end
 %% generate Lusi file
 [lusi_path, status] = LustrecUtils.generate_lusi(lus_file_path, LUSTREC );
 if status
     return;
 end
 %% extract SLX for all nodes
-try
-    translated_nodes_path  = lus2slx(emf_path, output_dir);
-catch ME
-    display_msg(ME.message, MsgType.ERROR, 'validation', '');
-    display_msg(ME.getReport(), MsgType.DEBUG, 'validation', '');
+[status, translated_nodes_path, emf_trace_file] = lus2slx(emf_path, output_dir);
+if status
     cd(OldPwd);
     return;
 end
 
 [~, translated_nodes, ~] = fileparts(translated_nodes_path);
-load_system(translated_nodes);
+load_system(translated_nodes_path);
 
 data = BUtils.read_EMF(emf_path);
 nodes = data.nodes;
 emf_nodes_names = fieldnames(nodes)';
 lusi_text = fileread(lusi_path);
 nodes_names = {};
-for node_idx =1:numel(emf_nodes_names) 
+for node_idx =1:numel(emf_nodes_names)
     name = emf_nodes_names{node_idx};
     pattern = strcat('(node|function)\s+',name,'\s*\(');
     tokens = regexp(lusi_text, pattern,'match');
@@ -57,8 +70,8 @@ for node_idx =1:numel(emf_nodes_names)
         nodes_names{numel(nodes_names) + 1} = name;
     end
 end
-for node_idx =0:numel(nodes_names) 
-    if node_idx==0 
+for node_idx =0:numel(nodes_names)
+    if node_idx==0
         if ismember(main_node, nodes_names)
             node_name = main_node;
         else
@@ -128,17 +141,24 @@ for node_idx =0:numel(nodes_names)
     
     if ~exist(output_dir, 'dir'); mkdir(output_dir); end
     try
-        [valid, lustrec_failed, lustrec_binary_failed, sim_failed] =compare_slx_lus(new_name, lus_file_path, node_name, ...
-            output_dir);
+        [valid, ...
+            lustrec_failed,...
+            lustrec_binary_failed,...
+            sim_failed] = compare_slx_lus(new_name, ...
+            lus_file_path, ...
+            node_name, ...
+            output_dir,...
+            tests_method,...
+            model_checker);
         if ~valid
-                display_msg(['Node ' node_name ' is not valid (see Counter example above)'], MsgType.RESULT, 'validation', '');
-                if stop_at_first_cex
-                    break;
-                end
+            display_msg(['Node ' node_name ' is not valid (see Counter example above)'], MsgType.RESULT, 'validation', '');
+            if deep_CEX
+                break;
+            end
         end
-        if node_idx==0 && (valid || stop_at_first_cex)
+        if node_idx==0 && (valid || (deep_CEX == 0))
             break;
-        elseif node_idx>0 && ~lustrec_failed && ~sim_failed && ~lustrec_binary_failed && ~valid && stop_at_first_cex
+        elseif node_idx>0 && ~lustrec_failed && ~sim_failed && ~lustrec_binary_failed && ~valid && (deep_CEX == 0)
             break;
         end
     catch ME
@@ -156,34 +176,37 @@ close_system(translated_nodes,0);
 system(['rm ' lusi_path]);
 
 
-% if ~lustrec_failed && ~sim_failed && ~lustrec_binary_failed && ~valid && ~stop_at_first_cex
-%     %get tracability
-%     trace_file_name = fullfile(output_dir,strcat(lus_fname,'.emf.trace.xml'));
-%     DOMNODE = xmlread(trace_file_name);
-%     xRoot = DOMNODE.getDocumentElement;
-%     xml_nodes = xRoot.getElementsByTagName('Node');
-%     validate_components(new_name, new_model_name, new_model_name, lus_file_path, xml_nodes,base_name{1}, output_dir, stop_at_first_cex);
-% end
+if ~lustrec_failed && ~sim_failed && ~lustrec_binary_failed && ~valid && (deep_CEX > 0)
+    %get tracability    
+    validate_components(new_name, new_model_name, new_model_name,...
+        lus_file_path, emf_trace_file,base_name{1}, output_dir,...
+        deep_CEX, 1, tests_method, model_checker);
+end
 end
 
-function validate_components(file_path,file_name,block_path,  lus_file_path, xml_nodes,base_name, output_dir, stop_at_first_cex)
+function validate_components(file_path, file_name, block_path, ...
+    lus_file_path, trace_file_name, base_name, output_dir, ...
+    deep_CEX, deep_current, tests_method, model_checker)
 ss = find_system(block_path, 'SearchDepth',1, 'BlockType','SubSystem');
+if ~exist('deep_current', 'var')
+    deep_current = 1;
+end
 for i=1:numel(ss)
     if strcmp(ss{i}, block_path)
         continue;
     end
     display_msg(['Validating SubSystem ' ss{i}], MsgType.INFO, 'validation', '');
     origin_ss = regexprep(ss{i}, strcat('^',file_name,'/'), strcat(base_name,'_emf/'));
-    node_name = get_lustre_node_from_Simulink_block_name(xml_nodes,origin_ss);
+    node_name = XMLUtils.get_lustre_node_from_Simulink_block_name(trace_file_name,origin_ss);
     if ~strcmp(node_name, '')
-        [new_model_path, ~] = extract_subsys(file_name, ss{i}, output_dir );
+        [new_model_path, ~] = SLXUtils.crete_model_from_subsystem(file_name, ss{i}, output_dir );
         try
-            [valid, ~, ~, ~] = compare_slx_lus(new_model_path, lus_file_path, node_name, output_dir);
+            [valid, ~, ~, ~] = compare_slx_lus(new_model_path, lus_file_path, node_name, output_dir, tests_method, model_checker);
             if ~valid
                 display_msg(['SubSystem ' ss{i} ' is not valid (see Counter example above)'], MsgType.RESULT, 'validation', '');
                 load_system(file_path);
-                validate_components(file_path, file_name, ss{i}, lus_file_path, xml_nodes,base_name,  output_dir, stop_at_first_cex);
-                if stop_at_first_cex; return;end
+                validate_components(file_path, file_name, ss{i}, lus_file_path, trace_file_name,base_name,  output_dir, deep_CEX, deep_current+1, tests_method, model_checker);
+                if deep_current > deep_CEX; return;end
             else
                 display_msg(['SubSystem ' ss{i} ' is valid'], MsgType.RESULT, 'validation', '');
             end
@@ -198,41 +221,4 @@ for i=1:numel(ss)
 end
 
 end
-function [new_model_path, new_model_name] = extract_subsys(file_name, block_name, output_dir )
-block_name_adapted = BUtils.adapt_block_name(SLXUtils.naming(LusValidateUtils.name_format(block_name)));
-new_model_name = strcat(file_name,'_', block_name_adapted);
-new_model_name = BUtils.adapt_block_name(new_model_name);
-new_model_path = fullfile(output_dir, strcat(new_model_name,'.slx'));
-if exist(new_model_path,'file')
-    if bdIsLoaded(new_model_name)
-        close_system(new_model_name,0)
-    end
-    delete(new_model_path);
-end
-close_system(new_model_name,0);
-model_handle = new_system(new_model_name);
-if getSimulinkBlockHandle(strcat(block_name, '/Reset'))>0
-    add_block(block_name, ...
-        strcat(new_model_name, '/tmp'));
-    delete_block( strcat(new_model_name, '/tmp','/Reset'));
-    Simulink.BlockDiagram.expandSubsystem( strcat(new_model_name, '/tmp'));
-else
-    Simulink.SubSystem.copyContentsToBlockDiagram(block_name, model_handle)
-end
-%% Save system
-save_system(model_handle,new_model_path,'OverwriteIfChangedOnDisk',true);
-close_system(file_name,0);
-end
 
-%%
-function node_name = get_lustre_node_from_Simulink_block_name(xml_nodes,Simulink_block_name)
-node_name = '';
-for idx_node=0:xml_nodes.getLength-1
-    block_name = xml_nodes.item(idx_node).getAttribute('block_name');
-    if strcmp(block_name, Simulink_block_name)
-        node_name = char(xml_nodes.item(idx_node).getAttribute('node_name'));
-        break;
-    end
-    
-end
-end

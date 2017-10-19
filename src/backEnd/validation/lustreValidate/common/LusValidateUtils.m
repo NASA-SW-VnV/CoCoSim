@@ -107,6 +107,17 @@ classdef LusValidateUtils
             end
         end
         
+        function slx_dt = get_slx_dt(lus_dt)
+            if strcmp(lus_dt, 'boo')
+                slx_dt = 'boolean';
+            elseif strcmp(lus_dt, 'int')
+                slx_dt = 'int32';
+            elseif strcmp(lus_dt, 'real')
+                slx_dt = 'double';
+            else
+                slx_dt = lus_dt;
+            end
+        end
       
     end
     

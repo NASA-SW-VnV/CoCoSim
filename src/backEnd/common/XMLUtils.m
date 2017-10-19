@@ -58,7 +58,10 @@ classdef XMLUtils
         end
         
         %%
-        function node_name = get_lustre_node_from_Simulink_block_name(xml_nodes,Simulink_block_name)
+        function node_name = get_lustre_node_from_Simulink_block_name(trace_file_name,Simulink_block_name)
+            DOMNODE = xmlread(trace_file_name);
+            xRoot = DOMNODE.getDocumentElement;
+            xml_nodes = xRoot.getElementsByTagName('Node');
             node_name = '';
             for idx_node=0:xml_nodes.getLength-1
                 block_name = xml_nodes.item(idx_node).getAttribute('block_name');

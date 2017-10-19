@@ -120,10 +120,24 @@ classdef BUtils
             end
             f1_info = dir(file1);
             f2_info = dir(file2);
+            if isempty(f1_info) || isempty(f2_info)
+                res = false;
+                return;
+            end
             res = f1_info.datenum < f2_info.datenum;
         end
         
-       
+        function status = check_files_exist(varargin)
+            status = 0;
+            for i=1:numel(varargin)
+                if ~exist(varargin{i}, 'file')
+                    msg = sprintf('FILE NOT FOUND: %s', varargin{i});
+                    display_msg(msg, Constants.ERROR, 'Zustre ', '');
+                    status = 1;
+                    break;
+                end
+            end
+        end
     end
     
 end

@@ -4,13 +4,14 @@ function [ T, coverage_percentage ] = lustret_test_mutation( model_full_path, ..
                                                             nb_steps,...
                                                             IMIN, ...
                                                             IMAX,...
+                                                            model_checker, ...
+                                                            nb_mutants_max, ...
                                                             MAX_nb_test,...
-                                                            Min_coverage,...
-                                                            model_checker )
+                                                            Min_coverage )
 %LUSTRET_TEST_MUTATION Summary of this function goes here
 %   Detailed explanation goes here
-
-
+T = [];
+coverage_percentage = 0;
 if nargin < 2
     print_help_messsage();
     return;
@@ -30,7 +31,7 @@ if ~exist('IMIN', 'var')
     IMIN = -1000;
 end
 if ~exist('MAX_nb_test', 'var')
-    MAX_nb_test = 5;
+    MAX_nb_test = 0;
 end
 if ~exist('Min_coverage', 'var')
     Min_coverage = 100;
@@ -38,10 +39,13 @@ end
 if ~exist('model_checker', 'var')
     model_checker = 'KIND2';
 end
+if ~exist('nb_mutants_max', 'var')
+    nb_mutants_max = 500;
+end
 Pwd = pwd;
 
 %% generate mutations
-[ err, output_dir] = lustret_mutation_generation( lus_full_path );
+[ err, output_dir] = lustret_mutation_generation( lus_full_path, nb_mutants_max );
 % output_dir = fullfile(lus_file_dir, strcat(lus_file_name,'_mutants'));
 % err = 0;
 if err
@@ -59,23 +63,22 @@ end
 
 %% create verification file compile to C binary all mutations
 tools_config;
-if ~exist('LUSTREC','var')
-    display_msg('Lustrec compiler is not declared in tools_config file', MsgType.ERROR, 'lustret_mutation_generation', '');
+status = BUtils.check_files_exist(LUSTREC, LUCTREC_INCLUDE_DIR);
+if status
+    msg = 'LUSTREC not found, please configure tools_config file under tools folder';
+    display_msg(msg, MsgType.ERROR, 'lustret_test_mutation', '');
     cd(Pwd);
     return;
 end
-if ~exist('LUCTREC_INCLUDE_DIR','var')
-    display_msg('LUCTREC_INCLUDE_DIR variable is not declared in tools_config file', MsgType.ERROR, 'lustret_mutation_generation', '');
-    cd(Pwd);
-    return;
-    
-end
+
+
 mutants_paths = cellfun(@(x,y) [x '/' y], {mutants_files.folder}, {mutants_files.name}, 'UniformOutput', false);
 node_name_mutant = strcat(node_name, '_mutant');
 % get main node signature
 main_node_struct = LustrecUtils.extract_node_struct(lus_full_path, node_name, LUSTREC, LUCTREC_INCLUDE_DIR);
 
 verification_files = {};
+nb_err = 0;
 for i=1:numel(mutants_paths)
     display_msg(['Generating C binary of mutant number ' num2str(i) ], MsgType.INFO, 'lustret_mutation_generation', '');
     mutant_file_path = mutants_paths{i};
@@ -87,7 +90,13 @@ for i=1:numel(mutants_paths)
     [Verif_dir, ~, ~] = fileparts(verif_lus_path);
     err = LustrecUtils.compile_lustre_to_Cbinary(verif_lus_path, 'top_verif' ,Verif_dir,  LUSTREC,LUCTREC_INCLUDE_DIR);
     if err
+        nb_err = nb_err + 1;
+        if nb_err >= 4
+            return;
+        end
         continue;
+    else
+        nb_err = nb_err - 1;
     end
     verification_files{numel(verification_files) + 1} = verif_lus_path;
 end
@@ -95,12 +104,15 @@ end
 %% generate random tests
 display_msg('Generating random tests', MsgType.INFO, 'lustret_mutation_generation', '');
 nb_test = 0;
-if ~isempty(model_full_path)
-    [inports, inputEvents_names] = SLXUtils.get_model_inputs_info(model_full_path);
-else
+% Need to correct the following, We can not use Simulink model information
+% if it has not the same input names as the lustre node.
+% We keep taking information from Lustre code.
+% if ~isempty(model_full_path)
+%     [inports, inputEvents_names] = SLXUtils.get_model_inputs_info(model_full_path);
+% else
     inports = main_node_struct.inputs;
     inputEvents_names = {};
-end
+% end
 T = [];
 nb_verif = numel(verification_files);
 coverage_percentage = 0;
@@ -111,8 +123,16 @@ while (numel(verification_files) > 0 ) && (nb_test < MAX_nb_test) && (coverage_p
     good_test = false;
     for i=1:numel(verification_files)
         [binary_dir, verif_file_name, ~] = fileparts(verification_files{i});
-        print_lus_input_values(binary_dir, lustre_input_values);
-        extract_outputs(verif_file_name);
+        status = LustrecUtils.printLustreInputValues(lustre_input_values,...
+            binary_dir, 'inputs_values');
+        if status
+            continue;
+        end
+        status = LustrecUtils.extract_lustre_outputs(verif_file_name,...
+            binary_dir, 'top_verif', 'inputs_values', 'outputs_values');
+        if status
+            continue;
+        end
         cd(binary_dir);
         txt  = fileread('outputs_values');
         if contains(txt, '''OK'': ''0''')
@@ -146,12 +166,24 @@ while (file_idx <= numel(verification_files))
     end
     lustre_input_values = LustrecUtils.getLustreInputValuesFormat(input_struct, time_step+1);
     good_test = false;
+    name_parts = regexp(verification_files{file_idx}, '\.', 'split');
+    last_part = name_parts{end-1};
+    inputs_fname = strcat(last_part, 'inputs_values');
+    outputs_fname = strcat(last_part, 'outputs_values');
     for i=1:numel(verification_files)
         [binary_dir, verif_file_name, ~] = fileparts(verification_files{i});
-        print_lus_input_values(binary_dir, lustre_input_values);
-        extract_outputs(verif_file_name);
+        status = LustrecUtils.printLustreInputValues(lustre_input_values,...
+            binary_dir, inputs_fname);
+        if status
+            continue;
+        end
+        status = LustrecUtils.extract_lustre_outputs(verif_file_name,...
+            binary_dir, 'top_verif', inputs_fname, outputs_fname);
+        if status
+            continue;
+        end
         cd(binary_dir);
-        txt  = fileread('outputs_values');
+        txt  = fileread(outputs_fname);
         if contains(txt, '''OK'': ''0''')
             verification_files{i} = '';
             good_test = true;
@@ -169,14 +201,17 @@ while (file_idx <= numel(verification_files))
     display_msg(msg, MsgType.INFO, 'lustret_mutation_generation', '');
 end
 nb_test = numel(T);
-fprintf('we generated %d random tests\n',nb_test);
-fprintf('Only %d are good tests\n',numel(T));
-fprintf('Test cases coverages %f%% of generated mutations\n', coverage_percentage);
-fprintf('files that has not been covered are :\n');
+msg = sprintf('we generated %d random tests\n',nb_test);
+msg = [msg sprintf('Only %d are good tests\n',numel(T))];
+msg = [msg sprintf('Test cases coverages %f percent of generated mutations\n', coverage_percentage)];
+display_msg(msg, MsgType.RESULT, 'lustret_mutation_generation', '');
+msg = sprintf('files that has not been covered are :\n');
 for i=1:numel(verification_files)
-    fprintf('%s\n',verification_files{i});
+    msg = [msg sprintf('%s\n',verification_files{i})];
 end
-%%
+display_msg(msg, MsgType.DEBUG, 'lustret_mutation_generation', '');
+
+
 
 cd(Pwd);
 end
@@ -193,35 +228,4 @@ msg = [msg, '\t     IMIN, IMAX: are the range of inputs,\n\t\t If given as scala
 msg = [msg, '\t     MAX_nb_test: is the maximum of test vectors should be generated. By default we use 10 tests. \n'];
 msg = [msg, '\t     Min_coverage: is the minimum coverage should be met of generated test vectors. By default we use 90%%. \n'];
 cprintf('blue', msg);
-end
-
-
-
-
-
-
-
-
-function print_lus_input_values(output_dir, lustre_input_values)
-%% print lustre inputs in a file
-cd(output_dir)
-values_file = fullfile(output_dir, 'input_values');
-fid = fopen(values_file, 'w');
-for i=1:numel(lustre_input_values)
-    value = [num2str(lustre_input_values(i),'%.20f') '\n'];
-    fprintf(fid, value);
-end
-fclose(fid);
-end
-
-function extract_outputs(lus_file_name)
-lustre_binary = strcat(lus_file_name,'_top_verif');
-command  = sprintf('./%s  < input_values > outputs_values',lustre_binary);
-[status, binary_out] =system(command);
-if status
-    err = sprintf('lustrec binary failed for model "%s"',lus_file_name,binary_out);
-    display_msg(err, MsgType.ERROR, 'validation', '');
-    display_msg(err, MsgType.DEBUG, 'validation', '');
-    display_msg(binary_out, MsgType.DEBUG, 'validation', '');
-end
 end

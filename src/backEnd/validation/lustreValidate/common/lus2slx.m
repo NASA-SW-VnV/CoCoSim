@@ -1,34 +1,56 @@
-function new_name = lus2slx(contract_path, output_dir)
-%LUS2SLX translate an EMF file to Simulink blocks. Every node is translated
-%to a subsystem.
-
-
-%%
-display_msg('Runing Lus2SLX on EMF file', MsgType.INFO, 'lus2slx', '');
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Copyright (c) 2017 United States Government as represented by the
+% Administrator of the National Aeronautics and Space Administration.
+% All Rights Reserved.
+% Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%LUS2SLX translate an EMF json file to Simulink blocks. Every node is translated
+%to a subsystem. If OnlyMainNode is true than only the main node specified
+%in main_node argument will be kept in the final simulink model.
+function [status,...
+    new_model_path, ...
+    trace_file_name] = lus2slx(...
+    contract_path, ...
+    output_dir, ...
+    main_node, ...
+    organize_blocks)
 
 [coco_dir, cocospec_name, ~] = fileparts(contract_path);
+if ~exist('main_node', 'var') || isempty(main_node)
+    onlyMainNode = false;
+else
+    onlyMainNode = true;
+end
+if ~exist('organize_blocks', 'var') || isempty(organize_blocks)
+    organize_blocks = false;
+end
+
+status = 0;
+display_msg('Runing Lus2SLX on EMF file', MsgType.INFO, 'lus2slx', '');
+
 if nargin < 2
     output_dir = coco_dir;
 end
 
 data = BUtils.read_EMF(contract_path);
 
-trace_file_name = fullfile(output_dir, strcat(cocospec_name, '.emf.trace.xml'));
+trace_file_name = fullfile(output_dir, ...
+    strcat(cocospec_name, '.emf.trace.xml'));
 xml_trace = XML_Trace(contract_path, trace_file_name);
 xml_trace.init();
-%%
+
 
 base_name = regexp(cocospec_name,'\.','split');
 new_model_name = BUtils.adapt_block_name(strcat(base_name{1}, '_emf'));
-new_name = fullfile(output_dir,strcat(new_model_name,'.slx'));
-if exist(new_name,'file')
-    if BUtils.isLastModified(contract_path, new_name)
+new_model_path = fullfile(output_dir,strcat(new_model_name,'.slx'));
+if exist(new_model_path,'file')
+    if BUtils.isLastModified(contract_path, new_model_path)
         return;
     end
     if bdIsLoaded(new_model_name)
         close_system(new_model_name,0)
     end
-    delete(new_name);
+    delete(new_model_path);
 end
 close_system(new_model_name,0);
 model_handle = new_system(new_model_name);
@@ -38,15 +60,35 @@ x = 200;
 y = -50;
 
 nodes = data.nodes;
+if onlyMainNode
+    nodes_names = arrayfun(@(x)  BUtils.adapt_block_name(x{1}),...
+        fieldnames(nodes)', 'UniformOutput', false);
+    if ~ismember(main_node, nodes_names)
+        msg = sprintf('Node "%s" not found in JSON "%s"', ...
+            main_node, contract_path);
+        display_msg(msg, MsgType.ERROR, 'LUS2SLX', '');
+        status = 1;
+        new_model_path = '';
+        close_system(new_model_name,0);
+        trace_file_name = '';
+        return
+    end
+end
+
 for node = fieldnames(nodes)'
     try
-        
+        node_name = BUtils.adapt_block_name(node{1});
+        display_msg(...
+            sprintf('Processing node "%s" ',node_name),...
+            MsgType.INFO, 'lus2slx', '');
         y = y + 150;
         x2 = 200;
         y2= -50;
-        node_name = BUtils.adapt_block_name(node{1});
+        
         node_block_path = fullfile(new_model_name,node_name);
-        xml_trace.create_Node_Element(node_block_path, node{1});
+        if (~onlyMainNode) || (onlyMainNode && strcmp(node{1}, main_node))
+            xml_trace.create_Node_Element(node_block_path, node{1});
+        end
         add_block('built-in/Subsystem', node_block_path);%,...
         %             'TreatAsAtomicUnit', 'on');
         block_pos = [(x+100) y (x+250) (y+50)];
@@ -69,21 +111,39 @@ for node = fieldnames(nodes)'
         %% Instructions
         %deal with the invariant expressions for the cocospec Subsys,
         blk_exprs = nodes.(node{1}).instrs;
-        [x2, y2] = instrs_process(new_model_name, node_block_path, blk_exprs, node_name, x2, y2, xml_trace);
-        
+        if (~onlyMainNode) || (onlyMainNode && strcmp(node{1}, main_node))
+            instrs_process(new_model_name, node_block_path, blk_exprs, node_name, x2, y2, xml_trace);
+        else
+            instrs_process(new_model_name, node_block_path, blk_exprs, node_name, x2, y2, []);
+        end
     catch ME
         display_msg(['couldn''t translate node ' node{1} ' to Simulink'], MsgType.ERROR, 'LUS2SLX', '');
         display_msg(ME.getReport(), MsgType.DEBUG, 'LUS2SLX', '');
         %         continue;
-        rethrow(ME);
+        status = 1;
+        return;
     end
 end
 
+if onlyMainNode
+    nodes_names = arrayfun(@(x)  BUtils.adapt_block_name(x{1}), fieldnames(nodes)', 'UniformOutput', false);
+    nodes_names = nodes_names(~strcmp(nodes_names,main_node));
+    for node_name = nodes_names
+        node_block_path = fullfile(new_model_name,node_name);
+        delete_block(node_block_path);
+    end
+end
+
+% Remove From Goto blocks and organize the blocks positions
+if organize_blocks
+    goto_process( new_model_name );
+    blocks_position_process( new_model_name );
+end
 % Write traceability informations
 xml_trace.write();
 configSet = getActiveConfigSet(model_handle);
 set_param(configSet, 'Solver', 'FixedStepDiscrete');
-save_system(model_handle,new_name,'OverwriteIfChangedOnDisk',true);
+save_system(model_handle,new_model_path,'OverwriteIfChangedOnDisk',true);
 % open_system(model_handle);
 end
 
@@ -107,6 +167,8 @@ for var = fieldnames(blk_exprs)'
             case {'statelesscall', 'statefulcall'}
                 [x2, y2] = process_node_call(new_model_name, node_block_path, blk_exprs, var, node_name, x2, y2, xml_trace);
                 
+            case 'functioncall'
+                [x2, y2] = process_functioncall( node_block_path, blk_exprs, var, node_name, x2, y2);
             case 'branch'
                 [x2, y2] = process_branch(new_model_name, node_block_path, blk_exprs, var, node_name, x2, y2);
         end
@@ -124,7 +186,7 @@ if ~exist('isBranch', 'var')
     isBranch = 0;
 end
 for i=1:numel(blk_outputs)
-    if y2 < 30000; y2 = y2 + 150; else, x2 = x2 + 500; y2 = 100; end;
+    if y2 < 30000; y2 = y2 + 150; else, x2 = x2 + 500; y2 = 100; end
     if isfield(blk_outputs(i), 'name')
         var_name = BUtils.adapt_block_name(blk_outputs(i).name, ID);
     else
@@ -193,7 +255,7 @@ end
 
 %%
 function [x2, y2] = process_arrow(node_block_path, blk_exprs, var, node_name, x2, y2)
-if y2 < 30000; y2 = y2 + 150; else, x2 = x2 + 500; y2 = 100; end;
+if y2 < 30000; y2 = y2 + 150; else, x2 = x2 + 500; y2 = 100; end
 ID = BUtils.adapt_block_name(var{1});
 lhs_name = BUtils.adapt_block_name(blk_exprs.(var{1}).lhs, node_name);
 lhs_path = strcat(node_block_path,'/',ID, '_lhs');
@@ -228,7 +290,7 @@ end
 %%
 function [x2, y2] = process_pre(node_block_path, blk_exprs, var, node_name, x2, y2)
 % lhs = pre rhs;
-if y2 < 30000; y2 = y2 + 150; else, x2 = x2 + 500; y2 = 100; end;
+if y2 < 30000; y2 = y2 + 150; else, x2 = x2 + 500; y2 = 100; end
 
 ID = BUtils.adapt_block_name(var{1});
 lhs_name = BUtils.adapt_block_name(blk_exprs.(var{1}).lhs, node_name);
@@ -244,7 +306,7 @@ if strcmp(rhs_type, 'constant')
         rhs_path,...
         'Value',rhs_name,...
         'Position',[x2 y2 (x2+50) (y2+50)]);
-%     set_param(rhs_path, 'OutDataTypeStr','Inherit: Inherit via back propagation');
+    %     set_param(rhs_path, 'OutDataTypeStr','Inherit: Inherit via back propagation');
     dt = blk_exprs.(var{1}).rhs.datatype;
     if strcmp(dt, 'bool')
         set_param(rhs_path, 'OutDataTypeStr', 'boolean');
@@ -363,7 +425,7 @@ for inport_number=1:numel(blk_exprs.(var{1}).args)
             input_path,...
             'Value', local_var,...
             'Position',[x2 y2 (x2+50) (y2+50)]);
-%         set_param(input_path, 'OutDataTypeStr','Inherit: Inherit via back propagation');
+        %         set_param(input_path, 'OutDataTypeStr','Inherit: Inherit via back propagation');
         dt = blk_exprs.(var{1}).args(inport_number).datatype;
         if strcmp(dt, 'bool')
             set_param(input_path, 'OutDataTypeStr', 'boolean');
@@ -454,7 +516,7 @@ end
 %%
 
 function  [x2, y2] = process_node_call(new_model_name, node_block_path, blk_exprs, var, node_name, x2, y2, xml_trace)
-if y2 < 30000; y2 = y2 + 150; else, x2 = x2 + 500; y2 = 100; end;
+if y2 < 30000; y2 = y2 + 150; else, x2 = x2 + 500; y2 = 100; end
 
 ID = BUtils.adapt_block_name(var{1});
 fcn_path = strcat(node_block_path,'/',ID,'_call');
@@ -464,8 +526,9 @@ fcn_subsys = strcat(new_model_name, '/', fun_name);
 add_block(fcn_subsys,...
     fcn_path,...
     'Position',[(x2+100) y2 (x2+250) (y2+50)]);
-xml_trace.create_Node_Element(fcn_path, fun_name);
-
+if ~isempty(xml_trace)
+    xml_trace.create_Node_Element(fcn_path, fun_name);
+end
 if strcmp(blk_exprs.(var{1}).kind, 'statefulcall') && strcmp(blk_exprs.(var{1}).reset.resetable, 'true')
     add_block('simulink/Ports & Subsystems/Resettable Subsystem/Reset', ...
         fullfile(fcn_path, 'Reset'),...
@@ -507,7 +570,7 @@ for i=1:numel(blk_exprs.(var{1}).args)
             input_path,...
             'Value', input,...
             'Position',[x2 y2 (x2+50) (y2+50)]);
-%         set_param(input_path, 'OutDataTypeStr','Inherit: Inherit via back propagation');
+        %         set_param(input_path, 'OutDataTypeStr','Inherit: Inherit via back propagation');
         dt = blk_exprs.(var{1}).args(i).datatype;
         if strcmp(dt, 'bool')
             set_param(input_path, 'OutDataTypeStr', 'boolean');
@@ -529,6 +592,7 @@ for i=1:numel(blk_exprs.(var{1}).args)
     add_line(node_block_path, SrcBlkH.Outport(1), DstBlkH.Inport(i), 'autorouting', 'on');
 end
 end
+
 
 %%
 function [x2, y2] = link_subsys_inputs( parent_path, subsys_block_path, inputs, var, node_name, x2, y2)
@@ -644,7 +708,7 @@ if strcmp(guard_type, 'constant')
         guard_path,...
         'Value', guard,...
         'Position',[x3 y3 (x3+50) (y3+50)]);
-%     set_param(guard_path, 'OutDataTypeStr','Inherit: Inherit via back propagation');
+    %     set_param(guard_path, 'OutDataTypeStr','Inherit: Inherit via back propagation');
     dt = blk_exprs.(var{1}).guard.datatype;
     if strcmp(dt, 'bool')
         set_param(guard_path, 'OutDataTypeStr', 'boolean');
@@ -715,9 +779,9 @@ for i=1:numel(outputs)
     output_path = strcat(branch_block_path,'/',output_adapted,'_merged');
     nb_merge = numel(fieldnames(branches));
     add_block('simulink/Signal Routing/Goto',...
-            output_path,...
-            'GotoTag',output_adapted,...
-            'Position',[(x3+300) y3 (x3+350) (y3+50)]);
+        output_path,...
+        'GotoTag',output_adapted,...
+        'Position',[(x3+300) y3 (x3+350) (y3+50)]);
     if nb_merge==1
         DstBlkH = get_param(output_path, 'PortHandles');
     else
@@ -729,12 +793,12 @@ for i=1:numel(outputs)
         SrcBlkH = get_param(merge_path, 'PortHandles');
         DstBlkH = get_param(output_path, 'PortHandles');
         add_line(branch_block_path, SrcBlkH.Outport(1), DstBlkH.Inport(1), 'autorouting', 'on');
-         % Merge inputs
-         DstBlkH = get_param(merge_path, 'PortHandles');
+        % Merge inputs
+        DstBlkH = get_param(merge_path, 'PortHandles');
     end
     
     
-   
+    
     j = 1;
     for b=fieldnames(branches)'
         branch_path = strcat(branch_block_path,'/',ID,'_branch_',b{1});
@@ -744,5 +808,114 @@ for i=1:numel(outputs)
     end
     
     y3 = y3 + 150;
+end
+end
+
+
+%%
+function  [x2, y2] = process_functioncall(node_block_path, blk_exprs, var, node_name, x2, y2)
+if y2 < 30000; y2 = y2 + 150; else, x2 = x2 + 500; y2 = 100; end
+
+ID = BUtils.adapt_block_name(var{1});
+fcn_path = strcat(node_block_path,'/',ID,'_call');
+fun_name = BUtils.adapt_block_name(blk_exprs.(var{1}).name);
+fun_library = blk_exprs.(var{1}).library;
+
+status = add_funLibrary_path(fcn_path, fun_name, fun_library, [(x2+100) y2 (x2+250) (y2+50)]);
+if status
+    return;
+end
+
+SrcBlkH = get_param(fcn_path,'PortHandles');
+y3=y2;
+for i=1:numel(blk_exprs.(var{1}).lhs)
+    output = blk_exprs.(var{1}).lhs(i);
+    output_adapted = BUtils.adapt_block_name(output, node_name);
+    output_path = strcat(node_block_path,'/',ID,'_output_',output_adapted);
+    add_block('simulink/Signal Routing/Goto',...
+        output_path,...
+        'GotoTag',output_adapted,...
+        'Position',[(x2+300) y2 (x2+350) (y2+50)]);
+    DstBlkH = get_param(output_path, 'PortHandles');
+    add_line(node_block_path, SrcBlkH.Outport(i), DstBlkH.Inport(1), 'autorouting', 'on');
+    y2 = y2 + 150;
+end
+y2 = y3;
+DstBlkH = get_param(fcn_path,'PortHandles');
+for i=1:numel(blk_exprs.(var{1}).args)
+    input = blk_exprs.(var{1}).args(i).value;
+    input_type = blk_exprs.(var{1}).args(i).type;
+    input_adapted = BUtils.adapt_block_name(input, node_name);
+    input_path = BUtils.get_unique_name(strcat(node_block_path,'/',ID,'_input_',input_adapted));
+    if strcmp(input_type, 'constant')
+        add_block('simulink/Commonly Used Blocks/Constant',...
+            input_path,...
+            'Value', input,...
+            'Position',[x2 y2 (x2+50) (y2+50)]);
+        %         set_param(input_path, 'OutDataTypeStr','Inherit: Inherit via back propagation');
+        dt = blk_exprs.(var{1}).args(i).datatype;
+        if strcmp(dt, 'bool')
+            set_param(input_path, 'OutDataTypeStr', 'boolean');
+        elseif strcmp(dt, 'int')
+            set_param(input_path, 'OutDataTypeStr', 'int32');
+        elseif strcmp(dt, 'real')
+            set_param(input_path, 'OutDataTypeStr', 'double');
+        else
+            set_param(input_path, 'OutDataTypeStr', dt);
+        end
+    else
+        add_block('simulink/Signal Routing/From',...
+            input_path,...
+            'GotoTag',input_adapted,...
+            'Position',[x2 y2 (x2+50) (y2+50)]);
+    end
+    y2 = y2 + 150;
+    SrcBlkH = get_param(input_path,'PortHandles');
+    add_line(node_block_path, SrcBlkH.Outport(1), DstBlkH.Inport(i), 'autorouting', 'on');
+end
+end
+
+
+function status = add_funLibrary_path(dst_path, fun_name, fun_library, position)
+status = 0;
+if strcmp(fun_library, 'lustrec_math') || strcmp(fun_library, 'math')
+    function_name = fun_name;
+    fcn_path = 'simulink/Math Operations/Trigonometric Function';
+    needFunctionParam = true;
+    if strcmp(fun_name, 'cbrt')
+    elseif strcmp(fun_name, 'ceil')
+        fcn_path = 'simulink/Math Operations/Rounding Function';
+    elseif strcmp(fun_name, 'fabs')
+        needFunctionParam = false;
+        fcn_path = 'simulink/Math Operations/Abs';
+    elseif strcmp(fun_name, 'pow')
+        fcn_path = 'simulink/Math Operations/Math Function';
+    elseif strcmp(fun_name, 'sqrt')
+        needFunctionParam = false;
+        fcn_path = 'simulink/Math Operations/Sqrt';
+    end
+    if needFunctionParam
+        add_block(fcn_path,...
+            dst_path,...
+            'Function', function_name,...
+            'Position',position);
+    else
+        add_block(fcn_path,...
+            dst_path,...
+            'Position',position);
+    end
+elseif strcmp(fun_library, 'conv')
+    fcn_path = 'simulink/Signal Attributes/Data Type Conversion';
+    dt = 'double';
+    if strcmp(fun_name, 'real_to_int')
+        dt = 'int32';
+    end
+    add_block(fcn_path,...
+            dst_path,...
+            'OutDataTypeStr', dt,...
+            'Position',position);
+    
+else
+    status = 1;
 end
 end

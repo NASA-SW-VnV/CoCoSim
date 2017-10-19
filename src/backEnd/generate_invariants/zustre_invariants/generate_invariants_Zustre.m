@@ -13,8 +13,13 @@
 % new_model_path: the path of the new Simulink model that has the generated
 % invariants of the associated model.
 
-function new_model_path = generate_invariants_Zustre(model_path, contract_path)
+function new_model_path = generate_invariants_Zustre(model_path, contract_path, cocosim_trace_file)
 
+[coco_dir, ~, ~] = fileparts(contract_path);
+[model_dir, base_name, ~] = fileparts(model_path);
+if ~exist('cocosim_trace_file', 'var')
+    cocosim_trace_file = fullfile(coco_dir,strcat(base_name,'.cocosim.trace.xml'));
+end
 try
     bdclose('all')
     new_model_path = '';
@@ -32,8 +37,8 @@ try
     end
     data = jsondecode(filetext);
     
-    [model_dir, base_name, ~] = fileparts(model_path);
-    [coco_dir, ~, ~] = fileparts(contract_path);
+    
+    
     
     % we add a Postfix to differentiate it with the original Simulink model
     new_model_name = strcat(base_name,'_with_cocospec');
@@ -56,14 +61,17 @@ try
     load_system(new_name);
     
     %get tracability
-    trace_file_name = fullfile(coco_dir,strcat(base_name,'.cocosim.trace.xml'));
-    DOMNODE = xmlread(trace_file_name);
+    
+    DOMNODE = xmlread(cocosim_trace_file);
     xRoot = DOMNODE.getDocumentElement;
     xml_nodes = xRoot.getElementsByTagName('Node');
     nb_coco = 0;
     
     
-    translated_nodes_path  = lus2slx(contract_path, coco_dir);
+    [status, translated_nodes_path, ~]  = lus2slx(contract_path, coco_dir);
+    if status
+        return;
+    end
     [~, translated_nodes, ~] = fileparts(translated_nodes_path);
     load_system(translated_nodes);
     

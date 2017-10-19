@@ -7,7 +7,7 @@
 
 %% add paths
 [cocoSim_root, ~, ~] = fileparts(mfilename('fullpath'));
-addpath(fullfile(cocoSim_root, 'libs'));
+addpath(genpath(fullfile(cocoSim_root, 'libs')));
 addpath(genpath(fullfile(cocoSim_root, 'src')));
 addpath(fullfile(cocoSim_root, 'tools'));
 

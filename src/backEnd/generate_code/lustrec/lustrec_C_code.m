@@ -22,14 +22,15 @@ end
 
 
 tools_config;
-
-if ~exist(LUSTREC,'file')
+status = BUtils.check_files_exist(LUSTREC, LUCTREC_INCLUDE_DIR);
+if status
     msg = 'LUSTREC not found, please configure tools_config file under tools folder';
     display_msg(msg, MsgType.ERROR, 'lustrec_C_code', '');
     return;
 end
 
-command = sprintf('%s -I "%s" -d "%s" -node %s "%s"', LUSTREC, include_dir, output_dir, lus_full_path, node_name);
+
+command = sprintf('%s -I "%s" -d "%s" -node %s "%s"', LUSTREC, LUCTREC_INCLUDE_DIR, output_dir, lus_full_path, node_name);
 [~, lustrec_output] = system(command);
 if ~contains(lustrec_output, '.. done')
     display_msg('Error Generating C code', Constants.ERROR, 'C Generation', '');

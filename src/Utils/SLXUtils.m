@@ -273,8 +273,78 @@ classdef SLXUtils
                 end
                 
             end
-           
+            
         end
+        
+        %% Simulate the model
+        function simOut = simulate_model(slx_file_name, ...
+                                         input_struct, ...
+                                         simulation_step,...
+                                         stop_time,...
+                                         numberOfInports,...
+                                         show_models)
+            configSet = Simulink.ConfigSet;
+            set_param(configSet, 'Solver', 'FixedStepDiscrete');
+            set_param(configSet, 'FixedStep', num2str(simulation_step));
+            set_param(configSet, 'StartTime', '0.0');
+            set_param(configSet, 'StopTime',  num2str(stop_time));
+            set_param(configSet, 'SaveFormat', 'Structure');
+            set_param(configSet, 'SaveOutput', 'on');
+            set_param(configSet, 'SaveTime', 'on');
+            
+            if numberOfInports>=1
+                set_param(configSet, 'SaveState', 'on');
+                set_param(configSet, 'StateSaveName', 'xout');
+                set_param(configSet, 'OutputSaveName', 'yout');
+                set_param(configSet, 'ExtMode', 'on');
+                set_param(configSet, 'LoadExternalInput', 'on');
+                set_param(configSet, 'ExternalInput', 'input_struct');
+                hws = get_param(slx_file_name, 'modelworkspace');
+                hws.assignin('input_struct',eval('input_struct'));
+                assignin('base','input_struct',input_struct);
+                if show_models
+                    open(slx_file_name)
+                end
+                warning off;
+                simOut = sim(slx_file_name, configSet);
+                warning on;
+            else
+                if show_models
+                    open(slx_file_name)
+                end
+                warning off;
+                simOut = sim(slx_file_name, configSet);
+                warning on;
+            end
+        end
+        
+        %%
+        function [new_model_path, new_model_name] = crete_model_from_subsystem(file_name, block_name, output_dir )
+            block_name_adapted = BUtils.adapt_block_name(SLXUtils.naming(LusValidateUtils.name_format(block_name)));
+            new_model_name = strcat(file_name,'_', block_name_adapted);
+            new_model_name = BUtils.adapt_block_name(new_model_name);
+            new_model_path = fullfile(output_dir, strcat(new_model_name,'.slx'));
+            if exist(new_model_path,'file')
+                if bdIsLoaded(new_model_name)
+                    close_system(new_model_name,0)
+                end
+                delete(new_model_path);
+            end
+            close_system(new_model_name,0);
+            model_handle = new_system(new_model_name);
+            if getSimulinkBlockHandle(strcat(block_name, '/Reset'))>0
+                add_block(block_name, ...
+                    strcat(new_model_name, '/tmp'));
+                delete_block( strcat(new_model_name, '/tmp','/Reset'));
+                Simulink.BlockDiagram.expandSubsystem( strcat(new_model_name, '/tmp'));
+            else
+                Simulink.SubSystem.copyContentsToBlockDiagram(block_name, model_handle)
+            end
+            %% Save system
+            save_system(model_handle,new_model_path,'OverwriteIfChangedOnDisk',true);
+            close_system(file_name,0);
+        end
+        
     end
     
 end
