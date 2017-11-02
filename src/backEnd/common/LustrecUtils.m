@@ -264,7 +264,378 @@ classdef LustrecUtils
                 header, functions_call, Ok_def, Prop);
             
         end
-        
+         %% construct_EMF_verif_model
+        function [status, new_name_path] = construct_EMF_verif_model(slx_file_name,...
+                lus_file_path, node_name, output_dir)
+            tools_config;
+            status = BUtils.check_files_exist(LUSTREC, LUCTREC_INCLUDE_DIR);
+            if status
+                return;
+            end
+            %1- Generate Simulink model from original Lustre file using EMF
+            %backend.
+            
+            %generate emf json
+            [emf_path, status] = ...
+                LustrecUtils.generate_emf(lus_file_path, output_dir, ...
+                LUSTREC, LUCTREC_INCLUDE_DIR);
+            if status
+                return;
+            end
+            
+            %generate simulink model
+            new_model_name = BUtils.adapt_block_name(strcat(slx_file_name,'_Verif'));
+            [status, new_name_path, ~] = lus2slx(emf_path, output_dir, new_model_name, node_name, 0);
+            if status
+                return;
+            end
+            
+            %2- Create Simulink model containing both SLX1 and SLX2
+            load_system(new_name_path);
+            
+            emf_sub_path = fullfile(new_model_name, node_name);
+            emf_pos = get_param(emf_sub_path, 'Position');
+            % copy contents of slx_file to a subsytem
+            
+            original_sub_path = fullfile(new_model_name, 'original');
+            add_block('built-in/Subsystem', original_sub_path);
+            load_system(slx_file_name);
+            Simulink.BlockDiagram.copyContentsToSubsystem(slx_file_name, original_sub_path);
+            
+            %add inputs and outputs for original subsystem
+            portHandles = get_param(original_sub_path, 'PortHandles');
+            nb_inports = numel(portHandles.Inport);
+            nb_outports = numel(portHandles.Outport);
+            m = max(nb_inports, nb_outports);
+            set_param(original_sub_path,'Position',[emf_pos(1), emf_pos(2), emf_pos(3), emf_pos(2) + 50 * m]);
+            emf_pos(2) = emf_pos(2) + 50 * m + 50;
+            set_param(emf_sub_path,'Position',[emf_pos(1), emf_pos(2), emf_pos(3), emf_pos(2) + 50 * m]);
+            
+            portHandlesEMF = get_param(emf_sub_path, 'PortHandles');
+            inport_idx = 1;
+            for i=1:nb_inports
+                p = get_param(portHandles.Inport(i), 'Position');
+                x = p(1) - 50;
+                y = p(2);
+                inport_name = strcat(new_model_name,'/In',num2str(i));
+                inport_handle = add_block('simulink/Ports & Subsystems/In1',...
+                    inport_name,...
+                    'MakeNameUnique', 'on', ...
+                    'Position',[(x-10) (y-10) (x+10) (y+10)]);
+                SrcBlkH = get_param(inport_handle,'PortHandles');
+                add_line(new_model_name,...
+                    SrcBlkH.Outport(1), portHandles.Inport(i),...
+                    'autorouting', 'on');
+                
+                %add the inport to emf subsytem, it depends to dimension we should
+                %inline vectors
+                code_on=sprintf('%s([], [], [], ''compile'')', new_model_name);
+                eval(code_on);
+                dim_struct = get_param(inport_handle, 'CompiledPortDimensions');
+                code_off=sprintf('%s([], [], [], ''term'')', new_model_name);
+                eval(code_off);
+                if numel(dim_struct.Outport)==2 ...
+                        && ~(dim_struct.Outport(1)==1 || dim_struct.Outport(2)==1)
+                    
+                    msg = sprintf('Invalid inport "%s": We do not support Matrix inports.',...
+                            get_param(inport_handle, 'Name'));
+                        display_msg(msg, MsgType.ERROR, ...
+                            'compare_slx_lus','');
+                    status = 1;
+                    return;
+                elseif numel(dim_struct.Outport)==2
+                    dim = dim_struct.Outport(1) * dim_struct.Outport(2);
+                elseif numel(dim_struct.Outport) > 2
+                    if numel(dim_struct.Outport) == 3 ...
+                         && (dim_struct.Outport(1)==1 || dim_struct.Outport(2)==1)
+                        dim = dim_struct.Outport(2) * dim_struct.Outport(3);
+                    else
+                        msg = sprintf('Invalid inport "%s": We do not support Matrix inports.',...
+                            get_param(inport_handle, 'Name'));
+                        display_msg(msg, MsgType.ERROR, ...
+                            'compare_slx_lus','');
+                        status = 1;
+                        return;
+                    end
+                else
+                    dim = dim_struct.Outport;
+                end
+                if dim == 1
+                    add_line(new_model_name,...
+                        SrcBlkH.Outport(1), portHandlesEMF.Inport(inport_idx), ...
+                        'autorouting', 'on');
+                    inport_idx = inport_idx + 1;
+                else
+                     p = get_param(portHandlesEMF.Inport(inport_idx), 'Position');
+                     x = p(1) - 50;
+                     y = p(2);
+                     demux_path = strcat(new_model_name,'/Demux',num2str(i));
+                     demux_pos(1) = (x - 10);
+                     demux_pos(2) = (y - 10);
+                     demux_pos(3) = (x + 10);
+                     demux_pos(4) = (y + 50 * dim);
+                     h = add_block('simulink/Signal Routing/Demux',...
+                         demux_path,...
+                         'MakeNameUnique', 'on', ...
+                         'Outputs', num2str(dim),...
+                         'Position',demux_pos);
+                     demux_Porthandl = get_param(h, 'PortHandles');
+                     add_line(new_model_name,...
+                        SrcBlkH.Outport(1),...
+                        demux_Porthandl.Inport(1), ...
+                        'autorouting', 'on');
+                    for j=1:dim
+                        add_line(new_model_name,...
+                           demux_Porthandl.Outport(j),...
+                            portHandlesEMF.Inport(inport_idx), ...
+                            'autorouting', 'on');
+                        inport_idx = inport_idx + 1;
+                    end
+                end
+            end
+            % add verification subsystem
+            emf_pos = get_param(emf_sub_path, 'Position');
+            orig_pos = get_param(original_sub_path, 'Position');
+            verif_pos(1) = emf_pos(3) + 100;
+            verif_pos(2) = (emf_pos(2) + orig_pos(2)) / 2;
+            verif_pos(3) = emf_pos(3) + 300;
+            verif_pos(4) = (emf_pos(4) + orig_pos(4)) / 2;
+            verif_sub_path = fullfile(new_model_name, 'verif');
+            add_block('built-in/Subsystem', verif_sub_path, ...
+                'Position',verif_pos, ...
+                'TreatAsAtomicUnit', 'on');
+            
+            mask = Simulink.Mask.create(verif_sub_path);
+            mask.Type = 'VerificationSubsystem';
+            set_param(verif_sub_path, 'ForegroundColor', 'red');
+            set_param(verif_sub_path, 'BackgroundColor', 'white');
+            
+            x = (50 * nb_outports +120) / 2;
+            Assertion_path = strcat(verif_sub_path,'/assert');
+            add_block('simulink/Model Verification/Assertion',...
+                Assertion_path,...
+                'MakeNameUnique', 'on',...
+                'Position', [450, x - 20,  550,  x + 20]...
+                );
+            
+            if nb_outports >= 2
+                AND_path = strcat(verif_sub_path,'/AND');
+                add_block('simulink/Logic and Bit Operations/Logical Operator',...
+                    AND_path,...
+                    'MakeNameUnique', 'on',...
+                    'NumInputPorts', num2str(nb_outports), ...
+                    'Position', [350, 75,  370,  50 * (nb_outports + 1)]...
+                    );
+                add_line(verif_sub_path, ...
+                        strcat('AND', '/1'),...
+                        strcat('assert', '/1'),...
+                        'autorouting', 'on');
+            end
+            
+            j = 1;
+            for i=1:2:2*nb_outports
+                inport_name1 = strcat(verif_sub_path,'/In',num2str(i));
+                add_block('simulink/Ports & Subsystems/In1',...
+                    inport_name1,...
+                    'MakeNameUnique', 'on',...
+                    'Position', [50, 50*i,  70,  50*i + 20]...
+                    );
+                inport_name2 = strcat(verif_sub_path,'/In',num2str(i+1));
+                add_block('simulink/Ports & Subsystems/In1',...
+                    inport_name2,...
+                    'MakeNameUnique', 'on',...
+                    'Position', [50, 50*(i+1),  70,  50*(i+1) + 20]...
+                    );
+                equal_path = strcat(verif_sub_path,'/Equal',num2str(j));
+                add_block('simulink/Logic and Bit Operations/Relational Operator',...
+                    equal_path,...
+                    'MakeNameUnique', 'on',...
+                    'OutDataTypeStr', 'fixdt(1,16)', ...
+                    'Operator', '==', ...
+                    'Position', [150, 50*i+25,  170,  50*i + 45]...
+                    );
+                
+                add_line(verif_sub_path, ...
+                    strcat('In',num2str(i), '/1'), ...
+                    strcat('Equal',num2str(j), '/1'), ...
+                    'autorouting', 'on');
+                add_line(verif_sub_path, ...
+                    strcat('In',num2str(i+1), '/1'),...
+                    strcat('Equal',num2str(j), '/2'),...
+                    'autorouting', 'on');
+                
+                % Add product of elements for vectors inports
+                product_path = strcat(verif_sub_path,'/Product',num2str(j));
+                add_block('simulink/Math Operations/Product of Elements',...
+                    product_path,...
+                    'MakeNameUnique', 'on',...
+                    'Position', [250, 50*i+25,  270,  50*i + 45]...
+                    );
+                
+                add_line(verif_sub_path, ...
+                        strcat('Equal',num2str(j), '/1'),...
+                        strcat('Product',num2str(j), '/1'),...
+                        'autorouting', 'on');
+                    
+                if nb_outports >= 2
+                    add_line(verif_sub_path, ...
+                        strcat('Product',num2str(j), '/1'),...
+                        strcat('AND', '/',num2str(j)),...
+                        'autorouting', 'on');
+                    
+                else
+                    add_line(verif_sub_path, ...
+                        strcat('Product',num2str(j), '/1'),...
+                        strcat('assert', '/1'),...
+                        'autorouting', 'on');
+                end
+                j = j + 1;
+            end
+            
+            %link outports
+            portHandlesVerif = get_param(verif_sub_path, 'PortHandles');
+            outport_idx = 1;
+            
+            for i=1:nb_outports
+                add_line(new_model_name, portHandles.Outport(i), portHandlesVerif.Inport(2*i-1), 'autorouting', 'on');
+                code_on=sprintf('%s([], [], [], ''compile'')', new_model_name);
+                eval(code_on);
+                dim_struct = get_param(portHandles.Outport(i), 'CompiledPortDimensions');
+                code_off=sprintf('%s([], [], [], ''term'')', new_model_name);
+                eval(code_off);
+                if numel(dim_struct)==2 ...
+                        && ~(dim_struct(1)==1 || dim_struct(2)==1)
+                    
+                    msg = sprintf('Invalid inport "%s": We do not support Matrix inports.',...
+                        get_param(portHandles.Outport(i), 'Name'));
+                    display_msg(msg, MsgType.ERROR, ...
+                        'compare_slx_lus','');
+                    status = 1;
+                    return;
+                elseif numel(dim_struct)==2
+                    dim = dim_struct(1) * dim_struct(2);
+                elseif numel(dim_struct) > 2
+                    if numel(dim_struct) == 3 ...
+                         && (dim_struct(1)==1 || dim_struct(2)==1)
+                        dim = dim_struct(2) * dim_struct(3);
+                    else
+                        msg = sprintf('Invalid inport "%s": We do not support Matrix inports.',...
+                            get_param(portHandles.Outport(i), 'Name'));
+                        display_msg(msg, MsgType.ERROR, ...
+                            'compare_slx_lus','');
+                        status = 1;
+                        return;
+                    end
+
+                else
+                    dim = dim_struct;
+                end
+                if dim == 1
+                    add_line(new_model_name, portHandlesEMF.Outport(outport_idx), portHandlesVerif.Inport(2*i), 'autorouting', 'on');
+                    outport_idx = outport_idx + 1;
+                else
+                     p = get_param(portHandlesEMF.Outport(outport_idx), 'Position');
+                     x = p(1) + 50;
+                     y = p(2);
+                     mux_path = strcat(new_model_name,'/Mux',num2str(i));
+                     mux_pos(1) = (x - 10);
+                     mux_pos(2) = (y - 10);
+                     mux_pos(3) = (x + 10);
+                     mux_pos(4) = (y + 50 * dim);
+                     h = add_block('simulink/Signal Routing/Mux',...
+                         mux_path,...
+                         'MakeNameUnique', 'on', ...
+                         'Inputs', num2str(dim),...
+                         'Position',mux_pos);
+                     mux_Porthandl = get_param(h, 'PortHandles');
+                     add_line(new_model_name,...
+                        mux_Porthandl.Outport(1),...
+                        portHandlesVerif.Inport(2*i), ...
+                        'autorouting', 'on');
+                    for j=1:dim
+                        add_line(new_model_name,...
+                            portHandlesEMF.Outport(outport_idx), ...
+                            mux_Porthandl.Inport(j),...
+                            'autorouting', 'on');
+                        outport_idx = outport_idx + 1;
+                    end
+                end
+            end
+            
+            %add inputs and outputs for EMF subsystem
+            
+            save_system(new_name_path);
+        end
+        %% construct EMF  model
+        function [status, new_name_path, emf_path, xml_trace] = construct_EMF_model(...
+                lus_file_path, node_name, output_dir)
+            tools_config;
+            status = BUtils.check_files_exist(LUSTREC, LUCTREC_INCLUDE_DIR);
+            if status
+                return;
+            end
+            %1- Generate Simulink model from original Lustre file using EMF
+            %backend.
+            
+            %generate emf json
+            [emf_path, status] = ...
+                LustrecUtils.generate_emf(lus_file_path, output_dir, ...
+                LUSTREC, LUCTREC_INCLUDE_DIR);
+            if status
+                return;
+            end
+            
+            [~, lus_fname, ~] = fileparts(lus_file_path);
+            %generate simulink model
+            if ~strcmp(lus_fname, node_name)
+                new_model_name = BUtils.adapt_block_name(strcat(lus_fname,'_',node_name));
+            else
+                new_model_name = BUtils.adapt_block_name(strcat(lus_fname,'_EMF'));
+            end
+            [status, new_name_path, xml_trace] = lus2slx(emf_path, output_dir, new_model_name, node_name, 0);
+            if status
+                return;
+            end
+            
+            %2- Create Simulink model containing both SLX1 and SLX2
+            load_system(new_name_path);
+            
+            main_block_path = strcat(new_model_name,'/', node_name);
+            portHandles = get_param(main_block_path, 'PortHandles');
+            nb_inports = numel(portHandles.Inport);
+            nb_outports = numel(portHandles.Outport);
+            m = max(nb_inports, nb_outports);
+            set_param(main_block_path,'Position',[100 0 (100+250) (0+50*m)]);
+            
+            for i=1:nb_inports
+                p = get_param(portHandles.Inport(i), 'Position');
+                x = p(1) - 50;
+                y = p(2);
+                inport_name = strcat(new_model_name,'/In',num2str(i));
+                add_block('simulink/Ports & Subsystems/In1',...
+                    inport_name,...
+                    'Position',[(x-10) (y-10) (x+10) (y+10)]);
+                SrcBlkH = get_param(inport_name,'PortHandles');
+                add_line(new_model_name, SrcBlkH.Outport(1), portHandles.Inport(i), 'autorouting', 'on');
+            end
+            
+            for i=1:nb_outports
+                p = get_param(portHandles.Outport(i), 'Position');
+                x = p(1) + 50;
+                y = p(2);
+                outport_name = strcat(new_model_name,'/Out',num2str(i));
+                add_block('simulink/Ports & Subsystems/Out1',...
+                    outport_name,...
+                    'Position',[(x-10) (y-10) (x+10) (y+10)]);
+                DstBlkH = get_param(outport_name,'PortHandles');
+                add_line(new_model_name, portHandles.Outport(i), DstBlkH.Inport(1), 'autorouting', 'on');
+            end
+            %% Save system
+            configSet = getActiveConfigSet(new_model_name);
+            set_param(configSet, 'Solver', 'FixedStepDiscrete', 'FixedStep', '1');
+            save_system(new_model_name,'','OverwriteIfChangedOnDisk',true);
+    
+        end
         %% verification file
         function verif_lus_path = create_mutant_verif_file(...
                 lus_file_path,...
@@ -280,7 +651,8 @@ classdef LustrecUtils
             verif_lus_path = fullfile(...
                 output_dir, strcat(mutant_lus_file_name, '_verif.lus'));
             
-            if BUtils.isLastModified(mutant_lus_fpath, verif_lus_path)
+            if BUtils.isLastModified(mutant_lus_fpath, verif_lus_path)...
+                    && BUtils.isLastModified(lus_file_path, verif_lus_path)
                 display_msg(...
                     ['file ' verif_lus_path ' has been already generated'],...
                     MsgType.DEBUG,...
@@ -307,7 +679,304 @@ classdef LustrecUtils
             fprintf(fid, verif_lus_text);
             fclose(fid);
         end
+        %% compositional verification file between EMF and cocosim
+        function verif_lus_path = create_emf_verif_file(...
+                lus_file_path,...
+                coco_lus_fpath,...
+                emf_path, ...
+                EMF_trace_xml, ...
+                cocosim_trace_file)
+            % create verification file
+            [output_dir, coco_lus_file_name, ~] = fileparts(coco_lus_fpath);
+            verif_lus_path = fullfile(...
+                output_dir, strcat(coco_lus_file_name, '_verif.lus'));
+            
+            if BUtils.isLastModified(coco_lus_fpath, verif_lus_path) ...
+                    && BUtils.isLastModified(lus_file_path, verif_lus_path)
+                display_msg(...
+                    ['file ' verif_lus_path ' has been already generated'],...
+                    MsgType.DEBUG,...
+                    'Validation', '');
+                return;
+            end
+            filetext1 = ...
+                LustrecUtils.adapt_lustre_text(fileread(coco_lus_fpath));
+            sep_line =...
+                '--******************** second file ********************';
+            filetext2 = ...
+                LustrecUtils.adapt_lustre_text(fileread(lus_file_path));
+            filetext2 = regexprep(filetext2, '#open\s*<\w+>','');
+            
+            [~, emf_model_name, ~] = fileparts(EMF_trace_xml.model_full_path);
+
+            DOMNODE = xmlread(cocosim_trace_file);
+            cocoRoot = DOMNODE.getDocumentElement;
+
+            data = BUtils.read_EMF(emf_path);
+            nodes = data.nodes;
+            emf_nodes_names = fieldnames(nodes)';
+            for node_idx =1:numel(emf_nodes_names)
+                node_name = emf_nodes_names{node_idx};
+                vars = '(\s*\w+\s*:\s*(int|real|bool);?)+';
+                pattern = strcat(...
+                    '(node|function)\s+',...
+                    node_name,...
+                    '\s*\(',...
+                    vars,...
+                    '\)\s*returns\s*\(',...
+                    vars,'\);');
+                tokens = regexp(filetext2, pattern,'match') ;
+                if ~isempty(tokens)
+                    
+                    emf_block_name = ...
+                        XMLUtils.get_Simulink_block_from_lustre_node_name(...
+                        EMF_trace_xml.traceRootNode, ...
+                        node_name, ...
+                        emf_model_name, ...
+                        strcat(emf_model_name, '_PP'));
+
+                    new_node_name = ...
+                        XMLUtils.get_lustre_node_from_Simulink_block_name(...
+                        cocoRoot, emf_block_name);
+
+                    if ~strcmp(new_node_name, '')
+                        contract = LustrecUtils.construct_contact(...
+                            nodes.(node_name), new_node_name);
+                        
+                        filetext2 = strrep(filetext2, tokens{1},...
+                            strcat(tokens{1}, '\n', contract));
+                    end
+                end
+            end
+
+            
+            verif_lus_text = sprintf('%s\n%s\n%s', ...
+                filetext1, sep_line, filetext2);
+            
+            
+            fid = fopen(verif_lus_path, 'w');
+            fprintf(fid, verif_lus_text);
+            fclose(fid);
+        end
         
+        function contract = construct_contact(node_struct, node_name)
+             %inputs
+            node_inputs = node_struct.inputs;
+            nb_in = numel(node_inputs);
+            inputs = cell(nb_in,1);
+            for i=1:nb_in
+                inputs{i} = node_inputs(i).name;
+            end
+            inputs = strjoin(inputs, ',');
+            
+            %outputs
+            node_outputs = node_struct.outputs;
+            nb_out = numel(node_outputs);
+            outputs = cell(nb_out,1);
+            for i=1:nb_out
+                outputs{i} = node_outputs(i).name;
+            end
+            outputs = ['(' strjoin(outputs, ',') ')'];
+            
+            header = '(*@contract\nguarantee';
+            
+            functions_call_fmt =  '%s = %s(%s);';
+            functions_call = sprintf(functions_call_fmt,...
+                outputs, node_name, inputs);
+
+            contract = sprintf('%s\t%s\n*)',...
+                header, functions_call);
+        end
+        
+        %% run compositional modular verification usin Kind2
+        function [valid, IN_struct, time_max] = run_comp_modular_verif_using_Kind2(...
+                verif_lus_path,...
+                output_dir)
+            
+            IN_struct = [];
+            time_max = 0;
+            valid = -1;
+            if nargin < 1
+                error('Missing arguments to function call: LustrecUtils.run_comp_modular_verif_using_Kind2')
+            end
+            [file_dir, file_name, ~] = fileparts(verif_lus_path);
+            if nargin < 3 || isempty(output_dir)
+                output_dir = file_dir;
+            end
+
+            timeout = '600';
+            PWD = pwd;
+            cd(output_dir);
+            tools_config;
+
+            status = BUtils.check_files_exist(KIND2, Z3);
+            if status
+                return;
+            end
+            command = sprintf('%s -xml  --z3_bin %s --timeout %s --compositional true --modular true "%s"',...
+                KIND2, Z3, timeout, verif_lus_path);
+            display_msg(['KIND2_COMMAND ' command],...
+                MsgType.DEBUG, 'LustrecUtils.run_verif', '');
+            
+            [~, solver_output] = system(command);
+            display_msg(...
+                solver_output,...
+                MsgType.DEBUG,...
+                'LustrecUtils.run_verif',...
+                '');
+            [valid, IN_struct] = ...
+                LustrecUtils.extract_Kind2_Comp_Verif_answer(...
+                solver_output,...
+                file_name,  output_dir);
+            
+            cd(PWD);
+            
+        end
+        function [valid, IN_struct] = extract_Kind2_Comp_Verif_answer(...
+                solver_output, ...
+                file_name, ...
+                output_dir)
+            valid = -1;
+            IN_struct = [];
+            if isempty(solver_output)
+                return
+            end
+            solver_output = regexprep(solver_output, '<AnalysisStart ([^/]+)/>','<Analysis $1>');
+            solver_output = strrep(solver_output, '<AnalysisStop/>','</Analysis>');
+
+            tmp_file = fullfile(...
+                output_dir, ...
+                strcat(file_name, '.kind2.xml'));
+            fid = fopen(tmp_file, 'w');
+            if fid == -1
+                display_msg(['Couldn''t create file ' tmp_file],...
+                    MsgType.ERROR, 'LustrecUtils.extract_answer', '');
+                return;
+            end
+            fprintf(fid, solver_output);
+            fclose(fid);
+            xDoc = xmlread(tmp_file);
+            xAnalysis = xDoc.getElementsByTagName('Analysis');
+            for idx_analys=0:xAnalysis.getLength-1
+                node_name = char(xAnalysis.item(idx_analys).getAttribute('top'));
+                xProperties = xAnalysis.item(idx_analys).getElementsByTagName('Property');
+                for idx_prop=0:xProperties.getLength-1
+                    property = xProperties.item(idx_prop);
+                    prop_name = xProperties.item(idx_prop).getAttribute('name');
+                    try
+                        answer = ...
+                            property.getElementsByTagName('Answer').item(0).getTextContent;
+                    catch
+                        answer = 'ERROR';
+                    end
+                    
+                    if strcmp(answer, 'valid')
+                        answer = 'SAFE';
+                        if valid == -1; valid = 1; end
+                    elseif strcmp(answer, 'falsifiable')
+                        answer = 'UNSAFE';
+                        valid = 0;
+                    end
+                    
+                    if strcmp(answer, 'UNSAFE')
+                        
+                        xml_cex = property.getElementsByTagName('CounterExample');
+                        if xml_cex.getLength > 0
+                            CEX_XML = xml_cex;
+                            [IN_struct_i, ~] =...
+                                LustrecUtils.Kind2CEXTostruct(CEX_XML, node_name);
+                            IN_struct = [IN_struct, IN_struct_i];
+                        else
+                            msg = sprintf('Could not parse counter example for node %s and property %s from %s', ...
+                                node_name, prop_name, solver_output);
+                            display_msg(msg, Constants.ERROR, 'Property Checking', '');
+                        end
+                    end
+                    msg = sprintf('Solver Result for node %s of property %s is %s', ...
+                        node_name, prop_name, answer);
+                    display_msg(msg, Constants.RESULT, 'LustrecUtils.extract_answer', '');
+                end
+            end
+            
+        end
+        function [IN_struct, time_max] = Kind2CEXTostruct(...
+                cex_xml, ...
+                node_name)
+            IN_struct = [];
+            time_max = 0;
+            nodes = cex_xml.item(0).getElementsByTagName('Node');
+            node = [];
+            for idx=0:(nodes.getLength-1)
+                if strcmp(nodes.item(idx).getAttribute('name'), node_name)
+                    node = nodes.item(idx);
+                    break;
+                end
+            end
+            if isempty(node)
+                return;
+            end
+            IN_struct.node_name = node_name;
+            streams = node.getElementsByTagName('Stream');
+            node_streams = {};
+            for i=0:(streams.getLength-1)
+                if strcmp(streams.item(i).getParentNode.getAttribute('name'),...
+                        node_name) && ...
+                        strcmp(streams.item(i).getAttribute('class'),...
+                        'input')
+                    node_streams{numel(node_streams) + 1} = streams.item(i);
+                end
+            end
+            for i=1:numel(node_streams)
+                s_name = char(node_streams{i}.getAttribute('name'));
+                s_dt =  char(LusValidateUtils.get_slx_dt(node_streams{i}.getAttribute('type')));
+                
+                IN_struct.signals(i).name = s_name;
+                IN_struct.signals(i).datatype = s_dt;
+                
+                %TODO parse the type and extract dimension
+                IN_struct.signals(i).dimensions =  1;
+
+                [values, time_step] =...
+                    LustrecUtils.extract_values(...
+                    node_streams{i}, s_dt);
+                IN_struct.signals(i).values = values';
+                time_max = max(time_max, time_step);
+            end
+            min = -100; max_v = 100;
+            for i=1:numel(IN_struct.signals)
+                if numel(IN_struct.signals(i).values) < time_max + 1
+                    nb_steps = time_max +1 - numel(IN_struct.signals(i).values);
+                    dim = IN_struct.signals(i).dimensions;
+                    if strcmp(...
+                            LusValidateUtils.get_lustre_dt(IN_struct.signals(i).datatype),...
+                            'bool')
+                        values = ...
+                            LusValidateUtils.construct_random_booleans(...
+                            nb_steps, min, max_v, dim);
+                    elseif strcmp(...
+                            LusValidateUtils.get_lustre_dt(IN_struct.signals(i).datatype),...
+                            'int')
+                        values = ...
+                            LusValidateUtils.construct_random_integers(...
+                            nb_steps, min, max_v, IN_struct.signals(i).datatype, dim);
+                    elseif strcmp(...
+                            IN_struct.signals(i).datatype,...
+                            'single')
+                        values = ...
+                            single(...
+                            LusValidateUtils.construct_random_doubles(...
+                            nb_steps, min, max_v, dim));
+                    else
+                        values = ...
+                            LusValidateUtils.construct_random_doubles(...
+                            nb_steps, min, max_v, dim);
+                    end
+                    IN_struct.signals(i).values =...
+                        [IN_struct.signals(i).values, values];
+                end
+            end
+            IN_struct.time = (0:1:time_max)';
+        end
         %% run Zustre or kind2 on verification file
         
         function [answer, IN_struct, time_max] = run_verif(...
@@ -383,7 +1052,6 @@ classdef LustrecUtils
                 output_dir)
             answer = '';
             CEX_XML = [];
-            display(solver_output)
             if isempty(solver_output)
                 return
             end

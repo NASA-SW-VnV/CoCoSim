@@ -4,7 +4,7 @@
 % All Rights Reserved.
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%PP_ORDER let the user order pre-processing functions 
+%PP_ORDER let the user order pre-processing functions
 % functions are ordered by ascending order of priority.
 % 0 is the highest priority
 % Give functions a priority -1 to not be called.
@@ -21,17 +21,18 @@ addpath(genpath(fullfile(config_path, 'pp2')));
 % Here are the functions to be called (or to be ignored) in the pre-processing.
 % examples:
 % -To add all supported blocks in `std_pp`, add 'std_pp/blocks/*.m'
-% -To add all supported blocks in `pp2` except `atomic_process.m`. 
+% -To add all supported blocks in `pp2` except `atomic_process.m`.
 %   Add 'pp2/blocks/*.m' to pp_handled_blocks and
 %   Add 'pp2/blocks/atomic_process.m' to pp_unhandled_blocks
-% -To impose a specific order of functions calls see above. 
+% -To impose a specific order of functions calls see above.
 global pp_handled_blocks pp_unhandled_blocks;
 % add both std_pp and pp2
 pp_handled_blocks = {'std_pp/blocks/*.m',...
-                     'pp2/blocks/*.m'};
-% To not call atomic_process we may add it to the following list, or give 
+    'pp2/blocks/*.m'};
+% To not call atomic_process we may add it to the following list, or give
 % it an order -1 in pp_order_map (see next TODO).
-pp_unhandled_blocks = {'pp2/blocks/atomic_process.m'};
+pp_unhandled_blocks = {'pp2/blocks/atomic_process.m',...
+    'pp2/blocks/compile_process.m'};%compile process is called in the end of cocosim_pp.
 
 
 %% TODO: define orders
@@ -42,13 +43,17 @@ pp_order_map = containers.Map('KeyType', 'int32', 'ValueType', 'any');
 
 pp_order_map(-1) = {'pp2/blocks/atomic_process.m'}; % -1 means not to call
 
-pp_order_map(0) = {'pp2/blocks/compile_process.m', ...
-                   'pp2/blocks/inport_process.m', ...
-                   'pp2/blocks/outport_process.m'};% 0 means all this functions will be called first.
+pp_order_map(0) = {'pp2/blocks/inport_process.m', ...
+    'pp2/blocks/outport_process.m'};% 0 means all this functions will be called first.
 
-pp_order_map(1) = {'std_pp/blocks/*.m', ...         % '*.m' means all std_pp blocks have the same priority 1
-                    'pp2/blocks/assertion_process.m'};
+pp_order_map(1) = {'std_pp/blocks/goto_process.m'};
+pp_order_map(2) = {'pp2/blocks/blocks_position_process.m'};
+    
+pp_order_map(3) = {'std_pp/blocks/*.m', ...  % '*.m' means all std_pp functions have the same priority 1, if a function already defined it will keep its highest priority.
+    'pp2/blocks/*.m'};
 
-                
-pp_order_map(2) = {'pp2/blocks/algebric_loops_process.m', ...
-                    'pp2/blocks/fixedStepDiscrete_process.m'};
+
+pp_order_map(4) = {'pp2/blocks/algebric_loops_process.m', ...
+    'pp2/blocks/fixedStepDiscrete_process.m'};
+
+pp_order_map(5) = {'pp2/blocks/compile_process.m'};

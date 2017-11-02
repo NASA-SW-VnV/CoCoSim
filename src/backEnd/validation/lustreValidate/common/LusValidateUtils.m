@@ -89,7 +89,7 @@ classdef LusValidateUtils
                 elseif strncmp(stateflow_Type, 'int', 3) || strncmp(stateflow_Type, 'uint', 4) || strncmp(stateflow_Type, 'fixdt(1,16,', 11) || strncmp(stateflow_Type, 'sfix64', 6)
                     Lustre_type = 'int';
                     initial_value = '0';
-                elseif ~isempty(strfind(stateflow_Type,'Inherit')) && nargin==2
+                elseif contains(stateflow_Type,'Inherit') && nargin==2
                     try
                         var = evalin('base',data_name);
                         [ Lustre_type, initial_value ] = get_lustre_dt( var.DataType, data_name );
@@ -108,7 +108,7 @@ classdef LusValidateUtils
         end
         
         function slx_dt = get_slx_dt(lus_dt)
-            if strcmp(lus_dt, 'boo')
+            if strcmp(lus_dt, 'bool')
                 slx_dt = 'boolean';
             elseif strcmp(lus_dt, 'int')
                 slx_dt = 'int32';

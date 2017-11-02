@@ -13,7 +13,7 @@ if nargin < 2 || isempty(main_node)
     main_node = BUtils.adapt_block_name(lus_fname);
 end
 if ~exist('tests_method', 'var')
-    tests_method = 2;
+    tests_method = 1;
 end
 if ~exist('model_checker', 'var')
     model_checker = 'KIND2';
@@ -48,7 +48,7 @@ if status
     return;
 end
 %% extract SLX for all nodes
-[status, translated_nodes_path, emf_trace_file] = lus2slx(emf_path, output_dir);
+[status, translated_nodes_path, ~] = lus2slx(emf_path, output_dir);
 if status
     cd(OldPwd);
     return;
@@ -176,12 +176,13 @@ close_system(translated_nodes,0);
 system(['rm ' lusi_path]);
 
 
-if ~lustrec_failed && ~sim_failed && ~lustrec_binary_failed && ~valid && (deep_CEX > 0)
-    %get tracability    
-    validate_components(new_name, new_model_name, new_model_name,...
-        lus_file_path, emf_trace_file,base_name{1}, output_dir,...
-        deep_CEX, 1, tests_method, model_checker);
-end
+%Already done above, we loop on all nodes.
+% if ~lustrec_failed && ~sim_failed && ~lustrec_binary_failed && ~valid && (deep_CEX > 0)
+%     %get tracability    
+%     validate_components(new_name, new_model_name, new_model_name,...
+%         lus_file_path, emf_trace_file,base_name{1}, output_dir,...
+%         deep_CEX, 1, tests_method, model_checker);
+% end
 end
 
 function validate_components(file_path, file_name, block_path, ...

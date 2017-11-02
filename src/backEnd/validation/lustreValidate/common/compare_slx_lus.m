@@ -14,14 +14,17 @@ function [valid, ...
 %test methods:
 %   tests_method == 1: Use one random vector test of 100 steps.
 %   tests_method == 2: Use vector tests using lustret_test_mutation
-%   function. It generate test vectors that covers mutations inserted on
-%   Lustre code.
+%           function. It generate test vectors that covers mutations inserted on
+%           Lustre code.
 %   tests_method == 3: Use equivalence checking following these steps:
-%           1- Generate Simulink model from original Lustre file using EMF
+%           1- Generate Simulink model SLX2 from original Lustre file using EMF
 %           backend.
-%           2- Generate Lustre file 2 from Simulink model of step 1 using
-%           CoCoSim.
-%           3- Prove original Lustre <=> Lustre file of step 2.
+%           2- Create Simulink model containing both SLX1 and SLX2
+%           3- Prove SLX1 <=> SLX2 Using Simulink Design Verifier. If the
+%           user does not have SLDV we use CoCoSim to prove the property.
+%   tests_method == 4: We generate Simulink model from the lustre file
+%           using Lus2SLX and then compile it to Lus2 file using CoCosim.
+%           We prove Lus1 <=> Lus2 using compositional verification
 
 if ~exist('show_models', 'var')
     show_models = 0;
@@ -29,10 +32,10 @@ elseif show_models
     open(model_full_path);
 end
 
-if ~exist('tests_method', 'var')
+if ~exist('tests_method', 'var') || isempty(tests_method)
     tests_method = 1;
 end
-if ~exist('model_checker', 'var')
+if ~exist('model_checker', 'var') || isempty(model_checker)
     model_checker = 'KIND2';
 end
 %% define configuration variables
@@ -42,12 +45,18 @@ assignin('base', 'RUST_GEN', 0);
 assignin('base', 'C_GEN', 0);
 OldPwd = pwd;
 
-
+valid = -1;
+lustrec_failed = -1;
+lustrec_binary_failed = -1;
+sim_failed = -1;
 %%
-[model_path, slx_file_name, ~] = fileparts(char(model_full_path));
-addpath(model_path);
-load_system(model_full_path);
-
+if tests_method ~= 4
+    [model_path, slx_file_name, ~] = fileparts(char(model_full_path));
+    addpath(model_path);
+    load_system(model_full_path);
+    %% Get model inports informations
+    [inports, inputEvents_names] = SLXUtils.get_model_inputs_info(model_full_path);
+end
 
 if ~exist(output_dir, 'dir')
     mkdir(output_dir);
@@ -55,8 +64,7 @@ end
 
 
 
-%% Get model inports informations
-[inports, inputEvents_names] = SLXUtils.get_model_inputs_info(model_full_path);
+
 
 %% Create the input struct for the simulation
 nb_steps = 100;
@@ -123,30 +131,105 @@ if tests_method == 1 || tests_method == 2
     
 end
 %% equivalence checking
-if tests_method == 3
-    tools_config;
-    status = BUtils.check_files_exist(LUSTREC, LUCTREC_INCLUDE_DIR);
+if (tests_method == 3)
+    [status, emf_model_path] = LustrecUtils.construct_EMF_verif_model(slx_file_name,...
+        lus_file_path, node_name, output_dir);
+    [verif_dir, verif_name, ~] = fileparts(emf_model_path);
     if status
         return;
     end
-    %1- Generate Simulink model from original Lustre file using EMF
-    %backend.
-    
-    %generate emf json
-    [emf_path, status] = ...
-        LustrecUtils.generate_emf(lus_file_path, output_dir, ...
-        LUSTREC, LUCTREC_INCLUDE_DIR);
+    %3- Prove SLX1 <=> SLX2.
+    if  (tests_method == 3) && license('test', 'Simulink_Design_Verifier')
+        
+        opts = sldvoptions;
+        opts.Mode = 'PropertyProving';
+        opts.MaxProcessTime = 300;
+        opts.SaveHarnessModel = 'on';
+        opts.SaveReport = 'on';
+        if ~show_models
+            opts.DisplayReport = 'off';
+        end
+        opts.HarnessModelFileName = ...
+            fullfile(verif_dir, strcat(verif_name,'_harness.slx'));
+        opts.ProvingStrategy = 'ProveWithViolationDetection';
+        opts.MaxViolationStep = 100;
+        [status,FILENAMES] = sldvrun(verif_name, opts);
+        if status ~= 1
+            display_msg('Simulink Design Verifier Failed', MsgType.ERROR, 'validation', '');
+            return;
+        end
+        sldvData = load(FILENAMES.DataFile);
+        sldvData = sldvData.sldvData;
+        if strcmp(sldvData.Objectives.status, 'Proven valid')
+            valid = 1;
+            msg = sprintf('Translation for model "%s" is valid \n',slx_file_name);
+            display_msg(msg, MsgType.RESULT, 'COMPARE_SLX_LUS', '');
+        elseif strcmp(sldvData.Objectives.status, 'Falsified')
+            f_msg = sprintf('translation for model "%s" is not valid \n',slx_file_name);
+            display_msg(f_msg, MsgType.RESULT, 'validation', '');
+            f_msg = sprintf('Find the counter example in "%s":\n', opts.HarnessModelFileName);
+            display_msg(f_msg, MsgType.RESULT, 'validation', '');
+        end
+        msg = sprintf('Verification model : %s', emf_model_path);
+        display_msg(msg, MsgType.RESULT, 'validation', '');
+        
+    else
+        msg = ['Method 3 with CoCosim is not supported yet/'...
+            'Methode 3 works only with Simulink Design Verifier license for the moment.'];
+        display_msg(msg, MsgType.ERROR, 'COMPARE_SLX_LUS', '');
+    end
+elseif (tests_method == 4) %4- Prove LUS1 <=> LUS2.
+    [status, emf_model_path, emf_path, EMF_trace_xml] = LustrecUtils.construct_EMF_model(...
+        lus_file_path, node_name, output_dir);
     if status
         return;
     end
+    msg = sprintf('EMF model : %s', emf_model_path);
+    display_msg(msg, MsgType.DEBUG, 'validation', '');
+    msg = sprintf('EMF traceability : %s', EMF_trace_xml.xml_file_path);
+    display_msg(msg, MsgType.DEBUG, 'validation', '');
     
-    %generate simulink model
-    [status, translated_nodes_path, trace_file_name] = lus2slx(emf_path, output_dir);
-    %2- Generate Lustre file 2 from Simulink model of step 1 using
-    %CoCoSim.
+    %         [coco_lus_fpath, ~, ~, ~, ~, cocosim_trace, ~]=lustre_compiler(emf_model_path, [], 1);
+    cocosim_trace = '/Users/hbourbou/Documents/cocoteam/lus2slx/test2/tmp2/lustre_files/src_two_counters_EMF_PP/two_counters_EMF_PP.cocosim.trace.xml';
+    coco_lus_fpath = '/Users/hbourbou/Documents/cocoteam/lus2slx/test2/tmp2/lustre_files/src_two_counters_EMF_PP/two_counters_EMF_PP.lus';
+    verif_lus_path = LustrecUtils.create_emf_verif_file(...
+        lus_file_path,...
+        coco_lus_fpath,...
+        emf_path,...
+        EMF_trace_xml, ...
+        cocosim_trace);
     
-    % 3- Prove original Lustre <=> Lustre file of step 2 using
-    %Compositional verification.
+    msg = sprintf('LUSTRE VERIFICATION File : %s', verif_lus_path);
+    display_msg(msg, MsgType.DEBUG, 'validation', '');
+    
+    [valid, IN_struct, ~] = LustrecUtils.run_comp_modular_verif_using_Kind2(...
+        verif_lus_path, output_dir);
+    
+    if ~isempty(IN_struct)
+        json_text = jsonencode(IN_struct);
+        json_text = regexprep(json_text, '\\/','/');
+        fname = fullfile(output_dir, 'CounterExamples_tmp.json');
+        fname_formatted = fullfile(output_dir, 'CounterExamples.json');
+        fid = fopen(fname, 'w');
+        if fid==-1
+            display_msg(['Couldn''t create file ' fname], MsgType.ERROR, 'compare_slx_lus', '');
+        else
+            fprintf(fid,'%s\n',json_text);
+            fclose(fid);
+            cmd = ['cat ' fname ' | python -mjson.tool > ' fname_formatted];
+            try
+                [status, output] = system(cmd);
+                if status~=0
+                    display_msg(['file is not formatted ' output], MsgType.ERROR, 'Stateflow_IRPP', '');
+                    fname_formatted = fname;
+                end
+            catch
+                fname_formatted = fname;
+            end
+        end
+        msg = sprintf('Counter examples path: %s', fname_formatted);
+        display_msg(msg, MsgType.RESULT, 'validation', '');
+    end
 end
 cd(OldPwd)
 

@@ -9,13 +9,15 @@
 %in main_node argument will be kept in the final simulink model.
 function [status,...
     new_model_path, ...
-    trace_file_name] = lus2slx(...
-    contract_path, ...
+    xml_trace] = lus2slx(...
+    json_path, ...
     output_dir, ...
+    new_model_name, ...
     main_node, ...
     organize_blocks)
 
-[coco_dir, cocospec_name, ~] = fileparts(contract_path);
+%% Init
+[coco_dir, cocospec_name, ~] = fileparts(json_path);
 if ~exist('main_node', 'var') || isempty(main_node)
     onlyMainNode = false;
 else
@@ -25,6 +27,16 @@ if ~exist('organize_blocks', 'var') || isempty(organize_blocks)
     organize_blocks = false;
 end
 
+base_name = regexp(cocospec_name,'\.','split');
+if ~exist('new_model_name', 'var') || isempty(new_model_name)
+    if onlyMainNode
+        new_model_name = BUtils.adapt_block_name(strcat(base_name{1}, '_', main_node));
+    else
+        new_model_name = BUtils.adapt_block_name(strcat(base_name{1}, '_emf'));
+    end
+end
+
+%%
 status = 0;
 display_msg('Runing Lus2SLX on EMF file', MsgType.INFO, 'lus2slx', '');
 
@@ -32,21 +44,15 @@ if nargin < 2
     output_dir = coco_dir;
 end
 
-data = BUtils.read_EMF(contract_path);
-
-trace_file_name = fullfile(output_dir, ...
-    strcat(cocospec_name, '.emf.trace.xml'));
-xml_trace = XML_Trace(contract_path, trace_file_name);
-xml_trace.init();
+data = BUtils.read_EMF(json_path);
 
 
-base_name = regexp(cocospec_name,'\.','split');
-new_model_name = BUtils.adapt_block_name(strcat(base_name{1}, '_emf'));
+
 new_model_path = fullfile(output_dir,strcat(new_model_name,'.slx'));
 if exist(new_model_path,'file')
-    if BUtils.isLastModified(contract_path, new_model_path)
-        return;
-    end
+%     if BUtils.isLastModified(json_path, new_model_path)
+%         return;
+%     end
     if bdIsLoaded(new_model_name)
         close_system(new_model_name,0)
     end
@@ -54,6 +60,11 @@ if exist(new_model_path,'file')
 end
 close_system(new_model_name,0);
 model_handle = new_system(new_model_name);
+
+trace_file_name = fullfile(output_dir, ...
+    strcat(cocospec_name, '.emf.trace.xml'));
+xml_trace = XML_Trace(new_model_path, trace_file_name);
+xml_trace.init();
 % save_system(model_handle,new_name);
 
 x = 200;
@@ -65,7 +76,7 @@ if onlyMainNode
         fieldnames(nodes)', 'UniformOutput', false);
     if ~ismember(main_node, nodes_names)
         msg = sprintf('Node "%s" not found in JSON "%s"', ...
-            main_node, contract_path);
+            main_node, json_path);
         display_msg(msg, MsgType.ERROR, 'LUS2SLX', '');
         status = 1;
         new_model_path = '';

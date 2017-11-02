@@ -21,7 +21,7 @@ tools_config;
 %% Second configuration Pre-processing
 % Go to src/pp/pp_config and follow instructions
 pp_config;
-
+fprintf('\n\t Click <a href="matlab: pp_user_config">here</a> to open pre-processing configuration.\n');
 
 %% IR config
 if exist(fullfile(cocoSim_root, 'src', 'frontend', 'IR', 'std_IR', 'utils', 'make.m'), 'file')

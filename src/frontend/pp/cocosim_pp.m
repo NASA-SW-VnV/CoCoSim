@@ -1,4 +1,4 @@
-function [new_file_path] = cocosim_pp(file_path, varargin)
+function [new_file_path, status] = cocosim_pp(file_path, varargin)
 % COCOSIM_PP pre-process complexe blocks in Simulink model into basic ones. 
 % This is a generic function that use pp_config as a configuration file that decides
 % which libraries to use and in which order to call the blocks functions.
@@ -18,17 +18,7 @@ function [new_file_path] = cocosim_pp(file_path, varargin)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 global cocosim_pp_gen_verif  cocosim_pp_gen_verif_dir;
-global pp_order_map pp_handled_blocks pp_unhandled_blocks;
-if isempty(pp_order_map)
-    warning('Order map ''pp_order_map'' has not been defined. Please check pp_order.m');
-    pp_order_map = containers.Map();
-end
-if isempty(pp_handled_blocks)
-    warning('Order map ''pp_handled_blocks'' has not been defined. Please check pp_order.m');
-end
-if isempty(pp_unhandled_blocks)
-    warning('Order map ''pp_unhandled_blocks'' has not been defined. Please check pp_order.m');
-end
+
 nodisplay = 0;
 cocosim_pp_gen_verif = 0;
 cocosim_pp_gen_verif_dir = '';
@@ -39,8 +29,6 @@ for i=1:numel(varargin)
         cocosim_pp_gen_verif = 1;
     end
 end
-
-pp_path = fileparts(mfilename('fullpath'));
 
 %% Creat the new model name
 [model_parent, model, ext] = fileparts(file_path);
@@ -91,114 +79,32 @@ if ~bdIsLoaded('gal_lib'); load_system('gal_lib.slx'); end
 
 
 
-%% Preprocess
-%% Create supported blocks
-display_msg('Looking for CoCoSim non-supported blocks', MsgType.INFO, 'PP', '');
-handled_blocks_map = containers.Map();
-
-for i=1:numel(pp_handled_blocks)
-    [library_path, ~,~] = fileparts(pp_handled_blocks{i});
-    full_path = fullfile(pp_path, pp_handled_blocks{i});
-    handled_blocks_i = dir(full_path);
-    if ~handled_blocks_map.isKey(library_path)
-        handled_blocks_map(library_path) = handled_blocks_i;
-    else
-        handled_blocks_map(library_path) = [handled_blocks_map(library_path); handled_blocks_i];
-    end
-end
-
-unhandled_blocks_map = containers.Map();
-for i=1:numel(pp_unhandled_blocks)
-    [library_path, ~,~] = fileparts(pp_unhandled_blocks{i});
-    full_path = fullfile(pp_path, pp_unhandled_blocks{i});
-    handled_blocks_i = dir(full_path);
-    if ~unhandled_blocks_map.isKey(library_path)
-        unhandled_blocks_map(library_path) = handled_blocks_i;
-    else
-        unhandled_blocks_map(library_path) = [unhandled_blocks_map(library_path); handled_blocks_i];
-    end
-end
-
-%% delete unsupported blocks from supported blocks map
-for key=unhandled_blocks_map.keys
-    if handled_blocks_map.isKey(key)
-        v = handled_blocks_map(key{1});
-        unv = unhandled_blocks_map(key{1});
-        A = {v.name};
-        B = {unv.name};
-        [~, ia] = setdiff(A,B);
-        
-        v = v(ia);
-        handled_blocks_map(key{1}) = v;
-    end
-end
-
-handled_blocks = [];
-for val = handled_blocks_map.values
-    handled_blocks = [handled_blocks; val{1}];
-end
-a2 = {handled_blocks.folder};
-b2 = {handled_blocks.name};
-handeled_full_paths=cellfun(@(x,y) [x '/' y],a2', b2','un',0);
-%% flatten pp_order_map
-ordered_blocks = [];
-
-for key= sort(cell2mat(pp_order_map.keys))
-    
-    v_list = pp_order_map(key);
-    for i=1:numel(v_list)
-        v = v_list{i};
-        full_path = fullfile(pp_path, v);
-        if key == -1
-            % remove it from handled blocks
-            index = find(ismember(handeled_full_paths, {full_path}));
-            handled_blocks(index) = [];
-            handeled_full_paths(index) = [];
-        else
-            ordered_blocks_i = dir(full_path);
-            ordered_blocks = [ordered_blocks; ordered_blocks_i];
-        end
-    end
-    
-end
-%% remove duplicated functions
-a = {ordered_blocks.folder};
-b = {ordered_blocks.name};
-c = cellfun(@(x,y) [x '/' y],a', b','un',0);
-[~,ii] = unique(c,'stable');
-ordered_blocks = ordered_blocks(ii);
-
-%% Add handled blocks that were not ordered. They will have the lowest priority
-if numel(handled_blocks) > numel(ordered_blocks)
-    a = {ordered_blocks.folder};
-    b = {ordered_blocks.name};
-    ordered_full_paths=cellfun(@(x,y) [x '/' y],a', b','un',0);
-    
-    [~, ia] = setdiff(handeled_full_paths, ordered_full_paths);
-    diff = handled_blocks(ia);
-    ordered_blocks = [ordered_blocks; diff];
-end
 
 
+%% Order functions
+ordered_functions = order_pp_functions();
 %% sort functions calls
 oldDir = pwd;
-if ~isempty(ordered_blocks) && isfield(ordered_blocks(1), 'folder')
-    for i=1:numel(ordered_blocks)
-        dirname = ordered_blocks(i).folder;
-        cd(dirname);
-        fh = str2func(ordered_blocks(i).name(1:end-2));
-        cd(oldDir);
-        try
-            display_msg(['runing ' func2str(fh)], MsgType.INFO, 'PP', '');
-            fh(new_model_base);
-        catch me
-            display_msg(['can not run ' func2str(fh)], MsgType.ERROR, 'PP', '');
-            display_msg(me.getReport(), MsgType.DEBUG, 'PP', '');
-        end
-        
+
+for i=1:numel(ordered_functions)
+    [dirname, func_name, ~] = fileparts(ordered_functions{i});
+    cd(dirname);
+    fh = str2func(func_name);
+    try
+        display_msg(['runing ' func2str(fh)], MsgType.INFO, 'PP', '');
+        fh(new_model_base);
+    catch me
+        display_msg(['can not run ' func2str(fh)], MsgType.ERROR, 'PP', '');
+        display_msg(me.getReport(), MsgType.DEBUG, 'PP', '');
     end
+    
 end
-%% 
+cd(oldDir);
+%% Make sure model compile
+status = compile_process( new_model_base );
+if status
+    return;
+end
 % Exporting the model to the mdl CoCoSim compatible file format
 
 display_msg('Saving simplified model', MsgType.INFO, 'PP', '');

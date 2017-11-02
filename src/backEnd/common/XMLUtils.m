@@ -42,8 +42,14 @@ classdef XMLUtils
         
         %%
         %%
-        function simulink_block_name = get_Simulink_block_from_lustre_node_name(xml_nodes,lustre_node_name,Sim_file_name,new_model_name)
+        function simulink_block_name =...
+                get_Simulink_block_from_lustre_node_name(...
+                xRoot, ...
+                lustre_node_name, ...
+                Sim_file_name,...
+                new_model_name)
             simulink_block_name = '';
+            xml_nodes = xRoot.getElementsByTagName('Node');
             for idx_node=0:xml_nodes.getLength-1
                 lustre_name = xml_nodes.item(idx_node).getAttribute('node_name');
                 if strcmp(lustre_name,lustre_node_name)
@@ -58,9 +64,13 @@ classdef XMLUtils
         end
         
         %%
-        function node_name = get_lustre_node_from_Simulink_block_name(trace_file_name,Simulink_block_name)
-            DOMNODE = xmlread(trace_file_name);
-            xRoot = DOMNODE.getDocumentElement;
+        function node_name = get_lustre_node_from_Simulink_block_name(trace_file,Simulink_block_name)
+            if isa(trace_file, 'char')
+                DOMNODE = xmlread(trace_file);
+                xRoot = DOMNODE.getDocumentElement;
+            else
+                xRoot = trace_file;
+            end
             xml_nodes = xRoot.getElementsByTagName('Node');
             node_name = '';
             for idx_node=0:xml_nodes.getLength-1

@@ -8,6 +8,8 @@ function [ new_ir ] = internalRep_pp( new_ir, json_export, output_dir )
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+
+%% apply functions in library folder
 [ir_pp_root, ~, ~] = fileparts(mfilename('fullpath'));
 lib_dir = fullfile(ir_pp_root, 'lib');
 functions = dir(fullfile(lib_dir , '*.m'));
@@ -21,6 +23,8 @@ if isstruct(functions) && isfield(functions, 'name')
     end
 end
 
+
+%% export json
 if json_export
     ir_encoded = json_encode(new_ir);
     ir_encoded = strrep(ir_encoded,'\/','/');

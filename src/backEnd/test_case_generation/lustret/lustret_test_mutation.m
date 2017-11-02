@@ -186,6 +186,9 @@ while (file_idx <= numel(verification_files))
         txt  = fileread(outputs_fname);
         if contains(txt, '''OK'': ''0''')
             verification_files{i} = '';
+            if i <= file_idx
+                file_idx = file_idx - 1;
+            end
             good_test = true;
         end
     end

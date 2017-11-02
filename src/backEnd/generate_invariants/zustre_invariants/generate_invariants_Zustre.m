@@ -64,7 +64,7 @@ try
     
     DOMNODE = xmlread(cocosim_trace_file);
     xRoot = DOMNODE.getDocumentElement;
-    xml_nodes = xRoot.getElementsByTagName('Node');
+    
     nb_coco = 0;
     
     
@@ -77,7 +77,7 @@ try
     
     nodes = data.nodes;
     for node = fieldnames(nodes)'
-        simulink_block_name = XMLUtils.get_Simulink_block_from_lustre_node_name(xml_nodes, ...
+        simulink_block_name = XMLUtils.get_Simulink_block_from_lustre_node_name(xRoot, ...
             node{1}, base_name, new_model_name);
         if strcmp(simulink_block_name, '')
             continue;
