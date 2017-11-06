@@ -82,12 +82,15 @@ if ~bdIsLoaded('gal_lib'); load_system('gal_lib.slx'); end
 
 
 %% Order functions
-ordered_functions = order_pp_functions();
+global ordered_pp_functions;
+if isempty(ordered_pp_functions)
+    pp_config;
+end
 %% sort functions calls
 oldDir = pwd;
 
-for i=1:numel(ordered_functions)
-    [dirname, func_name, ~] = fileparts(ordered_functions{i});
+for i=1:numel(ordered_pp_functions)
+    [dirname, func_name, ~] = fileparts(ordered_pp_functions{i});
     cd(dirname);
     fh = str2func(func_name);
     try
