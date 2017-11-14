@@ -46,7 +46,9 @@ end
 
 data = BUtils.read_EMF(json_path);
 
-
+if ~exist(output_dir, 'dir')
+    mkdir(output_dir);
+end
 
 new_model_path = fullfile(output_dir,strcat(new_model_name,'.slx'));
 if exist(new_model_path,'file')
@@ -85,65 +87,34 @@ if onlyMainNode
         return
     end
 end
-
-for node = fieldnames(nodes)'
-    try
-        node_name = BUtils.adapt_block_name(node{1});
-        display_msg(...
-            sprintf('Processing node "%s" ',node_name),...
-            MsgType.INFO, 'lus2slx', '');
-        y = y + 150;
-        x2 = 200;
-        y2= -50;
-        
-        node_block_path = fullfile(new_model_name,node_name);
-        if (~onlyMainNode) || (onlyMainNode && strcmp(node{1}, main_node))
-            xml_trace.create_Node_Element(node_block_path, node{1});
-        end
-        add_block('built-in/Subsystem', node_block_path);%,...
-        %             'TreatAsAtomicUnit', 'on');
-        block_pos = [(x+100) y (x+250) (y+50)];
-        set_param(node_block_path, 'Position', block_pos);
-        
-        
-        %% Outputs
-        
-        blk_outputs = nodes.(node{1}).outputs;
-        [x2, y2] = process_outputs(node_block_path, blk_outputs, node_name, x2, y2);
-        
-        
-        %% Inputs
-        
-        blk_inputs = nodes.(node{1}).inputs;
-        [x2, y2] = process_inputs(node_block_path, blk_inputs, node_name, x2, y2);
-        
-        
-        
-        %% Instructions
-        %deal with the invariant expressions for the cocospec Subsys,
-        blk_exprs = nodes.(node{1}).instrs;
-        if (~onlyMainNode) || (onlyMainNode && strcmp(node{1}, main_node))
-            instrs_process(new_model_name, node_block_path, blk_exprs, node_name, x2, y2, xml_trace);
-        else
-            instrs_process(new_model_name, node_block_path, blk_exprs, node_name, x2, y2, []);
-        end
-    catch ME
-        display_msg(['couldn''t translate node ' node{1} ' to Simulink'], MsgType.ERROR, 'LUS2SLX', '');
-        display_msg(ME.getReport(), MsgType.DEBUG, 'LUS2SLX', '');
-        %         continue;
-        status = 1;
-        return;
-    end
-end
-
 if onlyMainNode
-    nodes_names = arrayfun(@(x)  BUtils.adapt_block_name(x{1}), fieldnames(nodes)', 'UniformOutput', false);
-    nodes_names = nodes_names(~strcmp(nodes_names,main_node));
-    for node_name = nodes_names
-        node_block_path = fullfile(new_model_name,node_name);
-        delete_block(node_block_path);
+    node_name = BUtils.adapt_block_name(main_node);
+    node_block_path = fullfile(new_model_name,node_name);
+    block_pos = [(x+100) y (x+250) (y+50)];
+    node_process(new_model_name, nodes, main_node, node_block_path, block_pos, xml_trace);
+else
+    for node = fieldnames(nodes)'
+        try
+            node_name = BUtils.adapt_block_name(node{1});
+            display_msg(...
+                sprintf('Processing node "%s" ',node_name),...
+                MsgType.INFO, 'lus2slx', '');
+            y = y + 150;
+
+            block_pos = [(x+100) y (x+250) (y+50)];
+            node_block_path = fullfile(new_model_name,node_name);
+            node_process(new_model_name, nodes, node{1}, node_block_path, block_pos, []);
+            
+        catch ME
+            display_msg(['couldn''t translate node ' node{1} ' to Simulink'], MsgType.ERROR, 'LUS2SLX', '');
+            display_msg(ME.getReport(), MsgType.DEBUG, 'LUS2SLX', '');
+            %         continue;
+            status = 1;
+            return;
+        end
     end
 end
+
 
 % Remove From Goto blocks and organize the blocks positions
 if organize_blocks
@@ -155,15 +126,52 @@ xml_trace.write();
 configSet = getActiveConfigSet(model_handle);
 set_param(configSet, 'Solver', 'FixedStepDiscrete');
 save_system(model_handle,new_model_path,'OverwriteIfChangedOnDisk',true);
+
 % open_system(model_handle);
 end
 
 %%
-function [x2, y2] = instrs_process(new_model_name, node_block_path, blk_exprs, node_name,  x2, y2, xml_trace)
+function node_process(new_model_name, nodes, node, node_block_path, block_pos, xml_trace)
+node_name = BUtils.adapt_block_name(node);
+display_msg(...
+    sprintf('Processing node "%s" ',node_name),...
+    MsgType.INFO, 'lus2slx', '');
+x2 = 200;
+y2= -50;
+
+if ~isempty(xml_trace)
+    xml_trace.create_Node_Element(node_block_path, node);
+end
+add_block('built-in/Subsystem', node_block_path);%,...
+%             'TreatAsAtomicUnit', 'on');
+set_param(node_block_path, 'Position', block_pos);
+
+
+% Outputs
+
+blk_outputs = nodes.(node).outputs;
+[x2, y2] = process_outputs(node_block_path, blk_outputs, node_name, x2, y2);
+
+
+% Inputs
+
+blk_inputs = nodes.(node).inputs;
+[x2, y2] = process_inputs(node_block_path, blk_inputs, node_name, x2, y2);
+
+
+
+% Instructions
+%deal with the invariant expressions for the cocospec Subsys,
+blk_exprs = nodes.(node).instrs;
+instrs_process(nodes, new_model_name, node_block_path, blk_exprs, node_name, x2, y2, xml_trace);
+
+end
+%%
+function [x2, y2] = instrs_process(nodes, new_model_name, node_block_path, blk_exprs, node_name,  x2, y2, xml_trace)
 for var = fieldnames(blk_exprs)'
     try
         switch blk_exprs.(var{1}).kind
-            case 'arrow' % lhs = False -> True;
+            case 'arrow' % lhs = True -> False;
                 [x2, y2] = process_arrow(node_block_path, blk_exprs, var, node_name,  x2, y2);
                 
             case 'pre' % lhs = pre rhs;
@@ -172,16 +180,19 @@ for var = fieldnames(blk_exprs)'
             case 'local_assign' % lhs = rhs;
                 [x2, y2] = process_local_assign(node_block_path, blk_exprs, var, node_name,  x2, y2);
                 
+            case 'reset' % lhs = rhs;
+                [x2, y2] = process_reset(node_block_path, blk_exprs, var, node_name,  x2, y2);
+                
             case 'operator'
                 [x2, y2] = process_operator(node_block_path, blk_exprs, var, node_name, x2, y2);
                 
             case {'statelesscall', 'statefulcall'}
-                [x2, y2] = process_node_call(new_model_name, node_block_path, blk_exprs, var, node_name, x2, y2, xml_trace);
+                [x2, y2] = process_node_call(nodes, new_model_name, node_block_path, blk_exprs, var, node_name, x2, y2, xml_trace);
                 
             case 'functioncall'
                 [x2, y2] = process_functioncall( node_block_path, blk_exprs, var, node_name, x2, y2);
             case 'branch'
-                [x2, y2] = process_branch(new_model_name, node_block_path, blk_exprs, var, node_name, x2, y2);
+                [x2, y2] = process_branch(nodes, new_model_name, node_block_path, blk_exprs, var, node_name, x2, y2, xml_trace);
         end
     catch ME
         display_msg(['couldn''t translate expression ' var{1} ' to Simulink'], MsgType.ERROR, 'LUS2SLX', '');
@@ -204,7 +215,7 @@ for i=1:numel(blk_outputs)
         var_name = BUtils.adapt_block_name(blk_outputs(i), ID);
     end
     output_path = strcat(node_block_path,'/',var_name);
-    output_input =  strcat(node_block_path,'/',var_name,'_input');
+    output_input =  strcat(node_block_path,'/',var_name,'_In');
     add_block('simulink/Ports & Subsystems/Out1',...
         output_path,...
         'Position',[(x2+200) y2 (x2+250) (y2+50)]);
@@ -222,6 +233,7 @@ for i=1:numel(blk_outputs)
     add_block('simulink/Signal Routing/From',...
         output_input,...
         'GotoTag',var_name,...
+        'TagVisibility', 'local', ...
         'Position',[x2 y2 (x2+50) (y2+50)]);
     
     SrcBlkH = get_param(output_input,'PortHandles');
@@ -236,7 +248,7 @@ for i=1:numel(blk_inputs)
     if y2 < 30000; y2 = y2 + 150; else, x2 = x2 + 500; y2 = 100; end;
     var_name = BUtils.adapt_block_name(blk_inputs(i).name, ID);
     inport_path = strcat(node_block_path,'/',var_name);
-    inport_output =  strcat(node_block_path,'/',var_name,'_output');
+    inport_output =  strcat(node_block_path,'/',var_name,'_out');
     
     add_block('simulink/Ports & Subsystems/In1',...
         inport_path,...
@@ -256,6 +268,7 @@ for i=1:numel(blk_inputs)
     add_block('simulink/Signal Routing/Goto',...
         inport_output,...
         'GotoTag',var_name,...
+        'TagVisibility', 'local', ...
         'Position',[(x2+100) y2 (x2+150) (y2+50)]);
     
     SrcBlkH = get_param(inport_path,'PortHandles');
@@ -286,6 +299,7 @@ add_block('simulink/Discrete/Delay',...
 add_block('simulink/Signal Routing/Goto',...
     lhs_path,...
     'GotoTag',lhs_name,...
+    'TagVisibility', 'local', ...
     'Position',[(x2+200) y2 (x2+250) (y2+50)]);
 
 SrcBlkH = get_param(init_path,'PortHandles');
@@ -332,6 +346,7 @@ else
     add_block('simulink/Signal Routing/From',...
         rhs_path,...
         'GotoTag', rhs_name,...
+        'TagVisibility', 'local', ...
         'Position',[x2 y2 (x2+50) (y2+50)]);
 end
 add_block('simulink/Discrete/Delay',...
@@ -343,6 +358,7 @@ add_block('simulink/Discrete/Delay',...
 add_block('simulink/Signal Routing/Goto',...
     lhs_path,...
     'GotoTag',lhs_name,...
+    'TagVisibility', 'local', ...
     'Position',[(x2+200) y2 (x2+250) (y2+50)]);
 
 SrcBlkH = get_param(rhs_path, 'PortHandles');
@@ -386,11 +402,13 @@ else
     add_block('simulink/Signal Routing/From',...
         rhs_path,...
         'GotoTag',rhs_name,...
+        'TagVisibility', 'local', ...
         'Position',[x2 y2 (x2+50) (y2+50)]);
 end
 add_block('simulink/Signal Routing/Goto',...
     lhs_path,...
     'GotoTag',lhs_name,...
+    'TagVisibility', 'local', ...
     'Position',[(x2+100) y2 (x2+150) (y2+50)]);
 
 SrcBlkH = get_param(rhs_path,'PortHandles');
@@ -398,6 +416,34 @@ DstBlkH = get_param(lhs_path, 'PortHandles');
 add_line(node_block_path, SrcBlkH.Outport(1), DstBlkH.Inport(1), 'autorouting', 'on');
 end
 
+%%
+function  [x2, y2] = process_reset(node_block_path, blk_exprs, var, node_name, x2, y2)
+if y2 < 30000; y2 = y2 + 150; else, x2 = x2 + 500; y2 = 100; end
+
+ID = BUtils.adapt_block_name(var{1});
+lhs_name = BUtils.adapt_block_name(blk_exprs.(var{1}).lhs, node_name);
+lhs_path = BUtils.get_unique_name(strcat(node_block_path,'/',ID, '_lhs'));
+rhs_path = BUtils.get_unique_name(strcat(node_block_path,'/',ID,'_rhs'));
+
+
+rhs_name = blk_exprs.(var{1}).rhs;
+add_block('simulink/Commonly Used Blocks/Constant',...
+    rhs_path,...
+    'Value',rhs_name,...
+    'Position',[x2 y2 (x2+50) (y2+50)]);
+set_param(rhs_path, 'OutDataTypeStr', 'boolean');
+
+
+add_block('simulink/Signal Routing/Goto',...
+    lhs_path,...
+    'GotoTag',lhs_name,...
+    'TagVisibility', 'local', ...
+    'Position',[(x2+100) y2 (x2+150) (y2+50)]);
+
+SrcBlkH = get_param(rhs_path,'PortHandles');
+DstBlkH = get_param(lhs_path, 'PortHandles');
+add_line(node_block_path, SrcBlkH.Outport(1), DstBlkH.Inport(1), 'autorouting', 'on');
+end
 %%
 function [x2, y2] = process_operator(node_block_path, blk_exprs, var, node_name, x2, y2)
 if y2 < 30000; y2 = y2 + 150; else, x2 = x2 + 500; y2 = 100; end;
@@ -421,6 +467,7 @@ add_operator_block(op_path, operator,x2 ,y2, dt);
 add_block('simulink/Signal Routing/Goto',...
     lhs_path,...
     'GotoTag',lhs_name,...
+    'TagVisibility', 'local', ...
     'Position',[(x2+300) y2 (x2+350) (y2+50)]);
 SrcBlkH = get_param(op_path,'PortHandles');
 DstBlkH = get_param(lhs_path, 'PortHandles');
@@ -451,6 +498,7 @@ for inport_number=1:numel(blk_exprs.(var{1}).args)
         add_block('simulink/Signal Routing/From',...
             input_path,...
             'GotoTag',local_var_adapted,...
+            'TagVisibility', 'local', ...
             'Position',[x2 y2 (x2+50) (y2+50)]);
     end
     y2 = y2 + 150;
@@ -526,19 +574,34 @@ end
 
 %%
 
-function  [x2, y2] = process_node_call(new_model_name, node_block_path, blk_exprs, var, node_name, x2, y2, xml_trace)
+function  [x2, y2] = process_node_call(nodes, new_model_name, node_block_path, blk_exprs, var, node_name, x2, y2, xml_trace)
+persistent calls_map;
+if isempty(calls_map)
+    calls_map = containers.Map('KeyType', 'char', 'ValueType', 'any');
+end
 if y2 < 30000; y2 = y2 + 150; else, x2 = x2 + 500; y2 = 100; end
 
-ID = BUtils.adapt_block_name(var{1});
-fcn_path = strcat(node_block_path,'/',ID,'_call');
-fun_name = BUtils.adapt_block_name(blk_exprs.(var{1}).name);
-
-fcn_subsys = strcat(new_model_name, '/', fun_name);
-add_block(fcn_subsys,...
-    fcn_path,...
-    'Position',[(x2+100) y2 (x2+250) (y2+50)]);
+ID = BUtils.adapt_block_name(blk_exprs.(var{1}).name);
+fcn_path = BUtils.get_unique_name(...
+    strcat(node_block_path,'/',ID,'_call'));
 if ~isempty(xml_trace)
-    xml_trace.create_Node_Element(fcn_path, fun_name);
+
+    block_pos = [(x2+100) y2 (x2+250) (y2+50)];
+    if isKey(calls_map, ID) && (getSimulinkBlockHandle(calls_map(ID)) ~= -1)
+        fcn_subsys = calls_map(ID);
+        add_block(fcn_subsys,...
+            fcn_path,...
+            'Position',block_pos);
+    else
+        node_process(new_model_name, nodes, blk_exprs.(var{1}).name, fcn_path, block_pos, xml_trace);
+        calls_map(ID) = fcn_path;
+    end
+else
+    fcn_subsys = strcat(new_model_name, '/', ID);
+    add_block(fcn_subsys,...
+        fcn_path,...
+        'Position',[(x2+100) y2 (x2+250) (y2+50)]);
+    
 end
 if strcmp(blk_exprs.(var{1}).kind, 'statefulcall') && strcmp(blk_exprs.(var{1}).reset.resetable, 'true')
     add_block('simulink/Ports & Subsystems/Resettable Subsystem/Reset', ...
@@ -546,10 +609,12 @@ if strcmp(blk_exprs.(var{1}).kind, 'statefulcall') && strcmp(blk_exprs.(var{1}).
         'ResetTriggerType', 'level hold');
     reset_name = blk_exprs.(var{1}).reset.name;
     reset_adapted = BUtils.adapt_block_name(reset_name, node_name);
-    reset_path = strcat(node_block_path,'/',ID,'_', reset_adapted);
+    reset_path =  BUtils.get_unique_name(...
+        strcat(node_block_path,'/',ID,'_reset'));
     add_block('simulink/Signal Routing/From',...
         reset_path,...
         'GotoTag',reset_adapted,...
+        'TagVisibility', 'local', ...
         'Position',[(x2+150) (y2-50) (x2+200) (y2-30)]);
     SrcBlkH = get_param(reset_path, 'PortHandles');
     DstBlkH = get_param(fcn_path,'PortHandles');
@@ -560,10 +625,12 @@ y3=y2;
 for i=1:numel(blk_exprs.(var{1}).lhs)
     output = blk_exprs.(var{1}).lhs(i);
     output_adapted = BUtils.adapt_block_name(output, node_name);
-    output_path = strcat(node_block_path,'/',ID,'_output_',output_adapted);
+    output_path = BUtils.get_unique_name(...
+        strcat(node_block_path,'/',ID,'_out',num2str(i)));
     add_block('simulink/Signal Routing/Goto',...
         output_path,...
         'GotoTag',output_adapted,...
+        'TagVisibility', 'local', ...
         'Position',[(x2+300) y2 (x2+350) (y2+50)]);
     DstBlkH = get_param(output_path, 'PortHandles');
     add_line(node_block_path, SrcBlkH.Outport(i), DstBlkH.Inport(1), 'autorouting', 'on');
@@ -575,7 +642,8 @@ for i=1:numel(blk_exprs.(var{1}).args)
     input = blk_exprs.(var{1}).args(i).value;
     input_type = blk_exprs.(var{1}).args(i).type;
     input_adapted = BUtils.adapt_block_name(input, node_name);
-    input_path = BUtils.get_unique_name(strcat(node_block_path,'/',ID,'_input_',input_adapted));
+    input_path = BUtils.get_unique_name(...
+        strcat(node_block_path,'/',ID,'_In',num2str(i)));
     if strcmp(input_type, 'constant')
         add_block('simulink/Commonly Used Blocks/Constant',...
             input_path,...
@@ -596,6 +664,7 @@ for i=1:numel(blk_exprs.(var{1}).args)
         add_block('simulink/Signal Routing/From',...
             input_path,...
             'GotoTag',input_adapted,...
+            'TagVisibility', 'local', ...
             'Position',[x2 y2 (x2+50) (y2+50)]);
     end
     y2 = y2 + 150;
@@ -607,15 +676,17 @@ end
 
 %%
 function [x2, y2] = link_subsys_inputs( parent_path, subsys_block_path, inputs, var, node_name, x2, y2)
-ID = BUtils.adapt_block_name(var{1});
+[~, ID, ~] = fileparts(subsys_block_path);%BUtils.adapt_block_name(var{1});
 DstBlkH = get_param(subsys_block_path,'PortHandles');
 for i=1:numel(inputs)
     input = inputs(i).name;
     input_adapted = BUtils.adapt_block_name(input, node_name);
-    input_path = strcat(parent_path,'/',ID,'_input_',input_adapted);
+    input_path = BUtils.get_unique_name(...
+        strcat(parent_path,'/',ID,'_In',num2str(i)));
     add_block('simulink/Signal Routing/From',...
         input_path,...
         'GotoTag',input_adapted,...
+        'TagVisibility', 'local', ...
         'Position',[x2 y2 (x2+50) (y2+50)]);
     y2 = y2 + 150;
     SrcBlkH = get_param(input_path,'PortHandles');
@@ -623,7 +694,7 @@ for i=1:numel(inputs)
 end
 end
 function [x2, y2] = link_subsys_outputs( parent_path, subsys_block_path, outputs, var,node_name,  x2, y2, isBranch, branchIdx)
-ID = BUtils.adapt_block_name(var{1});
+[~, ID, ~] = fileparts(subsys_block_path);%BUtils.adapt_block_name(var{1});
 SrcBlkH = get_param(subsys_block_path,'PortHandles');
 for i=1:numel(outputs)
     output = outputs(i);
@@ -631,10 +702,11 @@ for i=1:numel(outputs)
     if exist('isBranch','var') && isBranch
         output_adapted = strcat(output_adapted, '_branch_', num2str(branchIdx));
     end
-    output_path = strcat(parent_path,'/',ID,'_output_',output_adapted);
+    output_path = strcat(parent_path,'/',ID,'_out',num2str(i));
     add_block('simulink/Signal Routing/Goto',...
         output_path,...
         'GotoTag',output_adapted,...
+        'TagVisibility', 'local', ...
         'Position',[(x2+300) y2 (x2+350) (y2+50)]);
     y2 = y2 + 150;
     DstBlkH = get_param(output_path, 'PortHandles');
@@ -642,7 +714,7 @@ for i=1:numel(outputs)
 end
 end
 %%
-function [x2, y2] = process_branch(new_model_name, node_block_path, blk_exprs, var, node_name, x2, y2)
+function [x2, y2] = process_branch(nodes, new_model_name, node_block_path, blk_exprs, var, node_name, x2, y2, xml_trace)
 if y2 < 30000; y2 = y2 + 150; else, x2 = x2 + 500; y2 = 100; end;
 
 ID = BUtils.adapt_block_name(var{1});
@@ -734,6 +806,7 @@ else
     add_block('simulink/Signal Routing/From',...
         guard_path,...
         'GotoTag',guard_adapted,...
+        'TagVisibility', 'local', ...
         'Position',[x3 y3 (x3+50) (y3+50)]);
 end
 %% link guard to IF block
@@ -774,7 +847,7 @@ for b=fieldnames(branches)'
     
     % instructions
     branch_exprs = branches.(b{1}).instrs;
-    [x4, y4] = instrs_process(new_model_name, branch_path, branch_exprs, branch_ID, x4, y4);
+    [x4, y4] = instrs_process(nodes, new_model_name, branch_path, branch_exprs, branch_ID, x4, y4, xml_trace);
     
     %
     idx = idx + 1;
@@ -792,6 +865,7 @@ for i=1:numel(outputs)
     add_block('simulink/Signal Routing/Goto',...
         output_path,...
         'GotoTag',output_adapted,...
+        'TagVisibility', 'local', ...
         'Position',[(x3+300) y3 (x3+350) (y3+50)]);
     if nb_merge==1
         DstBlkH = get_param(output_path, 'PortHandles');
@@ -842,10 +916,12 @@ y3=y2;
 for i=1:numel(blk_exprs.(var{1}).lhs)
     output = blk_exprs.(var{1}).lhs(i);
     output_adapted = BUtils.adapt_block_name(output, node_name);
-    output_path = strcat(node_block_path,'/',ID,'_output_',output_adapted);
+    output_path = BUtils.get_unique_name(...
+        strcat(node_block_path,'/',ID,'_out', num2str(i)));
     add_block('simulink/Signal Routing/Goto',...
         output_path,...
         'GotoTag',output_adapted,...
+        'TagVisibility', 'local', ...
         'Position',[(x2+300) y2 (x2+350) (y2+50)]);
     DstBlkH = get_param(output_path, 'PortHandles');
     add_line(node_block_path, SrcBlkH.Outport(i), DstBlkH.Inport(1), 'autorouting', 'on');
@@ -857,7 +933,8 @@ for i=1:numel(blk_exprs.(var{1}).args)
     input = blk_exprs.(var{1}).args(i).value;
     input_type = blk_exprs.(var{1}).args(i).type;
     input_adapted = BUtils.adapt_block_name(input, node_name);
-    input_path = BUtils.get_unique_name(strcat(node_block_path,'/',ID,'_input_',input_adapted));
+    input_path = BUtils.get_unique_name(...
+        strcat(node_block_path,'/',ID,'_In',num2str(i)));
     if strcmp(input_type, 'constant')
         add_block('simulink/Commonly Used Blocks/Constant',...
             input_path,...
@@ -878,6 +955,7 @@ for i=1:numel(blk_exprs.(var{1}).args)
         add_block('simulink/Signal Routing/From',...
             input_path,...
             'GotoTag',input_adapted,...
+            'TagVisibility', 'local', ...
             'Position',[x2 y2 (x2+50) (y2+50)]);
     end
     y2 = y2 + 150;

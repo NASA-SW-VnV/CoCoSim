@@ -22,14 +22,20 @@ global cocosim_pp_gen_verif  cocosim_pp_gen_verif_dir;
 nodisplay = 0;
 cocosim_pp_gen_verif = 0;
 cocosim_pp_gen_verif_dir = '';
+skip_pp = 0;
 for i=1:numel(varargin)
     if strcmp(varargin{i}, 'nodisplay')
         nodisplay = 1;
     elseif strcmp(varargin{i}, 'verif')
         cocosim_pp_gen_verif = 1;
+    elseif strcmp(varargin{i}, 'skip_pp')
+        skip_pp = 1;
     end
 end
-
+if skip_pp
+    new_file_path = file_path;
+    return;
+end
 %% Creat the new model name
 [model_parent, model, ext] = fileparts(file_path);
 already_pp = 0;

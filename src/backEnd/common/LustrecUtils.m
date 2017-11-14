@@ -1,4 +1,4 @@
-classdef LustrecUtils
+classdef LustrecUtils < handle
     %LUSTRECUTILS Summary of this class goes here
     %   Detailed explanation goes here
     
@@ -264,7 +264,7 @@ classdef LustrecUtils
                 header, functions_call, Ok_def, Prop);
             
         end
-         %% construct_EMF_verif_model
+        %% construct_EMF_verif_model
         function [status, new_name_path] = construct_EMF_verif_model(slx_file_name,...
                 lus_file_path, node_name, output_dir)
             tools_config;
@@ -285,6 +285,7 @@ classdef LustrecUtils
             
             %generate simulink model
             new_model_name = BUtils.adapt_block_name(strcat(slx_file_name,'_Verif'));
+            clear lus2slx
             [status, new_name_path, ~] = lus2slx(emf_path, output_dir, new_model_name, node_name, 0);
             if status
                 return;
@@ -338,16 +339,16 @@ classdef LustrecUtils
                         && ~(dim_struct.Outport(1)==1 || dim_struct.Outport(2)==1)
                     
                     msg = sprintf('Invalid inport "%s": We do not support Matrix inports.',...
-                            get_param(inport_handle, 'Name'));
-                        display_msg(msg, MsgType.ERROR, ...
-                            'compare_slx_lus','');
+                        get_param(inport_handle, 'Name'));
+                    display_msg(msg, MsgType.ERROR, ...
+                        'compare_slx_lus','');
                     status = 1;
                     return;
                 elseif numel(dim_struct.Outport)==2
                     dim = dim_struct.Outport(1) * dim_struct.Outport(2);
                 elseif numel(dim_struct.Outport) > 2
                     if numel(dim_struct.Outport) == 3 ...
-                         && (dim_struct.Outport(1)==1 || dim_struct.Outport(2)==1)
+                            && (dim_struct.Outport(1)==1 || dim_struct.Outport(2)==1)
                         dim = dim_struct.Outport(2) * dim_struct.Outport(3);
                     else
                         msg = sprintf('Invalid inport "%s": We do not support Matrix inports.',...
@@ -366,27 +367,27 @@ classdef LustrecUtils
                         'autorouting', 'on');
                     inport_idx = inport_idx + 1;
                 else
-                     p = get_param(portHandlesEMF.Inport(inport_idx), 'Position');
-                     x = p(1) - 50;
-                     y = p(2);
-                     demux_path = strcat(new_model_name,'/Demux',num2str(i));
-                     demux_pos(1) = (x - 10);
-                     demux_pos(2) = (y - 10);
-                     demux_pos(3) = (x + 10);
-                     demux_pos(4) = (y + 50 * dim);
-                     h = add_block('simulink/Signal Routing/Demux',...
-                         demux_path,...
-                         'MakeNameUnique', 'on', ...
-                         'Outputs', num2str(dim),...
-                         'Position',demux_pos);
-                     demux_Porthandl = get_param(h, 'PortHandles');
-                     add_line(new_model_name,...
+                    p = get_param(portHandlesEMF.Inport(inport_idx), 'Position');
+                    x = p(1) - 50;
+                    y = p(2);
+                    demux_path = strcat(new_model_name,'/Demux',num2str(i));
+                    demux_pos(1) = (x - 10);
+                    demux_pos(2) = (y - 10);
+                    demux_pos(3) = (x + 10);
+                    demux_pos(4) = (y + 50 * dim);
+                    h = add_block('simulink/Signal Routing/Demux',...
+                        demux_path,...
+                        'MakeNameUnique', 'on', ...
+                        'Outputs', num2str(dim),...
+                        'Position',demux_pos);
+                    demux_Porthandl = get_param(h, 'PortHandles');
+                    add_line(new_model_name,...
                         SrcBlkH.Outport(1),...
                         demux_Porthandl.Inport(1), ...
                         'autorouting', 'on');
                     for j=1:dim
                         add_line(new_model_name,...
-                           demux_Porthandl.Outport(j),...
+                            demux_Porthandl.Outport(j),...
                             portHandlesEMF.Inport(inport_idx), ...
                             'autorouting', 'on');
                         inport_idx = inport_idx + 1;
@@ -427,9 +428,9 @@ classdef LustrecUtils
                     'Position', [350, 75,  370,  50 * (nb_outports + 1)]...
                     );
                 add_line(verif_sub_path, ...
-                        strcat('AND', '/1'),...
-                        strcat('assert', '/1'),...
-                        'autorouting', 'on');
+                    strcat('AND', '/1'),...
+                    strcat('assert', '/1'),...
+                    'autorouting', 'on');
             end
             
             j = 1;
@@ -473,10 +474,10 @@ classdef LustrecUtils
                     );
                 
                 add_line(verif_sub_path, ...
-                        strcat('Equal',num2str(j), '/1'),...
-                        strcat('Product',num2str(j), '/1'),...
-                        'autorouting', 'on');
-                    
+                    strcat('Equal',num2str(j), '/1'),...
+                    strcat('Product',num2str(j), '/1'),...
+                    'autorouting', 'on');
+                
                 if nb_outports >= 2
                     add_line(verif_sub_path, ...
                         strcat('Product',num2str(j), '/1'),...
@@ -516,7 +517,7 @@ classdef LustrecUtils
                     dim = dim_struct(1) * dim_struct(2);
                 elseif numel(dim_struct) > 2
                     if numel(dim_struct) == 3 ...
-                         && (dim_struct(1)==1 || dim_struct(2)==1)
+                            && (dim_struct(1)==1 || dim_struct(2)==1)
                         dim = dim_struct(2) * dim_struct(3);
                     else
                         msg = sprintf('Invalid inport "%s": We do not support Matrix inports.',...
@@ -526,7 +527,7 @@ classdef LustrecUtils
                         status = 1;
                         return;
                     end
-
+                    
                 else
                     dim = dim_struct;
                 end
@@ -534,21 +535,21 @@ classdef LustrecUtils
                     add_line(new_model_name, portHandlesEMF.Outport(outport_idx), portHandlesVerif.Inport(2*i), 'autorouting', 'on');
                     outport_idx = outport_idx + 1;
                 else
-                     p = get_param(portHandlesEMF.Outport(outport_idx), 'Position');
-                     x = p(1) + 50;
-                     y = p(2);
-                     mux_path = strcat(new_model_name,'/Mux',num2str(i));
-                     mux_pos(1) = (x - 10);
-                     mux_pos(2) = (y - 10);
-                     mux_pos(3) = (x + 10);
-                     mux_pos(4) = (y + 50 * dim);
-                     h = add_block('simulink/Signal Routing/Mux',...
-                         mux_path,...
-                         'MakeNameUnique', 'on', ...
-                         'Inputs', num2str(dim),...
-                         'Position',mux_pos);
-                     mux_Porthandl = get_param(h, 'PortHandles');
-                     add_line(new_model_name,...
+                    p = get_param(portHandlesEMF.Outport(outport_idx), 'Position');
+                    x = p(1) + 50;
+                    y = p(2);
+                    mux_path = strcat(new_model_name,'/Mux',num2str(i));
+                    mux_pos(1) = (x - 10);
+                    mux_pos(2) = (y - 10);
+                    mux_pos(3) = (x + 10);
+                    mux_pos(4) = (y + 50 * dim);
+                    h = add_block('simulink/Signal Routing/Mux',...
+                        mux_path,...
+                        'MakeNameUnique', 'on', ...
+                        'Inputs', num2str(dim),...
+                        'Position',mux_pos);
+                    mux_Porthandl = get_param(h, 'PortHandles');
+                    add_line(new_model_name,...
                         mux_Porthandl.Outport(1),...
                         portHandlesVerif.Inport(2*i), ...
                         'autorouting', 'on');
@@ -592,6 +593,7 @@ classdef LustrecUtils
             else
                 new_model_name = BUtils.adapt_block_name(strcat(lus_fname,'_EMF'));
             end
+            clear lus2slx
             [status, new_name_path, xml_trace] = lus2slx(emf_path, output_dir, new_model_name, node_name, 0);
             if status
                 return;
@@ -634,7 +636,7 @@ classdef LustrecUtils
             configSet = getActiveConfigSet(new_model_name);
             set_param(configSet, 'Solver', 'FixedStepDiscrete', 'FixedStep', '1');
             save_system(new_model_name,'','OverwriteIfChangedOnDisk',true);
-    
+            
         end
         %% verification file
         function verif_lus_path = create_mutant_verif_file(...
@@ -680,25 +682,26 @@ classdef LustrecUtils
             fclose(fid);
         end
         %% compositional verification file between EMF and cocosim
-        function verif_lus_path = create_emf_verif_file(...
+        function [verif_lus_path, nodes_list] = create_emf_verif_file(...
                 lus_file_path,...
                 coco_lus_fpath,...
                 emf_path, ...
                 EMF_trace_xml, ...
                 cocosim_trace_file)
+            nodes_list = {};
             % create verification file
             [output_dir, coco_lus_file_name, ~] = fileparts(coco_lus_fpath);
             verif_lus_path = fullfile(...
                 output_dir, strcat(coco_lus_file_name, '_verif.lus'));
             
-            if BUtils.isLastModified(coco_lus_fpath, verif_lus_path) ...
-                    && BUtils.isLastModified(lus_file_path, verif_lus_path)
-                display_msg(...
-                    ['file ' verif_lus_path ' has been already generated'],...
-                    MsgType.DEBUG,...
-                    'Validation', '');
-                return;
-            end
+%             if BUtils.isLastModified(coco_lus_fpath, verif_lus_path) ...
+%                     && BUtils.isLastModified(lus_file_path, verif_lus_path)
+%                 display_msg(...
+%                     ['file ' verif_lus_path ' has been already generated'],...
+%                     MsgType.DEBUG,...
+%                     'Validation', '');
+%                 return;
+%             end
             filetext1 = ...
                 LustrecUtils.adapt_lustre_text(fileread(coco_lus_fpath));
             sep_line =...
@@ -708,23 +711,26 @@ classdef LustrecUtils
             filetext2 = regexprep(filetext2, '#open\s*<\w+>','');
             
             [~, emf_model_name, ~] = fileparts(EMF_trace_xml.model_full_path);
-
+            
             DOMNODE = xmlread(cocosim_trace_file);
             cocoRoot = DOMNODE.getDocumentElement;
-
+            
             data = BUtils.read_EMF(emf_path);
             nodes = data.nodes;
             emf_nodes_names = fieldnames(nodes)';
             for node_idx =1:numel(emf_nodes_names)
                 node_name = emf_nodes_names{node_idx};
-                vars = '(\s*\w+\s*:\s*(int|real|bool);?)+';
+                nl = '\s*\n*';
+                vars_names = strcat(nl, '\w+', nl, '(,',nl ,'\w+', nl, ')*');
+                vars = strcat('(', vars_names, ':', nl, '(int|real|bool);?)+');
                 pattern = strcat(...
-                    '(node|function)\s+',...
+                    '(node|function)', nl,...
                     node_name,...
-                    '\s*\(',...
-                    vars,...
-                    '\)\s*returns\s*\(',...
-                    vars,'\);');
+                    nl, '\(',...
+                    vars, nl, ...
+                    '\)', nl, ...
+                    'returns', nl,'\(',...
+                    vars,'\);?');
                 tokens = regexp(filetext2, pattern,'match') ;
                 if ~isempty(tokens)
                     
@@ -734,21 +740,23 @@ classdef LustrecUtils
                         node_name, ...
                         emf_model_name, ...
                         strcat(emf_model_name, '_PP'));
-
+                    
                     new_node_name = ...
                         XMLUtils.get_lustre_node_from_Simulink_block_name(...
                         cocoRoot, emf_block_name);
-
+                    
                     if ~strcmp(new_node_name, '')
                         contract = LustrecUtils.construct_contact(...
                             nodes.(node_name), new_node_name);
                         
                         filetext2 = strrep(filetext2, tokens{1},...
                             strcat(tokens{1}, '\n', contract));
+                        
+                        nodes_list{numel(nodes_list) + 1} = node_name;
                     end
                 end
             end
-
+            
             
             verif_lus_text = sprintf('%s\n%s\n%s', ...
                 filetext1, sep_line, filetext2);
@@ -760,7 +768,7 @@ classdef LustrecUtils
         end
         
         function contract = construct_contact(node_struct, node_name)
-             %inputs
+            %inputs
             node_inputs = node_struct.inputs;
             nb_in = numel(node_inputs);
             inputs = cell(nb_in,1);
@@ -783,7 +791,7 @@ classdef LustrecUtils
             functions_call_fmt =  '%s = %s(%s);';
             functions_call = sprintf(functions_call_fmt,...
                 outputs, node_name, inputs);
-
+            
             contract = sprintf('%s\t%s\n*)',...
                 header, functions_call);
         end
@@ -791,7 +799,8 @@ classdef LustrecUtils
         %% run compositional modular verification usin Kind2
         function [valid, IN_struct, time_max] = run_comp_modular_verif_using_Kind2(...
                 verif_lus_path,...
-                output_dir)
+                output_dir,...
+                node)
             
             IN_struct = [];
             time_max = 0;
@@ -799,26 +808,38 @@ classdef LustrecUtils
             if nargin < 1
                 error('Missing arguments to function call: LustrecUtils.run_comp_modular_verif_using_Kind2')
             end
+            if nargin < 3  
+                OPTS = '--modular true';
+            else
+                if isempty(node)
+                    return;
+                else
+                    OPTS = sprintf('--lus_main %s', node);
+                end
+            end
             [file_dir, file_name, ~] = fileparts(verif_lus_path);
-            if nargin < 3 || isempty(output_dir)
+            if nargin < 2 || isempty(output_dir)
                 output_dir = file_dir;
             end
-
-            timeout = '600';
+            
+            timeout = '200';
             PWD = pwd;
             cd(output_dir);
             tools_config;
-
+            
             status = BUtils.check_files_exist(KIND2, Z3);
             if status
+                display_msg(['KIND2 not found :' KIND2],...
+                MsgType.DEBUG, 'LustrecUtils.run_verif', '');
                 return;
             end
-            command = sprintf('%s -xml  --z3_bin %s --timeout %s --compositional true --modular true "%s"',...
-                KIND2, Z3, timeout, verif_lus_path);
+            command = sprintf('%s -xml  --z3_bin %s --timeout %s --compositional true %s "%s"',...
+                KIND2, Z3, timeout, OPTS,  verif_lus_path);
             display_msg(['KIND2_COMMAND ' command],...
                 MsgType.DEBUG, 'LustrecUtils.run_verif', '');
             
-            [~, solver_output] = system(command);
+            [~, solver_output] = system(command );
+%             solver_output = fileread('/Users/hbourbou/toto2.xml');
             display_msg(...
                 solver_output,...
                 MsgType.DEBUG,...
@@ -842,11 +863,22 @@ classdef LustrecUtils
                 return
             end
             solver_output = regexprep(solver_output, '<AnalysisStart ([^/]+)/>','<Analysis $1>');
+            solver_output = regexprep(solver_output, 'concrete="[^"]+"','');
             solver_output = strrep(solver_output, '<AnalysisStop/>','</Analysis>');
-
+            solver_output = regexprep(solver_output, '<Log class="note" [^/]+/Log>','');
+            solver_output = regexprep(solver_output, '<Log class="warn" [^/]+/Log>','');
+            solver_output = regexprep(solver_output, '\n\s*\n','\n');
+            
             tmp_file = fullfile(...
                 output_dir, ...
                 strcat(file_name, '.kind2.xml'));
+            i = 1;
+            while exist(tmp_file, 'file')
+                tmp_file = fullfile(...
+                    output_dir, ...
+                    strcat(file_name, '.kind2.', num2str(i), '.xml'));
+                i = i +1;
+            end
             fid = fopen(tmp_file, 'w');
             if fid == -1
                 display_msg(['Couldn''t create file ' tmp_file],...
@@ -855,7 +887,22 @@ classdef LustrecUtils
             end
             fprintf(fid, solver_output);
             fclose(fid);
-            xDoc = xmlread(tmp_file);
+            if strfind(solver_output,'Wallclock timeout')
+                msg = sprintf('Solver Result reached TIMEOUT. Check %s', ...
+                    tmp_file);
+                display_msg(msg, Constants.RESULT, 'LustrecUtils.extract_answer', '');
+                return;
+            end
+            
+            
+            try
+                xDoc = xmlread(tmp_file);
+            catch
+                msg = sprintf('Can not read file %s', ...
+                    tmp_file);
+                display_msg(msg, Constants.RESULT, 'LustrecUtils.extract_answer', '');
+                return
+            end
             xAnalysis = xDoc.getElementsByTagName('Analysis');
             for idx_analys=0:xAnalysis.getLength-1
                 node_name = char(xAnalysis.item(idx_analys).getAttribute('top'));
@@ -935,7 +982,7 @@ classdef LustrecUtils
                 
                 %TODO parse the type and extract dimension
                 IN_struct.signals(i).dimensions =  1;
-
+                
                 [values, time_step] =...
                     LustrecUtils.extract_values(...
                     node_streams{i}, s_dt);
