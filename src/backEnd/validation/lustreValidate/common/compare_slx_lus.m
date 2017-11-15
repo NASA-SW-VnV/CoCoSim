@@ -198,10 +198,11 @@ elseif (tests_method == 4) %4- Prove LUS1 <=> LUS2.
     msg = sprintf('EMF traceability : %s', EMF_trace_xml.xml_file_path);
     display_msg(msg, MsgType.DEBUG, 'validation', '');
     
+%     emf_model_path = '/Users/hbourbou/Documents/cocoteam/nfm2018/lustre_benchmarks/aocs/tmp/model2_adapted_mdl2_93_PP.slx';
     [coco_lus_fpath, ~, ~, ~, ~, cocosim_trace, ~]=lustre_compiler(emf_model_path, [], 1);
-%     cocosim_trace = '/Users/hbourbou/Documents/cocoteam/nfm2018/lustre_benchmarks/tcm/tmp/lustre_files/src_tcm_PP_EMF_PP/tcm_PP_EMF_PP.cocosim.trace.xml';
-%     coco_lus_fpath = '/Users/hbourbou/Documents/cocoteam/nfm2018/lustre_benchmarks/tcm/tmp/lustre_files/src_tcm_PP_EMF_PP/tcm_PP_EMF_PP.lus';
-    [verif_lus_path, nodes_list] = LustrecUtils.create_emf_verif_file(...
+%      cocosim_trace = '/Users/hbourbou/Documents/cocoteam/nfm2018/lustre_benchmarks/aocs/tmp/lustre_files/src_model2_adapted_mdl2_93/model2_adapted_mdl2_93.cocosim.trace.xml';
+%      coco_lus_fpath = '/Users/hbourbou/Documents/cocoteam/nfm2018/lustre_benchmarks/aocs/tmp/lustre_files/src_model2_adapted_mdl2_93/model2_adapted_mdl2_93.lus';
+     [verif_lus_path, nodes_list] = LustrecUtils.create_emf_verif_file(...
         lus_file_path,...
         coco_lus_fpath,...
         emf_path,...
@@ -209,10 +210,9 @@ elseif (tests_method == 4) %4- Prove LUS1 <=> LUS2.
         cocosim_trace);
     msg = sprintf('LUSTRE VERIFICATION File : %s', verif_lus_path);
     display_msg(msg, MsgType.DEBUG, 'validation', '');
-    
-%     verif_lus_path = which('fullrosace_bloc_Mdl_prelude_Flight_Dyn_PP_verif.lus');
-%     nodes_list = { 'Flight_Dyn_Vert_Speed_Vz',...
-%         'Flight_Dyn_Pitch_Rate_q', 'Flight_Dyn_Norm_Acc_az'};
+%     
+%     verif_lus_path = '/Users/hbourbou/Documents/cocoteam/nfm2018/lustre_benchmarks/aocs/tmp/lustre_files/src_model2_adapted_mdl2_93_PP/model2_adapted_mdl2_93_PP_verif.lus';
+    nodes_list = evalin('base', 'nodes_list');
     valid = []; IN_struct ={};
     parfor i=1:numel(nodes_list)
         msg = sprintf('Checking Node %s', nodes_list{i});

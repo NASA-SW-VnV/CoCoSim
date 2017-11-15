@@ -1,16 +1,22 @@
-
-
-
 ### Dependencies
 To install Dependencies, you can use our script that try to build all tools 
 from scratch and download all libraries.
 
 
 ```
-$cd "CoCoSim Path/scripts"
+$cd "PATH_TO_CoCoSim/scripts"
 $./install_cocosim 
 ```
+install_cocosim script assumes the operating system provides:
+    bash, basename, dirname, mkdir, touch, sed, date,
+    cat, rm, mv, cp, ln, find, tee, patch,tar, gzip, 
+    gunzip, xz, make, install, git
 
+Also the following dependencies:
+autoconf, automake, aclocal, pkg-config.
+
+The script detects the missing dependencies that should be installed by 
+the user.
 
 this commande will install Zustre, Spacer, Lustrec, Kind2 
 under `tools/verifiers/osx` if you are Mac user or `tools/verifiers/linux`.
@@ -22,7 +28,8 @@ and configure the tools paths. Or you can copy them under `tools/verifiers`
 as described above.
 
 The command will also copy the standard libraries from Github to cocosim folder.
-Which are `src/pp/std_pp` and `src/IR/std_IR`.
+Which are the pre-processing standard `src/pp/std_pp` and the internal representation
+ `src/IR/std_IR`.
 ...
 
 
