@@ -22,6 +22,12 @@
 % 3- Set your own paths by redefining the variables : ZUSTRE, LUSTREC,
 %   KIND2
 
+global tools_config_already_run;
+if isempty(tools_config_already_run)
+    tools_config_already_run = 0;
+else
+    tools_config_already_run = 1;
+end
 [tools_root, ~, ~] = fileparts(which('tools_config')); %fileparts(mfilename('fullpath'));
 cocoSim_root = fileparts(tools_root);
 if ~exist('solvers_path', 'var')
@@ -60,24 +66,25 @@ KIND2 = fullfile(solvers_path, 'kind2', 'bin', 'kind2');
 JKIND = 'Path to Jkind binary';
 SEAHORN = 'PATH';
 
-if ~exist(LUSTREC,'file')
-    warning('LUSTREC is not found in %s, configure your path in tools_config.m', LUSTREC);
-    warning('Please Ignore the previous warning if you are not going to use Zustre or Compiler Validation');
+if ~tools_config_already_run
+    if ~exist(LUSTREC,'file')
+        warning('LUSTREC is not found in %s, configure your path in tools_config.m', LUSTREC);
+        warning('Please Ignore the previous warning if you are not going to use Zustre or Compiler Validation');
+    end
+    if ~exist(ZUSTRE,'file')
+        warning('Zustre is not found in %s, configure your path in tools_config.m', ZUSTRE);
+        warning('Please Ignore the previous warning if you are not going to use Zustre for verification');
+    end
+    if ~exist(Z3,'file')
+        warning('Z3 is not found in %s, configure your path in tools_config.m', Z3);
+        warning('Please Ignore the previous warning if you are not going to use Zustre ');
+    end
+    if ~exist(KIND2,'file')
+        warning('KIND2 is not found in %s, configure your path in tools_config.m', KIND2);
+        warning('Please Ignore the previous warning if you are not going to use Kind2 for verification');
+    end
+    
 end
-if ~exist(ZUSTRE,'file')
-    warning('Zustre is not found in %s, configure your path in tools_config.m', ZUSTRE);
-    warning('Please Ignore the previous warning if you are not going to use Zustre for verification');
-end
-if ~exist(Z3,'file')
-    warning('Z3 is not found in %s, configure your path in tools_config.m', Z3);
-    warning('Please Ignore the previous warning if you are not going to use Zustre ');
-end
-if ~exist(KIND2,'file')
-    warning('KIND2 is not found in %s, configure your path in tools_config.m', KIND2);
-    warning('Please Ignore the previous warning if you are not going to use Kind2 for verification');
-end
-
-
 %% IKOS Configuration: WLLVM, WLLVMPP, EXTRACT_BC, IKOS
 % You should be interested to configure this part only if you will use IKOS
 % Install a tool called **Whole Program LLVM**: https://github.com/travitch/whole-program-llvm
@@ -97,7 +104,7 @@ setenv('PATH',[CLANG_PATH ':' getenv('PATH')  ])
 [status, WLLVM_PATH] = system('which wllvm');
 if isempty(status) || status~=0 || isempty(WLLVM_PATH) || isnumeric(WLLVM_PATH)
     % put your wllvm path here instead of mine
-    WLLVM_PATH = '/Users/hbourbou/Documents/cocoteam/build/whole-program-llvm/venv/bin';
+    WLLVM_PATH = 'path_to_WLLVM';
 end
 
 WLLVM = fullfile(WLLVM_PATH,'wllvm');
@@ -105,26 +112,27 @@ WLLVMPP = fullfile(WLLVM_PATH,'wllvm++');
 EXTRACT_BC = fullfile(WLLVM_PATH,'extract-bc');
 [status, IKOS] = system('which ikos');
 if isempty(status) || status~=0 || isempty(IKOS) || isnumeric(IKOS)
-    IKOS = '/Users/hbourbou/Documents/cocoteam/install/ikos/bin/ikos';
+    IKOS = 'path_to_IKOS';
 end
 
 
-if ~exist(WLLVM,'file')
-    warning('WLLVM is not found in %s, configure your path in config.m', WLLVM);
-    warning('Please Ignore the previous warning if you are not going to use IKOS for analyzing C code');
+if ~tools_config_already_run
+    if ~exist(WLLVM,'file')
+        warning('WLLVM is not found in %s, configure your path in config.m', WLLVM);
+        warning('Please Ignore the previous warning if you are not going to use IKOS for analyzing C code');
+    end
+    if ~exist(WLLVMPP,'file')
+        warning('WLLVMPP is not found in %s, configure your path in config.m', WLLVMPP);
+        warning('Please Ignore the previous warning if you are not going to use IKOS for analyzing C code');
+    end
+    if ~exist(EXTRACT_BC,'file')
+        warning('EXTRACT_BC is not found in %s, configure your path in config.m', EXTRACT_BC);
+        warning('Please Ignore the previous warning if you are not going to use IKOS for analyzing C code');
+    end
+    if ~exist(IKOS,'file')
+        warning('IKOS is not found in %s, configure your path in config.m', IKOS);
+        warning('Please Ignore the previous warning if you are not going to use IKOS for analyzing C code');
+    end
 end
-if ~exist(WLLVMPP,'file')
-    warning('WLLVMPP is not found in %s, configure your path in config.m', WLLVMPP);
-    warning('Please Ignore the previous warning if you are not going to use IKOS for analyzing C code');
-end
-if ~exist(EXTRACT_BC,'file')
-    warning('EXTRACT_BC is not found in %s, configure your path in config.m', EXTRACT_BC);
-    warning('Please Ignore the previous warning if you are not going to use IKOS for analyzing C code');
-end
-if ~exist(IKOS,'file')
-    warning('IKOS is not found in %s, configure your path in config.m', IKOS);
-    warning('Please Ignore the previous warning if you are not going to use IKOS for analyzing C code');
-end
-
 %%
 cocosim_version = 'v0.1';

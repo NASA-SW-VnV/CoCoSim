@@ -65,8 +65,9 @@ classdef PP_Utils
                     if ~isempty(files_struct)
                         library_path = files_struct.path;
                         mfiles = dir([library_path, filesep, fname,ext]);
+                        folder = library_path;
                         for j=1:numel(mfiles)
-                            mpath = fullfile(mfiles(j).folder, mfiles(j).name);
+                            mpath = fullfile(folder, mfiles(j).name);
                             if isKey(ordered_fcts_map, mpath)
                                 if ordered_fcts_map(mpath) == -1 || lowest_priority == -1
                                     ordered_fcts_map(mpath) = -1;
@@ -105,8 +106,9 @@ classdef PP_Utils
                         if ~isempty(files_struct)
                             library_path = files_struct.path;
                             mfiles = dir([library_path, filesep, fname,ext]);
+                            folder = library_path;
                             for j=1:numel(mfiles)
-                                mpath = fullfile(mfiles(j).folder, mfiles(j).name);
+                                mpath = fullfile(folder, mfiles(j).name);
                                 if isKey(ordered_fcts_map, mpath)
                                     if ordered_fcts_map(mpath) == -1 || key == -1
                                         ordered_fcts_map(mpath) = -1;

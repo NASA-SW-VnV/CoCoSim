@@ -84,7 +84,7 @@ classdef BUtils
                 warndlg('No cocospec contracts were generated','CoCoSim: Warning');
                 return;
             end
-            data = jsondecode(filetext);
+            data = json_decode(filetext);
         end
         
         %%

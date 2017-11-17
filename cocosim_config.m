@@ -27,6 +27,9 @@ fprintf('\n\t Click <a href="matlab: pp_user_config">here</a> to open pre-proces
 if exist(fullfile(cocoSim_root, 'src', 'frontend', 'IR', 'std_IR', 'utils', 'make.m'), 'file')
     PWD = pwd;
     cd(fullfile(cocoSim_root, 'src', 'frontend', 'IR', 'std_IR', 'utils'));
-    make
+    try
+        make
+    catch
+    end
     cd(PWD);
 end

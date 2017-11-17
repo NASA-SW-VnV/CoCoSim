@@ -72,7 +72,7 @@ if status
 end
 
 
-mutants_paths = cellfun(@(x,y) [x '/' y], {mutants_files.folder}, {mutants_files.name}, 'UniformOutput', false);
+mutants_paths = cellfun(@(y) [output_dir '/' y], {mutants_files.name}, 'UniformOutput', false);
 node_name_mutant = strcat(node_name, '_mutant');
 % get main node signature
 main_node_struct = LustrecUtils.extract_node_struct(lus_full_path, node_name, LUSTREC, LUCTREC_INCLUDE_DIR);

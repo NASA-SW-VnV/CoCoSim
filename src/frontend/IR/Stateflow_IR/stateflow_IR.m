@@ -32,7 +32,7 @@ end
 program = Program(chart_path, src_states, src_junctions, src_fcts, data, 0);
 
 if print_in_file
-    json_text = jsonencode(program);
+    json_text = json_encode(program);
     json_text = regexprep(json_text, '\\/','/');
     fname = fullfile(output_dir, strcat(file_name,'_tmp.json'));
     fname_formatted = fullfile(output_dir, strcat(file_name,'.json'));

@@ -31,7 +31,13 @@ if ~exist('show_models', 'var')
 elseif show_models
     open(model_full_path);
 end
-
+ [lus_dir, lus_fname, ~] = fileparts(lus_file_path);
+if ~exist('node_name', 'var') || isempty(node_name)
+    node_name = lus_fname;
+end
+if ~exist('output_dir', 'var') || isempty(output_dir)
+   output_dir = lus_dir;
+end
 if ~exist('tests_method', 'var') || isempty(tests_method)
     tests_method = 1;
 end
@@ -199,7 +205,7 @@ elseif (tests_method == 4) %4- Prove LUS1 <=> LUS2.
     display_msg(msg, MsgType.DEBUG, 'validation', '');
     
 %     emf_model_path = '/Users/hbourbou/Documents/cocoteam/nfm2018/lustre_benchmarks/aocs/tmp/model2_adapted_mdl2_93_PP.slx';
-    [coco_lus_fpath, ~, ~, ~, ~, cocosim_trace, ~]=lustre_compiler(emf_model_path, [], 1);
+    [coco_lus_fpath, ~, ~, ~, ~, xml_trace, ~]=lustre_compiler(emf_model_path, [], 1);
 %      cocosim_trace = '/Users/hbourbou/Documents/cocoteam/nfm2018/lustre_benchmarks/aocs/tmp/lustre_files/src_model2_adapted_mdl2_93/model2_adapted_mdl2_93.cocosim.trace.xml';
 %      coco_lus_fpath = '/Users/hbourbou/Documents/cocoteam/nfm2018/lustre_benchmarks/aocs/tmp/lustre_files/src_model2_adapted_mdl2_93/model2_adapted_mdl2_93.lus';
      [verif_lus_path, nodes_list] = LustrecUtils.create_emf_verif_file(...
@@ -207,12 +213,12 @@ elseif (tests_method == 4) %4- Prove LUS1 <=> LUS2.
         coco_lus_fpath,...
         emf_path,...
         EMF_trace_xml, ...
-        cocosim_trace);
+        xml_trace.xml_file_path);
     msg = sprintf('LUSTRE VERIFICATION File : %s', verif_lus_path);
     display_msg(msg, MsgType.DEBUG, 'validation', '');
 %     
 %     verif_lus_path = '/Users/hbourbou/Documents/cocoteam/nfm2018/lustre_benchmarks/aocs/tmp/lustre_files/src_model2_adapted_mdl2_93_PP/model2_adapted_mdl2_93_PP_verif.lus';
-    nodes_list = evalin('base', 'nodes_list');
+%     nodes_list = evalin('base', 'nodes_list');
     valid = []; IN_struct ={};
     parfor i=1:numel(nodes_list)
         msg = sprintf('Checking Node %s', nodes_list{i});
@@ -224,7 +230,7 @@ elseif (tests_method == 4) %4- Prove LUS1 <=> LUS2.
         IN_struct{i} = IN_struct_i;
     end
     if prod(cellfun(@isempty, IN_struct)) ~= 1
-        json_text = jsonencode(IN_struct);
+        json_text = json_encode(IN_struct);
         json_text = regexprep(json_text, '\\/','/');
         fname = fullfile(output_dir, 'CounterExamples_tmp.json');
         fname_formatted = fullfile(output_dir, 'CounterExamples.json');
