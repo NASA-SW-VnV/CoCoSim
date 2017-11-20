@@ -24,9 +24,9 @@ pp_config;
 fprintf('\n\t Click <a href="matlab: pp_user_config">here</a> to open pre-processing configuration.\n');
 
 %% IR config
-if exist(fullfile(cocoSim_root, 'src', 'frontend', 'IR', 'std_IR', 'utils', 'make.m'), 'file')
+if exist(fullfile(cocoSim_root, 'src', 'frontEnd', 'IR', 'std_IR', 'utils', 'make.m'), 'file')
     PWD = pwd;
-    cd(fullfile(cocoSim_root, 'src', 'frontend', 'IR', 'std_IR', 'utils'));
+    cd(fullfile(cocoSim_root, 'src', 'frontEnd', 'IR', 'std_IR', 'utils'));
     try
         make
     catch

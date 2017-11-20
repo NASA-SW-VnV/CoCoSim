@@ -10,12 +10,12 @@
 %
 %   The standard pre-processing has been pulled from Github version of
 %   CoCoSim,
-%   it is under path CoCoSim/src/frontend/pp/std_pp.
+%   it is under path CoCoSim/src/frontEnd/pp/std_pp.
 %
 %   We added some pre-processing functions that can be found in
-%   src/frontend/pp/pp2.
+%   src/frontEnd/pp/pp2.
 %   In order to re-use the work done in std_pp we created a symbolic folder
-%   "src/frontend/pp/main" that combines between "std_pp" and our "pp2".
+%   "src/frontEnd/pp/main" that combines between "std_pp" and our "pp2".
 %
 %   If you need to pre-process a Simulink block that is not pre-processed
 %   or to change how it has been pre-processed. Add your function to

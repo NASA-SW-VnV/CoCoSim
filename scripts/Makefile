@@ -10,7 +10,7 @@
 ################################################################################
 ####### Utils ###############
 IR_path = "../src/frontend/IR/std_IR"
-std_pp_path = "../src/frontend/pp/std_pp"
+std_pp_path = "../src/frontEnd/pp/std_pp"
 build_dir = "../tools/build"
 
 install: 
