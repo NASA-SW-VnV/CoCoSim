@@ -29,7 +29,8 @@ else
     
     
     %% TODO: add blocks to be pre-processed or to be ignored
-    % Here are the functions to be called (or to be ignored) in the pre-processing.
+    % Here are the functions to be called (or to be ignored) in the
+    % pre-processing.
     % examples:
     % -To add all supported blocks in `std_pp`, add 'std_pp/blocks/*.m'
     % -To add all supported blocks in `pp2` except `atomic_process.m`.
@@ -40,8 +41,8 @@ else
     % add both std_pp and pp2
     pp_handled_blocks = {'std_pp/blocks/*.m',...
         'pp2/blocks/*.m'};
-    % To not call atomic_process we may add it to the following list, or give
-    % it an order -1 in pp_order_map (see next TODO).
+    % To not call atomic_process we may add it to the following list, or
+    % give it an order -1 in pp_order_map (see next TODO).
     pp_unhandled_blocks = {'pp2/blocks/atomic_process.m',...
         'pp2/blocks/compile_process.m',...
         'pp2/blocks/blocks_position_process.m',...
@@ -54,15 +55,17 @@ else
     % functions list
     pp_order_map = containers.Map('KeyType', 'int32', 'ValueType', 'any');
     
-    pp_order_map(-1) = {'pp2/blocks/atomic_process.m'}; % -1 means not to call
-    
+    % -1 means not to call
+    pp_order_map(-1) = {'pp2/blocks/atomic_process.m'};
+    % 0 means all this functions will be called first.
     pp_order_map(0) = {'pp2/blocks/inport_process.m', ...
-        'pp2/blocks/outport_process.m'};% 0 means all this functions will be called first.
+        'pp2/blocks/outport_process.m'};
     
     pp_order_map(1) = {'std_pp/blocks/goto_process.m'};
     pp_order_map(2) = {'pp2/blocks/blocks_position_process.m'};
-    
-    pp_order_map(3) = {'std_pp/blocks/*.m', ...  % '*.m' means all std_pp functions have the same priority 1, if a function already defined it will keep its highest priority.
+    % '*.m' means all std_pp functions have the same priority 1,
+    % if a function already defined it will keep its highest priority.
+    pp_order_map(3) = {'std_pp/blocks/*.m', ...
         'pp2/blocks/*.m'};
     
     
@@ -70,6 +73,8 @@ else
         'pp2/blocks/fixedStepDiscrete_process.m'};
     
     pp_order_map(5) = {'pp2/blocks/compile_process.m'};
-
-    [ordered_pp_functions, priority_pp_map]  = PP_Utils.order_pp_functions(pp_order_map, pp_handled_blocks, pp_unhandled_blocks);
+    
+    [ordered_pp_functions, priority_pp_map]  = ...
+        PP_Utils.order_pp_functions(pp_order_map, pp_handled_blocks, ...
+        pp_unhandled_blocks);
 end

@@ -2,7 +2,12 @@ classdef Composition
     %Composition A component content Composition is either an Or(Transition,sl) state with initializing
     %transitions Transition and sub-states sl, or an And(sl) state where all sl
     %sub-states are run in parallel.
-    
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Copyright (c) 2017 United States Government as represented by the
+    % Administrator of the National Aeronautics and Space Administration.
+    % All Rights Reserved.
+    % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     properties
         type;
         tinit;

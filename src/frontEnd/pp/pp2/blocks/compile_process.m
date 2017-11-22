@@ -1,5 +1,5 @@
 function  status= compile_process( new_model_base )
-%ALGEBRAIC_LOOPS_PROCESS raises algebric loops error.
+%compile_process check if the model can be compiled or not.
 
 try
     status = 0;
