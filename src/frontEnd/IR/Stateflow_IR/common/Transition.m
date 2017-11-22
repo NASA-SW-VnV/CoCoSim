@@ -2,7 +2,12 @@ classdef Transition
     %Transition :each transition is associated with an event, a condition, side
     %effect condition actions ac, transition actions at and a destination
     %d.
-    
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Copyright (c) 2017 United States Government as represented by the
+    % Administrator of the National Aeronautics and Space Administration.
+    % All Rights Reserved.
+    % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     properties
         id;
         event;
@@ -131,7 +136,7 @@ classdef Transition
             pattern = strcat(event_exp,condition_exp,cond_action_exp,trans_action_exp);
         end
         
-       
+        
     end
     
 end

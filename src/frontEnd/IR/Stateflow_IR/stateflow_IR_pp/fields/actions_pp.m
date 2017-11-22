@@ -1,6 +1,11 @@
 function [ new_ir ] = actions_pp( new_ir )
 %ACTIONS_PP adapt Stateflow actions to lustre syntax
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Copyright (c) 2017 United States Government as represented by the
+% Administrator of the National Aeronautics and Space Administration.
+% All Rights Reserved.
+% Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 for i=1:numel(new_ir.states)
     new_ir.states(i).state_actions.entry = adapt_actions(new_ir.states(i).state_actions.entry, new_ir.data);
     new_ir.states(i).state_actions.during = adapt_actions(new_ir.states(i).state_actions.during, new_ir.data);

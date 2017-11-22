@@ -3,6 +3,12 @@ classdef State_def
     %is defined by the entry, during and exit actions (a_e, a_d, a_x),
     %outer and inner transitions T_o and T_i, as well as component content
     %C.
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Copyright (c) 2017 United States Government as represented by the
+    % Administrator of the National Aeronautics and Space Administration.
+    % All Rights Reserved.
+    % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     properties
         path;
         state_actions;
@@ -81,14 +87,14 @@ classdef State_def
             outer_transitions = SFIRUtils.sort_transitions(chart.find('-isa', 'Stateflow.Transition', '-and', 'Source', s));
             inner_transitions = SFIRUtils.sort_transitions(s.innerTransitions());
             outer_transitions = setdiff(outer_transitions,inner_transitions);
-
+            
             To = []; Ti =[];
             for i=1:numel(outer_transitions)
                 To = [To; Transition.create_object(outer_transitions(i))];
             end
             for i=1:numel(inner_transitions)
                 Ti = [Ti; Transition.create_object(inner_transitions(i))];
-            end            
+            end
         end
         
         
