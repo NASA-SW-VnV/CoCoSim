@@ -1,4 +1,4 @@
-package IR;
+package cocosim.matlab2IR;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -13,72 +13,72 @@ import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-import Lustre.EMBaseListener;
-import Lustre.EMLexer;
-import Lustre.EMParser;
-import Lustre.EMParser.AnnotationContext;
-import Lustre.EMParser.AssignmentContext;
-import Lustre.EMParser.BodyContext;
-import Lustre.EMParser.Body_itemContext;
-import Lustre.EMParser.Break_expContext;
-import Lustre.EMParser.Case_blockContext;
-import Lustre.EMParser.Catch_blockContext;
-import Lustre.EMParser.CellContext;
-import Lustre.EMParser.Clear_expContext;
-import Lustre.EMParser.ColonExpressionContext;
-import Lustre.EMParser.ConstantContext;
-import Lustre.EMParser.Continue_expContext;
-import Lustre.EMParser.DataTypeContext;
-import Lustre.EMParser.Declare_typeContext;
-import Lustre.EMParser.DimensionContext;
-import Lustre.EMParser.Else_blockContext;
-import Lustre.EMParser.Elseif_blockContext;
-import Lustre.EMParser.EmfileContext;
-import Lustre.EMParser.ExpressionContext;
-import Lustre.EMParser.ExpressionListContext;
-import Lustre.EMParser.For_blockContext;
-import Lustre.EMParser.Func_inputContext;
-import Lustre.EMParser.Func_outputContext;
-import Lustre.EMParser.FunctionContext;
-import Lustre.EMParser.Function_handleContext;
-import Lustre.EMParser.Function_parameterContext;
-import Lustre.EMParser.Function_parameter_listContext;
-import Lustre.EMParser.Global_expContext;
-import Lustre.EMParser.HorzcatContext;
-import Lustre.EMParser.If_blockContext;
-import Lustre.EMParser.Ignore_valueContext;
-import Lustre.EMParser.IndexingContext;
-import Lustre.EMParser.LdivideContext;
-import Lustre.EMParser.MatrixContext;
-import Lustre.EMParser.MldivideContext;
-import Lustre.EMParser.MpowerContext;
-import Lustre.EMParser.MrdivideContext;
-import Lustre.EMParser.MtimesContext;
-import Lustre.EMParser.NlocContext;
-import Lustre.EMParser.NlosContext;
-import Lustre.EMParser.NlosocContext;
-import Lustre.EMParser.NotAssignmentContext;
-import Lustre.EMParser.Otherwise_blockContext;
-import Lustre.EMParser.Persistent_expContext;
-import Lustre.EMParser.Plus_minusContext;
-import Lustre.EMParser.PostfixExpressionContext;
-import Lustre.EMParser.PowerContext;
-import Lustre.EMParser.PrimaryExpressionContext;
-import Lustre.EMParser.RdivideContext;
-import Lustre.EMParser.RelopANDContext;
-import Lustre.EMParser.RelopEQ_NEContext;
-import Lustre.EMParser.RelopGLContext;
-import Lustre.EMParser.RelopORContext;
-import Lustre.EMParser.RelopelANDContext;
-import Lustre.EMParser.RelopelORContext;
-import Lustre.EMParser.Return_expContext;
-import Lustre.EMParser.SocContext;
-import Lustre.EMParser.StatementContext;
-import Lustre.EMParser.Switch_blockContext;
-import Lustre.EMParser.TimesContext;
-import Lustre.EMParser.Try_catch_blockContext;
-import Lustre.EMParser.UnaryExpressionContext;
-import Lustre.EMParser.While_blockContext;
+import cocosim.emgrammar.EMBaseListener;
+import cocosim.emgrammar.EMLexer;
+import cocosim.emgrammar.EMParser;
+import cocosim.emgrammar.EMParser.AnnotationContext;
+import cocosim.emgrammar.EMParser.AssignmentContext;
+import cocosim.emgrammar.EMParser.BodyContext;
+import cocosim.emgrammar.EMParser.Body_itemContext;
+import cocosim.emgrammar.EMParser.Break_expContext;
+import cocosim.emgrammar.EMParser.Case_blockContext;
+import cocosim.emgrammar.EMParser.Catch_blockContext;
+import cocosim.emgrammar.EMParser.CellContext;
+import cocosim.emgrammar.EMParser.Clear_expContext;
+import cocosim.emgrammar.EMParser.ColonExpressionContext;
+import cocosim.emgrammar.EMParser.ConstantContext;
+import cocosim.emgrammar.EMParser.Continue_expContext;
+import cocosim.emgrammar.EMParser.DataTypeContext;
+import cocosim.emgrammar.EMParser.Declare_typeContext;
+import cocosim.emgrammar.EMParser.DimensionContext;
+import cocosim.emgrammar.EMParser.Else_blockContext;
+import cocosim.emgrammar.EMParser.Elseif_blockContext;
+import cocosim.emgrammar.EMParser.EmfileContext;
+import cocosim.emgrammar.EMParser.ExpressionContext;
+import cocosim.emgrammar.EMParser.ExpressionListContext;
+import cocosim.emgrammar.EMParser.For_blockContext;
+import cocosim.emgrammar.EMParser.Func_inputContext;
+import cocosim.emgrammar.EMParser.Func_outputContext;
+import cocosim.emgrammar.EMParser.FunctionContext;
+import cocosim.emgrammar.EMParser.Function_handleContext;
+import cocosim.emgrammar.EMParser.Function_parameterContext;
+import cocosim.emgrammar.EMParser.Function_parameter_listContext;
+import cocosim.emgrammar.EMParser.Global_expContext;
+import cocosim.emgrammar.EMParser.HorzcatContext;
+import cocosim.emgrammar.EMParser.If_blockContext;
+import cocosim.emgrammar.EMParser.Ignore_valueContext;
+import cocosim.emgrammar.EMParser.IndexingContext;
+import cocosim.emgrammar.EMParser.LdivideContext;
+import cocosim.emgrammar.EMParser.MatrixContext;
+import cocosim.emgrammar.EMParser.MldivideContext;
+import cocosim.emgrammar.EMParser.MpowerContext;
+import cocosim.emgrammar.EMParser.MrdivideContext;
+import cocosim.emgrammar.EMParser.MtimesContext;
+import cocosim.emgrammar.EMParser.NlocContext;
+import cocosim.emgrammar.EMParser.NlosContext;
+import cocosim.emgrammar.EMParser.NlosocContext;
+import cocosim.emgrammar.EMParser.NotAssignmentContext;
+import cocosim.emgrammar.EMParser.Otherwise_blockContext;
+import cocosim.emgrammar.EMParser.Persistent_expContext;
+import cocosim.emgrammar.EMParser.Plus_minusContext;
+import cocosim.emgrammar.EMParser.PostfixExpressionContext;
+import cocosim.emgrammar.EMParser.PowerContext;
+import cocosim.emgrammar.EMParser.PrimaryExpressionContext;
+import cocosim.emgrammar.EMParser.RdivideContext;
+import cocosim.emgrammar.EMParser.RelopANDContext;
+import cocosim.emgrammar.EMParser.RelopEQ_NEContext;
+import cocosim.emgrammar.EMParser.RelopGLContext;
+import cocosim.emgrammar.EMParser.RelopORContext;
+import cocosim.emgrammar.EMParser.RelopelANDContext;
+import cocosim.emgrammar.EMParser.RelopelORContext;
+import cocosim.emgrammar.EMParser.Return_expContext;
+import cocosim.emgrammar.EMParser.SocContext;
+import cocosim.emgrammar.EMParser.StatementContext;
+import cocosim.emgrammar.EMParser.Switch_blockContext;
+import cocosim.emgrammar.EMParser.TimesContext;
+import cocosim.emgrammar.EMParser.Try_catch_blockContext;
+import cocosim.emgrammar.EMParser.UnaryExpressionContext;
+import cocosim.emgrammar.EMParser.While_blockContext;
 
 /*################################################################################
 #
@@ -917,7 +917,10 @@ public class EM2JSON {
 		String file_name = null;
 		if ( args.length>0 ) {
 			inputFile = args[0];
-			file_name = args[0]+".json";
+			if ( args.length> 1 )
+				file_name = args[1];
+			else
+				file_name = args[0]+".json";
 		}else
 			file_name = "output.json";
 		InputStream is = System.in;
@@ -931,13 +934,13 @@ public class EM2JSON {
 		parser.setBuildParseTree(true);
 		ParseTree tree = parser.emfile();
 		// show tree in text form
-		System.out.println(tree.toStringTree(parser));
+		//System.out.println(tree.toStringTree(parser));
 
 		ParseTreeWalker walker = new ParseTreeWalker();
 		JSONEmitter converter = new JSONEmitter();
 		walker.walk(converter, tree);
 		String result = converter.getJSON(tree);
-		System.out.println(result);
+		//System.out.println(result);
 
 
 		try (PrintWriter out = new PrintWriter(file_name)) {

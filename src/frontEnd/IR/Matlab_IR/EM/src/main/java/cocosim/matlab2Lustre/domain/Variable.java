@@ -1,4 +1,4 @@
-package Lustre.domain;
+package cocosim.matlab2Lustre.domain;
 
 
 /*################################################################################

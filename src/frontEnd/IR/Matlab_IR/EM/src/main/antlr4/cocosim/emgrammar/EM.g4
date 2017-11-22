@@ -242,9 +242,9 @@ TRANSPOSE :   ( '\'' | '.\'')
 primaryExpression
     :   ID
     |   constant
-    |   '(' expression ')'
+    |   '(' expression ')'  
     |   cell
-	|   matrix
+	|   matrix   
     |   ignore_value
     ;
 
@@ -262,7 +262,7 @@ function_handle
 	: AT ID 
 	| AT func_input expression?
 	;
-
+ 
 
 Integer : '0'..'9'+ ;
 
