@@ -86,7 +86,7 @@ classdef LustrecUtils < handle
                 LUSTREC,...
                 LUCTREC_INCLUDE_DIR)
             [~, file_name, ~] = fileparts(lus_file_path);
-            makefile_name = fullfile(output_dir,strcat(file_name,'.makefile'));
+           
             binary_name = fullfile(output_dir,...
                 strcat(file_name,'_', node_name));
             % generate C code
@@ -116,6 +116,7 @@ classdef LustrecUtils < handle
             
             % generate C binary
             cd(output_dir);
+            makefile_name = strcat(file_name,'.makefile');
             msg = sprintf('start compiling model "%s"\n',file_name);
             display_msg(msg, MsgType.INFO, 'compile_lustre_to_Cbinary', '');
             command = sprintf('make -f "%s"', makefile_name);
