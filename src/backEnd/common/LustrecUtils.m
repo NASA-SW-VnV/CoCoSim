@@ -96,7 +96,8 @@ classdef LustrecUtils < handle
                     MsgType.DEBUG, 'compile_lustre_to_Cbinary', '');
                 return;
             end
-            command = sprintf('%s -I "%s" -d "%s" -algebraic-loop-solve -node %s "%s"',...
+            %-algebraic-loop-solve should be added
+            command = sprintf('%s -I "%s" -d "%s" -node %s "%s"',...
                 LUSTREC,LUCTREC_INCLUDE_DIR, output_dir, node_name, lus_file_path);
             msg = sprintf('LUSTREC_COMMAND : %s\n',command);
             display_msg(msg, MsgType.INFO, 'compile_lustre_to_Cbinary', '');
