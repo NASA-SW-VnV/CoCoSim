@@ -4,8 +4,11 @@ function err = algebric_loops_process( new_model_base )
 code_on=sprintf('%s([], [], [], ''compile'')', new_model_base);
 warning off;
 evalin('base',code_on);
+try
 loops = Simulink.BlockDiagram.getAlgebraicLoops(bdroot);
-
+catch
+    loops = [];
+end
 code_on=sprintf('%s([], [], [], ''term'')', new_model_base);
 evalin('base',code_on);
 if numel(loops) > 0
