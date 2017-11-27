@@ -116,7 +116,7 @@ classdef LustrecUtils < handle
             
             % generate C binary
             cd(output_dir);
-            makefile_name = strcat(file_name,'.makefile');
+            makefile_name = fullfile(output_dir,strcat(file_name,'.makefile'));
             msg = sprintf('start compiling model "%s"\n',file_name);
             display_msg(msg, MsgType.INFO, 'compile_lustre_to_Cbinary', '');
             command = sprintf('make -f "%s"', makefile_name);
