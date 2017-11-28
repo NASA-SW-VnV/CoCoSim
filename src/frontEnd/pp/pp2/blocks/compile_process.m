@@ -7,10 +7,13 @@ try
     warning off;
     evalin('base',code_on);
     
-    code_on=sprintf('%s([], [], [], ''term'')', new_model_base);
-    evalin('base',code_on);
+    code_off=sprintf('%s([], [], [], ''term'')', new_model_base);
+    evalin('base',code_off);
     warning on;
 catch
+    code_off=sprintf('%s([], [], [], ''term'')', new_model_base);
+    evalin('base',code_off);
+    warning on;
     status = 1;
     msg = sprintf('Make sure model "%s" can be compiled', new_model_base);
     errordlg(msg, 'CoCoSim_PP') ;
