@@ -97,7 +97,7 @@ classdef LustrecUtils < handle
                 return;
             end
             %-algebraic-loop-solve should be added
-            command = sprintf('%s -I "%s" -d "%s" -node %s "%s"',...
+            command = sprintf('%s -algebraic-loop-solve -I "%s" -d "%s" -node %s "%s"',...
                 LUSTREC,LUCTREC_INCLUDE_DIR, output_dir, node_name, lus_file_path);
             msg = sprintf('LUSTREC_COMMAND : %s\n',command);
             display_msg(msg, MsgType.INFO, 'compile_lustre_to_Cbinary', '');
@@ -140,12 +140,25 @@ classdef LustrecUtils < handle
                 node_name,...
                 LUSTREC,...
                 LUCTREC_INCLUDE_DIR)
+            
             [node_struct, status] = ...
-                LustrecUtils.extract_node_struct_using_emf(...
-                lus_file_path, node_name, LUSTREC, LUCTREC_INCLUDE_DIR);
+                LustrecUtils.extract_node_struct_using_lusi(...
+                lus_file_path, node_name, LUSTREC);
+            
             if status==0
                 return;
             end
+            
+            [node_struct, status] = ...
+                LustrecUtils.extract_node_struct_using_emf(...
+                lus_file_path, node_name, LUSTREC, LUCTREC_INCLUDE_DIR);
+                       
+        end
+        
+        function [node_struct,...
+                status] = extract_node_struct_using_lusi(lus_file_path,...
+                node_name,...
+                LUSTREC)
             [lusi_path, status] = ...
                 LustrecUtils.generate_lusi(lus_file_path, LUSTREC );
             if status
@@ -201,7 +214,9 @@ classdef LustrecUtils < handle
                 data = BUtils.read_EMF(contract_path);
                 nodes = data.nodes;
                 nodes_names = fieldnames(nodes)';
-                idx_main_node = find(ismember(nodes_names, main_node_name));
+                orig_names = arrayfun(@(x)  nodes.(x{1}).original_name,...
+                    nodes_names, 'UniformOutput', false);
+                idx_main_node = find(ismember(orig_names, main_node_name));
                 if isempty(idx_main_node)
                     display_msg(...
                         ['Node ' main_node_name ' does not exist in EMF ' contract_path], ...
@@ -725,6 +740,14 @@ classdef LustrecUtils < handle
             end
             cocoRoot = DOMNODE.getDocumentElement;
             
+            tools_config;
+            status = BUtils.check_files_exist(LUSTREC, LUCTREC_INCLUDE_DIR);
+            UseLusi = true;
+            if status
+                UseLusi = false;
+            end
+
+
             data = BUtils.read_EMF(emf_path);
             nodes = data.nodes;
             emf_nodes_names = fieldnames(nodes)';
@@ -757,8 +780,16 @@ classdef LustrecUtils < handle
                         cocoRoot, emf_block_name);
                     
                     if ~strcmp(new_node_name, '')
+                        if UseLusi
+                            main_node_struct = ...
+                                LustrecUtils.extract_node_struct(...
+                                lus_file_path, original_name, LUSTREC, LUCTREC_INCLUDE_DIR);
+                        else
+                            main_node_struct = nodes.(node_name);
+                        end
                         contract = LustrecUtils.construct_contact(...
-                            nodes.(node_name), new_node_name);
+                            main_node_struct, new_node_name);
+                        
                         
                         filetext2 = strrep(filetext2, tokens{1},...
                             strcat(tokens{1}, '\n', contract));
