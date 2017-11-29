@@ -64,22 +64,27 @@ lusi_text = fileread(lusi_path);
 nodes_names = {};
 for node_idx =1:numel(emf_nodes_names)
     name = emf_nodes_names{node_idx};
-    pattern = strcat('(node|function)\s+',name,'\s*\(');
+    original_name = nodes.(name).original_name;
+    pattern = strcat('(node|function)\s+',original_name,'\s*\(');
     tokens = regexp(lusi_text, pattern,'match');
-    if ~isempty(tokens) && ~(endsWith(name, '_unless') || endsWith(name, '_handler_until'))
+    if ~isempty(tokens) && ~(endsWith(original_name, '_unless') || endsWith(original_name, '_handler_until'))
         nodes_names{numel(nodes_names) + 1} = name;
     end
 end
+orig_names = arrayfun(@(x)  nodes.(x{1}).original_name,...
+        nodes_names, 'UniformOutput', false);
 for node_idx =0:numel(nodes_names)
+    original_name = nodes.(nodes_names{node_idx}).original_name;
     if node_idx==0
-        if ismember(main_node, nodes_names)
-            node_name = main_node;
+        if ismember(main_node, orig_names)
+            idx = ismember(orig_names, main_node);
+            node_name = BUtils.adapt_block_name(nodes_names{idx});
         else
             continue;
         end
     else
         node_name = BUtils.adapt_block_name(nodes_names{node_idx});
-        if strcmp(node_name, main_node)
+        if strcmp(original_name, main_node)
             continue;
         end
     end

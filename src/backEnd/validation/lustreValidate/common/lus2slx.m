@@ -73,9 +73,12 @@ x = 200;
 y = -50;
 
 nodes = data.nodes;
+emf_fieldnames = fieldnames(nodes)';
 if onlyMainNode
-    nodes_names = arrayfun(@(x)  BUtils.adapt_block_name(x{1}),...
-        fieldnames(nodes)', 'UniformOutput', false);
+%     nodes_names = arrayfun(@(x)  BUtils.adapt_block_name(x{1}),...
+%         fieldnames(nodes)', 'UniformOutput', false);
+    nodes_names = arrayfun(@(x)  nodes.(x{1}).original_name,...
+        emf_fieldnames, 'UniformOutput', false);
     if ~ismember(main_node, nodes_names)
         msg = sprintf('Node "%s" not found in JSON "%s"', ...
             main_node, json_path);
@@ -86,14 +89,13 @@ if onlyMainNode
         trace_file_name = '';
         return
     end
-end
-if onlyMainNode
-    node_name = BUtils.adapt_block_name(main_node);
-    node_block_path = fullfile(new_model_name,node_name);
+    node_idx = ismember(nodes_names, main_node);
+    node_name = emf_fieldnames{node_idx};
+    node_block_path = fullfile(new_model_name, BUtils.adapt_block_name(main_node));
     block_pos = [(x+100) y (x+250) (y+50)];
-    node_process(new_model_name, nodes, main_node, node_block_path, block_pos, xml_trace);
+    node_process(new_model_name, nodes, node_name, node_block_path, block_pos, xml_trace);
 else
-    for node = fieldnames(nodes)'
+    for node = emf_fieldnames
         try
             node_name = BUtils.adapt_block_name(node{1});
             display_msg(...
@@ -140,7 +142,7 @@ x2 = 200;
 y2= -50;
 
 if ~isempty(xml_trace)
-    xml_trace.create_Node_Element(node_block_path, node);
+    xml_trace.create_Node_Element(node_block_path,  nodes.(node).original_name);
 end
 add_block('built-in/Subsystem', node_block_path);%,...
 %             'TreatAsAtomicUnit', 'on');

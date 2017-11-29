@@ -77,8 +77,9 @@ try
     
     nodes = data.nodes;
     for node = fieldnames(nodes)'
+        original_name = nodes.(node{1}).original_name;
         simulink_block_name = XMLUtils.get_Simulink_block_from_lustre_node_name(xRoot, ...
-            node{1}, base_name, new_model_name);
+            original_name, base_name, new_model_name);
         if strcmp(simulink_block_name, '')
             continue;
         elseif strcmp(simulink_block_name,base_name)
@@ -124,7 +125,7 @@ try
             n = n + 1;
             y = y+250;
         end
-        node_subsystem = strcat(translated_nodes, '/', node{1});
+        node_subsystem = strcat(translated_nodes, '/', BUtils.adapt_block_name(node{1}));
         add_block(node_subsystem,...
             cocospec_block_path,...
             'Position',[(x+100) y (x+250) (y+50)]);
@@ -146,7 +147,7 @@ try
         %link inputs to the subsystem.
         for index=1:numel(blk_inputs)
             var_name = BUtils.adapt_block_name(blk_inputs{index});
-            input_block_name = get_input_block_name_from_variable(xRoot, node{1}, var_name, base_name,new_model_name);
+            input_block_name = get_input_block_name_from_variable(xRoot, original_name, var_name, base_name,new_model_name);
             link_block_with_its_cocospec(cocospec_block_path,  input_block_name, simulink_block_name, parent_block_name, index, isBaseName);
         end
     end
