@@ -31,12 +31,12 @@ if ~exist('show_models', 'var')
 elseif show_models
     open(model_full_path);
 end
- [lus_dir, lus_fname, ~] = fileparts(lus_file_path);
+[lus_dir, lus_fname, ~] = fileparts(lus_file_path);
 if ~exist('main_node_name', 'var') || isempty(main_node_name)
     main_node_name = lus_fname;
 end
 if ~exist('output_dir', 'var') || isempty(output_dir)
-   output_dir = lus_dir;
+    output_dir = lus_dir;
 end
 if ~exist('tests_method', 'var') || isempty(tests_method)
     tests_method = 1;
@@ -192,12 +192,20 @@ if (tests_method == 3)
         display_msg(msg, MsgType.ERROR, 'COMPARE_SLX_LUS', '');
     end
 elseif (tests_method == 4) %4- Prove LUS1 <=> LUS2.
+    tools_config;
+    
+    status = BUtils.check_files_exist(KIND2, Z3);
+    if status
+        display_msg(['KIND2 not found :' KIND2],...
+            MsgType.DEBUG, 'LustrecUtils.run_verif', '');
+        return;
+    end
     [status, emf_model_path, emf_path, EMF_trace_xml] = LustrecUtils.construct_EMF_model(...
         lus_file_path, main_node_name, output_dir);
     if status
         return;
     end
-
+    
     msg = sprintf('EMF model : %s', emf_model_path);
     display_msg(msg, MsgType.DEBUG, 'validation', '');
     msg = sprintf('EMF traceability : %s', EMF_trace_xml.xml_file_path);
@@ -219,7 +227,7 @@ elseif (tests_method == 4) %4- Prove LUS1 <=> LUS2.
         display_msg(msg, MsgType.INFO, 'validation', '');
         [valid_i, IN_struct_i, ~] = ...
             LustrecUtils.run_comp_modular_verif_using_Kind2(...
-            verif_lus_path, output_dir, nodes_list{i});
+            verif_lus_path, output_dir, nodes_list{i}, KIND2, Z3);
         valid(i) = valid_i;
         IN_struct{i} = IN_struct_i;
     end

@@ -61,6 +61,7 @@ if [ ! -d "$git_dir" ]; then
     git pull origin $cocosim_branch
 else
     cd $git_dir
+    git checkout $cocosim_branch
     git pull origin $cocosim_branch
 fi
 
