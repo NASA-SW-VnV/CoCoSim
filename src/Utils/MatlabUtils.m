@@ -6,7 +6,7 @@ classdef MatlabUtils
     methods (Static = true)
      
         %% Concat cell array with a specific delimator
-        function joinedStr = concat_delim(str, delimiter)
+        function joinedStr = strjoin(str, delimiter)
             if nargin < 1 || nargin > 2
                 narginchk(1, 2);
             end

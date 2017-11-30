@@ -822,7 +822,7 @@ x3 = x3 + 300;
 %% branches
 idx = 1;
 for b=fieldnames(branches)'
-    branch_ID = strcat(ID,'_branch_',b{1});
+    branch_ID = strcat(ID,'_branch_',branches.(b{1}).guard_value);
     branch_path = strcat(branch_block_path,'/',branch_ID);
     add_block('simulink/Ports & Subsystems/If Action Subsystem',...
         branch_path,...
@@ -890,7 +890,7 @@ for i=1:numel(outputs)
     
     j = 1;
     for b=fieldnames(branches)'
-        branch_path = strcat(branch_block_path,'/',ID,'_branch_',b{1});
+        branch_path = strcat(branch_block_path,'/',ID,'_branch_',branches.(b{1}).guard_value);
         SrcBlkH = get_param(branch_path,'PortHandles');
         add_line(branch_block_path, SrcBlkH.Outport(i), DstBlkH.Inport(j), 'autorouting', 'on');
         j = j + 1;
