@@ -11,22 +11,22 @@ function [b, status] = getWriteType(sub_blk)
 status = 0;
 b = [];
 
-if WriteType.NotHandled(sub_blk.BlockType)
+if Block_To_Lustre.NotHandled(sub_blk.BlockType)
     status = 1;
     return;
 end
 
 if strcmp(sub_blk.BlockType, 'SubSystem') && strcmp(sub_blk.Mask, 'on')
     type = sub_blk.MaskType;
-    fun_name = [WriteType.blkTypeFormat(type) '_write'];
+    fun_name = [Block_To_Lustre.blkTypeFormat(type) '_To_Lustre'];
     fun_path = which(fun_name);
     if isempty(fun_path)
         type = sub_blk.BlockType;
-        fun_name = [WriteType.blkTypeFormat(type) '_write'];
+        fun_name = [Block_To_Lustre.blkTypeFormat(type) '_To_Lustre'];
     end
 else
     type = sub_blk.BlockType;
-    fun_name = [WriteType.blkTypeFormat(type) '_write'];
+    fun_name = [Block_To_Lustre.blkTypeFormat(type) '_To_Lustre'];
 end
 fun_path = which(fun_name);
 if isempty(fun_path)

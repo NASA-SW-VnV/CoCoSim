@@ -22,7 +22,7 @@ comment = sprintf('-- Original block name: %s', origin_path);
 
 % creating node header
 node_name = SLX2LusUtils.node_name_format(subsys_struct);
-node_inputs = '';
+node_inputs = SLX2LusUtils.extract_node_inputs(subsys_struct, xml_trace);
 node_outputs = '';
 
 node_header = sprintf('node %s (%s) returns (%s);',...

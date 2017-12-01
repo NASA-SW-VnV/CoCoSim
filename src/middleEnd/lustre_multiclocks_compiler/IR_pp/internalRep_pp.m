@@ -8,7 +8,12 @@ function [ new_ir ] = internalRep_pp( new_ir, json_export, output_dir )
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
+if ~exist('json_export', 'var')
+    json_export = 0;
+end
+if ~exist('output_dir', 'var')
+    output_dir = fileparts(new_ir.meta.file_path);
+end
 %% apply functions in library folder
 [ir_pp_root, ~, ~] = fileparts(mfilename('fullpath'));
 lib_dir = fullfile(ir_pp_root, 'lib');

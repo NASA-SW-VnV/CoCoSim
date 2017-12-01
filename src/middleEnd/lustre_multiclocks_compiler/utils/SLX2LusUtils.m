@@ -41,6 +41,41 @@ classdef SLX2LusUtils < handle
             node_name = sprintf('%s_%s',SLX2LusUtils.name_format(subsys_struct.Name),handle_str );
         end
         
+        %% Lustre node inputs, outputs
+        function result = extract_node_InOutputs(subsys, type, xml_trace)
+            result = '';
+            %get all blocks names
+            fields = fieldnames(subsys.Content);
+            
+            % remove blocks without BlockType (e.g annotations)
+            fields = ...
+                fields(...
+                cellfun(@(x) isfield(subsys.Content.(x),'BlockType'), fields));
+            
+            % get only blocks with BlockType=type
+            fields = ...
+                fields(...
+                cellfun(@(x) strcmp(subsys.Content.(x).BlockType,type), fields));
+            
+            % sort the blocks by order of their ports
+            ports = cellfun(@(x) str2num(subsys.Content.(x).Port), fields);
+            [~, I] = sort(ports);
+            fields = fields(I);
+            
+            
+            
+        end
+        
+        %% get Inport/Outport names: inlining dimension
+        function names = getPortName(blk)
+            dim = blk.CompiledPortDimensions.Outport;
+            if numel(dim) == 2
+                
+            elseif numel(dim) == 1
+                
+            end
+        end
+        
         %% Change Simulink DataTypes to Lustre DataTypes. Initial default 
         %value is also given as a string.
         function [ Lustre_type, initial_value ] = get_lustre_dt( slx_dt)

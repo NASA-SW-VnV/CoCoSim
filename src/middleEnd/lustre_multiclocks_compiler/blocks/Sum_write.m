@@ -1,5 +1,5 @@
-classdef Sum_write < WriteType
-    %Test_write a dummy class
+classdef Sum_write < Block_To_Lustre
+    %Sum_write Translate Sum block to Lustre.
     
     properties
     end
@@ -10,6 +10,9 @@ classdef Sum_write < WriteType
             obj.code = 'Sum block in progress';
         end
         
+        function getUnsupportedOptions(obj, varargin)
+           obj.unsupported_options = {};  
+        end
     end
     
 end

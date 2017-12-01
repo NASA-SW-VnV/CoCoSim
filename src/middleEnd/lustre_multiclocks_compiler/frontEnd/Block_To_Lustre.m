@@ -1,5 +1,5 @@
-classdef WriteType < handle
-    %WriteType an interface for all write blocks classes. Any BlockType_write
+classdef Block_To_Lustre < handle
+    %Block_To_Lustre an interface for all write blocks classes. Any BlockType_write
     %class inherit from this class. 
     
     properties
@@ -7,10 +7,12 @@ classdef WriteType < handle
         variables = {};
         external_nodes = '';
         external_libraries = {};
+        unsupported_options = {};
     end
     
     methods (Abstract)
         write_code(obj)
+        getUnsupportedOptions(obj)
     end
     methods(Static)
         function name = blkTypeFormat(name)
