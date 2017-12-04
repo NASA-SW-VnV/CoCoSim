@@ -11,7 +11,8 @@ classdef Template_To_Lustre < Block_To_Lustre
         end
         
         function getUnsupportedOptions(obj, varargin)
-           obj.unsupported_options = {'your unsuported options list here'};  
+            % add your unsuported options list here
+           obj.unsupported_options = {};  
         end
     end
     

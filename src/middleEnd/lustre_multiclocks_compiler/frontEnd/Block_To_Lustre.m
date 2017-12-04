@@ -21,7 +21,8 @@ classdef Block_To_Lustre < handle
         end
         
         function b = NotHandled(type)
-            blks = {'Inport', 'Outport'};
+            % add blocks that will not be handled.
+            blks = {'Inport'};
             b = ismember(type, blks);
         end
     end

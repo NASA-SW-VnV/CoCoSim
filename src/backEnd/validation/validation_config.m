@@ -12,6 +12,9 @@
 
 %% Configure Validation menue: the menu and functions callbacks
 %
+function validation_items = validation_config()
+
 [validation_root, ~, ~] = fileparts(mfilename('fullpath'));
 validation_items{1} = fullfile(validation_root, 'lustreValidate', 'lusValidateMenu.m');
 validation_items{2} = fullfile(validation_root, 'cocoSpecValidate', 'cocoSpecValidateMenu.m');
+end

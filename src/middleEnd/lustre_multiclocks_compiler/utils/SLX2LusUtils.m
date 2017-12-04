@@ -27,6 +27,7 @@ classdef SLX2LusUtils < handle
             %             str_out = strrep(str_out, '/', '_slash_');
             str_out = strrep(str_out, '=', '_equal_');
             % for blocks starting with a digit.
+            str_out = regexprep(str_out, '^(\d+)', 'x$1');
             str_out = regexprep(str_out, '/(\d+)', '/_$1');
             % for anything missing from previous cases.
             str_out = regexprep(str_out, '[^a-zA-Z0-9_/]', '_');
@@ -37,13 +38,18 @@ classdef SLX2LusUtils < handle
         %the name of the block concatenated to its handle to be unique
         %name.
         function node_name = node_name_format(subsys_struct)
-            handle_str = strrep(sprintf('%.3f', subsys_struct.Handle), '.', '_');
-            node_name = sprintf('%s_%s',SLX2LusUtils.name_format(subsys_struct.Name),handle_str );
+            if isempty(strfind(subsys_struct.Path, filesep))
+                % main node: should be the same as filename
+                node_name = SLX2LusUtils.name_format(subsys_struct.Name);
+            else
+                handle_str = strrep(sprintf('%.3f', subsys_struct.Handle), '.', '_');
+                node_name = sprintf('%s_%s',SLX2LusUtils.name_format(subsys_struct.Name),handle_str );
+            end
         end
         
         %% Lustre node inputs, outputs
-        function result = extract_node_InOutputs(subsys, type, xml_trace)
-            result = '';
+        function result = extract_node_InOutputs_withDT(subsys, type, xml_trace)
+            result = {};
             %get all blocks names
             fields = fieldnames(subsys.Content);
             
@@ -61,19 +67,47 @@ classdef SLX2LusUtils < handle
             ports = cellfun(@(x) str2num(subsys.Content.(x).Port), fields);
             [~, I] = sort(ports);
             fields = fields(I);
+            names = {};
+            for i=1:numel(fields)
+                [~, names_i] = SLX2LusUtils.getBlockOutputsNames(subsys.Content.(fields{i}));
+                names = [names, names_i];
+            end
             
-            
-            
+            result = MatlabUtils.strjoin(names, ';\n');
         end
         
         %% get Inport/Outport names: inlining dimension
-        function names = getPortName(blk)
-            dim = blk.CompiledPortDimensions.Outport;
-            if numel(dim) == 2
-                
-            elseif numel(dim) == 1
-                
+        function [names, names_dt] = getBlockOutputsNames(blk)
+            % This function return the names of the block
+            % outputs. 
+            % Example : an Inport In with dimensio [1, 2] will be
+            % translated as : In_1, In_2.
+            % A block is defined by its outputs, if a block the does not
+            % have outports, like Outport block, than will be defined by its
+            % inports. E.g, Outport Out with dimension 2 -> Out_1, out2
+
+            if isempty(blk.CompiledPortWidths.Outport)
+                width = blk.CompiledPortWidths.Inport;
+                type = 'Outport';
+            else
+                width = blk.CompiledPortWidths.Outport;
+                type = 'Inport';
             end
+            
+            names = {};
+            names_dt = {};
+            for port=1:numel(width)
+                if strcmp(type, 'Outport')
+                    dt = SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Inport(port));
+                else
+                    dt = SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Outport(port));
+                end
+                for i=1:width(port)
+                    names{numel(names) + 1} = SLX2LusUtils.name_format(strcat(blk.Name, '_', num2str(i)));
+                    names_dt{numel(names_dt) + 1} = strcat(names{i} , ': ', dt);
+                end
+            end
+            
         end
         
         %% Change Simulink DataTypes to Lustre DataTypes. Initial default 

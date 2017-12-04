@@ -4,7 +4,14 @@ classdef MatlabUtils
     end
     
     methods (Static = true)
-     
+        
+        
+        %%
+        function out = naming(nomsim)
+            [a, b]=regexp (nomsim, '/', 'split');
+            out = strcat(a{numel(a)-1},'_',a{end});
+        end
+        
         %% Concat cell array with a specific delimator
         function joinedStr = strjoin(str, delimiter)
             if nargin < 1 || nargin > 2
@@ -109,7 +116,7 @@ classdef MatlabUtils
                     warning(message('MATLAB:strescape:InvalidEscapeSequence', c, c));
             end
         end
-       
+        
     end
     
 end

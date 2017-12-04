@@ -16,17 +16,17 @@ end
 function schema = Validate1(callbackInfo)
 schema = sl_action_schema;
 schema.label = 'Validation by random tests';
-schema.callback = @V1Callback;
+schema.callback = @(x) VCallback(1, x);
 end
 
-function V1Callback(callbackInfo)
+function VCallback(tests_method, callbackInfo)
 try
-    [cocoSim_path, ~, ~] = fileparts(mfilename('fullpath'));
     model_full_path = MenuUtils.get_file_name(gcs) ;
-    L = log4m.getLogger(fullfile(fileparts(model_full_path),'logfile.txt'));
-    validate_window(model_full_path,cocoSim_path,1,L);
+    validate_translation(model_full_path, tests_method, 'KIND2', ...
+        1);
 catch ME
     display_msg(ME.getReport(), Constants.DEBUG,'Validate_model','');
     display_msg(ME.message, Constants.ERROR,'Validate_model','');
 end
 end
+

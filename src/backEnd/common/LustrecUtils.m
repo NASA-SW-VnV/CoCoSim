@@ -1287,11 +1287,11 @@ classdef LustrecUtils < handle
         end
         
         %% transform input struct to lustre format (inlining values)
-        function lustre_input_values = getLustreInputValuesFormat(...
+        function [lustre_input_values, status] = getLustreInputValuesFormat(...
                 input_struct, ...
                 nb_steps)
             number_of_inputs = 0;
-            
+            status = 0;
             for i=1:numel(input_struct.signals)
                 dim = input_struct.signals(i).dimensions;
                 
@@ -1299,7 +1299,7 @@ classdef LustrecUtils < handle
                     number_of_inputs = number_of_inputs + nb_steps*dim;
                 else
                     number_of_inputs =...
-                        number_of_inputs + nb_steps*(dim(1) * dim(2));
+                        number_of_inputs + nb_steps*(prod(dim));
                 end
             end
             % Translate input_stract to lustre format (inline the inputs)
@@ -1313,7 +1313,7 @@ classdef LustrecUtils < handle
                             index2 = index + dim;
                             lustre_input_values(index+1:index2) = ...
                                 input_struct.signals(j).values(i+1,:)';
-                        else
+                        elseif numel(dim)==2
                             index2 = index + (dim(1) * dim(2));
                             signal_values = [];
                             y = input_struct.signals(j).values(:,:,i+1);
@@ -1321,6 +1321,22 @@ classdef LustrecUtils < handle
                                 signal_values = [signal_values; y(idr,:)'];
                             end
                             lustre_input_values(index+1:index2) = signal_values;
+                        elseif numel(dim)==3
+                            index2 = index + prod(dim);
+                            signal_values = [];
+                            for k=1:dim(3)
+                                y = input_struct.signals(j).values(:,:,k,i+1);
+                                for idr=1:dim(1)
+                                    signal_values = [signal_values; y(idr,:)'];
+                                end
+                            end
+                            lustre_input_values(index+1:index2) = signal_values;
+                            
+                        else
+                            display_msg(['We do not support dimension ' num2str(dim)], ...
+                                MsgType.ERROR, 'getLustreInputValuesFormat', '');
+                            status = 1;
+                            return;
                         end
                         
                         index = index2;
@@ -1394,7 +1410,9 @@ classdef LustrecUtils < handle
             for i=0:nb_steps-1
                 for k=1:numberOfOutputs
                     dim = yout_signals(k).dimensions;
-                    if numel(dim)==2
+                    if numel(dim)==1
+                        yout_values = yout_signals(k).values(i+1,:);
+                    elseif numel(dim)==2
                         yout_values = [];
                         y = yout_signals(k).values(:,:,i+1);
                         for idr=1:dim(1)
@@ -1402,7 +1420,14 @@ classdef LustrecUtils < handle
                         end
                         dim = dim(1)*dim(2);
                     else
-                        yout_values = yout_signals(k).values(i+1,:);
+                        yout_values = [];
+                        for z=1:dim(3)
+                            y = yout_signals(k).values(:,:,z, i+1);
+                            for idr=1:dim(1)
+                                yout_values = [yout_values; y(idr,:)'];
+                            end
+                        end
+                        dim = prod(dim);
                     end
                     for j=1:dim
                         index_out = index_out + 1;
@@ -1578,9 +1603,12 @@ classdef LustrecUtils < handle
             end
             
             % transform input_struct to Lustre format
-            lustre_input_values = ...
+            [lustre_input_values, status] = ...
                 LustrecUtils.getLustreInputValuesFormat(input_struct, nb_steps);
-            
+            if status
+                lustrec_failed = 1;
+                return
+            end
             % print lustre inputs in a file
             status = ...
                 LustrecUtils.printLustreInputValues(...
@@ -1652,7 +1680,7 @@ classdef LustrecUtils < handle
                 msg = sprintf('simulation failed for model "%s" :\n%s\n%s',...
                     slx_file_name,ME.identifier,ME.message);
                 display_msg(msg, MsgType.ERROR, 'validation', '');
-                display_msg(msg, MsgType.DEBUG, 'validation', '');
+                display_msg(ME.getReport(), MsgType.DEBUG, 'validation', '');
                 sim_failed = 1;
                 valid = 0;
                 cd(OldPwd);

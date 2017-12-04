@@ -22,10 +22,10 @@ comment = sprintf('-- Original block name: %s', origin_path);
 
 % creating node header
 node_name = SLX2LusUtils.node_name_format(subsys_struct);
-node_inputs = SLX2LusUtils.extract_node_inputs(subsys_struct, xml_trace);
-node_outputs = '';
+node_inputs = SLX2LusUtils.extract_node_InOutputs_withDT(subsys_struct, 'Inport', xml_trace);
+node_outputs = SLX2LusUtils.extract_node_InOutputs_withDT(subsys_struct, 'Outport', xml_trace);
 
-node_header = sprintf('node %s (%s) returns (%s);',...
+node_header = sprintf('node %s (%s)\n returns (%s);',...
     node_name, node_inputs, node_outputs);
 
 % creating contract
@@ -35,7 +35,7 @@ contract = '-- Contract In progress';
 % Body code
 [body, variables_str, external_nodes, external_libraries] = write_body(subsys_struct, main_sampleTime, xml_trace); 
 
-main_node = sprintf('%s\n%s\n%s\n%s\nlet\n%s\ntel',...
+main_node = sprintf('%s\n%s\n%s\n%s\nlet\n\t%s\ntel',...
     comment, node_header, contract, variables_str, body);
 end
 

@@ -16,7 +16,7 @@ classdef MenuUtils
         %% get function handle from its path
         function handle = funPath2Handle(fullpath)
             oldDir = pwd;
-            [dirname,funName,~] = fileparts(fullpath);
+            [dirname,funName,~] = fileparts(which(fullpath));
             cd(dirname);
             handle = str2func(funName);
             cd(oldDir);

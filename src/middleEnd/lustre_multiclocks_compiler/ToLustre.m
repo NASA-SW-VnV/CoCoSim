@@ -89,7 +89,7 @@ display_msg('Building internal format', MsgType.INFO, 'lustre_multiclocks_compil
 display_msg('Lustre generation', Constants.INFO, 'lustre_multiclocks_compiler', '');
 
 
-main_block = ir_struct.(SLX2LusUtils.name_format(file_name));
+main_block = ir_struct.(IRUtils.name_format(file_name));
 main_sampleTime = main_block.CompiledSampleTime;
 
 [nodes_code, external_libraries] = recursiveGeneration(main_block, main_sampleTime, xml_trace);
