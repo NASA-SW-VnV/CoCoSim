@@ -5,7 +5,7 @@ code_on=sprintf('%s([], [], [], ''compile'')', new_model_base);
 warning off;
 evalin('base',code_on);
 try
-loops = Simulink.BlockDiagram.getAlgebraicLoops(bdroot);
+loops = Simulink.BlockDiagram.getAlgebraicLoops(new_model_base);
 catch
     loops = [];
 end
