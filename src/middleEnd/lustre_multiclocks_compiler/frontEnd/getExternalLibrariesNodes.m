@@ -25,27 +25,27 @@ for i=1:numel(external_libraries)
         case  {'int_to_real', 'real_to_int'}
             open_list{numel(open_list) + 1} = 'conv';
             
-        case 'Floor'
+        case '_Floor'
             open_list{numel(open_list) + 1} = 'conv';
             node = getFloor();
             lustre_code = [lustre_code, node];
             
-        case 'Ceiling'
+        case '_Ceiling'
             open_list{numel(open_list) + 1} = 'conv';
             node = getCeiling();
             lustre_code = [lustre_code, node];
             
-        case 'Convergent'
+        case '_Convergent'
             [node, external_nodes_i] = getConvergent();
             lustre_code = [lustre_code, node];
             additional_nodes = [additional_nodes, external_nodes_i];
             
-        case 'Nearest'
+        case '_Nearest'
             [node, external_nodes_i] = getNearest();
             lustre_code = [lustre_code, node];
             additional_nodes = [additional_nodes, external_nodes_i];
             
-        case 'Round'
+        case '_Round'
             [node, external_nodes_i] = getRound();
             lustre_code = [lustre_code, node];
             additional_nodes = [additional_nodes, external_nodes_i];
@@ -151,7 +151,7 @@ end
 function node = getFloor()
 % Round towards minus infinity.
 format = '--Round towards minus infinity..\n ';
-format = [ 'node Floor (x: real)\nreturns(y:int);\nlet\n\t'];
+format = [ 'node _Floor (x: real)\nreturns(y:int);\nlet\n\t'];
 format = [format, 'y= if x < 0.0 then real_to_int(x) - 1 \n\t'];
 format = [format, 'else real_to_int(x);\ntel\n\n'];
 node = sprintf(format);
@@ -161,7 +161,7 @@ end
 function node = getCeiling()
 % Round towards plus infinity.
 format = '--Round towards plus infinity.\n ';
-format = [ format ,'node Ceiling (x: real)\nreturns(y:int);\nlet\n\t'];
+format = [ format ,'node _Ceiling (x: real)\nreturns(y:int);\nlet\n\t'];
 format = [format, 'y= if x < 0.0 then real_to_int(x) \n\t'];
 format = [format, 'else real_to_int(x) + 1;\ntel\n\n'];
 node = sprintf(format);
@@ -173,21 +173,21 @@ function [node, external_nodes] = getConvergent()
 %If a tie occurs, rounds to the nearest even integer.
 %Equivalent to the Fixed-Point Designer? convergent function.
 format = '--Rounds number to the nearest representable value.\n ';
-format = [ format ,'node Convergent (x: real)\nreturns(y:int);\nlet\n\t'];
+format = [ format ,'node _Convergent (x: real)\nreturns(y:int);\nlet\n\t'];
 format = [ format , 'y = if (x > 0.5) then\n\t\t\t'];
 format = [ format , 'if (fmod(x, 2.0) = 0.5) '];
-format = [ format , ' then Floor(x)\n\t\t\t'];
-format = [ format , ' else Floor(x + 0.5)\n\t\t'];
+format = [ format , ' then _Floor(x)\n\t\t\t'];
+format = [ format , ' else _Floor(x + 0.5)\n\t\t'];
 format = [ format , ' else\n\t\t'];
 format = [ format , ' if (x >= -0.5) then 0 \n\t\t'];
 format = [ format , ' else \n\t\t\t'];
-format = [ format , ' if (fmod(x, 2.0) = -0.5) then Ceiling(x)\n\t\t\t'];
-format = [ format , ' else Ceiling(x - 0.5);'];
+format = [ format , ' if (fmod(x, 2.0) = -0.5) then _Ceiling(x)\n\t\t\t'];
+format = [ format , ' else _Ceiling(x - 0.5);'];
 format = [ format , '\ntel\n\n'];
 
 
 node = sprintf(format);
-external_nodes = {'fmod', 'Floor', 'Ceiling'};
+external_nodes = {'fmod', '_Floor', '_Ceiling'};
 
 end
 
@@ -195,14 +195,14 @@ end
 %If a tie occurs, rounds toward positive infinity. Equivalent to the Fixed-Point Designer nearest function.
 function [node, external_nodes] = getNearest()
 format = '--Rounds number to the nearest representable value.\n--If a tie occurs, rounds toward positive infinity\n ';
-format = [ format ,'node Nearest (x: real)\nreturns(y:int);\nlet\n\t'];
-format = [ format , 'y = if (fabs(x) >= 0.5) then Floor(x + 0.5)\n\t'];
+format = [ format ,'node _Nearest (x: real)\nreturns(y:int);\nlet\n\t'];
+format = [ format , 'y = if (fabs(x) >= 0.5) then _Floor(x + 0.5)\n\t'];
 format = [ format , ' else 0;'];
 format = [ format , '\ntel\n\n'];
 
 
 node = sprintf(format);
-external_nodes = { 'Floor', 'Ceiling', 'fabs'};
+external_nodes = { '_Floor', '_Ceiling', 'fabs'};
 end
 
 %% Round Rounds number to the nearest representable value. 
@@ -210,15 +210,15 @@ end
 function [node, external_nodes] = getRound()
 format = '--Rounds number to the nearest representable value.\n';
 format = [format , '--If a tie occurs,rounds positive numbers toward positive infinity and rounds negative numbers toward negative infinity\n '];
-format = [ format ,'node Round (x: real)\nreturns(y:int);\nlet\n\t'];
-format = [ format , 'y = if (x >= 0.5) then Floor(x + 0.5)\n\t\t'];
+format = [ format ,'node _Round (x: real)\nreturns(y:int);\nlet\n\t'];
+format = [ format , 'y = if (x >= 0.5) then _Floor(x + 0.5)\n\t\t'];
 format = [ format , ' else if (x > -0.5) then 0 \n\t\t'];
-format = [ format , ' else Ceiling(x - 0.5);'];
+format = [ format , ' else _Ceiling(x - 0.5);'];
 format = [ format , '\ntel\n\n'];
 
 
 node = sprintf(format);
-external_nodes = {'Floor', 'Ceiling'};
+external_nodes = {'_Floor', '_Ceiling'};
 end
 %%
 function rem_node = getRem_int_int()

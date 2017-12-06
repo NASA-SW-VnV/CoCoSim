@@ -187,9 +187,11 @@ classdef SLX2LusUtils < handle
             else
                 if strcmp(lus_in_dt, 'int')
                     RndMeth = 'int_to_real';
-                end
-                if strcmp(RndMeth, 'Simplest') || strcmp(RndMeth, 'Zero')
+                
+                elseif strcmp(RndMeth, 'Simplest') || strcmp(RndMeth, 'Zero')
                     RndMeth = 'real_to_int';
+                else
+                    RndMeth = strcat('_',RndMeth);
                 end
             end
             external_lib = {};
