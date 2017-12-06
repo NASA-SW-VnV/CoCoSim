@@ -1,5 +1,5 @@
 function [ lustre_code ] = getExternalLibrariesNodes( external_libraries )
-[ lustre_code, open_list ] = recursive_call( external_libraries );
+[ lustre_code, open_list ] = recursive_call( external_libraries, {} );
 if ~isempty(open_list)
     open_list = unique(open_list);
     open_list = cellfun(@(x) sprintf('#open <%s>\n',x), open_list, 'un', 0);
@@ -7,7 +7,7 @@ if ~isempty(open_list)
 end
 end
 
-function [ lustre_code, open_list ] = recursive_call( external_libraries )
+function [ lustre_code, open_list ] = recursive_call( external_libraries, already_handled )
 %GETEXTERNALLIBRARIESNODES returns the lustre nodes and libraries to be add
 %to the head of lustre code.
 lustre_code = '';
@@ -94,9 +94,10 @@ for i=1:numel(external_libraries)
     
 end
 
+already_handled = unique([already_handled, external_libraries]);
 additional_nodes = unique(additional_nodes);
-additional_nodes = additional_nodes(~ismember(additional_nodes, external_libraries));
-[ additional_code, additional_open_list ] = recursive_call( additional_nodes );
+additional_nodes = additional_nodes(~ismember(additional_nodes, already_handled));
+[ additional_code, additional_open_list ] = recursive_call( additional_nodes, already_handled );
 lustre_code = [lustre_code, additional_code];
 open_list = [open_list, additional_open_list];
 
