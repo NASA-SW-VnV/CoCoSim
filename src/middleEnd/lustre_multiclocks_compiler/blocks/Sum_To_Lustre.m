@@ -25,7 +25,25 @@ classdef Sum_To_Lustre < Block_To_Lustre
             inputs = {};
             % get all inputs, Scalar inputs will be expanded to have 
             % the same dimensions as the other inputs
-            AccumDataTypeStr = blk.CompiledPortDataTypes.Outport{1};
+            OutputDataTypeStr = blk.OutDataTypeStr;
+            AccumDataTypeStr = blk.AccumDataTypeStr;
+            RndMeth = blk.RndMeth;
+            if strcmp(AccumDataTypeStr, 'Inherit: Inherit via internal rule')
+                AccumDataTypeStr = blk.CompiledPortDataTypes.Outport{1};
+            elseif strcmp(AccumDataTypeStr, 'Inherit: Same as first input')
+                AccumDataTypeStr = blk.CompiledPortDataTypes.Inport{1};
+            end
+            
+            if strcmp(OutputDataTypeStr, 'Inherit: Inherit via internal rule')
+                OutputDataTypeStr = blk.CompiledPortDataTypes.Outport{1};
+            elseif strcmp(OutputDataTypeStr, 'Inherit: Same as first input')
+                OutputDataTypeStr = blk.CompiledPortDataTypes.Inport{1};
+            elseif strcmp(OutputDataTypeStr, 'Inherit: Same as accumulator')
+                OutputDataTypeStr = AccumDataTypeStr;
+            end
+            
+            
+            
             for i=1:numel(widths)
                 inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
                 if numel(inputs{i}) < max_width
@@ -35,7 +53,7 @@ classdef Sum_To_Lustre < Block_To_Lustre
                 %converts the input data type(s) to 
                 %its accumulator data type
                 if ~strcmp(inport_dt, AccumDataTypeStr)
-                    [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, AccumDataTypeStr);
+                    [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, AccumDataTypeStr, RndMeth);
                     if ~isempty(external_lib)
                         obj.external_libraries = [obj.external_libraries,...
                             external_lib];
@@ -56,7 +74,11 @@ classdef Sum_To_Lustre < Block_To_Lustre
             end
             
             [~, zero] = SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Outport(1));
-            
+            [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(AccumDataTypeStr, OutputDataTypeStr, RndMeth);
+            if ~isempty(external_lib)
+                obj.external_libraries = [obj.external_libraries,...
+                    external_lib];
+            end
             codes = {};
             if numel(exp) == 1 && numel(inputs) == 1
                 % a Sum over the elements of same input.
@@ -64,6 +86,9 @@ classdef Sum_To_Lustre < Block_To_Lustre
                     code = zero;
                     for j=1:widths
                         code = sprintf('%s %s %s',code, exp(1), inputs{1}{j});
+                    end
+                    if ~isempty(conv_format)
+                        code = sprintf(conv_format, code);
                     end
                     codes{i} = sprintf('%s = %s;\n\t', outputs{i}, code);
                 end
@@ -73,6 +98,9 @@ classdef Sum_To_Lustre < Block_To_Lustre
                     for j=1:numel(widths)
                         code = sprintf('%s %s %s',code, exp(j), inputs{j}{i});
                     end
+                    if ~isempty(conv_format)
+                        code = sprintf(conv_format, code);
+                    end
                     codes{i} = sprintf('%s = %s;\n\t', outputs{i}, code);
                 end
             end
@@ -80,6 +108,8 @@ classdef Sum_To_Lustre < Block_To_Lustre
             obj.variables = outputs_dt;
         end
         
+        
+        %%
         function getUnsupportedOptions(obj, varargin)
             % add your unsuported options list here
             obj.unsupported_options = {};

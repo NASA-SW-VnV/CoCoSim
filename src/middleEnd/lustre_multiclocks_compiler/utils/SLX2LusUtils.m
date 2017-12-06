@@ -176,31 +176,65 @@ classdef SLX2LusUtils < handle
         end
         
         %% Data type conversion node name
-        function [external_lib, conv_format] = dataType_conversion(inport_dt, outport_dt)
+        function [external_lib, conv_format] = dataType_conversion(inport_dt, outport_dt, RndMeth)
+            lus_in_dt = SLX2LusUtils.get_lustre_dt( inport_dt);
+            if nargin < 3
+                if strcmp(lus_in_dt, 'int')
+                    RndMeth = 'int_to_real';
+                else
+                    RndMeth = 'real_to_int';
+                end
+            else
+                if strcmp(lus_in_dt, 'int')
+                    RndMeth = 'int_to_real';
+                end
+                if strcmp(RndMeth, 'Simplest') || strcmp(RndMeth, 'Zero')
+                    RndMeth = 'real_to_int';
+                end
+            end
             external_lib = {};
             conv_format = '';
-            lus_in_dt = SLX2LusUtils.get_lustre_dt( inport_dt);
+            
             switch outport_dt
-                case {'double', 'single'}
+                case 'boolean'
                     if strcmp(lus_in_dt, 'int')
-                        external_lib = {'int_to_real'};
-                        conv_format = 'int_to_real(%s)';
-                    elseif strcmp(lus_in_dt, 'bool')
+                        external_lib = {'int_to_bool'};
+                        conv_format = 'int_to_bool(%s)';
+                    elseif strcmp(lus_in_dt, 'real')
                         external_lib = {'real_to_bool'};
                         conv_format = 'real_to_bool(%s)';
                     end
-                case {'int8','uint8','int16','uint16','int32','uint32',}
+                case {'double', 'single'}
+                    if strcmp(lus_in_dt, 'int')
+                        external_lib = {RndMeth};
+                        conv_format = strcat(RndMeth, '(%s)');
+                    elseif strcmp(lus_in_dt, 'bool')
+                        external_lib = {'bool_to_real'};
+                        conv_format = 'bool_to_real(%s)';
+                    end
+                case {'int8','uint8','int16','uint16'}
+                    
                     conv = strcat('int_to_', outport_dt);
                     if strcmp(lus_in_dt, 'int')
                         external_lib = {conv};
                         conv_format = strcat(conv,'(%s)');
                     elseif strcmp(lus_in_dt, 'bool')
-                        external_lib = {conv, 'bool_to_int'};
-                        conv_format = strcat(conv,'(bool_to_int(%s))');
+                        external_lib = {'bool_to_int'};
+                        conv_format = 'bool_to_int(%s)';
                     elseif strcmp(lus_in_dt, 'real')
-                        external_lib = {conv, 'real_to_int'};
-                        conv_format = strcat(conv,'(real_to_int(%s))');
+                        external_lib = {conv, RndMeth};
+                        conv_format = strcat(conv,'(',RndMeth,'(%s))');
                     end
+                case {'int32','uint32'}
+                        % supporting 'int32','uint32' as lustre int.
+                    if strcmp(lus_in_dt, 'bool')
+                        external_lib = {'bool_to_int'};
+                        conv_format = 'bool_to_int(%s)';
+                    elseif strcmp(lus_in_dt, 'real')
+                        external_lib = {RndMeth};
+                        conv_format = strcat(RndMeth, '(%s)');
+                    end
+                    
                 case {'fixdt(1,16,0)', 'fixdt(1,16,2^0,0)'}
                     % DataType conversion not supported yet
                     % temporal solution is to consider those types as int
@@ -208,8 +242,35 @@ classdef SLX2LusUtils < handle
                         external_lib = { 'bool_to_int'};
                         conv_format = 'bool_to_int(%s)';
                     elseif strcmp(lus_in_dt, 'real')
-                        external_lib = { 'real_to_int'};
-                        conv_format = 'real_to_int(%s)';
+                        external_lib = {RndMeth};
+                        conv_format = strcat(RndMeth, '(%s)');
+                    end
+                    
+                    
+                %lustre conversion
+                case 'int'
+                    if strcmp(lus_in_dt, 'bool')
+                        external_lib = {'bool_to_int'};
+                        conv_format = 'bool_to_int(%s)';
+                    elseif strcmp(lus_in_dt, 'real')
+                        external_lib = {RndMeth};
+                        conv_format = strcat(RndMeth, '(%s)');
+                    end
+                case 'real'
+                    if strcmp(lus_in_dt, 'int')
+                        external_lib = {RndMeth};
+                        conv_format = strcat(RndMeth, '(%s)');
+                    elseif strcmp(lus_in_dt, 'bool')
+                        external_lib = {'bool_to_real'};
+                        conv_format = 'bool_to_real(%s)';
+                    end
+                case 'bool'
+                    if strcmp(lus_in_dt, 'int')
+                        external_lib = {'int_to_bool'};
+                        conv_format = 'int_to_bool(%s)';
+                    elseif strcmp(lus_in_dt, 'real')
+                        external_lib = {'real_to_bool'};
+                        conv_format = 'real_to_bool(%s)';
                     end
             end
         end

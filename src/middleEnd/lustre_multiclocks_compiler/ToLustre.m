@@ -94,14 +94,14 @@ main_sampleTime = main_block.CompiledSampleTime;
 
 [nodes_code, external_libraries] = recursiveGeneration(main_block, main_sampleTime, xml_trace);
 
-
+external_lib_code = getExternalLibrariesNodes(external_libraries);
 %% writing code
 fid = fopen(nom_lustre_file, 'a');
 if fid==-1
     msg = sprintf('Opening file "%s" is not possible', nom_lustre_file);
     display_msg(msg, MsgType.ERROR, 'lustre_multiclocks_compiler', '');
 end
-fprintf(fid, '%s', nodes_code);
+fprintf(fid, '--external libraries\n%s--Simulink code\n%s',external_lib_code, nodes_code);
 fclose(fid);
 
 %% display report files
@@ -121,10 +121,10 @@ if isfield(blk, 'Content')
         if ~isempty(nodes_code_i)
             nodes_code = sprintf('%s\n%s', nodes_code_i, nodes_code);
         end
-        external_libraries = [external_libraries; external_libraries_i];
+        external_libraries = [external_libraries, external_libraries_i];
     end
     [main_node, external_nodes, external_libraries_i] = subsystem2node(blk, main_sampleTime, xml_trace);
-    external_libraries = [external_libraries; external_libraries_i];
+    external_libraries = [external_libraries, external_libraries_i];
     nodes_code = sprintf('%s\n%s\n%s', external_nodes, nodes_code, main_node);
     
 end
