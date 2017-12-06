@@ -1,7 +1,12 @@
 classdef SLX2LusUtils < handle
-    %LUS2UTILS Summary of this class goes here
-    %   Detailed explanation goes here
-    
+    %LUS2UTILS contains all functions that helps in the translation from
+    %Simulink to Lustre.
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Copyright (c) 2017 United States Government as represented by the
+    % Administrator of the National Aeronautics and Space Administration.
+    % All Rights Reserved.
+    % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     properties
     end
     
@@ -73,19 +78,19 @@ classdef SLX2LusUtils < handle
                 names = [names, names_i];
             end
             
-            result = MatlabUtils.strjoin(names, ';\n');
+            result = MatlabUtils.strjoin(names, '\n');
         end
         
-        %% get Inport/Outport names: inlining dimension
-        function [names, names_dt] = getBlockOutputsNames(blk)
+        %% get block outputs names: inlining dimension
+        function [names, names_dt] = getBlockOutputsNames(blk, srcPort)
             % This function return the names of the block
-            % outputs. 
+            % outputs.
             % Example : an Inport In with dimensio [1, 2] will be
             % translated as : In_1, In_2.
             % A block is defined by its outputs, if a block the does not
             % have outports, like Outport block, than will be defined by its
             % inports. E.g, Outport Out with dimension 2 -> Out_1, out2
-
+            
             if isempty(blk.CompiledPortWidths.Outport)
                 width = blk.CompiledPortWidths.Inport;
                 type = 'Outport';
@@ -96,21 +101,58 @@ classdef SLX2LusUtils < handle
             
             names = {};
             names_dt = {};
-            for port=1:numel(width)
+            if nargin >= 2 && ~isempty(srcPort)
+                port = srcPort + 1;% srcPort starts by zero
                 if strcmp(type, 'Outport')
                     dt = SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Inport(port));
                 else
                     dt = SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Outport(port));
                 end
+                % The width should start from the port width regarding all
+                % subsystem outputs
+                idx = sum(width(1:port-1))+1;
                 for i=1:width(port)
-                    names{numel(names) + 1} = SLX2LusUtils.name_format(strcat(blk.Name, '_', num2str(i)));
-                    names_dt{numel(names_dt) + 1} = strcat(names{i} , ': ', dt);
+                    names{i} = SLX2LusUtils.name_format(strcat(blk.Name, '_', num2str(idx)));
+                    names_dt{i} = strcat(names{i} , ': ', dt, ';');
+                    idx = idx + 1;
+                end
+            else
+                idx = 1;
+                for port=1:numel(width)
+                    if strcmp(type, 'Outport')
+                        dt = SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Inport(port));
+                    else
+                        dt = SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Outport(port));
+                    end
+                    for i=1:width(port)
+                        names{idx} = SLX2LusUtils.name_format(strcat(blk.Name, '_', num2str(idx)));
+                        names_dt{idx} = strcat(names{idx} , ': ', dt, ';');
+                        idx = idx + 1;
+                    end
                 end
             end
-            
         end
         
-        %% Change Simulink DataTypes to Lustre DataTypes. Initial default 
+        %% get block inputs names. E.g subsystem taking input signals from differents blocks.
+        % We need to go over all linked blocks and get their output names
+        % in the corresponding port number.
+        % Read PortConnectivity documentation for more information.
+        function [inputs] = getBlockInputsNames(parent, blk, Port)
+            srcBlks = blk.PortConnectivity(...
+                arrayfun(@(x) ~isempty(x.SrcBlock), blk.PortConnectivity));
+            if nargin >= 3 && ~isempty(Port)
+                srcBlks = srcBlks(Port);
+            end
+            inputs = {};
+            for b=srcBlks'
+                srcPort = b.SrcPort;
+                srcHandle = b.SrcBlock;
+                src = get_struct(parent, srcHandle);
+                n_i = SLX2LusUtils.getBlockOutputsNames(src, srcPort);
+                inputs = [inputs, n_i];
+            end
+        end
+        %% Change Simulink DataTypes to Lustre DataTypes. Initial default
         %value is also given as a string.
         function [ Lustre_type, initial_value ] = get_lustre_dt( slx_dt)
             if strcmp(slx_dt, 'real') || strcmp(slx_dt, 'int') || strcmp(slx_dt, 'bool')
@@ -118,14 +160,57 @@ classdef SLX2LusUtils < handle
             else
                 if strcmp(slx_dt, 'logical') || strcmp(slx_dt, 'boolean')
                     Lustre_type = 'bool';
-                    initial_value = 'false';
                 elseif strncmp(slx_dt, 'int', 3) || strncmp(slx_dt, 'uint', 4) || strncmp(slx_dt, 'fixdt(1,16,', 11) || strncmp(slx_dt, 'sfix64', 6)
                     Lustre_type = 'int';
-                    initial_value = '0';
                 else
                     Lustre_type = 'real';
-                    initial_value = '0.0';
                 end
+            end
+            if strcmp(Lustre_type, 'bool')
+                initial_value = 'false';
+            elseif strcmp(Lustre_type, 'int')
+                initial_value = '0';
+            else
+                initial_value = '0.0';
+            end
+        end
+        
+        %% Data type conversion node name
+        function [external_lib, conv_format] = dataType_conversion(inport_dt, outport_dt)
+            external_lib = {};
+            conv_format = '';
+            lus_in_dt = SLX2LusUtils.get_lustre_dt( inport_dt);
+            switch outport_dt
+                case {'double', 'single'}
+                    if strcmp(lus_in_dt, 'int')
+                        external_lib = {'int_to_real'};
+                        conv_format = 'int_to_real(%s)';
+                    elseif strcmp(lus_in_dt, 'bool')
+                        external_lib = {'real_to_bool'};
+                        conv_format = 'real_to_bool(%s)';
+                    end
+                case {'int8','uint8','int16','uint16','int32','uint32',}
+                    conv = strcat('int_to_', outport_dt);
+                    if strcmp(lus_in_dt, 'int')
+                        external_lib = {conv};
+                        conv_format = strcat(conv,'(%s)');
+                    elseif strcmp(lus_in_dt, 'bool')
+                        external_lib = {conv, 'bool_to_int'};
+                        conv_format = strcat(conv,'(bool_to_int(%s))');
+                    elseif strcmp(lus_in_dt, 'real')
+                        external_lib = {conv, 'real_to_int'};
+                        conv_format = strcat(conv,'(real_to_int(%s))');
+                    end
+                case {'fixdt(1,16,0)', 'fixdt(1,16,2^0,0)'}
+                    % DataType conversion not supported yet
+                    % temporal solution is to consider those types as int
+                    if strcmp(lus_in_dt, 'bool')
+                        external_lib = { 'bool_to_int'};
+                        conv_format = 'bool_to_int(%s)';
+                    elseif strcmp(lus_in_dt, 'real')
+                        external_lib = { 'real_to_int'};
+                        conv_format = 'real_to_int(%s)';
+                    end
             end
         end
     end

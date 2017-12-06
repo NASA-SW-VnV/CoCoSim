@@ -61,11 +61,13 @@ for i=1:numel(fields)
     end
     b.write_code(subsys, blk, main_sampleTime, xml_trace);
     body = [body, b.code];
-    variables_str = [variables_str; MatlabUtils.strjoin(b.variables, ';')];
+    variables_str = [variables_str, char(MatlabUtils.strjoin(b.variables, '\n\t'))];
     external_nodes = [external_nodes, b.external_nodes];
-    external_libraries = [external_libraries; b.external_libraries];
+    external_libraries = [external_libraries, b.external_libraries];
 end
-
+if ~isempty(variables_str)
+    variables_str = ['var ' variables_str];
+end
 end
 
 

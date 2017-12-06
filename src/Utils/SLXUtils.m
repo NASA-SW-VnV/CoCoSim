@@ -9,9 +9,15 @@ classdef SLXUtils
         
         %% Try to calculate Block sample time using GCD
         function st = get_BlockDiagram_SampleTime(file_name)
+            try
             warning off;
             ts = Simulink.BlockDiagram.getSampleTimes(file_name);
             warning on;
+            catch ME
+                display_msg(ME.getReport(), MsgType.ERROR, 'SLXUtils.get_BlockDiagram_SampleTime', '' );
+                st = 1;
+                return;
+            end
             st = 1;
             for t=ts
                 if ~isempty(t.Value) && isnumeric(t.Value)

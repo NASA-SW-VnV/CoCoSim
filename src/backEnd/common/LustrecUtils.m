@@ -1308,37 +1308,9 @@ classdef LustrecUtils < handle
                 index = 0;
                 for i=0:nb_steps-1
                     for j=1:numel(input_struct.signals)
-                        dim = input_struct.signals(j).dimensions;
-                        if numel(dim)==1
-                            index2 = index + dim;
-                            lustre_input_values(index+1:index2) = ...
-                                input_struct.signals(j).values(i+1,:)';
-                        elseif numel(dim)==2
-                            index2 = index + (dim(1) * dim(2));
-                            signal_values = [];
-                            y = input_struct.signals(j).values(:,:,i+1);
-                            for idr=1:dim(1)
-                                signal_values = [signal_values; y(idr,:)'];
-                            end
-                            lustre_input_values(index+1:index2) = signal_values;
-                        elseif numel(dim)==3
-                            index2 = index + prod(dim);
-                            signal_values = [];
-                            for k=1:dim(3)
-                                y = input_struct.signals(j).values(:,:,k,i+1);
-                                for idr=1:dim(1)
-                                    signal_values = [signal_values; y(idr,:)'];
-                                end
-                            end
-                            lustre_input_values(index+1:index2) = signal_values;
-                            
-                        else
-                            display_msg(['We do not support dimension ' num2str(dim)], ...
-                                MsgType.ERROR, 'getLustreInputValuesFormat', '');
-                            status = 1;
-                            return;
-                        end
-                        
+                        [signal_values, width] = LustrecUtils.inline_array(input_struct.signals(j), i);                        
+                        index2 = index + width;
+                        lustre_input_values(index+1:index2) = signal_values;
                         index = index2;
                     end
                 end
@@ -1409,27 +1381,9 @@ classdef LustrecUtils < handle
             index_out = 0;
             for i=0:nb_steps-1
                 for k=1:numberOfOutputs
-                    dim = yout_signals(k).dimensions;
-                    if numel(dim)==1
-                        yout_values = yout_signals(k).values(i+1,:);
-                    elseif numel(dim)==2
-                        yout_values = [];
-                        y = yout_signals(k).values(:,:,i+1);
-                        for idr=1:dim(1)
-                            yout_values = [yout_values; y(idr,:)'];
-                        end
-                        dim = dim(1)*dim(2);
-                    else
-                        yout_values = [];
-                        for z=1:dim(3)
-                            y = yout_signals(k).values(:,:,z, i+1);
-                            for idr=1:dim(1)
-                                yout_values = [yout_values; y(idr,:)'];
-                            end
-                        end
-                        dim = prod(dim);
-                    end
-                    for j=1:dim
+                    [yout_values, width] = LustrecUtils.inline_array(yout_signals(k), i);
+     
+                    for j=1:width
                         index_out = index_out + 1;
                         output_value = ...
                             regexp(outputs_array{index_out},...
@@ -1447,6 +1401,7 @@ classdef LustrecUtils < handle
                             if  ~valid
                                 diff_name =  ...
                                     BUtils.naming_alone(yout_signals(k).blockName);
+                                diff_name =  strcat(diff_name, '(',num2str(j), ')');
                                 error_index = i+1;
                                 break
                             end
@@ -1470,6 +1425,41 @@ classdef LustrecUtils < handle
                 end
             end
         end
+        
+        %%
+        function [y_inlined, width, status] = inline_array(y_struct, time_step)
+            y_inlined = [];
+            width = 0;
+            status = 0;
+            dim = y_struct.dimensions;
+            if numel(dim)==1
+                y_inlined = y_struct.values(time_step+1,:);
+                width = dim;
+            elseif numel(dim)==2
+                y_inlined = [];
+                y = y_struct.values(:,:,time_step+1);
+                for idr=1:dim(1)
+                    y_inlined = [y_inlined; y(idr,:)'];
+                end
+                width = dim(1)*dim(2);
+            elseif numel(dim)== 3
+                y_inlined = [];
+                for z=1:dim(3)
+                    y = y_struct.values(:,:,z, time_step+1);
+                    for idr=1:dim(1)
+                        y_inlined = [y_inlined; y(idr,:)'];
+                    end
+                end
+                width = prod(dim);
+            else
+                display_msg(['We do not support dimension ' num2str(dim)], ...
+                    MsgType.ERROR, 'inline_array', '');
+                status = 1;
+                return;
+            end
+        end
+        
+        
         %% Show CEX
         function show_CEX(error_index,...
                 input_struct, ...
@@ -1484,42 +1474,19 @@ classdef LustrecUtils < handle
                 f_msg = sprintf('*****inputs: \n');
                 display_msg(f_msg, MsgType.RESULT, 'CEX', '');
                 for j=1:numberOfInports
-                    dim = input_struct.signals(j).dimensions;
-                    if numel(dim)==1
-                        in = input_struct.signals(j).values(i+1,:);
-                        name = input_struct.signals(j).name;
-                        for k=1:dim
-                            f_msg = sprintf('input %s_%d: %f\n',name,k,in(k));
-                            display_msg(f_msg, MsgType.RESULT, 'CEX', '');
-                        end
-                    else
-                        in = input_struct.signals(j).values(:,:,i+1);
-                        name = input_struct.signals(j).name;
-                        for dim1=1:dim(1)
-                            for dim2=1:dim(2)
-                                f_msg = sprintf('input %s_%d_%d: %10.10f\n',...
-                                    name,dim1,dim2,in(dim1, dim2));
-                                display_msg(f_msg, MsgType.RESULT, 'CEX', '');
-                            end
-                        end
+                    [in, width, ~] = LustrecUtils.inline_array(input_struct.signals(j), i);
+                    name = input_struct.signals(j).name;
+                    for k=1:width
+                        f_msg = sprintf('input %s_%d: %f\n',name,k,in(k));
+                        display_msg(f_msg, MsgType.RESULT, 'CEX', '');
                     end
                 end
+                
                 f_msg = sprintf('*****outputs: \n');
                 display_msg(f_msg, MsgType.RESULT, 'CEX', '');
                 for k=1:numberOfOutputs
-                    dim = yout_signals(k).dimensions;
-                    if numel(dim)==2
-                        %                                 if dim(1)>1
-                        yout_values = [];
-                        y = yout_signals(k).values(:,:,i+1);
-                        for idr=1:dim(1)
-                            yout_values = [yout_values; y(idr,:)'];
-                        end
-                        dim = dim(1)*dim(2);
-                    else
-                        yout_values = yout_signals(k).values(i+1,:);
-                    end
-                    for j=1:dim
+                    [yout_values, width, ~] = LustrecUtils.inline_array(yout_signals(k), i);
+                    for j=1:width
                         index_out = index_out + 1;
                         output_value = regexp(outputs_array{index_out},'\s*:\s*','split');
                         if ~isempty(output_value)

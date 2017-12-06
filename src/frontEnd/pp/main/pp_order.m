@@ -56,7 +56,8 @@ else
     pp_order_map = containers.Map('KeyType', 'int32', 'ValueType', 'any');
     
     % -1 means not to call
-    pp_order_map(-1) = {'pp2/blocks/atomic_process.m'};
+    pp_order_map(-1) = {'pp2/blocks/atomic_process.m', ...
+        'pp2/blocks/sameDT_process.m'};
     % 0 means all this functions will be called first.
     pp_order_map(0) = {'pp2/blocks/inport_process.m', ...
         'pp2/blocks/outport_process.m'};

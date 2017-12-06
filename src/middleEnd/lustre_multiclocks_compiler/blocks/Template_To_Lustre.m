@@ -6,7 +6,7 @@ classdef Template_To_Lustre < Block_To_Lustre
     
     methods
         
-        function  write_code(obj, varargin)
+        function  write_code(obj, parent, blk)
             obj.code = 'You code here';
         end
         
