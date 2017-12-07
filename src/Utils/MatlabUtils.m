@@ -17,12 +17,11 @@ classdef MatlabUtils
             if nargin < 1 || nargin > 2
                 narginchk(1, 2);
             end
-            
-            strIsString  = isstring(str);
+
             strIsCellstr = iscellstr(str);
             
             % Check input arguments.
-            if ~strIsCellstr && ~strIsString
+            if ~strIsCellstr 
                 error(message('MATLAB:strjoin:InvalidCellType'));
             end
             
@@ -46,13 +45,7 @@ classdef MatlabUtils
             
             str = reshape(str, numStrs, 1);
             
-            if strIsString
-                if isempty(str)
-                    joinedStr = string('');
-                else
-                    joinedStr = join(str, delimiter);
-                end
-            elseif numStrs == 0
+            if numStrs == 0
                 joinedStr = '';
             else
                 joinedCell = cell(2, numStrs);
