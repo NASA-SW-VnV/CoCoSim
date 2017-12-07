@@ -31,16 +31,19 @@ try
 catch ME
     causes = ME.cause;
     for c=causes'
-       if strcmp(c{1}.identifier,  'Simulink:Engine:BlkInAlgLoopErr')
-           display_msg('Algebraic Loop detected', MsgType.INFO, 'PP', '');
-           msg = c{1}.message;
-           tokens = regexp(msg, 'matlab:open\w+\s*\(''([^''])+''', 'tokens', 'once');
-           subsys = tokens{1};
-           display_msg(['Turn off atomic in block' subsys], MsgType.INFO, 'PP', '');
-           set_param(subsys,'TreatAsAtomicUnit','off');
-           solveAlgebraicLoops(new_model_base);
-           break;
-       end
+        if strcmp(c{1}.identifier,  'Simulink:Engine:BlkInAlgLoopErr')
+            display_msg('Algebraic Loop detected', MsgType.INFO, 'PP', '');
+            msg = c{1}.message;
+            tokens = regexp(msg, 'matlab:open\w+\s*\(''([^''])+''', 'tokens', 'once');
+            subsys = tokens{1};
+            try
+                display_msg(['Turn off atomic in block' subsys], MsgType.INFO, 'PP', '');
+                set_param(subsys,'TreatAsAtomicUnit','off');
+                solveAlgebraicLoops(new_model_base);
+            catch
+            end
+            break;
+        end
     end
     return;
 end
