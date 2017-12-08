@@ -30,7 +30,7 @@ classdef BUtils
         %%
         function new_name = adapt_block_name(var_name, ID)
             %     new_name = regexprep(var_name,'^__(\w)','$1');
-            var_name = char(var_name);
+            var_name = matlab.lang.makeValidName(char(var_name));
             prefix = '';
             if nargin >= 2
                 ID = char(ID);

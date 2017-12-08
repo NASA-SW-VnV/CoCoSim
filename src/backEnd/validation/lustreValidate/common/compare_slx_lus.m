@@ -25,6 +25,12 @@ function [valid, ...
 %   tests_method == 4: We generate Simulink model from the lustre file
 %           using Lus2SLX and then compile it to Lus2 file using CoCosim.
 %           We prove Lus1 <=> Lus2 using compositional verification
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Copyright (c) 2017 United States Government as represented by the
+% Administrator of the National Aeronautics and Space Administration.
+% All Rights Reserved.
+% Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 if ~exist('show_models', 'var')
     show_models = 0;
@@ -100,7 +106,7 @@ if tests_method == 2
         IMAX,...
         model_checker);
     if isempty(T)
-        display_msg(sprintf('Mutation testing has failed.'), ...
+        display_msg(sprintf('Mutation testing has failed. Random tests will be used instead.'), ...
             MsgType.INFO, 'compare_slx_lus', '');
         display_msg(sprintf('Using random vector test instead of Mutation testing'), ...
             MsgType.INFO, 'compare_slx_lus', '');
@@ -187,9 +193,8 @@ if (tests_method == 3)
         display_msg(msg, MsgType.RESULT, 'validation', '');
         
     else
-        msg = ['Method 3 with CoCosim is not supported yet/'...
-            'Methode 3 works only with Simulink Design Verifier license for the moment.'];
-        display_msg(msg, MsgType.ERROR, 'COMPARE_SLX_LUS', '');
+        msg = 'This method requires Simulink Design Verifier license.';
+        errordlg(msg);
     end
 elseif (tests_method == 4) %4- Prove LUS1 <=> LUS2.
     tools_config;

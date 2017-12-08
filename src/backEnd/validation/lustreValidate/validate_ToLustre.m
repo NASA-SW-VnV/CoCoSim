@@ -1,5 +1,5 @@
 function [valid, validation_compute,lustrec_failed, ...
-    lustrec_binary_failed, sim_failed, lus_file_path] = validate_translation(model_full_path, tests_method, model_checker, show_model, deep_CEX, min_max_constraints)
+    lustrec_binary_failed, sim_failed, lus_file_path] = validate_ToLustre(model_full_path, tests_method, model_checker, show_model, deep_CEX, min_max_constraints)
 
 
 validation_start = tic;
