@@ -29,7 +29,8 @@ if exist(fullfile(cocoSim_root, 'src', 'frontEnd', 'IR', 'std_IR', 'utils', 'mak
     cd(fullfile(cocoSim_root, 'src', 'frontEnd', 'IR', 'std_IR', 'utils'));
     try
         make
-    catch
+    catch  ME
+        display_msg(ME.getReport(), MsgType.ERROR, 'cocosim_config', '');
     end
     cd(PWD);
 end
