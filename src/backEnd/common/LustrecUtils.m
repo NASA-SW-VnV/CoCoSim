@@ -282,8 +282,25 @@ classdef LustrecUtils < handle
             
         end
         %% construct_EMF_verif_model
+        function status = check_DType_and_Dimensions(slx_file_name)
+            status = 0;
+            sys_list = find_system(slx_file_name, 'LookUnderMasks', 'all', 'RegExp', 'on', 'OutDataTypeStr', '[u]?int(8|16)');
+            if ~isempty(sys_list)
+                msg = sprintf('Model contains integers ports differens than int32.');
+                msg = [msg, 'Lus2slx current version support only int32 dataType'];
+                display_msg(msg, MsgType.ERROR, ...
+                    'LustrecUtils.check_DType_and_Dimensions','');
+                status = 1;
+            end
+        end
+            
         function [status, new_name_path] = construct_EMF_verif_model(slx_file_name,...
                 lus_file_path, node_name, output_dir)
+            new_name_path = '';
+            [status] = LustrecUtils.check_DType_and_Dimensions(slx_file_name);
+            if status
+                return;
+            end
             tools_config;
             status = BUtils.check_files_exist(LUSTREC, LUCTREC_INCLUDE_DIR);
             if status
