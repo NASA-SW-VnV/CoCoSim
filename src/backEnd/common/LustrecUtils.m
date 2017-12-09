@@ -284,16 +284,102 @@ classdef LustrecUtils < handle
         %% construct_EMF_verif_model
         function status = check_DType_and_Dimensions(slx_file_name)
             status = 0;
-            sys_list = find_system(slx_file_name, 'LookUnderMasks', 'all', 'RegExp', 'on', 'OutDataTypeStr', '[u]?int(8|16)');
+            sys_list = find_system(slx_file_name, 'LookUnderMasks', 'all',...
+                'RegExp', 'on', 'OutDataTypeStr', '[u]?int(8|16)');
             if ~isempty(sys_list)
                 msg = sprintf('Model contains integers ports differens than int32.');
                 msg = [msg, 'Lus2slx current version support only int32 dataType'];
                 display_msg(msg, MsgType.ERROR, ...
                     'LustrecUtils.check_DType_and_Dimensions','');
                 status = 1;
+                return;
+            end
+            % Dimensions should be less than 2
+            inport_list = find_system(slx_file_name, 'SearchDepth', 1, 'BlockType', 'Inport');
+            try
+                code_on=sprintf('%s([], [], [], ''compile'')', slx_file_name);
+                eval(code_on);
+            catch
+            end
+            dimensions = get_param(inport_list, 'CompiledPortDimensions');
+            outport_dimensions = cellfun(@(x) x.Outport, dimensions, 'un', 0);
+            for i=1:numel(outport_dimensions)
+                dim = outport_dimensions{i};
+                if numel(dim) > 3
+                    
+                    
+                    msg = sprintf('Invalid inport dimension "%s" with dimension %s: Lus2slx functions does not support dimension > 2.',...
+                        inport_list{i}, num2str(dim));
+                    display_msg(msg, MsgType.ERROR, ...
+                        'LustrecUtils.check_DType_and_Dimensions','');
+                    status = 1;
+                    break;
+                    
+                    
+                end
+            end
+            code_off=sprintf('%s([], [], [], ''term'')', slx_file_name);
+            eval(code_off);
+        end
+        
+        function inport_idx = add_demux(new_model_name, inport_idx, inport_name, dim,...
+                demux_outHandle, demux_inHandle)
+            p = get_param(demux_outHandle.Inport(inport_idx), 'Position');
+            x = p(1) - 50*inport_idx;
+            y = p(2);
+            demux_path = strcat(new_model_name,'/Demux',inport_name);
+            demux_pos(1) = (x - 10);
+            demux_pos(2) = (y - 10);
+            demux_pos(3) = (x + 10);
+            demux_pos(4) = (y + 50 * dim);
+            h = add_block('simulink/Signal Routing/Demux',...
+                demux_path,...
+                'MakeNameUnique', 'on', ...
+                'Outputs', num2str(dim),...
+                'Position',demux_pos);
+            demux_Porthandl = get_param(h, 'PortHandles');
+            add_line(new_model_name,...
+                demux_inHandle.Outport(1),...
+                demux_Porthandl.Inport(1), ...
+                'autorouting', 'on');
+            for j=1:dim
+                add_line(new_model_name,...
+                    demux_Porthandl.Outport(j),...
+                    demux_outHandle.Inport(inport_idx), ...
+                    'autorouting', 'on');
+                inport_idx = inport_idx + 1;
             end
         end
-            
+        
+        function idx = add_mux(new_model_name, outport_idx, i, muxID, dim,...
+                mux_inHandle, mux_outHandle, dim_3, colon )
+            p = get_param(mux_inHandle.Outport(outport_idx+1), 'Position');
+            x = p(1) + 50;
+            y = p(2);
+            mux_path = strcat(new_model_name,'/Mux',muxID);
+            mux_pos(1) = (x - 10);
+            mux_pos(2) = (y - 10);
+            mux_pos(3) = (x + 10);
+            mux_pos(4) = (y + 50 * dim);
+            h = add_block('simulink/Signal Routing/Mux',...
+                mux_path,...
+                'MakeNameUnique', 'on', ...
+                'Inputs', num2str(dim),...
+                'Position',mux_pos);
+            mux_Porthandl = get_param(h, 'PortHandles');
+            add_line(new_model_name,...
+                mux_Porthandl.Outport(1),...
+                mux_outHandle.Inport(i), ...
+                'autorouting', 'on');
+            for j=1:dim
+                idx = outport_idx + dim_3*(j-1) + colon;
+                add_line(new_model_name,...
+                    mux_inHandle.Outport(idx), ...
+                    mux_Porthandl.Inport(j),...
+                    'autorouting', 'on');
+                
+            end
+        end
         function [status, new_name_path] = construct_EMF_verif_model(slx_file_name,...
                 lus_file_path, node_name, output_dir)
             new_name_path = '';
@@ -338,18 +424,18 @@ classdef LustrecUtils < handle
             Simulink.BlockDiagram.copyContentsToSubsystem(slx_file_name, original_sub_path);
             
             %add inputs and outputs for original subsystem
-            portHandles = get_param(original_sub_path, 'PortHandles');
-            nb_inports = numel(portHandles.Inport);
-            nb_outports = numel(portHandles.Outport);
+            OrigSubPortHandles = get_param(original_sub_path, 'PortHandles');
+            nb_inports = numel(OrigSubPortHandles.Inport);
+            nb_outports = numel(OrigSubPortHandles.Outport);
             m = max(nb_inports, nb_outports);
             set_param(original_sub_path,'Position',[emf_pos(1), emf_pos(2), emf_pos(3), emf_pos(2) + 50 * m]);
             emf_pos(2) = emf_pos(2) + 50 * m + 50;
             set_param(emf_sub_path,'Position',[emf_pos(1), emf_pos(2), emf_pos(3), emf_pos(2) + 50 * m]);
             
             portHandlesEMF = get_param(emf_sub_path, 'PortHandles');
-            inport_idx = 1;
+            emf_inport_idx = 1;
             for i=1:nb_inports
-                p = get_param(portHandles.Inport(i), 'Position');
+                p = get_param(OrigSubPortHandles.Inport(i), 'Position');
                 x = p(1) - 50;
                 y = p(2);
                 inport_name = strcat(new_model_name,'/In',num2str(i));
@@ -357,9 +443,9 @@ classdef LustrecUtils < handle
                     inport_name,...
                     'MakeNameUnique', 'on', ...
                     'Position',[(x-10) (y-10) (x+10) (y+10)]);
-                SrcBlkH = get_param(inport_handle,'PortHandles');
+                inportPortHandle = get_param(inport_handle,'PortHandles');
                 add_line(new_model_name,...
-                    SrcBlkH.Outport(1), portHandles.Inport(i),...
+                    inportPortHandle.Outport(1), OrigSubPortHandles.Inport(i),...
                     'autorouting', 'on');
                 
                 %add the inport to emf subsytem, it depends to dimension we should
@@ -369,63 +455,64 @@ classdef LustrecUtils < handle
                 dim_struct = get_param(inport_handle, 'CompiledPortDimensions');
                 code_off=sprintf('%s([], [], [], ''term'')', new_model_name);
                 eval(code_off);
-                if numel(dim_struct.Outport)==2 ...
-                        && ~(dim_struct.Outport(1)==1 || dim_struct.Outport(2)==1)
-                    
-                    msg = sprintf('Invalid inport "%s": We do not support Matrix inports.',...
-                        get_param(inport_handle, 'Name'));
+                isMatrix = false;
+                if numel(dim_struct.Outport)==1
+                     dim = dim_struct.Outport;
+                elseif numel(dim_struct.Outport)==2 
+                    if (dim_struct.Outport(1)==1 || dim_struct.Outport(2)==1)
+                        dim = dim_struct.Outport(1) * dim_struct.Outport(2);
+                    else
+                        isMatrix = true;
+                        dim = dim_struct.Outport;
+                    end
+                elseif numel(dim_struct.Outport) == 3
+                    if  (dim_struct.Outport(2)==1 || dim_struct.Outport(3)==1)
+                        dim = dim_struct.Outport(2) * dim_struct.Outport(3);
+                    else
+                        isMatrix = true;
+                        dim = dim_struct.Outport;
+                    end
+                else
+                    msg = sprintf('Invalid inport "%s": We do not support dimension [%s].',...
+                        get_param(inport_handle, 'Name'), num2str(dim_struct.Outport));
                     display_msg(msg, MsgType.ERROR, ...
                         'compare_slx_lus','');
                     status = 1;
                     return;
-                elseif numel(dim_struct.Outport)==2
-                    dim = dim_struct.Outport(1) * dim_struct.Outport(2);
-                elseif numel(dim_struct.Outport) > 2
-                    if numel(dim_struct.Outport) == 3 ...
-                            && (dim_struct.Outport(1)==1 || dim_struct.Outport(2)==1)
-                        dim = dim_struct.Outport(2) * dim_struct.Outport(3);
-                    else
-                        msg = sprintf('Invalid inport "%s": We do not support Matrix inports.',...
-                            get_param(inport_handle, 'Name'));
-                        display_msg(msg, MsgType.ERROR, ...
-                            'compare_slx_lus','');
-                        status = 1;
-                        return;
-                    end
-                else
-                    dim = dim_struct.Outport;
                 end
                 if dim == 1
                     add_line(new_model_name,...
-                        SrcBlkH.Outport(1), portHandlesEMF.Inport(inport_idx), ...
+                        inportPortHandle.Outport(1), portHandlesEMF.Inport(emf_inport_idx), ...
                         'autorouting', 'on');
-                    inport_idx = inport_idx + 1;
-                else
-                    p = get_param(portHandlesEMF.Inport(inport_idx), 'Position');
-                    x = p(1) - 50;
-                    y = p(2);
-                    demux_path = strcat(new_model_name,'/Demux',num2str(i));
-                    demux_pos(1) = (x - 10);
-                    demux_pos(2) = (y - 10);
-                    demux_pos(3) = (x + 10);
-                    demux_pos(4) = (y + 50 * dim);
-                    h = add_block('simulink/Signal Routing/Demux',...
-                        demux_path,...
-                        'MakeNameUnique', 'on', ...
-                        'Outputs', num2str(dim),...
-                        'Position',demux_pos);
-                    demux_Porthandl = get_param(h, 'PortHandles');
-                    add_line(new_model_name,...
-                        SrcBlkH.Outport(1),...
-                        demux_Porthandl.Inport(1), ...
-                        'autorouting', 'on');
-                    for j=1:dim
+                    emf_inport_idx = emf_inport_idx + 1;
+                elseif ~isMatrix
+                    emf_inport_idx = ...
+                        LustrecUtils.add_demux(new_model_name, emf_inport_idx, ...
+                        strcat('In',num2str(i)), dim, portHandlesEMF, inportPortHandle);
+                elseif isMatrix
+                    for colon=1:dim(2)
+                        concat_path = strcat(new_model_name,'/Selector_',...
+                            strcat('In',num2str(i)), num2str(colon));
+                        IndexParamArray{1} = num2str(colon);
+                        IndexParamArray{2} = '1';
+                        h = add_block('simulink/Signal Routing/Selector',...
+                            concat_path,...
+                            'MakeNameUnique', 'on', ...
+                            'IndexMode', 'One-based',...
+                            'IndexParamArray', IndexParamArray, ...
+                            'NumberOfDimensions', '2',...
+                            'IndexOptions','Index vector (dialog),Select all');
+                        concat_Porthandl = get_param(h, 'PortHandles');
                         add_line(new_model_name,...
-                            demux_Porthandl.Outport(j),...
-                            portHandlesEMF.Inport(inport_idx), ...
+                            inportPortHandle.Outport(1),...
+                            concat_Porthandl.Inport(1), ...
                             'autorouting', 'on');
-                        inport_idx = inport_idx + 1;
+                        demuxID = strcat('In',num2str(i),'_', num2str(colon));
+                        emf_inport_idx = ...
+                            LustrecUtils.add_demux(new_model_name, emf_inport_idx, ...
+                            demuxID, dim(3), portHandlesEMF, concat_Porthandl);
                     end
+                    
                 end
             end
             % add verification subsystem
@@ -528,72 +615,71 @@ classdef LustrecUtils < handle
             end
             
             %link outports
-            portHandlesVerif = get_param(verif_sub_path, 'PortHandles');
-            outport_idx = 1;
+            VerifportHandles = get_param(verif_sub_path, 'PortHandles');
+            outport_idx = 0;
             
             for i=1:nb_outports
-                add_line(new_model_name, portHandles.Outport(i), portHandlesVerif.Inport(2*i-1), 'autorouting', 'on');
+                add_line(new_model_name, OrigSubPortHandles.Outport(i), VerifportHandles.Inport(2*i-1), 'autorouting', 'on');
                 code_on=sprintf('%s([], [], [], ''compile'')', new_model_name);
                 eval(code_on);
-                dim_struct = get_param(portHandles.Outport(i), 'CompiledPortDimensions');
+                dim_struct = get_param(OrigSubPortHandles.Outport(i), 'CompiledPortDimensions');
                 code_off=sprintf('%s([], [], [], ''term'')', new_model_name);
                 eval(code_off);
-                if numel(dim_struct)==2 ...
-                        && ~(dim_struct(1)==1 || dim_struct(2)==1)
-                    
-                    msg = sprintf('Invalid inport "%s": We do not support Matrix inports.',...
-                        get_param(portHandles.Outport(i), 'Name'));
+                isMatrix = false;
+                if numel(dim_struct)==1
+                     dim = dim_struct;
+                elseif numel(dim_struct)==2 
+                    if (dim_struct(1)==1 || dim_struct(2)==1)
+                        dim = dim_struct(1) * dim_struct(2);
+                    else
+                        isMatrix = true;
+                        dim = dim_struct;
+                    end
+                elseif numel(dim_struct) == 3
+                    if  (dim_struct(2)==1 || dim_struct(3)==1)
+                        dim = dim_struct(2) * dim_struct(3);
+                    else
+                        isMatrix = true;
+                        dim = dim_struct;
+                    end
+                else
+                    msg = sprintf('Invalid inport "%s": We do not support dimension [%s].',...
+                        get_param(OrigSubPortHandles.Outport(i), 'Name'), num2str(dim_struct));
                     display_msg(msg, MsgType.ERROR, ...
                         'compare_slx_lus','');
                     status = 1;
                     return;
-                elseif numel(dim_struct)==2
-                    dim = dim_struct(1) * dim_struct(2);
-                elseif numel(dim_struct) > 2
-                    if numel(dim_struct) == 3 ...
-                            && (dim_struct(1)==1 || dim_struct(2)==1)
-                        dim = dim_struct(2) * dim_struct(3);
-                    else
-                        msg = sprintf('Invalid inport "%s": We do not support Matrix inports.',...
-                            get_param(portHandles.Outport(i), 'Name'));
-                        display_msg(msg, MsgType.ERROR, ...
-                            'compare_slx_lus','');
-                        status = 1;
-                        return;
-                    end
-                    
-                else
-                    dim = dim_struct;
                 end
+                
+                
                 if dim == 1
-                    add_line(new_model_name, portHandlesEMF.Outport(outport_idx), portHandlesVerif.Inport(2*i), 'autorouting', 'on');
                     outport_idx = outport_idx + 1;
-                else
-                    p = get_param(portHandlesEMF.Outport(outport_idx), 'Position');
-                    x = p(1) + 50;
-                    y = p(2);
-                    mux_path = strcat(new_model_name,'/Mux',num2str(i));
-                    mux_pos(1) = (x - 10);
-                    mux_pos(2) = (y - 10);
-                    mux_pos(3) = (x + 10);
-                    mux_pos(4) = (y + 50 * dim);
-                    h = add_block('simulink/Signal Routing/Mux',...
-                        mux_path,...
-                        'MakeNameUnique', 'on', ...
-                        'Inputs', num2str(dim),...
-                        'Position',mux_pos);
-                    mux_Porthandl = get_param(h, 'PortHandles');
-                    add_line(new_model_name,...
-                        mux_Porthandl.Outport(1),...
-                        portHandlesVerif.Inport(2*i), ...
-                        'autorouting', 'on');
-                    for j=1:dim
-                        add_line(new_model_name,...
-                            portHandlesEMF.Outport(outport_idx), ...
-                            mux_Porthandl.Inport(j),...
-                            'autorouting', 'on');
-                        outport_idx = outport_idx + 1;
+                    add_line(new_model_name, portHandlesEMF.Outport(outport_idx), VerifportHandles.Inport(2*i), 'autorouting', 'on');
+                elseif ~isMatrix
+                    outport_idx = LustrecUtils.add_mux(new_model_name, outport_idx, 2*i, num2str(i), dim,...
+                        portHandlesEMF, VerifportHandles, 1, 1 );
+                elseif isMatrix
+                    concat_path = strcat(new_model_name,'/Concatenate_',...
+                            strcat('Out',num2str(i)));
+                        NumInputs = dim(3);
+                        h = add_block('simulink/Math Operations/Vector Concatenate',...
+                            concat_path,...
+                            'MakeNameUnique', 'on', ...
+                            'NumInputs', num2str(NumInputs), ...
+                            'ConcatenateDimension', '2',...
+                            'Mode','Multidimensional array');
+                        concat_Porthandl = get_param(h, 'PortHandles');
+                    for colon=1:dim(3)
+                        
+                        muxID = strcat('Out',num2str(i),'_', num2str(colon));
+                        last_index = LustrecUtils.add_mux(new_model_name, outport_idx, colon, muxID, dim(2),...
+                            portHandlesEMF, concat_Porthandl, dim(3), colon );
                     end
+                    add_line(new_model_name,...
+                                concat_Porthandl.Outport(1),...
+                                VerifportHandles.Inport(2*i), ...
+                                'autorouting', 'on');
+                    outport_idx = last_index;
                 end
             end
             
