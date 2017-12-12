@@ -31,7 +31,7 @@ if ~exist('IMIN', 'var')
     IMIN = -1000;
 end
 if ~exist('MAX_nb_test', 'var')
-    MAX_nb_test = 0;
+    MAX_nb_test = 3;
 end
 if ~exist('Min_coverage', 'var')
     Min_coverage = 100;
