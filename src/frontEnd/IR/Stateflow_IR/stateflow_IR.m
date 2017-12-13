@@ -1,4 +1,4 @@
-function program =  stateflow_IR( chart_path , output_dir, print_in_file)
+function program =  stateflow_IR( chart_path , print_in_file, output_dir)
 %STATEFLOW_IR generatesan internal representation for a Stateflow chart
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -12,10 +12,12 @@ if nargin ==0 || isempty(chart_path)
         MsgType.ERROR, 'stateflow_IR', '');
     return;
 end
-if nargin < 2 || isempty(output_dir)
+if nargin < 3 || isempty(output_dir)
     output_dir = pwd;
 end
-if nargin < 3 || isempty(print_in_file)
+MatlabUtils.mkdir(output_dir);
+
+if nargin < 2 || isempty(print_in_file)
     print_in_file = 0;
 end
 
@@ -38,28 +40,33 @@ end
 program = Program(chart_path, src_states, src_junctions, src_fcts, data, 0);
 
 if print_in_file
-    json_text = json_encode(program);
-    json_text = regexprep(json_text, '\\/','/');
-    fname = fullfile(output_dir, strcat(file_name,'_tmp.json'));
-    fname_formatted = fullfile(output_dir, strcat(file_name,'.json'));
-    fid = fopen(fname, 'w');
-    if fid==-1
-        display_msg(['Couldn''t create file ' fname], MsgType.ERROR, 'Stateflow_IRPP', '');
-    else
-        fprintf(fid,'%s\n',json_text);
-        fclose(fid);
-        cmd = ['cat ' fname ' | python -mjson.tool > ' fname_formatted];
-        try
-            [status, output] = system(cmd);
-            if status~=0
-                display_msg(['file is not formatted ' output], MsgType.ERROR, 'Stateflow_IRPP', '');
+    try
+        json_text = json_encode(SFIRUtils.objToStruct(program));
+        json_text = regexprep(json_text, '\\/','/');
+        fname = fullfile(output_dir, strcat(file_name,'_tmp.json'));
+        fname_formatted = fullfile(output_dir, strcat(file_name,'.json'));
+        fid = fopen(fname, 'w');
+        if fid==-1
+            display_msg(['Couldn''t create file ' fname], MsgType.ERROR, 'Stateflow_IR', '');
+        else
+            fprintf(fid,'%s\n',json_text);
+            fclose(fid);
+            cmd = ['cat ' fname ' | python -mjson.tool > ' fname_formatted];
+            try
+                [status, output] = system(cmd);
+                if status~=0
+                    display_msg(['file is not formatted ' output], MsgType.ERROR, 'Stateflow_IR', '');
+                    fname_formatted = fname;
+                end
+            catch
                 fname_formatted = fname;
             end
-        catch
-            fname_formatted = fname;
         end
+        display_msg(['IR has been written in ' fname_formatted], MsgType.RESULT, 'Stateflow_IR', '');
+    catch ME
+        display_msg(['Couldn''t export Stateflow to IR'], MsgType.WARNING, 'Stateflow_IR', '');
+        display_msg(ME.getReport(), MsgType.DEBUG, 'Stateflow_IR', '');
     end
-    display_msg(['IR has been written in ' fname_formatted], MsgType.RESULT, 'Stateflow_IRPP', '');
 end
 end
 
@@ -74,13 +81,13 @@ for s=states'
     src_states = [src_states; s_obj];
 end
 % if ~isFunction
-    state_actions.entry = '';
-    state_actions.during = '';
-    state_actions.exit = '';
-    fullpath = chart.Path;
-    comp = Composition.create_object(chart, isFunction);
-    s_obj = State_def(fullpath, state_actions, [], [], comp);
-    src_states = [s_obj; src_states];
+state_actions.entry_act = '';
+state_actions.during_act = '';
+state_actions.exit_act = '';
+fullpath = chart.Path;
+comp = Composition.create_object(chart, isFunction);
+s_obj = State_def(fullpath, state_actions, [], [], comp);
+src_states = [s_obj; src_states];
 % end
 %% junctions
 junctions = chart.find('-isa','Stateflow.Junction');

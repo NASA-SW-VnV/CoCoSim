@@ -76,9 +76,9 @@ classdef State_def
                 ex = [ex, action_map('exit')];
             end
             
-            state_actions.entry = SFIRUtils.split_actions(en);
-            state_actions.during = SFIRUtils.split_actions(du);
-            state_actions.exit = SFIRUtils.split_actions(ex);
+            state_actions.entry_act = SFIRUtils.split_actions(en);
+            state_actions.during_act = SFIRUtils.split_actions(du);
+            state_actions.exit_act = SFIRUtils.split_actions(ex);
             
         end
         

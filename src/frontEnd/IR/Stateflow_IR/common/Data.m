@@ -11,14 +11,16 @@ classdef Data
         scope;
         datatype;
         initial_value;
+        array_size;
     end
     
     methods(Static = true)
-        function obj = Data(name, scope, datatype, initial_value)
+        function obj = Data(name, scope, datatype, initial_value, array_size)
             obj.name = name;
             obj.scope = scope;
             obj.datatype = datatype;
             obj.initial_value = initial_value;
+            obj.array_size = array_size;
         end
         
         function d_obj = create_object(d, isevent)
@@ -30,12 +32,14 @@ classdef Data
             if ~isevent
                 datatype = d.get('DataType');
                 initial_value = d.get('Props').InitialValue;
+                array_size = d.get('Props').array.size;
             else
                 datatype = 'bool';
                 initial_value = 'false';
+                array_size = [];
             end
             
-            d_obj = Data(name, scope, datatype, initial_value);
+            d_obj = Data(name, scope, datatype, initial_value, array_size);
         end
         
     end

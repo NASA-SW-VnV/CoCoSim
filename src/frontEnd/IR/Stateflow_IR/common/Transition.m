@@ -88,7 +88,11 @@ classdef Transition
                 end
                 transition_action =operands{4};
                 if ~isempty(transition_action)
-                    transition_action = SFIRUtils.split_actions(transition_action(2:end));
+                    if contains(transition_action, '{')
+                        transition_action = SFIRUtils.split_actions(transition_action(3:end-1));
+                    else
+                        transition_action = SFIRUtils.split_actions(transition_action(2:end));
+                    end
                 end
             else
                 event ='';
@@ -132,7 +136,7 @@ classdef Transition
             aff_or_fun = strcat('(',affectation,'|',function_call,')');
             multiple_aff_or_fun = strcat('(','(',aff_or_fun ,';?\s*)*',')');
             cond_action_exp = strcat('({',multiple_aff_or_fun,'})?\s*');
-            trans_action_exp= strcat('(/',multiple_aff_or_fun,')?\s*');
+            trans_action_exp= strcat('(/{?',multiple_aff_or_fun,'}?)?\s*');
             pattern = strcat(event_exp,condition_exp,cond_action_exp,trans_action_exp);
         end
         

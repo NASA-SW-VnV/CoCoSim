@@ -16,7 +16,7 @@ if isSF
     new_name = regexp(new_ir.name, filesep, 'split');
     new_name = new_name{end};
 else
-    new_name = SFIRUtils.adapt_root_name(new_ir.name);
+    new_name = SFIRPPUtils.adapt_root_name(new_ir.name);
 end
 origin_name_pattern = strcat('^', new_ir.name);
 
