@@ -53,6 +53,11 @@ public class DataType {
 		this.baseType = baseType;
 	}
 	@Override
+	public boolean equals(Object obj) {
+		// TODO Auto-generated method stub
+		return this.baseType.equals(((DataType) obj).getBaseType());
+	}
+	@Override
     public String toString() {
 		if (dim2.equals("1")){
 			if (dim1.equals("1")){

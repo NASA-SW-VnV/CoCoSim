@@ -6,11 +6,19 @@ nloc	: ( NL |COMMA )+;
 nlos	: ( NL | SEMI )+; 
 soc     : ( SEMI | COMMA )+;
 
-emfile 	: function+  ;
+emfile 	
+	: function+
+	| script  
+	;
 
+script
+	: contract?
+	  body
+      nlosoc?
+    ;
 function
 	: FUNCTION func_output? ID func_input? nloc
-	  annotation*
+	  contract?
 	  body?
 	  END? 
       nlosoc?
@@ -32,11 +40,11 @@ body
 
 body_item
     :  statement 			
-    |  function  			
+    |  function 
+    |  annotation 			
     ;
 annotation
     : declare_type  
-    | contract
     ;
     
 declare_type
@@ -52,9 +60,9 @@ dimension :ID | Integer
 	;
 
 BASETYPE
-    : 'int'
-    | 'real'
-    | 'bool'
+    : 'int' | 'int8' | 'uint8' |'int16' | 'uint16' |'int32' | 'uint32'
+    | 'real' | 'single' | 'double'
+    | 'bool' | 'boolean'
     ;
 
 contract :  CONTRACT  contract_item+ '%}'
@@ -241,6 +249,7 @@ TRANSPOSE :   ( '\'' | '.\'')
 
 primaryExpression
     :   ID
+    |   indexing
     |   constant
     |   '(' expression ')'  
     |   cell
@@ -254,7 +263,6 @@ constant
     :   Integer
     |   Float
     |   String
-    |   indexing
     |   function_handle
     ;
 
@@ -309,7 +317,7 @@ indexing
         DOT (ID | LPAREN notAssignment RPAREN )
         | LPAREN function_parameter_list? RPAREN
 		| LBRACE function_parameter_list RBRACE
-	)*
+	)+
 	;
 
 function_parameter_list

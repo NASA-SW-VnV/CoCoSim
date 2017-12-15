@@ -179,12 +179,8 @@ public class EM2COCO {
 				});
 			}
 
-			ctx.annotation().forEach(new Consumer<AnnotationContext>() {
-				@Override
-				public void accept(AnnotationContext a) {
-					buf.append(getLus(a));
-				}
-			});
+			
+			buf.append(getLus(ctx.contract()));
 			buf.append("let\n");
 			buf.append(getLus(ctx.body()));
 			buf.append("tel\n");
@@ -541,6 +537,9 @@ public class EM2COCO {
 				setLus(ctx, buf.toString());
 			} else if (ctx.ID() != null) {
 				setLus(ctx, ctx.ID().getText());
+			} else if (ctx.indexing() != null) {
+				System.out.println("Indexing is not supported yet");
+				setLus(ctx, ctx.getText());
 			} else {
 				setLus(ctx, getLus(ctx.getChild(0)));
 			}
@@ -558,9 +557,6 @@ public class EM2COCO {
 			if (ctx.function_handle() != null) {
 				System.out.println("function_handle is not supported yet");
 				setLus(ctx, "");
-			} else if (ctx.indexing() != null) {
-				System.out.println("Indexing is not supported yet");
-				setLus(ctx, ctx.getText());
 			} else {
 				setLus(ctx, ctx.getText());
 			}

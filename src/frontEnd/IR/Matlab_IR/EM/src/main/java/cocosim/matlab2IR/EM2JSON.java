@@ -96,32 +96,50 @@ import cocosim.emgrammar.EMParser.While_blockContext;
 public class EM2JSON {
 	public static class JSONEmitter extends EMBaseListener {
 		ParseTreeProperty<String> json = new ParseTreeProperty<String>();
-		
+
 		String getJSON(ParseTree ctx) { 
 			String s = "";
 			String tmp = json.get(ctx);
 			if (tmp != null) s = tmp;
 			return s; 
 		}
-		
+
 		void setJSON(ParseTree ctx, String s) { json.put(ctx, s); }
 		@Override
 		public void exitEmfile(EMParser.EmfileContext ctx) {   
 			StringBuilder buf = new StringBuilder();
 			buf.append("{");
 			buf.append("\n");
-			buf.append(Quotes("functions")+":[");
-			int n = ctx.function().size();
-			for (int i=0; i < n; i++){
-				EMParser.FunctionContext fctx = ctx.function(i);
-				buf.append(getJSON(fctx));
-				if(i < n - 1) buf.append(",\n");
+			if(ctx.script() == null) {
+				buf.append(Quotes("functions")+":[");
+				int n = ctx.function().size();
+				for (int i=0; i < n; i++){
+					EMParser.FunctionContext fctx = ctx.function(i);
+					buf.append(getJSON(fctx));
+					if(i < n - 1) buf.append(",\n");
+				}
+				buf.append("]\n}");
+			}else {
+				buf.append(getJSON(ctx.script()));
+				buf.append("\n}");
 			}
-			buf.append("]\n}");
+
 			setJSON(ctx, buf.toString());
 
 		}
-		
+
+		@Override
+		public void exitScript(EMParser.ScriptContext ctx) {
+			StringBuilder buf = new StringBuilder();
+
+			buf.append(Quotes("type")+":"+Quotes("script"));
+			buf.append(",\n");
+
+			buf.append(Quotes("statements")+":["+getJSON(ctx.body()));
+			buf.append("\n]");
+			setJSON(ctx, buf.toString());
+		}
+
 		@Override
 		public void exitFunction(EMParser.FunctionContext ctx) {
 			StringBuilder buf = new StringBuilder();
@@ -147,7 +165,7 @@ public class EM2JSON {
 			buf.append("\n]\n}");
 			setJSON(ctx, buf.toString());
 		}
-		
+
 		@Override public void exitFunc_input(EMParser.Func_inputContext ctx) { 
 			StringBuilder buf = new StringBuilder();
 			buf.append("[");
@@ -159,7 +177,7 @@ public class EM2JSON {
 			buf.append("]");
 			setJSON(ctx, buf.toString());
 		}
-		
+
 		@Override public void exitFunc_output(EMParser.Func_outputContext ctx) {
 
 			StringBuilder buf = new StringBuilder();
@@ -188,9 +206,9 @@ public class EM2JSON {
 
 		@Override public void exitBody_item(EMParser.Body_itemContext ctx) { 
 			setJSON(ctx,getJSON(ctx.getChild(0)));
-				
+
 		}
-		
+
 		@Override public void exitAnnotation(EMParser.AnnotationContext ctx) { 
 			setJSON(ctx,getJSON(ctx.getChild(0)));
 		}
@@ -204,7 +222,7 @@ public class EM2JSON {
 				buf.append(Quotes("variable")+":"+Quotes(ctx.ID().getText()));
 				buf.append(",\n");
 				buf.append(Quotes("datatype")+":"+getJSON(ctx.dataType()));
-				
+
 				buf.append("\n}");
 				setJSON(ctx, buf.toString());
 			}
@@ -265,79 +283,79 @@ public class EM2JSON {
 				setJSON(ctx, getJSON(ctx.notAssignment()));
 
 		}
-		
+
 		@Override public void exitNotAssignment(EMParser.NotAssignmentContext ctx) {
 			setJSON(ctx,getJSON(ctx.relopOR()));
 		}
-		
+
 		@Override public void exitRelopOR(EMParser.RelopORContext ctx) { 
 			callExpression( ctx,  "relopOR",  "relopAND");
 		}
-		
+
 		@Override public void exitRelopAND(EMParser.RelopANDContext ctx) { 
 			callExpression( ctx,  "relopAND",  "relopelOR");
 		}
-		
+
 		@Override public void exitRelopelOR(EMParser.RelopelORContext ctx) { 
 			callExpression( ctx,  "relopelOR",  "relopelAND");
 		}
-		
+
 		@Override public void exitRelopelAND(EMParser.RelopelANDContext ctx) {
 			callExpression( ctx,  "relopelAND",  "relopEQ_NE");
 		}
-		
+
 		@Override public void exitRelopEQ_NE(EMParser.RelopEQ_NEContext ctx) {
 			callExpression( ctx,  "relopEQ_NE",  "relopGL");
 		}
-		
+
 		@Override public void exitRelopGL(EMParser.RelopGLContext ctx) {
 			callExpression( ctx,  "relopGL",  "plus_minus");
 		}
-		
+
 		@Override public void exitPlus_minus(EMParser.Plus_minusContext ctx) {
 			callExpression( ctx,  "plus_minus",  "mtimes");
 		}
-		
+
 		@Override public void exitMtimes(EMParser.MtimesContext ctx) {
 			callExpression( ctx,  "mtimes",  "mrdivide");
 		}
-		
+
 		@Override public void exitMrdivide(EMParser.MrdivideContext ctx) {
 			callExpression( ctx,  "mrdivide",  "mldivide");
 		}
-		
+
 		@Override public void exitMldivide(EMParser.MldivideContext ctx) {
 			callExpression( ctx,  "mldivide",  "mpower");
 		}
-		
+
 		@Override public void exitMpower(EMParser.MpowerContext ctx) { 
 			callExpression( ctx,  "mpower",  "times");
 		}
-		
+
 		@Override public void exitTimes(EMParser.TimesContext ctx) {
 			callExpression( ctx,  "times",  "rdivide");
 		}
-		
+
 		@Override public void exitRdivide(EMParser.RdivideContext ctx) {
 			callExpression( ctx,  "rdivide",  "ldivide");
 		}
-		
+
 		@Override public void exitLdivide(EMParser.LdivideContext ctx) { 
 			callExpression( ctx,  "ldivide",  "power");
 		}
-		
+
 		@Override public void exitPower(EMParser.PowerContext ctx) { 
 			callExpression( ctx,  "power",  "colonExpression");
 		}
-		
+
 		@Override public void exitColonExpression(EMParser.ColonExpressionContext ctx) {
 			callExpression( ctx,  "colonExpression",  "unaryExpression");
 		}
-		
+
 		@Override public void exitUnaryExpression(EMParser.UnaryExpressionContext ctx) {
 			callExpression( ctx,  "unaryExpression",  "postfixExpression");
 		}
-		
+
 		@Override public void exitPostfixExpression(EMParser.PostfixExpressionContext ctx) { 
 			if (ctx.primaryExpression() != null)
 				setJSON(ctx, getJSON(ctx.primaryExpression()));
@@ -359,7 +377,7 @@ public class EM2JSON {
 			}
 
 		}
-		
+
 		@Override public void exitPrimaryExpression(EMParser.PrimaryExpressionContext ctx) { 
 			if (ctx.getChild(0).getText().equals("(")){
 				StringBuilder buf = new StringBuilder();
@@ -385,7 +403,7 @@ public class EM2JSON {
 			}
 
 		}
-		
+
 		@Override public void exitIgnore_value(EMParser.Ignore_valueContext ctx) {
 			StringBuilder buf = new StringBuilder();
 			buf.append("{");
@@ -396,12 +414,10 @@ public class EM2JSON {
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
 		}
-		
+
 		@Override public void exitConstant(EMParser.ConstantContext ctx) { 
 			if (ctx.function_handle() != null){
 				setJSON(ctx, getJSON(ctx.function_handle()));
-			}else if (ctx.indexing() != null){
-				setJSON(ctx, getJSON(ctx.indexing()));
 			}else{
 				StringBuilder buf = new StringBuilder();
 				buf.append("{");
@@ -416,7 +432,7 @@ public class EM2JSON {
 				setJSON(ctx, buf.toString());
 			}
 		}
-		
+
 		public String ConstantDataType(EMParser.ConstantContext ctx){
 			String t = "";
 			if (ctx.Integer() != null)
@@ -427,7 +443,7 @@ public class EM2JSON {
 				t = "String";
 			return t;
 		}
-		
+
 		@Override public void exitFunction_handle(EMParser.Function_handleContext ctx) { 
 			if (ctx.func_input() != null){
 				StringBuilder buf = new StringBuilder();
@@ -521,7 +537,7 @@ public class EM2JSON {
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
 		}
-		
+
 		@Override public void exitFunction_parameter_list(EMParser.Function_parameter_listContext ctx) { 
 			StringBuilder buf = new StringBuilder();
 			buf.append("[");
@@ -534,7 +550,7 @@ public class EM2JSON {
 			buf.append("]");
 			setJSON(ctx, buf.toString());
 		}
-		
+
 		@Override public void exitFunction_parameter(EMParser.Function_parameterContext ctx) { 
 			if (ctx.COLON() == null)
 				setJSON(ctx,getJSON(ctx.getChild(0)));
@@ -548,9 +564,9 @@ public class EM2JSON {
 				buf.append("\n}");
 				setJSON(ctx, buf.toString());
 			}
-				
+
 		}
-		
+
 		@Override public void exitCell(EMParser.CellContext ctx) { 
 			StringBuilder buf = new StringBuilder();
 			buf.append("{");
@@ -567,7 +583,7 @@ public class EM2JSON {
 			buf.append("]\n}");
 			setJSON(ctx, buf.toString());
 		}
-		
+
 		@Override public void exitHorzcat(EMParser.HorzcatContext ctx) { 
 			StringBuilder buf = new StringBuilder();
 			buf.append("[");
@@ -580,7 +596,7 @@ public class EM2JSON {
 			buf.append("]\n");
 			setJSON(ctx, buf.toString());
 		}
-		
+
 		@Override public void exitMatrix(EMParser.MatrixContext ctx) { 
 			StringBuilder buf = new StringBuilder();
 			buf.append("{");
@@ -597,7 +613,7 @@ public class EM2JSON {
 			buf.append("]\n}");
 			setJSON(ctx, buf.toString());
 		}
-		
+
 		@Override public void exitIf_block(EMParser.If_blockContext ctx) { 
 			StringBuilder buf = new StringBuilder();
 			buf.append("{");
@@ -623,7 +639,7 @@ public class EM2JSON {
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
 		}
-		
+
 		@Override public void exitElseif_block(EMParser.Elseif_blockContext ctx) {
 			StringBuilder buf = new StringBuilder();
 			buf.append("{");
@@ -648,7 +664,7 @@ public class EM2JSON {
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
 		}
-		
+
 		@Override public void exitSwitch_block(EMParser.Switch_blockContext ctx) { 
 			StringBuilder buf = new StringBuilder();
 			buf.append("{");
@@ -672,7 +688,7 @@ public class EM2JSON {
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
 		}
-		
+
 		@Override public void exitCase_block(EMParser.Case_blockContext ctx) { 
 			StringBuilder buf = new StringBuilder();
 			buf.append("{");
@@ -686,7 +702,7 @@ public class EM2JSON {
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
 		}
-		
+
 		@Override public void exitOtherwise_block(EMParser.Otherwise_blockContext ctx) {
 			StringBuilder buf = new StringBuilder();
 			buf.append("{");
@@ -698,7 +714,7 @@ public class EM2JSON {
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
 		}
-		
+
 		@Override public void exitFor_block(EMParser.For_blockContext ctx) { 
 			StringBuilder buf = new StringBuilder();
 			buf.append("{");
@@ -714,7 +730,7 @@ public class EM2JSON {
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
 		}
-		
+
 		@Override public void exitWhile_block(EMParser.While_blockContext ctx) { 
 			StringBuilder buf = new StringBuilder();
 			buf.append("{");
@@ -728,7 +744,7 @@ public class EM2JSON {
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
 		}
-		
+
 		@Override public void exitTry_catch_block(EMParser.Try_catch_blockContext ctx) { 
 			StringBuilder buf = new StringBuilder();
 			buf.append("{");
@@ -757,7 +773,7 @@ public class EM2JSON {
 			buf.append(",\n");
 			buf.append(Quotes("statements")+":["+getJSON(ctx.body()));
 			buf.append("\n]");
-			
+
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
 		}
@@ -833,7 +849,7 @@ public class EM2JSON {
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
 		}
-		
+
 		@Override public void exitNlosoc(EMParser.NlosocContext ctx) { 
 			nlosoc(ctx, "nlosoc");
 		}
@@ -846,7 +862,7 @@ public class EM2JSON {
 		@Override public void exitSoc(EMParser.SocContext ctx) {
 			nlosoc(ctx, "soc");
 		}
-		
+
 		@Override public void visitTerminal(TerminalNode node) { 
 			setJSON(node, Quotes(node.getText()));
 		}
@@ -940,7 +956,7 @@ public class EM2JSON {
 		JSONEmitter converter = new JSONEmitter();
 		walker.walk(converter, tree);
 		String result = converter.getJSON(tree);
-		//System.out.println(result);
+		System.out.println(result);
 
 
 		try (PrintWriter out = new PrintWriter(file_name)) {
