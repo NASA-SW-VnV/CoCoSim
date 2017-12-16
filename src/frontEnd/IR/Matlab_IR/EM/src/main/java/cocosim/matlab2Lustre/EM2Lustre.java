@@ -27,6 +27,7 @@ import cocosim.emgrammar.EMBaseListener;
 import cocosim.emgrammar.EMLexer;
 import cocosim.emgrammar.EMParser;
 import cocosim.emgrammar.EMParser.Func_inputContext;
+import cocosim.emgrammar.EMParser.Function_parameter_listContext;
 import cocosim.matlab2Lustre.domain.DataType;
 import cocosim.matlab2Lustre.domain.Variable;
 
@@ -53,23 +54,41 @@ public class EM2Lustre {
 		HashSet<String> dimensions_consts = new HashSet<>();
 		//DataType Map, for every ctx get its dataType
 		ParseTreeProperty<DataType> dataType = new ParseTreeProperty<DataType>();
-		//Variable name of a ctx.
-		ParseTreeProperty<String> id = new ParseTreeProperty<String>();
+		
+		//Position of a ParseTree in assignement. 
+		//True if ParseTree is in left of an assignement
+		//False if ParseTree is in right of an assignement.
+		ParseTreeProperty<Boolean> ctx_position = new ParseTreeProperty<Boolean>();
 
+		
 		//External lustre functions
 		HashSet<String> external_fun = new HashSet<>();
-		HashSet<String> unsupported_expr = new HashSet<>();
+		HashSet<ParseTree> unsupported_expr = new HashSet<>();
 
 
-		public HashSet<String> getUnsupported_expr() {
+		
+		public ParseTreeProperty<Boolean> getCtx_position() {
+			return ctx_position;
+		}
+		public Boolean getCtx_position(ParseTree ctx) {
+			return ctx_position.get(ctx);
+		}
+		public void setCtx_position(ParseTreeProperty<Boolean> ctx_position) {
+			this.ctx_position = ctx_position;
+		}
+		public void setCtx_position(ParseTree ctx, Boolean ctx_position) {
+			this.ctx_position.put(ctx, ctx_position);
+		}
+		
+		public HashSet<ParseTree> getUnsupported_expr() {
 			return unsupported_expr;
 		}
 
-		public void setUnsupported_expr(HashSet<String> unsupported_expr) {
+		public void setUnsupported_expr(HashSet<ParseTree> unsupported_expr) {
 			this.unsupported_expr = unsupported_expr;
 		}
 
-		public void addUnsupported_expr(String unsupported_expr) {
+		public void addUnsupported_expr(ParseTree unsupported_expr) {
 			this.unsupported_expr.add(unsupported_expr);
 		}
 		public HashSet<String> getExternal_fun() {
@@ -103,14 +122,7 @@ public class EM2Lustre {
 			dataType.put(ctx, d);
 		}
 
-		String getID(ParseTree ctx) {
-			return id.get(ctx);
-		}
-
-		void setID(ParseTree ctx, String s) {
-			id.put(ctx, s);
-		}
-
+		
 		Variable getVar(String s) {
 			return variables.get(s);
 		}
@@ -140,7 +152,7 @@ public class EM2Lustre {
 		}
 		@Override
 		public void exitEmfile(EMParser.EmfileContext ctx) {
-			print_debug();
+			//print_debug();
 			
 			StringBuilder buf = new StringBuilder();
 			if(ctx.script() == null) {
@@ -204,7 +216,7 @@ public class EM2Lustre {
 				for (int i = 0; i < n; i++) {
 					String input_name = inputs.ID(i).getText();
 					Variable v = getVar(input_name);
-					buf.append(v.toString());
+					buf.append(v.toString(true));
 				}
 				buf.append(")");
 			} else
@@ -217,7 +229,7 @@ public class EM2Lustre {
 				for (int i = 0; i < n; i++) {
 					String output_name = outputs.ID(i).getText();
 					Variable v = getVar(output_name);
-					buf.append(v.toString());
+					buf.append(v.LastOccurenceName());
 				}
 				buf.append(")");
 			} else
@@ -227,23 +239,18 @@ public class EM2Lustre {
 			if (variables.values().stream().anyMatch(new Predicate<Variable>() {
 				@Override
 				public boolean test(Variable v) {
-					return v.isVar();
+					return v.needToBeDeclaredInVars();
 				}
 			})) {
 				Stream<Variable> vars = variables.values().stream().filter(new Predicate<Variable>() {
 					@Override
 					public boolean test(Variable v) {
-						return v.isVar();
+						return v.needToBeDeclaredInVars();
 					}
 				});
 				buf.append("var ");
-				vars.forEach(new Consumer<Variable>() {
-					@Override
-					public void accept(Variable v) {
-						buf.append(v.toString());
-						buf.append("\n");
-					}
-				});
+				vars.forEach(v -> buf.append(v.toString()+"\n"));
+				
 			}
 
 			buf.append("let\n");
@@ -258,7 +265,9 @@ public class EM2Lustre {
 			ctx.ID().forEach(new Consumer<TerminalNode>() {
 				@Override
 				public void accept(TerminalNode id) {
-					setVar(id.getText(), new Variable(id.getText(), false));
+					Variable v = new Variable(id.getText(), false);
+					v.setInput(true);
+					setVar(id.getText(), v);
 				}
 			});
 		}
@@ -268,7 +277,9 @@ public class EM2Lustre {
 			ctx.ID().forEach(new Consumer<TerminalNode>() {
 				@Override
 				public void accept(TerminalNode id) {
-					setVar(id.getText(), new Variable(id.getText(), false));
+					Variable v = new Variable(id.getText(), false);
+					v.setOutput(true);
+					setVar(id.getText(), v);
 				}
 			});
 		}
@@ -304,29 +315,43 @@ public class EM2Lustre {
 			if (ctx.DeclareType() != null) {
 				String var_name = ctx.ID().getText();
 				String baseType = ctx.dataType().BASETYPE().getText();
-				DataType dimension = new DataType(baseType);
+				DataType dt = new DataType(baseType);
 				if (ctx.dataType().dimension(0) != null) {
-					dimension.setDim1(ctx.dataType().dimension(0).getText());
+					dt.setDim1(ctx.dataType().dimension(0).getText());
 					addDim(ctx.dataType().dimension(0).getText());
 				}
 				if (ctx.dataType().dimension(1) != null) {
-					dimension.setDim2(ctx.dataType().dimension(1).getText());
+					dt.setDim2(ctx.dataType().dimension(1).getText());
 					addDim(ctx.dataType().dimension(1).getText());
 				}
 
 				Variable v = getVar(var_name);
-				if (!this.getVars().containsKey(var_name)) {
-					setVar(var_name, new Variable(var_name, dimension, true));
+				if (v == null) {
+					setVar(var_name, new Variable(var_name, dt, true));
 				} else {
-					setVar(var_name, new Variable(var_name, dimension, v.isVar(), v.getOccurance()));
+					v.setDataType(dt);
 				}
 
 			}
 		}
 
+		public boolean checkAllChildrenAreSupported(ParseTree ctx) {
+			if (getUnsupported_expr().contains(ctx))
+				return false;
+			
+			int n = ctx.getChildCount();
+			for (int i=0; i < n; i++) {
+				if(!checkAllChildrenAreSupported(ctx.getChild(i)))
+					return false;
+			}
+			return true;
+		}
 		@Override
 		public void exitStatement(EMParser.StatementContext ctx) {
-			setLus(ctx, getLus(ctx.getChild(0)));
+			if (checkAllChildrenAreSupported(ctx))
+				setLus(ctx, getLus(ctx.getChild(0)));
+			else
+				setLus(ctx, "--Unsupported expression: "+ ctx.getText());
 
 		}
 
@@ -356,14 +381,49 @@ public class EM2Lustre {
 			}
 
 		}
-
+		public void setCtx_positionAllChildren(ParseTree ctx, Boolean b) {
+			setCtx_position(ctx, b);
+			int n = ctx.getChildCount();
+			for (int i=0; i < n; i++) {
+				setCtx_positionAllChildren(ctx.getChild(i),  b);
+			}
+		}
+		public String getUnaryExpressionID(EMParser.UnaryExpressionContext ctx) {
+			if (ctx.postfixExpression() == null)
+				return null;
+			
+			EMParser.PostfixExpressionContext ptx = ctx.postfixExpression();
+			while (ptx.postfixExpression() != null) {
+				ptx = ptx.postfixExpression();
+			}
+			EMParser.PrimaryExpressionContext primary_ctx = ptx.primaryExpression();
+			if (primary_ctx == null)
+				return null;
+			
+			if (primary_ctx.ID() != null) {
+				return primary_ctx.ID().getText();
+			}
+			EMParser.IndexingContext ictx = primary_ctx.indexing();
+			if ( ictx != null)
+				return ictx.ID(0).getText();
+						
+			return null;
+		}
+		@Override
+		public void enterAssignment(EMParser.AssignmentContext ctx) {
+			if (ctx.notAssignment() == null) {
+				setCtx_positionAllChildren(ctx.unaryExpression(), true);
+				setCtx_positionAllChildren(ctx.assignment(), false);
+			}else {
+				setCtx_positionAllChildren(ctx.notAssignment(), false);
+			}
+		}
 		@Override
 		public void exitAssignment(EMParser.AssignmentContext ctx) {
 			if (ctx.notAssignment() == null) {
 				StringBuilder buf = new StringBuilder();
 
-				// add variable
-
+				
 				DataType unaryExpression_dt = getDataType(ctx.unaryExpression());
 				DataType assignment_dt = getDataType(ctx.assignment());
 				String leftExp = getLus(ctx.unaryExpression());
@@ -386,15 +446,7 @@ public class EM2Lustre {
 				}
 
 
-				String var_name = getID(ctx.unaryExpression());
-				if (var_name != null) {
-					if (!getVars().containsKey(var_name)) {
-						setVar(var_name, new Variable(var_name, unaryExpression_dt, false));
-					} else {
-						Variable v = getVar(var_name);
-						setVar(var_name, new Variable(var_name, unaryExpression_dt, v.isVar(), v.getOccurance() + 1));
-					}
-				}
+
 				if (!conversion_fun.equals("")){
 					buf.append(leftExp);
 					buf.append(" " + ctx.assignmentOperator().getText() + " ");
@@ -407,6 +459,17 @@ public class EM2Lustre {
 				}
 
 				setLus(ctx, buf.toString());
+				
+				//increment variable occurance
+				String ID = getUnaryExpressionID(ctx.unaryExpression());
+				if (ID != null) {
+					Variable v = getVar(ID);
+					if (v != null)
+						v.incrementOccurance();
+					else
+						setVar(ID, new Variable(ID, unaryExpression_dt, true, 0));
+				}
+					
 			} else {
 				setLus(ctx, getLus(ctx.notAssignment()));
 				setDataType(ctx, getDataType(ctx.notAssignment()));
@@ -553,7 +616,7 @@ public class EM2Lustre {
 		public void exitColonExpression(EMParser.ColonExpressionContext ctx) {
 			String operator = "";
 			if (ctx.colonExpression() != null) {
-				this.addUnsupported_expr(ctx.getText());
+				this.addUnsupported_expr(ctx);
 				operator = ctx.getChild(1).getText();
 			}
 			callExpression(ctx, "colonExpression", "unaryExpression", operator, "");
@@ -578,7 +641,7 @@ public class EM2Lustre {
 				setDataType(ctx, getDataType(ctx.primaryExpression()));
 			}
 			else if (ctx.TRANSPOSE() != null) {
-				this.addUnsupported_expr(ctx.getText());
+				this.addUnsupported_expr(ctx);
 				setLus(ctx, getLus(ctx.postfixExpression()));
 				DataType d = getDataType(ctx.postfixExpression());
 				if (d != null)
@@ -600,11 +663,12 @@ public class EM2Lustre {
 				setDataType(ctx, getDataType(ctx.expression()));
 			} else if (ctx.ID() != null) {
 				setDataType(ctx, getIDDataType(ctx.ID().getText()));
-				setLus(ctx, ctx.ID().getText());
+				String IDText = getIDText(ctx.ID().getText(), getCtx_position(ctx), "");
+				setLus(ctx, IDText);
 
 			} else if (ctx.ignore_value()  != null) {
-				String msg = "because of ~";
-				this.addUnsupported_expr(ctx.getText() + msg);
+//				String msg = "because of ~";
+				this.addUnsupported_expr(ctx);
 				setLus(ctx, getLus(ctx.ignore_value()));
 			} 
 			else {
@@ -630,7 +694,7 @@ public class EM2Lustre {
 				setDataType(ctx, new DataType("real"));
 
 			} else if (ctx.String() != null) {
-				this.addUnsupported_expr(ctx.getText());
+				this.addUnsupported_expr(ctx);
 
 			} else if (ctx.function_handle() != null) {
 				setLus(ctx, getLus(ctx.function_handle()));
@@ -644,41 +708,63 @@ public class EM2Lustre {
 		@Override
 		public void exitFunction_handle(EMParser.Function_handleContext ctx) {
 			// we do not support annonymous functions. 
-			this.addUnsupported_expr(ctx.getText());
+			this.addUnsupported_expr(ctx);
 		}
 
+		public boolean isArrayAccess(EMParser.IndexingContext ctx, Boolean left) {
+			if (!getVars().containsKey(ctx.ID(0).getText()) && !left)
+				return false;
+			if (ctx.function_parameter_list(0) == null)
+				return false;
+			EMParser.Function_parameter_listContext fpl = ctx.function_parameter_list(0);
+			if (fpl.function_parameter() != null)
+				for (EMParser.Function_parameterContext fp : fpl.function_parameter()) {
+					if ( !isNumeric(fp.getText()))
+						return false;
+				}
+			return true;
+		}
 		@Override
 		public void exitIndexing(EMParser.IndexingContext ctx) {
-			StringBuilder buf = new StringBuilder();
-
-			buf.append(ctx.getChild(0).getText());
-			int i = 1;
-			int n = ctx.children.size();
-			while (i < n) {
-				String type = ctx.getChild(i++).getText();
-				if (!type.equals("(")) {
-					this.addUnsupported_expr(ctx.getText());
-					return;
-				} else {
-					buf.append("(");
-					if (!ctx.getChild(i).getText().equals(")"))
-						buf.append(getLus(ctx.getChild(i++)));
-					buf.append(")");
-					i++;// consume ")"
-					if (i < n - 1){
-						this.addUnsupported_expr(ctx.getText());
-						return;
-					}
-				} 
+			if ( ctx.LPAREN().size() > 1 || ctx.DOT(0) != null || ctx.LBRACE(0) != null) {
+				this.addUnsupported_expr(ctx);
+				return;
 			}
+			Boolean ctx_position = getCtx_position(ctx);
+			String IDText = getIDText(ctx.ID(0).getText(), ctx_position, "");
+			StringBuilder postfix = new StringBuilder();
+			String lparen = "(";
+			String rparen = ")";
+			String sep = ",";
+			if (isArrayAccess(ctx, ctx_position)) {
+				lparen = "_";
+				rparen = "";
+				sep = "_";
+			}
+			postfix.append(lparen);
+			if (ctx.function_parameter_list(0) != null)
+				postfix.append(getFunction_parameter_list( ctx.function_parameter_list(0), sep));
+			postfix.append(rparen);
+			
+			
+			
+			
+			if (isArrayAccess(ctx, ctx_position)) 
+				IDText = getIDText(ctx.ID(0).getText(), 
+						ctx_position, postfix.toString());
+			
+			StringBuilder buf = new StringBuilder();
+			buf.append(IDText);
+			if (!isArrayAccess(ctx, ctx_position)) 
+				buf.append(postfix);
+			
 
 			setLus(ctx, buf.toString());
 			setDataType(ctx, getIDDataType(ctx.getChild(0).getText()));
 //			System.out.println("DataType of "+ctx.getText()+" is " + getDataType(ctx));
 		}
 
-		@Override
-		public void exitFunction_parameter_list(EMParser.Function_parameter_listContext ctx) {
+		public String getFunction_parameter_list(EMParser.Function_parameter_listContext ctx, String sep) {
 			StringBuilder buf = new StringBuilder();
 			int n = ctx.function_parameter().size();
 			for (int i = 0; i < n; i++) {
@@ -686,13 +772,17 @@ public class EM2Lustre {
 				if (pctx.COLON() == null) 
 					buf.append(getLus(pctx));
 				else {
-					this.addUnsupported_expr(ctx.getText());
-					return;
+					this.addUnsupported_expr(ctx);
+					return "";
 				}
 				if (i < n - 1)
-					buf.append(",");
+					buf.append(sep);
 			}
-			setLus(ctx, buf.toString());
+			return  buf.toString();
+		}
+		@Override
+		public void exitFunction_parameter_list(EMParser.Function_parameter_listContext ctx) {
+			setLus(ctx, getFunction_parameter_list(ctx, ","));
 		}
 
 		@Override
@@ -705,7 +795,7 @@ public class EM2Lustre {
 
 		@Override
 		public void exitCell(EMParser.CellContext ctx) {
-			this.addUnsupported_expr(ctx.getText());
+			this.addUnsupported_expr(ctx);
 		}
 
 		@Override
@@ -715,12 +805,12 @@ public class EM2Lustre {
 
 		@Override
 		public void exitMatrix(EMParser.MatrixContext ctx) {
-			this.addUnsupported_expr(ctx.getText());
+			this.addUnsupported_expr(ctx);
 		}
 
 		@Override
 		public void exitIf_block(EMParser.If_blockContext ctx) {
-			this.addUnsupported_expr(ctx.getText());
+			this.addUnsupported_expr(ctx);
 		}
 
 		@Override
@@ -735,7 +825,7 @@ public class EM2Lustre {
 
 		@Override
 		public void exitSwitch_block(EMParser.Switch_blockContext ctx) {
-			this.addUnsupported_expr(ctx.getText());
+			this.addUnsupported_expr(ctx);
 		}
 
 		@Override
@@ -750,12 +840,12 @@ public class EM2Lustre {
 
 		@Override
 		public void exitFor_block(EMParser.For_blockContext ctx) {
-			this.addUnsupported_expr(ctx.getText());
+			this.addUnsupported_expr(ctx);
 		}
 
 		@Override
 		public void exitWhile_block(EMParser.While_blockContext ctx) {
-			this.addUnsupported_expr(ctx.getText());
+			this.addUnsupported_expr(ctx);
 		}
 
 		@Override
@@ -765,37 +855,37 @@ public class EM2Lustre {
 
 		@Override
 		public void exitCatch_block(EMParser.Catch_blockContext ctx) {
-			this.addUnsupported_expr(ctx.getText());
+			this.addUnsupported_expr(ctx);
 		}
 
 		@Override
 		public void exitReturn_exp(EMParser.Return_expContext ctx) {
-			this.addUnsupported_expr(ctx.getText());
+			this.addUnsupported_expr(ctx);
 		}
 
 		@Override
 		public void exitBreak_exp(EMParser.Break_expContext ctx) {
-			this.addUnsupported_expr(ctx.getText());
+			this.addUnsupported_expr(ctx);
 		}
 
 		@Override
 		public void exitContinue_exp(EMParser.Continue_expContext ctx) {
-			this.addUnsupported_expr(ctx.getText());
+			this.addUnsupported_expr(ctx);
 		}
 
 		@Override
 		public void exitGlobal_exp(EMParser.Global_expContext ctx) {
-			this.addUnsupported_expr(ctx.getText());
+			this.addUnsupported_expr(ctx);
 		}
 
 		@Override
 		public void exitPersistent_exp(EMParser.Persistent_expContext ctx) {
-			this.addUnsupported_expr(ctx.getText());
+			this.addUnsupported_expr(ctx);
 		}
 
 		@Override
 		public void exitClear_exp(EMParser.Clear_expContext ctx) {
-			this.addUnsupported_expr(ctx.getText());
+			this.addUnsupported_expr(ctx);
 		}
 
 		@Override
@@ -901,8 +991,6 @@ public class EM2Lustre {
 			String new_exp = rightExp;
 			switch (outport_dt) {
 			case "int":
-				System.out.println("RightExp: " + rightExp);
-				System.out.println("isReal(rightExp): " + isReal(rightExp));
 				if (isReal(rightExp)){
 
 					new_exp = rightExp.replaceAll("\\.\\d*", "");;
@@ -911,8 +999,6 @@ public class EM2Lustre {
 				break;
 
 			case "real":
-				System.out.println("RightExp: " + rightExp);
-				System.out.println("isInt(rightExp): " + isInt(rightExp));
 				if (isInt(rightExp)){
 
 					new_exp = rightExp + ".0";
@@ -921,8 +1007,6 @@ public class EM2Lustre {
 				break;
 			case "bool":
 				double d = Double.parseDouble(rightExp);
-				System.out.println("RightExp: " + rightExp);
-				System.out.println("parseDouble(rightExp): " + d);
 				
 				if (d > 0)
 					new_exp = "true";
@@ -998,6 +1082,29 @@ public class EM2Lustre {
 
 			return conv_fun;
 		}
+		
+		private String getIDText(String var_name, Boolean position, String postfix) {
+			
+			if (var_name == null )
+				return "";
+			if (position == null)
+				return var_name;
+			String new_name = var_name;
+			if (!postfix.equals(""))
+				new_name = var_name + postfix;
+			
+			if (getVars().containsKey(var_name)) {
+				Variable v = getVar(var_name);
+				int occ = v.getOccurance();
+				if (position) {
+					occ++;
+				}
+				return occ==0? new_name:new_name + "__" + occ;
+			}
+
+			return new_name;
+		}
+		
 		private DataType getIDDataType(String v_name) {
 			if (this.getVars().containsKey(v_name)) {
 				Variable v = this.getVar(v_name);
@@ -1068,6 +1175,7 @@ public class EM2Lustre {
 		LusEmitter converter = new LusEmitter();
 		walker.walk(converter, tree);
 		String result = converter.getLus(tree);
+	
 		System.out.println(result);
 		return result;
 
