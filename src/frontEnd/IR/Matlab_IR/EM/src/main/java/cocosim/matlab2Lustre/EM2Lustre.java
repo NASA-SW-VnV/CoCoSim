@@ -1,20 +1,20 @@
 package cocosim.matlab2Lustre;
 
+import com.google.common.base.Joiner;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
-import java.util.stream.Stream;
-
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -27,8 +27,8 @@ import cocosim.emgrammar.EMBaseListener;
 import cocosim.emgrammar.EMLexer;
 import cocosim.emgrammar.EMParser;
 import cocosim.emgrammar.EMParser.Func_inputContext;
-import cocosim.emgrammar.EMParser.Function_parameter_listContext;
 import cocosim.matlab2Lustre.domain.DataType;
+import cocosim.matlab2Lustre.domain.ExternalLib;
 import cocosim.matlab2Lustre.domain.Variable;
 
 /*################################################################################
@@ -51,7 +51,7 @@ public class EM2Lustre {
 		//Variables Map, for every variable in script/function 
 		Map<String, Variable> variables = new HashMap<String, Variable>();
 		//For Arrays variables
-		HashSet<String> dimensions_consts = new HashSet<>();
+		HashSet<String> dimensions_consts = new HashSet<String>();
 		//DataType Map, for every ctx get its dataType
 		ParseTreeProperty<DataType> dataType = new ParseTreeProperty<DataType>();
 		
@@ -62,8 +62,8 @@ public class EM2Lustre {
 
 		
 		//External lustre functions
-		HashSet<String> external_fun = new HashSet<>();
-		HashSet<ParseTree> unsupported_expr = new HashSet<>();
+		HashSet<String> external_fun = new HashSet<String>();
+		HashSet<ParseTree> unsupported_expr = new HashSet<ParseTree>();
 
 
 		
@@ -146,10 +146,15 @@ public class EM2Lustre {
 			return dimensions_consts;
 		}
 		
-		public void print_debug() {
-			variables.values().stream().forEach(v -> System.out.println(v));
-			
-		}
+//		public void print_debug() {
+//			variables.values().stream().forEach(new Consumer<Variable>() {
+//				@Override
+//				public void accept(Variable v) {
+//					System.out.println(v);
+//				}
+//			});
+//			
+//		}
 		@Override
 		public void exitEmfile(EMParser.EmfileContext ctx) {
 			//print_debug();
@@ -173,19 +178,24 @@ public class EM2Lustre {
 		@Override
 		public void exitScript(EMParser.ScriptContext ctx) {
 			final StringBuilder buf = new StringBuilder();
+			boolean found = false;
+			
+			for (Variable v : getVars().values()) {
+				if (v.needToBeDeclaredInVars()) {
+					found = true;
+					break;
+				}
+			}
 
-
-			if (variables.values().stream().anyMatch(v -> v.isVar()))
+			if (found)
 			{
-				Stream<Variable> vars = variables.values().stream().filter(v -> v.isVar());
 				buf.append("var ");
-				vars.forEach(new Consumer<Variable>() {
-					@Override
-					public void accept(Variable v) {
+				for (Variable v : getVars().values()) {
+					if (v.needToBeDeclaredInVars()) {
 						buf.append(v.toString());
 						buf.append("\n");
 					}
-				});
+				}
 			}
 
 			buf.append("--let\n");
@@ -194,7 +204,7 @@ public class EM2Lustre {
 
 			setLus(ctx, buf.toString());
 		}
-
+ 
 
 		@Override
 		public void exitFunction(EMParser.FunctionContext ctx) {
@@ -203,7 +213,8 @@ public class EM2Lustre {
 
 			if (getConsts().size() > 0) {
 				buf.append("--dimensions as constants\n");
-				String constants = String.join(", ", getConsts());
+				Joiner joiner = Joiner.on(", ").skipNulls();
+				String constants = joiner.join(getConsts());
 				buf.append("const " + constants + ": int;\n");
 			}
 
@@ -236,20 +247,22 @@ public class EM2Lustre {
 				buf.append("()");
 			buf.append(";\n");
 
-			if (variables.values().stream().anyMatch(new Predicate<Variable>() {
-				@Override
-				public boolean test(Variable v) {
-					return v.needToBeDeclaredInVars();
+			boolean needToBeDeclared = false;
+			
+			for (Variable v : getVars().values()) {
+				if (v.needToBeDeclaredInVars()) {
+					needToBeDeclared = true;
+					break;
 				}
-			})) {
-				Stream<Variable> vars = variables.values().stream().filter(new Predicate<Variable>() {
-					@Override
-					public boolean test(Variable v) {
-						return v.needToBeDeclaredInVars();
-					}
-				});
+			}
+			if (needToBeDeclared) {
 				buf.append("var ");
-				vars.forEach(v -> buf.append(v.toString()+"\n"));
+				for (Variable v : getVars().values()) {
+					if (v.needToBeDeclaredInVars()) {
+						buf.append(v.toString()+"\n");
+					}
+				}
+				
 				
 			}
 
@@ -262,26 +275,22 @@ public class EM2Lustre {
 
 		@Override
 		public void exitFunc_input(EMParser.Func_inputContext ctx) {
-			ctx.ID().forEach(new Consumer<TerminalNode>() {
-				@Override
-				public void accept(TerminalNode id) {
-					Variable v = new Variable(id.getText(), false);
-					v.setInput(true);
-					setVar(id.getText(), v);
-				}
-			});
+			for (TerminalNode id : ctx.ID()) {
+				Variable v = new Variable(id.getText(), false);
+				v.setInput(true);
+				setVar(id.getText(), v);
+			}
+			
 		}
 
 		@Override
 		public void exitFunc_output(EMParser.Func_outputContext ctx) {
-			ctx.ID().forEach(new Consumer<TerminalNode>() {
-				@Override
-				public void accept(TerminalNode id) {
-					Variable v = new Variable(id.getText(), false);
-					v.setOutput(true);
-					setVar(id.getText(), v);
-				}
-			});
+			for (TerminalNode id : ctx.ID()) {
+				Variable v = new Variable(id.getText(), false);
+				v.setOutput(true);
+				setVar(id.getText(), v);
+			}
+			
 		}
 
 		@Override
@@ -439,7 +448,7 @@ public class EM2Lustre {
 						if (!unaryExpression_dt.equals(assignment_dt)) {
 							conversion_fun = getConvFun(unaryExpression_dt, assignment_dt);
 							if (isNumeric(rightExp) && !conversion_fun.equals("")) {
-								rightExp = fixConstant(unaryExpression_dt, rightExp);
+								rightExp = fixConstant(unaryExpression_dt.getBaseType(), rightExp);
 								conversion_fun = "";
 							}
 						}
@@ -553,6 +562,7 @@ public class EM2Lustre {
 
 		@Override
 		public void exitMldivide(EMParser.MldivideContext ctx) {
+			//type `help mldivide` in Matlab 
 			String operator = "";
 			if (ctx.mldivide() != null) {
 				this.addExternal_fun("mldivide");
@@ -589,7 +599,7 @@ public class EM2Lustre {
 				this.addExternal_fun("dot_rdivide");
 				operator = ctx.getChild(1).getText();
 			}
-			callExpression(ctx, "rdivide", "ldivide", operator, "dot_rdivide");
+			callExpression(ctx, "rdivide", "ldivide", operator, "rdivide");
 		}
 
 		@Override
@@ -599,7 +609,7 @@ public class EM2Lustre {
 				this.addExternal_fun("dot_ldivide");
 				operator = ctx.getChild(1).getText();
 			}
-			callExpression(ctx, "ldivide", "power", operator, "dot_ldivide");
+			callExpression(ctx, "ldivide", "power", operator, "ldivide");
 		}
 
 		@Override
@@ -662,7 +672,7 @@ public class EM2Lustre {
 				setLus(ctx, buf.toString());
 				setDataType(ctx, getDataType(ctx.expression()));
 			} else if (ctx.ID() != null) {
-				setDataType(ctx, getIDDataType(ctx.ID().getText()));
+				setDataType(ctx, getIDDataType(ctx.ID().getText(), null));
 				String IDText = getIDText(ctx.ID().getText(), getCtx_position(ctx), "");
 				setLus(ctx, IDText);
 
@@ -732,10 +742,12 @@ public class EM2Lustre {
 			}
 			Boolean ctx_position = getCtx_position(ctx);
 			String IDText = getIDText(ctx.ID(0).getText(), ctx_position, "");
+			String parameterDT = getIDParametersDataType(ctx.ID(0).getText(), 
+					getParametersDataType(ctx.function_parameter_list(0)));
 			StringBuilder postfix = new StringBuilder();
 			String lparen = "(";
 			String rparen = ")";
-			String sep = ",";
+			String sep = ", ";
 			if (isArrayAccess(ctx, ctx_position)) {
 				lparen = "_";
 				rparen = "";
@@ -743,7 +755,7 @@ public class EM2Lustre {
 			}
 			postfix.append(lparen);
 			if (ctx.function_parameter_list(0) != null)
-				postfix.append(getFunction_parameter_list( ctx.function_parameter_list(0), sep));
+				postfix.append(getFunction_parameter_list( ctx.function_parameter_list(0), parameterDT, sep));
 			postfix.append(rparen);
 			
 			
@@ -758,23 +770,67 @@ public class EM2Lustre {
 			if (!isArrayAccess(ctx, ctx_position)) 
 				buf.append(postfix);
 			
-
+			
 			setLus(ctx, buf.toString());
-			setDataType(ctx, getIDDataType(ctx.getChild(0).getText()));
+			setDataType(ctx, getIDDataType(ctx.getChild(0).getText(), getParametersDataType(ctx.function_parameter_list(0))));
 //			System.out.println("DataType of "+ctx.getText()+" is " + getDataType(ctx));
 		}
-
-		public String getFunction_parameter_list(EMParser.Function_parameter_listContext ctx, String sep) {
-			StringBuilder buf = new StringBuilder();
+		public ArrayList<String> getParametersDataType(EMParser.Function_parameter_listContext ctx){
+			ArrayList<String> params = new ArrayList<String>();
 			int n = ctx.function_parameter().size();
+
 			for (int i = 0; i < n; i++) {
 				EMParser.Function_parameterContext pctx = ctx.function_parameter(i);
-				if (pctx.COLON() == null) 
-					buf.append(getLus(pctx));
-				else {
+				if(pctx.notAssignment() == null){
+					return new ArrayList<String>();
+				}
+				params.add(i, getDataType(pctx.notAssignment()).getBaseType());
+				
+			}
+			return  params;
+		}
+		public String getFunction_parameter_list(EMParser.Function_parameter_listContext ctx, String paramsDT, String sep) {
+			String[] paramsDTSplited = paramsDT.split(", ");
+			List<String> params_dt = new ArrayList<String>();
+			int paramsDTLength = paramsDTSplited.length;
+			String first_dt = (paramsDTLength>=1)? paramsDTSplited[0]:"real";
+			StringBuilder buf = new StringBuilder();
+			int n = ctx.function_parameter().size();
+			for(int i=0; i < paramsDTLength; i++) {
+				params_dt.add(i, paramsDTSplited[i]);
+			}
+			if (paramsDTLength < n)
+				for(int i=paramsDTLength; i< n; i++)
+					params_dt.add(i, first_dt);
+			
+			for (int i = 0; i < n; i++) {
+				EMParser.Function_parameterContext pctx = ctx.function_parameter(i);
+				if(pctx.notAssignment() == null){
 					this.addUnsupported_expr(ctx);
 					return "";
 				}
+					
+				String leftdt = params_dt.get(i);
+				String rightdt = getDataType(pctx.notAssignment()).getBaseType();
+				//System.out.println("exp "+ctx.getParent().getText() + " param "+getLus(pctx.notAssignment())+" leftdt "+ leftdt+ " rightdt "+rightdt);
+				String conversion_fun = "";
+				String rightExp = getLus(pctx.notAssignment());
+				if (leftdt != null && !leftdt.equals("")) {
+					if (rightdt != null && !rightdt.equals("") )
+						if (!leftdt.equals(rightdt)) {
+							conversion_fun = getConvFun(leftdt, rightdt);
+							if (isNumeric(rightExp) && !conversion_fun.equals("")) {
+								rightExp = fixConstant(leftdt, rightExp);
+								conversion_fun = "";
+							}
+						}
+				}
+				
+				if (conversion_fun.equals(""))
+					buf.append(rightExp);
+				else
+					buf.append(conversion_fun + "(" + rightExp + ")");
+			
 				if (i < n - 1)
 					buf.append(sep);
 			}
@@ -782,7 +838,8 @@ public class EM2Lustre {
 		}
 		@Override
 		public void exitFunction_parameter_list(EMParser.Function_parameter_listContext ctx) {
-			setLus(ctx, getFunction_parameter_list(ctx, ","));
+			//not used. Parent context call a customizable function getFunction_parameter_list
+			//setLus(ctx, getFunction_parameter_list(ctx, "real", ", "));
 		}
 
 		@Override
@@ -956,7 +1013,7 @@ public class EM2Lustre {
 					String conversion_fun = getConvFun(method1_dt, method2_dt);
 
 					if (isNumeric(rightExp) && !conversion_fun.equals("")) {
-						rightExp = fixConstant(method1_dt, rightExp);
+						rightExp = fixConstant(method1_dt.getBaseType(), rightExp);
 						conversion_fun = "";
 					}
 					if (!conversion_fun.equals(""))
@@ -975,48 +1032,45 @@ public class EM2Lustre {
 				}
 
 
-			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			} catch (IllegalAccessException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			} catch (SecurityException e) {
+			}
+			catch ( IllegalArgumentException  e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			catch ( InvocationTargetException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}catch (SecurityException e) {
 				e.printStackTrace();
 			} catch (NoSuchMethodException e) {
 				e.printStackTrace();
 			}
 		}
 
-		private String fixConstant(DataType left_dt, String rightExp) {
+		private String fixConstant(String outport_dt, String rightExp) {
 
-			String outport_dt = toLustre_dt(left_dt.getBaseType());
 			String new_exp = rightExp;
-			switch (outport_dt) {
-			case "int":
+			if (outport_dt.equals("int")) {
 				if (isReal(rightExp)){
 
 					new_exp = rightExp.replaceAll("\\.\\d*", "");;
 				}
-
-				break;
-
-			case "real":
+			}else if (outport_dt.equals("real")) {
 				if (isInt(rightExp)){
 
 					new_exp = rightExp + ".0";
 				}
-
-				break;
-			case "bool":
+			}else if (outport_dt.equals("bool")) {
 				double d = Double.parseDouble(rightExp);
-				
 				if (d > 0)
 					new_exp = "true";
 				else
 					new_exp = "false";
-				break;
-
-			default:
-				break;
 			}
+			
 
 			return new_exp;
 		}
@@ -1024,7 +1078,6 @@ public class EM2Lustre {
 		public void nlosoc(ParserRuleContext ctx, String type) {
 
 		}
-
 
 		public String getConvFun(DataType left, DataType right) {
 			String outport_dt = "";
@@ -1039,9 +1092,12 @@ public class EM2Lustre {
 					lus_in_dt = toLustre_dt(right.getBaseType());
 				}
 			}
+			return getConvFun(outport_dt, lus_in_dt);
+		}
+		public String getConvFun(String outport_dt, String lus_in_dt) {
+			
 			String conv_fun = "";
-			switch (outport_dt) {
-			case "int":
+			if (outport_dt.equals("int")) {
 				if (lus_in_dt.equals("bool")){
 					this.addExternal_fun( "bool_to_int");
 					conv_fun = "bool_to_int";
@@ -1050,10 +1106,9 @@ public class EM2Lustre {
 					this.addExternal_fun( "real_to_int");
 					conv_fun = "real_to_int";
 				}
-
-				break;
-
-			case "real":
+				
+				
+			}else if (outport_dt.equals("real")) {
 				if (lus_in_dt.equals("bool")){
 					this.addExternal_fun( "bool_to_real");
 					conv_fun = "bool_to_real";
@@ -1062,9 +1117,9 @@ public class EM2Lustre {
 					this.addExternal_fun( "int_to_real");
 					conv_fun = "int_to_real";
 				}
-
-				break;
-			case "bool":
+				
+				
+			}else if (outport_dt.equals("bool")) {
 				if (lus_in_dt.equals("int")){
 					this.addExternal_fun( "int_to_bool");
 					conv_fun = "int_to_bool";
@@ -1073,12 +1128,8 @@ public class EM2Lustre {
 					this.addExternal_fun( "real_to_bool");
 					conv_fun = "real_to_bool";
 				}
-
-				break;
-
-			default:
-				break;
 			}
+			
 
 			return conv_fun;
 		}
@@ -1105,48 +1156,46 @@ public class EM2Lustre {
 			return new_name;
 		}
 		
-		private DataType getIDDataType(String v_name) {
+		private DataType getIDDataType(String v_name, ArrayList<String> arrayList) {
 			if (this.getVars().containsKey(v_name)) {
 				Variable v = this.getVar(v_name);
 				return v.getDataType();
 			}
-			return null;
+			ExternalLib lib = new ExternalLib(v_name, arrayList);
+			return new DataType(lib.getReturnDataType());
+
+		}
+		private String getIDParametersDataType(String v_name,  ArrayList<String> arrayList) {
+			if (this.getVars().containsKey(v_name)) {
+				//Array acces, parameters should be integers.
+				return "int";
+			}
+			ExternalLib lib = new ExternalLib(v_name, arrayList);
+			return lib.getParametersDataType();
 
 		}
 		private String toLustre_dt(String baseType) {
 			// TODO Auto-generated method stub
-			String res;
-			switch (baseType) {
-			case "int":
-			case "int8": 
-			case "uint8":
-			case "int16" :
-			case "uint16": 
-			case "int32": 
-			case "uint32":
+			String res = baseType;
+			if (baseType.contains("int")) {
 				res = "int";
-				break;
-			case "single":
-			case "double": 
-			case "real":
+			}else if(baseType.equals("single") 
+					|| baseType.equals("double") 
+					|| baseType.equals("real") ) {
 				res = "real";
-				break;
-			case "boolean":
-			case "bool":
+			}else if(baseType.equals("boolean") 
+					|| baseType.equals("bool") ) {
 				res = "bool";
-				break;
-			default:
-				res = "real";
-				break;
 			}
+			
 			return res;
 		}
 
 	}
-	private static String ToLustre(String matlabCode) {
+	public static String StringToLustre(String matlabCode) {
 		try {
 			InputStream stream = new ByteArrayInputStream(matlabCode.getBytes(StandardCharsets.UTF_8.name()));
-			return ToLustre(stream);
+			return InputStreamToLustre(stream);
 		} catch (UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -1154,7 +1203,7 @@ public class EM2Lustre {
 
 		return null;
 	}
-	public static String ToLustre(InputStream string) {
+	public static String InputStreamToLustre(InputStream string) {
 		ANTLRInputStream input = null;
 		try {
 			input = new ANTLRInputStream(string);
@@ -1190,14 +1239,24 @@ public class EM2Lustre {
 			file_name = "output.lus";
 		InputStream is = System.in;
 		if (inputFile != null) {
+			try {
 			is = new FileInputStream(inputFile);
+			}catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				System.out.println("File '"+ inputFile+"' Not Found.");
+			}
 		}
 
-		String result = ToLustre(is);
-		if (args.length > 0) 
-			try (PrintWriter out = new PrintWriter(file_name)) {
+		String result = InputStreamToLustre(is);
+		if (args.length > 0) {
+			try {
+				PrintWriter out = new PrintWriter(file_name);
 				out.println(result);
+			}catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
+		}
 	}
 
 

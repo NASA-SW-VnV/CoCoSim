@@ -47,7 +47,7 @@ public class DataType {
 		this.dim1 = dim1;
 	}
 	public String getBaseType() {
-		return baseType;
+		return baseType.equals("")? "real":baseType;
 	}
 	public void setBaseType(String baseType) {
 		this.baseType = baseType;

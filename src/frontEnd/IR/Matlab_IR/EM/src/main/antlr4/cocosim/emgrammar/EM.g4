@@ -13,6 +13,7 @@ emfile
 
 script
 	: contract?
+	  nlosoc?
 	  body
       nlosoc?
     ;

@@ -2,6 +2,8 @@ package cocosim.matlab2Lustre.domain;
 
 import java.util.ArrayList;
 
+import com.google.common.base.Joiner;
+
 /*################################################################################
 #
 # Installation script for cocoSim dependencies :
@@ -139,14 +141,15 @@ public class Variable {
 		int dim2 = Integer.parseInt(getDataType().getDim2());
 		String dt = getDataType().getBaseType() ;
 		if (dim1 == 1 && dim2 == 1) {
-			ArrayList<String> vars = new ArrayList<>();
+			ArrayList<String> vars = new ArrayList<String>();
 			for(int i=start_idx; i<=last_idx; i++){
 				vars.add( name + "__" + i);
 			}
-			buf.append(String.join(", ", vars));
+			Joiner joiner = Joiner.on(", ").skipNulls();
+			buf.append(joiner.join(vars));
 		}
 		else {
-			ArrayList<String> vars = new ArrayList<>();
+			ArrayList<String> vars = new ArrayList<String>();
 			for(int i=start_idx; i<=last_idx; i++){
 				for(int j=1; j <= dim1; j++) {
 					for(int k=1; k <= dim2; k++) {
@@ -154,7 +157,8 @@ public class Variable {
 					}
 				}
 			}
-			buf.append(String.join(", ", vars));
+			Joiner joiner = Joiner.on(", ").skipNulls();
+			buf.append(joiner.join(vars));
 			
 		}
 		if (!buf.toString().equals(""))

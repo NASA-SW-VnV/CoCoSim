@@ -16,69 +16,6 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import cocosim.emgrammar.EMBaseListener;
 import cocosim.emgrammar.EMLexer;
 import cocosim.emgrammar.EMParser;
-import cocosim.emgrammar.EMParser.AnnotationContext;
-import cocosim.emgrammar.EMParser.AssignmentContext;
-import cocosim.emgrammar.EMParser.BodyContext;
-import cocosim.emgrammar.EMParser.Body_itemContext;
-import cocosim.emgrammar.EMParser.Break_expContext;
-import cocosim.emgrammar.EMParser.Case_blockContext;
-import cocosim.emgrammar.EMParser.Catch_blockContext;
-import cocosim.emgrammar.EMParser.CellContext;
-import cocosim.emgrammar.EMParser.Clear_expContext;
-import cocosim.emgrammar.EMParser.ColonExpressionContext;
-import cocosim.emgrammar.EMParser.ConstantContext;
-import cocosim.emgrammar.EMParser.Continue_expContext;
-import cocosim.emgrammar.EMParser.DataTypeContext;
-import cocosim.emgrammar.EMParser.Declare_typeContext;
-import cocosim.emgrammar.EMParser.DimensionContext;
-import cocosim.emgrammar.EMParser.Else_blockContext;
-import cocosim.emgrammar.EMParser.Elseif_blockContext;
-import cocosim.emgrammar.EMParser.EmfileContext;
-import cocosim.emgrammar.EMParser.ExpressionContext;
-import cocosim.emgrammar.EMParser.ExpressionListContext;
-import cocosim.emgrammar.EMParser.For_blockContext;
-import cocosim.emgrammar.EMParser.Func_inputContext;
-import cocosim.emgrammar.EMParser.Func_outputContext;
-import cocosim.emgrammar.EMParser.FunctionContext;
-import cocosim.emgrammar.EMParser.Function_handleContext;
-import cocosim.emgrammar.EMParser.Function_parameterContext;
-import cocosim.emgrammar.EMParser.Function_parameter_listContext;
-import cocosim.emgrammar.EMParser.Global_expContext;
-import cocosim.emgrammar.EMParser.HorzcatContext;
-import cocosim.emgrammar.EMParser.If_blockContext;
-import cocosim.emgrammar.EMParser.Ignore_valueContext;
-import cocosim.emgrammar.EMParser.IndexingContext;
-import cocosim.emgrammar.EMParser.LdivideContext;
-import cocosim.emgrammar.EMParser.MatrixContext;
-import cocosim.emgrammar.EMParser.MldivideContext;
-import cocosim.emgrammar.EMParser.MpowerContext;
-import cocosim.emgrammar.EMParser.MrdivideContext;
-import cocosim.emgrammar.EMParser.MtimesContext;
-import cocosim.emgrammar.EMParser.NlocContext;
-import cocosim.emgrammar.EMParser.NlosContext;
-import cocosim.emgrammar.EMParser.NlosocContext;
-import cocosim.emgrammar.EMParser.NotAssignmentContext;
-import cocosim.emgrammar.EMParser.Otherwise_blockContext;
-import cocosim.emgrammar.EMParser.Persistent_expContext;
-import cocosim.emgrammar.EMParser.Plus_minusContext;
-import cocosim.emgrammar.EMParser.PostfixExpressionContext;
-import cocosim.emgrammar.EMParser.PowerContext;
-import cocosim.emgrammar.EMParser.PrimaryExpressionContext;
-import cocosim.emgrammar.EMParser.RdivideContext;
-import cocosim.emgrammar.EMParser.RelopANDContext;
-import cocosim.emgrammar.EMParser.RelopEQ_NEContext;
-import cocosim.emgrammar.EMParser.RelopGLContext;
-import cocosim.emgrammar.EMParser.RelopORContext;
-import cocosim.emgrammar.EMParser.RelopelANDContext;
-import cocosim.emgrammar.EMParser.RelopelORContext;
-import cocosim.emgrammar.EMParser.Return_expContext;
-import cocosim.emgrammar.EMParser.SocContext;
-import cocosim.emgrammar.EMParser.StatementContext;
-import cocosim.emgrammar.EMParser.Switch_blockContext;
-import cocosim.emgrammar.EMParser.TimesContext;
-import cocosim.emgrammar.EMParser.Try_catch_blockContext;
-import cocosim.emgrammar.EMParser.UnaryExpressionContext;
-import cocosim.emgrammar.EMParser.While_blockContext;
 
 /*################################################################################
 #
@@ -898,7 +835,15 @@ public class EM2JSON {
 				}else
 					setJSON(ctx, getJSON((ParseTree) method2.invoke(ctx)));
 
-			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			} catch (IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			catch ( IllegalArgumentException  e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			catch ( InvocationTargetException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}catch (SecurityException e) { 
@@ -958,9 +903,13 @@ public class EM2JSON {
 		String result = converter.getJSON(tree);
 		System.out.println(result);
 
-
-		try (PrintWriter out = new PrintWriter(file_name)) {
+		try {
+			PrintWriter out = new PrintWriter(file_name);
 			out.println(result);
+		}catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
 		}
+		 
 	}
 }
