@@ -40,6 +40,7 @@ classdef MatlabUtils
             end
         end
         function res = structUnique(struct2, fieldname)
+            
             res = struct2;
             if isempty(struct2) 
                 return;
@@ -53,6 +54,7 @@ classdef MatlabUtils
             [~,ia] = unique(A) ;
             res = struct2(ia) ;
         end
+        
         
         %% Concat cell array with a specific delimator
         function joinedStr = strjoin(str, delimiter)

@@ -34,13 +34,13 @@ for i=1:numel(transitions)
 end
 end
 %%
-function res = adapt_actions(actions, data, isCondition)
+function res = adapt_actions_using_Matlab_parser(actions, data, isCondition)
 if nargin < 3
     isCondition = false;
 end
 new_actions = actions;
 external_nodes = [];
-node_struct.intputs = {};
+node_struct.inputs = {};
 node_struct.outputs = {};
 % initialize output
 res.actions = new_actions;
@@ -56,9 +56,62 @@ for i=1:numel(actions)
     external_nodes = [external_nodes, external_nodes_i];
 end
 res.actions = new_actions;
-res.action_struct.intputs = MatlabUtils.structUnique(node_struct.intputs, 'name');
-res.action_struct.outputs = node_struct.outputs;
-res.external_nodes = external_nodes;
+res.inputs = MatlabUtils.structUnique(node_struct.inputs, 'name');
+res.outputs = node_struct.outputs;
+res.external_fun = external_nodes;
+end
+
+function res = adapt_actions(actions, data, isCondition)
+if nargin < 3
+    isCondition = false;
+end
+if ~isempty(actions)
+    disp('actions')
+    actions
+    [ actions_struct] = SFIRPPUtils.extractInputsOutputs(actions, data, isCondition);
+    inputs_data = MatlabUtils.structUnique(actions_struct.inputs, 'name');
+    disp('inputs')
+    inputs_data{:}
+    outputs_data = MatlabUtils.structUnique(actions_struct.outputs, 'name');
+    disp('outputs')
+    outputs_data{:}
+    inputs_names = {};
+    declare_type = {};
+    for i=1:numel(inputs_data)
+        inputs_names{i} = inputs_data{i}.name;
+        declare_type{i} = sprintf('%%@DeclareType %s: %s;\n',...
+            inputs_data{i}.name, SFIRPPUtils.to_lustre_dt(inputs_data{i}.datatype));
+    end
+    outputs_names = {};
+    for i=1:numel(outputs_data)
+        outputs_names{i} = outputs_data{i}.name;
+        if ~ismember(outputs_names{i}, inputs_names)
+            declare_type{numel(declare_type) + 1} = sprintf('\%@DeclareType %s: %s;\n',...
+                outputs_data{i}.name, SFIRPPUtils.to_lustre_dt(outputs_data{i}.datatype));
+        end
+    end
+    buf = java.lang.StringBuilder();
+    buf.append('Function [');
+    if (~isempty(outputs_names))
+        buf.append(MatlabUtils.strjoin(outputs_names, ', '));
+    end
+    buf.append('] = fun(');
+    if (~isempty(inputs_names))
+        buf.append(MatlabUtils.strjoin(inputs_names, ', '));
+    end
+    buf.append(sprintf(')\n'));
+    buf.append(MatlabUtils.strjoin(declare_type, ''));
+    buf.append(MatlabUtils.strjoin(actions, '\n'));
+    buf.append(sprintf('\nend'));
+    buf.toString()
+    
+    res.actions = actions;
+else
+    res.actions = actions;
+    res.inputs = {};
+    res.outputs = {};
+    res.external_fun = {};
+end
 end
 
 %%

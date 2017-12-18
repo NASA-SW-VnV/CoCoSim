@@ -10,15 +10,17 @@ classdef Data
         name;
         scope;
         datatype;
+        port;
         initial_value;
         array_size;
     end
     
     methods(Static = true)
-        function obj = Data(name, scope, datatype, initial_value, array_size)
+        function obj = Data(name, scope, datatype, port, initial_value, array_size)
             obj.name = name;
             obj.scope = scope;
             obj.datatype = datatype;
+            obj.port = port;
             obj.initial_value = initial_value;
             obj.array_size = array_size;
         end
@@ -27,6 +29,7 @@ classdef Data
             if nargin < 2
                 isevent = 0;
             end
+            port = d.get('Port');
             name = d.get('Name');
             scope = d.get('Scope');
             if ~isevent
@@ -39,7 +42,7 @@ classdef Data
                 array_size = [];
             end
             
-            d_obj = Data(name, scope, datatype, initial_value, array_size);
+            d_obj = Data(name, scope, datatype, port, initial_value, array_size);
         end
         
     end

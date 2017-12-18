@@ -46,6 +46,74 @@ classdef SFIRPPUtils
         end
         
         %%
+        function [ actions_struct] = extractInputsOutputs(actions, data, isCondition)
+            
+            
+            actions_struct.inputs = {};
+            actions_struct.outputs = {};
+            if nargin < 3
+                isCondition = false;
+            end            
+            for act_idx=1:numel(actions)
+                action = actions{act_idx};
+                
+                expression = '(\s|;)';
+                replace = '';
+                action_updated = regexprep(action,expression,replace);
+                
+                expression = '/\*(\s*\w*\W*\s*)*\*/';
+                replace = '';
+                right_expression = regexprep(action_updated,expression,replace);
+                
+                % handle x++, x--, x+= 1, x = x + 1 ...
+                expression = '(+{2}|-{2}|[+\-*/]=|={1})';
+                [operands, ~] = regexp(action_updated,expression,'split','tokens');
+                left_operand =operands{1};
+                
+                right_expression = action_updated;
+                
+                %update equation dataTypes and refresh variables names
+                if isempty(data) && ~isCondition
+                    return;
+                end
+                d = data(strcmp({data.name},left_operand));
+                data_found = 0;
+                if isempty(d)
+                    if contains(action, '[')
+                        vec = regexp(action,'\[','split');
+                        d = data(strcmp({data.name},vec{1}));
+                        if ~isempty(d)
+                            data_found = 1;
+                        end
+                    end
+                else
+                    data_found = 1;
+                end
+                
+                if ~data_found && ~isCondition
+                    return;
+                end
+               
+                
+                expression = '([a-zA-Z_]\w*)';
+                tokens = regexp(right_expression, expression, 'tokens');
+                for i=1:numel(tokens)
+                    d = data(strcmp({data.name},tokens{i}));
+                    if ~isempty(d)
+                        actions_struct.inputs{numel(actions_struct.inputs)+1}= d;
+                    end
+                end
+                
+                
+                %END
+                d_idx = find(strcmp({data.name},left_operand));
+               if ~isempty(d_idx)
+                actions_struct.outputs{numel(actions_struct.outputs)+1} = data(d_idx);
+               end
+
+            end
+        end
+        %%
         function [action_updated, data, actions_struct, external_nodes] = adapt_action(action, data, actions_struct_in, isCondition)
             
             external_nodes = [];
@@ -252,13 +320,16 @@ classdef SFIRPPUtils
             else
                 if ~isempty(left_operand) && contains(action, '=')
                     action_updated = [left_operand, ' = ' right_expression];
-                   
+                    
                 else
-                     action_updated = right_expression;
+                    action_updated = right_expression;
                 end
             end
         end
         
+        
+        
+        %%
         function [right_expression, external_nodes] = external_function_to_lustre(token, right_expression, external_nodes, dt)
             % this part should be more developped, it is the case where
             % we call extern functions in actions as min, max, matlab
@@ -293,11 +364,11 @@ classdef SFIRPPUtils
                 
             elseif ~strcmp(char(token),'true') && ~strcmp(char(token),'false')
                 
-                    display_msg(...
-                        sprintf('Token %s has not been processed',char(token)),...
-                        MsgType.ERROR,...
-                        'SFIRPPUtils',...
-                        '');
+                display_msg(...
+                    sprintf('Token %s has not been processed',char(token)),...
+                    MsgType.ERROR,...
+                    'SFIRPPUtils',...
+                    '');
             end
         end
         

@@ -34,3 +34,11 @@ if exist(fullfile(cocoSim_root, 'src', 'frontEnd', 'IR', 'std_IR', 'utils', 'mak
     end
     cd(PWD);
 end
+
+%% Java external libraries
+matlabParser = fullfile(cocoSim_root, 'src','frontEnd', 'IR',...
+    'Matlab_IR', 'Matlab-Parser.jar');
+
+if exist(matlabParser, 'file')
+    javaaddpath(matlabParser);
+end

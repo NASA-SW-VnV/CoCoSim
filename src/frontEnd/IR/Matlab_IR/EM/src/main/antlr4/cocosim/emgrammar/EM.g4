@@ -35,21 +35,21 @@ func_output
 	;
 
 body
-    :   body_item nlosoc
+    :   body_item nlosoc?
     |   body  body_item  nlosoc
     ;
 
 body_item
     :  statement 			
     |  function 
-    |  annotation 			
+    |  annotation 		
     ;
 annotation
     : declare_type  
     ;
     
 declare_type
-    : ANNOT DeclareType ID COLON dataType nlos?
+    : ANNOT DeclareType ID COLON dataType nlos
     ;
 
 DeclareType: 'DeclareType'
@@ -61,9 +61,9 @@ dimension :ID | Integer
 	;
 
 BASETYPE
-    : 'int' | 'int8' | 'uint8' |'int16' | 'uint16' |'int32' | 'uint32'
-    | 'real' | 'single' | 'double'
-    | 'bool' | 'boolean'
+    : 'int' //| 'int8' | 'uint8' |'int16' | 'uint16' |'int32' | 'uint32'
+    | 'real' //| 'single' | 'double'
+    | 'bool' //| 'boolean'
     ;
 
 contract :  CONTRACT  contract_item+ '%}'

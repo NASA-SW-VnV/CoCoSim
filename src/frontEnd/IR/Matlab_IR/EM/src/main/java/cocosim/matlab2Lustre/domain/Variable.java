@@ -165,8 +165,8 @@ public class Variable {
 			buf.append( ": " + dt + "; ");
 		return buf.toString();
 	}
-	public Object toString(boolean isNotVar) {
-		if (isNotVar) {
+	public Object toString(boolean onlyBaseType) {
+		if (onlyBaseType) {
 			StringBuilder buf = new StringBuilder();
 			buf.append(name);
 			buf.append( ": " + dataType.toString() + "; ");

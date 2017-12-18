@@ -21,10 +21,10 @@
 global ordered_sfIR_pp_functions priority_sfIR_pp_map;
 
 % add both std_pp and pp2
-sfIR_pp_handled_functions = {'fields/*.m'};
+sfIR_pp_handled_functions = {'stateflow_fields/*.m'};
 % To not call "funX" we may add it to the following list, or give
 % it an order -1 in sfIR_pp_order_map (see next TODO).
-sfIR_pp_unhandled_functions = {'fields/funX.m'};
+sfIR_pp_unhandled_functions = {};
 
 
 %% TODO: define orders
@@ -32,9 +32,10 @@ sfIR_pp_unhandled_functions = {'fields/funX.m'};
 % functions list
 sfIR_pp_order_map = containers.Map('KeyType', 'int32', 'ValueType', 'any');
 
-sfIR_pp_order_map(-1) = {'fields/funX.m'}; % -1 means not to call
+sfIR_pp_order_map(-1) = {}; % -1 means not to call
 
-sfIR_pp_order_map(0) = {'fields/*.m'};% 0 means all functions inside fields will be called first.
+sfIR_pp_order_map(0) = {'stateflow_fields/*.m'};% 0 means all functions inside fields will be called first.
+
 
 
 
