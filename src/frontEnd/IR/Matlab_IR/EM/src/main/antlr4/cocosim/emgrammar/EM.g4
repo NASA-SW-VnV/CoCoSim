@@ -31,7 +31,7 @@ func_input
  
 func_output
 	: ID EQ                             
-	| LSBRACE (ID COMMA?)+? RSBRACE EQ  
+	| LSBRACE (ID COMMA?)*? RSBRACE EQ  
 	;
 
 body

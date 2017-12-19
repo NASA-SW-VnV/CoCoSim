@@ -1,4 +1,4 @@
-function [ new_ir ] = to_lustre_dt( new_ir )
+function [ new_ir, status ] = to_lustre_dt( new_ir )
 %TO_LUSTRE_DT change simulink datatypes to lustre datatypes
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -7,6 +7,7 @@ function [ new_ir ] = to_lustre_dt( new_ir )
 % All Rights Reserved.
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+status = 0;
 for i=1:numel(new_ir.data)
     new_ir.data(i).datatype = SFIRPPUtils.to_lustre_dt(new_ir.data(i).datatype);
     new_ir.data(i).initial_value = SFIRPPUtils.default_InitialValue(new_ir.data(i).initial_value, new_ir.data(i).datatype);

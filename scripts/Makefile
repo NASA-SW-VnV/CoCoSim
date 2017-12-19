@@ -9,7 +9,7 @@
 #
 ################################################################################
 ####### Utils ###############
-IR_path = "../src/frontend/IR/std_IR"
+IR_path = "../src/frontEnd/IR/std_IR"
 std_pp_path = "../src/frontEnd/pp/std_pp"
 build_dir = "../tools/build"
 

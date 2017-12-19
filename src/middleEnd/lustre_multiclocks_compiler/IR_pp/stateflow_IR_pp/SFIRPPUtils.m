@@ -118,7 +118,7 @@ classdef SFIRPPUtils
             
             external_nodes = [];
             if nargin < 3 || isempty(actions_struct_in)
-                actions_struct.intputs = {};
+                actions_struct.inputs = {};
                 actions_struct.outputs = {};
             else
                 actions_struct = actions_struct_in;
@@ -277,9 +277,9 @@ classdef SFIRPPUtils
                         expression = strcat(operator,'(', char(tokens{i}), ')',operator);
                         replace = strcat('$1 $2__', num2str(data_index), ' $3');
                         right_expression = regexprep(right_expression,expression,replace);
-                        actions_struct.intputs{numel(actions_struct.intputs)+1}= d;
+                        actions_struct.inputs{numel(actions_struct.inputs)+1}= d;
                     elseif strcmp(dataScope,'Input') || strcmp(dataScope,'Constant') || strcmp(dataScope,'Parameter')
-                        actions_struct.intputs{numel(actions_struct.intputs)+1}= d;
+                        actions_struct.inputs{numel(actions_struct.inputs)+1}= d;
                     else
                         error('DataScope :%s is not supported yet',dataScope)
                     end
@@ -316,7 +316,7 @@ classdef SFIRPPUtils
                 else
                     actions_struct.outputs{idx} = data(d_idx);
                 end
-                action_updated = [left_operand, '__', num2str(index), ' = ' right_expression];
+                action_updated = [left_operand, '__', num2str(index), ' = ' right_expression ';'];
             else
                 if ~isempty(left_operand) && contains(action, '=')
                     action_updated = [left_operand, ' = ' right_expression];

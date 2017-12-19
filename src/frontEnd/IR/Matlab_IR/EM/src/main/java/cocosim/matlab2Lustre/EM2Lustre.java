@@ -142,7 +142,8 @@ public class EM2Lustre {
 		}
 
 		DataType getDataType(ParseTree ctx) {
-			return dataType.get(ctx);
+			
+			return dataType.get(ctx)!=null? dataType.get(ctx): new DataType("");
 		}
 
 		void setDataType(ParseTree ctx, DataType d) {
@@ -1264,6 +1265,7 @@ public class EM2Lustre {
 				return occ==0? new_name:new_name + "__" + occ;
 			}else {
 				new_name = ExternalLib.getLustreEquivalent(new_name);
+				addExternal_fun(new_name);
 			}
 
 			return new_name;
@@ -1303,14 +1305,14 @@ public class EM2Lustre {
 			
 			return res;
 		}
-		public String getUnsupported_exr() {
+		public String getUnsupported_exp() {
 			HashSet<ParseTree> U = getUnsupported_ctx();
 			StringBuilder buf = new StringBuilder();
 			for (ParseTree p : U) {
 				ParseTree parent = p.getParent();
 				while(parent != null) {
 					if (parent.getClass().toString().endsWith("StatementContext"))
-						buf.append(parent.getText().replaceAll("\n", " ") + "\n");
+						buf.append(parent.getText().replaceAll("\n", " ") + ";");
 					parent = parent.getParent();
 				}
 				
@@ -1404,11 +1406,11 @@ public class EM2Lustre {
 				System.out.println("Variables are: ");
 				System.out.println(converter.getVariablesStr());
 				System.out.println("Lustre Fun is: ");
-				System.out.println(converter.getLus(converter.getTree()));
+				System.out.println(converter.getLus_body());//.getLus(converter.getTree()));
 				System.out.println("External Functions are: ");
 				System.out.println(converter.getExternal_fun_str());
 				System.out.println("Unsupported expressions are: ");
-				System.out.println(converter.getUnsupported_exr());
+				System.out.println(converter.getUnsupported_exp());
 				out.close();
 			}catch (FileNotFoundException e) {
 				// TODO Auto-generated catch block

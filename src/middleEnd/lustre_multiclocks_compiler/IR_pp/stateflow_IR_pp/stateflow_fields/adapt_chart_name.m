@@ -1,4 +1,4 @@
-function new_ir = adapt_chart_name(new_ir, isSF)
+function [new_ir, status] = adapt_chart_name(new_ir, isSF)
 %adapt_chart_name change the chart path to one name to be adapted to lustre
 %compiler that only accept chart name to be the root name of all paths.
 %file_name/subsystem_A/chart1 -> file_name_subsystem_A_chart1
@@ -9,6 +9,7 @@ function new_ir = adapt_chart_name(new_ir, isSF)
 % All Rights Reserved.
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+status = 0;
 if nargin < 2
     isSF = 0;
 end

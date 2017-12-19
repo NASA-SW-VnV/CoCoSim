@@ -1,4 +1,4 @@
-function [new_ir] = stateflow_IR_pp(old_ir, print_in_file, output_dir)
+function [new_ir, status] = stateflow_IR_pp(old_ir, print_in_file, output_dir)
 % stateflow_IR_pp pre-process internal representation of stateflow. For
 % example change Simulink datatypes (int32, ...) to lustre datatypes (int,
 % real, bool).
@@ -10,7 +10,7 @@ function [new_ir] = stateflow_IR_pp(old_ir, print_in_file, output_dir)
 % All Rights Reserved.
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+status = 0;
 if nargin < 2 || isempty(output_dir)
     output_dir = pwd;
 end
@@ -51,7 +51,13 @@ for i=1:numel(ordered_sfIR_pp_functions)
     fh = str2func(func_name);
     try
         display_msg(['runing ' func2str(fh)], MsgType.INFO, 'Stateflow_IRPP', '');
-        new_ir = fh(new_ir);
+        [new_ir, status] = fh(new_ir);
+        if status
+            
+             display_msg('Stateflow_IR_PP has been interrupted', MsgType.ERROR, 'Stateflow_IRPP', '');
+             cd(oldDir);
+             return;
+        end
     catch me
         display_msg(['can not run ' func2str(fh)], MsgType.ERROR, 'Stateflow_IRPP', '');
         display_msg(me.getReport(), MsgType.DEBUG, 'Stateflow_IRPP', '');
