@@ -502,7 +502,9 @@ public class EM2Lustre {
 							if (isNumeric(rightExp) && !conversion_fun.equals("")) {
 								rightExp = fixConstant(unaryExpression_dt.getBaseType(), rightExp);
 								conversion_fun = "";
-							}
+							}else
+								if (!conversion_fun.equals(""))
+									this.addExternal_fun(conversion_fun);
 						}
 				}
 
@@ -875,7 +877,9 @@ public class EM2Lustre {
 							if (isNumeric(rightExp) && !conversion_fun.equals("")) {
 								rightExp = fixConstant(leftdt, rightExp);
 								conversion_fun = "";
-							}
+							}else
+								if (!conversion_fun.equals(""))
+									this.addExternal_fun(conversion_fun);
 						}
 				}
 				
@@ -1211,33 +1215,27 @@ public class EM2Lustre {
 			String conv_fun = "";
 			if (outport_dt.equals("int")) {
 				if (lus_in_dt.equals("bool")){
-					this.addExternal_fun( "bool_to_int");
 					conv_fun = "bool_to_int";
 				}
 				else if (lus_in_dt.equals("real")){
-					this.addExternal_fun( "real_to_int");
 					conv_fun = "real_to_int";
 				}
 				
 				
 			}else if (outport_dt.equals("real")) {
 				if (lus_in_dt.equals("bool")){
-					this.addExternal_fun( "bool_to_real");
 					conv_fun = "bool_to_real";
 				}
 				else if (lus_in_dt.equals("int")){
-					this.addExternal_fun( "int_to_real");
 					conv_fun = "int_to_real";
 				}
 				
 				
 			}else if (outport_dt.equals("bool")) {
 				if (lus_in_dt.equals("int")){
-					this.addExternal_fun( "int_to_bool");
 					conv_fun = "int_to_bool";
 				}
 				else if (lus_in_dt.equals("real")){
-					this.addExternal_fun( "real_to_bool");
 					conv_fun = "real_to_bool";
 				}
 			}

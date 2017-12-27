@@ -155,11 +155,18 @@ if nargin < 3
     isCondition = false;
 end
 status = 0;
-res.actions = actions;
+if(~isempty(actions))
+    res.actions = actions;
+    res.original_actions = MatlabUtils.strjoin(actions, '; ');
+else
+    res.original_actions = '';
+    res.actions = '';
+end
 res.inputs = '';
 res.outputs = '';
 res.external_fun = '';
 res.variables = '';
+
 if ~isempty(actions)
     [ actions_struct] = SFIRPPUtils.extractInputsOutputs(actions, data, isCondition);
     inputs_data = MatlabUtils.structUnique(actions_struct.inputs, 'name');
@@ -196,7 +203,7 @@ if ~isempty(actions)
     buf.append(sprintf('\nend'));
     
     try
-    em2lustre =  cocosim.matlab2Lustre.EM2Lustre;
+    em2lustre =  cocosim.matlab2Lustre.EM2PseudoLustre;
     converter = em2lustre.StringToLustre(buf.toString());
     catch ME
         display_msg('Error using cocosim.matlab2Lustre.EM2Lustre', ...
