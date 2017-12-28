@@ -25,8 +25,8 @@ cmake_install_version="3.7.2"
 m4_install_version="1.4.18"
 python_required_version="2.7"
 python_install_version="2.7.13"
-ocaml_required_version="4.03.0"
-ocaml_install_version="4.04.0"
+ocaml_required_version="4.02.0"
+ocaml_install_version="4.02.0"
 autoconf_install_version="2.69"
 automake_install_version="1.15"
 ocamlfind_install_version="1.7.1"
@@ -314,6 +314,7 @@ function git_clone() {
     cd "$download_dir"
     if [[ -d "$dirname" ]]; then
         progress "Using already downloaded $dirname from $url branch $branch"
+        git checkout $branch
     else
         progress "Downloading $url branch $branch"
 
@@ -754,9 +755,12 @@ fi
 
 utils_deps=('cat' 'rm' 'mv' 'cp' 'ln' 'find' 'tee' \
             'patch' 'tar' 'gzip' 'gunzip' 'xz' \
-            'make' 'install' 'git' \
+            'make' 'install' 'git' 'opam'\
             'autoconf' 'automake' 'aclocal' 'pkg-config')
 unset missing_deps
+
+
+## autoconf and automake should be installed by the user.
 ###################
 # install autoconf#
 ###################
@@ -1053,205 +1057,16 @@ fi
     python_satisfies_requirements "$version") ||
     assert_failed "python is not properly installed"
 
-###############
-# Check ocaml #
-###############
-
-progress "Checking for OCaml"
-found_ocaml=0
-
-if command_exists ocaml; then
-    version=$(ocaml_parse_version ocaml) || error_parse_version ocaml
-
-    if version_ge "$version" "$ocaml_required_version"; then
-        found_ocaml=1
-        success "Found OCaml $version"
-    else
-        progress "Found OCaml $version, version too old, skipped"
-    fi
-fi
-
-###################
-# Check ocamlfind #
-###################
-
-found_ocamlfind=0
-
-if (( found_ocaml )); then
-    progress "Checking for ocamlfind"
-    
-    if command_exists ocamlfind; then
-        found_ocamlfind=1
-        success "Found ocamlfind"
-    fi
-fi
 
 ####################
-# Check ocamlbuild #
+# Installing OCaml #
 ####################
+progress "Installing OCaml $ocaml_required_version, ocamlfind, ocamlbuild, cmdliner and ocamlgraph"
+progress_run opam init -y --comp  $ocaml_required_version || error_install opam
+progress_run opam switch -y $ocaml_required_version
+progress_run eval `opam config env` || error_install opam
+progress_run opam install -y  ocamlfind ocamlbuild ocamlgraph fmt logs topkg cmdliner|| error_install ocaml
 
-found_ocamlbuild=0
-
-if (( found_ocaml && found_ocamlfind )); then
-    progress "Checking for ocamlbuild"
-
-    if command_exists ocamlbuild; then
-        version=$(ocamlbuild_parse_version ocamlbuild) || error_parse_version ocamlbuild
-        found_ocamlbuild=1
-        success "Found ocamlbuild $version"
-    fi
-fi
-
-####################
-# Check ocamlgraph #
-####################
-
-found_ocamlgraph=0
-
-if (( found_ocaml && found_ocamlfind && found_ocamlbuild )); then
-    progress "Checking for ocamlgraph"
-
-    if ocamlgraph_dir=$(ocamlfind query ocamlgraph 2>&1) &&
-            [[ -f "$ocamlgraph_dir/graph.cmxa" ]]; then
-        found_ocamlgraph=1
-        success "Found ocamlgraph"
-    fi
-fi
-
-###########################
-# Install all ocaml tools #
-###########################
-
-if (( ! found_ocaml || ! found_ocamlfind || ! found_ocamlbuild || ! found_ocamlgraph )); then
-    progress "Could NOT find OCaml >= $ocaml_required_version, ocamlfind, ocamlbuild or ocamlgraph"
-
-    #################
-    # Install ocaml #
-    #################
-
-    if [[ -x "$install_dir/ocaml-$ocaml_install_version/bin/ocaml" ]]; then
-        progress "Using already built ${cgreen}ocaml $ocaml_install_version"
-    else
-        progress "Installing ${cgreen}ocaml $ocaml_install_version"
-
-        download_extract "https://caml.inria.fr/pub/distrib/ocaml-${ocaml_install_version%.*}/ocaml-$ocaml_install_version.tar.xz" \
-            "$build_dir/ocaml-$ocaml_install_version"
-
-        cd "$build_dir/ocaml-$ocaml_install_version"
-
-        progress_run ./configure \
-            -prefix "$install_dir/ocaml-$ocaml_install_version" \
-            -with-debug-runtime || error_configure ocaml
-
-        progress_run make world.opt -j1 || error_make ocaml
-
-        progress_run make install || error_install ocaml
-    fi
-
-    prepend_path "$install_dir/ocaml-$ocaml_install_version/bin"
-    prepend_manpath "$install_dir/ocaml-$ocaml_install_version/man"
-
-    (command_exists ocaml && version=$(ocaml_parse_version ocaml) &&
-        [[ "$version" = "$ocaml_install_version" ]]) ||
-        assert_failed "ocaml is not properly installed"
-
-    success "${cgreen}ocaml $ocaml_install_version${coff}${cbold} successfully installed"
-
-    #####################
-    # Install ocamlfind #
-    #####################
-
-    if [[ -x "$install_dir/ocamlfind-$ocamlfind_install_version/bin/ocamlfind" ]]; then
-        progress "Using already built ${cgreen}ocamlfind $ocamlfind_install_version"
-    else
-        progress "Installing ${cgreen}ocamlfind $ocamlfind_install_version"
-
-        download_extract "http://download.camlcity.org/download/findlib-$ocamlfind_install_version.tar.gz" \
-            "$build_dir/ocamlfind-$ocamlfind_install_version"
-
-        cd "$build_dir/ocamlfind-$ocamlfind_install_version"
-
-        progress_run ./configure \
-            -bindir "$install_dir/ocamlfind-$ocamlfind_install_version/bin" \
-            -mandir "$install_dir/ocamlfind-$ocamlfind_install_version/man" || error_configure ocamlfind
-
-        progress_run make all -j1 || error_make ocamlfind
-
-        progress_run make install || error_install ocamlfind
-    fi
-
-    prepend_path "$install_dir/ocamlfind-$ocamlfind_install_version/bin"
-    prepend_manpath "$install_dir/ocamlfind-$ocamlfind_install_version/man"
-
-    command_exists ocamlfind || assert_failed "ocamlfind is not properly instaled"
-
-    success "${cgreen}ocamlfind $ocamlfind_install_version${coff}${cbold} successfully installed"
-
-    ######################
-    # Install ocamlbuild #
-    ######################
-
-    if [[ -x "$install_dir/ocamlbuild-$ocamlbuild_install_version/bin/ocamlbuild" ]]; then
-        progress "Using already built ${cgreen}ocamlbuild $ocamlbuild_install_version"
-    else
-        progress "Installing ${cgreen}ocamlbuild $ocamlbuild_install_version"
-
-        download_rename "https://github.com/ocaml/ocamlbuild/archive/$ocamlbuild_install_version.tar.gz" \
-            "ocamlbuild-$ocamlbuild_install_version.tar.gz"
-        extract "$download_dir/ocamlbuild-$ocamlbuild_install_version.tar.gz" \
-            "$build_dir/ocamlbuild-$ocamlbuild_install_version"
-
-        cd "$build_dir/ocamlbuild-$ocamlbuild_install_version"
-
-        progress_run make configure \
-            OCAMLBUILD_PREFIX="$install_dir/ocamlbuild-$ocamlbuild_install_version" \
-            OCAMLBUILD_BINDIR="$install_dir/ocamlbuild-$ocamlbuild_install_version/bin" \
-            OCAMLBUILD_LIBDIR="$install_dir/ocamlbuild-$ocamlbuild_install_version/lib" \
-            OCAML_NATIVE=true  || error_configure ocamlbuild
-
-        progress_run make || error_make ocamlbuild
-
-        progress_run make install || error_install ocamlbuild
-    fi
-
-    prepend_path "$install_dir/ocamlbuild-$ocamlbuild_install_version/bin"
-    
-    (command_exists ocamlbuild && version=$(ocamlbuild_parse_version ocamlbuild) &&
-        [[ "$version" = "$ocamlbuild_install_version" ]]) ||
-        assert_failed "ocamlbuild is not properly installed"
-
-    success "${cgreen}ocamlbuild $ocamlbuild_install_version${coff}${cbold} successfully installed"
-
-    ######################
-    # Install ocamlgraph #
-    ######################
-
-    if [[ -f "$install_dir/ocaml-$ocaml_install_version/lib/ocaml/ocamlgraph/graph.cmxa" ]]; then
-        progress "Using already built ${cgreen}ocamlgraph $ocamlgraph_install_version"
-    else
-        progress "Installing ${cgreen}ocamlgraph $ocamlgraph_install_version"
-
-        download_extract "http://ocamlgraph.lri.fr/download/ocamlgraph-$ocamlgraph_install_version.tar.gz" \
-            "$build_dir/ocamlgraph-$ocamlgraph_install_version"
-
-        cd "$build_dir/ocamlgraph-$ocamlgraph_install_version"
-
-        progress_run ./configure \
-            --prefix="$install_dir/ocamlgraph-$ocamlgraph_install_version" || error_configure ocamlgraph
-
-        progress_run make || error_make ocamlgraph
-
-        progress_run make install || error_install ocamlgraph
-
-        progress_run make install-findlib || error_install ocamlgraph
-    fi
-
-    (ocamlgraph_dir=$(ocamlfind query ocamlgraph 2>&1) &&
-        [[ -f "$ocamlgraph_dir/graph.cmxa" ]]) ||
-        assert_failed "ocamlgraph is not properly installed"
-
-    success "${cgreen}ocamlgraph $ocamlgraph_install_version${coff}${cbold} successfully installed"
-fi
 
 ################
 # Check menhir #
