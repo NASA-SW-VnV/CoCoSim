@@ -11,6 +11,7 @@ classdef LustrecUtils < handle
             t = regexprep(t, '''', '''''');
             t = regexprep(t, '%', '%%');
             t = regexprep(t, '\\', '\\\');
+            t = regexprep(t, '!=', '<>');
         end
         
         %%
@@ -942,26 +943,32 @@ classdef LustrecUtils < handle
         end
         
         %% run compositional modular verification usin Kind2
-        function [valid, IN_struct, time_max] = run_comp_modular_verif_using_Kind2(...
+        function [valid, IN_struct, time_max] = run_Kind2(...
                 verif_lus_path,...
                 output_dir,...
                 node, ...
-                KIND2, Z3)
+                KIND2, Z3, OPTS)
             
             IN_struct = [];
             time_max = 0;
             valid = -1;
             if nargin < 1
-                error('Missing arguments to function call: LustrecUtils.run_comp_modular_verif_using_Kind2')
+                error('Missing arguments to function call: LustrecUtils.run_Kind2')
+            end
+            if ~exist('OPTS', 'var')
+                OPTS = '';
             end
             if nargin < 3  
-                OPTS = '--modular true';
+                OPTS = [OPTS ' --modular true'];
             else
                 if isempty(node)
-                    return;
+                    OPTS = [OPTS '--modular true'];
                 else
-                    OPTS = sprintf('--lus_main %s', node);
+                    OPTS = sprintf('%s --lus_main %s', OPTS, node);
                 end
+            end
+            if nargin < 4
+                tools_config;
             end
             [file_dir, file_name, ~] = fileparts(verif_lus_path);
             if nargin < 2 || isempty(output_dir)
@@ -972,7 +979,7 @@ classdef LustrecUtils < handle
             PWD = pwd;
             cd(output_dir);
             
-            command = sprintf('%s -xml  --z3_bin %s --timeout %s --compositional true %s "%s"',...
+            command = sprintf('%s -xml  --z3_bin %s --timeout %s %s "%s"',...
                 KIND2, Z3, timeout, OPTS,  verif_lus_path);
             display_msg(['KIND2_COMMAND ' command],...
                 MsgType.DEBUG, 'LustrecUtils.run_verif', '');
@@ -1042,6 +1049,8 @@ classdef LustrecUtils < handle
                 return
             end
             xAnalysis = xDoc.getElementsByTagName('Analysis');
+            nbSafe = 0;
+            nbUnsafe = 0;
             for idx_analys=0:xAnalysis.getLength-1
                 node_name = char(xAnalysis.item(idx_analys).getAttribute('top'));
                 xProperties = xAnalysis.item(idx_analys).getElementsByTagName('Property');
@@ -1076,13 +1085,22 @@ classdef LustrecUtils < handle
                                 node_name, prop_name, solver_output);
                             display_msg(msg, Constants.ERROR, 'Property Checking', '');
                         end
+                        nbUnsafe = nbUnsafe + 1;
+                    end
+                    if strcmp(answer, 'SAFE')
+                        nbSafe = nbSafe + 1;
                     end
                     msg = sprintf('Solver Result for node %s of property %s is %s', ...
                         node_name, prop_name, answer);
                     display_msg(msg, Constants.RESULT, 'LustrecUtils.extract_answer', '');
                 end
             end
-            
+            msg = sprintf('Numer of properties SAFE are %d', ...
+                nbSafe);
+            display_msg(msg, Constants.RESULT, 'LustrecUtils.extract_answer', '');
+            msg = sprintf('Numer of properties UNSAFE are %d', ...
+                nbUnsafe);
+            display_msg(msg, Constants.RESULT, 'LustrecUtils.extract_answer', '');
         end
         function [IN_struct, time_max] = Kind2CEXTostruct(...
                 cex_xml, ...

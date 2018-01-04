@@ -8,8 +8,14 @@ function [ T, coverage_percentage ] = lustret_test_mutation( model_full_path, ..
                                                             nb_mutants_max, ...
                                                             MAX_nb_test,...
                                                             Min_coverage )
-%LUSTRET_TEST_MUTATION Summary of this function goes here
-%   Detailed explanation goes here
+%LUSTRET_TEST_MUTATION generates test suite based on mutations inserted in
+%Lustre file
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Copyright (c) 2017 United States Government as represented by the
+% Administrator of the National Aeronautics and Space Administration.
+% All Rights Reserved.
+% Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 T = [];
 coverage_percentage = 0;
 if nargin < 2

@@ -231,8 +231,8 @@ elseif (tests_method == 4) %4- Prove LUS1 <=> LUS2.
         msg = sprintf('Checking Node %s', nodes_list{i});
         display_msg(msg, MsgType.INFO, 'validation', '');
         [valid_i, IN_struct_i, ~] = ...
-            LustrecUtils.run_comp_modular_verif_using_Kind2(...
-            verif_lus_path, output_dir, nodes_list{i}, KIND2, Z3);
+            LustrecUtils.run_Kind2(...
+            verif_lus_path, output_dir, nodes_list{i}, KIND2, Z3, ' --compositional true');
         valid(i) = valid_i;
         IN_struct{i} = IN_struct_i;
     end
