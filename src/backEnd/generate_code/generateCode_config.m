@@ -4,15 +4,16 @@
 % All Rights Reserved.
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%   In this configuration file the user can add an item to Verification
+%   In this configuration file the user can add an item to Generation
 %   menu. 
 %   the user needs to follow the same template defined in the following example.
 %   Variables:
-%   verification_items: Cell array containing the path to Verification Menu items.
+%   menu_items: Cell array containing the path to Verification Menu items.
 
 %% Configure Verification menue: the menu and functions callbacks
 %
 %take the current file directory.
-[verif_root, ~, ~] = fileparts(mfilename('fullpath'));
-verification_items{1} = fullfile(verif_root, 'lustreVerify', 'lusVerifyMenu.m');
-verification_items{2} = fullfile(verif_root, 'cocoSpecVerify', 'cocoSpecVerifyMenu.m');
+[gen_root, ~, ~] = fileparts(mfilename('fullpath'));
+menu_items{1} = fullfile(gen_root, 'C', 'CMenu.m');
+menu_items{2} = fullfile(gen_root, 'Lustre', 'LustreMenu.m');
+menu_items{3} = fullfile(gen_root, 'Rust', 'RustMenu.m');

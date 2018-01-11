@@ -216,7 +216,7 @@ elseif (tests_method == 4) %4- Prove LUS1 <=> LUS2.
     msg = sprintf('EMF traceability : %s', EMF_trace_xml.xml_file_path);
     display_msg(msg, MsgType.DEBUG, 'validation', '');
     
-    [coco_lus_fpath, ~, ~, ~, ~, xml_trace, ~]=ToLustre(emf_model_path, [], 1);
+    [coco_lus_fpath, ~, ~, ~, ~, xml_trace, ~]=lustre_compiler(emf_model_path, [], 1);
     [verif_lus_path, nodes_list] = LustrecUtils.create_emf_verif_file(...
         lus_file_path,...
         coco_lus_fpath,...
@@ -227,7 +227,7 @@ elseif (tests_method == 4) %4- Prove LUS1 <=> LUS2.
     msg = sprintf('LUSTRE VERIFICATION File : %s', verif_lus_path);
     display_msg(msg, MsgType.DEBUG, 'validation', '');
     valid = []; IN_struct ={};
-    parfor i=1:numel(nodes_list)
+    for i=1:numel(nodes_list)
         msg = sprintf('Checking Node %s', nodes_list{i});
         display_msg(msg, MsgType.INFO, 'validation', '');
         [valid_i, IN_struct_i, ~] = ...

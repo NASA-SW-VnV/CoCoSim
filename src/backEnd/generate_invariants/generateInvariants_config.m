@@ -14,5 +14,4 @@
 %
 %take the current file directory.
 [verif_root, ~, ~] = fileparts(mfilename('fullpath'));
-verification_items{1} = fullfile(verif_root, 'lustreVerify', 'lusVerifyMenu.m');
-verification_items{2} = fullfile(verif_root, 'cocoSpecVerify', 'cocoSpecVerifyMenu.m');
+menu_items{1} = fullfile(verif_root, 'zustre_invariants', 'zustreInvariantsMenu.m');

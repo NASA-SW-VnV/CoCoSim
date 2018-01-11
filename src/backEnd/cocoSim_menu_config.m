@@ -14,5 +14,9 @@
 %take the current file directory.
 [src_root, ~, ~] = fileparts(mfilename('fullpath'));
 menue_items = {};
-menue_items{numel(menue_items) + 1} = fullfile(src_root,'backend', 'verification','verificationMenu.m');
-menue_items{numel(menue_items) + 1} = fullfile(src_root,'backend', 'validation','validationMenu.m');
+menue_items{numel(menue_items) + 1} = fullfile(src_root, 'verification','verificationMenu.m');
+menue_items{numel(menue_items) + 1} = fullfile(src_root, 'test_case_generation','TestCaseGenMenu.m');
+menue_items{numel(menue_items) + 1} = fullfile(src_root, 'generate_invariants','generateInvariantsMenu.m');
+menue_items{numel(menue_items) + 1} = fullfile(src_root, 'generate_code','generateCodeMenu.m');
+menue_items{numel(menue_items) + 1} = fullfile(src_root, 'validation','validationMenu.m');
+

@@ -21,6 +21,7 @@ if ~exist('cocosim_trace_file', 'var')
     cocosim_trace_file = fullfile(coco_dir,strcat(base_name,'.cocosim.trace.xml'));
 end
 try
+    save_system(model_path)
     bdclose('all')
     new_model_path = '';
     try
@@ -57,7 +58,7 @@ try
     load_system(model_path);
     %we save it as the output model
     close_system(new_name,0)
-    save_system(model_path,new_name);
+    save_system(model_path,new_name, 'OverwriteIfChangedOnDisk', true);
     load_system(new_name);
     
     %get tracability
@@ -68,7 +69,7 @@ try
     nb_coco = 0;
     
     
-    [status, translated_nodes_path, ~]  = lus2slx(contract_path, coco_dir);
+    [status, translated_nodes_path, ~]  = lus2slx(contract_path, coco_dir, [], [], 1);
     if status
         return;
     end
@@ -146,7 +147,7 @@ try
         blk_inputs = nodes.(node{1}).inputs;
         %link inputs to the subsystem.
         for index=1:numel(blk_inputs)
-            var_name = BUtils.adapt_block_name(blk_inputs{index});
+            var_name = BUtils.adapt_block_name(blk_inputs(index).original_name);
             input_block_name = get_input_block_name_from_variable(xRoot, original_name, var_name, base_name,new_model_name);
             link_block_with_its_cocospec(cocospec_block_path,  input_block_name, simulink_block_name, parent_block_name, index, isBaseName);
         end

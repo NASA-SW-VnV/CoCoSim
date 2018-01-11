@@ -11,6 +11,20 @@ schema.statustip = 'Verify the current model with CoCoSim';
 schema.autoDisableWhen = 'Busy';
 
 schema.childrenFcns = {@getZustre, @getKind, @getJKind};
+schema.childrenFcns(numel(schema.childrenFcns)+1) = {@helpItem};
+
+end
+
+function  schema = helpItem(callbackInfo)
+schema = sl_action_schema;
+schema.label = 'Help';
+schema.callback = @helpCallback;
+end
+
+function helpCallback(callbackInfo)
+msg = sprintf('We recommend using Kind2 for compositional and contracts based Verification.');
+msg = sprintf('%s\nZustre may be good for non-linear functions.', msg);
+helpdlg(msg, 'CoCoSim help');
 end
 
 
