@@ -73,8 +73,6 @@ if tests_method ~= 4
     [model_path, slx_file_name, ~] = fileparts(char(model_full_path));
     addpath(model_path);
     load_system(model_full_path);
-    %% Get model inports informations
-    [inports, inputEvents_names] = SLXUtils.get_model_inputs_info(model_full_path);
 end
 
 if ~exist(output_dir, 'dir')
@@ -116,7 +114,7 @@ if tests_method == 2
     end
 end
 if tests_method == 1 || tests_method == 2
-    [input_struct, ~, ~] = SLXUtils.get_random_test(slx_file_name, inports, inputEvents_names, nb_steps,IMAX, IMIN);
+    [ input_struct ] = random_tests( model_full_path, nb_steps,IMAX, IMIN );
     T = [T, input_struct];
     
     for i=1:numel(T)

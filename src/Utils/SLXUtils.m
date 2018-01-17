@@ -10,9 +10,9 @@ classdef SLXUtils
         %% Try to calculate Block sample time using GCD
         function st = get_BlockDiagram_SampleTime(file_name)
             try
-            warning off;
-            ts = Simulink.BlockDiagram.getSampleTimes(file_name);
-            warning on;
+                warning off;
+                ts = Simulink.BlockDiagram.getSampleTimes(file_name);
+                warning on;
             catch ME
                 display_msg(ME.getReport(), MsgType.ERROR, 'SLXUtils.get_BlockDiagram_SampleTime', '' );
                 st = 1;
@@ -31,7 +31,7 @@ classdef SLXUtils
             
         end
         
-       
+        
         
         
         %% run constants files
@@ -178,11 +178,11 @@ classdef SLXUtils
         
         %% Simulate the model
         function simOut = simulate_model(slx_file_name, ...
-                                         input_struct, ...
-                                         simulation_step,...
-                                         stop_time,...
-                                         numberOfInports,...
-                                         show_models)
+                input_struct, ...
+                simulation_step,...
+                stop_time,...
+                numberOfInports,...
+                show_models)
             configSet = Simulink.ConfigSet;
             set_param(configSet, 'Solver', 'FixedStepDiscrete');
             set_param(configSet, 'FixedStep', num2str(simulation_step));
@@ -245,6 +245,163 @@ classdef SLXUtils
             close_system(file_name,0);
         end
         
+        %%
+        
+        function new_model_name = makeharness(T, subsys_path)
+            if isempty(T)
+                 display_msg('Tests struct is empty no test to be created',...
+                    MsgType.ERROR, 'makeharness', '');
+                return;
+            end
+            if ~isfield(T(1), 'time') || ~isfield(T(1), 'signals')
+                display_msg('Tests struct should have "signals" and "time" field"',...
+                    MsgType.ERROR, 'makeharness', '');
+            end
+            [~, subsys_name, ~] = fileparts(subsys_path);
+            sampleTime = SLXUtils.get_BlockDiagram_SampleTime(subsys_name);
+            if numel(sampleTime) == 1
+                sampleTime = [sampleTime, 0];
+            end
+            model_full_path = MenuUtils.get_file_name(subsys_path);
+            [output_dir, modelName, ext] = fileparts(model_full_path);
+            newBaseName = strcat(modelName, '_harness');
+            close_system(newBaseName, 0);
+            new_model_name = fullfile(output_dir, strcat(newBaseName, ext));
+            if exist(newBaseName, 'file'), delete(newBaseName);end
+            
+            %get CompiledPortDataTypes of inports
+            Inportsblocks = find_system(subsys_path, 'SearchDepth',1,'BlockType','Inport');
+            compile_cmd = strcat(modelName, '([],[],[],''compile'')');
+            eval (compile_cmd);
+            compiledPortDataTypes = get_param(Inportsblocks,'CompiledPortDataTypes');
+            InportsDTs = cellfun(@(x) x.Outport, compiledPortDataTypes);
+            term_cmd = strcat(modelName, '([],[],[],''term'')');
+            eval (term_cmd);
+            
+            % create new model
+            newSubName = fullfile(newBaseName, subsys_name);
+            
+            new_system(newBaseName);
+            configSet = getActiveConfigSet(newBaseName);
+            set_param(configSet, 'SaveFormat', 'Structure', ...
+                'Solver', 'FixedStepDiscrete', 'FixedStep', num2str(sampleTime(1)));
+            if contains(subsys_path, filesep)
+                add_block(subsys_path, newSubName);
+            else
+                add_block('built-in/Subsystem', fullfile(newBaseName, subsys_name));
+                Simulink.BlockDiagram.copyContentsToSubSystem...
+                    (subsys_path,  newSubName);
+            end
+            NewSubPortHandles = get_param(newSubName, 'PortHandles');
+            nb_inports = numel(NewSubPortHandles.Inport);
+            nb_outports = numel(NewSubPortHandles.Outport);
+            m = max(nb_inports, nb_outports);
+            position(1) = 300;
+            position(2) = 100;
+            position(3) = 500;
+            position(4) = 100 + 50*m;
+            set_param(newSubName, 'Position', position);
+            % add outports
+            for i=1:nb_outports
+                p = get_param(NewSubPortHandles.Outport(i), 'Position');
+                x = p(1) + 50;
+                y = p(2);
+                outport_name = strcat(newBaseName,'/Out',num2str(i));
+                outport_handle = add_block('simulink/Ports & Subsystems/Out1',...
+                    outport_name,...
+                    'MakeNameUnique', 'on', ...
+                    'Position',[(x+10) (y) (x+30) (y+20)]);
+                outportPortHandle = get_param(outport_handle,'PortHandles');
+                add_line(newBaseName,...
+                    NewSubPortHandles.Outport(i), outportPortHandle.Inport(1),...
+                    'autorouting', 'on');
+            end
+            
+            % add convertion subsystem with rate transitions
+            p = get_param(newSubName, 'Position');
+            position(1) = p(1) - 250;
+            position(2) = p(2);
+            position(3) = p(1) - 150;
+            position(4) = p(4);
+            convertSys = fullfile(newBaseName, 'Converssion');
+            add_block('built-in/Subsystem', convertSys, ...
+                'Position', position, ...
+                'BackgroundColor', 'black', ...
+                'ForegroundColor', 'black');
+            
+            for i=1:nb_inports
+                x = 100; y=100*i;
+                inport_name = strcat(convertSys, filesep, 'In',num2str(i));
+                add_block('simulink/Ports & Subsystems/In1',...
+                    inport_name,...
+                    'MakeNameUnique', 'on', ...
+                    'Position',[x y (x+30) (y+20)]);
+                if ~strcmp(InportsDTs{i}, 'double')
+                    convBlkName = strcat(convertSys, filesep, 'convert', num2str(i));
+                    add_block('Simulink/Signal Attributes/Data Type Conversion',convBlkName, ...
+                        'Position', [(x + 50) (y - 15) (x + 100) (y+35)],...
+                        'OutDataTypeStr', InportsDTs{i});
+                    add_line(convertSys, ...
+                        strcat('In',num2str(i), '/1'), ...
+                        strcat('convert', num2str(i), '/1'), ...
+                        'autorouting','on');
+                end
+                rateBlkName = strcat(convertSys, filesep, 'rateT', num2str(i));
+                add_block('Simulink/Signal Attributes/Rate Transition',rateBlkName, ...
+                    'Position', [(x + 150) (y - 15) (x + 200) (y+35)],...
+                    'OutPortSampleTime', mat2str(sampleTime));
+                if ~strcmp(InportsDTs{i}, 'double')
+                    add_line(convertSys, ...
+                        strcat('convert', num2str(i), '/1'), ...
+                        strcat('rateT', num2str(i), '/1'), ...
+                        'autorouting','on');
+                else
+                    add_line(convertSys, ...
+                        strcat('In',num2str(i), '/1'), ...
+                        strcat('rateT', num2str(i), '/1'), ...
+                        'autorouting','on');
+                end
+                
+                outport_name = strcat(convertSys, filesep, 'Out',num2str(i));
+                add_block('simulink/Ports & Subsystems/Out1',...
+                    outport_name,...
+                    'MakeNameUnique', 'on', ...
+                    'Position', [(x + 300) y (x + 330) (y+20)]);
+                add_line(convertSys, ...
+                    strcat('rateT', num2str(i), '/1'), ...
+                    strcat('Out',num2str(i), '/1'), ...
+                    'autorouting','on');
+                
+                %link conversion subsystem to model subsystem.
+                add_line(newBaseName, ...
+                    strcat('Converssion', '/', num2str(i)), ...
+                    strcat(subsys_name, '/', num2str(i)), ...
+                    'autorouting','on');
+                
+            end
+            % add signal builder signal
+            signalBuilderName = fullfile(newBaseName, 'Inputs');
+            signalbuilder(signalBuilderName, 'create', T(1).time, arrayfun(@(x) {double(x.values)}, T(1).signals)');
+            for i=2:numel(T)
+               signalbuilder(signalBuilderName, 'appendgroup', T(i).time, arrayfun(@(x) {double(x.values)}, T(i).signals)');
+            end
+            p = get_param(convertSys, 'Position');
+            position(1) = p(1) - 250;
+            position(2) = p(2);
+            position(3) = p(1) - 150;
+            position(4) = p(4);
+            set_param(signalBuilderName, 'Position', position);
+            
+            for i=1:nb_inports
+                add_line(newBaseName, ...
+                    strcat('Inputs', '/', num2str(i)), ...
+                    strcat('Converssion', '/', num2str(i)), ...
+                    'autorouting','on');
+                
+            end            
+            save_system(newBaseName, new_model_name,'OverwriteIfChangedOnDisk',true);
+            open(new_model_name)
+        end
     end
     
 end
