@@ -114,7 +114,7 @@ if tests_method == 2
     end
 end
 if tests_method == 1 || tests_method == 2
-    [ input_struct ] = random_tests( model_full_path, nb_steps,IMAX, IMIN );
+    [ input_struct ] = random_tests( model_full_path, nb_steps, IMIN, IMAX );
     T = [T, input_struct];
     
     for i=1:numel(T)

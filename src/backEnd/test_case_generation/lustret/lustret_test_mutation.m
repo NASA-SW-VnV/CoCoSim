@@ -24,28 +24,28 @@ if nargin < 2
 end
 [~, lus_file_name, ~] = fileparts(lus_full_path);
 [~, slx_file_name, ~] = fileparts(model_full_path);
-if  ~exist('node_name', 'var')
+if  ~exist('node_name', 'var')|| isempty(node_name)
     node_name = lus_file_name;
 end
-if  ~exist('nb_steps', 'var')
+if  ~exist('nb_steps', 'var')|| isempty(nb_steps)
     nb_steps = 100;
 end
-if ~exist('IMAX', 'var')
+if ~exist('IMAX', 'var')|| isempty(IMAX)
     IMAX = 1000;
 end
-if ~exist('IMIN', 'var')
+if ~exist('IMIN', 'var')|| isempty(IMIN)
     IMIN = -1000;
 end
-if ~exist('MAX_nb_test', 'var')
+if ~exist('MAX_nb_test', 'var')|| isempty(MAX_nb_test)
     MAX_nb_test = 3;
 end
-if ~exist('Min_coverage', 'var')
+if ~exist('Min_coverage', 'var')|| isempty(Min_coverage)
     Min_coverage = 100;
 end
-if ~exist('model_checker', 'var')
+if ~exist('model_checker', 'var') || isempty(model_checker)
     model_checker = 'KIND2';
 end
-if ~exist('nb_mutants_max', 'var')
+if ~exist('nb_mutants_max', 'var')|| isempty(nb_mutants_max)
     nb_mutants_max = 500;
 end
 Pwd = pwd;

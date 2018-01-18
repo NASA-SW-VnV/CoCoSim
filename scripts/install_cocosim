@@ -28,12 +28,12 @@ install_dir=$(abs_path "$install_dir")
 build_dir="../tools/build"
 build_dir=$(abs_path "$build_dir")
 lustrec_url="https://cavale.enseeiht.fr/git/lustrec"
-lustrec_branch="master"
+lustrec_branch="unstable"
 
 git_dir="$build_dir/github"
 
 cocosim_url="https://github.com/coco-team/cocoSim2.git"
-cocosim_branch="unstable"
+cocosim_branch="master"
 
 
 cocoSim2_dir=$(abs_path "..")
