@@ -122,7 +122,8 @@ nb_test = 0;
 T = [];
 nb_verif = numel(verification_files);
 coverage_percentage = 0;
-while (numel(verification_files) > 0 ) && (nb_test < MAX_nb_test) && (coverage_percentage < Min_coverage)
+nb_radnom_test = min(0, MAX_nb_test);
+while (numel(verification_files) > 0 ) && (nb_test < nb_radnom_test) && (coverage_percentage < Min_coverage)
     display_msg(['running test number ' num2str(nb_test) ], MsgType.INFO, 'lustret_mutation_generation', '');
     [input_struct, ~, ~] = SLXUtils.get_random_test(slx_file_name, inports, inputEvents_names, nb_steps,IMAX, IMIN);
     lustre_input_values = LustrecUtils.getLustreInputValuesFormat(input_struct, nb_steps);
@@ -161,7 +162,7 @@ end
 %% Use model checker to find mutation CEX is exists
 
 file_idx = 1;
-while (file_idx <= numel(verification_files))  
+while (file_idx <= numel(verification_files))  && (numel(T) < MAX_nb_test) && (coverage_percentage < Min_coverage)
     display_msg(['running model checker ' model_checker ' on file ' verification_files{file_idx} ], ...
         MsgType.INFO, 'lustret_mutation_generation', '');
     

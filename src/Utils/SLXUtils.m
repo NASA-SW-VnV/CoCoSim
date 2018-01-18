@@ -247,10 +247,11 @@ classdef SLXUtils
         
         %%
         
-        function new_model_name = makeharness(T, subsys_path, output_dir)
+        function [new_model_name, status] = makeharness(T, subsys_path, output_dir)
             % the model should be already loaded and subsys_path is the
             % path to the subsystem or the model name.
             new_model_name = '';
+            status = 0;
             try
                 if isempty(T)
                     display_msg('Tests struct is empty no test to be created',...
@@ -300,9 +301,7 @@ classdef SLXUtils
                 newSubName = fullfile(newBaseName, subsys_name);
                 
                 new_system(newBaseName);
-                configSet = getActiveConfigSet(newBaseName);
-                set_param(configSet, 'SaveFormat', 'Structure', ...
-                    'Solver', 'FixedStepDiscrete', 'FixedStep', num2str(sampleTime(1)));
+                
                 if contains(subsys_path, filesep)
                     add_block(subsys_path, newSubName);
                 else
@@ -390,10 +389,23 @@ classdef SLXUtils
                 end
                 % add signal builder signal
                 try
+                    % for tests with one step should be adapted
+                    for i=1:numel(T)
+                        if numel(T(i).time) == 1
+                            T(i).time(2) = sampleTime(1);
+                            for j=1:numel( T(i).signals)
+                                T(i).signals(j).values(2) = T(i).signals(j).values(1);
+                            end
+                        end
+                    end
                     signalBuilderName = fullfile(newBaseName, 'Inputs');
                     signalbuilder(signalBuilderName, 'create', T(1).time, arrayfun(@(x) {double(x.values)}, T(1).signals)');
+                    stopTime = T(1).time(end) + 0.0000000000001;
                     for i=2:numel(T)
                         signalbuilder(signalBuilderName, 'appendgroup', T(i).time, arrayfun(@(x) {double(x.values)}, T(i).signals)');
+                        if T(i).time(end) > stopTime
+                            stopTime = T(i).time(end) + 0.0000000000001;
+                        end
                     end
                     set_param(signalBuilderName, 'Position', [50    50   210   (50+30*m)]);
                     
@@ -404,19 +416,28 @@ classdef SLXUtils
                             'autorouting','on');
                         
                     end
+                    
+                    configSet = getActiveConfigSet(newBaseName);
+                    set_param(configSet, 'SaveFormat', 'Structure', ...
+                        'StopTime', num2str(stopTime), ...
+                        'Solver', 'FixedStepDiscrete', ...
+                        'FixedStep', num2str(sampleTime(1)));
+                    save_system(newBaseName, new_model_name,'OverwriteIfChangedOnDisk',true);
+                    display_msg(['Generated harness model is in: ' new_model_name],...
+                        MsgType.RESULT, 'makeharness', '');
+                    open(new_model_name)
                 catch me
                     display_msg('Test cases struct is not well formed.', MsgType.ERROR, 'makeharness', '');
                     display_msg(me.message, MsgType.ERROR, 'makeharness', '');
                     display_msg(me.getReport(), MsgType.DEBUG, 'makeharness', '');
+                    status = 1;
                 end
-                save_system(newBaseName, new_model_name,'OverwriteIfChangedOnDisk',true);
-                display_msg(['Generated harness model is in: ' new_model_name],...
-                    MsgType.RESULT, 'makeharness', '');
-                open(new_model_name)
+                
             catch me
                 display_msg('Failed generating harness model.', MsgType.ERROR, 'makeharness', '');
                 display_msg(me.message, MsgType.ERROR, 'makeharness', '');
                 display_msg(me.getReport(), MsgType.DEBUG, 'makeharness', '');
+                status = 1;
             end
         end
     end

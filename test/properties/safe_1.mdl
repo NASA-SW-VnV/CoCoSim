@@ -25,7 +25,7 @@ Model {
       BusOutputAsStruct	      "off"
     }
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.49"
+    ComputedModelVersion    "1.52"
     NumModelReferences	    0
     NumTestPointedSignals   0
   }
@@ -72,8 +72,8 @@ Model {
 	ViewObjType		"SimulinkTopLevel"
 	LoadSaveID		"0"
 	Extents			[1646.0, 777.0]
-	ZoomFactor		[2.0520547945205476]
-	Offset			[-12.751840569068975, 11.177570093457945]
+	ZoomFactor		[1.468627450980392]
+	Offset			[-75.598120410547466, 8.4672897196261658]
       }
     }
   }
@@ -83,9 +83,9 @@ Model {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "hbourbou"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Thu Jan 18 10:46:30 2018"
-  RTWModifiedTimeStamp	  438173172
-  ModelVersionFormat	  "1.%<AutoIncrement:49>"
+  LastModifiedDate	  "Thu Jan 18 11:13:53 2018"
+  RTWModifiedTimeStamp	  438174829
+  ModelVersionFormat	  "1.%<AutoIncrement:52>"
   ConfigurationManager	  "none"
   SampleTimeColors	  off
   SampleTimeAnnotations	  off
@@ -929,14 +929,14 @@ Model {
     TiledPaperMargins	    [1.270000, 1.270000, 1.270000, 1.270000]
     TiledPageScale	    1
     ShowPageBoundaries	    off
-    ZoomFactor		    "205"
+    ZoomFactor		    "147"
     ReportName		    "simulink-default.rpt"
-    SIDHighWatermark	    "36"
+    SIDHighWatermark	    "37"
     Block {
       BlockType		      Inport
       Name		      "In1"
       SID		      "1"
-      Position		      [50, 88, 80, 102]
+      Position		      [20, 153, 50, 167]
       ZOrder		      -1
       IconDisplay	      "Port number"
       OutDataTypeStr	      "int32"
@@ -945,171 +945,44 @@ Model {
       BlockType		      Inport
       Name		      "In2"
       SID		      "2"
-      Position		      [50, 173, 80, 187]
+      Position		      [20, 238, 50, 252]
       ZOrder		      -2
       Port		      "2"
       IconDisplay	      "Port number"
     }
     Block {
-      BlockType		      SubSystem
-      Name		      "Subsystem"
-      SID		      "31"
-      Ports		      [2, 2]
-      Position		      [210, 134, 305, 201]
-      ZOrder		      5
-      TreatAsAtomicUnit	      on
-      RequestExecContextInheritance off
-      System {
-	Name			"Subsystem"
-	Location		[0, 23, 1680, 970]
-	Open			off
-	ModelBrowserVisibility	off
-	ModelBrowserWidth	200
-	ScreenColor		"white"
-	PaperOrientation	"landscape"
-	PaperPositionMode	"auto"
-	PaperType		"usletter"
-	PaperUnits		"inches"
-	TiledPaperMargins	[0.500000, 0.500000, 0.500000, 0.500000]
-	TiledPageScale		1
-	ShowPageBoundaries	off
-	ZoomFactor		"381"
-	Block {
-	  BlockType		  Inport
-	  Name			  "In1"
-	  SID			  "32"
-	  Position		  [20, 23, 50, 37]
-	  ZOrder		  1
-	  IconDisplay		  "Port number"
-	}
-	Block {
-	  BlockType		  Inport
-	  Name			  "In3"
-	  SID			  "34"
-	  Position		  [40, 108, 70, 122]
-	  ZOrder		  3
-	  Port			  "2"
-	  IconDisplay		  "Port number"
-	}
-	Block {
-	  BlockType		  Abs
-	  Name			  "Abs"
-	  SID			  "3"
-	  Position		  [350, 150, 380, 180]
-	  ZOrder		  -3
-	  SaturateOnIntegerOverflow off
-	}
-	Block {
-	  BlockType		  RelationalOperator
-	  Name			  "Relational\nOperator"
-	  SID			  "4"
-	  Ports			  [2, 1]
-	  Position		  [130, 52, 160, 83]
-	  ZOrder		  -4
-	  InputSameDT		  off
-	  OutDataTypeStr	  "boolean"
-	}
-	Block {
-	  BlockType		  Switch
-	  Name			  "Switch"
-	  SID			  "5"
-	  Position		  [240, 55, 270, 85]
-	  ZOrder		  -5
-	  Criteria		  "u2 ~= 0"
-	  InputSameDT		  off
-	  SaturateOnIntegerOverflow off
-	}
-	Block {
-	  BlockType		  Outport
-	  Name			  "Out1"
-	  SID			  "35"
-	  Position		  [300, 63, 330, 77]
-	  ZOrder		  4
-	  IconDisplay		  "Port number"
-	}
-	Block {
-	  BlockType		  Outport
-	  Name			  "Out2"
-	  SID			  "36"
-	  Position		  [415, 158, 445, 172]
-	  ZOrder		  5
-	  Port			  "2"
-	  IconDisplay		  "Port number"
-	}
-	Line {
-	  ZOrder		  11
-	  SrcBlock		  "Relational\nOperator"
-	  SrcPort		  1
-	  DstBlock		  "Switch"
-	  DstPort		  2
-	}
-	Line {
-	  ZOrder		  22
-	  SrcBlock		  "Switch"
-	  SrcPort		  1
-	  Points		  [5, 0]
-	  Branch {
-	    ZOrder		    25
-	    Points		    [0, 95]
-	    DstBlock		    "Abs"
-	    DstPort		    1
-	  }
-	  Branch {
-	    ZOrder		    24
-	    DstBlock		    "Out1"
-	    DstPort		    1
-	  }
-	}
-	Line {
-	  ZOrder		  21
-	  SrcBlock		  "In3"
-	  SrcPort		  1
-	  Points		  [10, 0]
-	  Branch {
-	    ZOrder		    8
-	    Points		    [0, -40]
-	    DstBlock		    "Relational\nOperator"
-	    DstPort		    2
-	  }
-	  Branch {
-	    ZOrder		    9
-	    Points		    [140, 0]
-	    DstBlock		    "Switch"
-	    DstPort		    3
-	  }
-	}
-	Line {
-	  ZOrder		  23
-	  SrcBlock		  "Abs"
-	  SrcPort		  1
-	  DstBlock		  "Out2"
-	  DstPort		  1
-	}
-	Line {
-	  ZOrder		  19
-	  SrcBlock		  "In1"
-	  SrcPort		  1
-	  Points		  [30, 0]
-	  Branch {
-	    ZOrder		    3
-	    Points		    [0, 30]
-	    DstBlock		    "Relational\nOperator"
-	    DstPort		    1
-	  }
-	  Branch {
-	    ZOrder		    4
-	    Points		    [140, 0]
-	    DstBlock		    "Switch"
-	    DstPort		    1
-	  }
-	}
-      }
+      BlockType		      Abs
+      Name		      "Abs"
+      SID		      "3"
+      Position		      [515, 280, 545, 310]
+      ZOrder		      9
+      SaturateOnIntegerOverflow	off
+    }
+    Block {
+      BlockType		      RelationalOperator
+      Name		      "Relational\nOperator"
+      SID		      "4"
+      Ports		      [2, 1]
+      Position		      [295, 182, 325, 213]
+      ZOrder		      8
+      InputSameDT	      off
+      OutDataTypeStr	      "boolean"
+    }
+    Block {
+      BlockType		      Switch
+      Name		      "Switch"
+      SID		      "5"
+      Position		      [405, 185, 435, 215]
+      ZOrder		      7
+      Criteria		      "u2 ~= 0"
+      InputSameDT	      off
+      SaturateOnIntegerOverflow	off
     }
     Block {
       BlockType		      Terminator
       Name		      "Terminator"
       SID		      "6"
-      Position		      [495, 30, 515, 50]
+      Position		      [890, 30, 910, 50]
       ZOrder		      -6
     }
     Block {
@@ -1117,7 +990,7 @@ Model {
       Name		      "observer"
       SID		      "7"
       Ports		      [4, 1]
-      Position		      [315, 18, 470, 62]
+      Position		      [710, 18, 865, 62]
       ZOrder		      -7
       ForegroundColor	      "red"
       TreatAsAtomicUnit	      on
@@ -1412,7 +1285,7 @@ Model {
       BlockType		      Outport
       Name		      "Out1"
       SID		      "19"
-      Position		      [490, 128, 520, 142]
+      Position		      [775, 198, 805, 212]
       ZOrder		      -8
       IconDisplay	      "Port number"
     }
@@ -1420,45 +1293,10 @@ Model {
       BlockType		      Outport
       Name		      "Out2"
       SID		      "20"
-      Position		      [470, 223, 500, 237]
+      Position		      [775, 288, 805, 302]
       ZOrder		      -9
       Port		      "2"
       IconDisplay	      "Port number"
-    }
-    Line {
-      ZOrder		      1
-      SrcBlock		      "In1"
-      SrcPort		      1
-      Points		      [10, 0]
-      Branch {
-	ZOrder			59
-	Points			[0, 55]
-	DstBlock		"Subsystem"
-	DstPort			1
-      }
-      Branch {
-	ZOrder			5
-	Points			[0, -70]
-	DstBlock		"observer"
-	DstPort			1
-      }
-    }
-    Line {
-      ZOrder		      6
-      SrcBlock		      "In2"
-      SrcPort		      1
-      Points		      [30, 0]
-      Branch {
-	ZOrder			68
-	Points			[0, -145]
-	DstBlock		"observer"
-	DstPort			2
-      }
-      Branch {
-	ZOrder			61
-	DstBlock		"Subsystem"
-	DstPort			2
-      }
     }
     Line {
       ZOrder		      12
@@ -1468,39 +1306,112 @@ Model {
       DstPort		      1
     }
     Line {
-      ZOrder		      63
-      SrcBlock		      "Subsystem"
-      SrcPort		      2
-      Points		      [130, 0]
+      ZOrder		      77
+      SrcBlock		      "Abs"
+      SrcPort		      1
+      Points		      [175, 0]
+      Branch {
+	ZOrder			86
+	DstBlock		"Out2"
+	DstPort			1
+      }
       Branch {
 	ZOrder			69
-	Points			[0, -95; -140, 0]
+	Points			[0, -229; -100, 0; 0, -11]
 	DstBlock		"observer"
 	DstPort			4
       }
+    }
+    Line {
+      ZOrder		      22
+      SrcBlock		      "Switch"
+      SrcPort		      1
+      Points		      [5, 0]
       Branch {
-	ZOrder			65
-	Points			[0, 50]
-	DstBlock		"Out2"
+	ZOrder			79
+	Points			[194, 0]
+	Branch {
+	  ZOrder		  84
+	  Points		  [0, 5]
+	  DstBlock		  "Out1"
+	  DstPort		  1
+	}
+	Branch {
+	  ZOrder		  67
+	  Points		  [0, -155]
+	  DstBlock		  "observer"
+	  DstPort		  3
+	}
+      }
+      Branch {
+	ZOrder			25
+	Points			[0, 95]
+	DstBlock		"Abs"
 	DstPort			1
       }
     }
     Line {
-      ZOrder		      62
-      SrcBlock		      "Subsystem"
+      ZOrder		      1
+      SrcBlock		      "In1"
       SrcPort		      1
-      Points		      [44, 0; 0, -15]
+      Points		      [180, 0]
       Branch {
-	ZOrder			67
-	Points			[-29, 0; 0, -30; -40, 0; 0, -60]
+	ZOrder			87
+	Points			[0, -135]
 	DstBlock		"observer"
-	DstPort			3
-      }
-      Branch {
-	ZOrder			14
-	DstBlock		"Out1"
 	DstPort			1
       }
+      Branch {
+	ZOrder			80
+	Points			[15, 0]
+	Branch {
+	  ZOrder		  3
+	  Points		  [0, 30]
+	  DstBlock		  "Relational\nOperator"
+	  DstPort		  1
+	}
+	Branch {
+	  ZOrder		  4
+	  Points		  [140, 0]
+	  DstBlock		  "Switch"
+	  DstPort		  1
+	}
+      }
+    }
+    Line {
+      ZOrder		      6
+      SrcBlock		      "In2"
+      SrcPort		      1
+      Points		      [55, 0]
+      Branch {
+	ZOrder			78
+	Points			[140, 0]
+	Branch {
+	  ZOrder		  8
+	  Points		  [0, -40]
+	  DstBlock		  "Relational\nOperator"
+	  DstPort		  2
+	}
+	Branch {
+	  ZOrder		  9
+	  Points		  [140, 0]
+	  DstBlock		  "Switch"
+	  DstPort		  3
+	}
+      }
+      Branch {
+	ZOrder			68
+	Points			[0, -210]
+	DstBlock		"observer"
+	DstPort			2
+      }
+    }
+    Line {
+      ZOrder		      11
+      SrcBlock		      "Relational\nOperator"
+      SrcPort		      1
+      DstBlock		      "Switch"
+      DstPort		      2
     }
     Annotation {
       SID		      "21"
@@ -1510,7 +1421,7 @@ Model {
       "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-inden"
       "t:0px;\"><span style=\" font-size:18px;\">Go to Tools -&gt; CoCoSim -&gt; Verify with -&gt; Zuste (or Kind2 or J"
       "Kind)</span></p></body></html>"
-      Position		      [87, 363, 617, 383]
+      Position		      [227, 508, 757, 528]
       InternalMargins	      [0, 0, 0, 0]
       FixedHeight	      off
       FixedWidth	      off
