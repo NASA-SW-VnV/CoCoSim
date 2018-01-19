@@ -52,8 +52,8 @@ lus_full_path = lustre_compiler(model_full_path);
 
 %%
 if exportToWs
-    assignin('base', strcat(slx_file_name, '_random_tests'), T);
-    display_msg(['Generated test suite is saved in workspace under name: ' strcat(slx_file_name, '_random_tests')],...
+    assignin('base', strcat(slx_file_name, '_mutation_tests'), T);
+    display_msg(['Generated test suite is saved in workspace under name: ' strcat(slx_file_name, '_mutation_tests')],...
         MsgType.RESULT, 'mutation_tests', '');
 end
 

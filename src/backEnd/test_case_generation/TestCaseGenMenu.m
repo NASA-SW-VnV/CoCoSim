@@ -38,7 +38,13 @@ schema.callback = @MutationCallback;
 end
 
 function MutationCallback(callbackInfo)
-msgbox('Not implemented yet')
+try
+    mutation_test_gui('model_full_path',MenuUtils.get_file_name(gcs));
+catch ME
+    display_msg('Generation Failed', MsgType.ERROR, 'TestCaseGenMenu', '');
+    display_msg(ME.message, MsgType.ERROR, 'TestCaseGenMenu', '');
+    display_msg(ME.getReport(), MsgType.ERROR, 'TestCaseGenMenu', '');
+end
 end
 
 %%
@@ -49,5 +55,11 @@ schema.callback = @MCDCCallback;
 end
 
 function MCDCCallback(callbackInfo)
-msgbox('Not implemented yet')
+try
+    mcdc_test_gui('model_full_path',MenuUtils.get_file_name(gcs));
+catch ME
+    display_msg('Generation Failed', MsgType.ERROR, 'TestCaseGenMenu', '');
+    display_msg(ME.message, MsgType.ERROR, 'TestCaseGenMenu', '');
+    display_msg(ME.getReport(), MsgType.ERROR, 'TestCaseGenMenu', '');
+end
 end

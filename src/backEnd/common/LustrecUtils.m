@@ -1062,7 +1062,7 @@ classdef LustrecUtils < handle
                 xProperties = xAnalysis.item(idx_analys).getElementsByTagName('Property');
                 for idx_prop=0:xProperties.getLength-1
                     property = xProperties.item(idx_prop);
-                    prop_name = xProperties.item(idx_prop).getAttribute('name');
+                    prop_name = char(xProperties.item(idx_prop).getAttribute('name'));
                     try
                         answer = ...
                             property.getElementsByTagName('Answer').item(0).getTextContent;
