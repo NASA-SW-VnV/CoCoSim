@@ -44,7 +44,7 @@ if nargin < 2
     output_dir = coco_dir;
 end
 
-data = BUtils.read_EMF(json_path);
+data = BUtils.read_json(json_path);
 
 if ~exist(output_dir, 'dir')
     mkdir(output_dir);

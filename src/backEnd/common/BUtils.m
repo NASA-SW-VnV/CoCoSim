@@ -67,7 +67,7 @@ classdef BUtils
             out = a{end};
         end
         %%
-        function data = read_EMF(contract_path)
+        function data = read_json(contract_path)
             % read json file
             try
                 filetext = fileread(contract_path);

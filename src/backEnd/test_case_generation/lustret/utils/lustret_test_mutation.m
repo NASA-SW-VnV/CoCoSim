@@ -1,13 +1,14 @@
 function [ T, coverage_percentage ] = lustret_test_mutation( model_full_path, ...
-                                                            lus_full_path, ...
-                                                            node_name,...
-                                                            nb_steps,...
-                                                            IMIN, ...
-                                                            IMAX,...
-                                                            model_checker, ...
-                                                            nb_mutants_max, ...
-                                                            MAX_nb_test,...
-                                                            Min_coverage )
+    lus_full_path, ...
+    traceability_path,...
+    node_name,...
+    nb_steps,...
+    IMIN, ...
+    IMAX,...
+    model_checker, ...
+    nb_mutants_max, ...
+    MAX_nb_test,...
+    Min_coverage )
 %LUSTRET_TEST_MUTATION generates test suite based on mutations inserted in
 %Lustre file
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -22,8 +23,9 @@ if nargin < 2
     print_help_messsage();
     return;
 end
-[~, lus_file_name, ~] = fileparts(lus_full_path);
+[lus_dir, lus_file_name, ~] = fileparts(lus_full_path);
 [~, slx_file_name, ~] = fileparts(model_full_path);
+
 if  ~exist('node_name', 'var')|| isempty(node_name)
     node_name = lus_file_name;
 end
@@ -50,6 +52,27 @@ if ~exist('nb_mutants_max', 'var')|| isempty(nb_mutants_max)
 end
 Pwd = pwd;
 
+% get traceability Simulin -> Lustre
+no_traceability = true;
+if  ~exist('traceability_path', 'var')|| isempty(traceability_path)
+    if exist(fullfile(lus_dir, strcat(lus_file_name, '.cocosim.trace.xml')), 'file')
+        traceability_path = fullfile(lus_dir, strcat(lus_file_name, '.cocosim.trace.xml'));
+        no_traceability = false;
+    end
+end
+trace_xml = [];
+if ~no_traceability
+    try
+        DOMNODE = xmlread(traceability_path);
+    catch
+        display_msg(...
+            ['file ' cocosim_trace_file ' can not be read as xml file'],...
+            MsgType.DEBUG,...
+            'create_emf_verif_file', '');
+        no_traceability = true;
+    end
+    trace_xml = DOMNODE.getDocumentElement;
+end
 %% generate mutations
 [ err, output_dir] = lustret_mutation_generation( lus_full_path, nb_mutants_max );
 % output_dir = fullfile(lus_file_dir, strcat(lus_file_name,'_mutants'));
@@ -60,7 +83,9 @@ if err
     return;
 end
 mutants_files = dir(fullfile(output_dir,strcat( lus_file_name, '.mutant.n*.lus')));
-mutants_files = mutants_files(~cellfun('isempty', {mutants_files.date})); 
+mutants_report = fullfile(output_dir,strcat( lus_file_name, '.mutation.json'));
+
+mutants_files = mutants_files(~cellfun('isempty', {mutants_files.date}));
 if isempty(mutants_files)
     display_msg(['No mutation has been found in ' output_dir], MsgType.ERROR, 'lustret_test_mutation', '');
     cd(Pwd);
@@ -76,9 +101,44 @@ if status
     cd(Pwd);
     return;
 end
-
-
-mutants_paths = cellfun(@(y) [output_dir '/' y], {mutants_files.name}, 'UniformOutput', false);
+mutants_paths = {};
+if ~exist(mutants_report, 'file')
+    mutants_paths = cellfun(@(y) [output_dir filesep y], {mutants_files.name}, 'UniformOutput', false);
+else
+    load_system(model_full_path);
+    node_map = containers.Map('KeyType', 'char', 'ValueType', 'char');
+    mutants_summary = BUtils.read_json(mutants_report);
+    for i=1:numel(mutants_files)
+        node_id = mutants_summary.(mutants_files(i).name).node_id;
+        if isKey(node_map, node_id)
+            simulink_block_name = node_map(node_id);
+        else
+            simulink_block_name =...
+                XMLUtils.get_Simulink_block_from_lustre_node_name(...
+                trace_xml, ...
+                node_id, ...
+                slx_file_name);
+            node_map(node_id) = simulink_block_name;
+        end
+        blk_type = '';
+        if ~strcmp(simulink_block_name, '')
+            try
+                blk_type = get_param(simulink_block_name, 'MaskType');
+            catch
+            end
+            % do not include mutations inserted in properties nodes
+            if ~strcmp(blk_type, 'Observer')
+                mutants_paths{numel(mutants_paths) + 1} = fullfile(output_dir, mutants_files(i).name);
+            end
+        end
+        
+    end
+end
+if isempty(mutants_paths)
+    display_msg(['No mutation has been generated for ' slx_file_name], MsgType.RESULT, 'lustret_test_mutation', '');
+    cd(Pwd);
+    return;
+end
 node_name_mutant = strcat(node_name, '_mutant');
 % get main node signature
 main_node_struct = LustrecUtils.extract_node_struct(lus_full_path, node_name, LUSTREC, LUCTREC_INCLUDE_DIR);
@@ -116,8 +176,8 @@ nb_test = 0;
 % if ~isempty(model_full_path)
 %     [inports, inputEvents_names] = SLXUtils.get_model_inputs_info(model_full_path);
 % else
-    inports = main_node_struct.inputs;
-    inputEvents_names = {};
+inports = main_node_struct.inputs;
+inputEvents_names = {};
 % end
 T = [];
 nb_verif = numel(verification_files);

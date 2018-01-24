@@ -57,7 +57,7 @@ end
 [~, translated_nodes, ~] = fileparts(translated_nodes_path);
 load_system(translated_nodes_path);
 
-data = BUtils.read_EMF(emf_path);
+data = BUtils.read_json(emf_path);
 nodes = data.nodes;
 emf_nodes_names = fieldnames(nodes)';
 lusi_text = fileread(lusi_path);

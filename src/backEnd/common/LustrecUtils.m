@@ -218,7 +218,7 @@ classdef LustrecUtils < handle
             
             if status==0
                 % extract main node struct from EMF
-                data = BUtils.read_EMF(contract_path);
+                data = BUtils.read_json(contract_path);
                 nodes = data.nodes;
                 nodes_names = fieldnames(nodes)';
                 orig_names = arrayfun(@(x)  nodes.(x{1}).original_name,...
@@ -858,7 +858,7 @@ classdef LustrecUtils < handle
             end
 
 
-            data = BUtils.read_EMF(emf_path);
+            data = BUtils.read_json(emf_path);
             nodes = data.nodes;
             emf_nodes_names = fieldnames(nodes)';
             for node_idx =1:numel(emf_nodes_names)
