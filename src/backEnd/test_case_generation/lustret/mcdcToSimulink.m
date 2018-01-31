@@ -4,36 +4,28 @@
 % All Rights Reserved.
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%new_model_path = generate_invariants_Zustre(model_path, contract_path)
-% Inputs:
-% model_path : the path of Simulink model
-% contract_path : the Json that contains information about the Simulink
-% model contract
-% Outputs:
-% new_model_path: the path of the new Simulink model that has the generated
-% invariants of the associated model.
-
-function new_model_path = generate_invariants_Zustre(model_path, contract_path, cocosim_trace_file)
+function [ new_model_path ] = mcdcToSimulink( model_path, contract_path, cocosim_trace_file )
+%MCDCTOSIMULINK try to bring back the MC-DC conditions to simulink level.
 
 [coco_dir, ~, ~] = fileparts(contract_path);
 [model_dir, base_name, ~] = fileparts(model_path);
 if ~exist('cocosim_trace_file', 'var')
     cocosim_trace_file = fullfile(coco_dir,strcat(base_name,'.cocosim.trace.xml'));
 end
+
 try
     save_system(model_path)
     bdclose('all')
     new_model_path = '';
+    
+    % read the emf contract
     data = BUtils.read_json(contract_path);
     
-    
-    
-    
     % we add a Postfix to differentiate it with the original Simulink model
-    new_model_name = strcat(base_name,'_with_cocospec');
+    new_model_name = strcat(base_name,'_with_mcdc');
     new_name = fullfile(model_dir,strcat(new_model_name,'.slx'));
     
-    display_msg(['Cocospec path: ' new_name ], MsgType.INFO, 'generate_invariants_Zustre', '');
+    display_msg(['MCDC model path: ' new_name ], MsgType.INFO, 'generate_invariants_Zustre', '');
     
     if exist(new_name,'file')
         if bdIsLoaded(new_model_name)
@@ -53,12 +45,13 @@ try
     
     DOMNODE = xmlread(cocosim_trace_file);
     xRoot = DOMNODE.getDocumentElement;
+    nb_mcdc = 0;
     
-    nb_coco = 0;
     
-    
-    [status, translated_nodes_path, ~]  = lus2slx(contract_path, coco_dir, [], [], 1);
+    [status, translated_nodes_path, ~]  = mcdc2slx(contract_path, coco_dir, [], [], 1);
     if status
+        display_msg('Translation failed for MC-DC conditions',...
+            MsgType.INFO, 'generate_invariants_Zustre', '');
         return;
     end
     [~, translated_nodes, ~] = fileparts(translated_nodes_path);
@@ -119,7 +112,7 @@ try
             cocospec_block_path,...
             'Position',[(x+100) y (x+250) (y+50)]);
         set_mask_parameters(cocospec_block_path);
-        nb_coco = nb_coco + 1;
+        nb_mcdc = nb_mcdc + 1;
         
         %we plot the invariant of the block
         scope_block_path = strcat(simulink_block_name,'_scope',num2str(n));
@@ -141,7 +134,7 @@ try
         end
     end
     
-    if nb_coco == 0
+    if nb_mcdc == 0
         warndlg('No cocospec contracts were generated','CoCoSim: Warning');
         return;
     end
@@ -150,102 +143,11 @@ try
     open(new_name);
     save_system(new_name,[],'OverwriteIfChangedOnDisk',true);
     close_system(translated_nodes,0)
+    
 catch ME
-    display_msg(ME.message, MsgType.ERROR, 'generate_invariants_Zustre', '');
-    display_msg(ME.getReport(), MsgType.DEBUG, 'generate_invariants_Zustre', '');
+    display_msg(ME.message, MsgType.ERROR, 'mcdcToSimulink', '');
+    display_msg(ME.getReport(), MsgType.DEBUG, 'mcdcToSimulink', '');
     rethrow(ME);
 end
 end
 
-
-
-%%
-function input_block_name = get_input_block_name_from_variable(xRoot, node, var_name, Sim_file_name,new_model_name)
-
-input_block_name = XMLUtils.get_block_name_from_variable_using_xRoot(xRoot, node, var_name);
-input_block_name = regexprep(input_block_name,strcat('^',Sim_file_name,'/(\w)'),strcat(new_model_name,'/$1'));
-end
-
-
-%%
-function link_block_with_its_cocospec( cocospec_bloc_path, input_block_name, simulink_block_name, parent_block_name, index, isBaseName)
-
-
-DstBlkH = get_param(cocospec_bloc_path, 'PortHandles');
-inport_or_outport = get_param(input_block_name,'BlockType');
-Port_number = get_param(input_block_name,'Port');
-if strcmp(inport_or_outport,'Inport')
-    if isBaseName
-        SrcBlkH = get_param(input_block_name,'PortHandles');
-        inport_handle = SrcBlkH.Outport(1);
-    else
-        SrcBlkH = get_param(simulink_block_name,'PortHandles');
-        inport_handle = SrcBlkH.Inport(str2num(Port_number));
-    end
-    l = get_param(inport_handle,'line');
-    SrcPortHandle = get_param(l ,'SrcPortHandle');
-    add_line(parent_block_name, SrcPortHandle, DstBlkH.Inport(index), 'autorouting', 'on');
-elseif strcmp(inport_or_outport,'Outport')
-    if isBaseName
-        SrcBlkH = get_param(input_block_name,'PortHandles');
-        inport_handle = SrcBlkH.Inport(1);
-        l = get_param(inport_handle,'line');
-        SrcPortHandle = get_param(l ,'SrcPortHandle');
-    else
-        SrcBlkH = get_param(simulink_block_name,'PortHandles');
-        SrcPortHandle = SrcBlkH.Outport(str2num(Port_number));
-    end
-    add_line(parent_block_name, SrcPortHandle, DstBlkH.Inport(index), 'autorouting', 'on');
-end
-end
-
-
-
-
-function set_mask_parameters(observer_path)
-
-mask = Simulink.Mask.create(observer_path);
-mask.Display = sprintf('%s', get_observer_display());
-mask.IconUnits = 'normalized';
-mask.Type = 'Observer';
-mask.Description = get_obs_description();
-mask.addParameter('Type', 'popup', 'Prompt', 'Type of annotation (pre/post...)', 'Name', 'AnnotationType', 'TypeOptions', {'ensures','requires','assert','observer'}, 'Value', 'assert', 'Callback', get_obs_callback());
-mask.addParameter('Type', 'edit', 'Prompt', 'Observer type', 'Name', 'ObserverType', 'TypeOptions', {'Ellipsoid'}, 'Callback', get_obs_callback(), 'Evaluate', 'off');
-set_param(observer_path, 'ForegroundColor', 'red');
-set_param(observer_path, 'BackgroundColor', 'white');
-
-end
-
-%% Returns the Display parameter value for the Observer block
-function [display] = get_observer_display()
-display = sprintf('color(''red'')\n');
-display = [display sprintf('text(0.5, 0.5, [''CoCoSpec: '''''' get_param(gcb,''name'') ''''''''], ''horizontalAlignment'', ''center'');\n')];
-display = [display 'text(0.99, 0.03, ''{\bf\fontsize{12}'];
-display = [display char('INVARIANT')];
-display = [display '}'', ''hor'', ''right'', ''ver'', ''bottom'', ''texmode'', ''on'');'];
-end
-
-function [desc] = get_obs_description()
-
-desc = sprintf('Set an observer for the system.\n');
-desc = [desc sprintf('The annotation type parameter sets the type of observer:\n')];
-desc = [desc sprintf('- requires : pre-condition\n')];
-desc = [desc sprintf('- ensures : post-condition\n')];
-desc = [desc sprintf('- assert : an assertion\n')];
-desc = [desc sprintf('- observer : the observer computes a special type of properties')];
-
-end
-%% Retrieve the Callback parameter value
-function [call] = get_obs_callback()
-
-call = sprintf('paramStr = get_param(gcb, ''MaskValues'');\n');
-call = [call sprintf('if strcmp(paramStr{1}(1),''o'')\n')];
-call = [call sprintf('set_param(gcb,''MaskVisibilities'',{''on'';''on''});\n')];
-call = [call sprintf('paramStr{2} = ''ellipsoid'';\n')];
-call = [call sprintf('set_param(gcb,''MaskValues'',paramStr);\n')];
-call = [call sprintf('else\n')];
-call = [call sprintf('set_param(gcb,''MaskVisibilities'',{''on'';''off''});\n')];
-call = [call sprintf('end\n')];
-call = [call sprintf('clear paramStr;\n')];
-
-end
