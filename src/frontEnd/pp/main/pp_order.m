@@ -60,8 +60,8 @@ else
         'pp2/blocks/sameDT_process.m'};
     % 0 means all this functions will be called first.
     pp_order_map(0) = {'pp2/blocks/inport_process.m', ...
-        'pp2/blocks/outport_process.m', ...
-        'pp2/blocks/atomic_process.m'};
+        'pp2/blocks/outport_process.m' ...
+        };
     
     pp_order_map(1) = {'std_pp/blocks/goto_process.m'};
     pp_order_map(2) = {'pp2/blocks/blocks_position_process.m'};
@@ -70,11 +70,13 @@ else
     pp_order_map(3) = {'std_pp/blocks/*.m', ...
         'pp2/blocks/*.m'};
     
+    pp_order_map(4) = {'pp2/blocks/atomic_process.m'};
+    pp_order_map(5) = {'pp2/blocks/expand_sub_process.m'};
     
-    pp_order_map(4) = {'pp2/blocks/algebric_loops_process.m', ...
+    pp_order_map(6) = {'pp2/blocks/algebric_loops_process.m', ...
         'pp2/blocks/fixedStepDiscrete_process.m'};
     
-    pp_order_map(5) = {'pp2/blocks/compile_process.m'};
+    pp_order_map(7) = {'pp2/blocks/compile_process.m'};
     
     [ordered_pp_functions, priority_pp_map]  = ...
         PP_Utils.order_pp_functions(pp_order_map, pp_handled_blocks, ...

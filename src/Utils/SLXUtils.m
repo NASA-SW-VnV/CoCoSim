@@ -23,7 +23,7 @@ classdef SLXUtils
                 if ~isempty(t.Value) && isnumeric(t.Value)
                     tv = t.Value(1);
                     if ~(isnan(tv) || tv==Inf)
-                        st = gcd(st*100,tv*100)/100;
+                        st = gcd(st*10000,tv*10000)/10000;
                         
                     end
                 end

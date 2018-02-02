@@ -83,7 +83,7 @@ end
 display_msg('Loading library', MsgType.INFO, 'PP', '');
 if ~bdIsLoaded('gal_lib'); load_system('gal_lib.slx'); end
 
-
+if ~bdIsLoaded('pp_lib'); load_system('pp_lib.slx'); end
 
 
 
