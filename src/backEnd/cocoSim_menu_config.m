@@ -19,4 +19,4 @@ menue_items{numel(menue_items) + 1} = fullfile(src_root, 'test_case_generation',
 menue_items{numel(menue_items) + 1} = fullfile(src_root, 'generate_invariants','generateInvariantsMenu.m');
 menue_items{numel(menue_items) + 1} = fullfile(src_root, 'generate_code','generateCodeMenu.m');
 menue_items{numel(menue_items) + 1} = fullfile(src_root, 'validation','validationMenu.m');
-
+menue_items{numel(menue_items) + 1} = fullfile(src_root, 'extra_options','extraOptionsMenu.m');
