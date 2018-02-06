@@ -4,13 +4,15 @@
 % All Rights Reserved.
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%LUS2SLX translate an EMF json file to Simulink blocks. Every node is translated
-%to a subsystem. If OnlyMainNode is true than only the main node specified
+%MCDC2SLX translate MC-DC conditions an EMF json file to Simulink blocks. 
+%Every node is translated to a subsystem. If OnlyMainNode is true than only
+%the main node specified
 %in main_node argument will be kept in the final simulink model.
 function [status,...
     new_model_path, ...
     xml_trace] = mcdc2slx(...
     json_path, ...
+    mdl_trace, ...
     output_dir, ...
     new_model_name, ...
     main_node, ...
@@ -30,15 +32,25 @@ end
 base_name = regexp(cocospec_name,'\.','split');
 if ~exist('new_model_name', 'var') || isempty(new_model_name)
     if onlyMainNode
-        new_model_name = BUtils.adapt_block_name(strcat(base_name{1}, '_', main_node));
+        new_model_name = BUtils.adapt_block_name(strcat(base_name{1}, '_mcdc_', main_node));
     else
-        new_model_name = BUtils.adapt_block_name(strcat(base_name{1}, '_emf'));
+        new_model_name = BUtils.adapt_block_name(strcat(base_name{1}, '_mcdc'));
     end
 end
 
 %%
+try
+    DOMNODE = xmlread(mdl_trace);
+catch
+    display_msg(...
+        ['file ' cocosim_trace_file ' can not be read as xml file'],...
+        MsgType.ERROR,...
+        'create_emf_verif_file', '');
+    return;
+end
+mdlTraceRoot = DOMNODE.getDocumentElement;
 status = 0;
-display_msg('Runing Lus2SLX on EMF file', MsgType.INFO, 'lus2slx', '');
+display_msg('Runing MCDC2SLX on EMF file', MsgType.INFO, 'MCDC2SLX', '');
 
 if nargin < 2
     output_dir = coco_dir;
@@ -61,7 +73,7 @@ close_system(new_model_name,0);
 model_handle = new_system(new_model_name);
 
 trace_file_name = fullfile(output_dir, ...
-    strcat(cocospec_name, '.emf.trace.xml'));
+    strcat(cocospec_name, '.mcdc.trace.xml'));
 xml_trace = XML_Trace(new_model_path, trace_file_name);
 xml_trace.init();
 % save_system(model_handle,new_name);
@@ -77,7 +89,7 @@ if onlyMainNode
     if ~ismember(main_node, nodes_names)
         msg = sprintf('Node "%s" not found in JSON "%s"', ...
             main_node, json_path);
-        display_msg(msg, MsgType.ERROR, 'LUS2SLX', '');
+        display_msg(msg, MsgType.ERROR, 'MCDC2SLX', '');
         status = 1;
         new_model_path = '';
         close_system(new_model_name,0);
@@ -88,23 +100,23 @@ if onlyMainNode
     node_name = emf_fieldnames{node_idx};
     node_block_path = fullfile(new_model_name, BUtils.adapt_block_name(main_node));
     block_pos = [(x+100) y (x+250) (y+50)];
-    node_process(new_model_name, nodes, node_name, node_block_path, block_pos, xml_trace);
+    node_process(new_model_name, nodes, node_name, node_block_path, mdlTraceRoot, block_pos, xml_trace);
 else
     for node = emf_fieldnames
         try
             node_name = BUtils.adapt_block_name(node{1});
             display_msg(...
                 sprintf('Processing node "%s" ',node_name),...
-                MsgType.INFO, 'lus2slx', '');
+                MsgType.INFO, 'MCDC2SLX', '');
             y = y + 150;
 
             block_pos = [(x+100) y (x+250) (y+50)];
             node_block_path = fullfile(new_model_name,node_name);
-            node_process(new_model_name, nodes, node{1}, node_block_path, block_pos, []);
+            node_process(new_model_name, nodes, node{1}, node_block_path, mdlTraceRoot, block_pos, []);
             
         catch ME
-            display_msg(['couldn''t translate node ' node{1} ' to Simulink'], MsgType.ERROR, 'LUS2SLX', '');
-            display_msg(ME.getReport(), MsgType.DEBUG, 'LUS2SLX', '');
+            display_msg(['couldn''t translate node ' node{1} ' to Simulink'], MsgType.ERROR, 'MCDC2SLX', '');
+            display_msg(ME.getReport(), MsgType.DEBUG, 'MCDC2SLX', '');
             %         continue;
             status = 1;
             return;
@@ -128,11 +140,32 @@ save_system(model_handle,new_model_path,'OverwriteIfChangedOnDisk',true);
 end
 
 %%
-function node_process(new_model_name, nodes, node, node_block_path, block_pos, xml_trace)
+function variables_names = mcdcVariables(node_struct)
+variables_names = {};
+annotations = node_struct.annots;
+fields = fieldnames(annotations);
+for i=1:numel(fields)
+    if ismember('mcdc', annotations.(fields{i}).key) ...
+            && ismember('coverage', annotations.(fields{i}).key)
+        variables_names{numel(variables_names) + 1} = ...
+            annotations.(fields{i}).eexpr.qfexpr.value;
+    end
+end
+%%
+end
+function node_process(new_model_name, nodes, node, node_block_path, mdlTraceRoot, block_pos, xml_trace)
+variables_names = mcdcVariables(nodes.(node));
+display_msg([num2str(numel(variables_names)) ' mc-dc conditions has been generated'...
+    ' for node ' nodes.(node).original_name], MsgType.INFO, 'mcdc2slx', '');
+if ~isempty(variables_names)
+    
+end
+end
+function node_process2(new_model_name, nodes, node, node_block_path, block_pos, xml_trace)
 node_name = BUtils.adapt_block_name(node);
 display_msg(...
     sprintf('Processing node "%s" ',node_name),...
-    MsgType.INFO, 'lus2slx', '');
+    MsgType.INFO, 'MCDC2SLX', '');
 x2 = 200;
 y2= -50;
 
@@ -192,8 +225,8 @@ for var = fieldnames(blk_exprs)'
                 [x2, y2] = process_branch(nodes, new_model_name, node_block_path, blk_exprs, var, node_name, x2, y2, xml_trace);
         end
     catch ME
-        display_msg(['couldn''t translate expression ' var{1} ' to Simulink'], MsgType.ERROR, 'LUS2SLX', '');
-        display_msg(ME.getReport(), MsgType.DEBUG, 'LUS2SLX', '');
+        display_msg(['couldn''t translate expression ' var{1} ' to Simulink'], MsgType.ERROR, 'MCDC2SLX', '');
+        display_msg(ME.getReport(), MsgType.DEBUG, 'MCDC2SLX', '');
         %         continue;
         rethrow(ME)
     end
@@ -564,7 +597,7 @@ switch operator
             op_path,...
             'Position',[(x+200) y2 (x+250) (y2+50)]);
     otherwise
-        display_msg(['Unkown operator ' operator], MsgType.ERROR, 'LUS2SLX', '');
+        display_msg(['Unkown operator ' operator], MsgType.ERROR, 'MCDC2SLX', '');
 end
 
 end
