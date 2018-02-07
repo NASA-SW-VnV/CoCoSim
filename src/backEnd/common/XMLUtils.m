@@ -36,6 +36,15 @@ classdef XMLUtils
                             return;
                         end
                     end
+                    vars = nodes.item(idx_node).getElementsByTagName('Variable');
+                    for idx_var=0:vars.getLength-1
+                        var = vars.item(idx_var);
+                        if strcmp(var.getAttribute('variable'), var_name)
+                            block = var.getElementsByTagName('block_name');
+                            block_name = char(block.item(0).getFirstChild.getData);
+                            return;
+                        end
+                    end
                 end
             end
         end
