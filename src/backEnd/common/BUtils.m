@@ -32,7 +32,7 @@ classdef BUtils
             %     new_name = regexprep(var_name,'^__(\w)','$1');
             var_name = matlab.lang.makeValidName(char(var_name));
             prefix = '';
-            if nargin >= 2
+            if nargin >= 2 && ~isempty(ID)
                 ID = char(ID);
                 %                 display(ID)
                 prefix = strcat(ID, '_');
