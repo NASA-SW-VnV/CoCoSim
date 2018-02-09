@@ -4,13 +4,13 @@
 % All Rights Reserved.
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%MCDC2SLX translate MC-DC conditions an EMF json file to Simulink blocks. 
+%MCDC2SLX translate MC-DC conditions an EMF json file to Simulink blocks.
 %Every node is translated to a subsystem. If OnlyMainNode is true than only
 %the main node specified
 %in main_node argument will be kept in the final simulink model.
 function [status,...
     new_model_path, ...
-    xml_trace] = mcdc2slx(...
+    mcdc_trace] = mcdc2slx(...
     json_path, ...
     mdl_trace, ...
     output_dir, ...
@@ -48,7 +48,14 @@ end
 
 %%
 try
-    DOMNODE = xmlread(mdl_trace);
+    if ischar(mdl_trace)
+        DOMNODE = xmlread(mdl_trace);
+        mdlTraceRoot = DOMNODE.getDocumentElement;
+    elseif isa(mdl_trace, 'XML_Trace')
+        mdlTraceRoot = mdl_trace.traceRootNode;
+    else
+        mdlTraceRoot = mdl_trace;
+    end
 catch
     display_msg(...
         ['file ' cocosim_trace_file ' can not be read as xml file'],...
@@ -56,7 +63,7 @@ catch
         'create_emf_verif_file', '');
     return;
 end
-mdlTraceRoot = DOMNODE.getDocumentElement;
+
 status = 0;
 display_msg('Runing MCDC2SLX on EMF file', MsgType.INFO, 'MCDC2SLX', '');
 
@@ -82,8 +89,8 @@ model_handle = new_system(new_model_name);
 
 trace_file_name = fullfile(output_dir, ...
     strcat(cocospec_name, '.mcdc.trace.xml'));
-xml_trace = XML_Trace(new_model_path, trace_file_name);
-xml_trace.init();
+mcdc_trace = XML_Trace(new_model_path, trace_file_name);
+mcdc_trace.init();
 % save_system(model_handle,new_name);
 
 x = 200;
@@ -108,7 +115,7 @@ if onlyMainNode
     node_name = emf_fieldnames{node_idx};
     node_block_path = fullfile(new_model_name, BUtils.adapt_block_name(main_node));
     block_pos = [(x+100) y (x+250) (y+50)];
-    mcdc_node_process(new_model_name, nodes, node_name, node_block_path, mdlTraceRoot, block_pos, xml_trace);
+    mcdc_node_process(new_model_name, nodes, node_name, node_block_path, mdlTraceRoot, block_pos, mcdc_trace);
 else
     for node = emf_fieldnames
         try
@@ -117,10 +124,10 @@ else
                 sprintf('Processing node "%s" ',node_name),...
                 MsgType.INFO, 'MCDC2SLX', '');
             y = y + 150;
-
+            
             block_pos = [(x+100) y (x+250) (y+50)];
             node_block_path = fullfile(new_model_name,node_name);
-            mcdc_node_process(new_model_name, nodes, node{1}, node_block_path, mdlTraceRoot, block_pos,xml_trace);
+            mcdc_node_process(new_model_name, nodes, node{1}, node_block_path, mdlTraceRoot, block_pos,mcdc_trace);
             
         catch ME
             display_msg(['couldn''t translate node ' node{1} ' to Simulink'], MsgType.ERROR, 'MCDC2SLX', '');
@@ -139,7 +146,7 @@ if organize_blocks
     blocks_position_process( new_model_name );
 end
 % Write traceability informations
-xml_trace.write();
+mcdc_trace.write();
 configSet = getActiveConfigSet(model_handle);
 set_param(configSet, 'Solver', 'FixedStepDiscrete');
 save_system(model_handle,new_model_path,'OverwriteIfChangedOnDisk',true);
@@ -210,7 +217,7 @@ if ~isempty(mcdc_variables_names)
     for local=nodes.(node).locals
         originalNamesMap(local.name) = local.original_name;
     end
-    % get tracable variables names 
+    % get tracable variables names
     traceable_variables = XMLUtils.get_tracable_variables(mdlTraceRoot, nodes.(node).original_name);
     
     [instructionsIDs, inputList]= get_mcdc_instructions(mcdc_variables_names, ...
@@ -229,7 +236,7 @@ if ~isempty(mcdc_variables_names)
     set_param(node_block_path, 'Position', block_pos);
     
     % Outputs
-
+    
     [x2, y2] = Lus2SLXUtils.process_outputs(node_block_path, mcdc_variables_names, '', x2, y2);
     
     
@@ -248,17 +255,17 @@ if ~isempty(mcdc_variables_names)
         elseif ismember(inputList{i}, {nodes.(node).locals.name})
             blk_inputs(i) = nodes.(node).locals(...
                 ismember( {nodes.(node).locals.name}, inputList{i}));
-        else 
+        else
             display_msg(['couldn''t find variable ' inputList{i} ' in EMF'], MsgType.ERROR, 'MCDC2SLX', '');
             found = false;
             blk_inputs(i) = [];
-        end        
+        end
         if found
             var_orig_name = originalNamesMap(inputList{i});
             block_name = ...
                 XMLUtils.get_block_name_from_variable_using_xRoot(...
                 mdlTraceRoot, nodes.(node).original_name, var_orig_name);
-            xml_trace.add_Input(inputList{i}, block_name, 1, 1);
+            xml_trace.add_Input(var_orig_name, block_name, 1, 1);
         end
     end
     [x2, y2] = Lus2SLXUtils.process_inputs(node_block_path, blk_inputs, '', x2, y2);
@@ -272,7 +279,7 @@ if ~isempty(mcdc_variables_names)
         blk_exprs.(instructionsIDs{i}) = nodes.(node).instrs.(instructionsIDs{i});
     end
     Lus2SLXUtils.instrs_process(nodes, new_model_name, node_block_path, blk_exprs, '', x2, y2, []);
-
+    
 end
 end
 
@@ -288,44 +295,44 @@ for i=1:numel(fields)
             annotations.(fields{i}).eexpr.qfexpr.value;
     end
 end
-    
+
 end
 function [instructionsIDs, inputList]= get_mcdc_instructions(initial_variables_names, ...
-        lhs_instrID_map, lhs_rhs_map, originalNamesMap, traceable_variables)
-    instructionsIDs = {};
-    inputList = {};
-    new_variables_names = {};
-    for i=1:numel(initial_variables_names)
-        %add the current list instructions
-        instructionsIDs{numel(instructionsIDs) + 1} = lhs_instrID_map(initial_variables_names{i});
-        %caclulate the dependencies
-        rhs_list = lhs_rhs_map(initial_variables_names{i});
-        if iscell(rhs_list)
-            for j=1:numel(rhs_list)
-                origin_name = originalNamesMap(rhs_list{j});
-                if ismember(origin_name, traceable_variables)
-                    inputList{numel(inputList) + 1} = rhs_list{j};
-                else
-                    new_variables_names{numel(new_variables_names) + 1} = ...
-                        rhs_list{j};
-                end
-            end
-        else
-            origin_name = originalNamesMap(rhs_list);
+    lhs_instrID_map, lhs_rhs_map, originalNamesMap, traceable_variables)
+instructionsIDs = {};
+inputList = {};
+new_variables_names = {};
+for i=1:numel(initial_variables_names)
+    %add the current list instructions
+    instructionsIDs{numel(instructionsIDs) + 1} = lhs_instrID_map(initial_variables_names{i});
+    %caclulate the dependencies
+    rhs_list = lhs_rhs_map(initial_variables_names{i});
+    if iscell(rhs_list)
+        for j=1:numel(rhs_list)
+            origin_name = originalNamesMap(rhs_list{j});
             if ismember(origin_name, traceable_variables)
-                inputList{numel(inputList) + 1} = rhs_list;
+                inputList{numel(inputList) + 1} = rhs_list{j};
             else
                 new_variables_names{numel(new_variables_names) + 1} = ...
-                    rhs_list;
+                    rhs_list{j};
             end
         end
+    else
+        origin_name = originalNamesMap(rhs_list);
+        if ismember(origin_name, traceable_variables)
+            inputList{numel(inputList) + 1} = rhs_list;
+        else
+            new_variables_names{numel(new_variables_names) + 1} = ...
+                rhs_list;
+        end
     end
-    if ~isempty(new_variables_names)
-        [instructionsIDs_2, inputList_2]= get_mcdc_instructions(new_variables_names, ...
-            lhs_instrID_map, lhs_rhs_map, originalNamesMap, traceable_variables);
-        instructionsIDs = [instructionsIDs, instructionsIDs_2];
-        inputList = [inputList, inputList_2];
-    end
-    inputList = unique(inputList);
-    instructionsIDs = unique(instructionsIDs);
+end
+if ~isempty(new_variables_names)
+    [instructionsIDs_2, inputList_2]= get_mcdc_instructions(new_variables_names, ...
+        lhs_instrID_map, lhs_rhs_map, originalNamesMap, traceable_variables);
+    instructionsIDs = [instructionsIDs, instructionsIDs_2];
+    inputList = [inputList, inputList_2];
+end
+inputList = unique(inputList);
+instructionsIDs = unique(instructionsIDs);
 end

@@ -53,10 +53,18 @@ classdef XMLUtils
         %%
         function simulink_block_name =...
                 get_Simulink_block_from_lustre_node_name(...
-                xRoot, ...
+                traceability, ...
                 lustre_node_name, ...
                 Sim_file_name,...
                 new_model_name)
+            if ischar(traceability)
+                DOMNODE = xmlread(traceability);
+                xRoot = DOMNODE.getDocumentElement;
+            elseif isa(traceability, 'XML_Trace')
+                xRoot = traceability.traceRootNode;
+            else
+                xRoot = traceability;
+            end
             simulink_block_name = '';
             xml_nodes = xRoot.getElementsByTagName('Node');
             for idx_node=0:xml_nodes.getLength-1

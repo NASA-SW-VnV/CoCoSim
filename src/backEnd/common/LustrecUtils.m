@@ -44,11 +44,19 @@ classdef LustrecUtils < handle
         end
         
         %%
-        function [emf_path, ...
-                status] = generate_emf(lus_file_path,...
-                output_dir, ...
+        function [emf_path, status] = ...
+                generate_emf(lus_file_path, output_dir, ...
                 LUSTREC,...
                 LUCTREC_INCLUDE_DIR)
+            if nargin < 4
+                tools_config;
+                status = BUtils.check_files_exist(LUSTREC, LUCTREC_INCLUDE_DIR);
+                if status
+                    err = sprintf('Binary "%s" and directory "%s" not found ',LUSTREC, LUCTREC_INCLUDE_DIR);
+                    display_msg(err, MsgType.ERROR, 'generate_lusi', '');
+                    return;
+                end
+            end
             [lus_dir, lus_fname, ~] = fileparts(lus_file_path);
             if nargin < 2 || isempty(output_dir)
                 output_dir = fullfile(lus_dir, 'cocosim_tmp', lus_fname);
@@ -80,6 +88,47 @@ classdef LustrecUtils < handle
             
         end
         
+        %%
+        function [mcdc_file_tmp] = generate_MCDCLustreFile(lus_full_path, output_dir)
+            [~, lus_file_name, ~] = fileparts(lus_full_path);
+            tools_config;
+            status = BUtils.check_files_exist(LUSTRET);
+            if status
+                msg = 'LUSTRET not found, please configure tools_config file under tools folder';
+                display_msg(msg, MsgType.ERROR, 'generate_MCDCLustreFile', '');
+                return;
+            end
+            command = sprintf('%s -I %s -d %s -mcdc-cond  %s',LUSTRET, LUCTREC_INCLUDE_DIR, output_dir, lus_full_path);
+            msg = sprintf('LUSTRET_COMMAND : %s\n',command);
+            display_msg(msg, MsgType.INFO, 'lustret_test_mcdc', '');
+            [status, lustret_out] = system(command);
+            if status
+                msg = sprintf('lustret failed for model "%s"',lus_file_name);
+                display_msg(msg, MsgType.INFO, 'lustret_test_mcdc', '');
+                display_msg(msg, MsgType.ERROR, 'lustret_test_mcdc', '');
+                display_msg(msg, MsgType.DEBUG, 'lustret_test_mcdc', '');
+                display_msg(lustret_out, MsgType.DEBUG, 'lustret_test_mcdc', '');
+                return
+            end
+            
+            mcdc_file = fullfile(output_dir,strcat( lus_file_name, '.mcdc.lus'));
+            mcdc_file_tmp = fullfile(output_dir,strcat( lus_file_name, '_tmp.mcdc.lus'));
+            
+            if ~exist(mcdc_file, 'file')
+                display_msg(['No mcdc file has been found in ' output_dir], MsgType.ERROR, 'lustret_test_mcdc', '');
+                return;
+            end
+            
+            % adapt lustre code
+            fid = fopen(mcdc_file_tmp, 'w');
+            if fid > 0
+                fprintf(fid, '%s', LustrecUtils.adapt_lustre_text(fileread(mcdc_file)));
+                fclose(fid);
+            else
+                mcdc_file_tmp = mcdc_file;
+            end
+            
+        end
         %% compile_lustre_to_Cbinary
         function err = compile_lustre_to_Cbinary(lus_file_path, ...
                 node_name, ...
