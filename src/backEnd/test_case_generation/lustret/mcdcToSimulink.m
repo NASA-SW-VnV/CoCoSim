@@ -45,7 +45,7 @@ load_system(new_model_path);
 
 
 try
-%     [lus_full_path, ~, ~, ~, ~, mdl_trace, ~] = lustre_compiler(model_full_path);
+    %     [lus_full_path, ~, ~, ~, ~, mdl_trace, ~] = lustre_compiler(model_full_path);
     mdl_trace = '/Users/hbourbou/Documents/babelfish/cocosim2/test/properties/lustre_files/src_safe_1_PP/safe_1_PP.cocosim.trace.xml';
     lus_full_path = '/Users/hbourbou/Documents/babelfish/cocosim2/test/properties/lustre_files/src_safe_1_PP/safe_1_PP.lus';
     DOMNODE = xmlread(mdl_trace);
@@ -62,7 +62,7 @@ end
 
 % Generate MCDC lustre file from Simulink model Lustre file
 try
-%     mcdc_file = LustrecUtils.generate_MCDCLustreFile(lus_full_path, output_dir);
+    %     mcdc_file = LustrecUtils.generate_MCDCLustreFile(lus_full_path, output_dir);
     mcdc_file = '/Users/hbourbou/Documents/babelfish/cocosim2/test/properties/lustre_files/src_safe_1_PP/safe_1_PP_tmp.mcdc.lus';
 catch ME
     display_msg(['MCDC generation failed for lustre file ' lus_full_path],...
@@ -119,11 +119,9 @@ try
         
         %for having a good order of blocks
         try
-            if isBaseName
-                position  = BUtils.get_obs_position(new_model_name);
-            else
-                position  = get_param(simulink_block_name,'Position');
-            end
+            
+            position  = get_param(simulink_block_name,'Position');
+            
         catch ME
             msg = sprintf('There is no block called %s in your model\n', simulink_block_name);
             msg1 = [msg, sprintf('if the block %s exists, make sure it is atomic', simulink_block_name)];
@@ -148,6 +146,32 @@ try
             mcdc_dst_path);
         set_param(mcdc_dst_path, 'Position',[(x+100) y (x+250) (y+50)]);
         set_mask_parameters(mcdc_dst_path);
+        dst_blk_portHandles = get_param(mcdc_dst_path, 'PortHandles');
+        
+        inputs = nodes.item(idx_node).getElementsByTagName('Input');
+        for id_input=0:inputs.getLength-1
+            
+            block_name = ...
+                inputs.item(id_input).getElementsByTagName('block_name').item(0).getTextContent;
+            block_name = regexprep(char(block_name),strcat('^',slx_file_name,'/(\w)'),strcat(new_model_name,'/$1'));
+            if getSimulinkBlockHandle(block_name) ~= -1
+                blk_portHandles = get_param(block_name, 'PortHandles');
+                nb_outports = numel(blk_portHandles.Outport);
+                if nb_outports == 1
+                    add_line(simulink_block_name,...
+                        blk_portHandles.Outport(1), ...
+                        dst_blk_portHandles.Inport(id_input+1), ...
+                        'autorouting', 'on');
+                else
+                    %TODO: investigate the case where the block has many
+                    %outputs.
+                    display_msg('Block with many outports not supported yet', MsgType.ERROR, 'mcdcToSimulink', '');
+                end
+            else
+                display_msg(['Block not found ' block_name], MsgType.ERROR, 'mcdcToSimulink', '');
+            end
+        end
+        
         nb_mcdc = nb_mcdc + 1;
         
     end

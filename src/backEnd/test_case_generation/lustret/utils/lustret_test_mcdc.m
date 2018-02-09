@@ -22,7 +22,7 @@ end
 mcdc_file = LustrecUtils.generate_MCDCLustreFile(lus_full_path, output_dir);
 
 %% Use model checker to find mcdc CEX if exists
-[~, T, ~] = LustrecUtils.run_Kind2(mcdc_file, output_dir);
+[~, T, ~] = Kind2Utils.run_Kind2(mcdc_file, output_dir);
 
 
 

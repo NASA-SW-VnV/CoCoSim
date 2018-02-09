@@ -1,14 +1,20 @@
-function [  ] = blocks_position_process( model )
+function [  ] = blocks_position_process( model, depth )
 %BLOCKS_POSITION_PROCES try t change blocks position for graphical purpose.
 %
-
+limitedDepth = true;
+if ~exist('depth', 'var')
+    limitedDepth = false;
+    depth = 100000;
+end
 %Take the list of all blocks that has no outport so they can be at one
 %level. Blocks such Outports, displays ...
 allBlocks = find_system(model, 'SearchDepth', 1);
 levels_map =  [];
+currentDepth = 0;
 for i=2:length(allBlocks)
+    currentDepth = currentDepth +1;
     try
-    DstBlkH = get_param(allBlocks{i}, 'PortHandles');
+        DstBlkH = get_param(allBlocks{i}, 'PortHandles');
     catch
         continue;
     end
@@ -19,8 +25,11 @@ for i=2:length(allBlocks)
         levels_map = organize(get_param(allBlocks{i}, 'Handle'), 0, levels_map);
     end
     if strcmp(get_param(allBlocks{i}, 'BlockType'),'SubSystem')
-        blocks_position_process( allBlocks{i} );
+        if (~limitedDepth) || (limitedDepth && currentDepth <= depth)
+            blocks_position_process( allBlocks{i} , depth);
+        end
     end
+    
 end
 
 end
