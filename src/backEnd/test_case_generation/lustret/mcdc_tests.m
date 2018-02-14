@@ -24,8 +24,8 @@ addpath(model_path);
 load_system(model_full_path);
 %% Compile model
 lus_full_path = lustre_compiler(model_full_path);
-[output_dir, ~, ~] = fileparts(lus_full_path);
-[ T] = lustret_test_mcdc( lus_full_path,  output_dir);
+[output_dir, lus_file_name, ~] = fileparts(lus_full_path);
+[ T] = lustret_test_mcdc( lus_full_path, lus_file_name,  output_dir);
 
 %%
 if exportToWs

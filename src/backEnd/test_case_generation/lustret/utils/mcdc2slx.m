@@ -156,7 +156,8 @@ end
 
 
 %%
-function mcdc_node_process(new_model_name, nodes, node, node_block_path, mdlTraceRoot, block_pos, xml_trace)
+function mcdc_node_process(new_model_name, nodes, node, ...
+    node_block_path, mdlTraceRoot, block_pos, xml_trace)
 mcdc_variables_names = mcdcVariables(nodes.(node));
 display_msg([num2str(numel(mcdc_variables_names)) ' mc-dc conditions has been generated'...
     ' for node ' nodes.(node).original_name], MsgType.INFO, 'mcdc2slx', '');
@@ -218,7 +219,8 @@ if ~isempty(mcdc_variables_names)
         originalNamesMap(local.name) = local.original_name;
     end
     % get tracable variables names
-    traceable_variables = XMLUtils.get_tracable_variables(mdlTraceRoot, nodes.(node).original_name);
+    traceable_variables = XMLUtils.get_tracable_variables(mdlTraceRoot,...
+        nodes.(node).original_name);
     
     [instructionsIDs, inputList]= get_mcdc_instructions(mcdc_variables_names, ...
         lhs_instrID_map, lhs_rhs_map, originalNamesMap, traceable_variables);
@@ -256,16 +258,19 @@ if ~isempty(mcdc_variables_names)
             blk_inputs(i) = nodes.(node).locals(...
                 ismember( {nodes.(node).locals.name}, inputList{i}));
         else
-            display_msg(['couldn''t find variable ' inputList{i} ' in EMF'], MsgType.ERROR, 'MCDC2SLX', '');
+            display_msg(['couldn''t find variable ' inputList{i} ' in EMF'],...
+                MsgType.ERROR, 'MCDC2SLX', '');
             found = false;
             blk_inputs(i) = [];
         end
         if found
             var_orig_name = originalNamesMap(inputList{i});
-            block_name = ...
+            [block_name, out_port_nb, dimension] = ...
                 XMLUtils.get_block_name_from_variable_using_xRoot(...
                 mdlTraceRoot, nodes.(node).original_name, var_orig_name);
-            xml_trace.add_Input(var_orig_name, block_name, 1, 1);
+            
+            xml_trace.add_Input(var_orig_name, block_name, ...
+                str2num(out_port_nb), str2num(dimension));
         end
     end
     [x2, y2] = Lus2SLXUtils.process_inputs(node_block_path, blk_inputs, '', x2, y2);

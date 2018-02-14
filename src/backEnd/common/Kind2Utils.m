@@ -7,32 +7,32 @@ classdef Kind2Utils
     
     methods(Static = true)
          %% run compositional modular verification usin Kind2
-        function [valid, IN_struct, time_max] = run_Kind2(...
+        function [valid, IN_struct] = run_Kind2(...
                 verif_lus_path,...
                 output_dir,...
                 node, ...
-                KIND2, Z3, OPTS)
+                OPTS, KIND2, Z3)
             
             IN_struct = [];
-            time_max = 0;
             valid = -1;
             if nargin < 1
-                error('Missing arguments to function call: LustrecUtils.run_Kind2')
+                error('Missing arguments to function call: Kind2Utils.run_Kind2')
             end
             if ~exist('OPTS', 'var')
                 OPTS = '';
             end
-            if nargin < 3  
-                OPTS = [OPTS ' --modular true'];
-            else
-                if isempty(node)
-                    OPTS = [OPTS '--modular true'];
-                else
-                    OPTS = sprintf('%s --lus_main %s', OPTS, node);
-                end
+            if nargin >= 3 && ~isempty(node)
+                
+                OPTS = sprintf('%s --lus_main %s', OPTS, node);
             end
-            if nargin < 4
+            if nargin < 5
                 tools_config;
+                status = BUtils.check_files_exist(KIND2, Z3);
+                if status
+                    display_msg(['KIND2 or Z3 not found :' KIND2 ', ' Z3],...
+                        MsgType.DEBUG, 'LustrecUtils.run_verif', '');
+                    return;
+                end
             end
             [file_dir, file_name, ~] = fileparts(verif_lus_path);
             if nargin < 2 || isempty(output_dir)
@@ -99,7 +99,7 @@ classdef Kind2Utils
             if strfind(solver_output,'Wallclock timeout')
                 msg = sprintf('Solver Result reached TIMEOUT. Check %s', ...
                     tmp_file);
-                display_msg(msg, Constants.RESULT, 'Kind2Utils.extract_answer', '');
+                display_msg(msg, MsgType.RESULT, 'Kind2Utils.extract_answer', '');
                 return;
             end
             
@@ -109,7 +109,7 @@ classdef Kind2Utils
             catch
                 msg = sprintf('Can not read file %s', ...
                     tmp_file);
-                display_msg(msg, Constants.RESULT, 'Kind2Utils.extract_answer', '');
+                display_msg(msg, MsgType.ERROR, 'Kind2Utils.extract_answer', '');
                 return
             end
             xAnalysis = xDoc.getElementsByTagName('Analysis');
@@ -147,7 +147,7 @@ classdef Kind2Utils
                         else
                             msg = sprintf('Could not parse counter example for node %s and property %s from %s', ...
                                 node_name, prop_name, solver_output);
-                            display_msg(msg, Constants.ERROR, 'Property Checking', '');
+                            display_msg(msg, MsgType.ERROR, 'Property Checking', '');
                         end
                         nbUnsafe = nbUnsafe + 1;
                     end
@@ -156,15 +156,15 @@ classdef Kind2Utils
                     end
                     msg = sprintf('Solver Result for node %s of property %s is %s', ...
                         node_name, prop_name, answer);
-                    display_msg(msg, Constants.RESULT, 'Kind2Utils.extract_answer', '');
+                    display_msg(msg, MsgType.RESULT, 'Kind2Utils.extract_answer', '');
                 end
             end
-            msg = sprintf('Numer of properties SAFE are %d', ...
+            msg = sprintf('Number of properties SAFE are %d', ...
                 nbSafe);
-            display_msg(msg, Constants.RESULT, 'Kind2Utils.extract_answer', '');
-            msg = sprintf('Numer of properties UNSAFE are %d', ...
+            display_msg(msg, MsgType.RESULT, 'Kind2Utils.extract_answer', '');
+            msg = sprintf('Number of properties UNSAFE are %d', ...
                 nbUnsafe);
-            display_msg(msg, Constants.RESULT, 'Kind2Utils.extract_answer', '');
+            display_msg(msg, MsgType.RESULT, 'Kind2Utils.extract_answer', '');
         end
         
         function [IN_struct, time_max] = Kind2CEXTostruct(...
@@ -173,6 +173,9 @@ classdef Kind2Utils
             IN_struct = [];
             time_max = 0;
             nodes = cex_xml.item(0).getElementsByTagName('Node');
+            if nodes.getLength == 0
+                nodes = cex_xml.item(0).getElementsByTagName('Function');
+            end
             node = [];
             for idx=0:(nodes.getLength-1)
                 if strcmp(nodes.item(idx).getAttribute('name'), node_name)
@@ -181,6 +184,8 @@ classdef Kind2Utils
                 end
             end
             if isempty(node)
+                display_msg('Failed to parse CounterExample',...
+                    MsgType.ERROR, 'Kind2Utils.Kind2CEXTostruct', '');
                 return;
             end
             IN_struct.node_name = node_name;

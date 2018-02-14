@@ -7,13 +7,38 @@ classdef LustrecUtils < handle
     
     methods(Static = true)
         %%
-        function t = adapt_lustre_text(t)
+        function t = adapt_lustre_text(t, dest)
+            if nargin < 2
+                dest = '';
+            end
             t = regexprep(t, '''', '''''');
             t = regexprep(t, '%', '%%');
             t = regexprep(t, '\\', '\\\');
             t = regexprep(t, '!=', '<>');
+            if strcmp(dest, 'Kind2')
+                t = regexprep(t, '(*! /coverage/mcdc/:', '(* /coverage/mcdc/:');
+            end
         end
         
+        function new_mcdc_file = adapt_lustre_file(mcdc_file, dest)
+            % adapt lustre code
+            if nargin < 2
+                dest = '';
+            end
+            if ~exist(mcdc_file, 'file')
+                display_msg(['File not found ' mcdc_file], MsgType.ERROR, 'adapt_lustre_file', '');
+                return;
+            end
+            [output_dir, lus_file_name, ~] = fileparts(mcdc_file);
+            new_mcdc_file = fullfile(output_dir,strcat( lus_file_name, '_adapted.lus'));
+            fid = fopen(new_mcdc_file, 'w');
+            if fid > 0
+                fprintf(fid, '%s', LustrecUtils.adapt_lustre_text(fileread(mcdc_file), dest));
+                fclose(fid);
+            else
+                new_mcdc_file = mcdc_file;
+            end 
+        end
         %%
         function [lusi_path, status] = generate_lusi(lus_file_path, LUSTREC )
             % generate Lusi file
@@ -89,7 +114,7 @@ classdef LustrecUtils < handle
         end
         
         %%
-        function [mcdc_file_tmp] = generate_MCDCLustreFile(lus_full_path, output_dir)
+        function [mcdc_file] = generate_MCDCLustreFile(lus_full_path, output_dir)
             [~, lus_file_name, ~] = fileparts(lus_full_path);
             tools_config;
             status = BUtils.check_files_exist(LUSTRET);
@@ -100,32 +125,22 @@ classdef LustrecUtils < handle
             end
             command = sprintf('%s -I %s -d %s -mcdc-cond  %s',LUSTRET, LUCTREC_INCLUDE_DIR, output_dir, lus_full_path);
             msg = sprintf('LUSTRET_COMMAND : %s\n',command);
-            display_msg(msg, MsgType.INFO, 'lustret_test_mcdc', '');
+            display_msg(msg, MsgType.INFO, 'generate_MCDCLustreFile', '');
             [status, lustret_out] = system(command);
             if status
                 msg = sprintf('lustret failed for model "%s"',lus_file_name);
-                display_msg(msg, MsgType.INFO, 'lustret_test_mcdc', '');
-                display_msg(msg, MsgType.ERROR, 'lustret_test_mcdc', '');
-                display_msg(msg, MsgType.DEBUG, 'lustret_test_mcdc', '');
-                display_msg(lustret_out, MsgType.DEBUG, 'lustret_test_mcdc', '');
+                display_msg(msg, MsgType.INFO, 'generate_MCDCLustreFile', '');
+                display_msg(msg, MsgType.ERROR, 'generate_MCDCLustreFile', '');
+                display_msg(msg, MsgType.DEBUG, 'generate_MCDCLustreFile', '');
+                display_msg(lustret_out, MsgType.DEBUG, 'generate_MCDCLustreFile', '');
                 return
             end
             
             mcdc_file = fullfile(output_dir,strcat( lus_file_name, '.mcdc.lus'));
-            mcdc_file_tmp = fullfile(output_dir,strcat( lus_file_name, '_tmp.mcdc.lus'));
-            
             if ~exist(mcdc_file, 'file')
-                display_msg(['No mcdc file has been found in ' output_dir], MsgType.ERROR, 'lustret_test_mcdc', '');
+                display_msg(['No mcdc file has been found in ' output_dir ' with name ' ...
+                    strcat( lus_file_name, '.mcdc.lus')], MsgType.ERROR, 'generate_MCDCLustreFile', '');
                 return;
-            end
-            
-            % adapt lustre code
-            fid = fopen(mcdc_file_tmp, 'w');
-            if fid > 0
-                fprintf(fid, '%s', LustrecUtils.adapt_lustre_text(fileread(mcdc_file)));
-                fclose(fid);
-            else
-                mcdc_file_tmp = mcdc_file;
             end
             
         end

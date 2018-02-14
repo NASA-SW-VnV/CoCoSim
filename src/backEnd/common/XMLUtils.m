@@ -11,9 +11,11 @@ classdef XMLUtils
         %%
         %this function help to get the name of Simulink block from lustre
         %variable name, using the generated tracability by Cocosim.
-        function block_name = get_block_name_from_variable_using_xRoot(xRoot, node_name, var_name)
+        function [block_name, out_port_nb, dimension] = get_block_name_from_variable_using_xRoot(xRoot, node_name, var_name)
             
             block_name = '';
+            out_port_nb = '';
+            dimension = '';
             nodes = xRoot.getElementsByTagName('Node');
             for idx_node=0:nodes.getLength-1
                 block_name_node = nodes.item(idx_node).getAttribute('node_name');
@@ -24,6 +26,10 @@ classdef XMLUtils
                         if strcmp(input.getAttribute('variable'), var_name)
                             block = input.getElementsByTagName('block_name');
                             block_name = char(block.item(0).getFirstChild.getData);
+                            out_port_nb_xml = input.getElementsByTagName('out_port_nb');
+                            out_port_nb = char(out_port_nb_xml.item(0).getFirstChild.getData);
+                            dimension_xml = input.getElementsByTagName('dimension');
+                            dimension = char(dimension_xml.item(0).getFirstChild.getData);
                             return;
                         end
                     end
@@ -33,6 +39,10 @@ classdef XMLUtils
                         if strcmp(output.getAttribute('variable'), var_name)
                             block = output.getElementsByTagName('block_name');
                             block_name = char(block.item(0).getFirstChild.getData);
+                            out_port_nb_xml = output.getElementsByTagName('out_port_nb');
+                            out_port_nb = char(out_port_nb_xml.item(0).getFirstChild.getData);
+                            dimension_xml = output.getElementsByTagName('dimension');
+                            dimension = char(dimension_xml.item(0).getFirstChild.getData);
                             return;
                         end
                     end
@@ -42,6 +52,10 @@ classdef XMLUtils
                         if strcmp(var.getAttribute('variable'), var_name)
                             block = var.getElementsByTagName('block_name');
                             block_name = char(block.item(0).getFirstChild.getData);
+                            out_port_nb_xml = var.getElementsByTagName('out_port_nb');
+                            out_port_nb = char(out_port_nb_xml.item(0).getFirstChild.getData);
+                            dimension_xml = var.getElementsByTagName('dimension');
+                            dimension = char(dimension_xml.item(0).getFirstChild.getData);
                             return;
                         end
                     end

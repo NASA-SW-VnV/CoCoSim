@@ -4,7 +4,7 @@
 % All Rights Reserved.
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [ new_model_path, status ] = mcdcToSimulink( model_full_path )
+function [ new_model_path, status ] = generate_MCDC_observers( model_full_path )
 %MCDCTOSIMULINK try to bring back the MC-DC conditions to simulink level.
 
 if ~exist(model_full_path, 'file')
@@ -45,11 +45,11 @@ load_system(new_model_path);
 
 
 try
-    %     [lus_full_path, ~, ~, ~, ~, mdl_trace, ~] = lustre_compiler(model_full_path);
-    mdl_trace = '/Users/hbourbou/Documents/babelfish/cocosim2/test/properties/lustre_files/src_safe_1_PP/safe_1_PP.cocosim.trace.xml';
-    lus_full_path = '/Users/hbourbou/Documents/babelfish/cocosim2/test/properties/lustre_files/src_safe_1_PP/safe_1_PP.lus';
-    DOMNODE = xmlread(mdl_trace);
-    mdl_trace = DOMNODE.getDocumentElement;
+    [lus_full_path, ~, ~, ~, ~, mdl_trace, ~] = lustre_compiler(model_full_path);
+    %     mdl_trace = '/Users/hbourbou/Documents/babelfish/cocosim2/test/properties/lustre_files/src_safe_1_PP/safe_1_PP.cocosim.trace.xml';
+    %     lus_full_path = '/Users/hbourbou/Documents/babelfish/cocosim2/test/properties/lustre_files/src_safe_1_PP/safe_1_PP.lus';
+    %     DOMNODE = xmlread(mdl_trace);
+    %     mdl_trace = DOMNODE.getDocumentElement;
     [output_dir, ~, ~] = fileparts(lus_full_path);
     
 catch ME
@@ -62,8 +62,8 @@ end
 
 % Generate MCDC lustre file from Simulink model Lustre file
 try
-    %     mcdc_file = LustrecUtils.generate_MCDCLustreFile(lus_full_path, output_dir);
-    mcdc_file = '/Users/hbourbou/Documents/babelfish/cocosim2/test/properties/lustre_files/src_safe_1_PP/safe_1_PP_tmp.mcdc.lus';
+    mcdc_file = LustrecUtils.generate_MCDCLustreFile(lus_full_path, output_dir);
+    %     mcdc_file = '/Users/hbourbou/Documents/babelfish/cocosim2/test/properties/lustre_files/src_safe_1_PP/safe_1_PP_tmp.mcdc.lus';
 catch ME
     display_msg(['MCDC generation failed for lustre file ' lus_full_path],...
         MsgType.ERROR, 'mcdcToSimulink', '');
@@ -155,18 +155,15 @@ try
                 inputs.item(id_input).getElementsByTagName('block_name').item(0).getTextContent;
             block_name = regexprep(char(block_name),strcat('^',slx_file_name,'/(\w)'),strcat(new_model_name,'/$1'));
             if getSimulinkBlockHandle(block_name) ~= -1
+                %TODO: investigate the case where the block output is
+                %not scalar.
                 blk_portHandles = get_param(block_name, 'PortHandles');
-                nb_outports = numel(blk_portHandles.Outport);
-                if nb_outports == 1
-                    add_line(simulink_block_name,...
-                        blk_portHandles.Outport(1), ...
-                        dst_blk_portHandles.Inport(id_input+1), ...
-                        'autorouting', 'on');
-                else
-                    %TODO: investigate the case where the block has many
-                    %outputs.
-                    display_msg('Block with many outports not supported yet', MsgType.ERROR, 'mcdcToSimulink', '');
-                end
+                out_port_nb = char(...
+                    inputs.item(id_input).getElementsByTagName('out_port_nb').item(0).getTextContent);
+                add_line(simulink_block_name,...
+                    blk_portHandles.Outport(str2num(out_port_nb)), ...
+                    dst_blk_portHandles.Inport(id_input+1), ...
+                    'autorouting', 'on');
             else
                 display_msg(['Block not found ' block_name], MsgType.ERROR, 'mcdcToSimulink', '');
             end
@@ -193,6 +190,9 @@ catch ME
 end
 end
 
+
+
+%% Returns the Display parameter value for the Observer block
 function set_mask_parameters(observer_path)
 
 mask = Simulink.Mask.create(observer_path);
@@ -204,8 +204,6 @@ set_param(observer_path, 'ForegroundColor', 'red');
 set_param(observer_path, 'BackgroundColor', 'white');
 
 end
-
-%% Returns the Display parameter value for the Observer block
 function [display] = get_observer_display()
 display = sprintf('color(''red'')\n');
 display = [display sprintf('text(0.5, 0.5, [''MC-DC: '''''' get_param(gcb,''name'') ''''''''], ''horizontalAlignment'', ''center'');\n')];
