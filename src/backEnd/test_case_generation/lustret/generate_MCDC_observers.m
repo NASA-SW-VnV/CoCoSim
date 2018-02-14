@@ -4,7 +4,8 @@
 % All Rights Reserved.
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [ new_model_path, status ] = generate_MCDC_observers( model_full_path )
+function [ new_model_path, status ] = generate_MCDC_observers(...
+    model_full_path, exportToWs, mkHarnessMdl )
 %MCDCTOSIMULINK try to bring back the MC-DC conditions to simulink level.
 
 if ~exist(model_full_path, 'file')
@@ -14,6 +15,12 @@ if ~exist(model_full_path, 'file')
 else
     model_full_path = which(model_full_path);
 end
+if ~exist('exportToWs', 'var') || isempty(exportToWs)
+    exportToWs = 0;
+end
+if ~exist('mkHarnessMdl', 'var') || isempty(mkHarnessMdl)
+    mkHarnessMdl = 0;
+end
 [model_parent_path, slx_file_name, ~] = fileparts(model_full_path);
 display_msg(['Generating mc-dc coverage Model for : ' slx_file_name],...
     MsgType.INFO, 'mutation_tests', '');
@@ -21,7 +28,7 @@ status = 0;
 
 % create new model
 % we add a Postfix to differentiate it with the original Simulink model
-new_model_name = strcat(slx_file_name,'_with_mcdc');
+new_model_name = strcat(slx_file_name,'_mcdc');
 new_model_path = fullfile(model_parent_path,strcat(new_model_name,'.slx'));
 
 display_msg(['Cocospec path: ' new_model_path ], MsgType.INFO, 'mcdcToSimulink', '');
@@ -46,11 +53,7 @@ load_system(new_model_path);
 
 try
     [lus_full_path, ~, ~, ~, ~, mdl_trace, ~] = lustre_compiler(model_full_path);
-    %     mdl_trace = '/Users/hbourbou/Documents/babelfish/cocosim2/test/properties/lustre_files/src_safe_1_PP/safe_1_PP.cocosim.trace.xml';
-    %     lus_full_path = '/Users/hbourbou/Documents/babelfish/cocosim2/test/properties/lustre_files/src_safe_1_PP/safe_1_PP.lus';
-    %     DOMNODE = xmlread(mdl_trace);
-    %     mdl_trace = DOMNODE.getDocumentElement;
-    [output_dir, ~, ~] = fileparts(lus_full_path);
+    [output_dir, main_node, ~] = fileparts(lus_full_path);
     
 catch ME
     display_msg(['Compilation failed for model ' slx_file_name], ...
@@ -63,7 +66,6 @@ end
 % Generate MCDC lustre file from Simulink model Lustre file
 try
     mcdc_file = LustrecUtils.generate_MCDCLustreFile(lus_full_path, output_dir);
-    %     mcdc_file = '/Users/hbourbou/Documents/babelfish/cocosim2/test/properties/lustre_files/src_safe_1_PP/safe_1_PP_tmp.mcdc.lus';
 catch ME
     display_msg(['MCDC generation failed for lustre file ' lus_full_path],...
         MsgType.ERROR, 'mcdcToSimulink', '');
@@ -174,13 +176,38 @@ try
     end
     
     if nb_mcdc == 0
-        warndlg('No MCDC conditions were generated','CoCoSim: Warning');
+        display_msg('No MCDC conditions were generated', MsgType.RESULT, 'mcdcToSimulink', '');
         return;
     end
+    
+    % generate test cases that covers the MC-DC conditions
+    new_mcdc_file = LustrecUtils.adapt_lustre_file(mcdc_file, 'Kind2');
+    [~, T] = Kind2Utils.run_Kind2(new_mcdc_file, output_dir, main_node, ...
+    ' --slice_nodes false --check_subproperties true ');
+
+    if isempty(T)
+        display_msg('No MCDC conditions were generated', MsgType.RESULT, 'mcdcToSimulink', '');
+        return;
+    end
+    
+    if exportToWs
+        assignin('base', strcat(slx_file_name, '_mcdc_tests'), T);
+        display_msg(['Generated test suite is saved in workspace under name: ' strcat(slx_file_name, '_mcdc_tests')],...
+            MsgType.RESULT, 'mutation_tests', '');
+    end
+    
+    
+    
+    % Save the system
     save_system(new_model_path);
-    open(new_model_path);
+    
     save_system(new_model_path,[],'OverwriteIfChangedOnDisk',true);
     close_system(mcdc_subsys,0)
+    
+    if mkHarnessMdl
+        new_model_path = SLXUtils.makeharness(T, new_model_name, [], '_harness');
+    end
+    open(new_model_path);
 catch ME
     display_msg('MCDC to Simulink generation failed', MsgType.ERROR, 'mcdcToSimulink', '');
     display_msg(ME.message, MsgType.ERROR, 'mcdcToSimulink', '');

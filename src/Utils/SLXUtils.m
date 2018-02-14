@@ -247,9 +247,12 @@ classdef SLXUtils
         
         %%
         
-        function [new_model_name, status] = makeharness(T, subsys_path, output_dir)
+        function [new_model_name, status] = makeharness(T, subsys_path, output_dir, postfix_name)
             % the model should be already loaded and subsys_path is the
             % path to the subsystem or the model name.
+            if nargin < 4
+                postfix_name = '_harness';
+            end
             new_model_name = '';
             status = 0;
             try
@@ -290,7 +293,7 @@ classdef SLXUtils
                     sampleTime = [sampleTime, 0];
                 end
                 
-                newBaseName = strcat(modelName, '_harness');
+                newBaseName = strcat(modelName, postfix_name);
                 close_system(newBaseName, 0);
                 new_model_name = fullfile(output_dir, strcat(newBaseName, ext));
                 if exist(newBaseName, 'file'), delete(newBaseName);end
@@ -402,9 +405,13 @@ classdef SLXUtils
                     signalbuilder(signalBuilderName, 'create', T(1).time, arrayfun(@(x) {double(x.values)}, T(1).signals)');
                     stopTime = T(1).time(end) + 0.0000000000001;
                     for i=2:numel(T)
-                        signalbuilder(signalBuilderName, 'appendgroup', T(i).time, arrayfun(@(x) {double(x.values)}, T(i).signals)');
-                        if T(i).time(end) > stopTime
-                            stopTime = T(i).time(end) + 0.0000000000001;
+                        try
+                            signalbuilder(signalBuilderName, 'appendgroup', T(i).time, arrayfun(@(x) {double(x.values)}, T(i).signals)');
+                            if T(i).time(end) > stopTime
+                                stopTime = T(i).time(end) + 0.0000000000001;
+                            end
+                        catch me
+                            display_msg(me.getReport(), MsgType.DEBUG, 'makeharness', '');
                         end
                     end
                     set_param(signalBuilderName, 'Position', [50    50   210   (50+30*m)]);

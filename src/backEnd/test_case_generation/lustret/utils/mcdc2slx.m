@@ -42,7 +42,7 @@ if ~exist('new_model_name', 'var') || isempty(new_model_name)
     if onlyMainNode
         new_model_name = BUtils.adapt_block_name(strcat(base_name{1}, '_mcdc_', main_node));
     else
-        new_model_name = BUtils.adapt_block_name(strcat(base_name{1}, '_mcdc'));
+        new_model_name = BUtils.adapt_block_name(strcat(base_name{1}, '_mcdc_nodes'));
     end
 end
 
@@ -357,7 +357,13 @@ for i=1:numel(blk_outputs)
     add_block('pp_lib/MCDC_Counter',...
         output_path,...
         'Position',[(x2+200) y2 (x2+350) (y2+50)]);
-    
+    try
+        set_param(fullfile(output_path, 'ToWorkspace'),...
+            'VariableName', var_name);
+    catch
+        display_msg(['couldn''t find ToWorkspace block in ' output_path],...
+                MsgType.DEBUG, 'MCDC2SLX', '');
+    end
     add_block('simulink/Signal Routing/From',...
         output_input,...
         'GotoTag',var_name,...

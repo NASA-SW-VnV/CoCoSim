@@ -61,7 +61,7 @@ end
 new_model_name = '';
 if mkHarnessMdl
     if ~exist(output_dir, 'dir'), mkdir(output_dir); end
-    new_model_name = SLXUtils.makeharness(T, slx_file_name, output_dir);
+    new_model_name = SLXUtils.makeharness(T, slx_file_name, output_dir, '_mutations');
 end
 end
 
