@@ -16,7 +16,7 @@ classdef LustrecUtils < handle
             t = regexprep(t, '\\', '\\\');
             t = regexprep(t, '!=', '<>');
             if strcmp(dest, 'Kind2')
-                t = regexprep(t, '(*! /coverage/mcdc/:', '(* /coverage/mcdc/:');
+                t = regexprep(t, '\(\*! /coverage/mcdc/:', '(* /coverage/mcdc/:');
             end
         end
         
@@ -150,6 +150,15 @@ classdef LustrecUtils < handle
                 output_dir, ...
                 LUSTREC,...
                 LUCTREC_INCLUDE_DIR)
+            if nargin < 4
+                tools_config;
+                err = BUtils.check_files_exist(LUSTREC, LUCTREC_INCLUDE_DIR);
+                if err
+                    msg = sprintf('Binary "%s" and directory "%s" not found ',LUSTREC, LUCTREC_INCLUDE_DIR);
+                    display_msg(msg, MsgType.ERROR, 'generate_lusi', '');
+                    return;
+                end
+            end
             [~, file_name, ~] = fileparts(lus_file_path);
            
             binary_name = fullfile(output_dir,...
@@ -166,9 +175,8 @@ classdef LustrecUtils < handle
                 LUSTREC,LUCTREC_INCLUDE_DIR, output_dir, node_name, lus_file_path);
             msg = sprintf('LUSTREC_COMMAND : %s\n',command);
             display_msg(msg, MsgType.INFO, 'compile_lustre_to_Cbinary', '');
-            [status, lustre_out] = system(command);
-            err = 0;
-            if status
+            [err, lustre_out] = system(command);
+            if err
                 display_msg(msg, MsgType.DEBUG, 'compile_lustre_to_Cbinary', '');
                 msg = sprintf('lustrec failed for model "%s"',lus_file_path);
                 display_msg(msg, MsgType.ERROR, 'compile_lustre_to_Cbinary', '');
@@ -187,8 +195,8 @@ classdef LustrecUtils < handle
             command = sprintf('make -f "%s"', makefile_name);
             msg = sprintf('MAKE_LUSTREC_COMMAND : %s\n',command);
             display_msg(msg, MsgType.INFO, 'compile_lustre_to_Cbinary', '');
-            [status, make_out] = system(command);
-            if status
+            [err, make_out] = system(command);
+            if err
                 msg = sprintf('Compilation failed for model "%s" ',file_name);
                 display_msg(msg, MsgType.ERROR, 'compile_lustre_to_Cbinary', '');
                 display_msg(msg, MsgType.DEBUG, 'compile_lustre_to_Cbinary', '');
@@ -205,7 +213,15 @@ classdef LustrecUtils < handle
                 node_name,...
                 LUSTREC,...
                 LUCTREC_INCLUDE_DIR)
-            
+            if nargin < 3
+                tools_config;
+                status = BUtils.check_files_exist(LUSTREC, LUCTREC_INCLUDE_DIR);
+                if status
+                    err = sprintf('Binary "%s" and directory "%s" not found ',LUSTREC, LUCTREC_INCLUDE_DIR);
+                    display_msg(err, MsgType.ERROR, 'generate_lusi', '');
+                    return;
+                end
+            end
             try
                 [node_struct, status] = ...
                     LustrecUtils.extract_node_struct_using_emf(...

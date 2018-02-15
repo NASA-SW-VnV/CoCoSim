@@ -6,7 +6,7 @@ classdef Kind2Utils
     end
     
     methods(Static = true)
-         %% run compositional modular verification usin Kind2
+        %% run compositional modular verification usin Kind2
         function [valid, IN_struct] = run_Kind2(...
                 verif_lus_path,...
                 output_dir,...
@@ -54,8 +54,10 @@ classdef Kind2Utils
                 MsgType.DEBUG,...
                 'Kind2Utils.run_verif',...
                 '');
+            
             [valid, IN_struct] = ...
                 Kind2Utils.extract_Kind2_Comp_Verif_answer(...
+                verif_lus_path, ...
                 solver_output,...
                 file_name,  output_dir);
             
@@ -63,6 +65,7 @@ classdef Kind2Utils
             
         end
         function [valid, IN_struct] = extract_Kind2_Comp_Verif_answer(...
+                lus_full_path, ...
                 solver_output, ...
                 file_name, ...
                 output_dir)
@@ -117,6 +120,7 @@ classdef Kind2Utils
             nbUnsafe = 0;
             for idx_analys=0:xAnalysis.getLength-1
                 node_name = char(xAnalysis.item(idx_analys).getAttribute('top'));
+                main_node_struct = LustrecUtils.extract_node_struct(lus_full_path, node_name);
                 xProperties = xAnalysis.item(idx_analys).getElementsByTagName('Property');
                 for idx_prop=0:xProperties.getLength-1
                     property = xProperties.item(idx_prop);
@@ -142,7 +146,8 @@ classdef Kind2Utils
                         if xml_cex.getLength > 0
                             CEX_XML = xml_cex;
                             [IN_struct_i, ~] =...
-                                Kind2Utils.Kind2CEXTostruct(CEX_XML, node_name);
+                                Kind2Utils.Kind2CEXTostruct(main_node_struct, ...
+                                CEX_XML, node_name);
                             IN_struct = [IN_struct, IN_struct_i];
                         else
                             msg = sprintf('Could not parse counter example for node %s and property %s from %s', ...
@@ -168,6 +173,7 @@ classdef Kind2Utils
         end
         
         function [IN_struct, time_max] = Kind2CEXTostruct(...
+                node_struct, ...
                 cex_xml, ...
                 node_name)
             IN_struct = [];
@@ -191,29 +197,63 @@ classdef Kind2Utils
             IN_struct.node_name = node_name;
             streams = node.getElementsByTagName('Stream');
             node_streams = {};
+            node_streams_name = {};
             for i=0:(streams.getLength-1)
                 if strcmp(streams.item(i).getParentNode.getAttribute('name'),...
                         node_name) && ...
                         strcmp(streams.item(i).getAttribute('class'),...
                         'input')
+                    node_streams_name{numel(node_streams_name) + 1} = ...
+                        char(streams.item(i).getAttribute('name'));
                     node_streams{numel(node_streams) + 1} = streams.item(i);
                 end
             end
-            for i=1:numel(node_streams)
-                s_name = char(node_streams{i}.getAttribute('name'));
-                s_dt =  char(LusValidateUtils.get_slx_dt(node_streams{i}.getAttribute('type')));
-                
-                IN_struct.signals(i).name = s_name;
-                IN_struct.signals(i).datatype = s_dt;
-                
-                %TODO parse the type and extract dimension
-                IN_struct.signals(i).dimensions =  1;
-                
-                [values, time_step] =...
-                    LustrecUtils.extract_values(...
-                    node_streams{i}, s_dt);
-                IN_struct.signals(i).values = values';
-                time_max = max(time_max, time_step);
+            if isfield(node_struct, 'inputs')
+                node_inputs = node_struct.inputs;
+                nb_in = numel(node_inputs);
+                for i=1:nb_in
+                    input_name = node_inputs(i).name;
+                    id_stream = find(strcmp(input_name, node_streams_name));
+                    if isempty(id_stream)
+                        IN_struct.signals(i).name = input_name;
+                        IN_struct.signals(i).datatype = LusValidateUtils.get_slx_dt(node_inputs(i).datatype);
+                        %TODO dimension > 1 case
+                        IN_struct.signals(i).dimensions =  1;
+                        IN_struct.signals(i).values = [];
+                    else
+                        s_name = char(node_streams{id_stream}.getAttribute('name'));
+                        s_dt =  char(LusValidateUtils.get_slx_dt(node_streams{id_stream}.getAttribute('type')));
+                        
+                        IN_struct.signals(i).name = s_name;
+                        IN_struct.signals(i).datatype = s_dt;
+                        
+                        %TODO parse the type and extract dimension
+                        IN_struct.signals(i).dimensions =  1;
+                        
+                        [values, time_step] =...
+                            LustrecUtils.extract_values(...
+                            node_streams{id_stream}, s_dt);
+                        IN_struct.signals(i).values = values';
+                        time_max = max(time_max, time_step);
+                    end
+                end
+            else
+                for i=1:numel(node_streams)
+                    s_name = char(node_streams{i}.getAttribute('name'));
+                    s_dt =  char(LusValidateUtils.get_slx_dt(node_streams{i}.getAttribute('type')));
+                    
+                    IN_struct.signals(i).name = s_name;
+                    IN_struct.signals(i).datatype = s_dt;
+                    
+                    %TODO parse the type and extract dimension
+                    IN_struct.signals(i).dimensions =  1;
+                    
+                    [values, time_step] =...
+                        LustrecUtils.extract_values(...
+                        node_streams{i}, s_dt);
+                    IN_struct.signals(i).values = values';
+                    time_max = max(time_max, time_step);
+                end
             end
             min = -100; max_v = 100;
             for i=1:numel(IN_struct.signals)
