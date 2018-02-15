@@ -27,7 +27,7 @@ display_msg(['Generating mc-dc coverage Model for : ' slx_file_name],...
 status = 0;
 
 
-
+% Compile model
 try
     [lus_full_path, ~, ~, ~, ~, mdl_trace, ~] = lustre_compiler(model_full_path);
     [output_dir, main_node, ~] = fileparts(lus_full_path);
@@ -43,28 +43,11 @@ end
 
 
 
-% create new model
-% we add a Postfix to differentiate it with the original Simulink model
-new_model_name = strcat(slx_file_name,'_mcdc');
-new_model_path = fullfile(output_dir, strcat(new_model_name,'.slx'));
-
-display_msg(['Cocospec path: ' new_model_path ], MsgType.INFO, 'mcdcToSimulink', '');
-
-if exist(new_model_path,'file')
-    if bdIsLoaded(new_model_name)
-        close_system(new_model_name,0)
-    end
-    delete(new_model_path);
-end
-
-load_system(model_full_path);
-close_system(new_model_path,0)
-save_system(slx_file_name, new_model_path, 'OverwriteIfChangedOnDisk', true);
-load_system(new_model_path);
 
 
 
-% Compile model
+
+
 
 
 
@@ -112,6 +95,25 @@ end
 if ~mkHarnessMdl
     return;
 end
+
+% create new model
+% we add a Postfix to differentiate it with the original Simulink model
+new_model_name = strcat(slx_file_name,'_mcdc');
+new_model_path = fullfile(output_dir, strcat(new_model_name,'.slx'));
+
+display_msg(['Cocospec path: ' new_model_path ], MsgType.INFO, 'mcdcToSimulink', '');
+
+if exist(new_model_path,'file')
+    if bdIsLoaded(new_model_name)
+        close_system(new_model_name,0)
+    end
+    delete(new_model_path);
+end
+
+load_system(model_full_path);
+close_system(new_model_path,0)
+save_system(slx_file_name, new_model_path, 'OverwriteIfChangedOnDisk', true);
+load_system(new_model_path);
 % Generate IR of MCDC file
 [mcdc_IR_path, status] = LustrecUtils.generate_emf(mcdc_file, output_dir);
 
