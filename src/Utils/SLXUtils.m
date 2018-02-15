@@ -70,6 +70,14 @@ classdef SLXUtils
             end
         end
         
+        %% detecte if it is already pre-processed
+        function already_pp = isAlreadyPP(model_path)
+            [~, model, ~ ] = fileparts(model_path);
+            if ~bdIsLoaded(model); load_system(model_path); end
+            hws = get_param(model, 'modelworkspace') ;
+            already_pp = hasVariable(hws,'already_pp') && getVariable(hws,'already_pp') == 1;
+        end
+        
         %%
         function [model_inputs_struct, inputEvents_names] = get_model_inputs_info(model_full_path)
             %TODO: Need to be optimized

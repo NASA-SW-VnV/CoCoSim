@@ -1,4 +1,4 @@
-function [new_file_path, status] = cocosim_pp(file_path, varargin)
+function [new_file_path, status] = cocosim_pp(model_path, varargin)
 % COCOSIM_PP pre-process complexe blocks in Simulink model into basic ones. 
 % This is a generic function that use pp_config as a configuration file that decides
 % which libraries to use and in which order to call the blocks functions.
@@ -33,27 +33,23 @@ for i=1:numel(varargin)
     end
 end
 if skip_pp
-    new_file_path = file_path;
+    new_file_path = model_path;
     return;
 end
 %% Creat the new model name
-[model_parent, model, ext] = fileparts(file_path);
+[model_parent, model, ext] = fileparts(model_path);
 already_pp = 0;
-if strcmp(model(end-2:end), '_PP')
-    load_system(file_path);
-    annotations = find_system(model,'FindAll','on','Type','annotation','MarkupType', 'markup', 'Name', 'cocosim_pp');
-    if isempty(annotations)
-        new_model_base = strcat(model,'_PP');
-        new_file_path = fullfile(model_parent,strcat(new_model_base, ext));
-    else
-        already_pp = 1;
-        new_model_base = model;
-        new_file_path = file_path;
-    end
+load_system(model_path);
+
+if SLXUtils.isAlreadyPP(model_path)
+    already_pp = 1;
+    new_model_base = model;
+    new_file_path = model_path;
 else
     new_model_base = strcat(model,'_PP');
     new_file_path = fullfile(model_parent,strcat(new_model_base, ext));
 end
+
 %close it without saving it
 close_system(new_model_base,0);
 if ~already_pp; delete(new_file_path); end
@@ -71,13 +67,12 @@ end
 
 
 %% Creating a cache copy to process
-if ~already_pp; copyfile(file_path, new_file_path); end
+if ~already_pp; copyfile(model_path, new_file_path); end
 display_msg(['Loading ' new_file_path ], MsgType.INFO, 'PP', '');
 load_system(new_file_path);
 if ~already_pp
-    add_block('built-in/Note', ...
-    strcat(new_model_base, '/cocosim_pp'), ...
-    'MarkupType', 'markup')
+    hws = get_param(new_model_base, 'modelworkspace') ;
+    hws.assignin('already_pp', 1);
 end
 
 display_msg('Loading library', MsgType.INFO, 'PP', '');
