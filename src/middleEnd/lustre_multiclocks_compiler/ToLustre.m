@@ -42,7 +42,7 @@ model_full_path = which(model_path);
 PWD = pwd;
 
 %% Run constants
-SLXUtils.run_constants_files(const_files)
+SLXUtils.run_constants_files(const_files);
 
 
 %% Pre-process model
@@ -108,6 +108,7 @@ fclose(fid);
 t_finish = toc(t_start);
 msg = sprintf('Lustre generation finished in %f seconds', t_finish);
 display_msg(msg, MsgType.RESULT, 'lustre_multiclocks_compiler', '');
+cd(PWD)
 end
 
 %%

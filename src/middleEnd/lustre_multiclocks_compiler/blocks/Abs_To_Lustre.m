@@ -1,4 +1,4 @@
-classdef Template_To_Lustre < Block_To_Lustre
+classdef Abs_To_Lustre < Block_To_Lustre
     %Test_write a dummy class
     
     properties
