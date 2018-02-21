@@ -177,7 +177,9 @@ if (tests_method == 3)
         end
         sldvData = load(FILENAMES.DataFile);
         sldvData = sldvData.sldvData;
-        if strcmp(sldvData.Objectives.status, 'Proven valid')
+        if strcmp(sldvData.Objectives.status, 'Proven valid') ...
+                || strcmp(sldvData.Objectives.status, 'Valid under approximation')...
+                || strcmp(sldvData.Objectives.status, 'Valid')
             valid = 1;
             msg = sprintf('Translation for model "%s" is valid \n',slx_file_name);
             display_msg(msg, MsgType.RESULT, 'COMPARE_SLX_LUS', '');
@@ -186,6 +188,10 @@ if (tests_method == 3)
             display_msg(f_msg, MsgType.RESULT, 'validation', '');
             f_msg = sprintf('Find the counter example in "%s":\n', opts.HarnessModelFileName);
             display_msg(f_msg, MsgType.RESULT, 'validation', '');
+        else
+            msg = sprintf('Translation for model "%s" is %s \n',...
+                slx_file_name, sldvData.Objectives.status);
+            display_msg(msg, MsgType.RESULT, 'COMPARE_SLX_LUS', '');
         end
         msg = sprintf('Verification model : %s', emf_model_path);
         display_msg(msg, MsgType.RESULT, 'validation', '');

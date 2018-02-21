@@ -162,7 +162,7 @@ for node_idx =0:numel(nodes_names)
                 break;
             end
         end
-        if node_idx==0 && (valid || (deep_CEX == 0))
+        if node_idx==0 && (prod(valid) ==1  || (deep_CEX == 0))
             break;
         elseif node_idx>0 && ~lustrec_failed && ~sim_failed && ~lustrec_binary_failed && ~valid && (deep_CEX == 0)
             break;

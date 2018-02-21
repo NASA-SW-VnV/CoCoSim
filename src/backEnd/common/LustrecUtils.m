@@ -801,7 +801,7 @@ classdef LustrecUtils < handle
                 new_model_name = BUtils.adapt_block_name(strcat(lus_fname,'_EMF'));
             end
             clear lus2slx
-            [status, new_name_path, xml_trace] = lus2slx(emf_path, output_dir, new_model_name, node_name, 0);
+            [status, new_name_path, xml_trace] = lus2slx(emf_path, output_dir, new_model_name, node_name, 0, 1);
             if status
                 return;
             end

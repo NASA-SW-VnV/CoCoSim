@@ -470,6 +470,7 @@ classdef Lus2SLXUtils
                     add_block(fcn_subsys,...
                         fcn_path,...
                         'Position',block_pos);
+                    xml_trace.create_Node_Element(fcn_path,  nodes.(blk_exprs.(var{1}).name).original_name);
                 else
                     Lus2SLXUtils.node_process(new_model_name, nodes, blk_exprs.(var{1}).name, fcn_path, block_pos, xml_trace);
                     calls_map(ID) = fcn_path;
