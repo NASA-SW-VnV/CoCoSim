@@ -14,7 +14,8 @@ function [status,...
     output_dir, ...
     new_model_name, ...
     main_node, ...
-    organize_blocks)
+    organize_blocks,...
+    force)
 
 %% Init
 [coco_dir, cocospec_name, ~] = fileparts(json_path);
@@ -26,7 +27,9 @@ end
 if ~exist('organize_blocks', 'var') || isempty(organize_blocks)
     organize_blocks = false;
 end
-
+if ~exist('force', 'var') || isempty(force)
+    force = false;
+end
 base_name = regexp(cocospec_name,'\.','split');
 if ~exist('new_model_name', 'var') || isempty(new_model_name)
     if onlyMainNode
@@ -56,7 +59,7 @@ trace_file_name = fullfile(output_dir, ...
 xml_trace = XML_Trace(new_model_path, trace_file_name);
 xml_trace.init();
 if exist(new_model_path,'file')
-    if BUtils.isLastModified(json_path, new_model_path)
+    if BUtils.isLastModified(json_path, new_model_path) && ~force
         msg = sprintf('lus2slx file "%s" already generated. It will be used.\n',new_model_path);
         display_msg(msg, MsgType.DEBUG, 'generate_emf', '');
         return;

@@ -493,7 +493,7 @@ classdef LustrecUtils < handle
             %generate simulink model
             new_model_name = BUtils.adapt_block_name(strcat(slx_file_name,'_Verif'));
             clear lus2slx
-            [status, new_name_path, ~] = lus2slx(emf_path, output_dir, new_model_name, node_name, 0);
+            [status, new_name_path, ~] = lus2slx(emf_path, output_dir, new_model_name, node_name, 0, 1);
             if status
                 return;
             end
@@ -508,7 +508,7 @@ classdef LustrecUtils < handle
             original_sub_path = fullfile(new_model_name, 'original');
             add_block('built-in/Subsystem', original_sub_path);
             load_system(slx_file_name);
-            Simulink.BlockDiagram.copyContentsToSubsystem(slx_file_name, original_sub_path);
+            Simulink.BlockDiagram.copyContentsToSubSystem(slx_file_name, original_sub_path);
             
             %add inputs and outputs for original subsystem
             OrigSubPortHandles = get_param(original_sub_path, 'PortHandles');
