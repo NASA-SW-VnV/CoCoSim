@@ -74,7 +74,7 @@ end
 orig_names = arrayfun(@(x)  nodes.(x{1}).original_name,...
         nodes_names, 'UniformOutput', false);
 for node_idx =0:numel(nodes_names)
-    original_name = nodes.(nodes_names{node_idx}).original_name;
+    
     if node_idx==0
         if ismember(main_node, orig_names)
             idx = ismember(orig_names, main_node);
@@ -83,6 +83,7 @@ for node_idx =0:numel(nodes_names)
             continue;
         end
     else
+        original_name = nodes.(nodes_names{node_idx}).original_name;
         node_name = BUtils.adapt_block_name(nodes_names{node_idx});
         if strcmp(original_name, main_node)
             continue;

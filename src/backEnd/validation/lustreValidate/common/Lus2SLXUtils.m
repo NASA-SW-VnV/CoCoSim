@@ -617,7 +617,7 @@ classdef Lus2SLXUtils
             
             %% link outputs from outside
             outputs = blk_exprs.(var{1}).outputs;
-            [x2, y4] =link_subsys_outputs( node_block_path, branch_block_path, outputs, var, node_name, x2, y2);
+            [x2, y4] =Lus2SLXUtils.link_subsys_outputs( node_block_path, branch_block_path, outputs, var, node_name, x2, y2);
             
             
             %% link inputs from outside

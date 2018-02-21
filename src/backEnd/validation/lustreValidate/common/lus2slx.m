@@ -51,10 +51,16 @@ if ~exist(output_dir, 'dir')
 end
 
 new_model_path = fullfile(output_dir,strcat(new_model_name,'.slx'));
+trace_file_name = fullfile(output_dir, ...
+    strcat(cocospec_name, '.emf.trace.xml'));
+xml_trace = XML_Trace(new_model_path, trace_file_name);
+xml_trace.init();
 if exist(new_model_path,'file')
-%     if BUtils.isLastModified(json_path, new_model_path)
-%         return;
-%     end
+    if BUtils.isLastModified(json_path, new_model_path)
+        msg = sprintf('lus2slx file "%s" already generated. It will be used.\n',new_model_path);
+        display_msg(msg, MsgType.DEBUG, 'generate_emf', '');
+        return;
+    end
     if bdIsLoaded(new_model_name)
         close_system(new_model_name,0)
     end
@@ -63,10 +69,7 @@ end
 close_system(new_model_name,0);
 model_handle = new_system(new_model_name);
 
-trace_file_name = fullfile(output_dir, ...
-    strcat(cocospec_name, '.emf.trace.xml'));
-xml_trace = XML_Trace(new_model_path, trace_file_name);
-xml_trace.init();
+
 % save_system(model_handle,new_name);
 
 x = 200;
