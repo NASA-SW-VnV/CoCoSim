@@ -22,7 +22,7 @@ end
 
 function LusCompilerCallback(callbackInfo)
 mdl_full_path = MenuUtils.get_file_name(gcs);
-lustre_compiler(mdl_full_path);
+ToLustre(mdl_full_path);
 end
 
 function schema = CoCoSpecCompiler(callbackInfo)

@@ -12,14 +12,13 @@ coco_dir = fileparts(script_path);
 PWD = pwd;
 
 cd(coco_dir);
-cmd = sprintf('git ls-files --others --exclude-standard');
+cmd = 'git ls-files --others --exclude-standard';
 [status, git_output] = system(cmd);
 
 if status==0
     untrackFiles = regexprep(git_output, '[\t\b]', '');
     lines = regexp(untrackFiles, '\n', 'split');
     for i=1:numel(lines)
-        l = char(lines{i});
         if ~strncmp(lines{i}, 'tools/', 6) 
             cmd = sprintf('rm -rf %s', lines{i});
             [status, ~] = system(cmd);

@@ -1,6 +1,6 @@
 function [nom_lustre_file, xml_trace]= ToLustre(model_path, const_files, mode_display)
 %lustre_multiclocks_compiler translate Simulink models to Lustre. It is based on
-%article : 
+%article :
 %INPUTS:
 %   MODEL_PATH: The full path of the Simulink model.
 %   CONST_FILES: The list of constant files to be run in order to be able
@@ -36,8 +36,11 @@ nom_lustre_file = '';
 t_start = tic;
 
 %% Get Simulink model full path
-model_full_path = which(model_path);
-
+if (exist(model_path, 'file') == 2 || exist(model_path, 'file') == 4)
+    model_full_path = model_path;
+else
+    model_full_path = which(model_path);
+end
 %% Save current path
 PWD = pwd;
 

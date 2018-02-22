@@ -25,7 +25,7 @@ Model {
       BusOutputAsStruct	      "off"
     }
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.54"
+    ComputedModelVersion    "1.55"
     NumModelReferences	    0
     NumTestPointedSignals   0
   }
@@ -47,7 +47,7 @@ Model {
       $ObjectID		      2
       $ClassName	      "Simulink.WindowInfo"
       IsActive		      [1]
-      Location		      [-2472.0, -27.0, 1680.0, 947.0]
+      Location		      [-230.0, -1382.0, 1680.0, 947.0]
       Object {
 	$PropName		"ModelBrowserInfo"
 	$ObjectID		3
@@ -72,8 +72,8 @@ Model {
 	ViewObjType		"SimulinkTopLevel"
 	LoadSaveID		"0"
 	Extents			[1646.0, 777.0]
-	ZoomFactor		[1.468627450980392]
-	Offset			[-88.098120410547466, 8.4672897196261676]
+	ZoomFactor		[1.4686274509803916]
+	Offset			[-88.098120410547608, 8.4672897196261943]
       }
     }
   }
@@ -83,16 +83,16 @@ Model {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "hbourbou"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Mon Feb 12 14:28:40 2018"
+  LastModifiedDate	  "Thu Feb 22 14:20:58 2018"
   RTWModifiedTimeStamp	  440346505
-  ModelVersionFormat	  "1.%<AutoIncrement:54>"
+  ModelVersionFormat	  "1.%<AutoIncrement:55>"
   ConfigurationManager	  "none"
   SampleTimeColors	  off
   SampleTimeAnnotations	  off
   LibraryLinkDisplay	  "none"
   WideLines		  off
   ShowLineDimensions	  off
-  ShowPortDataTypes	  off
+  ShowPortDataTypes	  on
   ShowDesignRanges	  off
   ShowLoopsOnError	  on
   IgnoreBidirectionalLines off
@@ -919,7 +919,7 @@ Model {
   }
   System {
     Name		    "safe_1"
-    Location		    [-2472, -27, -792, 920]
+    Location		    [-230, -1382, 1450, -435]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -1046,7 +1046,7 @@ Model {
       }
       System {
 	Name			"observer"
-	Location		[-2472, -27, -792, 920]
+	Location		[-230, -1382, 1450, -435]
 	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
