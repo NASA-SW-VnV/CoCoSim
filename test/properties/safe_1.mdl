@@ -31,7 +31,7 @@ Model {
       UnitExpr		      "inherit"
     }
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.55"
+    ComputedModelVersion    "1.56"
     NumModelReferences	    0
     NumTestPointedSignals   0
     NumProvidedFunctions    0
@@ -92,9 +92,9 @@ Model {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "ktrinh"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Fri Feb 23 10:34:09 2018"
-  RTWModifiedTimeStamp	  440346505
-  ModelVersionFormat	  "1.%<AutoIncrement:55>"
+  LastModifiedDate	  "Fri Feb 23 10:42:55 2018"
+  RTWModifiedTimeStamp	  441283343
+  ModelVersionFormat	  "1.%<AutoIncrement:56>"
   ConfigurationManager	  "none"
   SampleTimeColors	  off
   SampleTimeAnnotations	  off
@@ -1097,7 +1097,7 @@ Model {
 	TiledPaperMargins	[1.270000, 1.270000, 1.270000, 1.270000]
 	TiledPageScale		1
 	ShowPageBoundaries	off
-	ZoomFactor		"250"
+	ZoomFactor		"211"
 	Block {
 	  BlockType		  Inport
 	  Name			  "In1"
@@ -1326,7 +1326,7 @@ Model {
       BlockType		      Outport
       Name		      "Out1"
       SID		      "19"
-      Position		      [775, 198, 805, 212]
+      Position		      [675, 193, 705, 207]
       ZOrder		      -8
       IconDisplay	      "Port number"
     }
@@ -1373,7 +1373,6 @@ Model {
 	Points			[194, 0]
 	Branch {
 	  ZOrder		  84
-	  Points		  [0, 5]
 	  DstBlock		  "Out1"
 	  DstPort		  1
 	}
