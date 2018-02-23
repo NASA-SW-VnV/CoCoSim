@@ -59,7 +59,7 @@ for i=1:numel(fields)
     if status
         continue;
     end
-    b.write_code(subsys, blk, main_sampleTime, xml_trace);
+    b.write_code(subsys, blk, xml_trace);
     body = [body, b.code];
     variables_str = [variables_str, char(MatlabUtils.strjoin(b.variables, '\n\t'))];
     external_nodes = [external_nodes, b.external_nodes];

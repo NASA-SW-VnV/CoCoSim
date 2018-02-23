@@ -11,7 +11,7 @@ classdef Subsystem_To_Lustre < Block_To_Lustre
     
     methods
         
-        function  write_code(obj, parent, blk, main_sampleTime, xml_trace)
+        function  write_code(obj, parent, blk, varargin)
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(blk);
             [inputs] = SLX2LusUtils.getBlockInputsNames(parent, blk);
             node_name = SLX2LusUtils.node_name_format(blk);
@@ -21,9 +21,9 @@ classdef Subsystem_To_Lustre < Block_To_Lustre
             obj.variables = outputs_dt;
         end
         
-        function getUnsupportedOptions(obj, varargin)
+        function options = getUnsupportedOptions(obj, varargin)
             % add your unsuported options list here
-           obj.unsupported_options = {};  
+           options = obj.unsupported_options;
         end
     end
     

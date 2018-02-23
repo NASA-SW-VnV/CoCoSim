@@ -110,9 +110,9 @@ classdef Sum_To_Lustre < Block_To_Lustre
         
         
         %%
-        function getUnsupportedOptions(obj, varargin)
+        function options = getUnsupportedOptions(obj, varargin)
             % add your unsuported options list here
-            obj.unsupported_options = {};
+            options = obj.unsupported_options;
         end
     end
     
