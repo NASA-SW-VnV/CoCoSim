@@ -12,7 +12,7 @@ classdef Abs_To_Lustre < Block_To_Lustre
             
             widths = blk.CompiledPortWidths.Inport;
             max_width = max(widths);
-            outputDataType = blk.CompiledPortDataTypes.Outport(1);
+            outputDataType = blk.CompiledPortDataTypes.Outport{1};
             RndMeth = blk.RndMeth;
             for i=1:numel(widths)
                 inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
@@ -32,17 +32,10 @@ classdef Abs_To_Lustre < Block_To_Lustre
                 end
             end
             [~, zero] = SLX2LusUtils.get_lustre_dt(outputDataType);
-            [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(outputDataType, blk.OutDataTypeStr, RndMeth);
-            if ~isempty(external_lib)
-                obj.external_libraries = [obj.external_libraries,...
-                    external_lib];
-            end
+
             codes = {};
             for j=1:numel(inputs{1})
                 code = sprintf('if %s >= %s then %s else -%s', inputs{1}{j}, zero, inputs{1}{j}, inputs{1}{j});
-                if ~isempty(conv_format)
-                    code = sprintf(conv_format, code);
-                end
                 codes{j} = sprintf('%s = %s;\n\t', outputs{j}, code);
             end
             
@@ -50,9 +43,15 @@ classdef Abs_To_Lustre < Block_To_Lustre
             obj.variables = outputs_dt;
         end
         
-        function getUnsupportedOptions(obj, varargin)
-            % add your unsuported options list here
+        function options = getUnsupportedOptions(obj, varargin)
             obj.unsupported_options = {};
+            if ~isempty(blk.OutMax) || ~isempty(blk.OutMin)
+                obj.unsupported_options{numel(obj.unsupported_options) + 1} = sprintf('The minimum/maximum value is not support in block %s', blk.Origin_path);
+            end
+            if strcmp(blk.SaturateOnIntegerOverflow, 'on')
+                obj.unsupported_options{numel(obj.unsupported_options) + 1} = sprintf('The Saturate on integer overflow option is not support in block %s', blk.Origin_path);
+            end 
+            options = obj.unsupported_options;
         end
     end
     

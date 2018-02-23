@@ -1,14 +1,14 @@
 function  fixedStepDiscrete_process( new_model_base )
 %ALGEBRAIC_LOOPS_PROCESS set the solver to FixedStepDiscrete.
 try
-    code_on=sprintf('%s([], [], [], ''compile'')', new_model_base);
-    warning off;
-    evalin('base',code_on);
+%     code_on=sprintf('%s([], [], [], ''compile'')', new_model_base);
+%     warning off;
+%     evalin('base',code_on);
     configSet = getActiveConfigSet(new_model_base);
     set_param(configSet, 'Solver', 'FixedStepDiscrete');
-    code_off=sprintf('%s([], [], [], ''term'')', new_model_base);
-    evalin('base',code_off);
-    warning on;
+%     code_off=sprintf('%s([], [], [], ''term'')', new_model_base);
+%     evalin('base',code_off);
+%     warning on;
 catch me
     try
         code_off=sprintf('%s([], [], [], ''term'')', new_model_base);

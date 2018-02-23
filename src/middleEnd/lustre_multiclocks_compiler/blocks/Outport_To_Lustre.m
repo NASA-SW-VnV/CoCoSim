@@ -11,7 +11,7 @@ classdef Outport_To_Lustre < Block_To_Lustre
     
     methods
         
-        function  write_code(obj, parent, blk, main_sampleTime, xml_trace)
+        function  write_code(obj, parent, blk, varargin)
             [outputs, ~] = SLX2LusUtils.getBlockOutputsNames(blk);
             [inputs] = SLX2LusUtils.getBlockInputsNames(parent, blk);
             codes = {};
@@ -22,8 +22,8 @@ classdef Outport_To_Lustre < Block_To_Lustre
             obj.code = MatlabUtils.strjoin(codes, '');
         end
         
-        function getUnsupportedOptions(obj, varargin)
-            obj.unsupported_options = {};
+        function options = getUnsupportedOptions(obj, varargin)
+            options = obj.unsupported_options;
         end
     end
     
