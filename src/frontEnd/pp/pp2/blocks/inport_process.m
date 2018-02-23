@@ -2,7 +2,7 @@ function inport_process( new_model_base )
 
 display_msg('Processing Inport blocks', MsgType.INFO, 'PP', '');
 
-inport_list = find_system(new_model_base,'BlockType','Inport');
+inport_list = find_system(new_model_base,'LookUnderMasks', 'all', 'BlockType','Inport');
 model = regexp(new_model_base,'/','split');
 model = model{1};
 if ~isempty(inport_list)
