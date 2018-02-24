@@ -1,4 +1,4 @@
-function [nom_lustre_file, xml_trace]= ToLustre(model_path, const_files, mode_display)
+function [nom_lustre_file, xml_trace]= ToLustre(model_path, const_files, mode_display, varargin)
 %lustre_multiclocks_compiler translate Simulink models to Lustre. It is based on
 %article :
 %INPUTS:
@@ -20,10 +20,10 @@ if nargin < 1
     display_help_message();
     return;
 end
-if ~exist('const_files', 'var')
+if ~exist('const_files', 'var') || isempty(const_files)
     const_files = {};
 end
-if ~exist('mode_display', 'var')
+if ~exist('mode_display', 'var') || isempty(mode_display)
     mode_display = 0;
 end
 
@@ -50,7 +50,12 @@ SLXUtils.run_constants_files(const_files);
 
 %% Pre-process model
 display_msg('Pre-processing', MsgType.INFO, 'lustre_multiclocks_compiler', '');
-[new_file_name, status] = cocosim_pp(model_full_path, 'nodisplay');
+% if nargin > 3
+%     varargin = [varargin; {'nodisplay'}];
+% else
+%     varargin = 'nodisplay';
+% end
+[new_file_name, status] = cocosim_pp(model_full_path ,'nodisplay',  varargin{:});
 if status
     return;
 end

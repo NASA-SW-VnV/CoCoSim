@@ -28,9 +28,6 @@ classdef UnitDelay_To_Lustre < Block_To_Lustre
                 x0_condition = str2num(blk.InitialCondition);
                 if contains(blk.InitialCondition, '.')
                     x0DataType = 'double';
-                elseif strcmp(inportDataType, 'double')
-                    x0_condition = sprintf('%f', x0_condition);
-                    x0DataType = 'double';
                 else
                     x0DataType = 'int';
                 end
@@ -44,13 +41,19 @@ classdef UnitDelay_To_Lustre < Block_To_Lustre
                 x0DataType =  evalin('base',...
                     sprintf('class(%s)', blk.InitialCondition));
             end
-            if numel(x0_condition) > 1
-                obj.unsupported_options{numel(obj.unsupported_options) + 1} = ...
-                    sprintf('InitialCondition condition %s is not supported in block %s.', ...
+            if isnumeric(x0_condition) && numel(x0_condition) > 1
+                msg = sprintf('InitialCondition condition %s is not supported in block %s.', ...
                     num2str(x0_condition), blk.Origin_path);
+                obj.unsupported_options{numel(obj.unsupported_options) + 1} = ...
+                    msg;
+                display_msg(msg, MsgType.WARNING, 'UnitDelay_To_Lustre', '');
                 return;
             else
-                if strncmp(x0DataType, 'int', 3) ...
+                % change x0_condition to string.
+                if strcmp(inportDataType, 'double')
+                    x0_condition = sprintf('%.15f', x0_condition);
+                    x0DataType = 'double';
+                elseif strncmp(x0DataType, 'int', 3) ...
                         || strncmp(x0DataType, 'uint', 4)
                     x0_condition = num2str(x0_condition);
                 elseif strcmp(x0DataType, 'boolean') || strcmp(x0DataType, 'logical')

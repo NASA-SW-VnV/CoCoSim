@@ -22,8 +22,10 @@ global cocosim_pp_gen_verif  cocosim_pp_gen_verif_dir;
 nodisplay = 0;
 cocosim_pp_gen_verif = 0;
 cocosim_pp_gen_verif_dir = '';
+
 skip_pp = 0;
 for i=1:numel(varargin)
+%     disp(varargin{i})
     if strcmp(varargin{i}, 'nodisplay')
         nodisplay = 1;
     elseif strcmp(varargin{i}, 'verif')
@@ -34,6 +36,7 @@ for i=1:numel(varargin)
 end
 if skip_pp
     new_file_path = model_path;
+    status = 0;
     return;
 end
 %% Creat the new model name
