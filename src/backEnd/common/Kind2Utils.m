@@ -39,7 +39,7 @@ classdef Kind2Utils
                 output_dir = file_dir;
             end
             
-            timeout = '200';
+            timeout = '600';
             PWD = pwd;
             cd(output_dir);
             
