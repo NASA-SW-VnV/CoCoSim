@@ -60,7 +60,7 @@ for i=1:numel(fields)
         continue;
     end
     b.write_code(subsys, blk, xml_trace);
-    body = [body, b.code];
+    body = [body, b.getCode()];
     variables_str = [variables_str, char(MatlabUtils.strjoin(b.variables, '\n\t'))];
     external_nodes = [external_nodes, b.external_nodes];
     external_libraries = [external_libraries, b.external_libraries];
