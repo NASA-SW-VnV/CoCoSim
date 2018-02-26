@@ -17,7 +17,7 @@ main_node = '';
 external_libraries = {};
 
 % Adding lustre comments tracking the original path
-origin_path = strrep(subsys_struct.Origin_path, '\n', '--');
+origin_path = regexprep(subsys_struct.Origin_path, '(\\n|\n)', '--');
 comment = sprintf('-- Original block name: %s', origin_path);
 
 % creating node header

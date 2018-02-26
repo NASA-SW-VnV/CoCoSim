@@ -55,8 +55,7 @@ classdef Sum_To_Lustre < Block_To_Lustre
                 if ~strcmp(inport_dt, AccumDataTypeStr)
                     [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, AccumDataTypeStr, RndMeth);
                     if ~isempty(external_lib)
-                        obj.external_libraries = [obj.external_libraries,...
-                            external_lib];
+                        obj.addExternal_libraries(external_lib);
                         inputs{i} = cellfun(@(x) sprintf(conv_format,x), inputs{i}, 'un', 0);
                     end
                 end
@@ -76,8 +75,7 @@ classdef Sum_To_Lustre < Block_To_Lustre
             [~, zero] = SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Outport(1));
             [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(AccumDataTypeStr, OutputDataTypeStr, RndMeth);
             if ~isempty(external_lib)
-                obj.external_libraries = [obj.external_libraries,...
-                    external_lib];
+                obj.addExternal_libraries(external_lib);
             end
             codes = {};
             if numel(exp) == 1 && numel(inputs) == 1
@@ -104,8 +102,8 @@ classdef Sum_To_Lustre < Block_To_Lustre
                     codes{i} = sprintf('%s = %s;\n\t', outputs{i}, code);
                 end
             end
-            obj.code = MatlabUtils.strjoin(codes, '');
-            obj.variables = outputs_dt;
+            obj.setCode(MatlabUtils.strjoin(codes, ''));
+            obj.addVariable(outputs_dt);
         end
         
         

@@ -17,8 +17,8 @@ classdef Subsystem_To_Lustre < Block_To_Lustre
             node_name = SLX2LusUtils.node_name_format(blk);
             x = MatlabUtils.strjoin(inputs, ',\n\t');
             y = MatlabUtils.strjoin(outputs, ',\n\t');
-            obj.code = sprintf('(%s) = %s(%s);\n\t', y, node_name, x);
-            obj.variables = outputs_dt;
+            obj.setCode(sprintf('(%s) = %s(%s);\n\t', y, node_name, x));
+            obj.addVariable(outputs_dt);
         end
         
         function options = getUnsupportedOptions(obj, varargin)

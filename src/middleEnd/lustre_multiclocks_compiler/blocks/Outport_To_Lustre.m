@@ -19,7 +19,7 @@ classdef Outport_To_Lustre < Block_To_Lustre
                 codes{i} = sprintf('%s = %s;\n\t', outputs{i}, inputs{i});
             end
             
-            obj.code = MatlabUtils.strjoin(codes, '');
+            obj.setCode( MatlabUtils.strjoin(codes, ''));
         end
         
         function options = getUnsupportedOptions(obj, varargin)

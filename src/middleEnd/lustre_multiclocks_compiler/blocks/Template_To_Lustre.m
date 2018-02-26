@@ -7,7 +7,7 @@ classdef Template_To_Lustre < Block_To_Lustre
     methods
         
         function  write_code(obj, parent, blk, varargin)
-            obj.code = 'You code here';
+            obj.setCode('You code here');
         end
         
         function options = getUnsupportedOptions(obj, varargin)

@@ -8,7 +8,7 @@ classdef UnitDelay_To_Lustre < Block_To_Lustre
         
         function  write_code(obj, parent, blk, varargin)
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(blk);
-            obj.variables = outputs_dt;
+            obj.addVariable(outputs_dt);
             inputs = {};
             
             widths = blk.CompiledPortWidths.Inport;
@@ -44,8 +44,7 @@ classdef UnitDelay_To_Lustre < Block_To_Lustre
             if isnumeric(x0_condition) && numel(x0_condition) > 1
                 msg = sprintf('InitialCondition condition %s is not supported in block %s.', ...
                     num2str(x0_condition), blk.Origin_path);
-                obj.unsupported_options{numel(obj.unsupported_options) + 1} = ...
-                    msg;
+                obj.addUnsupported_options(msg);
                 display_msg(msg, MsgType.WARNING, 'UnitDelay_To_Lustre', '');
                 return;
             else
@@ -74,8 +73,7 @@ classdef UnitDelay_To_Lustre < Block_To_Lustre
             if ~strcmp(x0DataType, inportDataType)
                 [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(x0DataType, inportDataType);
                 if ~isempty(external_lib)
-                    obj.external_libraries = [obj.external_libraries,...
-                        external_lib];
+                    obj.addExternal_libraries(external_lib);
                     x0_condition = sprintf(conv_format, x0_condition);
                 end
             end
@@ -88,7 +86,7 @@ classdef UnitDelay_To_Lustre < Block_To_Lustre
                 codes{j} = sprintf('%s = %s;\n\t', outputs{j}, code);
             end
             
-            obj.code = MatlabUtils.strjoin(codes, '');
+            obj.setCode(MatlabUtils.strjoin(codes, ''));
             
             
         end

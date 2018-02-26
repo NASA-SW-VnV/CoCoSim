@@ -8,7 +8,7 @@ classdef Delay_To_Lustre < Block_To_Lustre
         
         function  write_code(obj, parent, blk, varargin)
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(blk);
-            obj.variables = outputs_dt;
+            obj.addVariable(outputs_dt);
             inputs = {};
             
             widths = blk.CompiledPortWidths.Inport;
@@ -23,6 +23,7 @@ classdef Delay_To_Lustre < Block_To_Lustre
             % outside. If it is the case, the X0 port number, by
             % convention From Simulink, is the last one.  numel(widths)
             % gives the number of inports therefore the port number of X0.
+            
             if strcmp(blk.InitialConditionSource, 'Input port')
                 I = [1, nb_inports];
                 x0DataType = blk.CompiledPortDataTypes.Inport{end};
@@ -44,7 +45,7 @@ classdef Delay_To_Lustre < Block_To_Lustre
                         sprintf('class(%s)', blk.InitialCondition));
                 end
                 if numel(InitialCondition) > 1
-                    obj.unsupported_options{numel(obj.unsupported_options) + 1} = ...
+                    obj.addUnsupported_options(unsupported_options) = ...
                         sprintf('InitialCondition condition %s is not supported in block %s.', ...
                         num2str(InitialCondition), blk.Origin_path);
                     return;
@@ -77,31 +78,71 @@ classdef Delay_To_Lustre < Block_To_Lustre
             %converts the x0 data type(s) to the first inport data type
             %(Simulink documentation)
             if ~strcmp(x0DataType, inportDataType)
-                [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(x0DataType, inportDataType);
+                [external_lib, conv_format] = ...
+                    SLX2LusUtils.dataType_conversion(x0DataType, inportDataType);
                 if ~isempty(external_lib)
-                    obj.external_libraries = [obj.external_libraries,...
-                        external_lib];
+                    obj.addExternal_libraries(external_libraries) = external_lib;
                     inputs{end} = cellfun(@(x) sprintf(conv_format,x), inputs{end}, 'un', 0);
                 end
             end
             if strcmp(blk.DelayLengthSource, 'Dialog')
                 delay = str2num(blk.DelayLength);
             else
-                obj.unsupported_options{numel(obj.unsupported_options) + 1} = ...
+                obj.addUnsupported_options(unsupported_options) = ...
                     sprintf('DelayLengthSource is external and not supported in block %s.', ...
                     blk.Origin_path);
                 return;
             end
             x0 =  inputs{end};
             u = inputs{1};
+            % trigger port
             
-            codes = {};
-            for j=1:numel(u)
-                code =  Delay_To_Lustre.getExpofNDelays(x0{j}, u{j}, delay);
-                codes{j} = sprintf('%s = %s;\n\t', outputs{j}, code);
+            %enable port
+            if strcmp(blk.ShowEnablePort, 'on')
+                
+                %detect the port number of enable port
+                if strcmp(blk.DelayLengthSource, 'Dialog')
+                    enablePort = 2;
+                else
+                    enablePort = 3;
+                end
+                
+                %construct enabled condition
+                enableportDataType = blk.CompiledPortDataTypes.Inport{enablePort};
+                [~, zero] = SLX2LusUtils.get_lustre_dt(enableportDataType);
+                enableCondition = sprintf('%s > %s', inputs{enablePort}{1}, zero);
+                % construct additional variables
+                blk_name = SLX2LusUtils.name_format(blk.Name);
+                codes = {};
+                for i=1:numel(u)
+                    varName = sprintf('%s_%s', u{i}, blk_name);
+                    obj.addVariable(sprintf ('%s:%s;', varName, ...
+                        SLX2LusUtils.get_lustre_dt(inportDataType) ));
+                    pre_u =  Delay_To_Lustre.getExpofNDelays(...
+                        x0{i}, varName, delay);
+                    codes{numel(codes) + 1} = sprintf(...
+                        '%s = if  (%s) then %s\n\t\t\t', ...
+                        varName, enableCondition, u{i} );
+                    codes{numel(codes) + 1} = sprintf(...
+                        'else %s -> pre %s;\n\t', x0{i}, varName);
+                    codes{numel(codes) + 1} = sprintf(...
+                        '%s =  if (%s) then %s\n\t\t\t', ...
+                        outputs{i} , enableCondition, pre_u );
+                    codes{numel(codes) + 1} = sprintf(...
+                        'else %s -> pre %s;\n\t', x0{i}, outputs{i});
+                end
+                
+            else
+                codes = {};
+                for i=1:numel(u)
+                    pre_u =  Delay_To_Lustre.getExpofNDelays(x0{i},...
+                        u{i}, delay);
+                    codes{i} = sprintf('%s = %s;\n\t',...
+                        outputs{i} , pre_u );
+                end
             end
             
-            obj.code = MatlabUtils.strjoin(codes, '');
+            obj.setCode(MatlabUtils.strjoin(codes, ''));
             
             
         end
@@ -113,12 +154,11 @@ classdef Delay_To_Lustre < Block_To_Lustre
     end
     
     methods(Static = true)
-        function code = getExpofNDelays(x0, u, n)
-            
-            if n == 0
+        function code = getExpofNDelays(x0, u, D)
+            if D == 0
                 code = sprintf(' %s ' , u);
             else
-                code = sprintf(' %s -> pre(%s) ', x0 , Delay_To_Lustre.getExpofNDelays(x0, u, n -1));
+                code = sprintf(' %s -> pre(%s) ', x0 , Delay_To_Lustre.getExpofNDelays(x0, u, D -1));
             end
             
         end

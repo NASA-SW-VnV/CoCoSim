@@ -10,7 +10,7 @@ classdef Block_To_Lustre < handle
     properties
         
         % the code of the block, e.g. outputs = block_name(inputs);
-        code = '';
+        lustre_code = '';
         
         %The list of variables to be added to node variables list.
         variables = {};
@@ -38,6 +38,33 @@ classdef Block_To_Lustre < handle
         %this class
         write_code(obj)
         getUnsupportedOptions(obj)
+    end
+    methods
+        function addVariable(obj, varname)
+            if iscell(varname)
+                obj.variables = [obj.variables, varname];
+            else
+                obj.variables{numel(obj.variables) +1} = varname;
+            end
+        end
+        function addUnsupported_options(obj, option)
+            if iscell(option)
+                obj.unsupported_options = [obj.unsupported_options, option];
+            else
+                obj.unsupported_options{numel(obj.unsupported_options) +1} = option;
+            end
+        end
+        function addExternal_libraries(obj, lib)
+            if iscell(lib)
+                obj.external_libraries = [obj.external_libraries, lib];
+            else
+                obj.external_libraries{numel(obj.external_libraries) +1} = lib;
+            end
+        end
+        
+        function setCode(obj, code)
+            obj.lustre_code = code;
+        end
     end
     methods(Static)
         

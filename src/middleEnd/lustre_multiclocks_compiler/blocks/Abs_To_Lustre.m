@@ -25,8 +25,7 @@ classdef Abs_To_Lustre < Block_To_Lustre
                 if ~strcmp(inport_dt, outputDataType)
                     [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, outputDataType, RndMeth);
                     if ~isempty(external_lib)
-                        obj.external_libraries = [obj.external_libraries,...
-                            external_lib];
+                        obj.addExternal_libraries(external_lib);
                         inputs{i} = cellfun(@(x) sprintf(conv_format,x), inputs{i}, 'un', 0);
                     end
                 end
@@ -39,8 +38,8 @@ classdef Abs_To_Lustre < Block_To_Lustre
                 codes{j} = sprintf('%s = %s;\n\t', outputs{j}, code);
             end
             
-            obj.code = MatlabUtils.strjoin(codes, '');
-            obj.variables = outputs_dt;
+            obj.setCode(MatlabUtils.strjoin(codes, ''));
+            obj.addVariable(outputs_dt);
         end
         
         function options = getUnsupportedOptions(obj, varargin)
