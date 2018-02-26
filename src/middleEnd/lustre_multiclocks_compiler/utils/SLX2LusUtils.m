@@ -154,7 +154,7 @@ classdef SLX2LusUtils < handle
         end
         %% Change Simulink DataTypes to Lustre DataTypes. Initial default
         %value is also given as a string.
-        function [ Lustre_type, initial_value ] = get_lustre_dt( slx_dt)
+        function [ Lustre_type, zero, one ] = get_lustre_dt( slx_dt)
             if strcmp(slx_dt, 'real') || strcmp(slx_dt, 'int') || strcmp(slx_dt, 'bool')
                 Lustre_type = slx_dt;
             else
@@ -167,11 +167,14 @@ classdef SLX2LusUtils < handle
                 end
             end
             if strcmp(Lustre_type, 'bool')
-                initial_value = 'false';
+                zero = 'false';
+                one = 'true';
             elseif strcmp(Lustre_type, 'int')
-                initial_value = '0';
+                zero = '0';
+                one = '1';
             else
-                initial_value = '0.0';
+                zero = '0.0';
+                one = '1.0';
             end
         end
         

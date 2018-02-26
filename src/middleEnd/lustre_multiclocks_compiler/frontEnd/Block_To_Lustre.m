@@ -65,6 +65,7 @@ classdef Block_To_Lustre < handle
         function setCode(obj, code)
             obj.lustre_code = code;
         end
+        
         function code = getCode(obj)
             code = obj.lustre_code;
         end
