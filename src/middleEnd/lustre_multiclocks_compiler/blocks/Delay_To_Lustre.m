@@ -130,124 +130,118 @@ classdef Delay_To_Lustre < Block_To_Lustre
             end
             x0 =  inputs{end};
             u = inputs{1};
+            blk_name = SLX2LusUtils.name_format(blk.Name);
             reset_cond = arrayfun(@(x) {''}, (1:numel(u)));
+            codes = {};
             % Reset port
             if ~strcmp(ExternalReset, 'None')
                 %detect the port number of reset port
-                if strcmp(DelayLengthSource, 'Dialog') ...
+                if strcmp(DelayLengthSource, 'Input port') ...
                         && strcmp(ShowEnablePort, 'on')
                     resetPort = 4;
-                elseif ~(strcmp(DelayLengthSource, 'Dialog') ...
-                        && strcmp(ShowEnablePort, 'on'))
+                elseif ~(strcmp(DelayLengthSource, 'Input port') ...
+                        || strcmp(ShowEnablePort, 'on'))
                     resetPort = 2;
                 else
                     resetPort = 3;
                 end
                 %construct reset condition
-                blk_name = SLX2LusUtils.name_format(blk.Name);
                 resetportDataType = blk.CompiledPortDataTypes.Inport{resetPort};
-                [~, zero] = SLX2LusUtils.get_lustre_dt(resetportDataType);
-                r = inputs{resetPort};
+                [resetDT, zero] = SLX2LusUtils.get_lustre_dt(resetportDataType);
+                resetValue = inputs{resetPort};
+                reset_var = sprintf('Reset_%s', blk_name);
+                variables{numel(variables) + 1} = sprintf ('%s:bool;',...
+                    reset_var);
+                codes{numel(codes) + 1} = sprintf('%s = %s;\n\t'...
+                    ,reset_var , Delay_To_Lustre.getResetCode(...
+                    ExternalReset,resetDT, char(resetValue) , zero));
+                for i=1:numel(u)    
+                    reset_cond{i} = sprintf(' if %s then %s else \n\t\t'...
+                        ,reset_var , x0{i});
+                end
+            end
+            %enable port
+            if strcmp(ShowEnablePort, 'on')
+                
+                %detect the port number of enable port
+                if strcmp(DelayLengthSource, 'Dialog')
+                    enablePort = 2;
+                else
+                    enablePort = 3;
+                end
+                
+                %construct enabled condition
+                enableportDataType = blk.CompiledPortDataTypes.Inport{enablePort};
+                [~, zero] = SLX2LusUtils.get_lustre_dt(enableportDataType);
+                enableCondition = sprintf('%s > %s', inputs{enablePort}{1}, zero);
+                % construct additional variables
                 for i=1:numel(u)
-                    reset_cond{i} = sprintf('Reset_%s_%s', u{i}, blk_name);
+                    varName = sprintf('%s_%s', u{i}, blk_name);
                     variables{numel(variables) + 1} = ...
                         sprintf ('%s:%s;',...
-                        reset_cond{i}, SLX2LusUtils.get_lustre_dt(resetportDataType));
-                    
-                    if strcmp(ExternalReset, 'Rising')
-                        codes{numel(codes) + 1} = sprintf(...
-                        '%s = (%s >= %s && pre %s < %s) \n\t\t'...
-                        ,reset_cond{i} ,r{i} ,zero ,r{i} ,zero );
-                    elseif strcmp(ExternalReset, 'Falling')
-                        codes{numel(codes) + 1} = sprintf(...
-                        '%s = (%s < %s && pre %s >= %s) \n\t\t'...
-                        ,reset_cond{i} ,r{i} ,zero ,r{i} ,zero );
-                    elseif strcmp(ExternalReset, 'Either')
-                        codes{numel(codes) + 1} = sprintf(...
-                        '%s = ((%s < 0 && pre %s >= 0) || (%s >= %s && pre %s < %s)) \n\t\t'...
-                        ,reset_cond{i} ,r{i} ,zero ,r{i} ,zero );
-                    end
-                        
-                        
-                        %                     pre_u =  Delay_To_Lustre.getExpofNDelays(...
-                        %                         x0{i}, varName, delay);
-                        %                     codes{numel(codes) + 1} = sprintf(...
-                        %                         '%s = if  (%s) then %s\n\t\t\t', ...
-                        %                         varName, enableCondition, u{i} );
-                        %                     codes{numel(codes) + 1} = sprintf(...
-                        %                         'else %s -> pre %s;\n\t', x0{i}, varName);
-                        %                     codes{numel(codes) + 1} = sprintf(...
-                        %                         '%s = %s if (%s) then %s\n\t\t\t', ...
-                        %                         outputs{i}, reset_cond{i}, enableCondition, pre_u );
-                        %                     codes{numel(codes) + 1} = sprintf(...
-                        %                         'else %s -> pre %s;\n\t', x0{i}, outputs{i});
-                    end
-                    
-                    if strcmp(ExternalReset, 'Rising')
-                        
-                    end
-                    
-                    
-                    reset_cond{i} = sprintf(...
-                        'if  (Reset) then %s else\n\t\t',x0{i} );
-                    
+                        varName, SLX2LusUtils.get_lustre_dt(inportDataType));
+                    pre_u =  Delay_To_Lustre.getExpofNDelays(...
+                        x0{i}, varName, delay);
+                    codes{numel(codes) + 1} = sprintf(...
+                        '%s = if  (%s) then %s\n\t\t\t', ...
+                        varName, enableCondition, u{i} );
+                    codes{numel(codes) + 1} = sprintf(...
+                        'else %s -> pre %s;\n\t', x0{i}, varName);
+                    codes{numel(codes) + 1} = sprintf(...
+                        '%s =  if (%s) then \n\t\t\t %s %s\n\t\t\t', ...
+                        outputs{i}, enableCondition,reset_cond{i}, pre_u );
+                    codes{numel(codes) + 1} = sprintf(...
+                        'else 0.0 -> pre %s;\n\t', outputs{i});
                 end
-                %enable port
-                if strcmp(ShowEnablePort, 'on')
-                    
-                    %detect the port number of enable port
-                    if strcmp(DelayLengthSource, 'Dialog')
-                        enablePort = 2;
-                    else
-                        enablePort = 3;
-                    end
-                    
-                    %construct enabled condition
-                    enableportDataType = blk.CompiledPortDataTypes.Inport{enablePort};
-                    [~, zero] = SLX2LusUtils.get_lustre_dt(enableportDataType);
-                    enableCondition = sprintf('%s > %s', inputs{enablePort}{1}, zero);
-                    % construct additional variables
-                    codes = {};
-                    for i=1:numel(u)
-                        varName = sprintf('%s_%s', u{i}, blk_name);
-                        variables{numel(variables) + 1} = ...
-                            sprintf ('%s:%s;',...
-                            varName, SLX2LusUtils.get_lustre_dt(inportDataType));
-                        pre_u =  Delay_To_Lustre.getExpofNDelays(...
-                            x0{i}, varName, delay);
-                        codes{numel(codes) + 1} = sprintf(...
-                            '%s = if  (%s) then %s\n\t\t\t', ...
-                            varName, enableCondition, u{i} );
-                        codes{numel(codes) + 1} = sprintf(...
-                            'else %s -> pre %s;\n\t', x0{i}, varName);
-                        codes{numel(codes) + 1} = sprintf(...
-                            '%s = %s if (%s) then %s\n\t\t\t', ...
-                            outputs{i}, reset_cond{i}, enableCondition, pre_u );
-                        codes{numel(codes) + 1} = sprintf(...
-                            'else %s -> pre %s;\n\t', x0{i}, outputs{i});
-                    end
-                    
-                else
-                    codes = {};
-                    for i=1:numel(u)
-                        pre_u =  Delay_To_Lustre.getExpofNDelays(x0{i},...
-                            u{i}, delay);
-                        codes{i} = sprintf('%s = %s %s;\n\t',...
-                            outputs{i} , reset_cond{i},  pre_u );
-                    end
-                end
-                lustre_code = MatlabUtils.strjoin(codes, '');
                 
+            else
+                for i=1:numel(u)
+                    pre_u =  Delay_To_Lustre.getExpofNDelays(x0{i},...
+                        u{i}, delay);
+                    codes{numel(codes) + 1} = sprintf('%s = %s %s;\n\t',...
+                        outputs{i} , reset_cond{i},  pre_u );
+                end
             end
-            function code = getExpofNDelays(x0, u, D)
-                if D == 0
-                    code = sprintf(' %s ' , u);
-                else
-                    code = sprintf(' %s -> pre(%s) ', x0 , Delay_To_Lustre.getExpofNDelays(x0, u, D -1));
-                end
-                
+            lustre_code = MatlabUtils.strjoin(codes, '');
+            
+        end
+        
+        function [resetCode, unsupported_options] = getResetCode(resetType,resetDT, resetInput, zero )
+            unsupported_options = {};
+           if strcmp(resetDT, 'bool')
+               b = sprintf('%s',resetInput);
+           else
+               b = sprintf('(%s >= %s)',resetInput , zero);
+           end      
+            if strcmp(resetType, 'Rising')
+                resetCode = sprintf(...
+                    '%s and not pre %s'...
+                    ,b ,b );
+            elseif strcmp(resetType, 'Falling')
+                resetCode = sprintf(...
+                    'not %s and pre %s'...
+                    ,b ,b);
+            elseif strcmp(resetType, 'Either')
+                resetCode = sprintf(...
+                    '(%s and not pre %s) or (not %s and pre %s) '...
+                    ,b ,b ,b ,b);
+            else
+                unsupported_options{numel(unsupported_options) + 1} = ...
+                    sprintf('This External reset type [%s] is not supported in block %s.', ...
+                    resetType, blk.Origin_path);
+                return;
             end
         end
         
+        function code = getExpofNDelays(x0, u, D)
+            if D == 0
+                code = sprintf(' %s ' , u);
+            else
+                code = sprintf(' %s -> pre(%s) ', x0 , Delay_To_Lustre.getExpofNDelays(x0, u, D -1));
+            end
+            
+        end
     end
     
+end
+
