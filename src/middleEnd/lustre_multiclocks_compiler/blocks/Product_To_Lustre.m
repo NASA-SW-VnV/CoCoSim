@@ -1,5 +1,5 @@
 classdef Product_To_Lustre < Block_To_Lustre
-    %Sum_To_Lustre The Sum block performs addition or subtraction on its
+    %Product_To_Lustre The Product block performs addition or subtraction on its
     %inputs. This block can add or subtract scalar, vector, or matrix inputs.
     %It can also collapse the elements of a signal.
     %The Sum block first converts the input data type(s) to
