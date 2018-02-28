@@ -22,8 +22,9 @@ if isfield(ir, field_name)
 
     if ~isfield(ir.(field_name), 'Handle')
         ir.(field_name).Handle = get_param(file_name, 'Handle');
-    end 
+    end
     
+
     Cmd = [file_name, '([], [], [], ''term'');'];
     eval(Cmd);
 end

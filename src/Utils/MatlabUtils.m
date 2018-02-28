@@ -55,7 +55,34 @@ classdef MatlabUtils
             res = struct2(ia) ;
         end
         
-        
+        %% inlining multidimension variables
+        function [y_inlined, status, msg] = inline_values(y)
+            status = 0;
+            msg = '';
+            dim = size(y);
+            if numel(dim)==1
+                y_inlined = y;
+            elseif numel(dim)==2
+                y_inlined = [];
+                for idr=1:dim(1)
+                    y_inlined = [y_inlined; y(idr,:)'];
+                end
+            elseif numel(dim)== 3
+                y_inlined = [];
+                for z=1:dim(3)
+                    ylocal = y(:,:,z);
+                    for idr=1:dim(1)
+                        y_inlined = [y_inlined; ylocal(idr,:)'];
+                    end
+                end
+            else
+                msg = ['We do not support dimension ' num2str(dim)];
+                display_msg(msg, ...
+                    MsgType.ERROR, 'Constant_To_Lustre.inline_value', '');
+                status = 1;
+                return;
+            end
+        end
         %% Concat cell array with a specific delimator
         function joinedStr = strjoin(str, delimiter)
             if nargin < 1 || nargin > 2
