@@ -191,7 +191,7 @@ classdef Delay_To_Lustre < Block_To_Lustre
                         '%s =  if (%s) then \n\t\t\t %s %s\n\t\t\t', ...
                         outputs{i}, enableCondition,reset_cond{i}, pre_u );
                     codes{numel(codes) + 1} = sprintf(...
-                        'else 0.0 -> pre %s;\n\t', outputs{i});
+                        'else %s -> pre %s;\n\t', x0{i}, outputs{i});
                 end
                 
             else
@@ -204,6 +204,49 @@ classdef Delay_To_Lustre < Block_To_Lustre
             end
             lustre_code = MatlabUtils.strjoin(codes, '');
             
+        end
+        
+        function [delay_node] = getDelayNode(node_name, u_DT, delayLength, isDelayVariable, isReset)            
+            %node header
+            node_inputs = sprintf('u, x0:%s', u_DT);
+            if isDelayVariable
+                node_inputs = sprintf('%s;d:int', node_inputs);
+            end
+            reset_cond = '';
+            if isReset
+                node_inputs = sprintf('%s;reset:bool', node_inputs);
+                reset_cond = 'if reset then x0 else ';
+            end
+            node_header = sprintf('node %s(%s)\nreturns(pre_u:%s);\n',...
+                node_name, node_inputs, u_DT);
+            body = '';
+            
+            variables = {};
+            pre_u = 'pre_u = ';
+            for i=1:delayLength
+                if i< delayLength
+                    body = sprintf('%spre_u%d = x0 -> %s pre pre_u%d;\n\t',...
+                        body, i, reset_cond, i+1);
+                else
+                    body = sprintf('%spre_u%d = x0 -> %s pre u;\n\t',...
+                        body, i, reset_cond);
+                end
+                if isDelayVariable
+                    j = delayLength - i + 1;
+                    pre_u = sprintf('%s if d = %d then pre_u%d\n\t\telse', ...
+                        pre_u, i, j);
+                end
+                variables{i} = sprintf('pre_u%d', i);
+            end
+            if isDelayVariable
+                pre_u = sprintf('%s x0;', pre_u);
+            else
+                pre_u = sprintf('%s pre_u1;', pre_u);
+            end
+            vars = sprintf('var %s: %s;\n', ...
+                MatlabUtils.strjoin(variables, ', '), u_DT);
+            delay_node = sprintf('%s%slet\n\t%s%s\ntel',...
+                node_header, vars, body, pre_u);
         end
         
         function [resetCode, unsupported_options] = getResetCode(resetType,resetDT, resetInput, zero )
