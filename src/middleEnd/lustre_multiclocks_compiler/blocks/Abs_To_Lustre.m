@@ -1,5 +1,11 @@
 classdef Abs_To_Lustre < Block_To_Lustre
-    %Test_write a dummy class
+    %Abs_To_Lustre 
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Copyright (c) 2017 United States Government as represented by the
+    % Administrator of the National Aeronautics and Space Administration.
+    % All Rights Reserved.
+    % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     properties
     end
@@ -10,6 +16,14 @@ classdef Abs_To_Lustre < Block_To_Lustre
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(blk);
             inputs = {};
             
+            if ~isempty(blk.OutMax) || ~isempty(blk.OutMin)
+                display_msg(sprintf('The minimum/maximum value is not support in block %s',...
+                    blk.Origin_path), MsgType.WARNING, 'Abs_To_Lustre', '');
+            end
+            if strcmp(blk.SaturateOnIntegerOverflow, 'on')
+                display_msg(sprintf('The Saturate on integer overflow option is not support in block %s',...
+                    blk.Origin_path), MsgType.WARNING, 'Abs_To_Lustre', '');
+            end
             widths = blk.CompiledPortWidths.Inport;
             max_width = max(widths);
             outputDataType = blk.CompiledPortDataTypes.Outport{1};
@@ -42,13 +56,15 @@ classdef Abs_To_Lustre < Block_To_Lustre
             obj.addVariable(outputs_dt);
         end
         
-        function options = getUnsupportedOptions(obj, varargin)
+        function options = getUnsupportedOptions(obj, blk, varargin)
             obj.unsupported_options = {};
             if ~isempty(blk.OutMax) || ~isempty(blk.OutMin)
-                obj.unsupported_options{numel(obj.unsupported_options) + 1} = sprintf('The minimum/maximum value is not support in block %s', blk.Origin_path);
+                obj.addUnsupported_options(...
+                    sprintf('The minimum/maximum value is not support in block %s', blk.Origin_path));
             end
             if strcmp(blk.SaturateOnIntegerOverflow, 'on')
-                obj.unsupported_options{numel(obj.unsupported_options) + 1} = sprintf('The Saturate on integer overflow option is not support in block %s', blk.Origin_path);
+                obj.addUnsupported_options(...
+                    sprintf('The Saturate on integer overflow option is not support in block %s', blk.Origin_path));
             end 
             options = obj.unsupported_options;
         end

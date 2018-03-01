@@ -1,5 +1,11 @@
 classdef From_To_Lustre < Block_To_Lustre
-    %Test_write a dummy class
+    %From_To_Lustre
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Copyright (c) 2017 United States Government as represented by the
+    % Administrator of the National Aeronautics and Space Administration.
+    % All Rights Reserved.
+    % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     properties
     end
@@ -28,8 +34,13 @@ classdef From_To_Lustre < Block_To_Lustre
             
         end
         
-        function options = getUnsupportedOptions(obj, varargin)
-            % add your unsuported options list here
+        function options = getUnsupportedOptions(obj,blk, varargin)
+            goToPath = find_system(parent.Origin_path,'SearchDepth',1,...
+                'BlockType','Goto','GotoTag',blk.GotoTag);
+            if isempty(goToPath)
+                obj.addUnsupported_options...
+                    (sprintf('From block %s has no GoTo', blk.Origin_path));
+            end
             options = obj.unsupported_options;
             
         end

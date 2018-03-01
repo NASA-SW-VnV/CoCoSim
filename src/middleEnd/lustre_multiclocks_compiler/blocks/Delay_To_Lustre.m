@@ -1,5 +1,11 @@
 classdef Delay_To_Lustre < Block_To_Lustre
-    %Test_write a dummy class
+    %Delay_To_Lustre
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Copyright (c) 2017 United States Government as represented by the
+    % Administrator of the National Aeronautics and Space Administration.
+    % All Rights Reserved.
+    % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     properties
     end
@@ -19,8 +25,18 @@ classdef Delay_To_Lustre < Block_To_Lustre
             
         end
         
-        function options = getUnsupportedOptions(obj, varargin)
-            % add your unsuported options list here
+        function options = getUnsupportedOptions(obj,blk, varargin)
+            InitialCondition = str2num(blk.InitialCondition);
+            if numel(InitialCondition) > 1
+                obj.addUnsupported_options(...
+                    sprintf('InitialCondition condition %s is not supported in block %s.', ...
+                    num2str(InitialCondition), blk.Origin_path));
+            end
+            if ~strcmp(DelayLengthSource, 'Dialog')
+                obj.addUnsupported_options(...
+                    sprintf('DelayLengthSource is external and not supported in block %s.', ...
+                    blk.Origin_path));
+            end
             options = obj.unsupported_options;
         end
     end
@@ -69,15 +85,55 @@ classdef Delay_To_Lustre < Block_To_Lustre
                     InitialCondition = evalin('base', blk.InitialCondition);
                     x0DataType = 'boolean';
                 else
-                    InitialCondition = evalin('base', blk.InitialCondition);
-                    x0DataType =  evalin('base',...
-                        sprintf('class(%s)', blk.InitialCondition));
+                    try
+                        InitialCondition = evalin('base', blk.InitialCondition);
+                        x0DataType =  evalin('base',...
+                            sprintf('class(%s)', blk.InitialCondition));
+                    catch
+                        % search the variable in Model workspace, if not raise
+                        % unsupported option
+                        model_name = regexp(blk.Origin_path, filesep, 'split');
+                        model_name = model_name{1};
+                        hws = get_param(model_name, 'modelworkspace') ;
+                        if hasVariable(hws, blk.InitialCondition)
+                            InitialCondition = getVariable(hws, blk.InitialCondition);
+                            x0DataType = 'double';
+                        else
+                            display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
+                                blk.InitialCondition, blk.Origin_path), ...
+                                MsgType.ERROR, 'Constant_To_Lustr', '');
+                            return;
+                        end
+                    end
                 end
                 if numel(InitialCondition) > 1
-                    unsupported_options = ...
-                        sprintf('InitialCondition condition %s is not supported in block %s.', ...
-                        num2str(InitialCondition), blk.Origin_path);
-                    return;
+                    [value_inlined, status, msg] = MatlabUtils.inline_values(InitialCondition);
+                    if status
+                        %message
+                        display_msg(msg, MsgType.ERROR, 'Constant_To_Lustr', '');
+                        return;
+                    end
+                    for i=1:numel(value_inlined)
+                        if strcmp(lus_inportDataType, 'real')
+                            InitialCondition = sprintf('%.15f', value_inlined(i));
+                            x0DataType = 'double';
+                        elseif strcmp(lus_inportDataType, 'int')
+                            InitialCondition = sprintf('%d', int32(value_inlined(i)));
+                            x0DataType = 'int';
+                        elseif strncmp(x0DataType, 'int', 3) ...
+                                || strncmp(x0DataType, 'uint', 4)
+                            InitialCondition = num2str(value_inlined(i));
+                        elseif strcmp(x0DataType, 'boolean') || strcmp(x0DataType, 'logical')
+                            if value_inlined(i)
+                                InitialCondition = 'true';
+                            else
+                                InitialCondition = 'false';
+                            end
+                        else
+                            InitialCondition = sprintf('%.15f', value_inlined(i));
+                        end
+                        inputs{end+1}{i} = InitialCondition;
+                    end
                 else
                     if strcmp(lus_inportDataType, 'real')
                         InitialCondition = sprintf('%.15f', InitialCondition);
@@ -97,8 +153,9 @@ classdef Delay_To_Lustre < Block_To_Lustre
                     else
                         InitialCondition = sprintf('%.15f', InitialCondition);
                     end
+                    inputs{end+1} = {InitialCondition};
                 end
-                inputs{end+1} = {InitialCondition};
+                
                 
                 I = [1, (nb_inports+1)];
                 widths(end+1) = 1;
@@ -123,9 +180,9 @@ classdef Delay_To_Lustre < Block_To_Lustre
             if strcmp(DelayLengthSource, 'Dialog')
                 delay = str2num(DelayLength);
             else
-                unsupported_options{numel(unsupported_options) + 1} = ...
-                    sprintf('DelayLengthSource is external and not supported in block %s.', ...
-                    blk.Origin_path);
+                display_msg(sprintf('DelayLengthSource is external and not supported in block %s',...
+                    blk.Origin_path), ...
+                    MsgType.ERROR, 'Delay_To_Lustre', '');
                 return;
             end
             x0 =  inputs{end};
@@ -155,7 +212,7 @@ classdef Delay_To_Lustre < Block_To_Lustre
                 codes{numel(codes) + 1} = sprintf('%s = %s;\n\t'...
                     ,reset_var , Delay_To_Lustre.getResetCode(...
                     ExternalReset,resetDT, char(resetValue) , zero));
-                for i=1:numel(u)    
+                for i=1:numel(u)
                     reset_cond{i} = sprintf(' if %s then %s else \n\t\t'...
                         ,reset_var , x0{i});
                 end
@@ -208,11 +265,11 @@ classdef Delay_To_Lustre < Block_To_Lustre
         
         function [resetCode, unsupported_options] = getResetCode(resetType,resetDT, resetInput, zero )
             unsupported_options = {};
-           if strcmp(resetDT, 'bool')
-               b = sprintf('%s',resetInput);
-           else
-               b = sprintf('(%s >= %s)',resetInput , zero);
-           end      
+            if strcmp(resetDT, 'bool')
+                b = sprintf('%s',resetInput);
+            else
+                b = sprintf('(%s >= %s)',resetInput , zero);
+            end
             if strcmp(resetType, 'Rising')
                 resetCode = sprintf(...
                     '%s and not pre %s'...

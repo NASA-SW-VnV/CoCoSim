@@ -1,5 +1,11 @@
 classdef Template_To_Lustre < Block_To_Lustre
-    %Test_write a dummy class
+    %
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Copyright (c) 2017 United States Government as represented by the
+    % Administrator of the National Aeronautics and Space Administration.
+    % All Rights Reserved.
+    % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     properties
     end
@@ -10,7 +16,7 @@ classdef Template_To_Lustre < Block_To_Lustre
             obj.setCode('You code here');
         end
         
-        function options = getUnsupportedOptions(obj, varargin)
+        function options = getUnsupportedOptions(obj,blk, varargin)
             % add your unsuported options list here
            options = obj.unsupported_options;
            
