@@ -7,12 +7,13 @@ classdef Delay_To_Lustre < Block_To_Lustre
     methods
         
         function  write_code(obj, parent, blk, varargin)
-            [lustre_code, variables, external_libraries, unsupported_options] = ...
+            [lustre_code, delay_node_code, variables, external_libraries, unsupported_options] = ...
                 Delay_To_Lustre.get_code( parent, blk, ...
                 blk.InitialConditionSource, blk.DelayLengthSource,...
-                blk.DelayLength, blk.ExternalReset, blk.ShowEnablePort );
+                blk.DelayLength, blk.DelayLengthUpperLimit, blk.ExternalReset, blk.ShowEnablePort );
             obj.addVariable(variables);
             obj.addExternal_libraries(external_libraries);
+            obj.addExtenal_node(delay_node_code);
             obj.addUnsupported_options(unsupported_options);
             obj.setCode(lustre_code);
             
@@ -26,14 +27,14 @@ classdef Delay_To_Lustre < Block_To_Lustre
     end
     
     methods(Static = true)
-        function [lustre_code, variables, external_libraries, unsupported_options] = ...
+        function [lustre_code, delay_node_code, variables, external_libraries, unsupported_options] = ...
                 get_code( parent, blk, InitialConditionSource, DelayLengthSource,...
-                DelayLength, ExternalReset, ShowEnablePort )
+                DelayLength, DelayLengthUpperLimit, ExternalReset, ShowEnablePort )
             %initialize outputs
             external_libraries = {};
             unsupported_options = {};
             lustre_code = '';
-            
+            delay_node_code = '';
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(blk);
             variables = outputs_dt;
             inputs = {};
@@ -116,25 +117,40 @@ classdef Delay_To_Lustre < Block_To_Lustre
                 [external_lib, conv_format] = ...
                     SLX2LusUtils.dataType_conversion(x0DataType, inportDataType);
                 if ~isempty(external_lib)
-                    external_libraries = external_lib;
+                    external_libraries = [external_libraries, external_lib];
                     inputs{end} = cellfun(@(x) sprintf(conv_format,x), inputs{end}, 'un', 0);
                 end
             end
             if strcmp(DelayLengthSource, 'Dialog')
-                delay = str2num(DelayLength);
+                delayLength = str2num(DelayLength);
+                isDelayVariable = 0;
             else
-                unsupported_options{numel(unsupported_options) + 1} = ...
-                    sprintf('DelayLengthSource is external and not supported in block %s.', ...
-                    blk.Origin_path);
-                return;
+                delayLength = str2num(DelayLengthUpperLimit);
+                isDelayVariable = 1;
+                delayDataType = blk.CompiledPortDataTypes.Inport{2};
+                if delayLength <= 255
+                    delayLengthDT = 'uint8';
+                else
+                    delayLengthDT = 'uint16';
+                end
+                [external_lib, conv_format] = ...
+                    SLX2LusUtils.dataType_conversion(delayDataType, delayLengthDT);
+                if ~isempty(external_lib)
+                    external_libraries = [external_libraries, external_lib];
+                    inputs{2} = cellfun(@(x) sprintf(conv_format,x), inputs{2}, 'un', 0);
+                end
             end
             x0 =  inputs{end};
             u = inputs{1};
             blk_name = SLX2LusUtils.name_format(blk.Name);
             reset_cond = arrayfun(@(x) {''}, (1:numel(u)));
+            reset_var = '';
+            isReset = ~strcmp(ExternalReset, 'None');
             codes = {};
+            
             % Reset port
-            if ~strcmp(ExternalReset, 'None')
+            if isReset
+                isReset = 1;
                 %detect the port number of reset port
                 if strcmp(DelayLengthSource, 'Input port') ...
                         && strcmp(ShowEnablePort, 'on')
@@ -155,13 +171,9 @@ classdef Delay_To_Lustre < Block_To_Lustre
                 codes{numel(codes) + 1} = sprintf('%s = %s;\n\t'...
                     ,reset_var , Delay_To_Lustre.getResetCode(...
                     ExternalReset,resetDT, char(resetValue) , zero));
-                for i=1:numel(u)    
-                    reset_cond{i} = sprintf(' if %s then %s else \n\t\t'...
-                        ,reset_var , x0{i});
-                end
             end
-            %enable port
-            if strcmp(ShowEnablePort, 'on')
+            isEnabe = strcmp(ShowEnablePort, 'on');
+            if isEnabe
                 
                 %detect the port number of enable port
                 if strcmp(DelayLengthSource, 'Dialog')
@@ -173,41 +185,64 @@ classdef Delay_To_Lustre < Block_To_Lustre
                 %construct enabled condition
                 enableportDataType = blk.CompiledPortDataTypes.Inport{enablePort};
                 [~, zero] = SLX2LusUtils.get_lustre_dt(enableportDataType);
-                enableCondition = sprintf('%s > %s', inputs{enablePort}{1}, zero);
+                enableCondition = sprintf('(%s > %s)', inputs{enablePort}{1}, zero);
                 % construct additional variables
                 for i=1:numel(u)
                     varName = sprintf('%s_%s', u{i}, blk_name);
+                    
                     variables{numel(variables) + 1} = ...
                         sprintf ('%s:%s;',...
                         varName, SLX2LusUtils.get_lustre_dt(inportDataType));
-                    pre_u =  Delay_To_Lustre.getExpofNDelays(...
-                        x0{i}, varName, delay);
                     codes{numel(codes) + 1} = sprintf(...
-                        '%s = if  (%s) then %s\n\t\t\t', ...
+                        '%s = if  %s then %s\n\t\t\t', ...
                         varName, enableCondition, u{i} );
                     codes{numel(codes) + 1} = sprintf(...
                         'else %s -> pre %s;\n\t', x0{i}, varName);
-                    codes{numel(codes) + 1} = sprintf(...
-                        '%s =  if (%s) then \n\t\t\t %s %s\n\t\t\t', ...
-                        outputs{i}, enableCondition,reset_cond{i}, pre_u );
-                    codes{numel(codes) + 1} = sprintf(...
-                        'else %s -> pre %s;\n\t', x0{i}, outputs{i});
+                    u{i} = varName;
                 end
+            end
+            pre_u = {};
+            if isReset || isDelayVariable || isEnabe
+                delay_node_name = sprintf('Delay_%s', blk_name);
+                [delay_node_code] = ...
+                    Delay_To_Lustre.getDelayNode(delay_node_name, lus_inportDataType, delayLength, isDelayVariable, isReset, isEnabe);
                 
+                for i=1:numel(u)
+                    node_call_format = sprintf('%s(%s, %s', delay_node_name, u{i}, x0{i});
+                    if isDelayVariable
+                        node_call_format = sprintf('%s, %s',...
+                            node_call_format, inputs{2}{1});
+                    end
+                    if isReset
+                         node_call_format = sprintf('%s, %s',...
+                            node_call_format, reset_var);
+                    end
+                    if isEnabe
+                         node_call_format = sprintf('%s, %s',...
+                            node_call_format, enableCondition);
+                    end
+                    pre_u{i} = sprintf('%s)',...
+                            node_call_format);
+                end
             else
                 for i=1:numel(u)
-                    pre_u =  Delay_To_Lustre.getExpofNDelays(x0{i},...
-                        u{i}, delay);
-                    codes{numel(codes) + 1} = sprintf('%s = %s %s;\n\t',...
-                        outputs{i} , reset_cond{i},  pre_u );
+                    pre_u{i} =  Delay_To_Lustre.getExpofNDelays(x0{i},...
+                        u{i}, delayLength);
                 end
+            end
+
+            for i=1:numel(u)
+                codes{numel(codes) + 1} = sprintf('%s = %s;\n\t',...
+                    outputs{i} , pre_u{i} );
             end
             lustre_code = MatlabUtils.strjoin(codes, '');
             
         end
         
-        function [delay_node] = getDelayNode(node_name, u_DT, delayLength, isDelayVariable, isReset)            
+        function [delay_node] = getDelayNode(node_name, ...
+                u_DT, delayLength, isDelayVariable, isReset, isEnabel)            
             %node header
+            [ u_DT, zero ] = SLX2LusUtils.get_lustre_dt( u_DT);
             node_inputs = sprintf('u, x0:%s', u_DT);
             if isDelayVariable
                 node_inputs = sprintf('%s;d:int', node_inputs);
@@ -215,21 +250,41 @@ classdef Delay_To_Lustre < Block_To_Lustre
             reset_cond = '';
             if isReset
                 node_inputs = sprintf('%s;reset:bool', node_inputs);
-                reset_cond = 'if reset then x0 else ';
+                reset_cond = 'if reset then x0 else';
+            end
+            enable_cond = '';
+            if isEnabel
+                node_inputs = sprintf('%s;enable:bool', node_inputs);
+                enable_cond = 'if enable then';
             end
             node_header = sprintf('node %s(%s)\nreturns(pre_u:%s);\n',...
                 node_name, node_inputs, u_DT);
             body = '';
             
             variables = {};
-            pre_u = 'pre_u = ';
+            if isEnabel
+                pre_u = 'pre_u = if enable then ';
+            else
+                pre_u = 'pre_u = ';
+            end
+            if isDelayVariable
+                 pre_u = sprintf('%s if d < 1 then u\n\t\telse if d > %d then pre_u1\n\t\telse', ...
+                        pre_u, delayLength);
+            end
             for i=1:delayLength
                 if i< delayLength
-                    body = sprintf('%spre_u%d = x0 -> %s pre pre_u%d;\n\t',...
-                        body, i, reset_cond, i+1);
+                    body = sprintf('%spre_u%d = x0 -> %s %s pre pre_u%d ',...
+                        body, i, enable_cond, reset_cond, i+1);
                 else
-                    body = sprintf('%spre_u%d = x0 -> %s pre u;\n\t',...
-                        body, i, reset_cond);
+                    body = sprintf('%spre_u%d = x0 -> %s %s pre u ',...
+                        body, i, enable_cond, reset_cond);
+                end
+                if isEnabel
+                    body = sprintf('%s else %s -> pre pre_u%d;\n\t',...
+                        body, zero, i);
+                else
+                    body = sprintf('%s;\n\t',...
+                        body);
                 end
                 if isDelayVariable
                     j = delayLength - i + 1;
@@ -239,9 +294,14 @@ classdef Delay_To_Lustre < Block_To_Lustre
                 variables{i} = sprintf('pre_u%d', i);
             end
             if isDelayVariable
-                pre_u = sprintf('%s x0;', pre_u);
+                pre_u = sprintf('%s x0', pre_u);
             else
-                pre_u = sprintf('%s pre_u1;', pre_u);
+                pre_u = sprintf('%s pre_u1', pre_u);
+            end
+            if isEnabel
+                pre_u = sprintf('%s else %s -> pre pre_u;', pre_u, zero);
+            else
+                pre_u = sprintf('%s;', pre_u);
             end
             vars = sprintf('var %s: %s;\n', ...
                 MatlabUtils.strjoin(variables, ', '), u_DT);
