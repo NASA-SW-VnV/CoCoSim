@@ -35,10 +35,10 @@ classdef Abs_To_Lustre < Block_To_Lustre
             codes = {};
             for j=1:numel(inputs{1})
                 code = sprintf('if %s >= %s then %s else -%s', inputs{1}{j}, zero, inputs{1}{j}, inputs{1}{j});
-                codes{j} = sprintf('%s = %s;\n\t', outputs{j}, code);
+                codes{j} = sprintf('%s = %s;', outputs{j}, code);
             end
             
-            obj.setCode(MatlabUtils.strjoin(codes, ''));
+            obj.setCode(MatlabUtils.strjoin(codes, '\n\t'));
             obj.addVariable(outputs_dt);
         end
         
