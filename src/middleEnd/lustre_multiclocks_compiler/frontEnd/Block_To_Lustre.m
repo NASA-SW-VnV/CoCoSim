@@ -61,7 +61,10 @@ classdef Block_To_Lustre < handle
                 obj.external_libraries{numel(obj.external_libraries) +1} = lib;
             end
         end
-        
+        function addExtenal_node(obj, node_code)
+            obj.external_nodes = sprintf('%s\n%s', ...
+                obj.external_nodes, node_code);
+        end
         function setCode(obj, code)
             obj.lustre_code = code;
         end

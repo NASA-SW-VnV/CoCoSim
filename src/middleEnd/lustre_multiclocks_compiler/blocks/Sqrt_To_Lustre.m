@@ -35,34 +35,47 @@ classdef Sqrt_To_Lustre < Block_To_Lustre
                 inport_dt = blk.CompiledPortDataTypes.Inport(i);
                 %converts the input data type(s) to
                 %its accumulator data type
-                if ~strcmp(inport_dt, outputDataType)
-                    [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, outputDataType, RndMeth);
+                if ~strcmp(inport_dt, 'double')
+                    [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, 'double', RndMeth);
                     if ~isempty(external_lib)
                         obj.addExternal_libraries(external_lib);
                         inputs{i} = cellfun(@(x) sprintf(conv_format,x), inputs{i}, 'un', 0);
                     end
                 end
             end
-            [~, zero] = SLX2LusUtils.get_lustre_dt(outputDataType);
+            [outLusDT, zero, one] = SLX2LusUtils.get_lustre_dt(outputDataType);
             
             codes = {};
             for j=1:numel(inputs{1})
-                if strcomp(blk.Operator, 'sqrt')
+                if strcmp(blk.Operator, 'sqrt')
                     code = sprintf('sqrt(%s) ',  inputs{1}{j});
-                elseif strcomp(blk.Operator, 'signedSqrt')
-                    code = sprintf('sqrt(%s) ',  inputs{1}{j});
-                else
-                    strcomp(blk.Operator, 'rSqrt')
+
+                elseif strcmp(blk.Operator, 'signedSqrt')
+                    code = sprintf('if %s >= %s then sqrt(%s) else -sqrt(-%s)', inputs{1}{j}, zero, inputs{1}{j}, inputs{1}{j});
+                elseif strcmp(blk.Operator, 'rSqrt')
+                    code = sprintf('%s/sqrt(%s) ', one, inputs{1}{j});
+                end
+               
+                 if ~strcmp(outLusDT, 'real')
+                    [external_lib, conv_format] = SLX2LusUtils.dataType_conversion('real', outputDataType);
+                    if ~isempty(external_lib)
+                        obj.addExternal_libraries(external_lib);
+                        code = sprintf(conv_format,code);
+                    end
                 end
                 codes{j} = sprintf('%s = %s;\n\t', outputs{j}, code);
             end
-            
+            if strcmp(blk.AlgorithmType, 'Newton-Raphson')
+                msg = sprintf('Option Newton-Raphson is not supported in block %s', ...
+                    blk.Origin_path);
+                display_msg(msg, MsgType.WARNING, 'Sqrt_To_Lustre', '');
+            end
             obj.setCode(MatlabUtils.strjoin(codes, ''));
             obj.addVariable(outputs_dt);
         end
         
         function options = getUnsupportedOptions(obj,blk, varargin)
-            obj.unsupported_options = {};
+            
             if ~isempty(blk.OutMax) || ~isempty(blk.OutMin)
                 obj.addUnsupported_options(...
                     sprintf('The minimum/maximum value is not support in block %s', blk.Origin_path));
@@ -71,8 +84,14 @@ classdef Sqrt_To_Lustre < Block_To_Lustre
                 obj.addUnsupported_options(...
                     sprintf('The Saturate on integer overflow option is not support in block %s', blk.Origin_path));
             end
+            if strcmp(blk.AlgorithmType, 'Newton-Raphson')
+                obj.addUnsupported_options(...
+                sprintf('Option Newton-Raphson is not supported in block %s', ...
+                    blk.Origin_path));
+            end
             options = obj.unsupported_options;
         end
+       
     end
     
 end

@@ -22,6 +22,12 @@ classdef ExtLib
         end
         
         %%
+        function [node, external_nodes_i, opens] = get_lustrec_math()
+            opens = {'lustrec_math'};
+            external_nodes_i = {};
+            node = '';
+        end
+        
         function [node, external_nodes_i, opens] = get_int_to_real()
             opens = {'conv'};
             external_nodes_i = {};
