@@ -70,8 +70,8 @@ else
     pp_order_map(2) = {'pp2/blocks/blocks_position_process.m'};
     % '*.m' means all std_pp functions have the same priority 3,
     % if a function already defined it will keep its highest priority.
-    pp_order_map(3) = {'std_pp/blocks/*.m', ...
-        'pp2/blocks/*.m'};
+    pp_order_map(3) = {'pp2/blocks/*.m', ...
+        'std_pp/blocks/*.m'};
     
     pp_order_map(4) = {'pp2/blocks/atomic_process.m'};
     pp_order_map(5) = {'pp2/blocks/expand_sub_process.m'};
