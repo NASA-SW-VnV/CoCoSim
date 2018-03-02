@@ -132,7 +132,15 @@ classdef SLX2LusUtils < handle
                 end
             end
         end
-        
+        %% get pre block for specific port number
+        function [src] = getpreBlock(parent, blk, Port)
+            srcBlks = blk.PortConnectivity(...
+                arrayfun(@(x) ~isempty(x.SrcBlock), blk.PortConnectivity));
+            srcBlks = srcBlks(Port);
+            srcPort = srcBlks.SrcPort;
+            srcHandle = srcBlks.SrcBlock;
+            src = get_struct(parent, srcHandle);
+        end
         %% get block inputs names. E.g subsystem taking input signals from differents blocks.
         % We need to go over all linked blocks and get their output names
         % in the corresponding port number.

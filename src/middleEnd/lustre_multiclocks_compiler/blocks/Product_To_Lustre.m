@@ -32,6 +32,12 @@ classdef Product_To_Lustre < Block_To_Lustre
         %%
         function options = getUnsupportedOptions(obj, varargin)
             % add your unsuported options list here
+            if strcmp(blk.Multiplication, 'Matrix(*)')...
+                && contains(blk.Inputs, '/')
+                obj.addUnsupported_options(...
+                    sprintf('Option Matrix(*) with divid is not supported in block %s', ...
+                    blk.Origin_path));
+            end
             options = obj.unsupported_options;
         end
     end

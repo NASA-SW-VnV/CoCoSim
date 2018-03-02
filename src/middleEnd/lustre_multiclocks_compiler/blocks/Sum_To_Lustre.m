@@ -1,10 +1,10 @@
 classdef Sum_To_Lustre < Block_To_Lustre
-    %Sum_To_Lustre The Sum block performs addition or subtraction on its 
-    %inputs. This block can add or subtract scalar, vector, or matrix inputs. 
+    %Sum_To_Lustre The Sum block performs addition or subtraction on its
+    %inputs. This block can add or subtract scalar, vector, or matrix inputs.
     %It can also collapse the elements of a signal.
-    %The Sum block first converts the input data type(s) to 
-    %its accumulator data type, then performs the specified operations. 
-    %The block converts the result to its output data type using the 
+    %The Sum block first converts the input data type(s) to
+    %its accumulator data type, then performs the specified operations.
+    %The block converts the result to its output data type using the
     %specified rounding and overflow modes.
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -19,7 +19,7 @@ classdef Sum_To_Lustre < Block_To_Lustre
     methods
         
         function  write_code(obj, parent, blk, varargin)
-
+            
             OutputDataTypeStr = blk.OutDataTypeStr;
             AccumDataTypeStr = blk.AccumDataTypeStr;
             if strcmp(AccumDataTypeStr, 'Inherit: Inherit via internal rule')
@@ -53,20 +53,20 @@ classdef Sum_To_Lustre < Block_To_Lustre
     
     methods(Static)
         function [codes, outputs_dt] = getSumProductCodes(obj, parent, blk, OutputDataTypeStr,isSumBlock,AccumDataTypeStr)
-
+            
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(blk);
             widths = blk.CompiledPortWidths.Inport;
             max_width = max(widths);
             inputs = {};
             RndMeth = blk.RndMeth;
-                    
+            
             for i=1:numel(widths)
                 inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
                 if numel(inputs{i}) < max_width
                     inputs{i} = arrayfun(@(x) {inputs{i}{1}}, (1:max_width));
                 end
                 inport_dt = blk.CompiledPortDataTypes.Inport(i);
-                %converts the input data type(s) to 
+                %converts the input data type(s) to
                 %its accumulator data type
                 if ~strcmp(inport_dt, AccumDataTypeStr)
                     [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, AccumDataTypeStr, RndMeth);
@@ -80,11 +80,11 @@ classdef Sum_To_Lustre < Block_To_Lustre
             [~, zero, one] = SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Outport(1));
             if (isSumBlock)
                 operator_character = '+';
-                initCode = zero;                
+                initCode = zero;
             else
                 operator_character = '*';
-                initCode = one;                
-            end      
+                initCode = one;
+            end
             [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(AccumDataTypeStr, OutputDataTypeStr, RndMeth);
             if ~isempty(external_lib)
                 obj.addExternal_libraries(external_lib);
@@ -98,10 +98,10 @@ classdef Sum_To_Lustre < Block_To_Lustre
                 nb = str2num(exp);
                 exp = arrayfun(@(x) operator_character, (1:nb));
             else
-                % delete spacer character 
+                % delete spacer character
                 exp = strrep(exp, '|', '');
             end
-
+            
             codes = {};
             if numel(exp) == 1 && numel(inputs) == 1
                 % operate over the elements of same input.
@@ -116,17 +116,29 @@ classdef Sum_To_Lustre < Block_To_Lustre
                     codes{i} = sprintf('%s = %s;\n\t', outputs{i}, code);
                 end
             else
-                for i=1:numel(outputs)
-                    code = initCode;
-                    for j=1:numel(widths)
-                        code = sprintf('%s %s %s',code, exp(j), inputs{j}{i});
+                if ~isSumBlock && strcmp(blk.Multiplication, 'Matrix(*)')
+                    %This is a matrix multiplication
+                    if  contains(exp, '/')
+                        display_msg(...
+                            sprintf('Option Matrix(*) with divid is not supported in block %s', ...
+                            blk.Origin_path), ...
+                            MsgType.ERROR, 'getSumProductCodes', '');
+                        return;
                     end
-                    if ~isempty(conv_format)
-                        code = sprintf(conv_format, code);
+                    
+                else
+                    for i=1:numel(outputs)
+                        code = initCode;
+                        for j=1:numel(widths)
+                            code = sprintf('%s %s %s',code, exp(j), inputs{j}{i});
+                        end
+                        if ~isempty(conv_format)
+                            code = sprintf(conv_format, code);
+                        end
+                        codes{i} = sprintf('%s = %s;\n\t', outputs{i}, code);
                     end
-                    codes{i} = sprintf('%s = %s;\n\t', outputs{i}, code);
                 end
-            end              
+            end
         end
     end
     
