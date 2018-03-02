@@ -26,18 +26,40 @@ classdef Delay_To_Lustre < Block_To_Lustre
             
         end
         
-        function options = getUnsupportedOptions(obj,blk, varargin)
-            InitialCondition = str2num(blk.InitialCondition);
-            if numel(InitialCondition) > 1
-                obj.addUnsupported_options(...
-                    sprintf('InitialCondition condition %s is not supported in block %s.', ...
-                    num2str(InitialCondition), blk.Origin_path));
+        function options = getUnsupportedOptions(obj, blk, varargin)
+            
+            if isempty(regexp(blk.InitialCondition, '[a-zA-Z]', 'match'))
+                InitialCondition = str2num(blk.InitialCondition);
+            elseif strcmp(blk.InitialCondition, 'true') ...
+                    ||strcmp(blk.InitialCondition, 'false')
+                InitialCondition = evalin('base', blk.InitialCondition);
+            else
+                try
+                    InitialCondition = evalin('base', blk.InitialCondition);
+                catch
+                    % search the variable in Model workspace, if not raise
+                    % unsupported option
+                    model_name = regexp(blk.Origin_path, filesep, 'split');
+                    model_name = model_name{1};
+                    hws = get_param(model_name, 'modelworkspace') ;
+                    if hasVariable(hws, blk.InitialCondition)
+                        InitialCondition = getVariable(hws, blk.InitialCondition);
+                    else
+                        obj.addUnsupported_options(...
+                            sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
+                            blk.InitialCondition, blk.Origin_path));
+                        return;
+                    end
+                end
             end
-            if ~strcmp(DelayLengthSource, 'Dialog')
+            if numel(InitialCondition) > 1 ...
+                    && ~(strcmp(DelayLengthSource, 'Dialog') ...
+                    && strcmp(DelayLength, '1'))
                 obj.addUnsupported_options(...
-                    sprintf('DelayLengthSource is external and not supported in block %s.', ...
-                    blk.Origin_path));
+                    sprintf('InitialCondition %s in block %s is not supported for delay > 1',...
+                    blk.InitialCondition, blk.Origin_path));
             end
+            
             options = obj.unsupported_options;
         end
     end
@@ -108,12 +130,20 @@ classdef Delay_To_Lustre < Block_To_Lustre
                     end
                 end
                 if numel(InitialCondition) > 1
+                    if ~(strcmp(DelayLengthSource, 'Dialog') ...
+                            && strcmp(DelayLength, '1'))
+                        display_msg(sprintf('InitialCondition %s in block %s is not supported for delay > 1',...
+                            blk.InitialCondition, blk.Origin_path), ...
+                            MsgType.ERROR, 'Constant_To_Lustr', '');
+                        return;
+                    end
                     [value_inlined, status, msg] = MatlabUtils.inline_values(InitialCondition);
                     if status
                         %message
                         display_msg(msg, MsgType.ERROR, 'Constant_To_Lustr', '');
                         return;
                     end
+                    x0Port = numel(inputs) + 1;
                     for i=1:numel(value_inlined)
                         if strcmp(lus_inportDataType, 'real')
                             InitialCondition = sprintf('%.15f', value_inlined(i));
@@ -133,7 +163,7 @@ classdef Delay_To_Lustre < Block_To_Lustre
                         else
                             InitialCondition = sprintf('%.15f', value_inlined(i));
                         end
-                        inputs{end+1}{i} = InitialCondition;
+                        inputs{x0Port}{i} = InitialCondition;
                     end
                 else
                     if strcmp(lus_inportDataType, 'real')
