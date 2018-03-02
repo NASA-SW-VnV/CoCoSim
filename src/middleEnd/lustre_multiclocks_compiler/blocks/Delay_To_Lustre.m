@@ -95,39 +95,13 @@ classdef Delay_To_Lustre < Block_To_Lustre
                 I = [1, nb_inports];
                 x0DataType = blk.CompiledPortDataTypes.Inport{end};
             else
-                
-                if isempty(regexp(blk.InitialCondition, '[a-zA-Z]', 'match'))
-                    InitialCondition = str2num(blk.InitialCondition);
-                    if contains(blk.InitialCondition, '.')
-                        x0DataType = 'double';
-                    else
-                        x0DataType = 'int';
-                    end
-                elseif strcmp(blk.InitialCondition, 'true') ...
-                        ||strcmp(blk.InitialCondition, 'false')
-                    InitialCondition = evalin('base', blk.InitialCondition);
-                    x0DataType = 'boolean';
-                else
-                    try
-                        InitialCondition = evalin('base', blk.InitialCondition);
-                        x0DataType =  evalin('base',...
-                            sprintf('class(%s)', blk.InitialCondition));
-                    catch
-                        % search the variable in Model workspace, if not raise
-                        % unsupported option
-                        model_name = regexp(blk.Origin_path, filesep, 'split');
-                        model_name = model_name{1};
-                        hws = get_param(model_name, 'modelworkspace') ;
-                        if hasVariable(hws, blk.InitialCondition)
-                            InitialCondition = getVariable(hws, blk.InitialCondition);
-                            x0DataType = 'double';
-                        else
-                            display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
-                                blk.InitialCondition, blk.Origin_path), ...
-                                MsgType.ERROR, 'Constant_To_Lustr', '');
-                            return;
-                        end
-                    end
+                [InitialCondition, x0DataType, status] = ...
+                    Constant_To_Lustre.getValueFromParameter(parent, blk, blk.InitialCondition);
+                if status
+                    display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
+                        blk.InitialCondition, blk.Origin_path), ...
+                        MsgType.ERROR, 'Constant_To_Lustre', '');
+                    return;
                 end
                 if numel(InitialCondition) > 1
                     if ~(strcmp(DelayLengthSource, 'Dialog') ...

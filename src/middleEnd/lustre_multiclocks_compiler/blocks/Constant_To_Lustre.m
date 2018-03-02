@@ -15,37 +15,13 @@ classdef Constant_To_Lustre < Block_To_Lustre
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(blk);
             obj.addVariable(outputs_dt);
             lus_outputDataType = SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Outport{1});
-            if isempty(regexp(blk.Value, '[a-zA-Z]', 'match'))
-                Value = str2num(blk.Value);
-                if contains(blk.Value, '.')
-                    valueDataType = 'double';
-                else
-                    valueDataType = 'int';
-                end
-            elseif strcmp(blk.Value, 'true') ...
-                    ||strcmp(blk.Value, 'false')
-                Value = evalin('base', blk.Value);
-                valueDataType = 'boolean';
-            else
-                try
-                    Value = evalin('base', blk.Value);
-                    valueDataType =  evalin('base',...
-                        sprintf('class(%s)', blk.Value));
-                catch
-                    % search the variable in Model workspace, if not raise
-                    % unsupported option
-                    model_name = regexp(blk.Origin_path, filesep, 'split');
-                    model_name = model_name{1};
-                    hws = get_param(model_name, 'modelworkspace') ;
-                    if hasVariable(hws, blk.Value)
-                        Value = getVariable(hws, blk.Value);
-                    else
-                        display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
-                            blk.Value, blk.Origin_path), ...
-                            MsgType.ERROR, 'Constant_To_Lustr', '');
-                        return;
-                    end
-                end
+            [Value, valueDataType, status] = ...
+                Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Value);
+            if status
+                display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
+                    blk.Value, blk.Origin_path), ...
+                    MsgType.ERROR, 'Constant_To_Lustr', '');
+                return;
             end
             [value_inlined, status, msg] = MatlabUtils.inline_values(Value);
             if status
@@ -96,6 +72,48 @@ classdef Constant_To_Lustre < Block_To_Lustre
                     blk.Value, blk.Origin_path));
             end
             options = obj.unsupported_options;
+        end
+    end
+    methods(Static = true)
+        function [Value, valueDataType, status] = ...
+                getValueFromParameter(parent, blk, param)
+            status = 0;
+            valueDataType = 'double';
+            if isempty(regexp(param, '[a-zA-Z]', 'match'))
+                Value = str2num(param);
+                if contains(param, '.')
+                    valueDataType = 'double';
+                else
+                    valueDataType = 'int';
+                end
+            elseif strcmp(param, 'true') ...
+                    ||strcmp(param, 'false')
+                Value = evalin('base', param);
+                valueDataType = 'boolean';
+            else
+                try
+                    Value = evalin('base', param);
+                    valueDataType =  evalin('base',...
+                        sprintf('class(%s)', param));
+                catch
+                    % search the variable in Model workspace, if not raise
+                    % unsupported option
+                    model_name = regexp(blk.Origin_path, filesep, 'split');
+                    model_name = model_name{1};
+                    hws = get_param(model_name, 'modelworkspace') ;
+                    if hasVariable(hws, param)
+                        Value = getVariable(hws, param);
+                    else
+                        try
+                            Value = get_param(parent.Origin_path, param);
+                            Value = evalin('base', Value);
+                        catch
+                            status = 1;
+                        end
+                        
+                    end
+                end
+            end
         end
     end
     
