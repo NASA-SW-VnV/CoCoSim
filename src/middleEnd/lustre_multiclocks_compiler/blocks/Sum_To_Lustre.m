@@ -63,7 +63,9 @@ classdef Sum_To_Lustre < Block_To_Lustre
             for i=1:numel(widths)
                 inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
                 if numel(inputs{i}) < max_width
-                    inputs{i} = arrayfun(@(x) {inputs{i}{1}}, (1:max_width));
+                    if ~(~isSumBlock && strcmp(blk.Multiplication, 'Matrix(*)'))
+                        inputs{i} = arrayfun(@(x) {inputs{i}{1}}, (1:max_width));
+                    end
                 end
                 inport_dt = blk.CompiledPortDataTypes.Inport(i);
                 %converts the input data type(s) to
@@ -103,8 +105,11 @@ classdef Sum_To_Lustre < Block_To_Lustre
             end
             
             codes = {};
+            
             if numel(exp) == 1 && numel(inputs) == 1
-                % operate over the elements of same input.
+                % one input and 1 expression
+                % operate over the elements of same input.  Add/multiply
+                % all elements and output a scalar
                 for i=1:numel(outputs)
                     code = initCode;
                     for j=1:widths
@@ -117,7 +122,8 @@ classdef Sum_To_Lustre < Block_To_Lustre
                 end
             else
                 if ~isSumBlock && strcmp(blk.Multiplication, 'Matrix(*)')
-                    %This is a matrix multiplication
+                    %This is a matrix multiplication, only applies to
+                    %Product block
                     if  contains(exp, '/')
                         display_msg(...
                             sprintf('Option Matrix(*) with divid is not supported in block %s', ...
@@ -125,8 +131,36 @@ classdef Sum_To_Lustre < Block_To_Lustre
                             MsgType.ERROR, 'getSumProductCodes', '');
                         return;
                     end
+                    % check that the number of columns of 1st input matrix is equalled
+                    % to the number of rows of the 2nd matrix
+                    % matrix C(mxl) = A(mxn)*B(nxl)
+                    initCode = sprintf('%s ',zero);
+                    m=blk.CompiledPortDimensions.Inport(2);
+                    n=blk.CompiledPortDimensions.Inport(3);
+                    l=blk.CompiledPortDimensions.Inport(5);
+                    codeIndex = 0;
+                    for i=1:m      %i is row of result matrix
+                        for j=1:l      %j is column of result matrix
+                            codeIndex = codeIndex + 1;
+                            code = initCode;
+                            for k=1:n
+                                aIndex = (i-1)*n+k
+                                bIndex = (k-1)*l+j
+                                code = sprintf('%s + (%s * %s)',code, inputs{1,1}{1,aIndex},inputs{1,2}{1,bIndex});
+                                if ~isempty(conv_format)
+                                    code = sprintf(conv_format, code);
+                                end    
+                                diag = sprintf('i %d, j %d, k %d, aIndex %d, bIndex %d',i,j,k,aIndex,bIndex)
+                            end
+                            
+                            codes{codeIndex} = sprintf('%s = %s;\n\t', outputs{codeIndex}, code) 
+                        end
+                        
+                    end
+                    
                     
                 else
+                    % element wise operations
                     for i=1:numel(outputs)
                         code = initCode;
                         for j=1:numel(widths)
