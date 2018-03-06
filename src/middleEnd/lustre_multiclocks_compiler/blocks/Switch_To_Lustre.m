@@ -1,5 +1,11 @@
 classdef Switch_To_Lustre < Block_To_Lustre
-    %Test_write a dummy class
+    % Switch_To_Lustre
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Copyright (c) 2017 United States Government as represented by the
+    % Administrator of the National Aeronautics and Space Administration.
+    % All Rights Reserved.
+    % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     properties
     end
@@ -9,6 +15,11 @@ classdef Switch_To_Lustre < Block_To_Lustre
         function  write_code(obj, parent, blk, varargin)
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(blk);
             inputs = {};
+            
+            if strcmp(blk.AllowDiffInputSizes, 'on')
+                display_msg(sprintf('The Allow different data input sizes option is not support in block %s',...
+                    blk.Origin_path), MsgType.ERROR, 'Switch_To_Lustre', '');
+            end            
             
             widths = blk.CompiledPortWidths.Inport;
             max_width = max(widths);
@@ -31,14 +42,15 @@ classdef Switch_To_Lustre < Block_To_Lustre
                 end
             end
             [~, zero] = SLX2LusUtils.get_lustre_dt(outputDataType);
+            threshold = blk.Threshold;
 
             codes = {};
             if strcmp(blk.Criteria, 'u2 > Threshold')
-                    code{1} = sprintf('if %s > %s then %s else %s ',  inputs{1}{2}, inputs{1}{j},inputs{1}{j},inputs{1}{j});
+                    codes{1} = sprintf('if %s > %s then %s else %s \n\t',  inputs{1,2}{1}, threshold,inputs{1,1}{1},inputs{1,3}{1});
             elseif strcmp(blk.Criteria, 'u2 >= Threshold')
-                    code{1} = sprintf('if %s >= %s then %s else %s ',  inputs{1}{2}, inputs{1}{j},inputs{1}{j},inputs{1}{j});
+                    codes{1} = sprintf('if %s >= %s then %s else %s \n\t',  inputs{1,2}{1}, threshold,inputs{1,1}{1},inputs{1,3}{1});
             elseif strcmp(blk.Criteria, 'u2 ~= 0')
-                    code{1} = sprintf('if not(%s > %s) then %s else %s ',  inputs{2}{j}, inputs{1}{j},inputs{1}{j},inputs{1}{j});
+                    codes{1} = sprintf('if not(%s > %s) then %s else %s \n\t',  inputs{1,2}{1}, threshold,inputs{1,1}{1},inputs{1,3}{1});
             end
             
             obj.setCode(MatlabUtils.strjoin(codes, '\n\t'));
@@ -53,6 +65,9 @@ classdef Switch_To_Lustre < Block_To_Lustre
             if strcmp(blk.SaturateOnIntegerOverflow, 'on')
                 obj.unsupported_options{numel(obj.unsupported_options) + 1} = sprintf('The Saturate on integer overflow option is not support in block %s', blk.Origin_path);
             end 
+%             if strcmp(blk.AllowDiffInputSizes, 'on')
+%                 obj.unsupported_options{numel(obj.unsupported_options) + 1} = sprintf('The Allow different data input sizes option is not support in block %s', blk.Origin_path);
+%             end             
             options = obj.unsupported_options;
         end
     end
