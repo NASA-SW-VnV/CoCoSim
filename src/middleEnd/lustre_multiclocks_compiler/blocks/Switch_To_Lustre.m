@@ -25,6 +25,8 @@ classdef Switch_To_Lustre < Block_To_Lustre
             max_width = max(widths);
             outputDataType = blk.CompiledPortDataTypes.Outport{1};
             RndMeth = blk.RndMeth;
+            [threshold, thresholdDataType, status] = ...
+                Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Threshold);
             for i=1:numel(widths)
                 inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
                 if numel(inputs{i}) < max_width
@@ -33,27 +35,43 @@ classdef Switch_To_Lustre < Block_To_Lustre
                 inport_dt = blk.CompiledPortDataTypes.Inport(i);
                 %converts the input data type(s) to
                 %its accumulator data type
-                if ~strcmp(inport_dt, outputDataType)
+                if ~strcmp(inport_dt, outputDataType) && i~=2
                     [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, outputDataType, RndMeth);
                     if ~isempty(external_lib)
                         obj.addExternal_libraries(external_lib);
                         inputs{i} = cellfun(@(x) sprintf(conv_format,x), inputs{i}, 'un', 0);
                     end
+                elseif ~strcmp(inport_dt, thresholdDataType) && i==2
+                    [lus_inportDataType, ~] = SLX2LusUtils.get_lustre_dt(inport_dt);
+                    if strcmp(lus_inportDataType, 'real')
+                        threshold = sprintf('%.15f', threshold);
+                        thresholdDataType = 'double';
+                    elseif strcmp(lus_inportDataType, 'int')
+                        threshold = sprintf('%d', int32(threshold));
+                        thresholdDataType = 'int';
+                    end
                 end
             end
             [~, zero] = SLX2LusUtils.get_lustre_dt(outputDataType);
-            threshold = blk.Threshold;
-
+           
+            if status
+                display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
+                    blk.Threshold, blk.Origin_path), ...
+                    MsgType.ERROR, 'Constant_To_Lustre', '');
+                return;
+            end
             codes = {};
-            if strcmp(blk.Criteria, 'u2 > Threshold')
-                    codes{1} = sprintf('if %s > %s then %s else %s \n\t',  inputs{1,2}{1}, threshold,inputs{1,1}{1},inputs{1,3}{1});
-            elseif strcmp(blk.Criteria, 'u2 >= Threshold')
-                    codes{1} = sprintf('if %s >= %s then %s else %s \n\t',  inputs{1,2}{1}, threshold,inputs{1,1}{1},inputs{1,3}{1});
-            elseif strcmp(blk.Criteria, 'u2 ~= 0')
-                    codes{1} = sprintf('if not(%s > %s) then %s else %s \n\t',  inputs{1,2}{1}, threshold,inputs{1,1}{1},inputs{1,3}{1});
+            for i=1:numel(outputs)
+                if strcmp(blk.Criteria, 'u2 > Threshold')
+                    codes{i} = sprintf('%s = if %s > %s then %s else %s; \n\t', outputs{i}, inputs{2}{i}, threshold, inputs{1}{i},inputs{3}{i});
+                elseif strcmp(blk.Criteria, 'u2 >= Threshold')
+                    codes{i} = sprintf('%s = if %s >= %s then %s else %s; \n\t', outputs{i}, inputs{2}{i}, threshold,inputs{1}{i},inputs{3}{i});
+                elseif strcmp(blk.Criteria, 'u2 ~= 0')
+                    codes{i} = sprintf('%s = if not(%s = %s) then %s else %s; \n\t', outputs{i}, inputs{2}{i}, threshold,inputs{1}{i},inputs{3}{i});
+                end
             end
             
-            obj.setCode(MatlabUtils.strjoin(codes, '\n\t'));
+            obj.setCode(MatlabUtils.strjoin(codes, ''));
             obj.addVariable(outputs_dt);
         end
         

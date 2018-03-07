@@ -37,10 +37,11 @@ classdef Sum_To_Lustre < Block_To_Lustre
             end
             
             isSumBlock = true;
-            [codes, outputs_dt] = Sum_To_Lustre.getSumProductCodes(obj, parent, blk, OutputDataTypeStr,isSumBlock,AccumDataTypeStr);
+            [codes, outputs_dt, additionalVars] = Sum_To_Lustre.getSumProductCodes(obj, parent, blk, OutputDataTypeStr,isSumBlock,AccumDataTypeStr);
             
             obj.setCode(MatlabUtils.strjoin(codes, ''));
             obj.addVariable(outputs_dt);
+            obj.addVariable(additionalVars);
         end
         
         
@@ -52,14 +53,14 @@ classdef Sum_To_Lustre < Block_To_Lustre
     end
     
     methods(Static)
-        function [codes, outputs_dt] = getSumProductCodes(obj, parent, blk, OutputDataTypeStr,isSumBlock,AccumDataTypeStr)
+        function [codes, outputs_dt, additionalVars] = getSumProductCodes(obj, parent, blk, OutputDataTypeStr,isSumBlock,AccumDataTypeStr)
             
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(blk);
             widths = blk.CompiledPortWidths.Inport;
             max_width = max(widths);
             inputs = {};
             RndMeth = blk.RndMeth;
-            
+            additionalVars = {};
             for i=1:numel(widths)
                 inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
                 if numel(inputs{i}) < max_width
@@ -144,16 +145,16 @@ classdef Sum_To_Lustre < Block_To_Lustre
                             codeIndex = codeIndex + 1;
                             code = initCode;
                             for k=1:n
-                                aIndex = (i-1)*n+k
-                                bIndex = (k-1)*l+j
+                                aIndex = (i-1)*n+k;
+                                bIndex = (k-1)*l+j;
                                 code = sprintf('%s + (%s * %s)',code, inputs{1,1}{1,aIndex},inputs{1,2}{1,bIndex});
                                 if ~isempty(conv_format)
                                     code = sprintf(conv_format, code);
                                 end    
-                                diag = sprintf('i %d, j %d, k %d, aIndex %d, bIndex %d',i,j,k,aIndex,bIndex)
+                                diag = sprintf('i %d, j %d, k %d, aIndex %d, bIndex %d',i,j,k,aIndex,bIndex);
                             end
                             
-                            codes{codeIndex} = sprintf('%s = %s;\n\t', outputs{codeIndex}, code) 
+                            codes{codeIndex} = sprintf('%s = %s;\n\t', outputs{codeIndex}, code) ;
                         end
                         
                     end
