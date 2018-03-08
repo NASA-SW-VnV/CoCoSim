@@ -1,4 +1,5 @@
-Ktrinh: Sqrt, trigonomery, switch case, gain
+Ktrinh: Sqrt, trigonomery, switch case, gain, Logic
 
 Hamza:Delay, Saturation, Saturation dynamic, CompareTo, CompareToConstant,
+RElationalOper, MinMax
     
