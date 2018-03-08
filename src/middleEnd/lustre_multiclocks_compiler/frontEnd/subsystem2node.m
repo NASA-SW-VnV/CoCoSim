@@ -23,6 +23,9 @@ comment = sprintf('-- Original block name: %s', origin_path);
 % creating node header
 node_name = SLX2LusUtils.node_name_format(subsys_struct);
 node_inputs = SLX2LusUtils.extract_node_InOutputs_withDT(subsys_struct, 'Inport', xml_trace);
+if isempty(node_inputs)
+    node_inputs = '_virtual:bool';
+end
 node_outputs = SLX2LusUtils.extract_node_InOutputs_withDT(subsys_struct, 'Outport', xml_trace);
 
 node_header = sprintf('node %s (%s)\n returns (%s);',...

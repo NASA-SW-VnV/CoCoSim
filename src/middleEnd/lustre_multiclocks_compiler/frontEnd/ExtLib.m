@@ -22,6 +22,33 @@ classdef ExtLib
         end
         
         %%
+        function [node, external_nodes_i, opens] = get__min_int()
+            [node, external_nodes_i, opens] = ExtLib.getMinMax('min', 'int');
+        end
+        function [node, external_nodes_i, opens] = get__min_real()
+            [node, external_nodes_i, opens] = ExtLib.getMinMax('min', 'real');
+        end
+        function [node, external_nodes_i, opens] = get__max_int()
+            [node, external_nodes_i, opens] = ExtLib.getMinMax('max', 'int');
+        end
+        function [node, external_nodes_i, opens] = get__max_real()
+            [node, external_nodes_i, opens] = ExtLib.getMinMax('max', 'real');
+        end
+        function [node, external_nodes_i, opens] = getMinMax(minOrMAx, dt)
+            opens = {};
+            external_nodes_i = {};
+            format = 'node %s (x, y: %s)\nreturns(z:%s);\nlet\n\t z = if (x %s y) then x else y;\ntel\n\n';
+            node_name = strcat('_', minOrMAx, '_', dt);
+            if strcmp(minOrMAx, 'min')
+                op = '<';
+            else
+                op = '>';
+            end
+            node = sprintf(format, node_name, dt, dt, op);
+            
+        end
+        %%
+        
         function [node, external_nodes_i, opens] = get_lustrec_math()
             opens = {'lustrec_math'};
             external_nodes_i = {};
