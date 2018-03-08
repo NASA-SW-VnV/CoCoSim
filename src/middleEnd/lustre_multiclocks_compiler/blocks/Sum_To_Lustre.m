@@ -53,14 +53,14 @@ classdef Sum_To_Lustre < Block_To_Lustre
     end
     
     methods(Static)
-        function [codes, outputs_dt, additionalVars] = getSumProductCodes(obj, parent, blk, OutputDataTypeStr,isSumBlock,AccumDataTypeStr)
+        function [codes, outputs_dt, AdditinalVars] = getSumProductCodes(obj, parent, blk, OutputDataTypeStr,isSumBlock,AccumDataTypeStr)
             
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(blk);
             widths = blk.CompiledPortWidths.Inport;
             max_width = max(widths);
             inputs = {};
             RndMeth = blk.RndMeth;
-            additionalVars = {};
+            AdditinalVars = {};
             for i=1:numel(widths)
                 inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
                 if numel(inputs{i}) < max_width
@@ -80,7 +80,7 @@ classdef Sum_To_Lustre < Block_To_Lustre
                 end
                 
             end
-            [~, zero, one] = SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Outport(1));
+            [LusOutputDataTypeStr, zero, one] = SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Outport(1));
             if (isSumBlock)
                 operator_character = '+';
                 initCode = zero;
@@ -135,31 +135,37 @@ classdef Sum_To_Lustre < Block_To_Lustre
                     % check that the number of columns of 1st input matrix is equalled
                     % to the number of rows of the 2nd matrix
                     % matrix C(mxl) = A(mxn)*B(nxl)
-                    initCode = sprintf('%s ',zero);
-                    m=blk.CompiledPortDimensions.Inport(2);
-                    n=blk.CompiledPortDimensions.Inport(3);
-                    l=blk.CompiledPortDimensions.Inport(5);
-                    codeIndex = 0;
-                    for i=1:m      %i is row of result matrix
-                        for j=1:l      %j is column of result matrix
-                            codeIndex = codeIndex + 1;
-                            code = initCode;
-                            for k=1:n
-                                aIndex = (i-1)*n+k;
-                                bIndex = (k-1)*l+j;
-                                code = sprintf('%s + (%s * %s)',code, inputs{1,1}{1,aIndex},inputs{1,2}{1,bIndex});
-                                if ~isempty(conv_format)
-                                    code = sprintf(conv_format, code);
-                                end    
-                                diag = sprintf('i %d, j %d, k %d, aIndex %d, bIndex %d',i,j,k,aIndex,bIndex);
-                            end
-                            
-                            codes{codeIndex} = sprintf('%s = %s;\n\t', outputs{codeIndex}, code) ;
+                    
+                    in_matrix_dimension = Product_To_Lustre.getInputMatrixDimensions(blk);
+                    % the index of the current matrix pair
+                    pair_number = 0;
+                    codes = {};
+                    productOutputs = {};
+                    tmp_prefix = SLX2LusUtils.name_format(blk.Name);
+                    for i=1:numel(in_matrix_dimension)-1
+                        pair_number = pair_number + 1;
+                        output_m = {};
+                        if i==1
+                            m1_inputs = inputs{1};
+                            m1_dimension = in_matrix_dimension{i};
+                        else
+                            m1_inputs = productOutputs;
+                            m1_dim.dims(1,1) = in_matrix_dimension{i-1}.dims(1,1);
+                            m1_dim.dims(1,2) = in_matrix_dimension{i}.dims(1,2);
+                            m1_dimension = m1_dim;
+                        end
+                        if i==numel(in_matrix_dimension)-1
+                            output_m = outputs;
                         end
                         
+                        [code, tmp_outputs, addVar] = Product_To_Lustre.matrix_multiply(m1_dimension, ...
+                            in_matrix_dimension{i+1}, m1_inputs,...
+                            inputs{i+1}, output_m, zero, pair_number, LusOutputDataTypeStr, tmp_prefix);   
+                        codes = [codes, code];
+                        productOutputs = [productOutputs, tmp_outputs];
+                        AdditinalVars = [AdditinalVars, addVar];
                     end
-                    
-                    
+                             
                 else
                     % element wise operations
                     for i=1:numel(outputs)
