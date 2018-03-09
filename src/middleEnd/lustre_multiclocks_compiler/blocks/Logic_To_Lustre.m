@@ -1,5 +1,5 @@
 classdef Logic_To_Lustre < Block_To_Lustre
-    %Logic_To_Lustre 
+    %Logic_To_Lustre
     % supporting: AND, OR, NAND, NOR, XOR, NXOR, NOT
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -19,9 +19,10 @@ classdef Logic_To_Lustre < Block_To_Lustre
             inputs = {};
             
             widths = blk.CompiledPortWidths.Inport;
+            nbInputs = numel(widths);
             max_width = max(widths);
             outputDataType = blk.CompiledPortDataTypes.Outport{1};
-
+            
             for i=1:numel(widths)
                 inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
                 if numel(inputs{i}) < max_width
@@ -38,23 +39,27 @@ classdef Logic_To_Lustre < Block_To_Lustre
                     end
                 end
             end
-
+            
             codes = {};
             for i=1:numel(outputs)
+                scalars = {};
+                for j=1:nbInputs
+                    scalars{j} = inputs{j}{i};
+                end
                 if strcmp(blk.Operator, 'AND')
-                    codes{i} = sprintf('%s = %s and %s; \n\t', outputs{i}, inputs{1}{i}, inputs{2}{i});
+                    codes{i} = sprintf('%s = %s; \n\t', outputs{i}, MatlabUtils.strjoin(scalars, ' and '));
                 elseif strcmp(blk.Operator, 'OR')
-                    codes{i} = sprintf('%s = %s or %s; \n\t', outputs{i}, inputs{1}{i}, inputs{2}{i});                    
+                    codes{i} = sprintf('%s = %s; \n\t', outputs{i}, MatlabUtils.strjoin(scalars, ' or '));
                 elseif strcmp(blk.Operator, 'XOR')
-                    codes{i} = sprintf('%s = %s xor %s; \n\t', outputs{i}, inputs{1}{i}, inputs{2}{i});
+                    codes{i} = sprintf('%s = %s; \n\t', outputs{i}, MatlabUtils.strjoin(scalars, ' xor '));
                 elseif strcmp(blk.Operator, 'NOT')
                     codes{i} = sprintf('%s = not %s; \n\t', outputs{i}, inputs{1}{i});
                 elseif strcmp(blk.Operator, 'NAND')
-                    codes{i} = sprintf('%s = not(%s and %s); \n\t', outputs{i}, inputs{1}{i}, inputs{2}{i});
+                    codes{i} = sprintf('%s = not(%s); \n\t', outputs{i}, MatlabUtils.strjoin(scalars, ' and '));
                 elseif strcmp(blk.Operator, 'NOR')
-                    codes{i} = sprintf('%s = not(%s or %s); \n\t', outputs{i}, inputs{1}{i}, inputs{2}{i});                    
+                    codes{i} = sprintf('%s = not(%s); \n\t', outputs{i}, MatlabUtils.strjoin(scalars, ' or '));
                 elseif strcmp(blk.Operator, 'NXOR')
-                    codes{i} = sprintf('%s = not(%s xor %s); \n\t', outputs{i}, inputs{1}{i}, inputs{2}{i});                    
+                    codes{i} = sprintf('%s = not(%s); \n\t', outputs{i}, MatlabUtils.strjoin(scalars, ' xor '));
                 end
             end
             
@@ -66,12 +71,7 @@ classdef Logic_To_Lustre < Block_To_Lustre
         %%
         function options = getUnsupportedOptions(obj, varargin)
             % add your unsuported options list here
-            if strcmp(blk.Multiplication, 'Matrix(*)')...
-                    && contains(blk.Inputs, '/')
-                obj.addUnsupported_options(...
-                    sprintf('Option Matrix(*) with divid is not supported in block %s', ...
-                    blk.Origin_path));
-            end
+            
             options = obj.unsupported_options;
         end
     end
