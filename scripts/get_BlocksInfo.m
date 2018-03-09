@@ -1,17 +1,21 @@
-function [report] = get_BlocksType(folder)
+function [report] = get_BlocksInfo(folder)
 %GET_BLOCKSTYPE Summary of this function goes here
 %   Detailed explanation goes here
 slx_files = dir(fullfile(folder, '*.slx'));
 mdl_files = dir(fullfile(folder, '*.mdl'));
 all_files = [slx_files, mdl_files];
 report = {};
-
+CommonParameters = {'CompiledSampleTime', 'CompiledPortDataTypes', ...
+    'CompiledPortDimensions', 'CompiledPortWidths', ...
+    'CompiledPortComplexSignals', 'PortConnectivity',...
+    'Ports', 'Position', 'AttributesFormatString'};
 for i=1:numel(all_files)
     [~, base_name, ~] = fileparts( all_files(i).name);
     try
         load_system(fullfile(folder, ...
             all_files(i).name));
-        list_of_all_blacks = find_system(base_name);
+        list_of_all_blacks = find_system(base_name, ...
+            'LookUnderMasks', 'all');
         for j=2:numel(list_of_all_blacks)
             block_path = list_of_all_blacks{j};
             blks_type = get_param(block_path, 'BlockType');
