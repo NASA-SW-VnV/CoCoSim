@@ -4,7 +4,7 @@ function [] = substitute_gain_process(model)
 %   model is a string containing the name of the model to search in
 
 % Processing Gain blocks
-Gain_list = find_system(model,'BlockType','Gain');
+Gain_list = find_system(model,'LookUnderMasks', 'all', 'BlockType','Gain');
 if not(isempty(Gain_list))
     display_msg('Replacing Gain blocks...', MsgType.INFO,...
         'Gain_process', '');

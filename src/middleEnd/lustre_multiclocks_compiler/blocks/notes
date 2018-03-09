@@ -1,5 +1,23 @@
-Ktrinh: Sqrt, trigonomery, switch case, gain, Logic
+Ktrinh: Sqrt, 
+        Goto,
+        trigonomery, 
+        Switch,
+        gain (pp), 
+        Product,
+        Logic
 
-Hamza:Delay, Saturation, Saturation dynamic, CompareTo, CompareToConstant,
-RElationalOper, MinMax
+Hamza:  Abs,
+        Constant,
+        Delay,
+        UnitDelay,
+        From,
+        MinMax,
+        Outport,
+        RelationalOperator, 
+        Sum,
+        Subsystem,
+        Saturation (pp), 
+        Saturation dynamic (pp), 
+        CompareTo (Masked Subsystem), 
+        CompareToConstant (Masked Subsystem),
     
