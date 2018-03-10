@@ -77,7 +77,7 @@ classdef Switch_To_Lustre < Block_To_Lustre
         
         function options = getUnsupportedOptions(obj, blk, varargin)
             obj.unsupported_options = {};
-            if ~isempty(blk.OutMax) || ~isempty(blk.OutMin)
+            if ~strcmp(blk.OutMax, '[]') || ~strcmp(blk.OutMin, '[]')
                 obj.unsupported_options{numel(obj.unsupported_options) + 1} = sprintf('The minimum/maximum value is not support in block %s', blk.Origin_path);
             end
             if strcmp(blk.SaturateOnIntegerOverflow, 'on')
