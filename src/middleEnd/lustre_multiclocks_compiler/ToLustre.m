@@ -114,6 +114,7 @@ fclose(fid);
 %% display report files
 t_finish = toc(t_start);
 msg = sprintf('Lustre generation finished in %f seconds', t_finish);
+display_msg(nodes_code, MsgType.DEBUG, 'lustre_multiclocks_compiler', '');
 display_msg(msg, MsgType.RESULT, 'lustre_multiclocks_compiler', '');
 cd(PWD)
 end

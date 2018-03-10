@@ -16,8 +16,8 @@ classdef Abs_To_Lustre < Block_To_Lustre
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(blk);
             inputs = {};
             
-            if ~isempty(blk.OutMax) || ~isempty(blk.OutMin)
-                display_msg(sprintf('The minimum/maximum value is not support in block %s',...
+            if ~strcmp(blk.OutMax, '[]') || ~strcmp(blk.OutMin, '[]')
+                display_msg(sprintf('The minimum/maximum value is not supported in block %s',...
                     blk.Origin_path), MsgType.WARNING, 'Abs_To_Lustre', '');
             end
             if strcmp(blk.SaturateOnIntegerOverflow, 'on')
@@ -58,9 +58,9 @@ classdef Abs_To_Lustre < Block_To_Lustre
         
         function options = getUnsupportedOptions(obj, blk, varargin)
             obj.unsupported_options = {};
-            if ~isempty(blk.OutMax) || ~isempty(blk.OutMin)
+            if ~strcmp(blk.OutMax, '[]') || ~strcmp(blk.OutMin, '[]')
                 obj.addUnsupported_options(...
-                    sprintf('The minimum/maximum value is not support in block %s', blk.Origin_path));
+                    sprintf('The minimum/maximum value is not supported in block %s', blk.Origin_path));
             end
             if strcmp(blk.SaturateOnIntegerOverflow, 'on')
                 obj.addUnsupported_options(...

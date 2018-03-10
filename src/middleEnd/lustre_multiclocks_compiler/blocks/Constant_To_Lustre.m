@@ -91,26 +91,26 @@ classdef Constant_To_Lustre < Block_To_Lustre
                 Value = evalin('base', param);
                 valueDataType = 'boolean';
             else
-                try
-                    Value = evalin('base', param);
-                    valueDataType =  evalin('base',...
-                        sprintf('class(%s)', param));
-                catch
-                    % search the variable in Model workspace, if not raise
-                    % unsupported option
-                    model_name = regexp(blk.Origin_path, filesep, 'split');
-                    model_name = model_name{1};
-                    hws = get_param(model_name, 'modelworkspace') ;
-                    if hasVariable(hws, param)
-                        Value = getVariable(hws, param);
-                    else
+                
+                % search the variable in Model workspace, if not raise
+                % unsupported option
+                model_name = regexp(blk.Origin_path, filesep, 'split');
+                model_name = model_name{1};
+                hws = get_param(model_name, 'modelworkspace') ;
+                if hasVariable(hws, param)
+                    Value = getVariable(hws, param);
+                else
+                    try
+                        Value = evalin('base', param);
+                        valueDataType =  evalin('base',...
+                            sprintf('class(%s)', param));
+                    catch
                         try
                             Value = get_param(parent.Origin_path, param);
                             Value = evalin('base', Value);
                         catch
                             status = 1;
                         end
-                        
                     end
                 end
             end

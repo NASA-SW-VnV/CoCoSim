@@ -1,23 +1,80 @@
-Ktrinh: Sqrt, 
+(*Please add block in Alphabetic order*)
+Ktrinh: Gain (pp), 
         Goto,
-        trigonomery, 
-        Switch,
-        gain (pp), 
+        Logic,
         Product,
-        Logic
+        Switch,
+        Sqrt, 
+        Trigonomery, 
 
 Hamza:  Abs,
         Constant,
+        Clock (pp),
+        CompareTo (Masked Subsystem), 
+        CompareToConstant (Masked Subsystem),
+        Dead Zone (pp)
+        Dead Zone Dynamic (pp),
         Delay,
-        UnitDelay,
+        DigitalClock (pp),
+        DiscreteIntegrator (pp),
+        DiscreteStateSpace (pp),
+        Display (ignored)
+        Fcn (pp) (*TODO: need to be translated when pp fails*)
+        ForEach (pp),
         From,
+        Integrator (pp),
+        Lookup (pp),
+        Lookup_n-D (pp for n ==1 )(*TODO: for n > 1*)
         MinMax,
         Outport,
+        Quantizer (pp),
+        RateTransition (pp),
         RelationalOperator, 
+        Relay (pp),
         Sum,
         Subsystem,
         Saturation (pp), 
         Saturation dynamic (pp), 
-        CompareTo (Masked Subsystem), 
-        CompareToConstant (Masked Subsystem),
-    
+        Selector (pp),
+        Sigbuilder block (pp),
+        Terminator (ignored),
+        ToWorkspace (pp),
+        TransferFcn (pp),
+        UnitDelay,
+        ZeroPole (pp),
+        
+
+Blocks that has left from Biosentinel:
+    ActionPort
+    Assignment
+    Bias
+    BusAssignment
+    BusCreator
+    BusSelector
+    Concatenate
+    DataTypeConversion
+    DataTypeDuplicate
+    Demux
+    DiscreteTransferFcn (see TransferFcn in pp)
+    DotProduct
+    EnablePort
+    Fcn (partially done in pp)
+    ForIterator
+    FromWorkspace
+    If
+    Lookup\_n-D
+    Math
+    Memory (can be descritized in pp to unitDelay) 
+    Merge
+    ModelReference
+    MultiPortSwitch
+    Mux
+    RandomNumber ( to translate to empty node with contract)
+    Reshape
+    Rounding
+    S-Function
+    SampleTimeMath
+    Selector (see pp)
+    StateControl
+    SwitchCase
+    TriggerPort
