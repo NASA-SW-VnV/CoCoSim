@@ -6,6 +6,8 @@ Ktrinh: Gain (pp),
         Switch,
         Sqrt, 
         Trigonomery, 
+        Math,
+          
 
 Hamza:  Abs,
         Constant,
