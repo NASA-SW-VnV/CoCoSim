@@ -146,13 +146,13 @@ classdef SLX2LusUtils < handle
         % in the corresponding port number.
         % Read PortConnectivity documentation for more information.
         function [inputs] = getBlockInputsNames(parent, blk, Port)
-            srcBlks = blk.PortConnectivity(...
-                arrayfun(@(x) ~isempty(x.SrcBlock), blk.PortConnectivity));
+            srcPorts = blk.PortConnectivity(...
+                arrayfun(@(x) ~isempty(x.SrcBlock) && ~isempty(str2num(x.Type)), blk.PortConnectivity));
             if nargin >= 3 && ~isempty(Port)
-                srcBlks = srcBlks(Port);
+                srcPorts = srcPorts(Port);
             end
             inputs = {};
-            for b=srcBlks'
+            for b=srcPorts'
                 srcPort = b.SrcPort;
                 srcHandle = b.SrcBlock;
                 src = get_struct(parent, srcHandle);

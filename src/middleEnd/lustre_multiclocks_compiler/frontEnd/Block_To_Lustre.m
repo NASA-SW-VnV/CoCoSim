@@ -87,7 +87,7 @@ classdef Block_To_Lustre < handle
         % in the node signature.
         function b = NotHandled(type)
             % add blocks that will not be handled.
-            blks = {'Inport', 'Terminator'};
+            blks = {'Inport', 'Terminator', 'Scope'};
             b = ismember(type, blks);
         end
     end
