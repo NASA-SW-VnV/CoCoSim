@@ -11,7 +11,9 @@ classdef SLX2LusUtils < handle
     end
     
     methods (Static = true)
-        
+        function isEnabled = isEnabledStr()
+            isEnabled = '_isEnabled';
+        end
         %% adapt blocks names to be a valid lustre names.
         function str_out = name_format(str)
             newline = sprintf('\n');
@@ -54,7 +56,6 @@ classdef SLX2LusUtils < handle
         
         %% Lustre node inputs, outputs
         function result = extract_node_InOutputs_withDT(subsys, type, xml_trace)
-            result = {};
             %get all blocks names
             fields = fieldnames(subsys.Content);
             
@@ -64,20 +65,35 @@ classdef SLX2LusUtils < handle
                 cellfun(@(x) isfield(subsys.Content.(x),'BlockType'), fields));
             
             % get only blocks with BlockType=type
-            fields = ...
+            Portsfields = ...
                 fields(...
                 cellfun(@(x) strcmp(subsys.Content.(x).BlockType,type), fields));
             
+            
             % sort the blocks by order of their ports
-            ports = cellfun(@(x) str2num(subsys.Content.(x).Port), fields);
+            ports = cellfun(@(x) str2num(subsys.Content.(x).Port), Portsfields);
             [~, I] = sort(ports);
-            fields = fields(I);
+            Portsfields = Portsfields(I);
             names = {};
-            for i=1:numel(fields)
-                [~, names_i] = SLX2LusUtils.getBlockOutputsNames(subsys.Content.(fields{i}));
+            for i=1:numel(Portsfields)
+                [~, names_i] = SLX2LusUtils.getBlockOutputsNames(subsys.Content.(Portsfields{i}));
                 names = [names, names_i];
             end
-            
+            if strcmp(type, 'Inport')
+                % add enable port to the node inputs, its value may be used
+                enablePortsFields = fields(...
+                    cellfun(@(x) strcmp(subsys.Content.(x).BlockType,'EnablePort'), fields));
+                for i=1:numel(enablePortsFields)
+                    [~, names_i] = SLX2LusUtils.getBlockOutputsNames(subsys.Content.(enablePortsFields{i}));
+                    names = [names, names_i];
+                end
+                % add _isEnabled condition.
+                if ~isempty(enablePortsFields) ...
+                        || (isfield(subsys, 'isEnabled') && subsys.isEnabled == 1)
+                    names{numel(names) + 1} =...
+                        strcat(SLX2LusUtils.isEnabledStr() , ':bool;');
+                end
+            end
             result = MatlabUtils.strjoin(names, '\n');
         end
         
@@ -146,8 +162,11 @@ classdef SLX2LusUtils < handle
         % in the corresponding port number.
         % Read PortConnectivity documentation for more information.
         function [inputs] = getBlockInputsNames(parent, blk, Port)
+            % get only inports, we don't take enable/reset/trigger, outputs
+            % ports.
             srcPorts = blk.PortConnectivity(...
-                arrayfun(@(x) ~isempty(x.SrcBlock) && ~isempty(str2num(x.Type)), blk.PortConnectivity));
+                arrayfun(@(x) ~isempty(x.SrcBlock) ...
+                && ( ~isempty(str2num(x.Type)) || strcmp(x.Type, 'enable')), blk.PortConnectivity));
             if nargin >= 3 && ~isempty(Port)
                 srcPorts = srcPorts(Port);
             end
