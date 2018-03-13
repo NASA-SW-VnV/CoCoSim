@@ -9,6 +9,8 @@ Ktrinh: Gain (pp),
         Math,
         Bias,
         Concatenate,
+        DotProduct,
+        Reshape,
           
 
 Hamza:  Abs,
