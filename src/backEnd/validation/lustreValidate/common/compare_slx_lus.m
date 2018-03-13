@@ -89,7 +89,7 @@ if exist('min_max_constraints','var') && numel(min_max_constraints) > 0
     IMIN = min_max_constraints{:,2};
     IMAX = min_max_constraints{:,3};
 else
-    IMIN = 1;
+    IMIN = -100;
     IMAX = 100;
 end
 eps = 1e-5;
