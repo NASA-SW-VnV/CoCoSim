@@ -105,6 +105,7 @@ classdef Math_To_Lustre < Block_To_Lustre
                 else
                     obj.addExternal_libraries('simulink_math_fcn');
                     fun = 'mod_real';
+
                 end
                 for i=1:numel(outputs)
                     codes{i} = sprintf('%s = %s(%s, %s);\n\t',...
