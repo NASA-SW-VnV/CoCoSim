@@ -85,9 +85,9 @@ classdef Block_To_Lustre < handle
         % Return if the block has not a class that handle its translation.
         % e.g Inport block is trivial and does not need a code, its name is given
         % in the node signature.
-        function b = NotHandled(type)
-            % add blocks that will not be handled.
-            blks = {'Inport', 'Terminator', 'Scope'};
+        function b = ignored(type)
+            % add blocks that will be ignored because they are supported somehow implicitly.
+            blks = {'Inport', 'Terminator', 'Scope', 'EnablePort'};
             b = ismember(type, blks);
         end
     end

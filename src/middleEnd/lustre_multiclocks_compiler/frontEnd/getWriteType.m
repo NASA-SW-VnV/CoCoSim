@@ -11,7 +11,7 @@ function [b, status] = getWriteType(sub_blk)
 status = 0;
 b = [];
 
-if Block_To_Lustre.NotHandled(sub_blk.BlockType)
+if Block_To_Lustre.ignored(sub_blk.BlockType)
     status = 1;
     return;
 end

@@ -35,6 +35,12 @@ classdef Constant_To_Lustre < Block_To_Lustre
                     values_str{i} = sprintf('%.15f', value_inlined(i));
                 elseif strcmp(lus_outputDataType, 'int')
                     values_str{i} = sprintf('%d', int32(value_inlined(i)));
+                elseif strcmp(lus_outputDataType, 'bool')
+                    if value_inlined(i)
+                        values_str{i} = 'true';
+                    else
+                        values_str{i} = 'false';
+                    end
                 elseif strncmp(valueDataType, 'int', 3) ...
                         || strncmp(valueDataType, 'uint', 4)
                     values_str{i} = num2str(value_inlined(i));

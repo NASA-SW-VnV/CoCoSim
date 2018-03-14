@@ -55,7 +55,7 @@ classdef SLX2LusUtils < handle
         end
         
         %% Lustre node inputs, outputs
-        function result = extract_node_InOutputs_withDT(subsys, type, xml_trace)
+        function [names, names_withNoDT] = extract_node_InOutputs_withDT(subsys, type, xml_trace)
             %get all blocks names
             fields = fieldnames(subsys.Content);
             
@@ -75,26 +75,24 @@ classdef SLX2LusUtils < handle
             [~, I] = sort(ports);
             Portsfields = Portsfields(I);
             names = {};
+            names_withNoDT = {};
             for i=1:numel(Portsfields)
-                [~, names_i] = SLX2LusUtils.getBlockOutputsNames(subsys.Content.(Portsfields{i}));
+                [names_withNoDT_i, names_i] = SLX2LusUtils.getBlockOutputsNames(subsys.Content.(Portsfields{i}));
                 names = [names, names_i];
+                names_withNoDT = [names_withNoDT, names_withNoDT_i];
             end
             if strcmp(type, 'Inport')
                 % add enable port to the node inputs, its value may be used
                 enablePortsFields = fields(...
                     cellfun(@(x) strcmp(subsys.Content.(x).BlockType,'EnablePort'), fields));
-                for i=1:numel(enablePortsFields)
-                    [~, names_i] = SLX2LusUtils.getBlockOutputsNames(subsys.Content.(enablePortsFields{i}));
-                    names = [names, names_i];
-                end
-                % add _isEnabled condition.
                 if ~isempty(enablePortsFields) ...
-                        || (isfield(subsys, 'isEnabled') && subsys.isEnabled == 1)
-                    names{numel(names) + 1} =...
-                        strcat(SLX2LusUtils.isEnabledStr() , ':bool;');
+                        && strcmp(subsys.Content.(enablePortsFields{1}).ShowOutputPort, 'on')
+                    [names_withNoDT_i, names_i] = SLX2LusUtils.getBlockOutputsNames(subsys.Content.(enablePortsFields{1}));
+                    names = [names, names_i];
+                    names_withNoDT = [names_withNoDT, names_withNoDT_i];
                 end
             end
-            result = MatlabUtils.strjoin(names, '\n');
+            
         end
         
         %% get block outputs names: inlining dimension
@@ -166,10 +164,22 @@ classdef SLX2LusUtils < handle
             % ports.
             srcPorts = blk.PortConnectivity(...
                 arrayfun(@(x) ~isempty(x.SrcBlock) ...
-                && ( ~isempty(str2num(x.Type)) || strcmp(x.Type, 'enable')), blk.PortConnectivity));
+                &&  ~isempty(str2num(x.Type)) , blk.PortConnectivity));
             if nargin >= 3 && ~isempty(Port)
                 srcPorts = srcPorts(Port);
             end
+            inputs = {};
+            for b=srcPorts'
+                srcPort = b.SrcPort;
+                srcHandle = b.SrcBlock;
+                src = get_struct(parent, srcHandle);
+                n_i = SLX2LusUtils.getBlockOutputsNames(src, srcPort);
+                inputs = [inputs, n_i];
+            end
+        end
+        function [inputs] = getBlockEnableInputsNames(parent, blk)
+            srcPorts = blk.PortConnectivity(...
+                arrayfun(@(x) strcmp(x.Type, 'enable'), blk.PortConnectivity));
             inputs = {};
             for b=srcPorts'
                 srcPort = b.SrcPort;
