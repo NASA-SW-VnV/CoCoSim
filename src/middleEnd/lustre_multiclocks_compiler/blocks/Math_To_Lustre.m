@@ -47,12 +47,12 @@ classdef Math_To_Lustre < Block_To_Lustre
             elseif strcmp(operator, 'transpose')
                 display_msg(sprintf('The transpose operator is not support in block %s',...
                     blk.Origin_path), MsgType.ERROR, 'Trigonometry_To_Lustre', '');    
-            elseif strcmp(operator, 'rem')
-                display_msg(sprintf('The rem operator is not support in block %s',...
-                    blk.Origin_path), MsgType.ERROR, 'Trigonometry_To_Lustre', '');     
-            elseif strcmp(operator, '10^u')
-                display_msg(sprintf('The 10^u operator is not support in block %s',...
-                    blk.Origin_path), MsgType.ERROR, 'Trigonometry_To_Lustre', '');                   
+%             elseif strcmp(operator, 'rem')
+%                 display_msg(sprintf('The rem operator is not support in block %s',...
+%                     blk.Origin_path), MsgType.ERROR, 'Trigonometry_To_Lustre', '');     
+%             elseif strcmp(operator, '10^u')
+%                 display_msg(sprintf('The 10^u operator is not support in block %s',...
+%                     blk.Origin_path), MsgType.ERROR, 'Trigonometry_To_Lustre', '');                   
             else
                 for i=1:numel(outputs)
                     if strcmp(operator, 'square')
@@ -66,7 +66,7 @@ classdef Math_To_Lustre < Block_To_Lustre
                     elseif strcmp(operator, 'rem')
                         codes{i} = sprintf('%s = rem(%s,%s);\n\t', outputs{i}, inputs{1}{i},inputs{2}{i});    
                     elseif strcmp(operator, 'pow')
-                        codes{i} = sprintf('%s = rem(%s,%s);\n\t', outputs{i}, inputs{1}{i},inputs{2}{i});    
+                        codes{i} = sprintf('%s = pow(%s,%s);\n\t', outputs{i}, inputs{1}{i},inputs{2}{i});    
                     else
                         if strcmp(operator, '10^u')
                             operator = 'ArrayPowerBase10';
