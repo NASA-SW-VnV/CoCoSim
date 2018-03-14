@@ -64,7 +64,9 @@ classdef Math_To_Lustre < Block_To_Lustre
                     elseif strcmp(operator, 'hypot')
                         codes{i} = sprintf('%s = sqrt(%s*%s+%s*%s);\n\t', outputs{i}, inputs{1}{i},inputs{1}{i}, inputs{2}{i},inputs{2}{i});
                     elseif strcmp(operator, 'rem')
-                        codes{i} = sprintf('%s = rem(%s,%s);\n\t', outputs{i}, inputs{1}{i},inputs{2}{i});                        
+                        codes{i} = sprintf('%s = rem(%s,%s);\n\t', outputs{i}, inputs{1}{i},inputs{2}{i});    
+                    elseif strcmp(operator, 'pow')
+                        codes{i} = sprintf('%s = rem(%s,%s);\n\t', outputs{i}, inputs{1}{i},inputs{2}{i});    
                     else
                         if strcmp(operator, '10^u')
                             operator = 'ArrayPowerBase10';
