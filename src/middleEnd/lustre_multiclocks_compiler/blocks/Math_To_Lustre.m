@@ -13,10 +13,10 @@ classdef Math_To_Lustre < Block_To_Lustre
     methods
         
         function  write_code(obj, parent, blk, varargin)
-            operator = blk.Operator;
+            
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(blk);
             inputs = {};
-            obj.addExternal_libraries('lustrec_math');
+            
             widths = blk.CompiledPortWidths.Inport;
             nbInputs = numel(widths);
             max_width = max(widths);
@@ -38,44 +38,83 @@ classdef Math_To_Lustre < Block_To_Lustre
                 end
             end
 
-            [outLusDT, zero, one] = SLX2LusUtils.get_lustre_dt(outputDataType);
+            [outLusDT, ~, one] = SLX2LusUtils.get_lustre_dt(outputDataType);
             codes = {};
+            operator = blk.Operator;
+            if strcmp(operator, 'exp') || strcmp(operator, 'log')...
+                    || strcmp(operator, 'log10') 
+                
+                obj.addExternal_libraries('lustrec_math');
+                for i=1:numel(outputs)
+                    codes{i} = sprintf('%s = %s(%s);\n\t', outputs{i}, operator,inputs{1}{i});
+                end
+                
+            elseif strcmp(operator, '10^u')
+                obj.addExternal_libraries('lustrec_math');
+                for i=1:numel(outputs)
+                    codes{i} = sprintf('%s = pow(10.0, %s);\n\t', outputs{i}, inputs{1}{i});
+                end
+
+                
+            elseif strcmp(operator, 'square') || strcmp(operator, 'magnitude^2')
+                % for real variables (not complexe) magnitude is the same
+                % as square
+                for i=1:numel(outputs)
+                     codes{i} = sprintf('%s = %s * %s;\n\t', outputs{i}, inputs{1}{i},inputs{1}{i});
+                end
+            elseif strcmp(operator, 'pow')
+                
+                obj.addExternal_libraries('lustrec_math');
+                for i=1:numel(outputs)
+                    codes{i} = sprintf('%s = %s(%s, %s);\n\t', ...
+                        outputs{i}, operator, inputs{1}{i}, inputs{2}{i});
+                end   
+            elseif strcmp(operator, 'conj')
+                % assume input is real not complex
+                for i=1:numel(outputs)
+                    codes{i} = sprintf('%s = %s;\n\t', outputs{i}, inputs{1}{i});  
+                end
             
-            if strcmp(operator, 'hermitian')
+            elseif strcmp(operator, 'reciprocal')
+                for i=1:numel(outputs)
+                    codes{i} = sprintf('%s = %s / %s;\n\t', outputs{i}, one, inputs{1}{i});
+                end
+            
+            elseif strcmp(operator, 'hypot')
+                obj.addExternal_libraries('lustrec_math');
+                for i=1:numel(outputs)
+                    codes{i} = sprintf('%s = sqrt(%s * %s + %s * %s);\n\t', outputs{i}, inputs{1}{i},inputs{1}{i}, inputs{2}{i},inputs{2}{i});
+                end
+            elseif strcmp(operator, 'rem')
+                if strcmp(outLusDT, 'int')
+                    obj.addExternal_libraries('rem_int_int');
+                    fun = 'rem_int_int';
+                else
+                    obj.addExternal_libraries('simulink_math_fcn');
+                    fun = 'rem_real';
+                end
+                for i=1:numel(outputs)
+                    codes{i} = sprintf('%s = %s(%s, %s);\n\t',...
+                        outputs{i}, fun, inputs{1}{i}, inputs{2}{i});
+                end
+            
+            elseif strcmp(operator, 'mod')
+                if strcmp(outLusDT, 'int')
+                    obj.addExternal_libraries('simulink_math_fcn');
+                    fun = 'mod_int';
+                else
+                    obj.addExternal_libraries('simulink_math_fcn');
+                    fun = 'mod_real';
+                end
+                for i=1:numel(outputs)
+                    codes{i} = sprintf('%s = %s(%s, %s);\n\t',...
+                        outputs{i}, fun, inputs{1}{i}, inputs{2}{i});
+                end
+            elseif  strcmp(operator, 'transpose') || strcmp(operator, 'hermitian')
                 display_msg(sprintf('The hermitian operator is not support in block %s',...
                     blk.Origin_path), MsgType.ERROR, 'Trigonometry_To_Lustre', '');
-            elseif strcmp(operator, 'transpose')
-                display_msg(sprintf('The transpose operator is not support in block %s',...
-                    blk.Origin_path), MsgType.ERROR, 'Trigonometry_To_Lustre', '');    
-            elseif strcmp(operator, 'rem')
-                display_msg(sprintf('The rem operator is not support in block %s',...
-                    blk.Origin_path), MsgType.ERROR, 'Trigonometry_To_Lustre', '');     
-            elseif strcmp(operator, '10^u')
-                display_msg(sprintf('The 10^u operator is not support in block %s',...
-                    blk.Origin_path), MsgType.ERROR, 'Trigonometry_To_Lustre', '');                   
-            else
-                for i=1:numel(outputs)
-                    if strcmp(operator, 'square')
-                        codes{i} = sprintf('%s = %s*%s;\n\t', outputs{i}, inputs{1}{i},inputs{1}{i});
-                    elseif strcmp(operator, 'conj')
-                        codes{i} = sprintf('%s = %s;\n\t', outputs{i}, inputs{1}{i});  % assume input is real not complex
-                    elseif strcmp(operator, 'reciprocal')
-                        codes{i} = sprintf('%s = %s / %s;\n\t', outputs{i}, one, inputs{1}{i}); 
-                    elseif strcmp(operator, 'hypot')
-                        codes{i} = sprintf('%s = sqrt(%s*%s+%s*%s);\n\t', outputs{i}, inputs{1}{i},inputs{1}{i}, inputs{2}{i},inputs{2}{i});
-                    elseif strcmp(operator, 'rem')
-                        codes{i} = sprintf('%s = rem(%s,%s);\n\t', outputs{i}, inputs{1}{i},inputs{2}{i});    
-                    elseif strcmp(operator, 'pow')
-                        codes{i} = sprintf('%s = rem(%s,%s);\n\t', outputs{i}, inputs{1}{i},inputs{2}{i});    
-                    else
-                        if strcmp(operator, '10^u')
-                            operator = 'ArrayPowerBase10';
-                        elseif strcmp(operator, 'mod')
-                            operator = 'modulo';
-                        end
-                        codes{i} = sprintf('%s = %s(%s);\n\t', outputs{i}, operator,inputs{1}{i});
-                    end
-                end
+           
+           
             end
             
             obj.setCode(MatlabUtils.strjoin(codes, ''));

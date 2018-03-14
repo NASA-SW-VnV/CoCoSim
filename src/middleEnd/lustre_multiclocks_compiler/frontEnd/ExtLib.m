@@ -55,11 +55,18 @@ classdef ExtLib
             node = '';
         end
         
+        function [node, external_nodes_i, opens] = get_simulink_math_fcn()
+            opens = {'simulink_math_fcn'};
+            external_nodes_i = {};
+            node = '';
+        end
+        
         function [node, external_nodes_i, opens] = get_int_to_real()
             opens = {'conv'};
             external_nodes_i = {};
             node = '';
         end
+        
         function [node, external_nodes_i, opens] = get_real_to_int()
             opens = {'conv'};
             external_nodes_i = {};
@@ -228,7 +235,7 @@ classdef ExtLib
         end
         %%
         function [node, external_nodes_i, opens] = get_fmod()
-            opens = {'simulink_math_fcn'};
+            opens = {'lustrec_math'};
             external_nodes_i = {};
             node = '';
         end

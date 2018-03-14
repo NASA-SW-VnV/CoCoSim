@@ -28,8 +28,8 @@ classdef Trigonometry_To_Lustre < Block_To_Lustre
                 inport_dt = blk.CompiledPortDataTypes.Inport(i);
                 %converts the input data type(s) to
                 %its accumulator data type
-                if ~strcmp(inport_dt, outputDataType)
-                    [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, outputDataType);
+                if ~strcmp(inport_dt, 'real')
+                    [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, 'real');
                     if ~isempty(external_lib)
                         obj.addExternal_libraries(external_lib);
                         inputs{i} = cellfun(@(x) sprintf(conv_format,x), inputs{i}, 'un', 0);
@@ -45,10 +45,7 @@ classdef Trigonometry_To_Lustre < Block_To_Lustre
                     blk.Origin_path), MsgType.ERROR, 'Trigonometry_To_Lustre', '');
             elseif strcmp(operator, 'tanh')
                 display_msg(sprintf('The tanh operator is not support in block %s',...
-                    blk.Origin_path), MsgType.ERROR, 'Trigonometry_To_Lustre', '');                   
-%             elseif strcmp(operator, 'atanh')
-%                 display_msg(sprintf('The atanh operator is not support in block %s',...
-%                     blk.Origin_path), MsgType.ERROR, 'Trigonometry_To_Lustre', '');                
+                    blk.Origin_path), MsgType.ERROR, 'Trigonometry_To_Lustre', '');                
             elseif strcmp(operator, 'sincos')
                 index = 0;
                 for i=1:widths
