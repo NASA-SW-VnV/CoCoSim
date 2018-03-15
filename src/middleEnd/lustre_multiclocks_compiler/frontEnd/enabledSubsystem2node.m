@@ -64,11 +64,16 @@ fields = fieldnames(subsys.Content);
 enablePortsFields = fields(...
     cellfun(@(x) (isfield(subsys.Content.(x),'BlockType')...
     && strcmp(subsys.Content.(x).BlockType,'EnablePort')), fields));
-StatesWhenEnabling = subsys.Content.(enablePortsFields{1}).StatesWhenEnabling;
-if strcmp(StatesWhenEnabling, 'reset')
-    resumeOrRestart = 'restart';
+if isempty(enablePortsFields)
+    %the case of trigger port only
+    resumeOrRestart = 'resume';% by default
 else
-    resumeOrRestart = 'resume';
+    StatesWhenEnabling = subsys.Content.(enablePortsFields{1}).StatesWhenEnabling;
+    if strcmp(StatesWhenEnabling, 'reset')
+        resumeOrRestart = 'restart';
+    else
+        resumeOrRestart = 'resume';
+    end
 end
 Outportfields = ...
     fields(cellfun(@(x) (isfield(subsys.Content.(x),'BlockType')...
@@ -85,7 +90,7 @@ for i=1:numel(Outportfields)
         variables_cell{end + 1} = sprintf('pre_%s',outputs_DT_i{out_idx});
         inactiveStatement = sprintf('%s %s = pre_%s;\n\t', ...
             inactiveStatement, outputs_i{out_idx}, outputs_i{out_idx});
-        if strcmp(OutputWhenDisabled, 'reset')
+        if strcmp(OutputWhenDisabled, 'reset') && ~isempty(enablePortsFields)
             pre_out_str = sprintf('%spre_%s = %s;\n\t',...
                 pre_out_str, outputs_i{out_idx}, InitialOutput_cell{i});
         else

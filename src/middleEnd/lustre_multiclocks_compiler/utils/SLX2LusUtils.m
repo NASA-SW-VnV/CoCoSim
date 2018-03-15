@@ -91,6 +91,15 @@ classdef SLX2LusUtils < handle
                     names = [names, names_i];
                     names_withNoDT = [names_withNoDT, names_withNoDT_i];
                 end
+                % add trigger port to the node inputs, its value may be used
+                triggerPortsFields = fields(...
+                    cellfun(@(x) strcmp(subsys.Content.(x).BlockType,'TriggerPort'), fields));
+                if ~isempty(triggerPortsFields) ...
+                        && strcmp(subsys.Content.(triggerPortsFields{1}).ShowOutputPort, 'on')
+                    [names_withNoDT_i, names_i] = SLX2LusUtils.getBlockOutputsNames(subsys.Content.(triggerPortsFields{1}));
+                    names = [names, names_i];
+                    names_withNoDT = [names_withNoDT, names_withNoDT_i];
+                end
             end
             
         end
@@ -178,20 +187,17 @@ classdef SLX2LusUtils < handle
             end
         end
         function [inputs] = getSubsystemEnableInputsNames(parent, blk)
-            srcPorts = blk.PortConnectivity(...
-                arrayfun(@(x) strcmp(x.Type, 'enable'), blk.PortConnectivity));
-            inputs = {};
-            for b=srcPorts'
-                srcPort = b.SrcPort;
-                srcHandle = b.SrcBlock;
-                src = get_struct(parent, srcHandle);
-                n_i = SLX2LusUtils.getBlockOutputsNames(src, srcPort);
-                inputs = [inputs, n_i];
-            end
+            [inputs] = SLX2LusUtils.getSpecialInputsNames(parent, blk, 'enable');
+        end
+        function [inputs] = getSubsystemTriggerInputsNames(parent, blk)
+            [inputs] = SLX2LusUtils.getSpecialInputsNames(parent, blk, 'trigger');
         end
         function [inputs] = getSubsystemResetInputsNames(parent, blk)
+            [inputs] = SLX2LusUtils.getSpecialInputsNames(parent, blk, 'Reset');
+        end
+        function [inputs] = getSpecialInputsNames(parent, blk, type)
             srcPorts = blk.PortConnectivity(...
-                arrayfun(@(x) strcmp(x.Type, 'Reset'), blk.PortConnectivity));
+                arrayfun(@(x) strcmp(x.Type, type), blk.PortConnectivity));
             inputs = {};
             for b=srcPorts'
                 srcPort = b.SrcPort;
@@ -239,7 +245,7 @@ classdef SLX2LusUtils < handle
             else
                 if strcmp(lus_in_dt, 'int')
                     RndMeth = 'int_to_real';
-                
+                    
                 elseif strcmp(RndMeth, 'Simplest') || strcmp(RndMeth, 'Zero')
                     RndMeth = 'real_to_int';
                 else
@@ -280,7 +286,7 @@ classdef SLX2LusUtils < handle
                         conv_format = strcat(conv,'(',RndMeth,'(%s))');
                     end
                 case {'int32','uint32'}
-                        % supporting 'int32','uint32' as lustre int.
+                    % supporting 'int32','uint32' as lustre int.
                     if strcmp(lus_in_dt, 'bool')
                         external_lib = {'bool_to_int'};
                         conv_format = 'bool_to_int(%s)';
@@ -301,7 +307,7 @@ classdef SLX2LusUtils < handle
                     end
                     
                     
-                %lustre conversion
+                    %lustre conversion
                 case 'int'
                     if strcmp(lus_in_dt, 'bool')
                         external_lib = {'bool_to_int'};
@@ -330,32 +336,60 @@ classdef SLX2LusUtils < handle
         end
         
         %% reset conditions
-        function [resetCode, unsupported_options] = getResetCode(blk, ...
+        function [resetCode, status] = getResetCode(...
                 resetType, resetDT, resetInput, zero )
-            unsupported_options = {};
+            status = 0;
             if strcmp(resetDT, 'bool')
                 b = sprintf('%s',resetInput);
             else
                 b = sprintf('(%s >= %s)',resetInput , zero);
             end
-            if strcmp(resetType, 'Rising') || strcmp(resetType, 'rising') 
+            if strcmp(resetType, 'Rising') || strcmp(resetType, 'rising')
                 resetCode = sprintf(...
-                    '%s and not pre %s'...
+                    'false -> %s and not pre %s'...
                     ,b ,b );
-            elseif strcmp(resetType, 'Falling') || strcmp(resetType, 'falling') 
+            elseif strcmp(resetType, 'Falling') || strcmp(resetType, 'falling')
                 resetCode = sprintf(...
-                    'not %s and pre %s'...
+                    'false -> not %s and pre %s'...
                     ,b ,b);
             elseif strcmp(resetType, 'Either') || strcmp(resetType, 'either')
                 resetCode = sprintf(...
-                    '(%s and not pre %s) or (not %s and pre %s) '...
+                    'false -> (%s and not pre %s) or (not %s and pre %s) '...
                     ,b ,b ,b ,b);
             else
                 resetCode = '';
-                unsupported_options{numel(unsupported_options) + 1} = ...
-                    sprintf('This External reset type [%s] is not supported in block %s.', ...
-                    resetType, blk.Origin_path);
+                status = 1;
                 return;
+            end
+        end
+        
+        %% trigger value
+        function TriggerinputExp = getTriggerValue(Cond, triggerInput, TriggerType, dt)
+            if strcmp(dt, 'real')
+                suffix = '.0';
+                zero = '0.0';
+            else
+                suffix = '';
+                zero = '0';
+            end
+            if strcmp(TriggerType, 'rising')
+                TriggerinputExp = sprintf(...
+                    '0%s -> if %s then 1%s else 0%s'...
+                    ,suffix, Cond, suffix, suffix );
+            elseif strcmp(TriggerType, 'falling')
+                TriggerinputExp = sprintf(...
+                    '0%s -> if %s then -1%s else 0%s'...
+                    ,suffix, Cond, suffix, suffix );
+            elseif strcmp(TriggerType, 'function-call')
+                TriggerinputExp = sprintf(...
+                    '0%s -> if %s then 2%s else 0%s'...
+                    ,suffix, Cond, suffix, suffix );
+            else
+                risingCond = SLX2LusUtils.getResetCode(...
+                    'rising', dt, triggerInput, zero );
+                TriggerinputExp = sprintf(...
+                    '%s -> if %s then if %s then 1%s else -1%s else 0%s'...
+                    ,zero,  Cond, risingCond, suffix, suffix, suffix);
             end
         end
     end

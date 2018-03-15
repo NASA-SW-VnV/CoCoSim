@@ -43,7 +43,8 @@ contract = '-- Contract In progress';
 main_node = sprintf('%s\n%s\n%s\n%s\nlet\n\t%s\ntel\n',...
     comment, node_header, contract, variables_str, body);
 
-if Subsystem_To_Lustre.hasEnablePort(subsys_struct)
+if Subsystem_To_Lustre.hasEnablePort(subsys_struct) ...
+        || Subsystem_To_Lustre.hasTriggerPort(subsys_struct)
     automaton_node = enabledSubsystem2node(subsys_struct, xml_trace);
     main_node = [main_node, automaton_node];
 end
