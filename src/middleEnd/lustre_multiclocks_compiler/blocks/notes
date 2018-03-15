@@ -1,17 +1,18 @@
 (*Please add block in Alphabetic order*)
-Ktrinh: Gain (pp), 
+Ktrinh: Bias (pp),
+        Concatenate,
+        DotProduct(pp),
+        Gain (pp), 
         Goto,
         Logic,
+        Math,
         Product,
+        Reshape,
         Switch,
         Sqrt, 
         Trigonomery, 
-        Math,
-        Bias,
-        Concatenate,
-        DotProduct,
-        Reshape,
-          
+
+
 
 Hamza:  Abs,
         Constant,
@@ -25,6 +26,7 @@ Hamza:  Abs,
         DiscreteIntegrator (pp),
         DiscreteStateSpace (pp),
         Display (ignored)
+        EnablePort,
         Fcn (pp) (*TODO: need to be translated when pp fails*)
         ForEach (pp),
         From,
@@ -37,6 +39,7 @@ Hamza:  Abs,
         RateTransition (pp),
         RelationalOperator, 
         Relay (pp),
+        ResetPort, 
         Sum,
         Subsystem,
         Saturation (pp), 
@@ -53,30 +56,24 @@ Hamza:  Abs,
 Blocks that has left from Biosentinel:
     ActionPort
     Assignment
-    Bias
     BusAssignment
     BusCreator
     BusSelector
-    Concatenate
     DataTypeConversion
     DataTypeDuplicate
     Demux
     DiscreteTransferFcn (see TransferFcn in pp)
-    DotProduct
-    EnablePort
     Fcn (partially done in pp)
     ForIterator
     FromWorkspace
     If
     Lookup\_n-D
-    Math
     Memory (can be descritized in pp to unitDelay) 
     Merge
     ModelReference
     MultiPortSwitch
     Mux
     RandomNumber ( to translate to empty node with contract)
-    Reshape
     Rounding
     S-Function
     SampleTimeMath

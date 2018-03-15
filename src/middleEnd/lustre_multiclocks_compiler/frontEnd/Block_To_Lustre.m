@@ -87,7 +87,7 @@ classdef Block_To_Lustre < handle
         % in the node signature.
         function b = ignored(type)
             % add blocks that will be ignored because they are supported somehow implicitly.
-            blks = {'Inport', 'Terminator', 'Scope', 'EnablePort'};
+            blks = {'Inport', 'Terminator', 'Scope', 'EnablePort', 'ResetPort'};
             b = ismember(type, blks);
         end
     end

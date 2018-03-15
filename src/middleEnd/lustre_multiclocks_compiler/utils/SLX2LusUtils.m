@@ -177,9 +177,21 @@ classdef SLX2LusUtils < handle
                 inputs = [inputs, n_i];
             end
         end
-        function [inputs] = getBlockEnableInputsNames(parent, blk)
+        function [inputs] = getSubsystemEnableInputsNames(parent, blk)
             srcPorts = blk.PortConnectivity(...
                 arrayfun(@(x) strcmp(x.Type, 'enable'), blk.PortConnectivity));
+            inputs = {};
+            for b=srcPorts'
+                srcPort = b.SrcPort;
+                srcHandle = b.SrcBlock;
+                src = get_struct(parent, srcHandle);
+                n_i = SLX2LusUtils.getBlockOutputsNames(src, srcPort);
+                inputs = [inputs, n_i];
+            end
+        end
+        function [inputs] = getSubsystemResetInputsNames(parent, blk)
+            srcPorts = blk.PortConnectivity(...
+                arrayfun(@(x) strcmp(x.Type, 'Reset'), blk.PortConnectivity));
             inputs = {};
             for b=srcPorts'
                 srcPort = b.SrcPort;
@@ -314,6 +326,36 @@ classdef SLX2LusUtils < handle
                         external_lib = {'real_to_bool'};
                         conv_format = 'real_to_bool(%s)';
                     end
+            end
+        end
+        
+        %% reset conditions
+        function [resetCode, unsupported_options] = getResetCode(blk, ...
+                resetType, resetDT, resetInput, zero )
+            unsupported_options = {};
+            if strcmp(resetDT, 'bool')
+                b = sprintf('%s',resetInput);
+            else
+                b = sprintf('(%s >= %s)',resetInput , zero);
+            end
+            if strcmp(resetType, 'Rising') || strcmp(resetType, 'rising') 
+                resetCode = sprintf(...
+                    '%s and not pre %s'...
+                    ,b ,b );
+            elseif strcmp(resetType, 'Falling') || strcmp(resetType, 'falling') 
+                resetCode = sprintf(...
+                    'not %s and pre %s'...
+                    ,b ,b);
+            elseif strcmp(resetType, 'Either') || strcmp(resetType, 'either')
+                resetCode = sprintf(...
+                    '(%s and not pre %s) or (not %s and pre %s) '...
+                    ,b ,b ,b ,b);
+            else
+                resetCode = '';
+                unsupported_options{numel(unsupported_options) + 1} = ...
+                    sprintf('This External reset type [%s] is not supported in block %s.', ...
+                    resetType, blk.Origin_path);
+                return;
             end
         end
     end

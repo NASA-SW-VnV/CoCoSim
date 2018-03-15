@@ -231,7 +231,7 @@ classdef Delay_To_Lustre < Block_To_Lustre
                 variables{numel(variables) + 1} = sprintf ('%s:bool;',...
                     reset_var);
                 codes{numel(codes) + 1} = sprintf('%s = %s;\n\t'...
-                    ,reset_var , Delay_To_Lustre.getResetCode(...
+                    ,reset_var , SLX2LusUtils.getResetCode(blk, ...
                     ExternalReset,resetDT, char(resetValue) , zero));
             end
             isEnabe = strcmp(ShowEnablePort, 'on');
@@ -371,32 +371,7 @@ classdef Delay_To_Lustre < Block_To_Lustre
                 node_header, vars, body, pre_u);
         end
         
-        function [resetCode, unsupported_options] = getResetCode(resetType,resetDT, resetInput, zero )
-            unsupported_options = {};
-            if strcmp(resetDT, 'bool')
-                b = sprintf('%s',resetInput);
-            else
-                b = sprintf('(%s >= %s)',resetInput , zero);
-            end
-            if strcmp(resetType, 'Rising')
-                resetCode = sprintf(...
-                    '%s and not pre %s'...
-                    ,b ,b );
-            elseif strcmp(resetType, 'Falling')
-                resetCode = sprintf(...
-                    'not %s and pre %s'...
-                    ,b ,b);
-            elseif strcmp(resetType, 'Either')
-                resetCode = sprintf(...
-                    '(%s and not pre %s) or (not %s and pre %s) '...
-                    ,b ,b ,b ,b);
-            else
-                unsupported_options{numel(unsupported_options) + 1} = ...
-                    sprintf('This External reset type [%s] is not supported in block %s.', ...
-                    resetType, blk.Origin_path);
-                return;
-            end
-        end
+        
         
         function code = getExpofNDelays(x0, u, D)
             if D == 0
