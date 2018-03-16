@@ -44,7 +44,7 @@ classdef Product_To_Lustre < Block_To_Lustre
     end
     
     methods(Static)
-        %
+        % This method assume there are at least 2 inputs.
         function in_matrix_dimension = getInputMatrixDimensions(blk)
             % return structure of matrix size
             in_matrix_dimension = {};
