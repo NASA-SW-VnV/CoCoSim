@@ -1,5 +1,7 @@
 function [valid, validation_compute,lustrec_failed, ...
-    lustrec_binary_failed, sim_failed, lus_file_path] = validate_ToLustre(model_full_path, tests_method, model_checker, show_model, deep_CEX, min_max_constraints)
+    lustrec_binary_failed, sim_failed, lus_file_path] = ...
+    validate_ToLustre(model_full_path, tests_method, model_checker, ...
+    show_model, deep_CEX, min_max_constraints, options)
 
 
 validation_start = tic;
@@ -26,6 +28,9 @@ end
 if ~exist('model_checker', 'var')
     model_checker = 'KIND2';
 end
+if ~exist('options', 'var')
+    options = '';
+end
 assignin('base', 'SOLVER', 'V');
 assignin('base', 'RUST_GEN', 0);
 assignin('base', 'C_GEN', 0);
@@ -37,7 +42,7 @@ try
     f_msg = sprintf('Compiling model "%s" to Lustre\n',file_name);
     display_msg(f_msg, MsgType.RESULT, 'validation', '');
     GUIUtils.update_status('Runing CocoSim');
-    lus_file_path = ToLustre(model_full_path);
+    lus_file_path = ToLustre(model_full_path, [], [], options);
     [output_dir, lus_file_name, ~] = fileparts(lus_file_path);
     file_name = lus_file_name;
     main_node = lus_file_name;
@@ -60,7 +65,9 @@ BUtils.force_inports_DT(file_name);
 
 try
     [valid, lustrec_failed, lustrec_binary_failed, sim_failed] = ...
-        compare_slx_lus(model_full_path, lus_file_path, main_node, output_dir, tests_method, model_checker, show_model, min_max_constraints);
+        compare_slx_lus(model_full_path, lus_file_path, main_node, ...
+        output_dir, tests_method, model_checker, show_model,...
+        min_max_constraints, options);
 catch ME
     display_msg(ME.message, MsgType.ERROR, 'validation', '');
     display_msg(ME.getReport(), MsgType.DEBUG, 'validation', '');

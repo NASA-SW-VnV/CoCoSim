@@ -49,6 +49,7 @@ Hamza:  Abs,
         Terminator (ignored),
         ToWorkspace (pp),
         TransferFcn (pp),
+        TriggerPort, 
         UnitDelay,
         ZeroPole (pp),
         
@@ -80,4 +81,4 @@ Blocks that has left from Biosentinel:
     Selector (see pp)
     StateControl
     SwitchCase
-    TriggerPort
+    

@@ -9,7 +9,8 @@ function [valid, ...
     tests_method, ...
     model_checker, ...
     show_models,...
-    min_max_constraints)
+    min_max_constraints, ...
+    options)
 %compare_slx_lus compare lustre file and Simulink model based on different
 %test methods:
 %   tests_method == 1: Use one random vector test of 100 steps.
@@ -49,6 +50,9 @@ if ~exist('tests_method', 'var') || isempty(tests_method)
 end
 if ~exist('model_checker', 'var') || isempty(model_checker)
     model_checker = 'KIND2';
+end
+if ~exist('options', 'var') || isempty(options)
+    options = '';
 end
 %% define configuration variables
 
