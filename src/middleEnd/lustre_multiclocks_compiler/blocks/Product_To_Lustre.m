@@ -31,7 +31,7 @@ classdef Product_To_Lustre < Block_To_Lustre
         
         
         %%
-        function options = getUnsupportedOptions(obj, varargin)
+        function options = getUnsupportedOptions(obj, blk, varargin)
             % add your unsuported options list here
             if strcmp(blk.Multiplication, 'Matrix(*)')...
                     && contains(blk.Inputs, '/')

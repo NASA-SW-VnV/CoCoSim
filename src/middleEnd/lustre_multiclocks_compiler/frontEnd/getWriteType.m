@@ -16,7 +16,7 @@ if Block_To_Lustre.ignored(sub_blk.BlockType)
     return;
 end
 
-if strcmp(sub_blk.BlockType, 'SubSystem') && strcmp(sub_blk.Mask, 'on')
+if strcmp(sub_blk.Mask, 'on')
     type = sub_blk.MaskType;
     fun_name = [Block_To_Lustre.blkTypeFormat(type) '_To_Lustre'];
     fun_path = which(fun_name);

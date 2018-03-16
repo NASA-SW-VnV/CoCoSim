@@ -126,7 +126,16 @@ classdef Subsystem_To_Lustre < Block_To_Lustre
             obj.addVariable(outputs_dt);
         end
         
-        function options = getUnsupportedOptions(obj, varargin)
+        function options = getUnsupportedOptions(obj, blk, varargin)
+            [isEnabledSubsystem, ~] = ...
+                Subsystem_To_Lustre.hasEnablePort(blk);
+            [isTriggered, ~, ~] = ...
+                Subsystem_To_Lustre.hasTriggerPort(blk);
+            if isEnabledSubsystem && isTriggered
+                obj.addUnsupported_options(...
+                    sprintf('Subsystem %s has an EnablePort and TriggerPort, in this scenario we do not support "reset" option in the EnablePort. Please use held', ...
+                    blk.Origin_path));
+            end
             % add your unsuported options list here
             options = obj.unsupported_options;
         end
