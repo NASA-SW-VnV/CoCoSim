@@ -111,11 +111,21 @@ classdef Math_To_Lustre < Block_To_Lustre
                     codes{i} = sprintf('%s = %s(%s, %s);\n\t',...
                         outputs{i}, fun, inputs{1}{i}, inputs{2}{i});
                 end
-            elseif  strcmp(operator, 'transpose') || strcmp(operator, 'hermitian')
-                display_msg(sprintf('The hermitian operator is not support in block %s',...
-                    blk.Origin_path), MsgType.ERROR, 'Trigonometry_To_Lustre', '');
-           
-           
+            elseif  strcmp(operator, 'transpose') || strcmp(operator, 'hermitian')          
+                in_matrix_dimension = Product_To_Lustre.getInputMatrixDimensions(blk);
+                if in_matrix_dimension{1}.numDs > 2
+                    display_msg(sprintf('Matrix size > 2 is not supported for transpose/hermitian operator in block %s',...
+                        blk.Origin_path), MsgType.ERROR, 'Math_To_Lustre', '');
+                end
+                
+                outIndex = 0;
+                for i=1:in_matrix_dimension{1}.dims(2)
+                    for j=1:in_matrix_dimension{1}.dims(1)
+                        outIndex = outIndex + 1;
+                        inIndex = (j-1)*in_matrix_dimension{1}.dims(2)+i;
+                        codes{outIndex} = sprintf('%s = %s;\n\t', outputs{outIndex}, inputs{1}{inIndex});  
+                    end
+                end 
             end
             
             obj.setCode(MatlabUtils.strjoin(codes, ''));
@@ -124,18 +134,8 @@ classdef Math_To_Lustre < Block_To_Lustre
         
         function options = getUnsupportedOptions(obj, blk, varargin)
             obj.unsupported_options = {};
-            if strcmp(blk.Operator, 'cos + jsin')
-                obj.addUnsupported_options(...
-                    sprintf('The cos + jsin option is not support in block %s', blk.Origin_path));
-            end 
-            if strcmp(blk.Operator, 'atanh')
-                obj.addUnsupported_options(...
-                    sprintf('The atanh option is not support in block %s', blk.Origin_path));
-            end   
-            if strcmp(blk.Operator, 'tanh')
-                obj.addUnsupported_options(...
-                    sprintf('The tanh option is not support in block %s', blk.Origin_path));
-            end             
+
+           
             options = obj.unsupported_options;
         end
     end
