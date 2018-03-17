@@ -48,27 +48,44 @@ classdef Reshape_To_Lustre < Block_To_Lustre
             
             in_matrix_dimension = Reshape_To_Lustre.getInputMatrixDimensions(blk);
             codes = {}; 
-            if dimensionType < 4
+            if dimensionType == 1 || dimensionType == 2 || dimensionType == 3
+
+                % in matrix = nxm (i_in,j_in)        out matrix = kxl (i_out, j_out)
+                n = in_matrix_dimension{1}.dims(1,1);                
                 if in_matrix_dimension{1}.numDs==1
-                    for i=1:numel(outputs)
-                        codes{i} = sprintf('%s = %s;\n\t', outputs{i}, inputs{1}{i});
-                    end
+                    m = 1;
                 elseif in_matrix_dimension{1}.numDs==2
-                    outIndex = 0;
-                    for j=1:in_matrix_dimension{1}.dims(1,2)
-                        for i=1:in_matrix_dimension{1}.dims(1,1)
-                            outIndex = outIndex + 1;
-                            inIndex = (i-1)*in_matrix_dimension{1}.dims(1,2)+j;
-                            codes{outIndex} = sprintf('%s = %s;\n\t', outputs{outIndex}, inputs{1}{inIndex});
-                        end
-                    end                        
+                    m = in_matrix_dimension{1}.dims(1,2)
                 else
                     display_msg(sprintf('3 or more dimensions matrix is not supported in block %s',...
                         blk.Origin_path), MsgType.WARNING, 'Reshape_To_Lustre', '');
                 end
-%             elseif dimensionType == 2
-%                 
-%             elseif dimensionType == 3
+                if dimensionType == 1
+                    k = numel(outputs);
+                    l = 1;
+                else
+                    outmat_size = str2num(blk.OutputDimensions)
+                    k = outmat_size(1);
+                    l = outmat_size(2);
+                end
+                for i=1:numel(outputs)
+                    i_in = rem(i,n);
+                    j_in = fix(i/n)+1;
+                    if rem(i,n) == 0
+                        i_in = n;
+                        j_in = j_in - 1;
+                    end
+                    inIndex = (i_in-1)*m + j_in;
+                    i_out = rem(i,k);
+                    j_out = fix(i/k)+1;
+                    if rem(i,k) == 0
+                        i_out = k;
+                        j_out = j_out - 1;
+                    end
+                    outIndex = (i_out-1)*l + j_out;
+                    sprintf('i %d, inIndex %d, outIndex %d, i_in %d, j_in %d, i_out %d, j_out %d \n\t',i, inIndex, outIndex, i_in, j_in, i_out, j_out)
+                    codes{i} = sprintf('%s = %s;\n\t', outputs{outIndex}, inputs{1}{inIndex});
+                end
                 
             else
                 display_msg(sprintf('Unknown Output dimensionality in block %s',...
@@ -88,7 +105,8 @@ classdef Reshape_To_Lustre < Block_To_Lustre
     
     
     methods(Static)
-        % This method allows for only 1 input
+        % This method allows for only 1 input, the same static under
+        % Product_To_Lustre may require more than 1 input
         function in_matrix_dimension = getInputMatrixDimensions(blk)
             % return structure of matrix size
             in_matrix_dimension = {};
