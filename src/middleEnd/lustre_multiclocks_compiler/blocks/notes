@@ -11,6 +11,9 @@ Ktrinh: Bias (pp),
         Switch,
         Sqrt, 
         Trigonomery, 
+        Assignment,
+        Demux,
+        Mux
 
 
 
