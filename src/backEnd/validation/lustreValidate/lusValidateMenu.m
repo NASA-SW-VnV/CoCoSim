@@ -27,7 +27,7 @@ end
 
 function schema = Validate3(callbackInfo)
 schema = sl_action_schema;
-schema.label = 'Equivalence Checking using Simulink Design Vrifier';
+schema.label = 'Equivalence Checking using Simulink Design Verifier';
 schema.callback = @(x) VCallback(3, x);
 end
 
