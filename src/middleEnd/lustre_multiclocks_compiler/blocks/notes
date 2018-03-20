@@ -1,19 +1,22 @@
 (*Please add block in Alphabetic order*)
-Ktrinh: Bias (pp),
+Ktrinh: Assignment,
+        Bias (pp),
         Concatenate,
+        Demux,
         DotProduct(pp),
         Gain (pp), 
         Goto,
         Logic,
         Math,
+        Mux,
         Product,
         Reshape,
         Switch,
         Sqrt, 
         Trigonomery, 
-        Assignment,
-        Demux,
-        Mux
+        
+        
+        
 
 
 
