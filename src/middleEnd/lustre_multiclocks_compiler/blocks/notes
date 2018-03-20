@@ -62,24 +62,20 @@ Hamza:  Abs,
 
 Blocks that has left from Biosentinel:
     ActionPort
-    Assignment
     BusAssignment
     BusCreator
     BusSelector
     DataTypeConversion
     DataTypeDuplicate
-    Demux
     DiscreteTransferFcn (see TransferFcn in pp)
     Fcn (partially done in pp)
     ForIterator
-    FromWorkspace
     If
     Lookup\_n-D
     Memory (can be descritized in pp to unitDelay) 
     Merge
     ModelReference
     MultiPortSwitch
-    Mux
     RandomNumber ( to translate to empty node with contract)
     Rounding
     S-Function
