@@ -45,13 +45,6 @@ classdef MultiPortSwitch_To_Lustre < Block_To_Lustre
                 end
             end
 
-            DataPortOrder = blk.DataPortOrder;
-            DataPortIndices = blk.DataPortIndices;
-            UserInput_NumberDataPorts = blk.Inputs;
-            DataPortForDefault = blk.DataPortForDefault;
-            AllowDiffInputSizes = blk.AllowDiffInputSizes;
-            
-
             [outLusDT, ~, one] = SLX2LusUtils.get_lustre_dt(outputDataType);
             codes = {};
             indexBlock = SLX2LusUtils.getpreBlock(parent, blk, 1);
@@ -73,9 +66,9 @@ classdef MultiPortSwitch_To_Lustre < Block_To_Lustre
                 defaultIndex = defaultIndex + 1;
             end            
                
-            if strcmp(DataPortOrder, 'Zero-based contiguous')
+            if strcmp(blk.DataPortOrder, 'Zero-based contiguous')
                 switchIndex = switchIndex+1;
-            elseif strcmp(DataPortOrder, 'Specify indices')
+            elseif strcmp(blk.DataPortOrder, 'Specify indices')
                 display_msg(sprintf('Specify indices is not supported  in block %s',...
                     blk.Origin_path), MsgType.ERROR, 'MultiportSwitch_To_Lustre', '');
             end
@@ -94,8 +87,16 @@ classdef MultiPortSwitch_To_Lustre < Block_To_Lustre
         
         function options = getUnsupportedOptions(obj, blk, varargin)
             obj.unsupported_options = {};
-
-           
+            if strcmp(blk.DataPortOrder, 'Specify indices')
+                obj.addUnsupported_options(...
+                    sprintf('Specify indices is not supported  in block %s',...
+                    blk.Origin_path), MsgType.ERROR, 'MultiportSwitch_To_Lustre', '');
+            end    
+            if strcmp(blk.AllowDiffInputSizes, 'on')
+                obj.addUnsupported_options(...
+                    sprintf('Allow different data input sizes is not supported  in block %s',...
+                    blk.Origin_path), MsgType.ERROR, 'MultiportSwitch_To_Lustre', '');
+            end             
             options = obj.unsupported_options;
         end
     end
