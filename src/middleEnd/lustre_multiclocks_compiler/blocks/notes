@@ -1,13 +1,18 @@
 (*Please add block in Alphabetic order*)
 Ktrinh: Assignment,
         Bias (pp),
+        BusAssignment
+        BusCreator
+        BusSelector
         Concatenate,
         Demux,
         DotProduct(pp),
+        FromWorkspace,
         Gain (pp), 
         Goto,
         Logic,
         Math,
+        MultiPortSwitch
         Mux,
         Product,
         Reshape,
@@ -62,9 +67,6 @@ Hamza:  Abs,
 
 Blocks that has left from Biosentinel:
     ActionPort
-    BusAssignment
-    BusCreator
-    BusSelector
     DataTypeConversion
     DataTypeDuplicate
     DiscreteTransferFcn (see TransferFcn in pp)
@@ -75,7 +77,6 @@ Blocks that has left from Biosentinel:
     Memory (can be descritized in pp to unitDelay) 
     Merge
     ModelReference
-    MultiPortSwitch
     RandomNumber ( to translate to empty node with contract)
     Rounding
     S-Function
