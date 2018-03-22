@@ -1,5 +1,5 @@
-classdef Mux_To_Lustre < Block_To_Lustre
-    % Mux_To_Lustre
+classdef Demux_To_Lustre < Block_To_Lustre
+    % Demux_To_Lustre
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -13,11 +13,16 @@ classdef Mux_To_Lustre < Block_To_Lustre
     methods
         
         function  write_code(obj, parent, blk, varargin)
+            
+            if strcmp(blk.BusSelectionMode, 'on')
+                display_msg(sprintf('BusSelectionMode on is not supported in block %s',...
+                    blk.Origin_path), ...
+                    MsgType.ERROR, 'Demux_To_Lustre', '');
+            end
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(blk);
             inputs = {};
             
-            widths = blk.CompiledPortWidths.Inport;
-            max_width = max(widths);
+            widths = blk.CompiledPortWidths.Inport;  
             outputDataType = blk.CompiledPortDataTypes.Outport{1};
 
             for i=1:numel(widths)
@@ -35,16 +40,10 @@ classdef Mux_To_Lustre < Block_To_Lustre
             end
                        
             codes = {};
-            if 1
-                outputIndex = 0;
-                for i=1:numel(widths)
-                    for j=1:numel(inputs{i})
-                        outputIndex = outputIndex + 1;
-                        codes{outputIndex} = sprintf('%s = %s;\n\t', outputs{outputIndex}, inputs{i}{j});
-                    end
-                end
-
-            end        
+            
+            for i=1:widths
+                codes{i} = sprintf('%s = %s;\n\t', outputs{i}, inputs{1}{i});
+            end
             
             obj.setCode(MatlabUtils.strjoin(codes, ''));
             obj.addVariable(outputs_dt);
@@ -52,7 +51,12 @@ classdef Mux_To_Lustre < Block_To_Lustre
         
         function options = getUnsupportedOptions(obj, blk, varargin)
             obj.unsupported_options = {};
-           
+            if strcmp(blk.BusSelectionMode, 'on')
+                obj.addUnsupported_options(...
+                    sprintf('BusSelectionMode on is not supported in block %s',...
+                    blk.Origin_path), ...
+                    MsgType.ERROR, 'Demux_To_Lustre', '');
+            end           
             options = obj.unsupported_options;
         end
     end
