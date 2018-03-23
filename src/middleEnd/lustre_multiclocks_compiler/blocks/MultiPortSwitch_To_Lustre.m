@@ -53,7 +53,7 @@ classdef MultiPortSwitch_To_Lustre < Block_To_Lustre
             if status
                 display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
                     indexBlock.Value, indexBlock.Origin_path), ...
-                    MsgType.ERROR, 'Constant_To_Lustr', '');
+                    MsgType.ERROR, 'MultiPortSwitch_To_Lustre', '');
                 return;
             end
             switchIndex = int16(indexValue)+1;     
