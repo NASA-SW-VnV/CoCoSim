@@ -776,11 +776,14 @@ classdef LustrecUtils < handle
         end
         %% construct EMF  model
         function [status, new_name_path, emf_path, xml_trace] = construct_EMF_model(...
-                lus_file_path, node_name, output_dir)
+                lus_file_path, node_name, output_dir, organize_blocks)
             tools_config;
             status = BUtils.check_files_exist(LUSTREC, LUCTREC_INCLUDE_DIR);
             if status
                 return;
+            end
+            if ~exist('organize_blocks', 'var')
+                organize_blocks = 0;
             end
             %1- Generate Simulink model from original Lustre file using EMF
             %backend.
@@ -801,7 +804,7 @@ classdef LustrecUtils < handle
                 new_model_name = BUtils.adapt_block_name(strcat(lus_fname,'_EMF'));
             end
             clear lus2slx
-            [status, new_name_path, xml_trace] = lus2slx(emf_path, output_dir, new_model_name, node_name, 0, 1);
+            [status, new_name_path, xml_trace] = lus2slx(emf_path, output_dir, new_model_name, node_name, organize_blocks, 1);
             if status
                 return;
             end

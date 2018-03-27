@@ -3,7 +3,7 @@ function [] = SampleTimeMath_process(model)
 %  equivalent subsystem.
 %   model is a string containing the name of the model to search in
 
-SampleTimeMath_list = find_system(model,'BlockType','SampleTimeMath');
+SampleTimeMath_list = find_system(model,'LookUnderMasks', 'all', 'BlockType','SampleTimeMath');
 if not(isempty(SampleTimeMath_list))
     display_msg('Processing SampleTimeMath blocks...', MsgType.INFO, 'SampleTimeMath_process', '');
     for i=1:length(SampleTimeMath_list)

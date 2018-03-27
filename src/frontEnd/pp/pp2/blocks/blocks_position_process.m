@@ -1,6 +1,7 @@
 function [  ] = blocks_position_process( model, depth )
 %BLOCKS_POSITION_PROCES try t change blocks position for graphical purpose.
 %
+clear organize
 limitedDepth = true;
 if ~exist('depth', 'var')
     limitedDepth = false;
@@ -46,6 +47,7 @@ if isempty(alreadyProcessed)
 elseif ~ismember(block_handle, alreadyProcessed)
     alreadyProcessed(numel(alreadyProcessed) + 1) = block_handle;
 else
+    disp('***************')
     return;
 end
 if isempty(levels_map)

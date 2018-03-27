@@ -3,7 +3,7 @@ function [] = ForEach_process(model)
 %  equivalent subsystem.
 %   model is a string containing the name of the model to search in
 
-ForEach_list = find_system(model,'BlockType','ForEach');
+ForEach_list = find_system(model,'LookUnderMasks', 'all', 'BlockType','ForEach');
 if not(isempty(ForEach_list))
     display_msg('Processing ForEach blocks...', MsgType.INFO, 'ForEach_process', '');
     for i=1:length(ForEach_list)

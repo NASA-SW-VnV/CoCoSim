@@ -484,8 +484,16 @@ classdef Lus2SLXUtils
             end
             if strcmp(blk_exprs.(var{1}).kind, 'statefulcall') && strcmp(blk_exprs.(var{1}).reset.resetable, 'true')
                 add_block('simulink/Ports & Subsystems/Resettable Subsystem/Reset', ...
-                    fullfile(fcn_path, 'Reset'),...
-                    'ResetTriggerType', 'level hold');
+                    fullfile(fcn_path, 'Reset'));
+                try
+                    % in 2017 version of Simulink there is level hold
+                    % option, but not on the other Simulink versions
+                    set_param(fullfile(fcn_path, 'Reset'), 'ResetTriggerType', 'level hold');
+                    isEither = false;
+                catch
+                    set_param(fullfile(fcn_path, 'Reset'), 'ResetTriggerType', 'either');
+                    isEither = true;
+                end
                 reset_name = blk_exprs.(var{1}).reset.name;
                 reset_adapted = BUtils.adapt_block_name(reset_name, node_name);
                 reset_path =  BUtils.get_unique_name(...
@@ -495,9 +503,23 @@ classdef Lus2SLXUtils
                     'GotoTag',reset_adapted,...
                     'TagVisibility', 'local', ...
                     'Position',[(x2+150) (y2-50) (x2+200) (y2-30)]);
-                SrcBlkH = get_param(reset_path, 'PortHandles');
-                DstBlkH = get_param(fcn_path,'PortHandles');
-                add_line(node_block_path, SrcBlkH.Outport(1), DstBlkH.Reset(1), 'autorouting', 'on');
+                if isEither
+                    if ~bdIsLoaded('pp_lib'); load_system('pp_lib.slx'); end
+                    eitherTrigger_path =  BUtils.get_unique_name(...
+                    strcat(node_block_path,'/',ID,'_reset_Either'));
+                    add_block('pp_lib/bool_To_eitherTrigger',...
+                        eitherTrigger_path);
+                    SrcBlkH = get_param(reset_path, 'PortHandles');
+                    DstBlkH = get_param(eitherTrigger_path,'PortHandles');
+                    add_line(node_block_path, SrcBlkH.Outport(1), DstBlkH.Inport(1), 'autorouting', 'on');
+                    SrcBlkH = get_param(eitherTrigger_path, 'PortHandles');
+                    DstBlkH = get_param(fcn_path,'PortHandles');
+                    add_line(node_block_path, SrcBlkH.Outport(1), DstBlkH.Reset(1), 'autorouting', 'on');
+                else
+                    SrcBlkH = get_param(reset_path, 'PortHandles');
+                    DstBlkH = get_param(fcn_path,'PortHandles');
+                    add_line(node_block_path, SrcBlkH.Outport(1), DstBlkH.Reset(1), 'autorouting', 'on');
+                end
             end
             SrcBlkH = get_param(fcn_path,'PortHandles');
             y3=y2;

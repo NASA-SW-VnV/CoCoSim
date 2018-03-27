@@ -35,7 +35,7 @@ function [valid, ...
 
 if ~exist('show_models', 'var')
     show_models = 0;
-elseif show_models
+elseif show_models && ~isempty(model_full_path)
     open(model_full_path);
 end
 [lus_dir, lus_fname, ~] = fileparts(lus_file_path);

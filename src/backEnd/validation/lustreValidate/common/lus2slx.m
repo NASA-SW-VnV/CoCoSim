@@ -18,6 +18,7 @@ function [status,...
     force)
 
 %% Init
+bdclose('all');
 [coco_dir, cocospec_name, ~] = fileparts(json_path);
 if ~exist('main_node', 'var') || isempty(main_node)
     onlyMainNode = false;
