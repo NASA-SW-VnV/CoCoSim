@@ -13,9 +13,6 @@ classdef Abs_To_Lustre < Block_To_Lustre
     methods
         
         function  write_code(obj, parent, blk, varargin)
-            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(blk);
-            inputs = {};
-            
             if ~strcmp(blk.OutMax, '[]') || ~strcmp(blk.OutMin, '[]')
                 display_msg(sprintf('The minimum/maximum value is not supported in block %s',...
                     blk.Origin_path), MsgType.WARNING, 'Abs_To_Lustre', '');
@@ -24,6 +21,9 @@ classdef Abs_To_Lustre < Block_To_Lustre
                 display_msg(sprintf('The Saturate on integer overflow option is not support in block %s',...
                     blk.Origin_path), MsgType.WARNING, 'Abs_To_Lustre', '');
             end
+            
+            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(blk);
+            inputs = {};
             widths = blk.CompiledPortWidths.Inport;
             max_width = max(widths);
             outputDataType = blk.CompiledPortDataTypes.Outport{1};
