@@ -108,8 +108,10 @@ classdef SLX2LusUtils < handle
         function [names, names_dt] = getBlockOutputsNames(blk, srcPort)
             % This function return the names of the block
             % outputs.
-            % Example : an Inport In with dimensio [1, 2] will be
-            % translated as : In_1, In_2.
+            % Example : an Inport In with dimension [2, 3] will be
+            % translated as : In_1, In_2, In_3, In_4, In_5, In_6.
+            % where In_1 = In(1,1), In_2 = In(2,1), In_3 = In(1,2),        
+            % In_4 = In(2,2), In_5 = In(1,3), In_6 = In(2,3).
             % A block is defined by its outputs, if a block does not
             % have outports, like Outport block, than will be defined by its
             % inports. E.g, Outport Out with width 2 -> Out_1, out_2
