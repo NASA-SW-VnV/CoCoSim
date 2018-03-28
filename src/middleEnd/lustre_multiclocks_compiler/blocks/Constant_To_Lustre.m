@@ -23,35 +23,31 @@ classdef Constant_To_Lustre < Block_To_Lustre
                     MsgType.ERROR, 'Constant_To_Lustr', '');
                 return;
             end
-            [value_inlined, status, msg] = MatlabUtils.inline_values(Value);
-            if status
-                %message
-                display_msg(msg,MsgType.ERROR, 'Constant_To_Lustr', '');
-                return;
-            end
+
             values_str = {};
-            for i=1:numel(value_inlined)
+            width = numel(Value);
+            for i=1:width
                 if strcmp(lus_outputDataType, 'real')
-                    values_str{i} = sprintf('%.15f', value_inlined(i));
+                    values_str{i} = sprintf('%.15f', Value(i));
                 elseif strcmp(lus_outputDataType, 'int')
-                    values_str{i} = sprintf('%d', int32(value_inlined(i)));
+                    values_str{i} = sprintf('%d', int32(Value(i)));
                 elseif strcmp(lus_outputDataType, 'bool')
-                    if value_inlined(i)
+                    if Value(i)
                         values_str{i} = 'true';
                     else
                         values_str{i} = 'false';
                     end
                 elseif strncmp(valueDataType, 'int', 3) ...
                         || strncmp(valueDataType, 'uint', 4)
-                    values_str{i} = num2str(value_inlined(i));
+                    values_str{i} = num2str(Value(i));
                 elseif strcmp(valueDataType, 'boolean') || strcmp(valueDataType, 'logical')
-                    if value_inlined(i)
+                    if Value(i)
                         values_str{i} = 'true';
                     else
                         values_str{i} = 'false';
                     end
                 else
-                    values_str{i} = sprintf('%.15f', value_inlined(i));
+                    values_str{i} = sprintf('%.15f', Value(i));
                 end
             end
             
@@ -101,7 +97,7 @@ classdef Constant_To_Lustre < Block_To_Lustre
                 model_name = regexp(blk.Origin_path, filesep, 'split');
                 model_name = model_name{1};
                 hws = get_param(model_name, 'modelworkspace') ;
-                if hasVariable(hws, param)
+                if isvarname(param) && hasVariable(hws, param)
                     Value = getVariable(hws, param);
                 else
                     try

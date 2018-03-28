@@ -95,7 +95,7 @@ classdef Delay_To_Lustre < Block_To_Lustre
                 I = [1, nb_inports];
                 x0DataType = blk.CompiledPortDataTypes.Inport{end};
             else
-                [InitialCondition, x0DataType, status] = ...
+                [ICValue, x0DataType, status] = ...
                     Constant_To_Lustre.getValueFromParameter(parent, blk, blk.InitialCondition);
                 if status
                     display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
@@ -103,7 +103,7 @@ classdef Delay_To_Lustre < Block_To_Lustre
                         MsgType.ERROR, 'Constant_To_Lustre', '');
                     return;
                 end
-                if numel(InitialCondition) > 1
+                if numel(ICValue) > 1
                     if ~(strcmp(DelayLengthSource, 'Dialog') ...
                             && strcmp(DelayLength, '1'))
                         display_msg(sprintf('InitialCondition %s in block %s is not supported for delay > 1',...
@@ -111,54 +111,28 @@ classdef Delay_To_Lustre < Block_To_Lustre
                             MsgType.ERROR, 'Constant_To_Lustr', '');
                         return;
                     end
-                    [value_inlined, status, msg] = MatlabUtils.inline_values(InitialCondition);
-                    if status
-                        %message
-                        display_msg(msg, MsgType.ERROR, 'Constant_To_Lustr', '');
-                        return;
-                    end
-                    x0Port = numel(inputs) + 1;
-                    for i=1:numel(value_inlined)
-                        if strcmp(lus_inportDataType, 'real')
-                            InitialCondition = sprintf('%.15f', value_inlined(i));
-                            x0DataType = 'double';
-                        elseif strcmp(lus_inportDataType, 'int')
-                            InitialCondition = sprintf('%d', int32(value_inlined(i)));
-                            x0DataType = 'int';
-                        elseif strncmp(x0DataType, 'int', 3) ...
-                                || strncmp(x0DataType, 'uint', 4)
-                            InitialCondition = num2str(value_inlined(i));
-                        elseif strcmp(x0DataType, 'boolean') || strcmp(x0DataType, 'logical')
-                            if value_inlined(i)
-                                InitialCondition = 'true';
-                            else
-                                InitialCondition = 'false';
-                            end
-                        else
-                            InitialCondition = sprintf('%.15f', value_inlined(i));
-                        end
-                        inputs{x0Port}{i} = InitialCondition;
-                    end
-                else
+                end
+                x0Port = numel(inputs) + 1;
+                for i=1:numel(ICValue)
                     if strcmp(lus_inportDataType, 'real')
-                        InitialCondition = sprintf('%.15f', InitialCondition);
+                        InitialCondition = sprintf('%.15f', ICValue(i));
                         x0DataType = 'double';
                     elseif strcmp(lus_inportDataType, 'int')
-                        InitialCondition = sprintf('%d', int32(InitialCondition));
+                        InitialCondition = sprintf('%d', int32(ICValue(i)));
                         x0DataType = 'int';
                     elseif strncmp(x0DataType, 'int', 3) ...
                             || strncmp(x0DataType, 'uint', 4)
-                        InitialCondition = num2str(InitialCondition);
+                        InitialCondition = num2str(ICValue(i));
                     elseif strcmp(x0DataType, 'boolean') || strcmp(x0DataType, 'logical')
-                        if InitialCondition
+                        if ICValue(i)
                             InitialCondition = 'true';
                         else
                             InitialCondition = 'false';
                         end
                     else
-                        InitialCondition = sprintf('%.15f', InitialCondition);
+                        InitialCondition = sprintf('%.15f', ICValue(i));
                     end
-                    inputs{end+1} = {InitialCondition};
+                    inputs{x0Port}{i} = InitialCondition;
                 end
                 
                 

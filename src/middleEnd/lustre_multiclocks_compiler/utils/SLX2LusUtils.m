@@ -110,9 +110,9 @@ classdef SLX2LusUtils < handle
             % outputs.
             % Example : an Inport In with dimensio [1, 2] will be
             % translated as : In_1, In_2.
-            % A block is defined by its outputs, if a block the does not
+            % A block is defined by its outputs, if a block does not
             % have outports, like Outport block, than will be defined by its
-            % inports. E.g, Outport Out with dimension 2 -> Out_1, out2
+            % inports. E.g, Outport Out with width 2 -> Out_1, out_2
             
             if isempty(blk.CompiledPortWidths.Outport)
                 width = blk.CompiledPortWidths.Inport;
@@ -155,15 +155,7 @@ classdef SLX2LusUtils < handle
                 end
             end
         end
-        %% get pre block for specific port number
-        function [src] = getpreBlock(parent, blk, Port)
-            srcBlks = blk.PortConnectivity(...
-                arrayfun(@(x) ~isempty(x.SrcBlock), blk.PortConnectivity));
-            srcBlks = srcBlks(Port);
-            srcPort = srcBlks.SrcPort;
-            srcHandle = srcBlks.SrcBlock;
-            src = get_struct(parent, srcHandle);
-        end
+        
         %% get block inputs names. E.g subsystem taking input signals from differents blocks.
         % We need to go over all linked blocks and get their output names
         % in the corresponding port number.
@@ -206,6 +198,15 @@ classdef SLX2LusUtils < handle
                 n_i = SLX2LusUtils.getBlockOutputsNames(src, srcPort);
                 inputs = [inputs, n_i];
             end
+        end
+        %% get pre block for specific port number
+        function [src] = getpreBlock(parent, blk, Port)
+            srcBlks = blk.PortConnectivity(...
+                arrayfun(@(x) ~isempty(x.SrcBlock), blk.PortConnectivity));
+            srcBlks = srcBlks(Port);
+            srcPort = srcBlks.SrcPort;
+            srcHandle = srcBlks.SrcBlock;
+            src = get_struct(parent, srcHandle);
         end
         %% Change Simulink DataTypes to Lustre DataTypes. Initial default
         %value is also given as a string.

@@ -1403,34 +1403,21 @@ classdef LustrecUtils < handle
         
         %%
         function [y_inlined, width, status] = inline_array(y_struct, time_step)
-            y_inlined = [];
-            width = 0;
+            % this function inline a multi-dimension array to a vector, it
+            % follows the cullumn convention.
+
             status = 0;
             dim = y_struct.dimensions;
             if numel(dim)==1
                 y_inlined = y_struct.values(time_step+1,:);
                 width = dim;
-            elseif numel(dim)==2
-                y_inlined = [];
-                y = y_struct.values(:,:,time_step+1);
-                for idr=1:dim(1)
-                    y_inlined = [y_inlined; y(idr,:)'];
-                end
-                width = dim(1)*dim(2);
-            elseif numel(dim)== 3
-                y_inlined = [];
-                for z=1:dim(3)
-                    y = y_struct.values(:,:,z, time_step+1);
-                    for idr=1:dim(1)
-                        y_inlined = [y_inlined; y(idr,:)'];
-                    end
-                end
-                width = prod(dim);
             else
-                display_msg(['We do not support dimension ' num2str(dim)], ...
-                    MsgType.ERROR, 'inline_array', '');
-                status = 1;
-                return;
+                width = prod(dim);
+                %time dimension is the last dimension
+                timeDimension = numel(size(y_struct.values));
+                % put time as first dimension
+                A = permute(y_struct.values, [timeDimension, 1:timeDimension-1]);
+                y_inlined = A(time_step+1,:);
             end
         end
         

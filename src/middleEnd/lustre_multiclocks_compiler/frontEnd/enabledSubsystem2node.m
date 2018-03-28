@@ -143,35 +143,30 @@ if status
         MsgType.ERROR, 'Outport_To_Lustre', '');
     return;
 end
-[value_inlined, status, msg] = MatlabUtils.inline_values(InitialOutputValue);
-if status
-    %message
-    display_msg(msg,MsgType.ERROR, 'Outport_To_Lustre', '');
-    return;
-end
+
 InitialOutput_cell = {};
-for i=1:numel(value_inlined)
+for i=1:numel(InitialOutputValue)
     if strcmp(lus_outputDataType, 'real')
-        InitialOutput_cell{i} = sprintf('%.15f', value_inlined(i));
+        InitialOutput_cell{i} = sprintf('%.15f', InitialOutputValue(i));
     elseif strcmp(lus_outputDataType, 'int')
-        InitialOutput_cell{i} = sprintf('%d', int32(value_inlined(i)));
+        InitialOutput_cell{i} = sprintf('%d', int32(InitialOutputValue(i)));
     elseif strcmp(lus_outputDataType, 'bool')
-        if value_inlined(i)
+        if InitialOutputValue(i)
             InitialOutput_cell{i} = 'true';
         else
             InitialOutput_cell{i} = 'false';
         end
     elseif strncmp(InitialOutputType, 'int', 3) ...
             || strncmp(InitialOutputType, 'uint', 4)
-        InitialOutput_cell{i} = num2str(value_inlined(i));
+        InitialOutput_cell{i} = num2str(InitialOutputValue(i));
     elseif strcmp(InitialOutputType, 'boolean') || strcmp(InitialOutputType, 'logical')
-        if value_inlined(i)
+        if InitialOutputValue(i)
             InitialOutput_cell{i} = 'true';
         else
             InitialOutput_cell{i} = 'false';
         end
     else
-        InitialOutput_cell{i} = sprintf('%.15f', value_inlined(i));
+        InitialOutput_cell{i} = sprintf('%.15f', InitialOutputValue(i));
     end
 end
 if numel(InitialOutput_cell) < blk.CompiledPortWidths.Inport
