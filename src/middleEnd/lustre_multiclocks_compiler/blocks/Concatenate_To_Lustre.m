@@ -22,9 +22,6 @@ classdef Concatenate_To_Lustre < Block_To_Lustre
 
             for i=1:numel(widths)
                 inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
-                if numel(inputs{i}) < max_width
-                    inputs{i} = arrayfun(@(x) {inputs{i}{1}}, (1:max_width));
-                end
                 inport_dt = blk.CompiledPortDataTypes.Inport(i);
                 %converts the input data type(s) to
                 %its accumulator data type
@@ -48,48 +45,61 @@ classdef Concatenate_To_Lustre < Block_To_Lustre
                     end
                 end
             else
-                in_matrix_dimension = Product_To_Lustre.getInputMatrixDimensions(blk);
+                in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(blk);
                 [ConcatenateDimension, ~, status] = ...
                 Constant_To_Lustre.getValueFromParameter(parent, blk, blk.ConcatenateDimension);
                 if status
                     display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
                         blk.ConcatenateDimension, blk.Origin_path), ...
-                        MsgType.ERROR, 'Constant_To_Lustr', '');
+                        MsgType.ERROR, 'Concatenate_To_Lustre', '');
                     return;
                 end
-                if ConcatenateDimension == 1
+                if numel(in_matrix_dimension) > 7
+                    display_msg(sprintf('More than 7 dimensions is not supported in block %s ',...
+                        blk.Origin_path), ...
+                        MsgType.ERROR, 'Concatenate_To_Lustre', '');
+                    return;
+                end                
+                if ConcatenateDimension == 2    %concat matrix in row direction
                     index = 0;
                     for i=1:numel(in_matrix_dimension)       %loop over number of inports
-                        origColLen = in_matrix_dimension{i}.dims(1);
-                        for j=1:in_matrix_dimension{i}.dims(1);     % loop over each inport array 1st dimension
-                            for k=1:in_matrix_dimension{i}.dims(2)                            % loop over each inport array 2nd  dimension, vector is also treated as 2Ds
+                        for j=1:numel(inputs{i});     % loop over each element of inport 
                                 index = index + 1;
-                                inputIndex = origColLen*(j-1)+k;
-                                codes{index} = sprintf('%s = %s;\n\t', outputs{index}, inputs{i}{inputIndex});
-                            end
+                                codes{index} = sprintf('%s = %s;\n\t', outputs{index}, inputs{i}{j});
                         end
                     end
-                elseif ConcatenateDimension == 2
-                    outputIndex = 0;
-                    origRowLen = round(in_matrix_dimension{1}.dims(1));
-                    origColLen = round(in_matrix_dimension{1}.dims(2));
-                    matrixSize = round(origRowLen*origRowLen);
-                    numOutputRows = origRowLen;
-                    numOutputColumns = numel(in_matrix_dimension)*origColLen;
-                    for i=1:numOutputRows       %loop over number of inports
-                        for j=1:numOutputColumns    % loop over each inport array 1st dimension
-                            outputIndex = outputIndex + 1;
-                            inputPortIndex = floor((j-1)/origColLen)+ 1;
-                            rowIndex = i;
-                            columnIndex = rem(j,origColLen);
-                            if columnIndex==0
-                                columnIndex = origColLen;
-                            end
-                            a = sprintf('out %d, in mat %d, row %d, col %d',outputIndex, inputPortIndex, rowIndex, columnIndex);
-                            inputIndex = (rowIndex-1)*origColLen + columnIndex;
-                            codes{outputIndex} = sprintf('%s = %s;\n\t', outputs{outputIndex}, inputs{inputPortIndex}{inputIndex});
-                        end
+                elseif ConcatenateDimension == 1    %concat matrix in column direction
+                    sizeD1 = 0;
+                    for i=1:numel(in_matrix_dimension)
+                        sizeD1 = sizeD1 + in_matrix_dimension{i}.dims(1);
                     end
+                    outMatSize = in_matrix_dimension{1}.dims;
+                    outMatSize(1) = sizeD1;
+                    cumuRow = zeros(1,7);  % seven Ds
+                    cumu = 0;
+                    for i=1:numel(in_matrix_dimension)
+                        cumuRow(i) = cumu + in_matrix_dimension{i}.dims(1);
+                        cumu = cumu + in_matrix_dimension{i}.dims(1);          
+                    end
+                    for i=1:numel(outputs)
+                        [d1, d2, d3, d4, d5, d6, d7 ] = ind2sub(outMatSize,i);   % 7 dims max
+                        rowCounted = 0;
+                        inputPortIndex = 0;
+                        for j=1:7
+                            if d1 <= cumuRow(j)
+                                inputPortIndex = j;
+                                if j~= 1
+                                    rowCounted = cumuRow(j-1);
+                                end
+                                break;
+                            end
+                        end
+                        curD1 = d1-rowCounted;
+                        curMatSize = in_matrix_dimension{inputPortIndex}.dims;
+                        inputIndex = sub2ind(curMatSize,curD1,d2);
+                        codes{i} = sprintf('%s = %s;\n\t', outputs{i}, inputs{inputPortIndex}{inputIndex});
+                    end
+                    
                 else
                     display_msg(sprintf('ConcatenateDimension > 2 in block %s',...
                         blk.Origin_path), ...
@@ -104,7 +114,13 @@ classdef Concatenate_To_Lustre < Block_To_Lustre
         
         function options = getUnsupportedOptions(obj, blk, varargin)
             obj.unsupported_options = {};
-           
+            in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(blk);
+            if numel(in_matrix_dimension) > 7
+                obj.addUnsupported_options(...
+                    sprintf('More than 7 dimensions is not supported in block %s',...
+                    blk.Origin_path), ...
+                    MsgType.ERROR, 'Concatenate_To_Lustre', '');
+            end
             options = obj.unsupported_options;
         end
     end
