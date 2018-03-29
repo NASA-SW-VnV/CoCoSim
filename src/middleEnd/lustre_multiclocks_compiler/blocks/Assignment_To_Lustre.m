@@ -40,7 +40,7 @@ classdef Assignment_To_Lustre < Block_To_Lustre
 
             codes = {};
                         
-            in_matrix_dimension = Reshape_To_Lustre.getInputMatrixDimensions(blk);
+            in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(blk);
             siz = zeros(1,numel(in_matrix_dimension));
             for i=1:numel(in_matrix_dimension)
                 siz(i) = in_matrix_dimension{i}.numDs;
