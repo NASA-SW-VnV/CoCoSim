@@ -23,7 +23,7 @@ classdef Reshape_To_Lustre < Block_To_Lustre
                 inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
                 inport_dt = blk.CompiledPortDataTypes.Inport(i);
                 %converts the input data type(s) to
-                %its accumulator data type
+                %its outputDataType
                 if ~strcmp(inport_dt, outputDataType)
                     [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, outputDataType);
                     if ~isempty(external_lib)
@@ -33,8 +33,8 @@ classdef Reshape_To_Lustre < Block_To_Lustre
                 end
             end
             
-            % reshape doesn't do anything. Just pass inputs to outputs.
-            % PP?
+            % As we inline following columns, reshape doesn't do anything. 
+            % Just pass inputs to outputs.
             for i=1:numel(outputs)
                 codes{i} = sprintf('%s = %s;\n\t', outputs{i}, inputs{1}{i});
             end
@@ -45,12 +45,6 @@ classdef Reshape_To_Lustre < Block_To_Lustre
         
         function options = getUnsupportedOptions(obj, blk, varargin)
             obj.unsupported_options = {};
-            if strcmp(blk.BusSelectionMode, 'on')
-                obj.addUnsupported_options(...
-                    sprintf('Derive from reference input port is not supported in block %s',...
-                    blk.Origin_path), ...
-                    MsgType.ERROR, 'Reshape_To_Lustre', '');
-            end            
             options = obj.unsupported_options;
         end
     end
