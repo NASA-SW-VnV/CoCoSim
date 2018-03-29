@@ -109,12 +109,70 @@ classdef Sum_To_Lustre < Block_To_Lustre
             
             if numel(exp) == 1 && numel(inputs) == 1
                 % one input and 1 expression
-                % operate over the elements of same input.  Add/multiply
-                % all elements and output a scalar
+                [CollapseDim, ~, status] = ...
+                    Constant_To_Lustre.getValueFromParameter(parent, blk, blk.CollapseDim);
+                if status
+                    display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
+                        blk.ConcatenateDimension, blk.Origin_path), ...
+                        MsgType.ERROR, 'Concatenate_To_Lustre', '');
+                    return;
+                end
+                
+                if numel(outputs)>1        % needed for collapsing of matrix
+                    in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(blk);
+                    numelCollapseDim = in_matrix_dimension{1}.dims(CollapseDim);
+                    matSize = in_matrix_dimension{1}.dims;
+                    
+                    subscripts = ones(1,in_matrix_dimension{1}.numDs);
+                    subscripts(CollapseDim) = 2;
+                    sub2ind_string = 'ind1 = sub2ind(matSize';
+                    for j=1:in_matrix_dimension{1}.numDs
+                        sub2ind_string = sprintf('%s, 1',sub2ind_string);
+                    end
+                    sub2ind_string = sprintf('%s);',sub2ind_string);
+                    eval(sub2ind_string);
+                    sub2ind_string = 'ind2 = sub2ind(matSize';
+                    for j=1:in_matrix_dimension{1}.numDs
+                        sub2ind_string = sprintf('%s, %d',sub2ind_string,subscripts(j));
+                    end
+                    sub2ind_string = sprintf('%s);',sub2ind_string);
+                    eval(sub2ind_string);
+                    delta = ind2-ind1;
+                    collapseDims = matSize;
+                    collapseDims(CollapseDim) = 1;
+                end
+                
                 for i=1:numel(outputs)
                     code = initCode;
-                    for j=1:widths
-                        code = sprintf('%s %s %s',code, exp(1), inputs{1}{j});
+                    if numel(outputs)==1
+                        % if output is a scalar,
+                        % operate over the elements of same input.
+                        for j=1:widths
+                            code = sprintf('%s %s %s',code, exp(1), inputs{1}{j});
+                        end
+                    else
+                        % operate over the elements of same dimension in input.
+
+                        [d1, d2, d3, d4, d5, d6, d7 ] = ind2sub(collapseDims,i);   % 7 dims max
+                        subscripts(1) = d1;
+                        subscripts(2) = d2;
+                        subscripts(3) = d3;
+                        subscripts(4) = d4;
+                        subscripts(5) = d5;
+                        subscripts(6) = d6;
+                        subscripts(7) = d7;                       
+                        sub2ind_string = 'inpIndex = sub2ind(matSize';
+                        for j=1:in_matrix_dimension{1}.numDs
+                            sub2ind_string = sprintf('%s, %d',sub2ind_string,subscripts(j));
+                        end    
+                        sub2ind_string = sprintf('%s);',sub2ind_string);
+                        eval(sub2ind_string);
+                        
+                        code = sprintf('%s %s %s',code, exp(1), inputs{1}{inpIndex});
+
+                        for j=2:numelCollapseDim 
+                            code = sprintf('%s %s %s',code, exp(1), inputs{1}{inpIndex+(j-1)*delta});
+                        end
                     end
                     if ~isempty(conv_format)
                         code = sprintf(conv_format, code);
@@ -181,6 +239,7 @@ classdef Sum_To_Lustre < Block_To_Lustre
                 end
             end
         end
+        
     end
     
 end
