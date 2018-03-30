@@ -117,6 +117,17 @@ classdef Sum_To_Lustre < Block_To_Lustre
                         MsgType.ERROR, 'Concatenate_To_Lustre', '');
                     return;
                 end
+                collapseAllDims = 0;
+                if strcmp(blk.CollapseMode, 'All dimensions')
+                    collapseAllDims = 1;
+                end
+                
+                if ~isSumBlock && strcmp(blk.Multiplication, 'Matrix(*)')    % product, 1 input, 1 exp, Matrix(x), matrix remains unchanged.
+                    for i=1:numel(outputs)
+                        codes{i} = sprintf('%s = %s;\n\t', outputs{i}, inputs{1}{i});
+                    end
+                    return;
+                end
                 
                 if numel(outputs)>1        % needed for collapsing of matrix
                     in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(blk);
@@ -203,24 +214,25 @@ classdef Sum_To_Lustre < Block_To_Lustre
                     for i=1:numel(in_matrix_dimension)-1
                         pair_number = pair_number + 1;
                         output_m = {};
+                        m2_dimension = in_matrix_dimension{i+1};
                         if i==1
                             m1_inputs = inputs{1};
                             m1_dimension = in_matrix_dimension{i};
                         else
                             m1_inputs = productOutputs;
-                            m1_dim.dims(1,1) = in_matrix_dimension{i-1}.dims(1,1);
+                            m1_dim.dims(1,1) = in_matrix_dimension{1}.dims(1,1);
                             m1_dim.dims(1,2) = in_matrix_dimension{i}.dims(1,2);
                             m1_dimension = m1_dim;
                         end
                         if i==numel(in_matrix_dimension)-1
                             output_m = outputs;
                         end
-                        
-                        [code, tmp_outputs, addVar] = Product_To_Lustre.matrix_multiply(m1_dimension, ...
-                            in_matrix_dimension{i+1}, m1_inputs,...
+                                                   
+                        [code, productOutputs, addVar] = Product_To_Lustre.matrix_multiply(m1_dimension, ...
+                            m2_dimension, m1_inputs,...
                             inputs{i+1}, output_m, zero, pair_number, LusOutputDataTypeStr, tmp_prefix);   
                         codes = [codes, code];
-                        productOutputs = [productOutputs, tmp_outputs];
+                        %productOutputs = [productOutputs, tmp_outputs];
                         AdditinalVars = [AdditinalVars, addVar];
                     end
                              
