@@ -48,6 +48,13 @@ classdef Sum_To_Lustre < Block_To_Lustre
         %%
         function options = getUnsupportedOptions(obj,blk, varargin)
             % add your unsuported options list here
+            % if there is one input and the output dimension is > 7
+            if numel(blk.CompiledPortWidths.Inport) == 1 ...
+                    &&  numel(blk.CompiledPortDimensions.Outport) > 7
+                obj.addUnsupported_options(...
+                    sprintf('Dimension %s in block %s is not supported.',...
+                    mat2str(blk.CompiledPortDimensions.Inport), blk.Origin_path));
+            end
             options = obj.unsupported_options;
         end
     end
@@ -113,8 +120,8 @@ classdef Sum_To_Lustre < Block_To_Lustre
                     Constant_To_Lustre.getValueFromParameter(parent, blk, blk.CollapseDim);
                 if status
                     display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
-                        blk.ConcatenateDimension, blk.Origin_path), ...
-                        MsgType.ERROR, 'Concatenate_To_Lustre', '');
+                        blk.CollapseDim, blk.Origin_path), ...
+                        MsgType.ERROR, 'Sum_To_Lustre', '');
                     return;
                 end
                 
@@ -152,7 +159,13 @@ classdef Sum_To_Lustre < Block_To_Lustre
                         end
                     else
                         % operate over the elements of same dimension in input.
-
+                        % we support 7 dimesion for the moment.
+                        if in_matrix_dimension{1}.numDs > 7
+                            display_msg(sprintf('Dimension %s in block %s is not supported.',...
+                                 mat2str(blk.CompiledPortDimensions.Inport), blk.Origin_path), ...
+                                MsgType.ERROR, 'Sum_To_Lustre', '');
+                            return;
+                        end
                         [d1, d2, d3, d4, d5, d6, d7 ] = ind2sub(collapseDims,i);   % 7 dims max
                         subscripts(1) = d1;
                         subscripts(2) = d2;
@@ -187,7 +200,7 @@ classdef Sum_To_Lustre < Block_To_Lustre
                         display_msg(...
                             sprintf('Option Matrix(*) with divid is not supported in block %s', ...
                             blk.Origin_path), ...
-                            MsgType.ERROR, 'getSumProductCodes', '');
+                            MsgType.ERROR, 'Sum_To_Lustre', '');
                         return;
                     end
                     % check that the number of columns of 1st input matrix is equalled
