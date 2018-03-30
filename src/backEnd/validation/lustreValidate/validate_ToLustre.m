@@ -6,7 +6,11 @@ function [valid, validation_compute,lustrec_failed, ...
 
 validation_start = tic;
 
-
+valid = -1;
+lustrec_failed = -1;
+lustrec_binary_failed= -1;
+sim_failed = -1;
+validation_compute = -1;
 %close all simulink models
 bdclose('all')
 %% define parameters if not given by the user
@@ -31,9 +35,7 @@ end
 if ~exist('options', 'var')
     options = '';
 end
-assignin('base', 'SOLVER', 'V');
-assignin('base', 'RUST_GEN', 0);
-assignin('base', 'C_GEN', 0);
+
 
 [model_path, file_name, ext] = fileparts(char(model_full_path));
 addpath(model_path);
@@ -56,11 +58,12 @@ catch ME
         file_name,ME.identifier,ME.message);
     display_msg(msg, MsgType.ERROR, 'validation', '');
     display_msg(ME.getReport(), MsgType.DEBUG, 'validation', '');
-    rethrow(ME);
+    return;
 end
 
 %% for data types
-BUtils.force_inports_DT(file_name);
+% no need in new compiler
+% BUtils.force_inports_DT(file_name);
 %% launch validation
 
 try
@@ -71,7 +74,7 @@ try
 catch ME
     display_msg(ME.message, MsgType.ERROR, 'validation', '');
     display_msg(ME.getReport(), MsgType.DEBUG, 'validation', '');
-    rethrow(ME);
+    return;
 end
 
 
