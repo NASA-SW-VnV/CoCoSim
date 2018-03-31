@@ -119,10 +119,10 @@ classdef Math_To_Lustre < Block_To_Lustre
                 end
                 
                 outIndex = 0;
-                for i=1:in_matrix_dimension{1}.dims(2)
-                    for j=1:in_matrix_dimension{1}.dims(1)
+                for j=1:in_matrix_dimension{1}.dims(1)
+                    for i=1:in_matrix_dimension{1}.dims(2)
                         outIndex = outIndex + 1;
-                        inIndex = (j-1)*in_matrix_dimension{1}.dims(2)+i;
+                        inIndex = sub2ind(in_matrix_dimension{1}.dims,j,i);
                         codes{outIndex} = sprintf('%s = %s;\n\t', outputs{outIndex}, inputs{1}{inIndex});  
                     end
                 end 
