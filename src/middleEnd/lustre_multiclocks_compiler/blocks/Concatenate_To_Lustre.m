@@ -35,6 +35,15 @@ classdef Concatenate_To_Lustre < Block_To_Lustre
             end
                        
             isVector = strcmp(blk.Mode,'Vector');
+            % Users may specified Multidimensional array but define vector
+            % for inputs.  This case is equivalent to Vector.  Check for
+            % this.
+            if ~isVector
+                in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(blk);
+                if in_matrix_dimension{1}.numDs == 1
+                    isVector = 1;
+                end
+            end
             codes = {}; 
             if isVector
                 outputIndex = 0;
