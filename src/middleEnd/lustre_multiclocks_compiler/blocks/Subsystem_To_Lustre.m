@@ -86,6 +86,8 @@ classdef Subsystem_To_Lustre < Block_To_Lustre
                     ,EnableCondName,  EnableCond);
                 inputs{end + 1} = EnableCondName;
             end
+            % add time input
+            inputs{end + 1} = SLX2LusUtils.timeStepStr();
             x = MatlabUtils.strjoin(inputs, ',\n\t\t');
             y = MatlabUtils.strjoin(outputs, ',\n\t');
             

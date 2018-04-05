@@ -11,8 +11,12 @@ classdef SLX2LusUtils < handle
     end
     
     methods (Static = true)
+        %% refactoring names
         function isEnabled = isEnabledStr()
             isEnabled = '_isEnabled';
+        end
+        function time_step = timeStepStr()
+            time_step = '__time_step';
         end
         %% adapt blocks names to be a valid lustre names.
         function str_out = name_format(str)

@@ -24,6 +24,11 @@ comment = sprintf('-- Original block name: %s', origin_path);
 node_name = SLX2LusUtils.node_name_format(subsys_struct);
 node_inputs_cell = SLX2LusUtils.extract_node_InOutputs_withDT(subsys_struct, 'Inport', xml_trace);
 node_inputs = MatlabUtils.strjoin(node_inputs_cell, '\n');
+is_main_node = true;
+if contains(origin_path, '/')
+    node_inputs = [node_inputs, sprintf('%s:real;', SLX2LusUtils.timeStepStr())];
+    is_main_node = false;
+end
 if isempty(node_inputs)
     node_inputs = '_virtual:bool;';
 end
@@ -39,7 +44,15 @@ contract = '-- Contract In progress';
 
 % Body code
 [body, variables_str, external_nodes, external_libraries] = write_body(subsys_struct, main_sampleTime, xml_trace); 
-
+if is_main_node
+    if ~isempty(variables_str)
+        variables_str = [variables_str sprintf('\n\t%s:real;', SLX2LusUtils.timeStepStr())];
+    else
+        variables_str = ['var ' sprintf('%s:real;', SLX2LusUtils.timeStepStr())];
+    end
+    body = [sprintf('%s = 0.0 -> pre %s + %.15f;\n\t', ...
+        SLX2LusUtils.timeStepStr(), SLX2LusUtils.timeStepStr(), main_sampleTime(1)), body];
+end
 main_node = sprintf('%s\n%s\n%s\n%s\nlet\n\t%s\ntel\n',...
     comment, node_header, contract, variables_str, body);
 

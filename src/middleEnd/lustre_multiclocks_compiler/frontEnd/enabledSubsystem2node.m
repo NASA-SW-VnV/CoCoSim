@@ -26,6 +26,10 @@ end
 node_inputs = MatlabUtils.strjoin(node_inputs_cell, '\n');
 node_inputs = [node_inputs, ...
     strcat(SLX2LusUtils.isEnabledStr() , ':bool;')];
+% add time input
+node_inputs = [node_inputs, sprintf('%s:real;', SLX2LusUtils.timeStepStr())];
+node_inputs_withoutDT_cell{end+1} = SLX2LusUtils.timeStepStr();
+
 [node_outputs_cell, node_outputs_withoutDT_cell] = SLX2LusUtils.extract_node_InOutputs_withDT(subsys_struct, 'Outport', xml_trace);
 node_outputs = MatlabUtils.strjoin(node_outputs_cell, '\n');
 
@@ -94,9 +98,9 @@ for i=1:numel(Outportfields)
             pre_out_str = sprintf('%spre_%s = %s;\n\t',...
                 pre_out_str, outputs_i{out_idx}, InitialOutput_cell{out_idx});
         else
-            pre_out_str = sprintf('%spre_%s = pre(%s);\n\t',...
-                pre_out_str, outputs_i{out_idx},...
-                 outputs_i{out_idx});
+            pre_out_str = sprintf('%spre_%s = if %s > 0.0 then pre(%s) else %s;\n\t',...
+                pre_out_str, outputs_i{out_idx}, SLX2LusUtils.timeStepStr(), ...
+                 outputs_i{out_idx}, InitialOutput_cell{out_idx});
         end
     end
 end
