@@ -1,17 +1,21 @@
-function [report] = get_BlocksType(folder)
+function [report] = get_BlocksInfo(folder)
 %GET_BLOCKSTYPE Summary of this function goes here
 %   Detailed explanation goes here
 slx_files = dir(fullfile(folder, '*.slx'));
-mdl_files = dir(fullfile(folder, '*.mdl'));
-all_files = [slx_files, mdl_files];
+mdl_files = dir(fullfile(folder, '*.mdl')) ;
+all_files = [slx_files; mdl_files];
 report = {};
-
+CommonParameters = {'CompiledSampleTime', 'CompiledPortDataTypes', ...
+    'CompiledPortDimensions', 'CompiledPortWidths', ...
+    'CompiledPortComplexSignals',...
+    'Ports'};
 for i=1:numel(all_files)
     [~, base_name, ~] = fileparts( all_files(i).name);
     try
         load_system(fullfile(folder, ...
             all_files(i).name));
-        list_of_all_blacks = find_system(base_name);
+        list_of_all_blacks = find_system(base_name, ...
+            'LookUnderMasks', 'all');
         for j=2:numel(list_of_all_blacks)
             block_path = list_of_all_blacks{j};
             blks_type = get_param(block_path, 'BlockType');
@@ -25,6 +29,15 @@ for i=1:numel(all_files)
                     S.(fields{k}) = get_param(block_path, fields{k});
                 end
             end
+            S.Mask = get_param(block_path, 'Mask');
+            S.MaskType = get_param(block_path, 'MaskType');
+            Cmd = [base_name, '([], [], [], ''compile'');'];
+            eval(Cmd);
+            for k=1:numel(CommonParameters)
+                S.(CommonParameters{k}) = get_param(block_path, CommonParameters{k});
+            end
+            Cmd = [base_name, '([], [], [], ''term'');'];
+            eval(Cmd);
             report{numel(report) + 1} = S;
         end
         close_system(base_name, 0);
