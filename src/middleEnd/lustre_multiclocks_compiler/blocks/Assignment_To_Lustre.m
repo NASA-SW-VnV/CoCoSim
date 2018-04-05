@@ -49,6 +49,7 @@ classdef Assignment_To_Lustre < Block_To_Lustre
             indexPortNumber = 0;
             isPortIndex = false;
             IndexMode = blk.IndexMode;
+            indPortNumber = zeros(1,numel(blk.IndexOptionArray));
             for i=1:numel(blk.IndexOptionArray)
                 if strcmp(blk.IndexOptionArray{i}, 'Assign all')
                     ind{i} = (1:in_matrix_dimension{2}.dims(i));
@@ -60,6 +61,7 @@ classdef Assignment_To_Lustre < Block_To_Lustre
                     isPortIndex = true;
                     indexPortNumber = indexPortNumber + 1;
                     portNumber = indexPortNumber + 2;   % 1st and 2nd for Y0 and U
+                    indPortNumber(i) = portNumber;
                     indexBlock = SLX2LusUtils.getpreBlock(parent, blk, portNumber);
                     [ind{i}, indexDataType, status] = ...
                         Constant_To_Lustre.getValueFromParameter(parent, indexBlock, indexBlock.Value);
@@ -81,6 +83,7 @@ classdef Assignment_To_Lustre < Block_To_Lustre
                     isPortIndex = true;
                     indexPortNumber = indexPortNumber + 1;
                     portNumber = indexPortNumber + 2;   % 1st and 2nd for Y0 and U
+                    indPortNumber(i) = portNumber;
                     indexBlock = SLX2LusUtils.getpreBlock(parent, blk, portNumber);
                     [Idx, indexDataType, status] = ...
                         Constant_To_Lustre.getValueFromParameter(parent, indexBlock, indexBlock.Value);
@@ -143,7 +146,7 @@ classdef Assignment_To_Lustre < Block_To_Lustre
                         end
                     else
                         % port
-                        portNum = 3;
+                        portNum = indPortNumber(i);
                         for j=1:numel(ind{i})
                             addVarIndex = addVarIndex + 1;
                             addVars{addVarIndex} = sprintf('ind_dim_%d_%d:%s;',i,j,indexDataType);
