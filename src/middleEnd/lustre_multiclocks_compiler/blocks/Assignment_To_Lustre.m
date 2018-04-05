@@ -23,15 +23,23 @@ classdef Assignment_To_Lustre < Block_To_Lustre
             for i=1:numel(widths)
                 inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
                 inport_dt = blk.CompiledPortDataTypes.Inport(i);
+                [lusInport_dt, ~] = SLX2LusUtils.get_lustre_dt(inport_dt);
                 %converts the input data type(s) to
                 %its accumulator data type
-%                 if ~strcmp(inport_dt, outputDataType)
-%                     [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, outputDataType);
-%                     if ~isempty(external_lib)
-%                         obj.addExternal_libraries(external_lib);
-%                         inputs{i} = cellfun(@(x) sprintf(conv_format,x), inputs{i}, 'un', 0);
-%                     end
-%                 end
+                if ~strcmp(inport_dt, outputDataType) && i <= 2
+                    [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, outputDataType);
+                    if ~isempty(external_lib)
+                        obj.addExternal_libraries(external_lib);
+                        inputs{i} = cellfun(@(x) sprintf(conv_format,x), inputs{i}, 'un', 0);
+                    end
+                elseif i > 2 && ~strcmp(lusInport_dt, 'int')
+                    
+                    [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, 'int');
+                    if ~isempty(external_lib)
+                        obj.addExternal_libraries(external_lib);
+                        inputs{i} = cellfun(@(x) sprintf(conv_format,x), inputs{i}, 'un', 0);
+                    end
+                end
             end
             
             %             OutputInitialize = blk.OutputInitialize;
@@ -63,6 +71,7 @@ classdef Assignment_To_Lustre < Block_To_Lustre
                     portNumber = indexPortNumber + 2;   % 1st and 2nd for Y0 and U
                     indPortNumber(i) = portNumber;
                     indexBlock = SLX2LusUtils.getpreBlock(parent, blk, portNumber);
+                    
                     [ind{i}, indexDataType, status] = ...
                         Constant_To_Lustre.getValueFromParameter(parent, indexBlock, indexBlock.Value);
                 elseif strcmp(blk.IndexOptionArray{i}, 'Starting index (dialog)')
@@ -132,9 +141,9 @@ classdef Assignment_To_Lustre < Block_To_Lustre
                 for i=1:numel(inputs{2})
                     U_index{i} = sprintf('U_index_%d',i);
                     addVarIndex = addVarIndex + 1;
-                    addVars{addVarIndex} = sprintf('%s:%s;',U_index{i},indexDataType);                    
+                    addVars{addVarIndex} = sprintf('%s:%s;',U_index{i},indexDataType);
                 end
-
+                
                 % pass to Lustre ind
                 for i=1:numel(ind)
                     if ~contains(blk.IndexOptionArray{i}, '(port)')
@@ -146,13 +155,14 @@ classdef Assignment_To_Lustre < Block_To_Lustre
                         end
                     else
                         % port
+                        % add more code for starting index case
                         portNum = indPortNumber(i);
                         for j=1:numel(ind{i})
                             addVarIndex = addVarIndex + 1;
                             addVars{addVarIndex} = sprintf('ind_dim_%d_%d:%s;',i,j,indexDataType);
                             codeIndex = codeIndex + 1;
                             codes{codeIndex} = sprintf('ind_dim_%d_%d = %s;\n\t',i,j, inputs{portNum}{j}) ;
-                        end                        
+                        end
                     end
                 end
                 %calculating U_index{i}
@@ -169,7 +179,7 @@ classdef Assignment_To_Lustre < Block_To_Lustre
                     for j=1:i-1
                         U_dimJump(i) = U_dimJump(i)*in_matrix_dimension{2}.dims(j);
                     end
-                end     
+                end
                 str_Y_index = {};
                 for i=1:numel(inputs{2})    % looping over U elements
                     curSub = ones(1,numel(in_matrix_dimension{2}.dims));
@@ -183,22 +193,22 @@ classdef Assignment_To_Lustre < Block_To_Lustre
                     curSub(5) = d5;
                     curSub(6) = d6;
                     curSub(7) = d7;
-%                     for j=numel(in_matrix_dimension{2}.dims):-1:1
-%                         if j==1
-%                             curSub(j) = floor(curNum/U_dimJump(j));
-%                         else
-%                             curSub(j) = floor(curNum/U_dimJump(j))+1;
-%                         end
-%                         curNum = rem(curNum,U_dimJump(j));
-%                     end
+                    %                     for j=numel(in_matrix_dimension{2}.dims):-1:1
+                    %                         if j==1
+                    %                             curSub(j) = floor(curNum/U_dimJump(j));
+                    %                         else
+                    %                             curSub(j) = floor(curNum/U_dimJump(j))+1;
+                    %                         end
+                    %                         curNum = rem(curNum,U_dimJump(j));
+                    %                     end
                     for j=1:numel(in_matrix_dimension{2}.dims)
                         Y_index{j} = ind{j}(curSub(j));
                         str_Y_index{i}{j} = sprintf('str_Y_index_%d_%d',i,j);
                         addVarIndex = addVarIndex + 1;
                         addVars{addVarIndex} = sprintf('str_Y_index_%d_%d:%s;',i,j,indexDataType);
                         codeIndex = codeIndex + 1;
-                        codes{codeIndex} = sprintf('%s = ind_dim_%d_%d;\n\t',str_Y_index{i}{j},j,curSub(j)) ;                        
-                    end                      
+                        codes{codeIndex} = sprintf('%s = ind_dim_%d_%d;\n\t',str_Y_index{i}{j},j,curSub(j)) ;
+                    end
                     
                     value = '0';
                     for j=1:numel(in_matrix_dimension{2}.dims)
@@ -209,32 +219,32 @@ classdef Assignment_To_Lustre < Block_To_Lustre
                         end
                     end
                     codeIndex = codeIndex + 1;
-                    codes{codeIndex} = sprintf('%s = %s;\n\t', U_index{i}, value) 
+                    codes{codeIndex} = sprintf('%s = %s;\n\t', U_index{i}, value)
                 end
                 if numel(in_matrix_dimension{1}.dims) > 7
-
+                    
                     display_msg(sprintf('More than 3 dimensions is not supported in block %s',...
                         indexBlock.Origin_path), ...
-                        MsgType.ERROR, 'Assignment_To_Lustre', '');                    
+                        MsgType.ERROR, 'Assignment_To_Lustre', '');
                 end
-                    
-
+                
+                
                 for i=1:numel(outputs)
-                    codeIndex = codeIndex + 1;                   
+                    codeIndex = codeIndex + 1;
                     code = sprintf('%s = \n\t', outputs{i});
                     for j=1:numel(inputs{2})
                         if j==1
                             code = sprintf('%s  if(%s = %d) then %s\n\t', code, U_index{j},i,inputs{2}{j});
                         else
-                            code = sprintf('%s  else if(%s = %d) then %s\n\t', code, U_index{j},i,inputs{2}{j});                            
+                            code = sprintf('%s  else if(%s = %d) then %s\n\t', code, U_index{j},i,inputs{2}{j});
                         end
                     end
                     codes{codeIndex} = sprintf('%s  else %s ;\n\t', code,inputs{1}{i});
                     
                 end
-
+                
                 obj.addVariable(addVars);
-                                
+                
             else
                 if in_matrix_dimension{1}.numDs == 1   % for 1D
                     U_to_Y0 = ind{1};
