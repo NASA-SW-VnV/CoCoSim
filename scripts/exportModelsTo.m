@@ -23,7 +23,7 @@ for i=1:numel(models)
     try
         info = Simulink.MDLInfo(full_path);
         
-        if str2double(info.SimulinkVersion)> 8.3
+        if str2double(info.SimulinkVersion)> 8.5
             
             fprintf('saving model %s in %s format\n', m.name, version);
             load_system(full_path);
