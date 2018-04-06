@@ -5,6 +5,7 @@ Ktrinh: Assignment,
         BusCreator
         BusSelector
         Concatenate,
+        DataTypeDuplicate (ignored),
         Demux,
         DotProduct(pp),
         FromWorkspace,
@@ -66,22 +67,21 @@ Hamza:  Abs,
         
 
 Blocks that has left from Biosentinel:
-    ActionPort
-    DataTypeConversion
-    DataTypeDuplicate
-    DiscreteTransferFcn (see TransferFcn in pp)
-    Fcn (partially done in pp)
-    ForIterator
-    If
-    Lookup\_n-D
-    Memory (can be descritized in pp to unitDelay) 
-    Merge
-    ModelReference
-    RandomNumber ( to translate to empty node with contract)
-    Rounding
-    S-Function
-    SampleTimeMath
-    Selector (see pp)
-    StateControl
-    SwitchCase
+    ActionPort (Hamza)
+    DataTypeConversion (Khanh)
+    DiscreteTransferFcn (see TransferFcn in pp) (Khanh)
+    Fcn (partially done in pp) (Khanh)
+    ForIterator (Hamza)
+    If (Hamza)
+    Lookup\_n-D (Khanh)
+    Memory (can be descritized in pp to unitDelay)  (Hamza)
+    Merge (Hamza)
+    ModelReference (Hamza)
+    RandomNumber ( to translate to empty node with contract) (Hamza)
+    Rounding (Khanh)
+    S-Function (Hamza)
+    SampleTimeMath (Hamza)
+    Selector (see pp) (Khanh)
+    StateControl 
+    SwitchCase (Hamza)
     

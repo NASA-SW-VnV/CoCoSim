@@ -88,7 +88,8 @@ classdef Block_To_Lustre < handle
         function b = ignored(type)
             % add blocks that will be ignored because they are supported somehow implicitly.
             blks = {'Inport', 'Terminator', 'Scope', 'Display', ...
-                'EnablePort', 'ResetPort', 'TriggerPort', 'ToWorkspace'};
+                'EnablePort', 'ResetPort', 'TriggerPort', 'ToWorkspace', ...
+                'DataTypeDuplicate'};
             b = ismember(type, blks);
         end
     end
