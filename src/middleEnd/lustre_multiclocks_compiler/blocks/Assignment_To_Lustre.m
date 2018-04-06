@@ -142,8 +142,8 @@ classdef Assignment_To_Lustre < Block_To_Lustre
             % code on Lustre side
             if isPortIndex
                 
-                if numOutDims>3
-                    display_msg(sprintf('For index option %s, more than 3 dimensions is not supported in block %s',...
+                if numOutDims>7
+                    display_msg(sprintf('For index option %s, more than 7 dimensions is not supported in block %s',...
                         blk.IndexOptionArray{i}, indexBlock.Origin_path), ...
                         MsgType.ERROR, 'Assignment_To_Lustre', '');
                 end
@@ -318,6 +318,13 @@ classdef Assignment_To_Lustre < Block_To_Lustre
         
         function options = getUnsupportedOptions(obj, blk, varargin)
             obj.unsupported_options = {};
+            in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(blk);
+            if in_matrix_dimension{1}.numDs>7
+                obj.addUnsupported_options(...
+                    sprintf('More than 7 dimensions is not supported in block %s',...
+                    indexBlock.Origin_path), ...
+                    MsgType.ERROR, 'Assignment_To_Lustre', '');
+            end
             
             options = obj.unsupported_options;
         end
