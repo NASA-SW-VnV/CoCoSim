@@ -257,8 +257,8 @@ classdef Assignment_To_Lustre < Block_To_Lustre
                 for i=1:numel(outputs)
                     codeIndex = codeIndex + 1;
                     code = sprintf('%s = \n\t', outputs{i});
-                    for j=1:numel(inputs{2})
-                        if j==1
+                    for j=numel(inputs{2}):-1:1
+                        if j==numel(inputs{2})
                             code = sprintf('%s  if(%s = %d) then %s\n\t', code, U_index{j},i,inputs{2}{j});
                         else
                             code = sprintf('%s  else if(%s = %d) then %s\n\t', code, U_index{j},i,inputs{2}{j});
