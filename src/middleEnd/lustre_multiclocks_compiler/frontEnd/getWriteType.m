@@ -1,4 +1,4 @@
-function [b, status] = getWriteType(sub_blk)
+function [b, status, type] = getWriteType(sub_blk)
 % getWriteType returns the handle of class corresponding to blockType/MaskType 
 % of the block in parameter.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -10,7 +10,7 @@ function [b, status] = getWriteType(sub_blk)
 
 status = 0;
 b = [];
-
+type = sub_blk.BlockType;
 if Block_To_Lustre.ignored(sub_blk.BlockType)
     status = 1;
     return;
