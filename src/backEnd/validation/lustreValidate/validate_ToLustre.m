@@ -45,6 +45,7 @@ try
     display_msg(f_msg, MsgType.RESULT, 'validation', '');
     GUIUtils.update_status('Runing CocoSim');
     lus_file_path = ToLustre(model_full_path, [], [], options);
+%     lus_file_path = lustre_compiler(model_full_path);
     [output_dir, lus_file_name, ~] = fileparts(lus_file_path);
     file_name = lus_file_name;
     main_node = lus_file_name;
