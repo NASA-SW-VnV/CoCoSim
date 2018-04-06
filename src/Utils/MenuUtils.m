@@ -22,10 +22,42 @@ classdef MenuUtils
             cd(oldDir);
         end
         
-        
+        %% get file name from the current opened Simulink model.
         function fname = get_file_name(gcs)
             names = regexp(gcs,'/','split');
             fname = get_param(names{1},'FileName');
+        end
+        
+        %% Create html page with title and items list.
+        function html_path = createHtmlList(title, items_list, html_path)
+            cocoSim_path = regexprep(mfilename('fullpath'), 'cocosim2/.+', 'cocosim2');
+            css_source = fullfile(cocoSim_path, 'lib', 'materialize' , 'css' , 'materialize.css');
+            html_text = fileread(fullfile(cocoSim_path, 'src', 'backEnd' , 'html_templates' , 'item_list.html'));
+            html_text = strrep(html_text, '[css_source]', css_source);
+            % update title
+            html_text = strrep(html_text, '[TITLE]', title);
+            %add Items text
+            library_item_template = '<a class="collection-item"><div class="blue-text text-darken-2">[Item]</div></a>';
+            items_text = '';
+            if iscell(items_list)
+                for i=1:numel(items_list)
+                    code = strrep(library_item_template, '[Item]', items_list{i});
+                    items_text = [items_text, '\n', code];
+                end
+            else
+                items_text = strrep(library_item_template, '[Item]', items_list);
+            end
+            html_text = strrep(html_text, '[List_Items]', items_text);
+            [output_dir, ~, ~] = fileparts(html_path);
+            if ~exist(output_dir, 'dir')
+                MatlabUtils.mkdir(output_dir);
+            end
+            fid = fopen(html_path, 'w+');
+            if ~strcmp(html_text, '')
+                fprintf(fid, html_text);
+                open(html_path);
+            end
+            fclose(fid);
         end
     end
     

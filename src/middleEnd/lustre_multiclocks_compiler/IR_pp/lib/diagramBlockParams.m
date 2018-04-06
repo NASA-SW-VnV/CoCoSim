@@ -24,6 +24,9 @@ if isfield(ir, field_name)
         ir.(field_name).Handle = get_param(file_name, 'Handle');
     end
     
+    if ~isfield(ir.(field_name), 'BlockType')
+        ir.(field_name).BlockType = 'block_diagram';
+    end
 
     Cmd = [file_name, '([], [], [], ''term'');'];
     eval(Cmd);

@@ -23,7 +23,7 @@ classdef Constant_To_Lustre < Block_To_Lustre
                     MsgType.ERROR, 'Constant_To_Lustr', '');
                 return;
             end
-
+            
             values_str = {};
             width = numel(Value);
             for i=1:width
@@ -63,13 +63,19 @@ classdef Constant_To_Lustre < Block_To_Lustre
         function options = getUnsupportedOptions(obj,blk, varargin)
             % search the variable in Model workspace, if not raise
             % unsupported option
-            model_name = regexp('Constant/Constant1', filesep, 'split');
-            model_name = model_name{1};
-            hws = get_param(model_name, 'modelworkspace') ;
-            if ~hasVariable(hws, blk.Value)
-                obj.addUnsupported_options(...
-                    sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
-                    blk.Value, blk.Origin_path));
+            if isvarname(blk.Value)
+                try
+                    evalin('base', blk.Value);
+                catch
+                    model_name = regexp(blk.Origin_path, filesep, 'split');
+                    model_name = model_name{1};
+                    hws = get_param(model_name, 'modelworkspace') ;
+                    if ~hasVariable(hws, blk.Value)
+                        obj.addUnsupported_options(...
+                            sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
+                            blk.Value, blk.Origin_path));
+                    end
+                end
             end
             options = obj.unsupported_options;
         end

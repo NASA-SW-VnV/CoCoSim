@@ -12,11 +12,12 @@
 %% Configure CoCoSim toolbar: the menu and functions callbacks
 %
 %take the current file directory.
-[src_root, ~, ~] = fileparts(mfilename('fullpath'));
+[backEnd_root, ~, ~] = fileparts(mfilename('fullpath'));
 menue_items = {};
-menue_items{numel(menue_items) + 1} = fullfile(src_root, 'verification','verificationMenu.m');
-menue_items{numel(menue_items) + 1} = fullfile(src_root, 'test_case_generation','TestCaseGenMenu.m');
-menue_items{numel(menue_items) + 1} = fullfile(src_root, 'generate_invariants','generateInvariantsMenu.m');
-menue_items{numel(menue_items) + 1} = fullfile(src_root, 'generate_code','generateCodeMenu.m');
-menue_items{numel(menue_items) + 1} = fullfile(src_root, 'validation','validationMenu.m');
-menue_items{numel(menue_items) + 1} = fullfile(src_root, 'extra_options','extraOptionsMenu.m');
+menue_items{end + 1} = fullfile(backEnd_root, 'unsupported_blocks','unsupportedBlocksMenu.m');
+menue_items{end + 1} = fullfile(backEnd_root, 'verification','verificationMenu.m');
+menue_items{end + 1} = fullfile(backEnd_root, 'test_case_generation','TestCaseGenMenu.m');
+menue_items{end + 1} = fullfile(backEnd_root, 'generate_invariants','generateInvariantsMenu.m');
+menue_items{end + 1} = fullfile(backEnd_root, 'generate_code','generateCodeMenu.m');
+menue_items{end + 1} = fullfile(backEnd_root, 'validation','validationMenu.m');
+menue_items{end + 1} = fullfile(backEnd_root, 'extra_options','extraOptionsMenu.m');
