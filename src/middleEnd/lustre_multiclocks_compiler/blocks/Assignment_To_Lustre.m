@@ -33,7 +33,7 @@ classdef Assignment_To_Lustre < Block_To_Lustre
                         inputs{i} = cellfun(@(x) sprintf(conv_format,x), inputs{i}, 'un', 0);
                     end
                 elseif i > 2 && ~strcmp(lusInport_dt, 'int')
-                    
+                    % convert index values to int for Lustre code
                     [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, 'int');
                     if ~isempty(external_lib)
                         obj.addExternal_libraries(external_lib);
@@ -42,18 +42,25 @@ classdef Assignment_To_Lustre < Block_To_Lustre
                 end
             end
             
-            %             OutputInitialize = blk.OutputInitialize;
+
             [numOutDims, ~, ~] = ...
                 Constant_To_Lustre.getValueFromParameter(parent, blk, blk.NumberOfDimensions);
             
             codes = {};
             codeIndex = 0;
             in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(blk);
-            siz = zeros(1,numel(in_matrix_dimension));
-            for i=1:numel(in_matrix_dimension)
-                siz(i) = in_matrix_dimension{i}.numDs;
-            end
-            
+%             siz = zeros(1,numel(in_matrix_dimension));
+%             for i=1:numel(in_matrix_dimension)
+%                 siz(i) = in_matrix_dimension{i}.numDs;
+%             end
+
+            % reading and assigning index map ind{i}
+            % ind{i}   mapping index for dimension i.   e.g.   ind{1} =
+            % [1,3] means for dimension 1, U has 2 rows, 1st row of U maps
+            % to 1 row of Y, 2nd row of U maps to 3rd row of Y  
+            % for non "port" row i, ind{i} is an array of integer
+            % for "port" row i, ind{i} is an array of string for Lustre
+            % code
             indexPortNumber = 0;
             isPortIndex = false;
             IndexMode = blk.IndexMode;
@@ -70,10 +77,14 @@ classdef Assignment_To_Lustre < Block_To_Lustre
                     indexPortNumber = indexPortNumber + 1;
                     portNumber = indexPortNumber + 2;   % 1st and 2nd for Y0 and U
                     indPortNumber(i) = portNumber;
-                    indexBlock = SLX2LusUtils.getpreBlock(parent, blk, portNumber);
-                    
-                    [ind{i}, indexDataType, status] = ...
-                        Constant_To_Lustre.getValueFromParameter(parent, indexBlock, indexBlock.Value);
+                    for j=1:in_matrix_dimension{2}.dims(i)
+                        if strcmp(IndexMode, 'Zero-based')
+                            ind{i}{j} = sprintf('%s + 1',inputs{portNumber}{j});
+                        else
+                            ind{i}{j} = inputs{portNumber}{j};
+                        end
+                    end
+                    %ind{i} = cell(in_matrix_dimension{2}.dims(i));
                 elseif strcmp(blk.IndexOptionArray{i}, 'Starting index (dialog)')
                     [Idx, ~, ~] = ...
                         Constant_To_Lustre.getValueFromParameter(parent, blk, blk.IndexParamArray{i});
@@ -91,21 +102,24 @@ classdef Assignment_To_Lustre < Block_To_Lustre
                 elseif strcmp(blk.IndexOptionArray{i}, 'Starting index (port)')
                     isPortIndex = true;
                     indexPortNumber = indexPortNumber + 1;
-                    portNumber = indexPortNumber + 2;   % 1st and 2nd for Y0 and U
+                    portNumber = indexPortNumber + 2;   % 1st and 2nd for Y0 and U    
                     indPortNumber(i) = portNumber;
-                    indexBlock = SLX2LusUtils.getpreBlock(parent, blk, portNumber);
-                    [Idx, indexDataType, status] = ...
-                        Constant_To_Lustre.getValueFromParameter(parent, indexBlock, indexBlock.Value);
-                    % check for scalar or vector
-                    if in_matrix_dimension{2}.numDs == 1
-                        if in_matrix_dimension{2}.dims(1) == 1   %scalar
-                            ind{i} = Idx;
-                        else     %vector
-                            ind{i} = (Idx:Idx+in_matrix_dimension{2}.dims(1)-1);
+                    for j=1:in_matrix_dimension{2}.dims(i)                        
+                        if j==1
+                            if strcmp(IndexMode, 'Zero-based')
+                                ind{i}{j} = sprintf('%s + 1',inputs{portNumber}{1});
+                            else
+                                ind{i}{j} = inputs{portNumber}{j};
+                            end
+                        else                            
+                            if strcmp(IndexMode, 'Zero-based')
+                                ind{i}{j} = sprintf('%s + 1 + d',inputs{portNumber}{1},(j-1));
+                            else
+                                ind{i}{j} = sprintf('%s + d',inputs{portNumber}{1},(j-1));
+                            end
                         end
-                    else      % matrix
-                        ind{i} = (Idx:Idx+in_matrix_dimension{2}.dims(i)-1);
-                    end
+                    end                    
+
                 else
                     % should not be here
                     display_msg(sprintf('IndexOption  %s not recognized in block %s',...
@@ -119,14 +133,13 @@ classdef Assignment_To_Lustre < Block_To_Lustre
                 end
             end
             
-            % ind{i}   mapping index for dimension i.   e.g.   ind{1} =
-            % [1,3] means for dimension 1, U has 2 rows, 1st row of U maps
-            % to 1 row of Y, 2nd row of U maps to 3rd row of Y
-            
             U_to_Y0 = zeros(1,numel(inputs{2}));
             y0_dims = in_matrix_dimension{1}.dims;    % y0_dims = U_dims
             U_dims = in_matrix_dimension{2}.dims;
+            indexDataType = 'int';
             
+            % if index assignment is read in form index port, write mapping
+            % code on Lustre side
             if isPortIndex
                 
                 if numOutDims>3
@@ -155,13 +168,25 @@ classdef Assignment_To_Lustre < Block_To_Lustre
                         end
                     else
                         % port
-                        % add more code for starting index case
                         portNum = indPortNumber(i);
-                        for j=1:numel(ind{i})
-                            addVarIndex = addVarIndex + 1;
-                            addVars{addVarIndex} = sprintf('ind_dim_%d_%d:%s;',i,j,indexDataType);
-                            codeIndex = codeIndex + 1;
-                            codes{codeIndex} = sprintf('ind_dim_%d_%d = %s;\n\t',i,j, inputs{portNum}{j}) ;
+                        if strcmp(blk.IndexOptionArray{i}, 'Starting index (port)')
+                            for j=1:numel(ind{i})
+                                addVarIndex = addVarIndex + 1;
+                                addVars{addVarIndex} = sprintf('ind_dim_%d_%d:%s;',i,j,indexDataType);
+                                codeIndex = codeIndex + 1;
+                                if j==1
+                                    codes{codeIndex} = sprintf('ind_dim_%d_%d = %s;\n\t',i,j, inputs{portNum}{1}) ;
+                                else
+                                    codes{codeIndex} = sprintf('ind_dim_%d_%d = %s + %d;\n\t',i,j, inputs{portNum}{1}, (j-1)) ;
+                                end
+                            end                            
+                        else   % 'Index vector (port)'
+                            for j=1:numel(ind{i})
+                                addVarIndex = addVarIndex + 1;
+                                addVars{addVarIndex} = sprintf('ind_dim_%d_%d:%s;',i,j,indexDataType);
+                                codeIndex = codeIndex + 1;
+                                codes{codeIndex} = sprintf('ind_dim_%d_%d = %s;\n\t',i,j, inputs{portNum}{j}) ;
+                            end
                         end
                     end
                 end
