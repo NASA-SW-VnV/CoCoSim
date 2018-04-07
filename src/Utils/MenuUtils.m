@@ -23,9 +23,10 @@ classdef MenuUtils
         end
         
         %% get file name from the current opened Simulink model.
-        function fname = get_file_name(gcs)
+        function [fpath, fname] = get_file_name(gcs)
             names = regexp(gcs,'/','split');
-            fname = get_param(names{1},'FileName');
+            fname = names{1};
+            fpath = get_param(fname,'FileName');
         end
         
         %% Create html page with title and items list.
@@ -49,6 +50,9 @@ classdef MenuUtils
             end
             html_text = strrep(html_text, '[List_Items]', items_text);
             [output_dir, ~, ~] = fileparts(html_path);
+            if exist(html_path, 'file')
+                delete(html_path);
+            end
             if ~exist(output_dir, 'dir')
                 MatlabUtils.mkdir(output_dir);
             end

@@ -50,7 +50,7 @@ end
 %% Update model path with the pre-processed model
 if ~strcmp(new_file_name, '')
     model_full_path = new_file_name;
-    [~, file_name, ~] = fileparts(model_full_path);
+    [model_dir, file_name, ~] = fileparts(model_full_path);
 else
     display_msg('Pre-processing has failed', MsgType.ERROR, 'ToLustreUnsupportedBlocks', '');
     return;
@@ -76,6 +76,27 @@ main_sampleTime = main_block.CompiledSampleTime;
 unsupportedOptions = recursiveGeneration(main_block, main_sampleTime);
 
 %% display report files
+if isempty(unsupportedOptions)
+    if exist('success.png', 'file')
+        [icondata,iconcmap] = imread('success.png');
+        msgbox('Your model is compatible with CoCoSim!','Success','custom',icondata,iconcmap);
+    else
+        msgbox('Your model is compatible with CoCoSim!');
+    end
+else
+    try
+        output_dir = fullfile(model_dir, 'cocosim_output', file_name);
+        html_path = fullfile(output_dir, strcat(file_name, '_unsupportedOptions.html'));
+        if ~exist(output_dir, 'dir'); MatlabUtils.mkdir(output_dir); end
+        MenuUtils.createHtmlList('Unsupported options/blocks', unsupportedOptions, html_path);
+    catch me
+        display_msg(me.getReport(), MsgType.DEBUG, 'unsupportedBlocksMenu', '');
+        msg = sprintf('Your model is incompatible with CoCoSim for the following reasons:\n%s', ...
+            MatlabUtils.strjoin(unsupportedOptions, '\n\n'));
+        msgbox(msg, 'Error','error');
+    end
+end
+
 t_finish = toc(t_start);
 msg = sprintf('ToLustreUnsupportedBlocks finished in %f seconds', t_finish);
 display_msg(MatlabUtils.strjoin(unsupportedOptions, '\n'), MsgType.DEBUG, 'ToLustreUnsupportedBlocks', '');
