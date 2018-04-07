@@ -279,7 +279,7 @@ classdef SLX2LusUtils < handle
                         external_lib = {'bool_to_real'};
                         conv_format = 'bool_to_real(%s)';
                     end
-                case {'int8','uint8','int16','uint16'}
+                case {'int8','uint8','int16','uint16', 'int32','uint32'}
                     
                     conv = strcat('int_to_', outport_dt);
                     if strcmp(lus_in_dt, 'int')
@@ -292,15 +292,18 @@ classdef SLX2LusUtils < handle
                         external_lib = {conv, RndMeth};
                         conv_format = strcat(conv,'(',RndMeth,'(%s))');
                     end
-                case {'int32','uint32'}
-                    % supporting 'int32','uint32' as lustre int.
-                    if strcmp(lus_in_dt, 'bool')
-                        external_lib = {'bool_to_int'};
-                        conv_format = 'bool_to_int(%s)';
-                    elseif strcmp(lus_in_dt, 'real')
-                        external_lib = {RndMeth};
-                        conv_format = strcat(RndMeth, '(%s)');
-                    end
+                    % issue should be solved in Lustrec, if lustrec support
+                    % long int, the following is not important, it is
+                    % supported by the previous case (with int16, uint16).
+%                 case {'int32','uint32'}
+%                     % supporting 'int32','uint32' as lustre int.
+%                     if strcmp(lus_in_dt, 'bool')
+%                         external_lib = {'bool_to_int'};
+%                         conv_format = 'bool_to_int(%s)';
+%                     elseif strcmp(lus_in_dt, 'real')
+%                         external_lib = {RndMeth};
+%                         conv_format = strcat(RndMeth, '(%s)');
+%                     end
                     
                 case {'fixdt(1,16,0)', 'fixdt(1,16,2^0,0)'}
                     % DataType conversion not supported yet

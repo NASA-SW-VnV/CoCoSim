@@ -83,7 +83,7 @@ classdef ExtLib
         function [node, external_nodes_i, opens] = getToBool(dt)
             opens = {};
             external_nodes_i = {};
-            format = 'node %s (x: %s)\nreturns(y:bool);\nlet\n\t y= (x > %s);\ntel\n\n';
+            format = 'node %s (x: %s)\nreturns(y:bool);\nlet\n\t y= (x <> %s);\ntel\n\n';
             node_name = strcat(dt, '_to_bool');
             if strcmp(dt, 'int')
                 zero = '0';
@@ -164,6 +164,19 @@ classdef ExtLib
             format = [format, 'else real_to_int(x);\ntel\n\n'];
             node = sprintf(format);
         end
+        % this one for "Rounding" Simulink block, it is different from Floor by
+        % returning a real instead of int.
+        function [node, external_nodes_i, opens] = get__floor()
+            opens = {'conv'};
+            external_nodes_i = {'_Floor'};
+            % Round towards minus infinity.
+            format = '--Rounds each element of the input signal to the nearest integer value towards minus infinity.\n ';
+            format = [format,  'node _floor (x: real)\nreturns(y:real);\nlet\n\t'];
+            format = [format, 'y= int_to_real(_Floor(x));\ntel\n\n'];
+            node = sprintf(format);
+        end
+        
+        
         
         %%
         function [node, external_nodes_i, opens] = get__Ceiling()
@@ -174,6 +187,17 @@ classdef ExtLib
             format = [ format ,'node _Ceiling (x: real)\nreturns(y:int);\nlet\n\t'];
             format = [format, 'y= if x < 0.0 then real_to_int(x) \n\t'];
             format = [format, 'else real_to_int(x) + 1;\ntel\n\n'];
+            node = sprintf(format);
+        end
+        % this one for "Rounding" block, it is different from Ceiling by
+        % returning a real instead of int.
+        function [node, external_nodes_i, opens] = get__ceil()
+            opens = {'conv'};
+            external_nodes_i = {'_Ceiling'};
+            % Round towards minus infinity.
+            format = '--Rounds each element of the input signal to the nearest integer towards positive infinity.\n ';
+            format = [format,  'node _ceil (x: real)\nreturns(y:real);\nlet\n\t'];
+            format = [format, 'y= int_to_real(_Ceiling(x));\ntel\n\n'];
             node = sprintf(format);
         end
         
@@ -232,6 +256,43 @@ classdef ExtLib
             
             node = sprintf(format);
             external_nodes = {'_Floor', '_Ceiling'};
+        end
+        % this one for "Rounding" block, it is different from Ceiling by
+        % returning a real instead of int.
+        function [node, external_nodes_i, opens] = get__round()
+            opens = {'conv'};
+            external_nodes_i = {'_Round'};
+            % Round towards minus infinity.
+            format = '--Rounds each element of the input signal to the nearest integer.\n ';
+            format = [format,  'node _round (x: real)\nreturns(y:real);\nlet\n\t'];
+            format = [format, 'y= int_to_real(_Round(x));\ntel\n\n'];
+            node = sprintf(format);
+        end
+        
+        %% Rounds each element of the input signal to the nearest integer towards zero.
+        function [node, external_nodes, opens] = get__Fix()
+            opens = {};
+            format = '--Rounds number to the nearest integer towards zero.\n';
+            format = [ format ,'node _Fix (x: real)\nreturns(y:int);\nlet\n\t'];
+            format = [ format , 'y = if (x >= 0.5) then _Floor(x)\n\t\t'];
+            format = [ format , ' else if (x > -0.5) then 0 \n\t\t'];
+            format = [ format , ' else _Ceiling(x);'];
+            format = [ format , '\ntel\n\n'];
+            
+            
+            node = sprintf(format);
+            external_nodes = {'_Floor', '_Ceiling'};
+        end
+        % this one for "Rounding" block, it is different from Fix by
+        % returning a real instead of int.
+        function [node, external_nodes_i, opens] = get__fix()
+            opens = {'conv'};
+            external_nodes_i = {'_Fix'};
+            % Round towards minus infinity.
+            format = '--Round towards minus infinity..\n ';
+            format = [format,  'node _fix (x: real)\nreturns(y:real);\nlet\n\t'];
+            format = [format, 'y= int_to_real(_Fix(x));\ntel\n\n'];
+            node = sprintf(format);
         end
         %%
         function [node, external_nodes_i, opens] = get_fmod()
