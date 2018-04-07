@@ -5,7 +5,7 @@ Ktrinh: Assignment,
         BusCreator
         BusSelector
         Concatenate,
-        DataTypeConversion (Khanh)  many failures due to rounding methods
+        DataTypeConversion 
         DataTypeDuplicate (ignored),
         Demux,
         DotProduct(pp),
@@ -18,6 +18,7 @@ Ktrinh: Assignment,
         Mux,
         Product,
         Reshape,
+        Rounding,
         Switch,
         Sqrt, 
         Trigonomery, 
@@ -69,6 +70,7 @@ Hamza:  Abs,
 
 Blocks that has left from Biosentinel:
     ActionPort (Hamza)
+    BusCreator, BusSelector
     DiscreteTransferFcn (see TransferFcn in pp) (Khanh)
     Fcn (partially done in pp) (Khanh)
     ForIterator (Hamza)
@@ -78,10 +80,14 @@ Blocks that has left from Biosentinel:
     Merge (Hamza)
     ModelReference (Hamza)
     RandomNumber ( to translate to empty node with contract) (Hamza)
-    Rounding (Khanh)
     S-Function (Hamza)
     SampleTimeMath (Hamza)
     Selector (see pp) (Khanh)
     StateControl 
     SwitchCase (Hamza)
     
+
+LM Challenger new blocks 
+    {'InportShadow'      }
+    {'SignalConversion'  }
+   
