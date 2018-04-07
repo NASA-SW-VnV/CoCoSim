@@ -5,6 +5,7 @@ Ktrinh: Assignment,
         BusCreator
         BusSelector
         Concatenate,
+        DataTypeConversion (Khanh)  many failures due to rounding methods
         DataTypeDuplicate (ignored),
         Demux,
         DotProduct(pp),
@@ -68,7 +69,6 @@ Hamza:  Abs,
 
 Blocks that has left from Biosentinel:
     ActionPort (Hamza)
-    DataTypeConversion (Khanh)
     DiscreteTransferFcn (see TransferFcn in pp) (Khanh)
     Fcn (partially done in pp) (Khanh)
     ForIterator (Hamza)
