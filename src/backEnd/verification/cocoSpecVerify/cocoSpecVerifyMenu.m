@@ -1,6 +1,6 @@
 function schema = lusVerifyMenu(callbackInfo)
 schema = sl_container_schema;
-schema.label = 'CoCoSpec compiler';
+schema.label = 'Compositional Verification';
 schema.statustip = 'Verify the current model with CoCoSim';
 schema.autoDisableWhen = 'Busy';
 

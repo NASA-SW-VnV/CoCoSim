@@ -7,13 +7,12 @@
 
 %% add paths
 [cocoSim_root, ~, ~] = fileparts(mfilename('fullpath'));
+warning off
 addpath(cocoSim_root);
 addpath(genpath(fullfile(cocoSim_root, 'libs')));
 addpath(genpath(fullfile(cocoSim_root, 'scripts')));
 addpath(genpath(fullfile(cocoSim_root, 'src')));
 addpath(fullfile(cocoSim_root, 'tools'));
-
-
 
 %% First configuration, Zustre, Kind2 and Lustrec
 % Go to tools/tools_config and follow instructions
@@ -44,3 +43,5 @@ matlabParser = fullfile(cocoSim_root, 'src','frontEnd', 'IR',...
 if exist(matlabParser, 'file')
     javaaddpath(matlabParser);
 end
+
+warning on

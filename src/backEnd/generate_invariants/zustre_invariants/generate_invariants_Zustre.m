@@ -47,7 +47,7 @@ try
     %we save it as the output model
     close_system(new_name,0)
     save_system(model_path,new_name, 'OverwriteIfChangedOnDisk', true);
-    load_system(new_name);
+    
     
     %get tracability
     
@@ -63,7 +63,7 @@ try
     end
     [~, translated_nodes, ~] = fileparts(translated_nodes_path);
     load_system(translated_nodes);
-    
+    load_system(new_name);
     nodes = data.nodes;
     for node = fieldnames(nodes)'
         original_name = nodes.(node{1}).original_name;

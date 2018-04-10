@@ -10,6 +10,10 @@ function [b, status, type] = getWriteType(sub_blk)
 
 status = 0;
 b = [];
+if ~isfield(sub_blk, 'BlockType')
+    status = 1;
+    return;
+end
 type = sub_blk.BlockType;
 if Block_To_Lustre.ignored(sub_blk.BlockType)
     status = 1;

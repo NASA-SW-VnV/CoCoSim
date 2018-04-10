@@ -6,7 +6,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function schema = lusValidateMenu(callbackInfo)
 schema = sl_container_schema;
-schema.label = 'Lustre compiler using ...';
+schema.label = 'Simulink to Lustre compiler using ...';
 schema.statustip = 'Validate Lustre compiler';
 schema.autoDisableWhen = 'Busy';
 

@@ -5,12 +5,16 @@
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function schema = LustreMenu(callbackInfo)
-schema = sl_container_schema;
+schema = sl_action_schema;
 schema.label = 'C';
-schema.statustip = 'Generate C code';
-schema.autoDisableWhen = 'Busy';
+schema.callback = @LusCompilerCallback;
 
-schema.childrenFcns = {@LusCompiler, @SimulinkCompiler};
+% schema = sl_container_schema;
+% schema.label = 'C';
+% schema.statustip = 'Generate C code';
+% schema.autoDisableWhen = 'Busy';
+% 
+% schema.childrenFcns = {@LusCompiler}, @SimulinkCompiler};
 end
 
 

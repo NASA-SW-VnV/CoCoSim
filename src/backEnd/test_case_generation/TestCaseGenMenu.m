@@ -10,7 +10,7 @@ schema.label = 'Test-case generation using ...';
 schema.statustip = 'Generate Lustre code';
 schema.autoDisableWhen = 'Busy';
 
-schema.childrenFcns = {@Random, @Mutation, @MCDC};
+schema.childrenFcns = {@MCDC,@Mutation , @Random};
 end
 
 %%

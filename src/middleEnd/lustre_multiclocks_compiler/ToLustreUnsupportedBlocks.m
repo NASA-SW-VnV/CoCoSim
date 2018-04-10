@@ -111,6 +111,9 @@ unsupportedOptions_i = blockUnsupportedOptions(blk, main_sampleTime);
 unsupportedOptions = [unsupportedOptions, unsupportedOptions_i];
 if isfield(blk, 'Content')
     field_names = fieldnames(blk.Content);
+    field_names = ...
+        field_names(...
+        cellfun(@(x) isfield(blk.Content.(x),'BlockType'), field_names));
     for i=1:numel(field_names)
         unsupportedOptions_i = recursiveGeneration(blk.Content.(field_names{i}), main_sampleTime);
         unsupportedOptions = [unsupportedOptions, unsupportedOptions_i];

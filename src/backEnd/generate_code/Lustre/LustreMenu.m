@@ -5,12 +5,15 @@
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function schema = LustreMenu(callbackInfo)
-schema = sl_container_schema;
+schema = sl_action_schema;
 schema.label = 'Lustre';
-schema.statustip = 'Generate Lustre code';
-schema.autoDisableWhen = 'Busy';
-
-schema.childrenFcns = {@LusCompiler, @CoCoSpecCompiler};
+schema.callback = @LusCompilerCallback;
+% schema = sl_container_schema;
+% schema.label = 'Lustre';
+% schema.statustip = 'Generate Lustre code';
+% schema.autoDisableWhen = 'Busy';
+% 
+% schema.childrenFcns = {@LusCompiler, @CoCoSpecCompiler};
 end
 
 

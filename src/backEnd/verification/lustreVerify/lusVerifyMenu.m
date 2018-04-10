@@ -6,7 +6,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function schema = lusVerifyMenu(callbackInfo)
 schema = sl_container_schema;
-schema.label = 'Lustre compiler';
+schema.label = 'Monolithic Verification';
 schema.statustip = 'Verify the current model with CoCoSim';
 schema.autoDisableWhen = 'Busy';
 
