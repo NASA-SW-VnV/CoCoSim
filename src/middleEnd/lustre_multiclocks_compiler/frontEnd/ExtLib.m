@@ -321,6 +321,9 @@ classdef ExtLib
             
             node = sprintf(format);
         end
+        
+        %% interpolation functions
+
     end
     
 end
