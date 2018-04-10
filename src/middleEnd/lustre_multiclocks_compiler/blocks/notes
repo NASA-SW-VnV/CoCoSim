@@ -13,6 +13,7 @@ Ktrinh: Assignment,
         Gain (pp), 
         Goto,
         Logic,
+        Lookup\_n-D (Khanh)
         Math,
         MultiPortSwitch
         Mux,
@@ -75,7 +76,7 @@ Blocks that has left from Biosentinel:
     Fcn (partially done in pp) (Khanh)
     ForIterator (Hamza)
     If (Hamza)
-    Lookup\_n-D (Khanh)
+   
     Memory (can be descritized in pp to unitDelay)  (Hamza)
     Merge (Hamza)
     ModelReference (Hamza)

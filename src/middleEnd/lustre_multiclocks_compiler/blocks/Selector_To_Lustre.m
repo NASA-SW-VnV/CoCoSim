@@ -1,5 +1,5 @@
-classdef Assignment_To_Lustre < Block_To_Lustre
-    % Assignment_To_Lustre
+classdef Selector_To_Lustre < Block_To_Lustre
+    % Selector_To_Lustre
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -17,7 +17,6 @@ classdef Assignment_To_Lustre < Block_To_Lustre
             inputs = {};
             
             widths = blk.CompiledPortWidths.Inport;
-            max_width = max(widths);
             outputDataType = blk.CompiledPortDataTypes.Outport{1};
             
             for i=1:numel(widths)
@@ -32,7 +31,7 @@ classdef Assignment_To_Lustre < Block_To_Lustre
                         obj.addExternal_libraries(external_lib);
                         inputs{i} = cellfun(@(x) sprintf(conv_format,x), inputs{i}, 'un', 0);
                     end
-                elseif i > 2 && ~strcmp(lusInport_dt, 'int')
+                elseif i > 1 && ~strcmp(lusInport_dt, 'int')
                     % convert index values to int for Lustre code
                     [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, 'int');
                     if ~isempty(external_lib)
@@ -42,7 +41,6 @@ classdef Assignment_To_Lustre < Block_To_Lustre
                 end
             end
             
-
             [numOutDims, ~, ~] = ...
                 Constant_To_Lustre.getValueFromParameter(parent, blk, blk.NumberOfDimensions);
             
@@ -51,9 +49,8 @@ classdef Assignment_To_Lustre < Block_To_Lustre
             in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(blk);
 
             % reading and assigning index map ind{i}
-            % ind{i}   mapping index for dimension i.   e.g.   ind{1} =
-            % [1,3] means for dimension 1, U has 2 rows, 1st row of U maps
-            % to 1 row of Y, 2nd row of U maps to 3rd row of Y  
+            % ind{i} is the mapping i for dimension i.   e.g.   ind{1} =
+            % [1,3] means for dimension 1, select row 1 and 3.
             % for non "port" row i, ind{i} is an array of integer
             % for "port" row i, ind{i} is an array of string for Lustre
             % code
@@ -61,41 +58,60 @@ classdef Assignment_To_Lustre < Block_To_Lustre
             isPortIndex = false;
             IndexMode = blk.IndexMode;
             indPortNumber = zeros(1,numel(blk.IndexOptionArray));
+            outputDimsArray = ones(1,numOutDims);
+
             for i=1:numel(blk.IndexOptionArray)
-                if strcmp(blk.IndexOptionArray{i}, 'Assign all')
-                    ind{i} = (1:in_matrix_dimension{2}.dims(i));
+                [outputDimsArray(i), ~, ~] = ...
+                    Constant_To_Lustre.getValueFromParameter(parent, blk, blk.OutputSizeArray{i});
+                if strcmp(blk.IndexOptionArray{i}, 'Select all')
+                    ind{i} = (1:in_matrix_dimension{1}.dims(i));
+                    outputDimsArray(i) = in_matrix_dimension{1}.dims(i);
                 elseif strcmp(blk.IndexOptionArray{i}, 'Index vector (dialog)')
                     [Idx, ~, ~] = ...
                         Constant_To_Lustre.getValueFromParameter(parent, blk, blk.IndexParamArray{i});
                     ind{i} = Idx;
+                    outputDimsArray(i) = numel(Idx);
                 elseif strcmp(blk.IndexOptionArray{i}, 'Index vector (port)')
                     isPortIndex = true;
                     indexPortNumber = indexPortNumber + 1;
-                    portNumber = indexPortNumber + 2;   % 1st and 2nd for Y0 and U
+                    portNumber = indexPortNumber + 1;   % 1st is for input
                     indPortNumber(i) = portNumber;
-                    for j=1:in_matrix_dimension{2}.dims(i)
+                    outputDimsArray(i) = numel(inputs{portNumber});
+                    for j=1:outputDimsArray(i)
                         if strcmp(IndexMode, 'Zero-based')
                             ind{i}{j} = sprintf('%s + 1',inputs{portNumber}{j});
                         else
                             ind{i}{j} = inputs{portNumber}{j};
                         end
                     end
-                    %ind{i} = cell(in_matrix_dimension{2}.dims(i));
                 elseif strcmp(blk.IndexOptionArray{i}, 'Starting index (dialog)')
                     [Idx, ~, ~] = ...
-                        Constant_To_Lustre.getValueFromParameter(parent, blk, blk.IndexParamArray{i});
-                    % check for scalar or vector
-                    if in_matrix_dimension{2}.numDs == 1
-                        if in_matrix_dimension{2}.dims(1) == 1   %scalar
-                            ind{i} = Idx;
-                        else     %vector
-                            ind{i} = (Idx:Idx+in_matrix_dimension{2}.dims(1)-1);
-                        end
-                    else      % matrix
-                        ind{i} = (Idx:Idx+in_matrix_dimension{2}.dims(i)-1);
-                    end
+                        Constant_To_Lustre.getValueFromParameter(parent, blk, blk.IndexParamArray{i});                    
+                    ind{i} = (Idx:Idx+outputDimsArray(i)-1);
                     
                 elseif strcmp(blk.IndexOptionArray{i}, 'Starting index (port)')
+                    isPortIndex = true;
+                    indexPortNumber = indexPortNumber + 1;
+                    portNumber = indexPortNumber + 1;   % 1st is for input
+                    indPortNumber(i) = portNumber;
+
+                    for j=1:outputDimsArray(i)
+                        if j==1
+                            if strcmp(IndexMode, 'Zero-based')
+                                ind{i}{j} = sprintf('%s + 1',inputs{portNumber}{1});
+                            else
+                                ind{i}{j} = inputs{portNumber}{j};
+                            end
+                        else
+                            if strcmp(IndexMode, 'Zero-based')
+                                ind{i}{j} = sprintf('%s + 1 + %d',inputs{portNumber}{1},(j-1));
+                            else
+                                ind{i}{j} = sprintf('%s + %d',inputs{portNumber}{1},(j-1));
+                            end
+                        end
+                    end
+                    
+                elseif strcmp(blk.IndexOptionArray{i}, 'Starting and ending indices (port)')
                     isPortIndex = true;
                     indexPortNumber = indexPortNumber + 1;
                     portNumber = indexPortNumber + 2;   % 1st and 2nd for Y0 and U    
@@ -114,40 +130,36 @@ classdef Assignment_To_Lustre < Block_To_Lustre
                                 ind{i}{j} = sprintf('%s + d',inputs{portNumber}{1},(j-1));
                             end
                         end
-                    end                    
-
+                    end    
                 else
                     % should not be here
                     display_msg(sprintf('IndexOption  %s not recognized in block %s',...
                         blk.IndexOptionArray{i}, indexBlock.Origin_path), ...
-                        MsgType.ERROR, 'Assignment_To_Lustre', '');
+                        MsgType.ERROR, 'Selector_To_Lustre', '');
                 end
                 if strcmp(IndexMode, 'Zero-based') && ~isPortIndex
-                    if ~strcmp(blk.IndexOptionArray{i}, 'Assign all')
+                    if ~strcmp(blk.IndexOptionArray{i}, 'Select all')
                         ind{i} = ind{i} + 1;
                     end
                 end
             end
             
-            U_to_Y0 = zeros(1,numel(inputs{2}));
-            y0_dims = in_matrix_dimension{1}.dims;    % y0_dims = U_dims
-            U_dims = in_matrix_dimension{2}.dims;
             indexDataType = 'int';
             
             % if index assignment is read in form index port, write mapping
             % code on Lustre side
-            if isPortIndex
+            if isPortIndex   
                 
                 if numOutDims>7
                     display_msg(sprintf('For index option %s, more than 7 dimensions is not supported in block %s',...
                         blk.IndexOptionArray{i}, indexBlock.Origin_path), ...
-                        MsgType.ERROR, 'Assignment_To_Lustre', '');
+                        MsgType.ERROR, 'Selector_To_Lustre', '');
                 end
                 
                 U_index = {};
                 addVars = {};
                 addVarIndex = 0;
-                for i=1:numel(inputs{2})
+                for i=1:numel(outputs)
                     U_index{i} = sprintf('U_index_%d',i);
                     addVarIndex = addVarIndex + 1;
                     addVars{addVarIndex} = sprintf('%s:%s;',U_index{i},indexDataType);
@@ -171,9 +183,9 @@ classdef Assignment_To_Lustre < Block_To_Lustre
                                 addVars{addVarIndex} = sprintf('ind_dim_%d_%d:%s;',i,j,indexDataType);
                                 codeIndex = codeIndex + 1;
                                 if j==1
-                                    codes{codeIndex} = sprintf('ind_dim_%d_%d = %s;\n\t',i,j, inputs{portNum}{1}) ;
+                                    codes{codeIndex} = sprintf('ind_dim_%d_%d = %s;\n\t',i,j, ind{i}{1}) ;
                                 else
-                                    codes{codeIndex} = sprintf('ind_dim_%d_%d = %s + %d;\n\t',i,j, inputs{portNum}{1}, (j-1)) ;
+                                    codes{codeIndex} = sprintf('ind_dim_%d_%d = %s + %d;\n\t',i,j, ind{i}{1}, (j-1)) ;
                                 end
                             end                            
                         else   % 'Index vector (port)'
@@ -181,7 +193,7 @@ classdef Assignment_To_Lustre < Block_To_Lustre
                                 addVarIndex = addVarIndex + 1;
                                 addVars{addVarIndex} = sprintf('ind_dim_%d_%d:%s;',i,j,indexDataType);
                                 codeIndex = codeIndex + 1;
-                                codes{codeIndex} = sprintf('ind_dim_%d_%d = %s;\n\t',i,j, inputs{portNum}{j}) ;
+                                codes{codeIndex} = sprintf('ind_dim_%d_%d = %s;\n\t',i,j, ind{i}{j}) ;
                             end
                         end
                     end
@@ -189,24 +201,23 @@ classdef Assignment_To_Lustre < Block_To_Lustre
                 %calculating U_index{i}
                 % 1D
                 
-                Y0_dimJump = ones(1,numel(in_matrix_dimension{1}.dims));
-                for i=2:numel(in_matrix_dimension{1}.dims)
+                Y_dimJump = ones(1,numel(outputDimsArray));
+                for i=2:numel(outputDimsArray)
                     for j=1:i-1
-                        Y0_dimJump(i) = Y0_dimJump(i)*in_matrix_dimension{1}.dims(j);
+                        Y_dimJump(i) = Y_dimJump(i)*outputDimsArray(j);
                     end
                 end
-                U_dimJump = ones(1,numel(in_matrix_dimension{2}.dims));
-                for i=2:numel(in_matrix_dimension{2}.dims)
+                U_dimJump = ones(1,numel(in_matrix_dimension{1}.dims));
+                for i=2:numel(in_matrix_dimension{1}.dims)
                     for j=1:i-1
-                        U_dimJump(i) = U_dimJump(i)*in_matrix_dimension{2}.dims(j);
+                        U_dimJump(i) = U_dimJump(i)*in_matrix_dimension{1}.dims(j);
                     end
                 end
                 str_Y_index = {};
-                for i=1:numel(inputs{2})    % looping over U elements
-                    curSub = ones(1,numel(in_matrix_dimension{2}.dims));
-                    curNum = i;
+                for i=1:numel(outputs)  % looping over Y elements
+                    curSub = ones(1,numel(outputDimsArray));
                     % ind2sub
-                    [d1, d2, d3, d4, d5, d6, d7 ] = ind2sub(in_matrix_dimension{2}.dims,i);   % 7 dims max
+                    [d1, d2, d3, d4, d5, d6, d7 ] = ind2sub(outputDimsArray,i);   % 7 dims max
                     curSub(1) = d1;
                     curSub(2) = d2;
                     curSub(3) = d3;
@@ -215,7 +226,7 @@ classdef Assignment_To_Lustre < Block_To_Lustre
                     curSub(6) = d6;
                     curSub(7) = d7;
 
-                    for j=1:numel(in_matrix_dimension{2}.dims)
+                    for j=1:numel(outputDimsArray)
                         str_Y_index{i}{j} = sprintf('str_Y_index_%d_%d',i,j);
                         addVarIndex = addVarIndex + 1;
                         addVars{addVarIndex} = sprintf('str_Y_index_%d_%d:%s;',i,j,indexDataType);
@@ -223,12 +234,13 @@ classdef Assignment_To_Lustre < Block_To_Lustre
                         codes{codeIndex} = sprintf('%s = ind_dim_%d_%d;\n\t',str_Y_index{i}{j},j,curSub(j)) ;
                     end
                     
+                    % calculating sub2ind in Lustre
                     value = '0';
-                    for j=1:numel(in_matrix_dimension{2}.dims)
+                    for j=1:numel(outputDimsArray)
                         if j==1
-                            value = sprintf('%s + %s*%d',value,str_Y_index{i}{j}, Y0_dimJump(j))
+                            value = sprintf('%s + %s*%d',value,str_Y_index{i}{j}, U_dimJump(j))
                         else
-                            value = sprintf('%s + (%s-1)*%d',value,str_Y_index{i}{j}, Y0_dimJump(j))
+                            value = sprintf('%s + (%s-1)*%d',str_Y_index{i}{j}, U_dimJump(j))
                         end
                     end
                     codeIndex = codeIndex + 1;
@@ -238,66 +250,65 @@ classdef Assignment_To_Lustre < Block_To_Lustre
                     
                     display_msg(sprintf('More than 7 dimensions is not supported in block %s',...
                         indexBlock.Origin_path), ...
-                        MsgType.ERROR, 'Assignment_To_Lustre', '');
+                        MsgType.ERROR, 'Selector_To_Lustre', '');
                 end
                 
-                
+                % writing outputs code
                 for i=1:numel(outputs)
                     codeIndex = codeIndex + 1;
                     code = sprintf('%s = \n\t', outputs{i});
-                    for j=numel(inputs{2}):-1:1
-                        if j==numel(inputs{2})
-                            code = sprintf('%s  if(%s = %d) then %s\n\t', code, U_index{j},i,inputs{2}{j});
+                    for j=numel(inputs{1}):-1:2
+                        if j==numel(inputs{1})
+                            code = sprintf('%s  if(%s = %d) then %s\n\t', code, U_index{i},j,inputs{1}{j});
                         else
-                            code = sprintf('%s  else if(%s = %d) then %s\n\t', code, U_index{j},i,inputs{2}{j});
+                            code = sprintf('%s  else if(%s = %d) then %s\n\t', code, U_index{i},j,inputs{1}{j});
                         end
                     end
-                    codes{codeIndex} = sprintf('%s  else %s ;\n\t', code,inputs{1}{i});
+                    codes{codeIndex} = sprintf('%s  else %s ;\n\t', code,inputs{1}{1});
                     
                 end
                 
                 obj.addVariable(addVars);
                 
-            else
-                if in_matrix_dimension{1}.numDs == 1   % for 1D
-                    U_to_Y0 = ind{1};
+            else   % no port input.  Mapping is done in Matlab.
+                if numOutDims > 7
+                    display_msg(sprintf('For index option %s, more than 7 dimensions is not supported in block %s',...
+                        blk.IndexOptionArray{i}, indexBlock.Origin_path), ...
+                        MsgType.ERROR, 'Selector_To_Lustre', '');
+                elseif numOutDims == 1
+                    for i=1:numel(outputs)
+                        codeIndex = codeIndex + 1;
+                        U_index = ind{1}(i);
+                        codes{codeIndex} = sprintf('%s = %s ;\n\t', outputs{i}, inputs{1}{U_index});
+                    end                    
                 else
-                    % support max dimensions = 7
-                    sub2ind_string = 'U_to_Y0 = sub2ind(y0_dims';
-                    dString = {'[ ', '[ ', '[ ', '[ ', '[ ', '[ ', '[ '};
-                    
-                    for i=1:numel(inputs{2})    % looping over U elements
-                        [d1, d2, d3, d4, d5, d6, d7 ] = ind2sub(U_dims,i);
+                    % support max dimensions = 7                    
+                    for i=1:numel(outputs)
+                        codeIndex = codeIndex + 1;
+                        [d1, d2, d3, d4, d5, d6, d7 ] = ind2sub(outputDimsArray,i);
                         d = [d1, d2, d3, d4, d5, d6, d7 ];
                         
-                        for j=1:numel(y0_dims)
-                            y0d(j) = ind{j}(d(j));
+                        sub2ind_string = 'U_index = sub2ind(in_matrix_dimension{1}.dims';
+                        dString = {'[ ', '[ ', '[ ', '[ ', '[ ', '[ ', '[ '};
+                        for j=1:numOutDims
+                            Ud(j) = ind{j}(d(j));
                             if i==1
-                                dString{j}  = sprintf('%s%d', dString{j}, y0d(j));
+                                dString{j}  = sprintf('%s%d', dString{j}, Ud(j));
                             else
-                                dString{j}  = sprintf('%s, %d', dString{j}, y0d(j));
+                                dString{j}  = sprintf('%s, %d', dString{j}, Ud(j));
                             end
                         end
+                        
+                        for j=1:numOutDims
+                            sub2ind_string = sprintf('%s, %s]',sub2ind_string,dString{j});
+                        end
+                        
+                        sub2ind_string = sprintf('%s);',sub2ind_string);
+                        eval(sub2ind_string);
+                        codes{codeIndex} = sprintf('%s = %s ;\n\t', outputs{i}, inputs{1}{U_index});
                     end
                     
-                    for j=1:numel(y0_dims)
-                        sub2ind_string = sprintf('%s, %s]',sub2ind_string,dString{j});
-                    end
-                    sub2ind_string = sprintf('%s);',sub2ind_string);
-                    eval(sub2ind_string);
                 end
-                
-                codeIndex = 0;
-                for i=1:numel(outputs)
-                    codeIndex = codeIndex + 1;
-                    if find(U_to_Y0==i)
-                        Uindex = find(U_to_Y0==i);
-                        codes{codeIndex} = sprintf('%s = %s ;\n\t', outputs{i}, inputs{2}{Uindex});
-                    else
-                        codes{codeIndex} = sprintf('%s = %s ;\n\t', outputs{i}, inputs{1}{i});
-                    end
-                end
-                
             end
             
             obj.setCode(MatlabUtils.strjoin(codes, ''));
@@ -306,49 +317,18 @@ classdef Assignment_To_Lustre < Block_To_Lustre
         
         function options = getUnsupportedOptions(obj, blk, varargin)
             obj.unsupported_options = {};
-            in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(blk);
-            if in_matrix_dimension{1}.numDs>7
+            [numOutDims, ~, ~] = ...
+                Constant_To_Lustre.getValueFromParameter(parent, blk, blk.NumberOfDimensions);
+            if numOutDims>7
                 obj.addUnsupported_options(...
                     sprintf('More than 7 dimensions is not supported in block %s',...
                     indexBlock.Origin_path), ...
-                    MsgType.ERROR, 'Assignment_To_Lustre', '');
+                    MsgType.ERROR, 'Selector_To_Lustre', '');
             end
             
             options = obj.unsupported_options;
         end
     end
-    
-    
-    methods(Static)
-        % This method allows for only 1 input, the same static under
-        % Product_To_Lustre may require more than 1 input
-        function in_matrix_dimension = getInputMatrixDimensions(blk)
-            % return structure of matrix size
-            in_matrix_dimension = {};
-            readMatrixDimension = true;
-            numMat = 0;
-            inport_dimensions = blk.CompiledPortDimensions.Inport;
-            
-            for i=1:numel(inport_dimensions)
-                if readMatrixDimension
-                    numMat = numMat + 1;
-                    numDs = inport_dimensions(i);
-                    readMatrixDimension = false;
-                    in_matrix_dimension{numMat}.numDs = numDs;
-                    in_matrix_dimension{numMat}.dims = zeros(1,numDs);
-                    index = 0;
-                else
-                    index = index + 1;
-                    in_matrix_dimension{numMat}.dims(1,index) = inport_dimensions(i);
-                    if index == numDs;
-                        readMatrixDimension = true;
-                    end
-                end
-                
-            end
-        end
         
-    end
-    
 end
 
