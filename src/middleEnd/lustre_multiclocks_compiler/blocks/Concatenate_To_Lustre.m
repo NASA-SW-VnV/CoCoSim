@@ -17,7 +17,6 @@ classdef Concatenate_To_Lustre < Block_To_Lustre
             inputs = {};
             
             widths = blk.CompiledPortWidths.Inport;
-            max_width = max(widths);
             outputDataType = blk.CompiledPortDataTypes.Outport{1};
 
             for i=1:numel(widths)
