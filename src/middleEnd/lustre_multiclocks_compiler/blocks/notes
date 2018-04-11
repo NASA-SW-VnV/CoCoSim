@@ -20,6 +20,7 @@ Ktrinh: Assignment,
         Product,
         Reshape,
         Rounding,
+        Selector (see pp) (Khanh)
         Switch,
         Sqrt, 
         Trigonomery, 
@@ -83,7 +84,6 @@ Blocks that has left from Biosentinel:
     RandomNumber ( to translate to empty node with contract) (Hamza)
     S-Function (Hamza)
     SampleTimeMath (Hamza)
-    Selector (see pp) (Khanh)
     StateControl 
     SwitchCase (Hamza)
     

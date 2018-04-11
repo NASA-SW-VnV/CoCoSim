@@ -96,41 +96,19 @@ classdef Selector_To_Lustre < Block_To_Lustre
                     indPortNumber(i) = portNumber;
 
                     for j=1:outputDimsArray(i)
-                        if j==1
-                            if strcmp(IndexMode, 'Zero-based')
-                                ind{i}{j} = sprintf('%s + 1',inputs{portNumber}{1});
-                            else
-                                ind{i}{j} = inputs{portNumber}{j};
-                            end
+                        
+                        if strcmp(IndexMode, 'Zero-based')
+                            ind{i}{j} = sprintf('%s + 1 + %d',inputs{portNumber}{1},(j-1));
                         else
-                            if strcmp(IndexMode, 'Zero-based')
-                                ind{i}{j} = sprintf('%s + 1 + %d',inputs{portNumber}{1},(j-1));
-                            else
-                                ind{i}{j} = sprintf('%s + %d',inputs{portNumber}{1},(j-1));
-                            end
-                        end
+                            ind{i}{j} = sprintf('%s + %d',inputs{portNumber}{1},(j-1));
+                        end                        
                     end
                     
-                elseif strcmp(blk.IndexOptionArray{i}, 'Starting and ending indices (port)')
-                    isPortIndex = true;
-                    indexPortNumber = indexPortNumber + 1;
-                    portNumber = indexPortNumber + 2;   % 1st and 2nd for Y0 and U    
-                    indPortNumber(i) = portNumber;
-                    for j=1:in_matrix_dimension{2}.dims(i)                        
-                        if j==1
-                            if strcmp(IndexMode, 'Zero-based')
-                                ind{i}{j} = sprintf('%s + 1',inputs{portNumber}{1});
-                            else
-                                ind{i}{j} = inputs{portNumber}{j};
-                            end
-                        else                            
-                            if strcmp(IndexMode, 'Zero-based')
-                                ind{i}{j} = sprintf('%s + 1 + d',inputs{portNumber}{1},(j-1));
-                            else
-                                ind{i}{j} = sprintf('%s + d',inputs{portNumber}{1},(j-1));
-                            end
-                        end
-                    end    
+                elseif strcmp(blk.IndexOptionArray{i}, 'Starting and ending indices (port)')                    
+                    display_msg(sprintf('Starting and ending indices (port) is not supported in block %s',...
+                        blk.Origin_path), ...
+                        MsgType.ERROR, 'Selector_To_Lustre', '');    
+                   
                 else
                     % should not be here
                     display_msg(sprintf('IndexOption  %s not recognized in block %s',...
@@ -160,7 +138,7 @@ classdef Selector_To_Lustre < Block_To_Lustre
                 addVars = {};
                 addVarIndex = 0;
                 for i=1:numel(outputs)
-                    U_index{i} = sprintf('%s_U_index_%d',blk.Name,i);
+                    U_index{i} = sprintf('%s_U_index_%d',SLX2LusUtils.name_format(blk.Name),i);
                     addVarIndex = addVarIndex + 1;
                     addVars{addVarIndex} = sprintf('%s:%s;',U_index{i},indexDataType);
                 end
@@ -170,9 +148,11 @@ classdef Selector_To_Lustre < Block_To_Lustre
                     if ~contains(blk.IndexOptionArray{i}, '(port)')
                         for j=1:numel(ind{i})
                             addVarIndex = addVarIndex + 1;
-                            addVars{addVarIndex} = sprintf('%s_ind_dim_%d_%d:%s;',blk.Name,i,j,indexDataType);
+                            addVars{addVarIndex} = sprintf('%s_ind_dim_%d_%d:%s;',...
+                                SLX2LusUtils.name_format(blk.Name),i,j,indexDataType);
                             codeIndex = codeIndex + 1;
-                            codes{codeIndex} = sprintf('%s_ind_dim_%d_%d = %d;\n\t',blk.Name,i,j, ind{i}(j)) ;
+                            codes{codeIndex} = sprintf('%s_ind_dim_%d_%d = %d;\n\t',...
+                                SLX2LusUtils.name_format(blk.Name),i,j, ind{i}(j)) ;
                         end
                     else
                         % port
@@ -180,20 +160,25 @@ classdef Selector_To_Lustre < Block_To_Lustre
                         if strcmp(blk.IndexOptionArray{i}, 'Starting index (port)')
                             for j=1:numel(ind{i})
                                 addVarIndex = addVarIndex + 1;
-                                addVars{addVarIndex} = sprintf('%s_ind_dim_%d_%d:%s;',blk.Name,i,j,indexDataType);
+                                addVars{addVarIndex} = sprintf('%s_ind_dim_%d_%d:%s;',...
+                                    SLX2LusUtils.name_format(blk.Name),i,j,indexDataType);
                                 codeIndex = codeIndex + 1;
                                 if j==1
-                                    codes{codeIndex} = sprintf('%s_ind_dim_%d_%d = %s;\n\t',blk.Name,i,j, ind{i}{1}) ;
+                                    codes{codeIndex} = sprintf('%s_ind_dim_%d_%d = %s;\n\t',...
+                                        SLX2LusUtils.name_format(blk.Name),i,j, ind{i}{1}) ;
                                 else
-                                    codes{codeIndex} = sprintf('%s_ind_dim_%d_%d = %s + %d;\n\t',blk.Name,i,j, ind{i}{1}, (j-1)) ;
+                                    codes{codeIndex} = sprintf('%s_ind_dim_%d_%d = %s + %d;\n\t',...
+                                        SLX2LusUtils.name_format(blk.Name),i,j, ind{i}{1}, (j-1)) ;
                                 end
                             end                            
                         else   % 'Index vector (port)'
                             for j=1:numel(ind{i})
                                 addVarIndex = addVarIndex + 1;
-                                addVars{addVarIndex} = sprintf('%s_ind_dim_%d_%d:%s;',blk.Name,i,j,indexDataType);
+                                addVars{addVarIndex} = sprintf('%s_ind_dim_%d_%d:%s;',...
+                                    SLX2LusUtils.name_format(blk.Name),i,j,indexDataType);
                                 codeIndex = codeIndex + 1;
-                                codes{codeIndex} = sprintf('%s_ind_dim_%d_%d = %s;\n\t',blk.Name,i,j, ind{i}{j}) ;
+                                codes{codeIndex} = sprintf('%s_ind_dim_%d_%d = %s;\n\t',...
+                                    SLX2LusUtils.name_format(blk.Name),i,j, ind{i}{j}) ;
                             end
                         end
                     end
@@ -227,11 +212,14 @@ classdef Selector_To_Lustre < Block_To_Lustre
                     curSub(7) = d7;
 
                     for j=1:numel(outputDimsArray)
-                        str_Y_index{i}{j} = sprintf('%s_str_Y_index_%d_%d',blk.Name,i,j);
+                        str_Y_index{i}{j} = sprintf('%s_str_Y_index_%d_%d',...
+                            SLX2LusUtils.name_format(blk.Name),i,j);
                         addVarIndex = addVarIndex + 1;
-                        addVars{addVarIndex} = sprintf('%s_str_Y_index_%d_%d:%s;',blk.Name,i,j,indexDataType);
+                        addVars{addVarIndex} = sprintf('%s_str_Y_index_%d_%d:%s;',...
+                            SLX2LusUtils.name_format(blk.Name),i,j,indexDataType);
                         codeIndex = codeIndex + 1;
-                        codes{codeIndex} = sprintf('%s = %s_ind_dim_%d_%d;\n\t',str_Y_index{i}{j},blk.Name,j,curSub(j)) ;
+                        codes{codeIndex} = sprintf('%s = %s_ind_dim_%d_%d;\n\t',...
+                            str_Y_index{i}{j},SLX2LusUtils.name_format(blk.Name),j,curSub(j)) ;
                     end
                     
                     % calculating sub2ind in Lustre
@@ -246,8 +234,7 @@ classdef Selector_To_Lustre < Block_To_Lustre
                     codeIndex = codeIndex + 1;
                     codes{codeIndex} = sprintf('%s = %s;\n\t', U_index{i}, value);
                 end
-                if numel(in_matrix_dimension{1}.dims) > 7
-                    
+                if numel(in_matrix_dimension{1}.dims) > 7                    
                     display_msg(sprintf('More than 7 dimensions is not supported in block %s',...
                         indexBlock.Origin_path), ...
                         MsgType.ERROR, 'Selector_To_Lustre', '');
