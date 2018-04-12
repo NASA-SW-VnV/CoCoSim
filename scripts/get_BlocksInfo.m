@@ -1,7 +1,10 @@
 function [report] = get_BlocksInfo(folder)
-%GET_BLOCKSTYPE Summary of this function goes here
-%   Detailed explanation goes here
+%GET_BLOCKSTYPE This function go over all Simulink model inside a folder
+%and get information about the blocks used. It does not care about the
+%architecture of your models, it is generating information only about
+%BlockType, the dimensions used and the DataTypes.
 bdclose('all')
+addpath(genpath(folder));
 slx_files = dir(fullfile(folder,'**', '*.slx'));
 mdl_files = dir(fullfile(folder,'**', '*.mdl')) ;
 all_files = [slx_files; mdl_files];
@@ -21,8 +24,11 @@ for i=1:numel(all_files)
         bdclose('all')
         load_system(fullfile(file_dir, ...
             all_files(i).name));
+        if bdIsLibrary(base_name)
+            continue;
+        end
         list_of_all_blocks = find_system(base_name, ...
-            'LookUnderMasks', 'all');
+            'LookUnderMasks', 'all', 'FollowLinks', 'on');
         Cmd = [base_name, '([], [], [], ''compile'');'];
         eval(Cmd);
         for j=2:numel(list_of_all_blocks)
@@ -45,7 +51,7 @@ for i=1:numel(all_files)
                 S.(CommonParameters{k}) = get_param(block_path, CommonParameters{k});
             end
             
-            report{numel(report) + 1} = S;
+            report{end + 1} = S;
         end
         Cmd = [base_name, '([], [], [], ''term'');'];
         eval(Cmd);
@@ -67,7 +73,7 @@ for ii = 1:length(report)-1
 end
 
 report(~isUnique) = [];
-
+report = report';
 save   all_blks_options report
 
 end

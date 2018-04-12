@@ -778,6 +778,8 @@ classdef LustrecUtils < handle
         function [status, new_name_path, emf_path, xml_trace] = construct_EMF_model(...
                 lus_file_path, node_name, output_dir, organize_blocks)
             tools_config;
+            new_name_path = '';
+            xml_trace = [];
             status = BUtils.check_files_exist(LUSTREC, LUCTREC_INCLUDE_DIR);
             if status
                 return;

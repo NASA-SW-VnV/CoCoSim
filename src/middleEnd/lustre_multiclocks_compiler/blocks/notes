@@ -52,7 +52,7 @@ Hamza:  Abs,
         MinMax,
         Outport,
         Quantizer (pp),
-        RateTransition (pp),
+        
         RelationalOperator, 
         Relay (pp),
         ResetPort, 
@@ -82,6 +82,7 @@ Blocks that has left from Biosentinel:
     Merge (Hamza)
     ModelReference (Hamza)
     RandomNumber ( to translate to empty node with contract) (Hamza)
+    RateTransition (check the pp, Khanh),
     S-Function (Hamza)
     SampleTimeMath (Hamza)
     StateControl 

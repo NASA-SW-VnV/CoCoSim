@@ -69,7 +69,7 @@ sim_failed = -1;
 if tests_method ~= 4
     if isempty(model_full_path)
         [status, model_full_path, ~, ~] = LustrecUtils.construct_EMF_model(...
-            lus_file_path, main_node_name, output_dir);
+            lus_file_path, main_node_name, output_dir, 1);
         if status
             return;
         end
