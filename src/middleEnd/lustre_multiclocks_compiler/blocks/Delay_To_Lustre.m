@@ -26,7 +26,7 @@ classdef Delay_To_Lustre < Block_To_Lustre
             
         end
         
-        function options = getUnsupportedOptions(obj, blk, varargin)
+        function options = getUnsupportedOptions(obj, parent, blk, varargin)
             
             if isempty(regexp(blk.InitialCondition, '[a-zA-Z]', 'match'))
                 InitialCondition = str2num(blk.InitialCondition);

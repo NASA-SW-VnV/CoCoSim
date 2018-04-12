@@ -315,7 +315,7 @@ classdef Selector_To_Lustre < Block_To_Lustre
             obj.addVariable(outputs_dt);
         end
         
-        function options = getUnsupportedOptions(obj, blk, varargin)
+        function options = getUnsupportedOptions(obj, parent, blk, varargin)
             obj.unsupported_options = {};
             [numOutDims, ~, ~] = ...
                 Constant_To_Lustre.getValueFromParameter(parent, blk, blk.NumberOfDimensions);

@@ -73,7 +73,7 @@ display_msg('Unsupported blocks detection', Constants.INFO, 'ToLustreUnsupported
 main_block = ir_struct.(IRUtils.name_format(file_name));
 main_sampleTime = main_block.CompiledSampleTime;
 
-unsupportedOptions = recursiveGeneration(main_block, main_sampleTime);
+unsupportedOptions = recursiveGeneration(main_block, main_block, main_sampleTime);
 
 %% display report files
 if isempty(unsupportedOptions)
@@ -105,9 +105,9 @@ cd(PWD)
 end
 
 %%
-function unsupportedOptions= recursiveGeneration(blk, main_sampleTime)
+function unsupportedOptions= recursiveGeneration(parent, blk, main_sampleTime)
 unsupportedOptions = {};
-unsupportedOptions_i = blockUnsupportedOptions(blk, main_sampleTime);
+unsupportedOptions_i = blockUnsupportedOptions(parent, blk, main_sampleTime);
 unsupportedOptions = [unsupportedOptions, unsupportedOptions_i];
 if isfield(blk, 'Content')
     field_names = fieldnames(blk.Content);
@@ -115,13 +115,13 @@ if isfield(blk, 'Content')
         field_names(...
         cellfun(@(x) isfield(blk.Content.(x),'BlockType'), field_names));
     for i=1:numel(field_names)
-        unsupportedOptions_i = recursiveGeneration(blk.Content.(field_names{i}), main_sampleTime);
+        unsupportedOptions_i = recursiveGeneration(blk, blk.Content.(field_names{i}), main_sampleTime);
         unsupportedOptions = [unsupportedOptions, unsupportedOptions_i];
     end
 end
 end
 
-function  unsupportedOptions_i  = blockUnsupportedOptions( blk,  main_sampleTime)
+function  unsupportedOptions_i  = blockUnsupportedOptions( parent, blk,  main_sampleTime)
 %blockUnsupportedOptions get unsupported options of a bock.
 %INPUTS:
 %   blk: The internal representation of the subsystem.
@@ -135,7 +135,7 @@ if status
     end
     return;
 end
-unsupportedOptions_i = b.getUnsupportedOptions(blk,  main_sampleTime);
+unsupportedOptions_i = b.getUnsupportedOptions(parent, blk,  main_sampleTime);
 
 end
 

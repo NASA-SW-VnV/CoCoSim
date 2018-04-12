@@ -46,7 +46,7 @@ classdef Sum_To_Lustre < Block_To_Lustre
         
         
         %%
-        function options = getUnsupportedOptions(obj,blk, varargin)
+        function options = getUnsupportedOptions(obj, parent,  blk, varargin)
             % add your unsuported options list here
             % if there is one input and the output dimension is > 7
             if numel(blk.CompiledPortWidths.Inport) == 1 ...

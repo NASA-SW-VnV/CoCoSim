@@ -68,7 +68,7 @@ classdef Trigonometry_To_Lustre < Block_To_Lustre
             obj.addVariable(outputs_dt);
         end
         
-        function options = getUnsupportedOptions(obj, blk, varargin)
+        function options = getUnsupportedOptions(obj, parent, blk, varargin)
             obj.unsupported_options = {};
             if strcmp(blk.Operator, 'cos + jsin')
                 obj.addUnsupported_options(...

@@ -34,7 +34,7 @@ classdef From_To_Lustre < Block_To_Lustre
             
         end
         
-        function options = getUnsupportedOptions(obj,blk, varargin)
+        function options = getUnsupportedOptions(obj, parent, blk, varargin)
             goToPath = find_system(parent.Origin_path,'SearchDepth',1,...
                 'BlockType','Goto','GotoTag',blk.GotoTag);
             if isempty(goToPath)

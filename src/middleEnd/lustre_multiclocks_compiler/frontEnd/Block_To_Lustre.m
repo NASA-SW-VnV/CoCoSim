@@ -37,7 +37,7 @@ classdef Block_To_Lustre < handle
         %these functions should be implemented by all classes inherit from
         %this class
         write_code(obj)
-        getUnsupportedOptions(obj)
+        getUnsupportedOptions(obj, parent, blk, varargin)
     end
     methods
         function addVariable(obj, varname)

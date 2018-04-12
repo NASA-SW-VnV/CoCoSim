@@ -14,7 +14,7 @@ classdef block_diagram_To_Lustre < Block_To_Lustre
         function  write_code(obj, parent, blk, varargin)
         end
         
-        function options = getUnsupportedOptions(obj, blk, varargin)
+        function options = getUnsupportedOptions(obj, parent, blk, varargin)
             if Subsystem_To_Lustre.hasEnablePort(blk) ...
                     || Subsystem_To_Lustre.hasTriggerPort(blk) ...
                     || Subsystem_To_Lustre.hasResetPort(blk)

@@ -110,7 +110,7 @@ classdef FromWorkspace_To_Lustre < Block_To_Lustre
             obj.addVariable(outputs_dt);
         end
         
-        function options = getUnsupportedOptions(obj, blk, varargin)
+        function options = getUnsupportedOptions(obj, parent, blk, varargin)
             obj.unsupported_options = {};
             VariableName = blk.VariableName;
             variable = evalin('base',VariableName);

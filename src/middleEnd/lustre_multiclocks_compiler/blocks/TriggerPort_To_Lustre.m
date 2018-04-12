@@ -15,7 +15,7 @@ classdef TriggerPort_To_Lustre < Block_To_Lustre
         function  write_code(obj, parent, blk, varargin)
         end
         
-        function options = getUnsupportedOptions(obj, blk, varargin)
+        function options = getUnsupportedOptions(obj, parent, blk, varargin)
             if strcmp(blk.TriggerType, 'function-call')
                 obj.addUnsupported_options(...
                     sprintf('Option function-call is not supported in TriggerPort block %s', ...

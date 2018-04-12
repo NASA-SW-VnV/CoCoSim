@@ -65,7 +65,7 @@ classdef RelationalOperator_To_Lustre < Block_To_Lustre
             obj.addVariable(outputs_dt);
         end
         
-        function options = getUnsupportedOptions(obj,blk,  varargin)
+        function options = getUnsupportedOptions(obj,parent, blk,  varargin)
             % add your unsuported options list here
             op = blk.Operator;
            if strcmp(op, 'isInf') || strcmp(op, 'isNaN') ...
