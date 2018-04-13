@@ -181,12 +181,28 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
             codes{codeIndex} = sprintf('%s = %s ;\n\t', N_shape_node{1}, code);
           
             % N2
+            code = one;
             for j=1:NumberOfTableDimensions
                 code = sprintf('%s*((%s-%s)/(%s-%s))',code,coords_node{j,2},inputs{j}{1},coords_node{j,2},coords_node{j,1});
             end
             codeIndex = codeIndex + 1;
-            codes{codeIndex} = sprintf('%s = %s ;\n\t', N_shape_node{1}, code);            
+            codes{codeIndex} = sprintf('%s = %s ;\n\t', N_shape_node{2}, code);            
             
+            % N3
+            code = one;
+            for j=1:NumberOfTableDimensions
+                code = sprintf('%s*((%s-%s)/(%s-%s))',code,coords_node{j,2},inputs{j}{1},coords_node{j,2},coords_node{j,1});
+            end
+            codeIndex = codeIndex + 1;
+            codes{codeIndex} = sprintf('%s = %s ;\n\t', N_shape_node{3}, code);       
+            
+            % N4
+            code = one;
+            for j=1:NumberOfTableDimensions
+                code = sprintf('%s*((%s-%s)/(%s-%s))',code,coords_node{j,2},inputs{j}{1},coords_node{j,2},coords_node{j,1});
+            end
+            codeIndex = codeIndex + 1;
+            codes{codeIndex} = sprintf('%s = %s ;\n\t', N_shape_node{4}, code);               
             
             codeIndex = codeIndex + 1;
             codes{codeIndex} = sprintf('%s = %s ;\n\t', u_node{1}, table_elem{1});
@@ -211,14 +227,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
         
         function options = getUnsupportedOptions(obj, blk, varargin)
             obj.unsupported_options = {};
-            [numOutDims, ~, ~] = ...
-                Constant_To_Lustre.getValueFromParameter(parent, blk, blk.NumberOfDimensions);
-            if numOutDims>7
-                obj.addUnsupported_options(...
-                    sprintf('More than 7 dimensions is not supported in block %s',...
-                    indexBlock.Origin_path), ...
-                    MsgType.ERROR, 'Selector_To_Lustre', '');
-            end
+ 
             
             options = obj.unsupported_options;
         end
