@@ -51,57 +51,6 @@ classdef Product_To_Lustre < Block_To_Lustre
     end
     
     methods(Static)
-        % This method assume there are at least 2 inputs.
-        function in_matrix_dimension = getInputMatrixDimensions(blk)
-            % return structure of matrix size
-            in_matrix_dimension = {};
-            readMatrixDimension = true;
-            numMat = 0;
-            inport_dimensions = blk.CompiledPortDimensions.Inport;
-            
-            for i=1:numel(inport_dimensions)
-                if readMatrixDimension
-                    numMat = numMat + 1;
-                    numDs = inport_dimensions(i);
-                    readMatrixDimension = false;
-                    in_matrix_dimension{numMat}.numDs = numDs;
-                    in_matrix_dimension{numMat}.dims = zeros(1,numDs);
-                    index = 0;
-                else
-                    index = index + 1;
-                    if numDs == 1
-                        % fix the case where it is a vector, [1 x] where x
-                        % is the number of elements in the vector, we
-                        % should change the [1 x] to [2 1 x] or [2 x 1]
-                        % depending on the product.
-                        if i==1
-                            if inport_dimensions(i+2) == 1
-                                in_matrix_dimension{numMat}.dims(1,1) = 1;
-                                in_matrix_dimension{numMat}.dims(1,2) = inport_dimensions(i);
-                            else
-                                in_matrix_dimension{numMat}.dims(1,1) = inport_dimensions(i);
-                                in_matrix_dimension{numMat}.dims(1,2) = 1;
-                            end
-                        else
-                            if in_matrix_dimension{numMat-1}.dims(1,end) == 1
-                                in_matrix_dimension{numMat}.dims(1,1) = 1;
-                                in_matrix_dimension{numMat}.dims(1,2) = inport_dimensions(i);
-                            else
-                                in_matrix_dimension{numMat}.dims(1,1) = inport_dimensions(i);
-                                in_matrix_dimension{numMat}.dims(1,2) = 1;
-                            end
-                            
-                        end
-                    else
-                        in_matrix_dimension{numMat}.dims(1,index) = inport_dimensions(i);
-                    end
-                    if index == numDs;
-                        readMatrixDimension = true;
-                    end
-                end
-                
-            end
-        end
         
         function [codes, product_out, addVars] = matrix_multiply(m1_dim, m2_dim, ...
                 input_m1, input_m2, output_m, zero, pair_number, OutputDT, tmp_prefix)
