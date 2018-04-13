@@ -112,7 +112,7 @@ classdef Math_To_Lustre < Block_To_Lustre
                         outputs{i}, fun, inputs{1}{i}, inputs{2}{i});
                 end
             elseif  strcmp(operator, 'transpose') || strcmp(operator, 'hermitian')          
-                in_matrix_dimension = Product_To_Lustre.getInputMatrixDimensions(blk);
+                in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(blk);
                 if in_matrix_dimension{1}.numDs > 2
                     display_msg(sprintf('Matrix size > 2 is not supported for transpose/hermitian operator in block %s',...
                         blk.Origin_path), MsgType.ERROR, 'Math_To_Lustre', '');
