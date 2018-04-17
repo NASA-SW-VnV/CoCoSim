@@ -56,7 +56,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
             
             RndMeth = blk.RndMeth;
             
-            % storing table
+            % declaring and defining table 
             table_elem = {}
             for i=1:numel(Table)
                     table_elem{i} = sprintf('%s_table_elem_%d',SLX2LusUtils.name_format(blk.Name),i);
@@ -65,11 +65,10 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                     codeIndex = codeIndex + 1;
                     codes{codeIndex} = sprintf('%s = %f ;\n\t', table_elem{i}, Table(i));
             end
-            % storing break points
-            
+            % declaring and defining break points            
             for j = 1:NumberOfTableDimensions
                 Breakpoints{j} = {}
-                for i=1:numel(BreakpointsForDimension)
+                for i=1:numel(BreakpointsForDimension{j})
                     Breakpoints{j}{i} = sprintf('%s_Breakpoints_dim%d_%d',SLX2LusUtils.name_format(blk.Name),j,i);
                     addVarIndex = addVarIndex + 1;
                     addVars{addVarIndex} = sprintf('%s:%s;',Breakpoints{j}{i},lusInport_dt);      
@@ -77,10 +76,77 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                     codes{codeIndex} = sprintf('%s = %f ;\n\t', Breakpoints{j}{i}, BreakpointsForDimension{j}(i));                    
                 end
             end
+            
             % shape functions interpolation
             numGridPoints = 2^NumberOfTableDimensions;
+            indexDataType = 'int';
+            
+            % defining nodes bounding element (coords_node{NumberOfTableDimensions,2}: dim1_low, dim1_high,
+            % dim2_low, dim2_high,... dimn_low, dimn_high)
+                        
+            % finding nodes bounding element
+            coords_node = {};  
+            index_node = {};  
+            boundingNodes = zeros(NumberOfTableDimensions,2);
+            for i=1:NumberOfTableDimensions
+                % low node for dimension i
+                coords_node{i,1} = sprintf('%s_coords_dim_%d_1',SLX2LusUtils.name_format(blk.Name),i);
+                addVarIndex = addVarIndex + 1;
+                addVars{addVarIndex} = sprintf('%s:%s;',coords_node{i,1},lusInport_dt);
+                
+                index_node{i,1} = sprintf('%s_index_dim_%d_1',SLX2LusUtils.name_format(blk.Name),i);
+                addVarIndex = addVarIndex + 1;
+                addVars{addVarIndex} = sprintf('%s:%s;',index_node{i,1},indexDataType);                
+                
+                % high node for dimension i
+                coords_node{i,2} = sprintf('%s_coords_dim_%d_2',SLX2LusUtils.name_format(blk.Name),i);
+                addVarIndex = addVarIndex + 1;
+                addVars{addVarIndex} = sprintf('%s:%s;',coords_node{i,2},lusInport_dt);
+                
+                index_node{i,2} = sprintf('%s_index_dim_%d_2',SLX2LusUtils.name_format(blk.Name),i);
+                addVarIndex = addVarIndex + 1;
+                addVars{addVarIndex} = sprintf('%s:%s;',index_node{i,2},indexDataType);                  
+                
+                % looking for low node                
+                code = sprintf('%s = \n\t', coords_node{i,1});
+                code2 = sprintf('%s = \n\t', index_node{i,1});
+                for j=numel(BreakpointsForDimension{i}):-1:1
+                    if j==numel(BreakpointsForDimension{i})
+                        code = sprintf('%s  if(%s >= %s) then %s\n\t', code, inputs{i}{1},Breakpoints{i}{j},Breakpoints{i}{j-1});
+                        code2 = sprintf('%s  if(%s >= %s) then %d\n\t', code2, inputs{i}{1},Breakpoints{i}{j},(j-1));
+                    else
+                        code = sprintf('%s  else if(%s >= %s) then %s\n\t', code, inputs{i}{1},Breakpoints{i}{j},Breakpoints{i}{j});
+                        code2 = sprintf('%s  else if(%s >= %s) then %d\n\t', code2, inputs{i}{1},Breakpoints{i}{j},j);
+                    end
+
+                end
+                codeIndex = codeIndex + 1;
+                codes{codeIndex} = sprintf('%s  else %d ;\n\t', code2,1);
+                codeIndex = codeIndex + 1;
+                codes{codeIndex} = sprintf('%s  else %s ;\n\t', code,Breakpoints{i}{1});
+                % looking for high node
+                code = sprintf('%s = \n\t', coords_node{i,2});
+                code2 = sprintf('%s = \n\t', index_node{i,2});
+                for j=numel(BreakpointsForDimension{i}):-1:1
+                    if j==numel(BreakpointsForDimension{i})
+                        code = sprintf('%s  if(%s >= %s) then %s\n\t', code, inputs{i}{1},Breakpoints{i}{j},Breakpoints{i}{j});
+                        code2 = sprintf('%s  if(%s >= %s) then %d\n\t', code2, inputs{i}{1},Breakpoints{i}{j},j);
+                    else
+                        code = sprintf('%s  else if(%s >= %s) then %s\n\t', code, inputs{i}{1},Breakpoints{i}{j},Breakpoints{i}{j+1});
+                        code2 = sprintf('%s  else if(%s >= %s) then %d\n\t', code2, inputs{i}{1},Breakpoints{i}{j},(j+1));
+                    end                  
+                end
+                codeIndex = codeIndex + 1;
+                codes{codeIndex} = sprintf('%s  else %d ;\n\t', code2,2);
+                codeIndex = codeIndex + 1;
+                codes{codeIndex} = sprintf('%s  else %s ;\n\t', code,Breakpoints{i}{2});
+                
+            end
+            
             u_node = {};
             N_shape_node = {};
+            
+            % declaring node value and shape function
             for i=1:numGridPoints
                     % y results at the node of the element
                     u_node{i} = sprintf('%s_u_node_%d',SLX2LusUtils.name_format(blk.Name),i);
@@ -90,128 +156,93 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                     N_shape_node{i} = sprintf('%s_N_shape_%d',SLX2LusUtils.name_format(blk.Name),i);
                     addVarIndex = addVarIndex + 1;
                     addVars{addVarIndex} = sprintf('%s:%s;',N_shape_node{i},lusInport_dt);
+            end            
+            
+            % defining u
+            
+            % doing subscripts to index in Lustre.  Need subscripts, and
+            % dimension jump.  
+            % calculating dimension jump
+            shapeNodeSign = Lookup_nD_To_Lustre.getShapeBoundingNodeSign(NumberOfTableDimensions);
+            dimJump = ones(1,NumberOfTableDimensions);
+            L_dimjump = {};
+            L_dimjump{1} =  sprintf('%s_dimJump_%d',SLX2LusUtils.name_format(blk.Name),1);
+            addVarIndex = addVarIndex + 1;
+            addVars{addVarIndex} = sprintf('%s:%s;',L_dimjump{1},indexDataType);
+            codeIndex = codeIndex + 1;
+            codes{codeIndex} = sprintf('%s = %d;\n\t', L_dimjump{1}, dimJump(1));
+            for i=2:NumberOfTableDimensions
+                L_dimjump{i} =  sprintf('%s_dimJump_%d',SLX2LusUtils.name_format(blk.Name),i);
+                addVarIndex = addVarIndex + 1;
+                addVars{addVarIndex} = sprintf('%s:%s;',L_dimjump{i},indexDataType);
+                for j=1:i-1
+                    dimJump(i) = dimJump(i)*numel(BreakpointsForDimension{j});
+                end
+                codeIndex = codeIndex + 1;
+                codes{codeIndex} = sprintf('%s = %d;\n\t', L_dimjump{i}, dimJump(i));                   
             end
             
-            % defining u_node and N_shape_node
-            
-            
-            % write function to find nodes bounding element
-            coords_node = {};  % storing convention:  dim1_low, dim1_high, dim2_low, dim2_high,... dimn_low, dimn_high
+            boundingNodeIndex = {};
+            nodeIndex = 0;
+            for i=1:numGridPoints
+                nodeIndex= nodeIndex+1;
+                dimSign = shapeNodeSign(nodeIndex,:);  
+                
+                % declaring boundingNodeIndex{nodeIndex}
+                boundingNodeIndex{nodeIndex} = sprintf('%s_bound_node_index_%d',SLX2LusUtils.name_format(blk.Name),nodeIndex);
+                addVarIndex = addVarIndex + 1;
+                addVars{addVarIndex} = sprintf('%s:%s;',boundingNodeIndex{nodeIndex},indexDataType);
+
+                % defining boundingNodeIndex{nodeIndex}
+                value = '0';
+                for j=1:NumberOfTableDimensions
+                    % dimSign(j): -1 is low, 1: high
+                    if dimSign(j) == -1
+                        curIndex =  index_node{j,1};
+                    else
+                        curIndex =  index_node{j,2}
+                    end
+                    if j==1
+                        value = sprintf('%s + %s*%d',value,curIndex, dimJump(j))
+                    else
+                        value = sprintf('%s + (%s-1)*%d',value,curIndex, dimJump(j))
+                    end
+                end
+                codeIndex = codeIndex + 1;
+                codes{codeIndex} = sprintf('%s = %s;\n\t', boundingNodeIndex{nodeIndex}, value)
+                                
+                % defining u_node{nodeIndex}
+                code = sprintf('%s = \n\t', u_node{nodeIndex});       
+                for j=1:numel(table_elem)-1
+                        if j==1
+                            code = sprintf('%s  if(%s = %d) then %s\n\t', code, boundingNodeIndex{nodeIndex},j,table_elem{j});
+                        else
+                            code = sprintf('%s  else if(%s = %d) then %s\n\t', code, boundingNodeIndex{nodeIndex},j,table_elem{j});
+                        end                
+                end
+                codeIndex = codeIndex + 1;
+                codes{codeIndex} = sprintf('%s  else %s ;\n\t', code,table_elem{numel(table_elem)});
+
+            end   
+                        
+            % calculating shape function value 
+            denom = one;
             for i=1:NumberOfTableDimensions
-                % low                   
-                coords_node{i,1} = sprintf('%s_coords_dim_%d_1',SLX2LusUtils.name_format(blk.Name),i);
-                addVarIndex = addVarIndex + 1;
-                addVars{addVarIndex} = sprintf('%s:%s;',coords_node{i,1},lusInport_dt);
-%                 codeIndex = codeIndex + 1;
-%                 code = sprintf('%s = \n\t', coords_node{i,1});                
-%                 for j=(numel(Breakpoints{i})-0):-1:1
-%                         if j==numel(numel(Breakpoints{i})-1)
-%                             code = sprintf('%s  if(%s < %s) then %s\n\t', code, inputs{i}{1},Breakpoints{i}{j},Breakpoints{i}{j-1});
-%                         else
-%                             code = sprintf('%s  else if(%s = %d) then %s\n\t', code, inputs{i}{1},Breakpoints{i}{j},Breakpoints{i}{j-1});
-%                         end                
-%                 end
-%                 codes{codeIndex} = sprintf('%s  else %s ;\n\t', code,Breakpoints{i}{numel(Breakpoints{i})});
-                % high                
-                coords_node{i,2} = sprintf('%s_coords_dim_%d_2',SLX2LusUtils.name_format(blk.Name),i);
-                addVarIndex = addVarIndex + 1;
-                addVars{addVarIndex} = sprintf('%s:%s;',coords_node{i,2},lusInport_dt);
-%                 codeIndex = codeIndex + 1;
-%                 code = sprintf('%s = \n\t', coords_node{i,2});                
-%                 for j=(numel(Breakpoints{i})-0):-1:1
-%                     if j==numel(numel(Breakpoints{i})-1)
-%                         code = sprintf('%s  if(%s < %s) then %s\n\t', code, inputs{i}{1},Breakpoints{i}{j},Breakpoints{i}{j});
-%                     else
-%                         code = sprintf('%s  else if(%s = %d) then %s\n\t', code, inputs{i}{1},Breakpoints{i}{j},Breakpoints{i}{j});
-%                     end
-%                 end
-%                 codes{codeIndex} = sprintf('%s  else %s ;\n\t', code,Breakpoints{i}{numel(Breakpoints{i})});
+                denom = sprintf('%s*(%s-%s)',denom,coords_node{i,2},coords_node{i,1});
             end
             
-            
-            codeIndex = codeIndex + 1;
-            codes{codeIndex} = sprintf('%s = %s ;\n\t', coords_node{1,1}, Breakpoints{1}{1});
-            codeIndex = codeIndex + 1;
-            codes{codeIndex} = sprintf('%s = %s ;\n\t', coords_node{1,2}, Breakpoints{1}{2});
-            codeIndex = codeIndex + 1;
-            
-            codes{codeIndex} = sprintf('%s = %s ;\n\t', coords_node{2,1}, Breakpoints{2}{1});
-            codeIndex = codeIndex + 1;
-            codes{codeIndex} = sprintf('%s = %s ;\n\t', coords_node{2,2}, Breakpoints{2}{2});
-            
-
-%             % defining u
-%             nodeIndex = 0;
-%             for i=1:NumberOfTableDimensions
-%                 % low     
-%                 nodeIndex= nodeIndex+1;
-%                 codeIndex = codeIndex + 1;
-%                 code = sprintf('%s = \n\t', u_node{nodeIndex});                
-%                 for j=(numel(Breakpoints{i})-1):-1:1
-%                         if j==numel(numel(Breakpoints{i})-1)
-%                             code = sprintf('%s  if(%s >= %s) then %s\n\t', code, inputs{i},Breakpoints{i}{j},table_elem{i}{i}(j));
-%                         else
-%                             code = sprintf('%s  else if(%s = %d) then %s\n\t', code, inputs{i},Breakpoints{i}{j},table_elem{i}{i}(j));
-%                         end                
-%                 end
-%                 codes{codeIndex} = sprintf('%s  else %s ;\n\t', code,table_elem{i}{i}(1));
-%                 % high
-% 
-%                 nodeIndex= nodeIndex+1;
-%                 codeIndex = codeIndex + 1;
-%                 code = sprintf('%s = \n\t', u_node{nodeIndex});            
-%                 for j=(numel(Breakpoints{i})-1):-1:1
-%                     if j==numel(numel(Breakpoints{i})-1)
-%                         code = sprintf('%s  if(%s >= %s) then %s\n\t', code, inputs{i},Breakpoints{i}{j},table_elem{i}{i}{j+1});
-%                     else
-%                         code = sprintf('%s  else if(%s = %d) then %s\n\t', code, inputs{i},Breakpoints{i}{j},table_elem{i}{i}{j+1});
-%                     end
-%                 end
-%                 codes{codeIndex} = sprintf('%s  else %s ;\n\t', code,table_elem{i}{i}(1+1));
-%             end            
-            
-            % write function to define shape function value
-
-            code = one;
-            % N1
-            for j=1:NumberOfTableDimensions
-                code = sprintf('%s*((%s-%s)/(%s-%s))',code,coords_node{j,2},inputs{j}{1},coords_node{j,2},coords_node{j,1});
-            end
-            codeIndex = codeIndex + 1;
-            codes{codeIndex} = sprintf('%s = %s ;\n\t', N_shape_node{1}, code);
-          
-            % N2
-            code = one;
-            for j=1:NumberOfTableDimensions
-                code = sprintf('%s*((%s-%s)/(%s-%s))',code,coords_node{j,2},inputs{j}{1},coords_node{j,2},coords_node{j,1});
-            end
-            codeIndex = codeIndex + 1;
-            codes{codeIndex} = sprintf('%s = %s ;\n\t', N_shape_node{2}, code);            
-            
-            % N3
-            code = one;
-            for j=1:NumberOfTableDimensions
-                code = sprintf('%s*((%s-%s)/(%s-%s))',code,coords_node{j,2},inputs{j}{1},coords_node{j,2},coords_node{j,1});
-            end
-            codeIndex = codeIndex + 1;
-            codes{codeIndex} = sprintf('%s = %s ;\n\t', N_shape_node{3}, code);       
-            
-            % N4
-            code = one;
-            for j=1:NumberOfTableDimensions
-                code = sprintf('%s*((%s-%s)/(%s-%s))',code,coords_node{j,2},inputs{j}{1},coords_node{j,2},coords_node{j,1});
-            end
-            codeIndex = codeIndex + 1;
-            codes{codeIndex} = sprintf('%s = %s ;\n\t', N_shape_node{4}, code);               
-            
-            codeIndex = codeIndex + 1;
-            codes{codeIndex} = sprintf('%s = %s ;\n\t', u_node{1}, table_elem{1});
-            codeIndex = codeIndex + 1;
-            codes{codeIndex} = sprintf('%s = %s ;\n\t', u_node{2}, table_elem{2});
-            codeIndex = codeIndex + 1;
-            codes{codeIndex} = sprintf('%s = %s ;\n\t', u_node{3}, table_elem{3});
-            codeIndex = codeIndex + 1;
-            codes{codeIndex} = sprintf('%s = %s ;\n\t', u_node{4}, table_elem{4});                      
+            for i=1:numGridPoints
+                code = one;
+                for j=1:NumberOfTableDimensions
+                    if shapeNodeSign(i,j)==-1
+                        code = sprintf('%s*(%s-%s)',code,coords_node{j,2},inputs{j}{1});
+                    else
+                        code = sprintf('%s*(%s-%s)',code,inputs{j}{1},coords_node{j,1});
+                    end
+                end
+                codeIndex = codeIndex + 1;
+                codes{codeIndex} = sprintf('%s = (%s)/%s ;\n\t', N_shape_node{i}, code,denom);
+            end      
             
             code = zero;
             for i=1:numGridPoints            
@@ -231,6 +262,104 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
             
             options = obj.unsupported_options;
         end
+    end
+    
+    methods(Static)
+        function shapeNodeSign = getShapeBoundingNodeSign(dims)
+            % generating sign for nodes bounding element for up to 7
+            % dimensions
+            shapeNodeSign = [];
+            if dims == 1
+                shapeNodeSign = [-1;1];
+                return;
+            elseif dims == 2
+                shapeNodeSign = [-1 -1;-1 1;1 -1; 1 1];
+                return;
+            elseif dims == 3
+                shapeNodeSign = [-1 -1 -1;-1 -1 1;-1 1 -1; -1 1 1;1 -1 -1;1 -1 1;1 1 -1; 1 1 1];
+                return;
+            elseif dims == 4
+                shapeNodeSign = [-1    -1    -1    -1;-1    -1    -1     1;-1    -1     1    -1;
+                -1    -1     1     1;-1     1    -1    -1;-1     1    -1     1;
+                -1     1     1    -1;-1     1     1     1;1    -1    -1    -1;
+                1    -1    -1     1;1    -1     1    -1;1    -1     1     1;1     1    -1    -1;
+                1     1    -1     1;1     1     1    -1;1     1     1     1     ];
+                return;
+            elseif dims == 5
+                shapeNodeSign = [];
+                index = 0;
+                for i=1:2
+                    for j=1:2
+                        for k=1:2
+                            for l=1:2
+                                for m=1:2
+                                    ai = (-1)^i;
+                                    aj = (-1)^j;
+                                    ak = (-1)^k;
+                                    al = (-1)^l;
+                                    am = (-1)^m;
+                                    index = index + 1;
+                                    shapeNodeSign(index,:) = [ai aj ak al am];
+                                end
+                            end
+                        end
+                    end
+                end
+                Ns{5} = shapeNodeSign;
+                return;
+            elseif dims == 6
+                shapeNodeSign = [];
+                index = 0;
+                for i=1:2
+                    for j=1:2
+                        for k=1:2
+                            for l=1:2
+                                for m=1:2
+                                    for n=1:2
+                                        ai = (-1)^i;
+                                        aj = (-1)^j;
+                                        ak = (-1)^k;
+                                        al = (-1)^l;
+                                        am = (-1)^m;
+                                        an = (-1)^n;
+                                        index = index + 1;
+                                        shapeNodeSign(index,:) = [ai aj ak al am an];
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+                return;
+            elseif dims == 7
+                for i=1:2
+                    for j=1:2
+                        for k=1:2
+                            for l=1:2
+                                for m=1:2
+                                    for n=1:2
+                                        for o=1:2
+                                            ai = (-1)^i;
+                                            aj = (-1)^j;
+                                            ak = (-1)^k;
+                                            al = (-1)^l;
+                                            am = (-1)^m;
+                                            an = (-1)^n;
+                                            ao = (-1)^o;
+                                            index = index + 1;
+                                            shapeNodeSign(index,:) = [ai aj ak al am an ao];
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+                return;
+            else
+                return;
+            end              
+        end  
     end
         
 end
