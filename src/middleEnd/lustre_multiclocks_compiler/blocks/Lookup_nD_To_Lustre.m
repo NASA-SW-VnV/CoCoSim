@@ -54,6 +54,10 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                 Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Table);                     
             InterpMethod = blk.InterpMethod;
             ExtrapMethod = blk.ExtrapMethod;
+            skipInterpolation = 0;            
+            if strcmp(InterpMethod,'Flat') || strcmp(InterpMethod,'Nearest')
+                skipInterpolation = 1;                
+            end            
             
             % UseOneInputPortForAllInputData
             p_inputs = {};
@@ -118,48 +122,52 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                 addVars{addVarIndex} = sprintf('%s:%s;',index_node{i,2},indexDataType);                  
                 
                 % looking for low node                
-                code = sprintf('%s = \n\t', coords_node{i,1});
-                code2 = sprintf('%s = \n\t', index_node{i,1});
+                code = sprintf('%s = \n\t', coords_node{i,1});    % code for coordinate values
+                index_code = sprintf('%s = \n\t', index_node{i,1});  % index_code for indices
                 for j=numel(BreakpointsForDimension{i}):-1:1
                     if j==numel(BreakpointsForDimension{i})
-                        code = sprintf('%s  if(%s >= %s) then %s\n\t', code, p_inputs{i}{1},Breakpoints{i}{j},Breakpoints{i}{j-1});
-                        code2 = sprintf('%s  if(%s >= %s) then %d\n\t', code2, p_inputs{i}{1},Breakpoints{i}{j},(j-1));
+                        if ~skipInterpolation
+                            % for extrapolation, we want to use the last 2
+                            % nodes
+                            code = sprintf('%s  if(%s >= %s) then %s\n\t', code, p_inputs{i}{1},Breakpoints{i}{j},Breakpoints{i}{j-1});
+                            index_code = sprintf('%s  if(%s >= %s) then %d\n\t', index_code, p_inputs{i}{1},Breakpoints{i}{j},(j-1));
+                        else
+                            % for "flat" we want lower node to be last node
+                            code = sprintf('%s  if(%s >= %s) then %s\n\t', code, p_inputs{i}{1},Breakpoints{i}{j},Breakpoints{i}{j});
+                            index_code = sprintf('%s  if(%s >= %s) then %d\n\t', index_code, p_inputs{i}{1},Breakpoints{i}{j},(j));
+                        end
+                        
                     else
                         code = sprintf('%s  else if(%s >= %s) then %s\n\t', code, p_inputs{i}{1},Breakpoints{i}{j},Breakpoints{i}{j});
-                        code2 = sprintf('%s  else if(%s >= %s) then %d\n\t', code2, p_inputs{i}{1},Breakpoints{i}{j},j);
+                        index_code = sprintf('%s  else if(%s >= %s) then %d\n\t', index_code, p_inputs{i}{1},Breakpoints{i}{j},j);
                     end
 
                 end
                 codeIndex = codeIndex + 1;
-                codes{codeIndex} = sprintf('%s  else %d ;\n\t', code2,1);
+                codes{codeIndex} = sprintf('%s  else %d ;\n\t', index_code,1);
                 codeIndex = codeIndex + 1;
                 codes{codeIndex} = sprintf('%s  else %s ;\n\t', code,Breakpoints{i}{1});
                 % looking for high node
                 code = sprintf('%s = \n\t', coords_node{i,2});
-                code2 = sprintf('%s = \n\t', index_node{i,2});
+                index_code = sprintf('%s = \n\t', index_node{i,2});
                 for j=numel(BreakpointsForDimension{i}):-1:1
                     if j==numel(BreakpointsForDimension{i})
                         code = sprintf('%s  if(%s >= %s) then %s\n\t', code, p_inputs{i}{1},Breakpoints{i}{j},Breakpoints{i}{j});
-                        code2 = sprintf('%s  if(%s >= %s) then %d\n\t', code2, p_inputs{i}{1},Breakpoints{i}{j},j);
+                        index_code = sprintf('%s  if(%s >= %s) then %d\n\t', index_code, p_inputs{i}{1},Breakpoints{i}{j},j);
                     else
                         code = sprintf('%s  else if(%s >= %s) then %s\n\t', code, p_inputs{i}{1},Breakpoints{i}{j},Breakpoints{i}{j+1});
-                        code2 = sprintf('%s  else if(%s >= %s) then %d\n\t', code2, p_inputs{i}{1},Breakpoints{i}{j},(j+1));
+                        index_code = sprintf('%s  else if(%s >= %s) then %d\n\t', index_code, p_inputs{i}{1},Breakpoints{i}{j},(j+1));
                     end                  
                 end
                 codeIndex = codeIndex + 1;
-                codes{codeIndex} = sprintf('%s  else %d ;\n\t', code2,2);
+                codes{codeIndex} = sprintf('%s  else %d ;\n\t', index_code,2);
                 codeIndex = codeIndex + 1;
                 codes{codeIndex} = sprintf('%s  else %s ;\n\t', code,Breakpoints{i}{2});
                 
             end
             
             % if flat, make inputs the lowest bounding node
-            skipInterpolation = 0;
-            returnTableIndex = {};
-            if strcmp(InterpMethod,'Flat') || strcmp(InterpMethod,'Nearest')
-                skipInterpolation = 1;                
-            end
-            
+            returnTableIndex = {};            
             u_node = {};
             N_shape_node = {};
             
