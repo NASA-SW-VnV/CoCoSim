@@ -11,6 +11,7 @@ lustrec_failed = -1;
 lustrec_binary_failed= -1;
 sim_failed = -1;
 validation_compute = -1;
+lus_file_path = '';
 %close all simulink models
 bdclose('all')
 %% define parameters if not given by the user

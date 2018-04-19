@@ -54,7 +54,7 @@ classdef BUtils
         
         
         %%
-        function block_path  = get_unique_name(block_path)
+        function block_path  = get_unique_block_name(block_path)
             n= 1;
             while getSimulinkBlockHandle(block_path) ~= -1
                 block_path = strcat(block_path, num2str(n));

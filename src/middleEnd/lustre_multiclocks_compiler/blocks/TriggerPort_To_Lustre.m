@@ -1,5 +1,5 @@
 classdef TriggerPort_To_Lustre < Block_To_Lustre
-    %TriggerPort is supported by Subsystem_To_Lustre. Here we add only not
+    %TriggerPort is supported by SubSystem_To_Lustre. Here we add only not
     %supported options    
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the

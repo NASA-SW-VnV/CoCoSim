@@ -56,6 +56,7 @@ Hamza:  Abs,
         RelationalOperator, 
         Relay (pp),
         ResetPort, 
+        Scope(ignored)
         Sum,
         Subsystem,
         Saturation (pp), 
@@ -73,11 +74,13 @@ Hamza:  Abs,
 Blocks that has left from Biosentinel:
     ActionPort (Hamza)
     BusCreator, BusSelector
+    DigitalClock (Hamza: need to be using _time_step ),
     DiscreteTransferFcn (see TransferFcn in pp) (Khanh)
+    
     Fcn (partially done in pp) (Khanh)
     ForIterator (Hamza)
     If (Hamza)
-   
+    
     Memory (can be descritized in pp to unitDelay)  (Hamza)
     Merge (Hamza)
     ModelReference (Hamza)
@@ -88,6 +91,15 @@ Blocks that has left from Biosentinel:
     StateControl 
     SwitchCase (Hamza)
     
+AVA mission Simulink blocks:
+    CombinatorialLogic
+    DiscreteFilter
+    DiscreteFir
+    DiscretePulseGenerator
+    SignalConversion
+    Signum
+    Step
+    WhileIterator
 
 LM Challenger new blocks 
     {'InportShadow'      }

@@ -206,13 +206,25 @@ classdef SLX2LusUtils < handle
             end
         end
         %% get pre block for specific port number
-        function [src] = getpreBlock(parent, blk, Port)
-            srcBlks = blk.PortConnectivity(...
-                arrayfun(@(x) ~isempty(x.SrcBlock), blk.PortConnectivity));
-            srcBlks = srcBlks(Port);
-            srcPort = srcBlks.SrcPort;
-            srcHandle = srcBlks.SrcBlock;
-            src = get_struct(parent, srcHandle);
+        function [src, srcPort] = getpreBlock(parent, blk, Port)
+            if ischar(Port)
+                % case of Type: ifaction ...
+                srcBlk = blk.PortConnectivity(...
+                    arrayfun(@(x) strcmp(x.Type, Port), blk.PortConnectivity));
+            else
+                srcBlks = blk.PortConnectivity(...
+                    arrayfun(@(x) ~isempty(x.SrcBlock), blk.PortConnectivity));
+                srcBlk = srcBlks(Port);
+            end
+            if isempty(srcBlk)
+                src = [];
+                srcPort = [];
+            else
+                % Simulink srcPort starts from 0, we add one.
+                srcPort = srcBlk.SrcPort + 1;
+                srcHandle = srcBlk.SrcBlock;
+                src = get_struct(parent, srcHandle);
+            end
         end
         %% Change Simulink DataTypes to Lustre DataTypes. Initial default
         %value is also given as a string.
@@ -220,7 +232,7 @@ classdef SLX2LusUtils < handle
             if strcmp(slx_dt, 'real') || strcmp(slx_dt, 'int') || strcmp(slx_dt, 'bool')
                 Lustre_type = slx_dt;
             else
-                if strcmp(slx_dt, 'logical') || strcmp(slx_dt, 'boolean')
+                if strcmp(slx_dt, 'logical') || strcmp(slx_dt, 'boolean') || strcmp(slx_dt, 'action')
                     Lustre_type = 'bool';
                 elseif strncmp(slx_dt, 'int', 3) || strncmp(slx_dt, 'uint', 4) || strncmp(slx_dt, 'fixdt(1,16,', 11) || strncmp(slx_dt, 'sfix64', 6)
                     Lustre_type = 'int';
@@ -356,15 +368,15 @@ classdef SLX2LusUtils < handle
             end
             if strcmp(resetType, 'Rising') || strcmp(resetType, 'rising')
                 resetCode = sprintf(...
-                    'false -> %s and not pre %s'...
+                    'false -> (%s and not pre %s)'...
                     ,b ,b );
             elseif strcmp(resetType, 'Falling') || strcmp(resetType, 'falling')
                 resetCode = sprintf(...
-                    'false -> not %s and pre %s'...
+                    'false -> (not %s and pre %s)'...
                     ,b ,b);
             elseif strcmp(resetType, 'Either') || strcmp(resetType, 'either')
                 resetCode = sprintf(...
-                    'false -> (%s and not pre %s) or (not %s and pre %s) '...
+                    'false -> ((%s and not pre %s) or (not %s and pre %s)) '...
                     ,b ,b ,b ,b);
             else
                 resetCode = '';
@@ -374,8 +386,8 @@ classdef SLX2LusUtils < handle
         end
         
         %% trigger value
-        function TriggerinputExp = getTriggerValue(Cond, triggerInput, TriggerType, dt)
-            if strcmp(dt, 'real')
+        function TriggerinputExp = getTriggerValue(Cond, triggerInput, TriggerType, TriggerBlockDt, IncomingSignalDT)
+            if strcmp(TriggerBlockDt, 'real')
                 suffix = '.0';
                 zero = '0.0';
             else
@@ -396,9 +408,9 @@ classdef SLX2LusUtils < handle
                     ,suffix, Cond, suffix, suffix );
             else
                 risingCond = SLX2LusUtils.getResetCode(...
-                    'rising', dt, triggerInput, zero );
+                    'rising', IncomingSignalDT, triggerInput, zero );
                 TriggerinputExp = sprintf(...
-                    '%s -> if %s then if %s then 1%s else -1%s else 0%s'...
+                    '%s -> if %s then if (%s) then 1%s else -1%s else 0%s'...
                     ,zero,  Cond, risingCond, suffix, suffix, suffix);
             end
         end

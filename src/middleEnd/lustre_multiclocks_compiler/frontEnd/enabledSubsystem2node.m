@@ -1,5 +1,6 @@
 function [ main_node] = enabledSubsystem2node( subsys_struct, xml_trace)
-%enabledSubsystem2node create an automaton lustre node for enabled subsystem
+%enabledSubsystem2node create an automaton lustre node for 
+%enabled/triggered/Action subsystem
 %INPUTS:
 %   subsys_struct: The internal representation of the subsystem.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -67,12 +68,17 @@ original_node_call = ...
 fields = fieldnames(subsys.Content);
 enablePortsFields = fields(...
     cellfun(@(x) (isfield(subsys.Content.(x),'BlockType')...
-    && strcmp(subsys.Content.(x).BlockType,'EnablePort')), fields));
+    && (strcmp(subsys.Content.(x).BlockType,'EnablePort') ...
+        || strcmp(subsys.Content.(x).BlockType,'ActionPort')) ), fields));
 if isempty(enablePortsFields)
     %the case of trigger port only
     resumeOrRestart = 'resume';% by default
 else
-    StatesWhenEnabling = subsys.Content.(enablePortsFields{1}).StatesWhenEnabling;
+    if strcmp(subsys.Content.(enablePortsFields{1}).BlockType, 'EnablePort')
+        StatesWhenEnabling = subsys.Content.(enablePortsFields{1}).StatesWhenEnabling;
+    else
+        StatesWhenEnabling = subsys.Content.(enablePortsFields{1}).InitializeStates;
+    end
     if strcmp(StatesWhenEnabling, 'reset')
         resumeOrRestart = 'restart';
     else
@@ -131,7 +137,7 @@ if ~isempty(variables_str)
 end
 end
 
-% Get the initial ouput of Outport depending on the dimension.
+%% Get the initial ouput of Outport depending on the dimension.
 function InitialOutput_cell = getInitialOutput(parent, blk)
 lus_outputDataType = SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Inport{1});
 if strcmp(blk.InitialOutput, '[]')
@@ -174,7 +180,7 @@ for i=1:numel(InitialOutputValue)
     end
 end
 if numel(InitialOutput_cell) < blk.CompiledPortWidths.Inport
-    InitialOutput_cell = arrayfun(@(x) {InitialOutput_cell{1}}, (1:numel(outputs)));
+    InitialOutput_cell = arrayfun(@(x) {InitialOutput_cell{1}}, (1:blk.CompiledPortWidths.Inport));
 end
 
 end

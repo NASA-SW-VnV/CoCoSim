@@ -124,7 +124,9 @@ else
     end
 end
 
-
+% fix issue of IF blocks inside Resettable subsystem, the block IF-Action
+% should be forced to reset.
+Lus2SLXUtils.AddResettableSubsystemToIfBlock(new_model_name);
 % Remove From Goto blocks and organize the blocks positions
 if organize_blocks
     goto_process( new_model_name );
