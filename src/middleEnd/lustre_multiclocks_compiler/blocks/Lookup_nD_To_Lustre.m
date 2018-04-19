@@ -54,6 +54,10 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                 Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Table);                     
             InterpMethod = blk.InterpMethod;
             ExtrapMethod = blk.ExtrapMethod;
+            skipInterpolation = 0; 
+            if strcmp(InterpMethod,'Flat') || strcmp(InterpMethod,'Nearest')
+                skipInterpolation = 1;                
+            end            
             
             % UseOneInputPortForAllInputData
             p_inputs = {};
@@ -98,6 +102,14 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
             coords_node = {};  
             index_node = {};  
             boundingNodes = zeros(NumberOfTableDimensions,2);
+            
+            isExtrapolation = sprintf('%s_extrap',SLX2LusUtils.name_format(blk.Name));
+            addVarIndex = addVarIndex + 1;
+            addVars{addVarIndex} = sprintf('%s:%s;',isExtrapolation,indexDataType);
+            % test code
+            codeIndex = codeIndex + 1;
+            codes{codeIndex} = sprintf('%s = 0 ;\n\t', isExtrapolation);
+            
             for i=1:NumberOfTableDimensions
                 % low node for dimension i
                 coords_node{i,1} = sprintf('%s_coords_dim_%d_1',SLX2LusUtils.name_format(blk.Name),i);
@@ -118,48 +130,53 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                 addVars{addVarIndex} = sprintf('%s:%s;',index_node{i,2},indexDataType);                  
                 
                 % looking for low node                
-                code = sprintf('%s = \n\t', coords_node{i,1});
-                code2 = sprintf('%s = \n\t', index_node{i,1});
+                code = sprintf('%s = \n\t', coords_node{i,1});    % code for coordinate values
+                index_code = sprintf('%s = \n\t', index_node{i,1});  % index_code for indices
                 for j=numel(BreakpointsForDimension{i}):-1:1
                     if j==numel(BreakpointsForDimension{i})
-                        code = sprintf('%s  if(%s >= %s) then %s\n\t', code, p_inputs{i}{1},Breakpoints{i}{j},Breakpoints{i}{j-1});
-                        code2 = sprintf('%s  if(%s >= %s) then %d\n\t', code2, p_inputs{i}{1},Breakpoints{i}{j},(j-1));
+                        
+                        if ~skipInterpolation
+                            % for extrapolation, we want to use the last 2
+                            % nodes
+                            code = sprintf('%s  if(%s >= %s) then %s\n\t', code, p_inputs{i}{1},Breakpoints{i}{j},Breakpoints{i}{j-1});
+                            index_code = sprintf('%s  if(%s >= %s) then %d\n\t', index_code, p_inputs{i}{1},Breakpoints{i}{j},(j-1));
+                        else
+                            % for "flat" we want lower node to be last node
+                            code = sprintf('%s  if(%s >= %s) then %s\n\t', code, p_inputs{i}{1},Breakpoints{i}{j},Breakpoints{i}{j});
+                            index_code = sprintf('%s  if(%s >= %s) then %d\n\t', index_code, p_inputs{i}{1},Breakpoints{i}{j},(j));
+                        end
+                        
                     else
                         code = sprintf('%s  else if(%s >= %s) then %s\n\t', code, p_inputs{i}{1},Breakpoints{i}{j},Breakpoints{i}{j});
-                        code2 = sprintf('%s  else if(%s >= %s) then %d\n\t', code2, p_inputs{i}{1},Breakpoints{i}{j},j);
+                        index_code = sprintf('%s  else if(%s >= %s) then %d\n\t', index_code, p_inputs{i}{1},Breakpoints{i}{j},j);
                     end
 
                 end
                 codeIndex = codeIndex + 1;
-                codes{codeIndex} = sprintf('%s  else %d ;\n\t', code2,1);
+                codes{codeIndex} = sprintf('%s  else %d ;\n\t', index_code,1);
                 codeIndex = codeIndex + 1;
                 codes{codeIndex} = sprintf('%s  else %s ;\n\t', code,Breakpoints{i}{1});
                 % looking for high node
                 code = sprintf('%s = \n\t', coords_node{i,2});
-                code2 = sprintf('%s = \n\t', index_node{i,2});
+                index_code = sprintf('%s = \n\t', index_node{i,2});
                 for j=numel(BreakpointsForDimension{i}):-1:1
                     if j==numel(BreakpointsForDimension{i})
                         code = sprintf('%s  if(%s >= %s) then %s\n\t', code, p_inputs{i}{1},Breakpoints{i}{j},Breakpoints{i}{j});
-                        code2 = sprintf('%s  if(%s >= %s) then %d\n\t', code2, p_inputs{i}{1},Breakpoints{i}{j},j);
+                        index_code = sprintf('%s  if(%s >= %s) then %d\n\t', index_code, p_inputs{i}{1},Breakpoints{i}{j},j);
                     else
                         code = sprintf('%s  else if(%s >= %s) then %s\n\t', code, p_inputs{i}{1},Breakpoints{i}{j},Breakpoints{i}{j+1});
-                        code2 = sprintf('%s  else if(%s >= %s) then %d\n\t', code2, p_inputs{i}{1},Breakpoints{i}{j},(j+1));
+                        index_code = sprintf('%s  else if(%s >= %s) then %d\n\t', index_code, p_inputs{i}{1},Breakpoints{i}{j},(j+1));
                     end                  
                 end
                 codeIndex = codeIndex + 1;
-                codes{codeIndex} = sprintf('%s  else %d ;\n\t', code2,2);
+                codes{codeIndex} = sprintf('%s  else %d ;\n\t', index_code,2);
                 codeIndex = codeIndex + 1;
                 codes{codeIndex} = sprintf('%s  else %s ;\n\t', code,Breakpoints{i}{2});
                 
             end
             
             % if flat, make inputs the lowest bounding node
-            skipInterpolation = 0;
-            returnTableIndex = {};
-            if strcmp(InterpMethod,'Flat') || strcmp(InterpMethod,'Nearest')
-                skipInterpolation = 1;                
-            end
-            
+            returnTableIndex = {};            
             u_node = {};
             N_shape_node = {};
             
@@ -313,6 +330,25 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                 codes{codeIndex} = sprintf('%s  else %s ;\n\t', code,table_elem{numel(table_elem)});
  
             else
+                % clipping
+                clipped_inputs = {};
+                
+                for i=1:NumberOfTableDimensions
+                    clipped_inputs{i} = sprintf('%s_clip_input_%d',SLX2LusUtils.name_format(blk.Name),i);
+                    addVarIndex = addVarIndex + 1;
+                    addVars{addVarIndex} = sprintf('%s:%s;',clipped_inputs{i},lusInport_dt);
+                    if strcmp(ExtrapMethod,'Clip')
+                        code = sprintf('%s = if(%s<%s) then %s \n\t', clipped_inputs{i}, p_inputs{i}{1}, coords_node{i,1}, coords_node{i,1});
+                        code = sprintf('%s  else if(%s > %s) then %s\n\t', code, p_inputs{i}{1}, coords_node{i,2}, coords_node{i,2});
+                        codeIndex = codeIndex + 1;
+                        codes{codeIndex} = sprintf('%s  else %s ;\n\t', code,p_inputs{i}{1});
+                    else
+                        codeIndex = codeIndex + 1;
+                        codes{codeIndex} = sprintf('%s = %s ;\n\t', clipped_inputs{i},p_inputs{i}{1});                        
+                    end                    
+                end
+                
+                
                 if strcmp(InterpMethod,'Linear')
                     % calculating linear shape function value
                     denom = one;
@@ -325,9 +361,9 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                         code = one;
                         for j=1:NumberOfTableDimensions
                             if shapeNodeSign(i,j)==-1
-                                code = sprintf('%s*(%s-%s)',code,coords_node{j,2},p_inputs{j}{1});
+                                code = sprintf('%s*(%s-%s)',code,coords_node{j,2},clipped_inputs{j});
                             else
-                                code = sprintf('%s*(%s-%s)',code,p_inputs{j}{1},coords_node{j,1});
+                                code = sprintf('%s*(%s-%s)',code,clipped_inputs{j},coords_node{j,1});
                             end
                         end
                         codeIndex = codeIndex + 1;
@@ -343,9 +379,9 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                         code = one;
                         for j=1:NumberOfTableDimensions
                             if shapeNodeSign(i,j)==-1
-                                code = sprintf('%s*(%s-%s)',code,coords_node{j,2},p_inputs{j}{1});
+                                code = sprintf('%s*(%s-%s)',code,coords_node{j,2},clipped_inputs{j});
                             else
-                                code = sprintf('%s*(%s-%s)',code,p_inputs{j}{1},coords_node{j,1});
+                                code = sprintf('%s*(%s-%s)',code,clipped_inputs{j},coords_node{j,1});
                             end
                         end
                         codeIndex = codeIndex + 1;
@@ -358,7 +394,9 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                     code = sprintf('%s+%s*%s ',code,N_shape_node{i},u_node{i});
                 end
                 codeIndex = codeIndex + 1;
-                codes{codeIndex} = sprintf('%s = %s ;\n\t', outputs{1}, code);
+                codes{codeIndex} = sprintf('%s = if (%s = 1) then 25. \n\t', outputs{1}, isExtrapolation);                
+                codeIndex = codeIndex + 1;
+                codes{codeIndex} = sprintf('else %s ;\n\t', code);
             end
             
             obj.setCode(MatlabUtils.strjoin(codes, ''));
