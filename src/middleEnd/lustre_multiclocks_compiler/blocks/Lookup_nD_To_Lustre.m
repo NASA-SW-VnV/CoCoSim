@@ -34,13 +34,12 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                     end
                 end
             end
-            
             % initialize
             addVarIndex = 0;
             codeIndex = 0;
             codes = {};            
             in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(blk);  
-            BreakpointsForDimension = {}
+            BreakpointsForDimension = {};
             
             % read blk
             [NumberOfTableDimensions, ~, ~] = ...
@@ -71,23 +70,23 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
             end            
             
             % declaring and defining table 
-            table_elem = {}
+            table_elem = {};
             for i=1:numel(Table)
                     table_elem{i} = sprintf('%s_table_elem_%d',SLX2LusUtils.name_format(blk.Name),i);
                     addVarIndex = addVarIndex + 1;
                     addVars{addVarIndex} = sprintf('%s:%s;',table_elem{i},lusInport_dt);
                     codeIndex = codeIndex + 1;
-                    codes{codeIndex} = sprintf('%s = %f ;\n\t', table_elem{i}, Table(i));
+                    codes{codeIndex} = sprintf('%s = %.15f ;\n\t', table_elem{i}, Table(i));
             end
             % declaring and defining break points            
             for j = 1:NumberOfTableDimensions
-                Breakpoints{j} = {}
+                Breakpoints{j} = {};
                 for i=1:numel(BreakpointsForDimension{j})
                     Breakpoints{j}{i} = sprintf('%s_Breakpoints_dim%d_%d',SLX2LusUtils.name_format(blk.Name),j,i);
                     addVarIndex = addVarIndex + 1;
                     addVars{addVarIndex} = sprintf('%s:%s;',Breakpoints{j}{i},lusInport_dt);      
                     codeIndex = codeIndex + 1;
-                    codes{codeIndex} = sprintf('%s = %f ;\n\t', Breakpoints{j}{i}, BreakpointsForDimension{j}(i));                    
+                    codes{codeIndex} = sprintf('%s = %.15f ;\n\t', Breakpoints{j}{i}, BreakpointsForDimension{j}(i));                    
                 end
             end
             
@@ -105,10 +104,10 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
             
             isExtrapolation = sprintf('%s_extrap',SLX2LusUtils.name_format(blk.Name));
             addVarIndex = addVarIndex + 1;
-            addVars{addVarIndex} = sprintf('%s:%s;',isExtrapolation,indexDataType);
+            addVars{addVarIndex} = sprintf('%s:bool;',isExtrapolation);
             % test code
             codeIndex = codeIndex + 1;
-            codes{codeIndex} = sprintf('%s = 0 ;\n\t', isExtrapolation);
+            codes{codeIndex} = sprintf('%s = false ;\n\t', isExtrapolation);
             
             for i=1:NumberOfTableDimensions
                 % low node for dimension i
@@ -236,16 +235,16 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                     if dimSign(j) == -1
                         curIndex =  index_node{j,1};
                     else
-                        curIndex =  index_node{j,2}
+                        curIndex =  index_node{j,2};
                     end
                     if j==1
-                        value = sprintf('%s + %s*%d',value,curIndex, dimJump(j))
+                        value = sprintf('%s + %s*%d',value,curIndex, dimJump(j));
                     else
-                        value = sprintf('%s + (%s-1)*%d',value,curIndex, dimJump(j))
+                        value = sprintf('%s + (%s-1)*%d',value,curIndex, dimJump(j));
                     end
                 end
                 codeIndex = codeIndex + 1;
-                codes{codeIndex} = sprintf('%s = %s;\n\t', boundingNodeIndex{nodeIndex}, value)
+                codes{codeIndex} = sprintf('%s = %s;\n\t', boundingNodeIndex{nodeIndex}, value);
                                 
                 if ~skipInterpolation
                     % defining u_node{nodeIndex}
@@ -276,9 +275,9 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                         
                         curIndex =  index_node{j,1};
                         if j==1
-                            value = sprintf('%s + %s*%d',value,curIndex, dimJump(j))
+                            value = sprintf('%s + %s*%d',value,curIndex, dimJump(j));
                         else
-                            value = sprintf('%s + (%s-1)*%d',value,curIndex, dimJump(j))
+                            value = sprintf('%s + (%s-1)*%d',value,curIndex, dimJump(j));
                         end
                     end
                 else   % 'Nearest' case
@@ -309,14 +308,14 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                     value = '0';
                     for j=1:NumberOfTableDimensions   
                         if j==1
-                            value = sprintf('%s + %s*%d',value,nearestIndex{j}, dimJump(j))
+                            value = sprintf('%s + %s*%d',value,nearestIndex{j}, dimJump(j));
                         else
-                            value = sprintf('%s + (%s-1)*%d',value,nearestIndex{j}, dimJump(j))
+                            value = sprintf('%s + (%s-1)*%d',value,nearestIndex{j}, dimJump(j));
                         end
                     end
                 end
                 codeIndex = codeIndex + 1;
-                codes{codeIndex} = sprintf('%s = %s;\n\t', returnTableIndex{1}, value)
+                codes{codeIndex} = sprintf('%s = %s;\n\t', returnTableIndex{1}, value);
                 % defining outputs{1}
                 code = sprintf('%s = \n\t', outputs{1});
                 for j=1:numel(table_elem)-1
@@ -394,7 +393,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                     code = sprintf('%s+%s*%s ',code,N_shape_node{i},u_node{i});
                 end
                 codeIndex = codeIndex + 1;
-                codes{codeIndex} = sprintf('%s = if (%s = 1) then 25. \n\t', outputs{1}, isExtrapolation);                
+                codes{codeIndex} = sprintf('%s = if (%s) then 25.0 \n\t', outputs{1}, isExtrapolation);                
                 codeIndex = codeIndex + 1;
                 codes{codeIndex} = sprintf('else %s ;\n\t', code);
             end

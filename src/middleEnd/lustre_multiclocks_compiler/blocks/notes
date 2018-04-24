@@ -31,6 +31,7 @@ Ktrinh: Assignment,
 
 
 Hamza:  Abs,
+        ActionPort,
         Constant,
         Clock (pp),
         CompareTo (Masked Subsystem), 
@@ -46,9 +47,11 @@ Hamza:  Abs,
         Fcn (pp) (*TODO: need to be translated when pp fails*)
         ForEach (pp),
         From,
+        If,
         Integrator (pp),
         Lookup (pp),
         Lookup_n-D (pp for n ==1 )(*TODO: for n > 1*)
+        Memory (pp)
         MinMax,
         Outport,
         Quantizer (pp),
@@ -72,16 +75,16 @@ Hamza:  Abs,
         
 
 Blocks that has left from Biosentinel:
-    ActionPort (Hamza)
+   
     BusCreator, BusSelector
     DigitalClock (Hamza: need to be using _time_step ),
     DiscreteTransferFcn (see TransferFcn in pp) (Khanh)
     
     Fcn (partially done in pp) (Khanh)
     ForIterator (Hamza)
-    If (Hamza)
     
-    Memory (can be descritized in pp to unitDelay)  (Hamza)
+    
+    
     Merge (Hamza)
     ModelReference (Hamza)
     RandomNumber ( to translate to empty node with contract) (Hamza)

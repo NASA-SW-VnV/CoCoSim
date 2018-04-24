@@ -96,7 +96,7 @@ else
     IMIN = -100;
     IMAX = 100;
 end
-eps = 1e-5;
+eps = 1e-4;
 T = [];
 %% equivalence testing
 if tests_method == 2
