@@ -53,27 +53,9 @@ classdef If_To_Lustre < Block_To_Lustre
                 IfExp{end+1} = '';
             end
             %% Step 4: start filling the definition of each output
-            codes = {};
-            % Go over outputs
-            not_outputs = cellfun(@(x) sprintf('(not %s)', x), outputs,...
-                'UniformOutput', 0);
-            for j=1:numel(outputs)
-                lusCond = If_To_Lustre.formatConditionToLustre(...
-                    IfExp{j}, inputs, inports_dt, parent, blk);
-                notExp = MatlabUtils.strjoin(not_outputs(1:j-1), ' and ');
-                if isempty(notExp)
-                    codes{j} = sprintf('%s = %s;\n\t', ...
-                        outputs{j}, lusCond);
-                elseif isempty(lusCond)
-                    codes{j} = sprintf('%s = %s;\n\t', ...
-                        outputs{j}, notExp);
-                else
-                    codes{j} = sprintf('%s = %s and (%s);\n\t', ...
-                        outputs{j}, notExp, lusCond);
-                end
-            end
-            % join the lines and set the block code.
-            obj.setCode(MatlabUtils.strjoin(codes, ''));
+            code = If_To_Lustre.ifElseCode(parent, blk, outputs, ...
+                inputs, inports_dt, IfExp);
+            obj.setCode(code);
             
         end
         
@@ -85,6 +67,38 @@ classdef If_To_Lustre < Block_To_Lustre
         
     end
     methods(Static)
+        function code = ifElseCode(parent, blk, outputs, inputs, inports_dt, IfExp)
+            codes = {};
+            % Go over outputs
+            nbOutputs=numel(outputs);
+            for j=1:nbOutputs
+                lusCond = If_To_Lustre.formatConditionToLustre(...
+                    IfExp{j}, inputs, inports_dt, parent, blk);
+                if j==nbOutputs && isempty(IfExp{j})
+                    %default condition
+                    codes{j} = sprintf('%s;\n\t', ...
+                        If_To_Lustre.outputsValues(nbOutputs, j));
+                elseif j==nbOutputs
+                    %last condition
+                    codes{j} = sprintf('if (%s) then %s else %s;\n\t', ...
+                        lusCond, If_To_Lustre.outputsValues(nbOutputs, j), ...
+                        If_To_Lustre.outputsValues(nbOutputs, 0));
+                else
+                    codes{j} = sprintf('if (%s) then %s else\n\t\t', ...
+                        lusCond, If_To_Lustre.outputsValues(nbOutputs, j));
+                end
+                
+            end
+            code = sprintf('(%s) = %s', ...
+                MatlabUtils.strjoin(outputs, ', '), MatlabUtils.strjoin(codes, ''));
+        end
+        function exp  = outputsValues(outputsNumber, outputIdx)
+            values = arrayfun(@(x) 'false', (1:outputsNumber), 'UniformOutput', 0);
+            if outputIdx > 0 && outputIdx <= outputsNumber
+                values{outputIdx} = 'true';
+            end
+            exp = sprintf('(%s)', MatlabUtils.strjoin(values, ', '));
+        end
         function exp = formatConditionToLustre(cond, inputs_cell, inputs_dt, parent, blk)
             %If Conditions uses only: <, <=, ==, ~=, >, >=, &, |, ~, (), unary-minus
             

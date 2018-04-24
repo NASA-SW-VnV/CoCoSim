@@ -237,7 +237,13 @@ classdef SLX2LusUtils < handle
                 elseif strncmp(slx_dt, 'int', 3) || strncmp(slx_dt, 'uint', 4) || strncmp(slx_dt, 'fixdt(1,16,', 11) || strncmp(slx_dt, 'sfix64', 6)
                     Lustre_type = 'int';
                 else
-                    Lustre_type = 'real';
+                    % considering enumaration as int
+                    m = evalin('base', sprintf('enumeration(''%s'')',char(slx_dt)));
+                    if isempty(m)
+                        Lustre_type = 'real';
+                    else
+                        Lustre_type = 'int';
+                    end
                 end
             end
             if strcmp(Lustre_type, 'bool')

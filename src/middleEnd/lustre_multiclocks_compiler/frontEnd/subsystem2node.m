@@ -35,24 +35,30 @@ end
 node_outputs_cell = SLX2LusUtils.extract_node_InOutputs_withDT(subsys_struct, 'Outport', xml_trace);
 node_outputs = MatlabUtils.strjoin(node_outputs_cell, '\n');
 
-node_header = sprintf('node %s (%s)\n returns (%s);',...
-    node_name, node_inputs, node_outputs);
 
 % creating contract
 contract = '-- Contract In progress';
 
 
 % Body code
-[body, variables_str, external_nodes, external_libraries] = write_body(subsys_struct, main_sampleTime, xml_trace); 
+[body, variables_str, external_nodes, external_libraries] = write_body(subsys_struct, main_sampleTime, xml_trace);
 if is_main_node
-    if ~isempty(variables_str)
-        variables_str = [variables_str sprintf('\n\t%s:real;', SLX2LusUtils.timeStepStr())];
+    if isempty(node_outputs)
+        node_outputs = sprintf('%s:real;', SLX2LusUtils.timeStepStr());
     else
-        variables_str = ['var ' sprintf('%s:real;', SLX2LusUtils.timeStepStr())];
+        if ~isempty(variables_str)
+            variables_str = [variables_str sprintf('\n\t%s:real;', SLX2LusUtils.timeStepStr())];
+        else
+            variables_str = ['var ' sprintf('%s:real;', SLX2LusUtils.timeStepStr())];
+        end
     end
     body = [sprintf('%s = 0.0 -> pre %s + %.15f;\n\t', ...
         SLX2LusUtils.timeStepStr(), SLX2LusUtils.timeStepStr(), main_sampleTime(1)), body];
 end
+
+node_header = sprintf('node %s (%s)\n returns (%s);',...
+    node_name, node_inputs, node_outputs);
+
 main_node = sprintf('%s\n%s\n%s\n%s\nlet\n\t%s\ntel\n',...
     comment, node_header, contract, variables_str, body);
 

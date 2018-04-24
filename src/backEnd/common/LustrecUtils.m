@@ -1578,6 +1578,12 @@ classdef LustrecUtils < handle
                 GUIUtils.update_status('Compare Simulink outputs and lustrec outputs');
                 
                 yout = get(simOut,'yout');
+                if ~isfield(yout, 'signals')
+                    f_msg = sprintf('Model "%s" contains no signals to compare. \n',slx_file_name);
+                    display_msg(f_msg, MsgType.RESULT, 'validation', '');
+                    done = 1;
+                    return;
+                end
                 yout_signals = yout.signals;
                 assignin('base','yout',yout);
                 assignin('base','yout_signals',yout_signals);

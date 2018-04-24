@@ -20,10 +20,7 @@ comment = sprintf('-- Original block name: %s', origin_path);
 blk_name = SLX2LusUtils.node_name_format(subsys_struct);
 node_name = strcat(blk_name, '_automaton');
 [node_inputs_cell, node_inputs_withoutDT_cell] = SLX2LusUtils.extract_node_InOutputs_withDT(subsys_struct, 'Inport', xml_trace);
-if isempty(node_inputs_cell)
-    node_inputs_cell{1} = '_virtual:bool;';
-    node_inputs_withoutDT_cell{1} = '_virtual';
-end
+
 node_inputs = MatlabUtils.strjoin(node_inputs_cell, '\n');
 node_inputs = [node_inputs, ...
     strcat(SLX2LusUtils.isEnabledStr() , ':bool;')];
