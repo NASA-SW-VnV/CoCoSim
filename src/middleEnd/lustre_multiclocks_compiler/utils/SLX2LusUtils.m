@@ -119,7 +119,11 @@ classdef SLX2LusUtils < handle
             % A block is defined by its outputs, if a block does not
             % have outports, like Outport block, than will be defined by its
             % inports. E.g, Outport Out with width 2 -> Out_1, out_2
-            
+            names = {};
+            names_dt = {};
+            if isempty(blk)
+                return;
+            end
             if isempty(blk.CompiledPortWidths.Outport)
                 width = blk.CompiledPortWidths.Inport;
                 type = 'Outport';
@@ -128,8 +132,7 @@ classdef SLX2LusUtils < handle
                 type = 'Inport';
             end
             
-            names = {};
-            names_dt = {};
+            
             if nargin >= 2 && ~isempty(srcPort)
                 port = srcPort + 1;% srcPort starts by zero
                 if strcmp(type, 'Outport')
