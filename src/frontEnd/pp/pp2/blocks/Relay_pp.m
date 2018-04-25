@@ -1,8 +1,13 @@
-function [] = Relay_process(model)
+function [] = Relay_pp(model)
 % Relay_PROCESS Searches for Relay blocks and replaces them by a
 %  equivalent subsystem.
 %   model is a string containing the name of the model to search in
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Copyright (c) 2017 United States Government as represented by the
+% Administrator of the National Aeronautics and Space Administration.
+% All Rights Reserved.
+% Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Relay_list = find_system(model,'BlockType','Relay');
 if not(isempty(Relay_list))
     display_msg('Processing Relay blocks...', MsgType.INFO, 'Relay_process', ''); 

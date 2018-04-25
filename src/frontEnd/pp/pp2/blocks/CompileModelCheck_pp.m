@@ -1,6 +1,11 @@
-function  status= compile_process( new_model_base )
+function  status= CompileModelCheck_pp( new_model_base )
 %compile_process check if the model can be compiled or not.
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Copyright (c) 2017 United States Government as represented by the
+% Administrator of the National Aeronautics and Space Administration.
+% All Rights Reserved.
+% Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 try
     status = 0;
     code_on=sprintf('%s([], [], [], ''compile'')', new_model_base);

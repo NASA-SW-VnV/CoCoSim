@@ -1,8 +1,13 @@
-function [] = Quantizer_process(model)
+function [] = Quantizer_pp(model)
 % Quantizer_PROCESS Searches for Quantizer blocks and replaces them by a
 %  equivalent subsystem.
 %   model is a string containing the name of the model to search in
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Copyright (c) 2017 United States Government as represented by the
+% Administrator of the National Aeronautics and Space Administration.
+% All Rights Reserved.
+% Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Quantizer_list = find_system(model,'BlockType','Quantizer');
 if not(isempty(Quantizer_list))
     display_msg('Processing Quantizer blocks...', MsgType.INFO, 'Quantizer_process', ''); 

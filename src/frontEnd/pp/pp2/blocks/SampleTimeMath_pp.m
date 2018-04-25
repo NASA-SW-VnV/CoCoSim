@@ -1,8 +1,13 @@
-function [] = SampleTimeMath_process(model)
+function [] = SampleTimeMath_pp(model)
 % SampleTimeMath_PROCESS Searches for SampleTimeMath blocks and replaces them by a
 %  equivalent subsystem.
 %   model is a string containing the name of the model to search in
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Copyright (c) 2017 United States Government as represented by the
+% Administrator of the National Aeronautics and Space Administration.
+% All Rights Reserved.
+% Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 SampleTimeMath_list = find_system(model,'LookUnderMasks', 'all', 'BlockType','SampleTimeMath');
 if not(isempty(SampleTimeMath_list))
     display_msg('Processing SampleTimeMath blocks...', MsgType.INFO, 'SampleTimeMath_process', '');

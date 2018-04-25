@@ -1,8 +1,13 @@
-function [] = ForEach_process(model)
+function [] = ForEach_pp(model)
 % ForEach_process Searches for ForEach blocks and replaces them by a
 %  equivalent subsystem.
 %   model is a string containing the name of the model to search in
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Copyright (c) 2017 United States Government as represented by the
+% Administrator of the National Aeronautics and Space Administration.
+% All Rights Reserved.
+% Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ForEach_list = find_system(model,'LookUnderMasks', 'all', 'BlockType','ForEach');
 if not(isempty(ForEach_list))
     display_msg('Processing ForEach blocks...', MsgType.INFO, 'ForEach_process', '');

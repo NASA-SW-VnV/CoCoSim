@@ -33,7 +33,7 @@ Ktrinh: Assignment,
 Hamza:  Abs,
         ActionPort,
         Constant,
-        Clock (pp),
+        Clock,
         CompareTo (Masked Subsystem), 
         CompareToConstant (Masked Subsystem),
         Dead Zone (pp)

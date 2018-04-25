@@ -1,6 +1,12 @@
-function [  ] = blocks_position_process( model, depth )
+function [  ] = BlocksPosition_pp( model, depth )
 %BLOCKS_POSITION_PROCES try t change blocks position for graphical purpose.
 %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Copyright (c) 2017 United States Government as represented by the
+% Administrator of the National Aeronautics and Space Administration.
+% All Rights Reserved.
+% Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 clear organize
 limitedDepth = true;
 if ~exist('depth', 'var')

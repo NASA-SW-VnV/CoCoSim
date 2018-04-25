@@ -1,6 +1,11 @@
-function atomic_process( new_model_base )
+function AtomicSubsystems_pp( new_model_base )
 %ATOMIC_PROCESS change all blocks to be atomic
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Copyright (c) 2017 United States Government as represented by the
+% Administrator of the National Aeronautics and Space Administration.
+% All Rights Reserved.
+% Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Configure any subsystem to be treated as Atomic
 ssys_list = find_system(new_model_base,'BlockType','SubSystem');
 if not(isempty(ssys_list))

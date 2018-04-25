@@ -1,8 +1,13 @@
-function [] = substitute_bias_process(model)
+function [] = Bias_pp(model)
 % substitute_bias_process Searches for bias blocks and replaces them by a
 % PP-friendly equivalent.
 %   model is a string containing the name of the model to search in
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Copyright (c) 2017 United States Government as represented by the
+% Administrator of the National Aeronautics and Space Administration.
+% All Rights Reserved.
+% Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Processing Bias blocks
 Bias_list = find_system(model,'LookUnderMasks', 'all', 'BlockType','Bias');
 if not(isempty(Bias_list))

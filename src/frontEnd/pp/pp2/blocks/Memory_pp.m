@@ -1,7 +1,12 @@
 function [] = Memory_pp(model)
 % Memory_pp discretizing Memory block by UnitDelay
 %   model is a string containing the name of the model to search in
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Copyright (c) 2017 United States Government as represented by the
+% Administrator of the National Aeronautics and Space Administration.
+% All Rights Reserved.
+% Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 memoryBlk_list = find_system(model,'BlockType','Memory');
 if not(isempty(memoryBlk_list))
     display_msg('Processing Memory blocks...', MsgType.INFO, 'Memory_pp', ''); 

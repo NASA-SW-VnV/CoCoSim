@@ -1,8 +1,13 @@
-function [] = substitute_gain_process(model)
+function [] = Gain_pp(model)
 % substitute_gain_process Searches for gain blocks and replaces them by a
 % PP-friendly equivalent.
 %   model is a string containing the name of the model to search in
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Copyright (c) 2017 United States Government as represented by the
+% Administrator of the National Aeronautics and Space Administration.
+% All Rights Reserved.
+% Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Processing Gain blocks
 Gain_list = find_system(model,'LookUnderMasks', 'all', 'BlockType','Gain');
 if not(isempty(Gain_list))

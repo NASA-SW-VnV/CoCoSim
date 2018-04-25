@@ -1,5 +1,10 @@
-function inport_process( new_model_base )
-
+function Inport_pp( new_model_base )
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Copyright (c) 2017 United States Government as represented by the
+% Administrator of the National Aeronautics and Space Administration.
+% All Rights Reserved.
+% Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 display_msg('Processing Inport blocks', MsgType.INFO, 'PP', '');
 
 inport_list = find_system(new_model_base,'LookUnderMasks', 'all', 'BlockType','Inport');

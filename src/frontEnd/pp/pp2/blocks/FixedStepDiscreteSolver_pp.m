@@ -1,5 +1,11 @@
-function  fixedStepDiscrete_process( new_model_base )
+function  FixedStepDiscreteSolver_pp( new_model_base )
 %ALGEBRAIC_LOOPS_PROCESS set the solver to FixedStepDiscrete.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Copyright (c) 2017 United States Government as represented by the
+% Administrator of the National Aeronautics and Space Administration.
+% All Rights Reserved.
+% Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 try
 %     code_on=sprintf('%s([], [], [], ''compile'')', new_model_base);
 %     warning off;
