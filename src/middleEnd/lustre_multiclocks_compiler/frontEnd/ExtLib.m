@@ -1,13 +1,13 @@
 classdef ExtLib
     %EXTLIB This function  is used in getExternalLibrariesNodes function.
-    %To support an external library you need to follow the template. 
+    %To support an external library you need to follow the template.
     % Function name should be : get_LibraryName. For example a library
-    % called int_to_int8 will be handled in get_int_to_int8, 
+    % called int_to_int8 will be handled in get_int_to_int8,
     % the Matlab function should return :
     %   - node: The equivalent lustre node if exists.
-    %   - external_nodes: returns external libraries that depends on, 
+    %   - external_nodes: returns external libraries that depends on,
     %       for example _Convergent library depends on _Floor library.
-    %   - opens: the open libraries that will be needed, such as conv, 
+    %   - opens: the open libraries that will be needed, such as conv,
     %       lustrect_math or simulink_math_fcn.
     
     properties
@@ -322,8 +322,19 @@ classdef ExtLib
             node = sprintf(format);
         end
         
-        %% interpolation functions
-
+        %% Digital clock
+        
+        function [node, external_nodes_i, opens] = get__DigitalClock()
+            opens = {};
+            external_nodes_i = {'_round', '_fabs'};
+            format = 'node _DigitalClock (simulationTime, SampleTime:real)\nreturns(q:real);\n';
+            format = [format, 'var b:bool;\n'];
+            format = [format, 'let\n\t'];
+            format = [format, 'b = _fabs(simulationTime - _round(simulationTime/SampleTime) * SampleTime) <= 0.000000001; \n\t'];
+            format = [format, 'q = if b then simulationTime else pre q; \n'];
+            format = [format, 'tel\n\n'];
+            node = sprintf(format);
+        end
     end
     
 end

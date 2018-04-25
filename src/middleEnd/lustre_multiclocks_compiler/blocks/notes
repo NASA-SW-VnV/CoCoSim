@@ -39,7 +39,7 @@ Hamza:  Abs,
         Dead Zone (pp)
         Dead Zone Dynamic (pp),
         Delay,
-        DigitalClock (pp),
+        DigitalClock,
         DiscreteIntegrator (pp),
         DiscreteStateSpace (pp),
         Display (ignored)
@@ -49,13 +49,10 @@ Hamza:  Abs,
         From,
         If,
         Integrator (pp),
-        Lookup (pp),
-        Lookup_n-D (pp for n ==1 )(*TODO: for n > 1*)
         Memory (pp)
         MinMax,
         Outport,
         Quantizer (pp),
-        
         RelationalOperator, 
         Relay (pp),
         ResetPort, 
@@ -66,6 +63,7 @@ Hamza:  Abs,
         Saturation dynamic (pp), 
         Selector (pp),
         Sigbuilder block (pp),
+        SwitchCase
         Terminator (ignored),
         ToWorkspace (pp),
         TransferFcn (pp),
@@ -76,15 +74,12 @@ Hamza:  Abs,
 
 Blocks that has left from Biosentinel:
    
-    BusCreator, BusSelector
-    DigitalClock (Hamza: need to be using _time_step ),
+    BusCreator, 
+    BusSelector
     DiscreteTransferFcn (see TransferFcn in pp) (Khanh)
     
     Fcn (partially done in pp) (Khanh)
     ForIterator (Hamza)
-    
-    
-    
     Merge (Hamza)
     ModelReference (Hamza)
     RandomNumber ( to translate to empty node with contract) (Hamza)
@@ -92,7 +87,6 @@ Blocks that has left from Biosentinel:
     S-Function (Hamza)
     SampleTimeMath (Hamza)
     StateControl 
-    SwitchCase (Hamza)
     
 AVA mission Simulink blocks:
     CombinatorialLogic
