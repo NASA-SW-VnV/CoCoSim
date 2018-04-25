@@ -46,43 +46,47 @@ classdef MultiPortSwitch_To_Lustre < Block_To_Lustre
             end
 
             [outLusDT, ~, one] = SLX2LusUtils.get_lustre_dt(outputDataType);
-            codes = {};
-            indexBlock = SLX2LusUtils.getpreBlock(parent, blk, 1);
-            [indexValue, ~, status] = ...
-                Constant_To_Lustre.getValueFromParameter(parent, indexBlock, indexBlock.Value);
-            if status
-                display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
-                    indexBlock.Value, indexBlock.Origin_path), ...
-                    MsgType.ERROR, 'MultiPortSwitch_To_Lustre', '');
-                return;
-            end
-            switchIndex = int16(indexValue)+1;     
             
-            [defaultIndex, ~, ~] = ...
+            [numInputs, ~, ~] = ...
                 Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Inputs);
+            blk_name = SLX2LusUtils.name_format(blk.Name);
             
-            defaultIndex = defaultIndex + 1;  % 1st port for control input
-            if strcmp(blk.DataPortForDefault, 'Additional data port')
-                defaultIndex = defaultIndex + 1;
-            end            
+            addVarIndex = 0;
+            addVarIndex = addVarIndex + 1;
+            portIndex = sprintf('%s_portIndex',blk_name);
+            addVars{addVarIndex} = sprintf('%s:int;',portIndex);
+            codes = {}; 
+            codeIndex = 0;
+            indexShift = 0;    % portIndex = readin index + indexShift.  
+            %                    indexShift = 0 for 1-based contiguous (1st port is control port)
+            %                    indexShift = 2 for 0-based contigous        
                
             if strcmp(blk.DataPortOrder, 'Zero-based contiguous')
-                switchIndex = switchIndex+1;
+                indexShift = indexShift + 1;
             elseif strcmp(blk.DataPortOrder, 'Specify indices')
                 display_msg(sprintf('Specify indices is not supported  in block %s',...
                     blk.Origin_path), MsgType.ERROR, 'MultiportSwitch_To_Lustre', '');
             end
             
-            if ~isinteger(switchIndex) || switchIndex < 1 || switchIndex > defaultIndex  % else condition
-                switchIndex = defaultIndex;
-            end
-            
+            codeIndex = codeIndex + 1;
+            codes{codeIndex} = sprintf('%s = %s + %d; \n\t', portIndex, inputs{1}{1},indexShift);
+                        
             for i=1:numel(outputs)
-                codes{i} = sprintf('%s = %s ;\n\t', outputs{i}, inputs{switchIndex}{i});
+                code = sprintf('%s = \n\t', outputs{i});
+                for j=1:numInputs
+                    if j==1
+                        code = sprintf('%s  if(%s = %d) then %s\n\t', code, portIndex,j,inputs{j+1}{i});   % 1st port is control port
+                    else
+                        code = sprintf('%s else if(%s = %d) then %s\n\t', code, portIndex,j,inputs{j+1}{i});
+                    end
+                end
+                codeIndex = codeIndex + 1;
+                codes{codeIndex} = sprintf('%s  else %s ;\n\t', code,inputs{numel(inputs)}{i});   % default port is always last port whether there is additional port or not
             end
             
             obj.setCode(MatlabUtils.strjoin(codes, ''));
             obj.addVariable(outputs_dt);
+            obj.addVariable(addVars);
         end
         
         function options = getUnsupportedOptions(obj, parent, blk, varargin)
