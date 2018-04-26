@@ -12,7 +12,7 @@ schema.callback = @LusCompilerCallback;
 % schema.label = 'Lustre';
 % schema.statustip = 'Generate Lustre code';
 % schema.autoDisableWhen = 'Busy';
-% 
+%
 % schema.childrenFcns = {@LusCompiler, @CoCoSpecCompiler};
 end
 
@@ -24,8 +24,13 @@ schema.callback = @LusCompilerCallback;
 end
 
 function LusCompilerCallback(callbackInfo)
-mdl_full_path = MenuUtils.get_file_name(gcs);
-ToLustre(mdl_full_path);
+try
+    mdl_full_path = MenuUtils.get_file_name(gcs);
+    ToLustre(mdl_full_path);
+catch ME
+    display_msg(ME.getReport(), Constants.DEBUG,'LusCompilerCallback','');
+    display_msg(ME.message, Constants.ERROR,'LusCompilerCallback','');
+end
 end
 
 function schema = CoCoSpecCompiler(callbackInfo)

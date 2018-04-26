@@ -130,7 +130,7 @@ Lus2SLXUtils.AddResettableSubsystemToIfBlock(new_model_name);
 % Remove From Goto blocks and organize the blocks positions
 if organize_blocks
     goto_process( new_model_name );
-    blocks_position_process( new_model_name );
+    BlocksPosition_pp( new_model_name );
 end
 % Write traceability informations
 xml_trace.write();

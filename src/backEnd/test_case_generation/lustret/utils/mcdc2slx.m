@@ -143,7 +143,7 @@ end
 % Remove From Goto blocks and organize the blocks positions
 if organize_blocks
     goto_process( new_model_name );
-    blocks_position_process( new_model_name,2 );
+    BlocksPosition_pp( new_model_name,2 );
 end
 % Write traceability informations
 mcdc_trace.write();

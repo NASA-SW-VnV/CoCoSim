@@ -121,21 +121,23 @@ classdef SLX2LusUtils < handle
             % inports. E.g, Outport Out with width 2 -> Out_1, out_2
             names = {};
             names_dt = {};
-            if isempty(blk)
+            if isempty(blk) ...
+                    || (isempty(blk.CompiledPortWidths.Outport) ...
+                    && isempty(blk.CompiledPortWidths.Inport))
                 return;
             end
             if isempty(blk.CompiledPortWidths.Outport)
                 width = blk.CompiledPortWidths.Inport;
-                type = 'Outport';
+                type = 'Inports';
             else
                 width = blk.CompiledPortWidths.Outport;
-                type = 'Inport';
+                type = 'Outports';
             end
             
             
             if nargin >= 2 && ~isempty(srcPort)
                 port = srcPort + 1;% srcPort starts by zero
-                if strcmp(type, 'Outport')
+                if strcmp(type, 'Inports')
                     dt = SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Inport(port));
                 else
                     dt = SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Outport(port));
@@ -151,7 +153,7 @@ classdef SLX2LusUtils < handle
             else
                 idx = 1;
                 for port=1:numel(width)
-                    if strcmp(type, 'Outport')
+                    if strcmp(type, 'Inports')
                         dt = SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Inport(port));
                     else
                         dt = SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Outport(port));
@@ -231,7 +233,8 @@ classdef SLX2LusUtils < handle
         end
         %% Change Simulink DataTypes to Lustre DataTypes. Initial default
         %value is also given as a string.
-        function [ Lustre_type, zero, one ] = get_lustre_dt( slx_dt)
+        function [ Lustre_type, zero, one, isBus ] = get_lustre_dt( slx_dt)
+            isBus = false;
             if strcmp(slx_dt, 'real') || strcmp(slx_dt, 'int') || strcmp(slx_dt, 'bool')
                 Lustre_type = slx_dt;
             else
@@ -247,6 +250,12 @@ classdef SLX2LusUtils < handle
                     else
                         Lustre_type = 'int';
                     end
+%                     isBus = evalin('base', sprintf('isa(%s, ''Simulink.Bus'')',char(slx_dt)));
+%                     if isBus
+%                         Lustre_type = SLX2LusUtils.getLustreTypesFromBusObject(char(slx_dt));
+%                     else
+%                         Lustre_type = 'real';
+%                     end
                 end
             end
             if strcmp(Lustre_type, 'bool')
@@ -258,6 +267,30 @@ classdef SLX2LusUtils < handle
             else
                 zero = '0.0';
                 one = '1.0';
+            end
+        end
+        function lustreTypes = getLustreTypesFromBusObject(busName)
+            bus = evalin('base', char(busName));
+            lustreTypes = {};
+            try
+            elems = bus.Elements;
+            catch
+            end
+            for i=1:numel(elems)
+                dt = elems(i).DataType;
+                dimensions = elems(i).Dimensions;
+                width = prod(dimensions);
+                if strncmp(dt, 'Bus:', 4)
+                    dt = regexprep(dt, 'Bus:\s*', '');
+                end
+                lusDT = SLX2LusUtils.get_lustre_dt( dt);
+                for w=1:width
+                    if ischar(lusDT)
+                        lustreTypes{end+1} = lusDT;
+                    else
+                        lustreTypes = [lustreTypes, lusDT];
+                    end
+                end
             end
         end
         

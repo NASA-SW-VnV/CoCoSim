@@ -1,5 +1,5 @@
 function [  ] = Assertion_pp( model )
-%ASSERTION_PROCESS disable all assertions to stop simulation when assertion
+%Assertion_pp disable all assertions to stop simulation when assertion
 %fails
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Copyright (c) 2017 United States Government as represented by the

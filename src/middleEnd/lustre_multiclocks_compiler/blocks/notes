@@ -1,9 +1,6 @@
 (*Please add block in Alphabetic order*)
 Ktrinh: Assignment,
         Bias (pp),
-        BusAssignment
-        BusCreator
-        BusSelector
         Concatenate,
         DataTypeConversion 
         DataTypeDuplicate (ignored),
@@ -14,6 +11,7 @@ Ktrinh: Assignment,
         Goto,
         Logic,
         Lookup\_n-D (Khanh)
+        LookupTableDynamic,
         Math,
         MultiPortSwitch
         Mux,
@@ -48,6 +46,7 @@ Hamza:  Abs,
         ForEach (pp),
         From,
         If,
+        InportShadow(pp),
         Integrator (pp),
         Memory (pp)
         MinMax,
@@ -74,10 +73,18 @@ Hamza:  Abs,
 
 Blocks that has left from Biosentinel:
    
-    BusCreator, 
-    BusSelector
+    BusCreator (Hamza), 
+    BusSelector (Hamza), 
+    BusAssignment (Hamza)
+
+    Using the same algorithm A, B, C, D
     DiscreteTransferFcn (see TransferFcn in pp) (Khanh)
-    
+    DiscreteStateSpace (Khanh).
+    ZeroPole(Khanh)
+    DiscreteFilter(Khanh)
+    DiscreteFir
+
+
     Fcn (partially done in pp) (Khanh)
     ForIterator (Hamza)
     Merge (Hamza)
@@ -90,15 +97,12 @@ Blocks that has left from Biosentinel:
     
 AVA mission Simulink blocks:
     CombinatorialLogic
-    DiscreteFilter
-    DiscreteFir
+    
+    
     DiscretePulseGenerator
-    SignalConversion
+    SignalConversion (Hamza)
     Signum
-    Step
+    Step (Hamza)
     WhileIterator
 
-LM Challenger new blocks 
-    {'InportShadow'      }
-    {'SignalConversion'  }
    

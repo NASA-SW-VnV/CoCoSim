@@ -108,7 +108,7 @@ for i=1:numel(ordered_pp_functions)
 end
 cd(oldDir);
 %% Make sure model compile
-status = compile_process( new_model_base );
+status = CompileModelCheck_pp( new_model_base );
 if status
     return;
 end

@@ -148,7 +148,7 @@ for partition_idx=1:nb_partition
 end
 
 
-blocks_position_process(equivSubPath);
+BlocksPosition_pp(equivSubPath);
 %% Replace the block by the new_block
 Orient=get_param(forEachSubsys,'orientation');
 Size=get_param(forEachSubsys,'position');

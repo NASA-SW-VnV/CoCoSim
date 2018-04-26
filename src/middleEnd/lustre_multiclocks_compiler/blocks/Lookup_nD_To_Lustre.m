@@ -75,7 +75,9 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
             %node header
             node_inputs = '';
             for i=1:numel(inputs)
-                node_inputs = sprintf('%s%s:real;\n', node_inputs,inputs{i}{1});
+                for j=1:numel(inputs{i})
+                    node_inputs = sprintf('%s%s:real;\n', node_inputs,inputs{i}{j});
+                end
             end
             node_returns = '';
             for i=1:numel(outputs_dt)
@@ -89,16 +91,25 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
             % declaring and defining table 
             table_elem = {};
             for i=1:numel(Table)
+%                 if ~Dynamic
                     table_elem{i} = sprintf('%s_table_elem_%d',SLX2LusUtils.name_format(blk.Name),i);
                     vars = sprintf('%s\t%s:%s;\n',vars,table_elem{i},lusInport_dt);
+%                 else
+%                     table_elem{i} = inputs{3}{i};
+%                 end
+                    
                     body = sprintf('%s%s = %.15f ;\n\t',body, table_elem{i}, Table(i));
             end
             % declaring and defining break points            
             for j = 1:NumberOfTableDimensions
                 Breakpoints{j} = {};
                 for i=1:numel(BreakpointsForDimension{j})
+                    %                 if ~Dynamic
                     Breakpoints{j}{i} = sprintf('%s_Breakpoints_dim%d_%d',SLX2LusUtils.name_format(blk.Name),j,i);
                     vars = sprintf('%s\t%s:%s;\n',vars,Breakpoints{j}{i},lusInport_dt);
+                    %                 else
+%                     table_elem{i} = inputs{2}{i};
+%                 end
                     body = sprintf('%s\t%s = %.15f ;\n', body, Breakpoints{j}{i}, BreakpointsForDimension{j}(i));
                 end
             end
@@ -390,7 +401,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                 obj.unsupported_options{numel(obj.unsupported_options) + 1} = ...
                     sprintf('More than 7 dimensions is not support in block %s', blk.Origin_path);
             end 
-            if ~strcmp(blk.InterpMethod, 'Cubic spline')
+            if strcmp(blk.InterpMethod, 'Cubic spline')
                 obj.unsupported_options{numel(obj.unsupported_options) + 1} = ...
                     sprintf('Cubic spline interpolation is not support in block %s', blk.Origin_path);
             end            
