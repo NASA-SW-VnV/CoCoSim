@@ -13,6 +13,40 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
     methods
         
         function  write_code(obj, parent, blk, varargin)
+            
+            isLookupTableDynamic = 0;
+            [external_lib, codes, vars, nodeCodes] =  ...
+                Lookup_nD_To_Lustre.get_code_to_write(parent, blk, varargin,isLookupTableDynamic);
+            
+            obj.addExternal_libraries(external_lib);
+            obj.setCode(codes);
+            obj.addVariable(vars);
+            obj.addExtenal_node(nodeCodes);
+            
+        end
+        
+        function options = getUnsupportedOptions(obj, blk, varargin)
+            obj.unsupported_options = {};
+            [NumberOfTableDimensions, ~, ~] = ...
+                Constant_To_Lustre.getValueFromParameter(parent, blk, blk.NumberOfTableDimensions);
+            if NumberOfTableDimensions >= 7
+                obj.unsupported_options{numel(obj.unsupported_options) + 1} = ...
+                    sprintf('More than 7 dimensions is not support in block %s', blk.Origin_path);
+            end 
+            if strcmp(blk.InterpMethod, 'Cubic spline')
+                obj.unsupported_options{numel(obj.unsupported_options) + 1} = ...
+                    sprintf('Cubic spline interpolation is not support in block %s', blk.Origin_path);
+            end            
+            options = obj.unsupported_options;
+        end      
+        
+    end
+    
+    methods(Static)
+        
+        function [external_lib, codes, vars, nodeCodes] =  ...
+                get_code_to_write(parent, blk, varargin,isLookupTableDynamic)
+            external_lib = '';
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(blk);
             inputs = {};
             
@@ -29,7 +63,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                 if ~strcmp(inport_dt, outputDataType) && i <= 2
                     [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, outputDataType,RndMeth);
                     if ~isempty(external_lib)
-                        obj.addExternal_libraries(external_lib);
+                        %obj.addExternal_libraries(external_lib);
                         inputs{i} = cellfun(@(x) sprintf(conv_format,x), inputs{i}, 'un', 0);
                     end
                 end
@@ -41,35 +75,68 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
             in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(blk);  
             BreakpointsForDimension = {};
             blk_name = SLX2LusUtils.name_format(blk.Name);
+            ext_node_name = sprintf('%s_ext_node',blk_name);
+            skipInterpolation = 0;
             
             % read blk
-            [NumberOfTableDimensions, ~, ~] = ...
-                Constant_To_Lustre.getValueFromParameter(parent, blk, blk.NumberOfTableDimensions);
-            for i=1:NumberOfTableDimensions
-                evalString = sprintf('[BreakpointsForDimension{i}, ~, ~] = Constant_To_Lustre.getValueFromParameter(parent, blk, blk.BreakpointsForDimension%d); ',i);
-                eval(evalString);
-            end
-           
-            [Table, ~, ~] = ...
-                Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Table);                     
-            InterpMethod = blk.InterpMethod;
-            ExtrapMethod = blk.ExtrapMethod;
-            skipInterpolation = 0; 
-            if strcmp(InterpMethod,'Flat') || strcmp(InterpMethod,'Nearest')
-                skipInterpolation = 1;                
-            end            
             
-            % UseOneInputPortForAllInputData
-            p_inputs = {};
-            if strcmp(blk.UseOneInputPortForAllInputData, 'on')
-                dimLen = numel(inputs{1})/NumberOfTableDimensions;
-                for i=1:NumberOfTableDimensions
-                    p_inputs{i} = inputs{1}((i-1)*dimLen+1:i*dimLen);
+            if isLookupTableDynamic
+                NumberOfTableDimensions = 1;
+                BreakpointsForDimension{1} = inputs{2};
+                % table
+                Table = inputs{3};
+                % look up method 
+                if strcmp(blk.LookUpMeth, 'Interpolation-Extrapolation')
+                    InterpMethod = 'Linear';
+                    ExtrapMethod = 'Linear';
+                elseif strcmp(blk.LookUpMeth, 'Interpolation-Use End Values')
+                    InterpMethod = 'Linear';
+                    ExtrapMethod  = 'Clip';
+                elseif strcmp(blk.LookUpMeth, 'Use Input Nearest')
+                    InterpMethod = 'Nearest';
+                    ExtrapMethod  = 'Clip';
+                elseif strcmp(blk.LookUpMeth, 'Use Input Below')
+                    InterpMethod = 'Flat';
+                    ExtrapMethod  = 'Clip';                    
+                elseif strcmp(blk.LookUpMeth, 'Use Input Above')
+                    InterpMethod = 'Above';
+                    ExtrapMethod  = 'Clip';                       
+                else
+                    InterpMethod = 'Linear';
+                    ExtrapMethod = 'Linear';                    
                 end
             else
-                p_inputs = inputs;
-            end      
-            inputs = p_inputs;
+                [NumberOfTableDimensions, ~, ~] = ...
+                    Constant_To_Lustre.getValueFromParameter(parent, blk, blk.NumberOfTableDimensions);    
+                
+                for i=1:NumberOfTableDimensions
+                    evalString = sprintf('[BreakpointsForDimension{i}, ~, ~] = Constant_To_Lustre.getValueFromParameter(parent, blk, blk.BreakpointsForDimension%d); ',i);
+                    eval(evalString);
+                end  
+                
+                [Table, ~, ~] = ...
+                    Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Table);
+                InterpMethod = blk.InterpMethod;
+                ExtrapMethod = blk.ExtrapMethod;
+                skipInterpolation = 0;
+                if strcmp(InterpMethod,'Flat') || strcmp(InterpMethod,'Nearest')
+                    skipInterpolation = 1;
+                end
+            end                    
+                
+            % UseOneInputPortForAllInputData
+            if ~isLookupTableDynamic
+                p_inputs = {};
+                if strcmp(blk.UseOneInputPortForAllInputData, 'on')
+                    dimLen = numel(inputs{1})/NumberOfTableDimensions;
+                    for i=1:NumberOfTableDimensions
+                        p_inputs{i} = inputs{1}((i-1)*dimLen+1:i*dimLen);
+                    end
+                else
+                    p_inputs = inputs;
+                end
+                inputs = p_inputs;
+            end
             
             % writing external node code
             %node header
@@ -84,33 +151,35 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                 node_returns = sprintf('%s%s\n', node_returns, outputs_dt{i});
             end
             node_header = sprintf('node %s(%s)\nreturns(%s);\n',...
-                blk_name, node_inputs, node_returns);
+                ext_node_name, node_inputs, node_returns);
             body = '';            
             vars = 'var ';
                        
             % declaring and defining table 
             table_elem = {};
             for i=1:numel(Table)
-%                 if ~Dynamic
-                    table_elem{i} = sprintf('%s_table_elem_%d',SLX2LusUtils.name_format(blk.Name),i);
-                    vars = sprintf('%s\t%s:%s;\n',vars,table_elem{i},lusInport_dt);
-%                 else
-%                     table_elem{i} = inputs{3}{i};
-%                 end
-                    
+                table_elem{i} = sprintf('%s_table_elem_%d',SLX2LusUtils.name_format(blk.Name),i);
+                vars = sprintf('%s\t%s:%s;\n',vars,table_elem{i},lusInport_dt);
+                if ~isLookupTableDynamic
                     body = sprintf('%s%s = %.15f ;\n\t',body, table_elem{i}, Table(i));
+                else
+                    body = sprintf('%s%s = %s;\n\t',body, table_elem{i}, inputs{3}{i});
+                end
+                
+                
             end
-            % declaring and defining break points            
+            % declaring and defining break points
             for j = 1:NumberOfTableDimensions
                 Breakpoints{j} = {};
                 for i=1:numel(BreakpointsForDimension{j})
-                    %                 if ~Dynamic
                     Breakpoints{j}{i} = sprintf('%s_Breakpoints_dim%d_%d',SLX2LusUtils.name_format(blk.Name),j,i);
                     vars = sprintf('%s\t%s:%s;\n',vars,Breakpoints{j}{i},lusInport_dt);
-                    %                 else
-%                     table_elem{i} = inputs{2}{i};
-%                 end
-                    body = sprintf('%s\t%s = %.15f ;\n', body, Breakpoints{j}{i}, BreakpointsForDimension{j}(i));
+                    if ~isLookupTableDynamic
+                        body = sprintf('%s\t%s = %.15f ;\n', body, Breakpoints{j}{i}, BreakpointsForDimension{j}(i));
+                    else
+                        body = sprintf('%s\t%s = %s;\n', body, Breakpoints{j}{i}, inputs{3}{i});
+                    end
+                    
                 end
             end
             
@@ -382,35 +451,19 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                 end
             end
             codeIndex = codeIndex + 1;
-            codes{codeIndex} = sprintf('(%s) =  %s(%s) ;\n\t', outputs{1}, blk_name, nodeCall_inputs);
+            codes{codeIndex} = sprintf('(%s) =  %s(%s) ;\n\t', outputs{1}, ext_node_name, nodeCall_inputs);
             
             
             lookupND_node_code = sprintf('%s%slet\n\t%s\ntel',...
-                node_header, vars, body);            
+                node_header, vars, body);   
             
-            obj.setCode(MatlabUtils.strjoin(codes, ''));
-            obj.addVariable(outputs_dt);
-            obj.addExtenal_node(lookupND_node_code);
+            codes = MatlabUtils.strjoin(codes, '');
+            vars = outputs_dt;
+            nodeCodes = lookupND_node_code;
+
         end
         
-        function options = getUnsupportedOptions(obj, blk, varargin)
-            obj.unsupported_options = {};
-            [NumberOfTableDimensions, ~, ~] = ...
-                Constant_To_Lustre.getValueFromParameter(parent, blk, blk.NumberOfTableDimensions);
-            if NumberOfTableDimensions >= 7
-                obj.unsupported_options{numel(obj.unsupported_options) + 1} = ...
-                    sprintf('More than 7 dimensions is not support in block %s', blk.Origin_path);
-            end 
-            if strcmp(blk.InterpMethod, 'Cubic spline')
-                obj.unsupported_options{numel(obj.unsupported_options) + 1} = ...
-                    sprintf('Cubic spline interpolation is not support in block %s', blk.Origin_path);
-            end            
-            options = obj.unsupported_options;
-        end      
         
-    end
-    
-    methods(Static)
         function shapeNodeSign = getShapeBoundingNodeSign(dims)
             % generating sign for nodes bounding element for up to 7
             % dimensions
