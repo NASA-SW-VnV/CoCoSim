@@ -97,8 +97,6 @@ Blocks that has left from Biosentinel:
     
 AVA mission Simulink blocks:
     CombinatorialLogic
-    
-    
     DiscretePulseGenerator
     SignalConversion (Hamza)
     Signum

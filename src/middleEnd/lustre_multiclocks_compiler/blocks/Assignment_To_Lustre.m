@@ -48,7 +48,7 @@ classdef Assignment_To_Lustre < Block_To_Lustre
             
             codes = {};
             codeIndex = 0;
-            in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(blk);
+            in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(blk.CompiledPortDimensions.Inport);
 
             % reading and assigning index map ind{i}
             % ind{i}   mapping index for dimension i.   e.g.   ind{1} =
@@ -316,7 +316,7 @@ classdef Assignment_To_Lustre < Block_To_Lustre
         
         function options = getUnsupportedOptions(obj, parent, blk, varargin)
             obj.unsupported_options = {};
-            in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(blk);
+            in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(blk.CompiledPortDimensions.Inport);
             if in_matrix_dimension{1}.numDs>7
                 obj.addUnsupported_options(...
                     sprintf('More than 7 dimensions is not supported in block %s',...
@@ -332,12 +332,11 @@ classdef Assignment_To_Lustre < Block_To_Lustre
     methods(Static)
         % This method allows for only 1 input, the same static under
         % Product_To_Lustre may require more than 1 input
-        function in_matrix_dimension = getInputMatrixDimensions(blk)
+        function in_matrix_dimension = getInputMatrixDimensions(inport_dimensions)
             % return structure of matrix size
             in_matrix_dimension = {};
             readMatrixDimension = true;
             numMat = 0;
-            inport_dimensions = blk.CompiledPortDimensions.Inport;
             
             for i=1:numel(inport_dimensions)
                 if readMatrixDimension
@@ -350,7 +349,7 @@ classdef Assignment_To_Lustre < Block_To_Lustre
                 else
                     index = index + 1;
                     in_matrix_dimension{numMat}.dims(1,index) = inport_dimensions(i);
-                    if index == numDs;
+                    if index == numDs
                         readMatrixDimension = true;
                     end
                 end

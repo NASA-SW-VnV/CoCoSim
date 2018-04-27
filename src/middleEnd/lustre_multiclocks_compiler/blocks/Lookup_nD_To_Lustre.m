@@ -76,7 +76,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
             addVarIndex = 0;
             codeIndex = 0;
                  
-            in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(blk);  
+            in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(blk.CompiledPortDimensions.Inport);  
             BreakpointsForDimension = {};
             blk_name = SLX2LusUtils.node_name_format(blk);
             ext_node_name = sprintf('%s_ext_node',blk_name);

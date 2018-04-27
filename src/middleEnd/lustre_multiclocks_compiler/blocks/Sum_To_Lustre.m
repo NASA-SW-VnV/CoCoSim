@@ -137,7 +137,7 @@ classdef Sum_To_Lustre < Block_To_Lustre
                 end
                 
                 if numel(outputs)>1        % needed for collapsing of matrix
-                    in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(blk);
+                    in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(blk.CompiledPortDimensions.Inport);
                     numelCollapseDim = in_matrix_dimension{1}.dims(CollapseDim);
                     matSize = in_matrix_dimension{1}.dims;
                     
@@ -218,7 +218,7 @@ classdef Sum_To_Lustre < Block_To_Lustre
                     % to the number of rows of the 2nd matrix
                     % matrix C(mxl) = A(mxn)*B(nxl)
                     
-                    in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(blk);
+                    in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(blk.CompiledPortDimensions.Inport);
                     % the index of the current matrix pair
                     pair_number = 0;
                     codes = {};

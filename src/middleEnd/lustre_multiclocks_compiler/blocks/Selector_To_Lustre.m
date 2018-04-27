@@ -46,7 +46,7 @@ classdef Selector_To_Lustre < Block_To_Lustre
             
             codes = {};
             codeIndex = 0;
-            in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(blk);
+            in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(blk.CompiledPortDimensions.Inport);
 
             % reading and assigning index map ind{i}
             % ind{i} is the mapping i for dimension i.   e.g.   ind{1} =

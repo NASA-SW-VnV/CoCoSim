@@ -38,7 +38,7 @@ classdef Concatenate_To_Lustre < Block_To_Lustre
             % for inputs.  This case is equivalent to Vector.  Check for
             % this.
             if ~isVector
-                in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(blk);
+                in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(blk.CompiledPortDimensions.Inport);
                 if in_matrix_dimension{1}.numDs == 1
                     isVector = 1;
                 end
@@ -53,7 +53,7 @@ classdef Concatenate_To_Lustre < Block_To_Lustre
                     end
                 end
             else
-                in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(blk);
+                in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(blk.CompiledPortDimensions.Inport);
                 [ConcatenateDimension, ~, status] = ...
                 Constant_To_Lustre.getValueFromParameter(parent, blk, blk.ConcatenateDimension);
                 if status
@@ -122,7 +122,7 @@ classdef Concatenate_To_Lustre < Block_To_Lustre
         
         function options = getUnsupportedOptions(obj, parent, blk, varargin)
             obj.unsupported_options = {};
-            in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(blk);
+            in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(blk.CompiledPortDimensions.Inport);
             if numel(in_matrix_dimension) > 7
                 obj.addUnsupported_options(...
                     sprintf('More than 7 dimensions is not supported in block %s',...

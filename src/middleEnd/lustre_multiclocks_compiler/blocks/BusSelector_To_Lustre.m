@@ -19,6 +19,12 @@ classdef BusSelector_To_Lustre < Block_To_Lustre
             [inputs] = SLX2LusUtils.getBlockInputsNames(parent, blk);
             codes = {};
             % everything is inlined
+            InportDimensions = blk.CompiledPortDimensions.Inport;
+            if InportDimensions(1) == -2
+                % case of virtual bus
+                
+            else
+            end
             for i=1:numel(outputs)
                 codes{i} = sprintf('%s = %s;\n\t', outputs{i}, inputs{i});
             end
