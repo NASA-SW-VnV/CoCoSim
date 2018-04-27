@@ -187,7 +187,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                     if ~isLookupTableDynamic
                         body = sprintf('%s\t%s = %.15f ;\n', body, Breakpoints{j}{i}, BreakpointsForDimension{j}(i));
                     else
-                        body = sprintf('%s\t%s = %s;\n', body, Breakpoints{j}{i}, inputs{3}{i});
+                        body = sprintf('%s\t%s = %s;\n', body, Breakpoints{j}{i}, inputs{2}{i});
                     end
                     
                 end
