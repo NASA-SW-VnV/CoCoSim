@@ -223,7 +223,7 @@ classdef Sum_To_Lustre < Block_To_Lustre
                     pair_number = 0;
                     codes = {};
                     productOutputs = {};
-                    tmp_prefix = SLX2LusUtils.name_format(blk.Name);
+                    tmp_prefix = SLX2LusUtils.node_name_format(blk);
                     for i=1:numel(in_matrix_dimension)-1
                         pair_number = pair_number + 1;
                         output_m = {};

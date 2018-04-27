@@ -137,8 +137,9 @@ classdef Selector_To_Lustre < Block_To_Lustre
                 U_index = {};
                 addVars = {};
                 addVarIndex = 0;
+                blk_name = SLX2LusUtils.node_name_format(blk);
                 for i=1:numel(outputs)
-                    U_index{i} = sprintf('%s_U_index_%d',SLX2LusUtils.name_format(blk.Name),i);
+                    U_index{i} = sprintf('%s_U_index_%d',blk_name,i);
                     addVarIndex = addVarIndex + 1;
                     addVars{addVarIndex} = sprintf('%s:%s;',U_index{i},indexDataType);
                 end
@@ -149,10 +150,10 @@ classdef Selector_To_Lustre < Block_To_Lustre
                         for j=1:numel(ind{i})
                             addVarIndex = addVarIndex + 1;
                             addVars{addVarIndex} = sprintf('%s_ind_dim_%d_%d:%s;',...
-                                SLX2LusUtils.name_format(blk.Name),i,j,indexDataType);
+                               blk_name,i,j,indexDataType);
                             codeIndex = codeIndex + 1;
                             codes{codeIndex} = sprintf('%s_ind_dim_%d_%d = %d;\n\t',...
-                                SLX2LusUtils.name_format(blk.Name),i,j, ind{i}(j)) ;
+                               blk_name,i,j, ind{i}(j)) ;
                         end
                     else
                         % port
@@ -161,24 +162,24 @@ classdef Selector_To_Lustre < Block_To_Lustre
                             for j=1:numel(ind{i})
                                 addVarIndex = addVarIndex + 1;
                                 addVars{addVarIndex} = sprintf('%s_ind_dim_%d_%d:%s;',...
-                                    SLX2LusUtils.name_format(blk.Name),i,j,indexDataType);
+                                   blk_name,i,j,indexDataType);
                                 codeIndex = codeIndex + 1;
                                 if j==1
                                     codes{codeIndex} = sprintf('%s_ind_dim_%d_%d = %s;\n\t',...
-                                        SLX2LusUtils.name_format(blk.Name),i,j, ind{i}{1}) ;
+                                       blk_name,i,j, ind{i}{1}) ;
                                 else
                                     codes{codeIndex} = sprintf('%s_ind_dim_%d_%d = %s + %d;\n\t',...
-                                        SLX2LusUtils.name_format(blk.Name),i,j, ind{i}{1}, (j-1)) ;
+                                       blk_name,i,j, ind{i}{1}, (j-1)) ;
                                 end
                             end                            
                         else   % 'Index vector (port)'
                             for j=1:numel(ind{i})
                                 addVarIndex = addVarIndex + 1;
                                 addVars{addVarIndex} = sprintf('%s_ind_dim_%d_%d:%s;',...
-                                    SLX2LusUtils.name_format(blk.Name),i,j,indexDataType);
+                                   blk_name,i,j,indexDataType);
                                 codeIndex = codeIndex + 1;
                                 codes{codeIndex} = sprintf('%s_ind_dim_%d_%d = %s;\n\t',...
-                                    SLX2LusUtils.name_format(blk.Name),i,j, ind{i}{j}) ;
+                                   blk_name,i,j, ind{i}{j}) ;
                             end
                         end
                     end
@@ -213,10 +214,10 @@ classdef Selector_To_Lustre < Block_To_Lustre
 
                     for j=1:numel(outputDimsArray)
                         str_Y_index{i}{j} = sprintf('%s_str_Y_index_%d_%d',...
-                            SLX2LusUtils.name_format(blk.Name),i,j);
+                           blk_name,i,j);
                         addVarIndex = addVarIndex + 1;
                         addVars{addVarIndex} = sprintf('%s_str_Y_index_%d_%d:%s;',...
-                            SLX2LusUtils.name_format(blk.Name),i,j,indexDataType);
+                           blk_name,i,j,indexDataType);
                         codeIndex = codeIndex + 1;
                         codes{codeIndex} = sprintf('%s = %s_ind_dim_%d_%d;\n\t',...
                             str_Y_index{i}{j},SLX2LusUtils.name_format(blk.Name),j,curSub(j)) ;

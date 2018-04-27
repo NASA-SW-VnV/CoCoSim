@@ -20,7 +20,7 @@ classdef SubSystem_To_Lustre < Block_To_Lustre
                 SubSystem_To_Lustre.hasEnablePort(blk);
             [isTriggered, TriggerShowOutputPortIsOn, TriggerType, TriggerDT] = ...
                 SubSystem_To_Lustre.hasTriggerPort(blk);
-            blk_name = SLX2LusUtils.name_format(blk.Name);
+            blk_name = SLX2LusUtils.node_name_format(blk);
             [isActionSS, ~] = SubSystem_To_Lustre.hasActionPort(blk);
             if isEnabledSubsystem || isTriggered || isActionSS
                 [codes, node_name, inputs, EnableCondVar] = ...

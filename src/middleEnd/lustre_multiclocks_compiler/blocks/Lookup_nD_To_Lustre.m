@@ -17,8 +17,9 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
             isLookupTableDynamic = 0;
             [external_lib, codes, vars, nodeCodes] =  ...
                 Lookup_nD_To_Lustre.get_code_to_write(parent, blk, varargin,isLookupTableDynamic);
-            
-            obj.addExternal_libraries(external_lib);
+            if ~isempty(external_lib)
+                obj.addExternal_libraries(external_lib);
+            end
             obj.setCode(codes);
             obj.addVariable(vars);
             obj.addExtenal_node(nodeCodes);
@@ -53,15 +54,18 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
             widths = blk.CompiledPortWidths.Inport;
             outputDataType = blk.CompiledPortDataTypes.Outport{1};
             RndMeth = blk.RndMeth;
-            
+            max_width = max(widths);
             for i=1:numel(widths)
                 inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
+                if ~isLookupTableDynamic && numel(inputs{i}) < max_width
+                    inputs{i} = arrayfun(@(x) {inputs{i}{1}}, (1:max_width));
+                end
                 inport_dt = blk.CompiledPortDataTypes.Inport(i);
                 [lusInport_dt, zero, one] = SLX2LusUtils.get_lustre_dt(inport_dt);
-                %converts the input data type(s) to
-                %its accumulator data type
-                if ~strcmp(inport_dt, outputDataType) && i <= 2
-                    [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, outputDataType,RndMeth);
+                %converts the input data type(s) to real
+
+                if ~strcmp(lusInport_dt, 'real')
+                    [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, 'real', RndMeth);
                     if ~isempty(external_lib)
                         %obj.addExternal_libraries(external_lib);
                         inputs{i} = cellfun(@(x) sprintf(conv_format,x), inputs{i}, 'un', 0);
@@ -71,10 +75,10 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
             % initialize
             addVarIndex = 0;
             codeIndex = 0;
-            codes = {};            
+                 
             in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(blk);  
             BreakpointsForDimension = {};
-            blk_name = SLX2LusUtils.name_format(blk.Name);
+            blk_name = SLX2LusUtils.node_name_format(blk);
             ext_node_name = sprintf('%s_ext_node',blk_name);
             skipInterpolation = 0;
             
@@ -132,24 +136,30 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                     for i=1:NumberOfTableDimensions
                         p_inputs{i} = inputs{1}((i-1)*dimLen+1:i*dimLen);
                     end
-                else
-                    p_inputs = inputs;
+                    inputs = p_inputs;
                 end
-                inputs = p_inputs;
+                
             end
             
             % writing external node code
             %node header
             node_inputs = '';
-            for i=1:numel(inputs)
-                for j=1:numel(inputs{i})
-                    node_inputs = sprintf('%s%s:real;\n', node_inputs,inputs{i}{j});
+             if ~isLookupTableDynamic
+                for i=1:numel(inputs)
+                    node_inputs = sprintf('%s%s:real;\n', node_inputs,inputs{i}{1});
                 end
-            end
+             else
+                 node_inputs = {};
+                 node_inputs{1} = sprintf('%s:real', inputs{1}{1});
+                 for i=2:3
+                     for j=1:numel(inputs{i})
+                         node_inputs{end+1} = sprintf('%s:real', inputs{i}{j});
+                     end
+                 end
+                 node_inputs = MatlabUtils.strjoin(node_inputs, '; ');
+             end
             node_returns = '';
-            for i=1:numel(outputs_dt)
-                node_returns = sprintf('%s%s\n', node_returns, outputs_dt{i});
-            end
+            node_returns = sprintf('%s%s:real;\n', node_returns, outputs{1});
             node_header = sprintf('node %s(%s)\nreturns(%s);\n',...
                 ext_node_name, node_inputs, node_returns);
             body = '';            
@@ -158,7 +168,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
             % declaring and defining table 
             table_elem = {};
             for i=1:numel(Table)
-                table_elem{i} = sprintf('%s_table_elem_%d',SLX2LusUtils.name_format(blk.Name),i);
+                table_elem{i} = sprintf('%s_table_elem_%d',blk_name,i);
                 vars = sprintf('%s\t%s:%s;\n',vars,table_elem{i},lusInport_dt);
                 if ~isLookupTableDynamic
                     body = sprintf('%s%s = %.15f ;\n\t',body, table_elem{i}, Table(i));
@@ -172,7 +182,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
             for j = 1:NumberOfTableDimensions
                 Breakpoints{j} = {};
                 for i=1:numel(BreakpointsForDimension{j})
-                    Breakpoints{j}{i} = sprintf('%s_Breakpoints_dim%d_%d',SLX2LusUtils.name_format(blk.Name),j,i);
+                    Breakpoints{j}{i} = sprintf('%s_Breakpoints_dim%d_%d',blk_name,j,i);
                     vars = sprintf('%s\t%s:%s;\n',vars,Breakpoints{j}{i},lusInport_dt);
                     if ~isLookupTableDynamic
                         body = sprintf('%s\t%s = %.15f ;\n', body, Breakpoints{j}{i}, BreakpointsForDimension{j}(i));
@@ -197,17 +207,17 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
             
             for i=1:NumberOfTableDimensions
                 % low node for dimension i
-                coords_node{i,1} = sprintf('%s_coords_dim_%d_1',SLX2LusUtils.name_format(blk.Name),i);
+                coords_node{i,1} = sprintf('%s_coords_dim_%d_1',blk_name,i);
                 vars = sprintf('%s\t%s:%s;\n',vars,coords_node{i,1},lusInport_dt);
                 
-                index_node{i,1} = sprintf('%s_index_dim_%d_1',SLX2LusUtils.name_format(blk.Name),i);
+                index_node{i,1} = sprintf('%s_index_dim_%d_1',blk_name,i);
                 vars = sprintf('%s\t%s:%s;\n',vars,index_node{i,1},indexDataType);
                 
                 % high node for dimension i
-                coords_node{i,2} = sprintf('%s_coords_dim_%d_2',SLX2LusUtils.name_format(blk.Name),i);
+                coords_node{i,2} = sprintf('%s_coords_dim_%d_2',blk_name,i);
                 vars = sprintf('%s\t%s:%s;\n',vars,coords_node{i,2},lusInport_dt);
                 
-                index_node{i,2} = sprintf('%s_index_dim_%d_2',SLX2LusUtils.name_format(blk.Name),i);
+                index_node{i,2} = sprintf('%s_index_dim_%d_2',blk_name,i);
                 vars = sprintf('%s\t%s:%s;\n',vars,index_node{i,2},indexDataType);
                 
                 % looking for low node                
@@ -263,10 +273,10 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
             if ~skipInterpolation
                 for i=1:numGridPoints
                     % y results at the node of the element
-                    u_node{i} = sprintf('%s_u_node_%d',SLX2LusUtils.name_format(blk.Name),i);
+                    u_node{i} = sprintf('%s_u_node_%d',blk_name,i);
                     vars = sprintf('%s\t%s:%s;\n',vars,u_node{i},lusInport_dt);
                     % shape function result at the node of the element
-                    N_shape_node{i} = sprintf('%s_N_shape_%d',SLX2LusUtils.name_format(blk.Name),i);
+                    N_shape_node{i} = sprintf('%s_N_shape_%d',blk_name,i);
                     vars = sprintf('%s\t%s:%s;\n',vars,N_shape_node{i},lusInport_dt);
                 end
             end
@@ -279,11 +289,11 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
             shapeNodeSign = Lookup_nD_To_Lustre.getShapeBoundingNodeSign(NumberOfTableDimensions);
             dimJump = ones(1,NumberOfTableDimensions);
             L_dimjump = {};
-            L_dimjump{1} =  sprintf('%s_dimJump_%d',SLX2LusUtils.name_format(blk.Name),1);
+            L_dimjump{1} =  sprintf('%s_dimJump_%d',blk_name,1);
             vars = sprintf('%s\t%s:%s;\n',vars,L_dimjump{1},indexDataType);
             body = sprintf('%s%s = %d;\n\t', body,L_dimjump{1}, dimJump(1));
             for i=2:NumberOfTableDimensions
-                L_dimjump{i} =  sprintf('%s_dimJump_%d',SLX2LusUtils.name_format(blk.Name),i);
+                L_dimjump{i} =  sprintf('%s_dimJump_%d',blk_name,i);
                 vars = sprintf('%s\t%s:%s;\n',vars,L_dimjump{i},indexDataType);
                 for j=1:i-1
                     dimJump(i) = dimJump(i)*numel(BreakpointsForDimension{j});
@@ -298,7 +308,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                 dimSign = shapeNodeSign(nodeIndex,:);  
                 
                 % declaring boundingNodeIndex{nodeIndex}
-                boundingNodeIndex{nodeIndex} = sprintf('%s_bound_node_index_%d',SLX2LusUtils.name_format(blk.Name),nodeIndex);
+                boundingNodeIndex{nodeIndex} = sprintf('%s_bound_node_index_%d',blk_name,nodeIndex);
                 vars = sprintf('%s\t%s:%s;\n',vars,boundingNodeIndex{nodeIndex},indexDataType);
 
                 % defining boundingNodeIndex{nodeIndex}
@@ -335,7 +345,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                        
             if skipInterpolation
             
-                returnTableIndex{1} =  sprintf('%s_retTableInd_%d',SLX2LusUtils.name_format(blk.Name),1);
+                returnTableIndex{1} =  sprintf('%s_retTableInd_%d',blk_name,1);
                 vars = sprintf('%s\t%s:%s;\n',vars,returnTableIndex{1},indexDataType);
                 
                 if strcmp(InterpMethod,'Flat')
@@ -355,14 +365,14 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                     disFromTableNode = {};
                     nearestIndex = {};
                     for i=1:NumberOfTableDimensions                        
-                        disFromTableNode{i,1} = sprintf('%s_disFromTableNode_dim_%d_1',SLX2LusUtils.name_format(blk.Name),i);
+                        disFromTableNode{i,1} = sprintf('%s_disFromTableNode_dim_%d_1',blk_name,i);
                         vars = sprintf('%s\t%s:%s;\n',vars,disFromTableNode{i,1},lusInport_dt);
-                        disFromTableNode{i,2} = sprintf('%s_disFromTableNode_dim_%d_2',SLX2LusUtils.name_format(blk.Name),i);
+                        disFromTableNode{i,2} = sprintf('%s_disFromTableNode_dim_%d_2',blk_name,i);
                         vars = sprintf('%s\t%s:%s;\n',vars,disFromTableNode{i,2},lusInport_dt);
                         body = sprintf('%s%s = %s - %s ;\n\t', body,disFromTableNode{i,1},inputs{i}{1},coords_node{i,1});    
                         body = sprintf('%s%s = %s - %s ;\n\t', body,disFromTableNode{i,2},coords_node{i,2},inputs{i}{1});
                         
-                        nearestIndex{i} = sprintf('%s_nearestIndex_dim_%d',SLX2LusUtils.name_format(blk.Name),i);
+                        nearestIndex{i} = sprintf('%s_nearestIndex_dim_%d',blk_name,i);
                         vars = sprintf('%s%s:%s;\n',vars,nearestIndex{i},indexDataType);     
 
                         code = sprintf('%s = if(%s <= %s) then %s\n\t', nearestIndex{i},disFromTableNode{i,2},disFromTableNode{i,1},index_node{i,2});
@@ -395,7 +405,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                 clipped_inputs = {};
                 
                 for i=1:NumberOfTableDimensions
-                    clipped_inputs{i} = sprintf('%s_clip_input_%d',SLX2LusUtils.name_format(blk.Name),i);
+                    clipped_inputs{i} = sprintf('%s_clip_input_%d',blk_name,i);
                     vars = sprintf('%s\t%s:%s;\n',vars,clipped_inputs{i},lusInport_dt);
                     if strcmp(ExtrapMethod,'Clip')
                         code = sprintf('%s = if(%s<%s) then %s \n\t', clipped_inputs{i}, inputs{i}{1}, coords_node{i,1}, coords_node{i,1});
@@ -437,22 +447,23 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
 
                 body = sprintf('%s%s =  %s ;\n\t', body, outputs{1}, code);
             end
-
-            nodeCall_inputs = '';
-            isFirst = 1;
-            for i=1:numel(inputs)
-                for j=1:numel(inputs{i})
-                    if isFirst==1
-                        nodeCall_inputs = sprintf('%s%s',nodeCall_inputs,inputs{i}{j});
-                        isFirst = 0;
-                    else
-                        nodeCall_inputs = sprintf('%s,%s',nodeCall_inputs,inputs{i}{j});
+            codes = {}; 
+            for outIdx=1:numel(outputs)
+                nodeCall_inputs = {};
+                if isLookupTableDynamic
+                    nodeCall_inputs{end+1} = inputs{1}{outIdx};
+                    for i=2:numel(inputs)
+                        nodeCall_inputs = [nodeCall_inputs, inputs{i}];
+                    end
+                else
+                    for i=1:numel(inputs)
+                        nodeCall_inputs{end+1} = inputs{i}{outIdx};
                     end
                 end
+                nodeCall_inputs = MatlabUtils.strjoin(nodeCall_inputs, ', ');
+                              
+                codes{outIdx} = sprintf('%s =  %s(%s) ;\n\t', outputs{outIdx}, ext_node_name, nodeCall_inputs);
             end
-            codeIndex = codeIndex + 1;
-            codes{codeIndex} = sprintf('(%s) =  %s(%s) ;\n\t', outputs{1}, ext_node_name, nodeCall_inputs);
-            
             
             lookupND_node_code = sprintf('%s%slet\n\t%s\ntel',...
                 node_header, vars, body);   

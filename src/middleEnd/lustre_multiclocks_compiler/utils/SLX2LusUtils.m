@@ -134,35 +134,38 @@ classdef SLX2LusUtils < handle
                 type = 'Outports';
             end
             
-            
-            if nargin >= 2 && ~isempty(srcPort)
-                port = srcPort + 1;% srcPort starts by zero
+            function [names, names_dt] = blockOutputs(portNumber)
+                names = {};
+                names_dt = {};
                 if strcmp(type, 'Inports')
-                    dt = SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Inport(port));
+                    [dt, ~, ~, isBus] = SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Inport(portNumber));
                 else
-                    dt = SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Outport(port));
+                    [dt, ~, ~, isBus] = SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Outport(portNumber));
                 end
                 % The width should start from the port width regarding all
                 % subsystem outputs
-                idx = sum(width(1:port-1))+1;
-                for i=1:width(port)
-                    names{i} = SLX2LusUtils.name_format(strcat(blk.Name, '_', num2str(idx)));
-                    names_dt{i} = strcat(names{i} , ': ', dt, ';');
+                idx = sum(width(1:portNumber-1))+1;
+                for i=1:width(portNumber)
+                    if ~isBus
+                        names{end+1} = SLX2LusUtils.name_format(strcat(blk.Name, '_', num2str(idx)));
+                        names_dt{end+1} = strcat(names{end} , ': ', dt, ';');
+                    else
+                        for k=1:numel(dt)
+                            names{end+1} = SLX2LusUtils.name_format(strcat(blk.Name, '_', num2str(idx), '_BusElem', num2str(k)));
+                            names_dt{end+1} = strcat(names{end} , ': ', dt{k}, ';');
+                        end
+                    end
                     idx = idx + 1;
                 end
+            end
+            if nargin >= 2 && ~isempty(srcPort)
+                port = srcPort + 1;% srcPort starts by zero
+                [names, names_dt] = blockOutputs(port);
             else
-                idx = 1;
                 for port=1:numel(width)
-                    if strcmp(type, 'Inports')
-                        dt = SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Inport(port));
-                    else
-                        dt = SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Outport(port));
-                    end
-                    for i=1:width(port)
-                        names{idx} = SLX2LusUtils.name_format(strcat(blk.Name, '_', num2str(idx)));
-                        names_dt{idx} = strcat(names{idx} , ': ', dt, ';');
-                        idx = idx + 1;
-                    end
+                    [names_i, names_dt_i] = blockOutputs(port);
+                    names = [names, names_i];
+                    names_dt = [names_dt, names_dt_i];
                 end
             end
         end
@@ -242,39 +245,65 @@ classdef SLX2LusUtils < handle
                     Lustre_type = 'bool';
                 elseif strncmp(slx_dt, 'int', 3) || strncmp(slx_dt, 'uint', 4) || strncmp(slx_dt, 'fixdt(1,16,', 11) || strncmp(slx_dt, 'sfix64', 6)
                     Lustre_type = 'int';
+                elseif strcmp(slx_dt, 'double') || strcmp(slx_dt, 'single') 
+                    Lustre_type = 'real';
                 else
                     % considering enumaration as int
                     m = evalin('base', sprintf('enumeration(''%s'')',char(slx_dt)));
                     if isempty(m)
-                        Lustre_type = 'real';
+                        try
+                            isBus = evalin('base', sprintf('isa(%s, ''Simulink.Bus'')',char(slx_dt)));
+                        catch
+                            isBus = false;
+                        end
+                        if isBus
+                            Lustre_type = SLX2LusUtils.getLustreTypesFromBusObject(char(slx_dt));
+                        else
+                            Lustre_type = 'real';
+                        end
                     else
+                        % considering enumaration as int
                         Lustre_type = 'int';
                     end
-%                     isBus = evalin('base', sprintf('isa(%s, ''Simulink.Bus'')',char(slx_dt)));
-%                     if isBus
-%                         Lustre_type = SLX2LusUtils.getLustreTypesFromBusObject(char(slx_dt));
-%                     else
-%                         Lustre_type = 'real';
-%                     end
+                    
                 end
             end
-            if strcmp(Lustre_type, 'bool')
-                zero = 'false';
-                one = 'true';
-            elseif strcmp(Lustre_type, 'int')
-                zero = '0';
-                one = '1';
+            if iscell(Lustre_type)
+                zero = {};
+                one = {};
+                for i=1:numel(Lustre_type)
+                    if strcmp(Lustre_type{i}, 'bool')
+                        zero{i} = 'false';
+                        one{i} = 'true';
+                    elseif strcmp(Lustre_type{i}, 'int')
+                        zero{i} = '0';
+                        one{i} = '1';
+                    else
+                        zero{i} = '0.0';
+                        one{i} = '1.0';
+                    end
+                end
             else
-                zero = '0.0';
-                one = '1.0';
+                if strcmp(Lustre_type, 'bool')
+                    zero = 'false';
+                    one = 'true';
+                elseif strcmp(Lustre_type, 'int')
+                    zero = '0';
+                    one = '1';
+                else
+                    zero = '0.0';
+                    one = '1.0';
+                end
             end
         end
         function lustreTypes = getLustreTypesFromBusObject(busName)
             bus = evalin('base', char(busName));
             lustreTypes = {};
             try
-            elems = bus.Elements;
+                elems = bus.Elements;
             catch
+                % Elements is not in bus.
+                return;
             end
             for i=1:numel(elems)
                 dt = elems(i).DataType;
@@ -285,10 +314,10 @@ classdef SLX2LusUtils < handle
                 end
                 lusDT = SLX2LusUtils.get_lustre_dt( dt);
                 for w=1:width
-                    if ischar(lusDT)
-                        lustreTypes{end+1} = lusDT;
-                    else
+                    if iscell(lusDT)
                         lustreTypes = [lustreTypes, lusDT];
+                    else
+                        lustreTypes{end+1} = lusDT;
                     end
                 end
             end

@@ -49,7 +49,7 @@ classdef MultiPortSwitch_To_Lustre < Block_To_Lustre
             
             [numInputs, ~, ~] = ...
                 Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Inputs);
-            blk_name = SLX2LusUtils.name_format(blk.Name);
+            blk_name = SLX2LusUtils.node_name_format(blk);
             
             addVarIndex = 0;
             addVarIndex = addVarIndex + 1;

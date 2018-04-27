@@ -132,9 +132,11 @@ if isfield(blk, 'Content')
         end
         external_libraries = [external_libraries, external_libraries_i];
     end
-    [main_node, external_nodes, external_libraries_i] = subsystem2node(blk, main_sampleTime, xml_trace);
-    external_libraries = [external_libraries, external_libraries_i];
-    nodes_code = sprintf('%s\n%s\n%s', external_nodes, nodes_code, main_node);
+    if ~isempty(field_names)
+        [main_node, external_nodes, external_libraries_i] = subsystem2node(blk, main_sampleTime, xml_trace);
+        external_libraries = [external_libraries, external_libraries_i];
+        nodes_code = sprintf('%s\n%s\n%s', external_nodes, nodes_code, main_node);
+    end
     
 end
 end

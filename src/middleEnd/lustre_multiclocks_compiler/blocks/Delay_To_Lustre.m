@@ -178,7 +178,7 @@ classdef Delay_To_Lustre < Block_To_Lustre
             end
             x0 =  inputs{end};
             u = inputs{1};
-            blk_name = SLX2LusUtils.name_format(blk.Name);
+            blk_name = SLX2LusUtils.node_name_format(blk);
             reset_cond = arrayfun(@(x) {''}, (1:numel(u)));
             reset_var = '';
             isReset = ~strcmp(ExternalReset, 'None');

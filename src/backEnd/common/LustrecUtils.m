@@ -1579,9 +1579,9 @@ classdef LustrecUtils < handle
                 
                 yout = get(simOut,'yout');
                 if ~isfield(yout, 'signals')
-                    f_msg = sprintf('Model "%s" contains no signals to compare. \n',slx_file_name);
+                    f_msg = sprintf('Model "%s" contains no outport signals to compare or contains Bus Outports. \n',slx_file_name);
                     display_msg(f_msg, MsgType.RESULT, 'validation', '');
-                    done = 1;
+                    done = 0;
                     return;
                 end
                 yout_signals = yout.signals;
