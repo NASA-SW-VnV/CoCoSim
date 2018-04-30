@@ -28,12 +28,12 @@ for i=2:length(allBlocks)
     if isempty(DstBlkH.Outport)
         display_msg(...
             sprintf('organizing block "%s" and its linked blocks',allBlocks{i}),...
-            MsgType.INFO, 'blocks_position_process', '');
+            MsgType.INFO, 'BlocksPosition_pp', '');
         levels_map = organize(get_param(allBlocks{i}, 'Handle'), 0, levels_map);
     end
     if strcmp(get_param(allBlocks{i}, 'BlockType'),'SubSystem')
         if (~limitedDepth) || (limitedDepth && currentDepth <= depth)
-            blocks_position_process( allBlocks{i} , depth);
+            BlocksPosition_pp( allBlocks{i} , depth);
         end
     end
     

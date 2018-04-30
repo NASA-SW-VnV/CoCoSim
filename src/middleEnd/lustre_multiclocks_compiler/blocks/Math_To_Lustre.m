@@ -117,7 +117,9 @@ classdef Math_To_Lustre < Block_To_Lustre
                     display_msg(sprintf('Matrix size > 2 is not supported for transpose/hermitian operator in block %s',...
                         blk.Origin_path), MsgType.ERROR, 'Math_To_Lustre', '');
                 end
-                
+                if numel(in_matrix_dimension{1}.dims) == 1
+                    in_matrix_dimension{1}.dims(2) = 1;
+                end
                 outIndex = 0;
                 for j=1:in_matrix_dimension{1}.dims(1)
                     for i=1:in_matrix_dimension{1}.dims(2)
