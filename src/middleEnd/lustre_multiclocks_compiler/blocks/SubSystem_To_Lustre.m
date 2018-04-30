@@ -12,7 +12,7 @@ classdef SubSystem_To_Lustre < Block_To_Lustre
     methods
         
         function  write_code(obj, parent, blk, varargin)
-            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(blk);
+            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk);
             [inputs] = SLX2LusUtils.getBlockInputsNames(parent, blk);
             node_name = SLX2LusUtils.node_name_format(blk);
             codes = {};
@@ -157,7 +157,7 @@ classdef SubSystem_To_Lustre < Block_To_Lustre
                 % The case of Action subsystems
                 [srcBlk, srcPort] = SLX2LusUtils.getpreBlock(parent, blk, 'ifaction');
                 if ~isempty(srcBlk)
-                    [IfBlkOutputs, ~] = SLX2LusUtils.getBlockOutputsNames(srcBlk);
+                    [IfBlkOutputs, ~] = SLX2LusUtils.getBlockOutputsNames(parent, srcBlk);
                     EnableCondName = IfBlkOutputs{srcPort};
                     inputs{end + 1} = EnableCondName;
                 end

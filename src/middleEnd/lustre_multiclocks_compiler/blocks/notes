@@ -72,7 +72,11 @@ Hamza:  Abs,
         
 
 Blocks that has left from Biosentinel:
-   
+
+     ForIterator (Hamza)
+Tapped Delay Line
+Bitwise Operator
+    
     BusCreator (Hamza), 
     BusSelector (Hamza), 
     BusAssignment (Hamza)
@@ -86,7 +90,7 @@ Blocks that has left from Biosentinel:
 
 
     Fcn (partially done in pp) (Khanh)
-    ForIterator (Hamza)
+   
     Merge (Hamza)
     ModelReference (Hamza)
     RandomNumber ( to translate to empty node with contract) (Hamza)

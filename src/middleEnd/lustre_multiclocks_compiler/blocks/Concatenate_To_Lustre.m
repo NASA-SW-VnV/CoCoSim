@@ -13,7 +13,7 @@ classdef Concatenate_To_Lustre < Block_To_Lustre
     methods
         
         function  write_code(obj, parent, blk, varargin)
-            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(blk);
+            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk);
             inputs = {};
             
             widths = blk.CompiledPortWidths.Inport;

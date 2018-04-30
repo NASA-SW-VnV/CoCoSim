@@ -13,17 +13,22 @@ classdef Assignment_To_Lustre < Block_To_Lustre
     methods
         
         function  write_code(obj, parent, blk, varargin)
-            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(blk);
+            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk);
             inputs = {};
             
             widths = blk.CompiledPortWidths.Inport;
-            max_width = max(widths);
+            max_width = widths(1);
             outputDataType = blk.CompiledPortDataTypes.Outport{1};
             
             for i=1:numel(widths)
                 inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
                 inport_dt = blk.CompiledPortDataTypes.Inport(i);
                 [lusInport_dt, ~] = SLX2LusUtils.get_lustre_dt(inport_dt);
+                
+                % inline second input if it is a scalar
+                if i == 2 && numel(inputs{i}) == 1 && numel(inputs{i}) < max_width
+                    inputs{i} = arrayfun(@(x) {inputs{i}{1}}, (1:max_width));
+                end
                 %converts the input data type(s) to
                 %its accumulator data type
                 if ~strcmp(inport_dt, outputDataType) && i <= 2
@@ -236,13 +241,13 @@ classdef Assignment_To_Lustre < Block_To_Lustre
                     value = '0';
                     for j=1:numel(in_matrix_dimension{2}.dims)
                         if j==1
-                            value = sprintf('%s + %s*%d',value,str_Y_index{i}{j}, Y0_dimJump(j))
+                            value = sprintf('%s + %s*%d',value,str_Y_index{i}{j}, Y0_dimJump(j));
                         else
-                            value = sprintf('%s + (%s-1)*%d',value,str_Y_index{i}{j}, Y0_dimJump(j))
+                            value = sprintf('%s + (%s-1)*%d',value,str_Y_index{i}{j}, Y0_dimJump(j));
                         end
                     end
                     codeIndex = codeIndex + 1;
-                    codes{codeIndex} = sprintf('%s = %s;\n\t', U_index{i}, value)
+                    codes{codeIndex} = sprintf('%s = %s;\n\t', U_index{i}, value);
                 end
                 if numel(in_matrix_dimension{1}.dims) > 7
                     
@@ -330,18 +335,25 @@ classdef Assignment_To_Lustre < Block_To_Lustre
     
     
     methods(Static)
-        % This method allows for only 1 input, the same static under
-        % Product_To_Lustre may require more than 1 input
         function in_matrix_dimension = getInputMatrixDimensions(inport_dimensions)
+            if inport_dimensions(1) == -2
+                % bus case, the first 2 elements should be ignored
+                inport_dimensions = inport_dimensions(3:end);
+            end
             % return structure of matrix size
             in_matrix_dimension = {};
             readMatrixDimension = true;
             numMat = 0;
-            
-            for i=1:numel(inport_dimensions)
+            i = 1;
+            while i <= numel(inport_dimensions)
                 if readMatrixDimension
                     numMat = numMat + 1;
+                    if inport_dimensions(i) == -2
+                        % bus signal: skip 2 scalars
+                        i = i + 2;
+                    end
                     numDs = inport_dimensions(i);
+                    
                     readMatrixDimension = false;
                     in_matrix_dimension{numMat}.numDs = numDs;
                     in_matrix_dimension{numMat}.dims = zeros(1,numDs);
@@ -353,7 +365,12 @@ classdef Assignment_To_Lustre < Block_To_Lustre
                         readMatrixDimension = true;
                     end
                 end
-                
+                i = i + 1;
+            end
+            
+            % add width information
+            for i=1:numel(in_matrix_dimension)
+                in_matrix_dimension{i}.width = prod(in_matrix_dimension{i}.dims);
             end
         end
         

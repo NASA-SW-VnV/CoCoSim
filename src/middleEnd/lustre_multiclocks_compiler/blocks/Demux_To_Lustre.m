@@ -19,7 +19,7 @@ classdef Demux_To_Lustre < Block_To_Lustre
                     blk.Origin_path), ...
                     MsgType.ERROR, 'Demux_To_Lustre', '');
             end
-            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(blk);
+            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk);
             inputs = {};
             
             widths = blk.CompiledPortWidths.Inport;  

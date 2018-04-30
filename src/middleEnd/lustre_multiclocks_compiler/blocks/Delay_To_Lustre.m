@@ -73,7 +73,7 @@ classdef Delay_To_Lustre < Block_To_Lustre
             unsupported_options = {};
             lustre_code = '';
             delay_node_code = '';
-            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(blk);
+            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk);
             variables = outputs_dt;
             inputs = {};
             

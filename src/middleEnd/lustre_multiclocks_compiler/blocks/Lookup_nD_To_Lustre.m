@@ -48,7 +48,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
         function [external_lib, codes, vars, nodeCodes] =  ...
                 get_code_to_write(parent, blk, varargin,isLookupTableDynamic)
             external_lib = '';
-            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(blk);
+            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk);
             inputs = {};
             
             widths = blk.CompiledPortWidths.Inport;

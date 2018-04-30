@@ -61,18 +61,18 @@ for i=1:numel(all_files)
         fprintf('couldnt load model %s\n',base_name );
     end
 end
-isUnique = true(size(report));
-
-for ii = 1:length(report)-1
-    for jj = ii+1:length(report)
-        if isequal(report(ii),report(jj))
-            isUnique(ii) = false;
-            break;
-        end
-    end
-end
-
-report(~isUnique) = [];
+% isUnique = true(size(report));
+% 
+% for ii = 1:length(report)-1
+%     for jj = ii+1:length(report)
+%         if isequal(report(ii),report(jj))
+%             isUnique(ii) = false;
+%             break;
+%         end
+%     end
+% end
+% 
+% report(~isUnique) = [];
 report = report';
 save   all_blks_options report
 

@@ -12,7 +12,7 @@ classdef Outport_To_Lustre < Block_To_Lustre
     methods
         
         function  write_code(obj, parent, blk, varargin)
-            [outputs, ~] = SLX2LusUtils.getBlockOutputsNames(blk);
+            [outputs, ~] = SLX2LusUtils.getBlockOutputsNames(parent, blk);
             [inputs] = SLX2LusUtils.getBlockInputsNames(parent, blk);
             codes = {};
             for i=1:numel(outputs)

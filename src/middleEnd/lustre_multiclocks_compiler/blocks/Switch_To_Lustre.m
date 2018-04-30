@@ -13,7 +13,7 @@ classdef Switch_To_Lustre < Block_To_Lustre
     methods
         
         function  write_code(obj, parent, blk, varargin)
-            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(blk);
+            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk);
             inputs = {};
             
             if strcmp(blk.AllowDiffInputSizes, 'on')

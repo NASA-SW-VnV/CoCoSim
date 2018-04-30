@@ -18,7 +18,7 @@ classdef If_To_Lustre < Block_To_Lustre
             % and has one outport with width 3 and datatype double,
             % then outputs = {'X_1', 'X_2', 'X_3'}
             % and outputs_dt = {'X_1:real;', 'X_2:real;', 'X_3:real;'}
-            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(blk);
+            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk);
             
             %% Step 2: add outputs_dt to the list of variables to be declared
             % in the var section of the node.

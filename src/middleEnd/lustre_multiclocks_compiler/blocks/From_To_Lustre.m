@@ -12,7 +12,7 @@ classdef From_To_Lustre < Block_To_Lustre
     
     methods
         function  write_code(obj, parent, blk, varargin)
-            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(blk);
+            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk);
             goToPath = find_system(parent.Origin_path,'SearchDepth',1,...
                 'BlockType','Goto','GotoTag',blk.GotoTag);
             if ~isempty(goToPath)
@@ -23,7 +23,7 @@ classdef From_To_Lustre < Block_To_Lustre
                 return;
             end
             gotoBlk = get_struct(parent, GotoHandle);
-            [goto_outputs, ~] = SLX2LusUtils.getBlockOutputsNames(gotoBlk);
+            [goto_outputs, ~] = SLX2LusUtils.getBlockOutputsNames(parent, gotoBlk);
             codes = {};
             for j=1:numel(outputs)
                 codes{j} = sprintf('%s = %s;\n\t', outputs{j}, goto_outputs{j});

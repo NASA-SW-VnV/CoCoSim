@@ -81,7 +81,7 @@ classdef SLX2LusUtils < handle
             names = {};
             names_withNoDT = {};
             for i=1:numel(Portsfields)
-                [names_withNoDT_i, names_i] = SLX2LusUtils.getBlockOutputsNames(subsys.Content.(Portsfields{i}));
+                [names_withNoDT_i, names_i] = SLX2LusUtils.getBlockOutputsNames(subsys, subsys.Content.(Portsfields{i}));
                 names = [names, names_i];
                 names_withNoDT = [names_withNoDT, names_withNoDT_i];
             end
@@ -91,7 +91,7 @@ classdef SLX2LusUtils < handle
                     cellfun(@(x) strcmp(subsys.Content.(x).BlockType,'EnablePort'), fields));
                 if ~isempty(enablePortsFields) ...
                         && strcmp(subsys.Content.(enablePortsFields{1}).ShowOutputPort, 'on')
-                    [names_withNoDT_i, names_i] = SLX2LusUtils.getBlockOutputsNames(subsys.Content.(enablePortsFields{1}));
+                    [names_withNoDT_i, names_i] = SLX2LusUtils.getBlockOutputsNames(subsys, subsys.Content.(enablePortsFields{1}));
                     names = [names, names_i];
                     names_withNoDT = [names_withNoDT, names_withNoDT_i];
                 end
@@ -100,7 +100,7 @@ classdef SLX2LusUtils < handle
                     cellfun(@(x) strcmp(subsys.Content.(x).BlockType,'TriggerPort'), fields));
                 if ~isempty(triggerPortsFields) ...
                         && strcmp(subsys.Content.(triggerPortsFields{1}).ShowOutputPort, 'on')
-                    [names_withNoDT_i, names_i] = SLX2LusUtils.getBlockOutputsNames(subsys.Content.(triggerPortsFields{1}));
+                    [names_withNoDT_i, names_i] = SLX2LusUtils.getBlockOutputsNames(subsys, subsys.Content.(triggerPortsFields{1}));
                     names = [names, names_i];
                     names_withNoDT = [names_withNoDT, names_withNoDT_i];
                 end
@@ -109,7 +109,7 @@ classdef SLX2LusUtils < handle
         end
         
         %% get block outputs names: inlining dimension
-        function [names, names_dt] = getBlockOutputsNames(blk, srcPort)
+        function [names, names_dt] = getBlockOutputsNames(parent, blk, srcPort)
             % This function return the names of the block
             % outputs.
             % Example : an Inport In with dimension [2, 3] will be
@@ -126,7 +126,9 @@ classdef SLX2LusUtils < handle
                     && isempty(blk.CompiledPortWidths.Inport))
                 return;
             end
-            if isempty(blk.CompiledPortWidths.Outport)
+            if isempty(blk.CompiledPortWidths.Outport) ...
+                    || (numel(blk.CompiledPortDataTypes.Outport) == 1 ...
+                    && strcmp(blk.CompiledPortDataTypes.Outport{1}, 'auto')) 
                 width = blk.CompiledPortWidths.Inport;
                 type = 'Inports';
             else
@@ -138,27 +140,39 @@ classdef SLX2LusUtils < handle
                 names = {};
                 names_dt = {};
                 if strcmp(type, 'Inports')
-                    [dt, ~, ~, isBus] = SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Inport(portNumber));
+                    slx_dt = blk.CompiledPortDataTypes.Inport{portNumber};
                 else
-                    [dt, ~, ~, isBus] = SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Outport(portNumber));
+                    slx_dt = blk.CompiledPortDataTypes.Outport{portNumber};
+                end
+                if strcmp(slx_dt, 'auto') && strcmp(type, 'Inports')
+                    % this is the case of virtual bus, we need to do back
+                    % propagation to find the real datatypes
+                    lus_dt = SLX2LusUtils.getpreBlockLusDT(parent, blk, portNumber);
+                    isBus = false;
+                else
+                    [lus_dt, ~, ~, isBus] = SLX2LusUtils.get_lustre_dt(slx_dt);
                 end
                 % The width should start from the port width regarding all
                 % subsystem outputs
                 idx = sum(width(1:portNumber-1))+1;
                 for i=1:width(portNumber)
-                    if ~isBus
-                        names{end+1} = SLX2LusUtils.name_format(strcat(blk.Name, '_', num2str(idx)));
-                        names_dt{end+1} = strcat(names{end} , ': ', dt, ';');
-                    else
-                        for k=1:numel(dt)
+                    if isBus
+                        for k=1:numel(lus_dt)
                             names{end+1} = SLX2LusUtils.name_format(strcat(blk.Name, '_', num2str(idx), '_BusElem', num2str(k)));
-                            names_dt{end+1} = strcat(names{end} , ': ', dt{k}, ';');
+                            names_dt{end+1} = strcat(names{end} , ': ', lus_dt{k}, ';');
                         end
+                    elseif iscell(lus_dt) && numel(lus_dt) == width(portNumber)
+                        names{end+1} = SLX2LusUtils.name_format(strcat(blk.Name, '_', num2str(idx)));
+                        names_dt{end+1} = sprintf('%s: %s;', names{end}, char(lus_dt{i}));
+                    else
+                        names{end+1} = SLX2LusUtils.name_format(strcat(blk.Name, '_', num2str(idx)));
+                        names_dt{end+1} = sprintf('%s: %s;', names{end}, char(lus_dt));
                     end
                     idx = idx + 1;
                 end
             end
-            if nargin >= 2 && ~isempty(srcPort)
+            if nargin >= 3 && ~isempty(srcPort)...
+                    && ~strcmp(blk.CompiledPortDataTypes.Outport{srcPort + 1}, 'auto') 
                 port = srcPort + 1;% srcPort starts by zero
                 [names, names_dt] = blockOutputs(port);
             else
@@ -188,7 +202,7 @@ classdef SLX2LusUtils < handle
                 srcPort = b.SrcPort;
                 srcHandle = b.SrcBlock;
                 src = get_struct(parent, srcHandle);
-                n_i = SLX2LusUtils.getBlockOutputsNames(src, srcPort);
+                n_i = SLX2LusUtils.getBlockOutputsNames(parent, src, srcPort);
                 inputs = [inputs, n_i];
             end
         end
@@ -209,7 +223,7 @@ classdef SLX2LusUtils < handle
                 srcPort = b.SrcPort;
                 srcHandle = b.SrcBlock;
                 src = get_struct(parent, srcHandle);
-                n_i = SLX2LusUtils.getBlockOutputsNames(src, srcPort);
+                n_i = SLX2LusUtils.getBlockOutputsNames(parent, src, srcPort);
                 inputs = [inputs, n_i];
             end
         end
@@ -232,6 +246,47 @@ classdef SLX2LusUtils < handle
                 srcPort = srcBlk.SrcPort + 1;
                 srcHandle = srcBlk.SrcBlock;
                 src = get_struct(parent, srcHandle);
+            end
+        end
+        %% get pre block DataType for specific port, 
+        %it is used in the case of 'auto' type.
+        function lus_dt = getpreBlockLusDT(parent, blk, portNumber)
+            [srcBlk, blkOutportPort] = SLX2LusUtils.getpreBlock(parent, blk, portNumber);
+            lus_dt = {};
+            if isempty(srcBlk) ...
+                    || ~strcmp(srcBlk.BlockType, 'BusCreator')
+                lus_dt = {'real'};
+                display_msg(sprintf('Bock %s has an auto dataType and is not supported',...
+                    srcBlk.Origin_path), MsgType.ERROR, '', '');
+                return;
+            end
+            if strcmp(srcBlk.CompiledPortDataTypes.Outport{blkOutportPort}, 'auto')
+                width = srcBlk.CompiledPortWidths.Inport;
+                for port=1:numel(width)
+                    slx_dt = srcBlk.CompiledPortDataTypes.Inport{port};
+                    if strcmp(slx_dt, 'auto') 
+                        lus_dt = [lus_dt, ...
+                            SLX2LusUtils.getpreBlockLusDT(parent, srcBlk, port)];
+                    else
+                        lus_dt_tmp = SLX2LusUtils.get_lustre_dt(slx_dt);
+                        if iscell(lus_dt_tmp)
+                            lus_dt = [lus_dt, lus_dt_tmp];
+                        else
+                            lus_dt_tmp = arrayfun(@(x) {lus_dt_tmp}, (1:width(port)), 'UniformOutput',false);
+                            lus_dt = [lus_dt, lus_dt_tmp];
+                        end
+                    end
+                end
+            else
+                width = srcBlk.CompiledPortWidths.Outport;
+                slx_dt = srcBlk.CompiledPortDataTypes.Outport{blkOutportPort};
+                lus_dt_tmp = SLX2LusUtils.get_lustre_dt(slx_dt);
+                if iscell(lus_dt_tmp)
+                    lus_dt = [lus_dt, lus_dt_tmp];
+                else
+                    lus_dt_tmp = cellfun(@(x) {lus_dt_tmp}, (1:width(blkOutportPort)), 'UniformOutput',false);
+                    lus_dt = [lus_dt, lus_dt_tmp];
+                end
             end
         end
         %% Change Simulink DataTypes to Lustre DataTypes. Initial default

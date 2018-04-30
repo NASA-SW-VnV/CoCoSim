@@ -62,7 +62,7 @@ classdef Sum_To_Lustre < Block_To_Lustre
     methods(Static)
         function [codes, outputs_dt, AdditinalVars] = getSumProductCodes(obj, parent, blk, OutputDataTypeStr,isSumBlock,AccumDataTypeStr)
             
-            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(blk);
+            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk);
             widths = blk.CompiledPortWidths.Inport;
             max_width = max(widths);
             inputs = {};
