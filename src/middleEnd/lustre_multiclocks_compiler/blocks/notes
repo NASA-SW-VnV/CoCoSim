@@ -30,6 +30,8 @@ Ktrinh: Assignment,
 
 Hamza:  Abs,
         ActionPort,
+        BusCreator, 
+        BusSelector, 
         Constant,
         Clock,
         CompareTo (Masked Subsystem), 
@@ -62,6 +64,7 @@ Hamza:  Abs,
         Saturation dynamic (pp), 
         Selector (pp),
         Sigbuilder block (pp),
+        SignalConversion,
         SwitchCase
         Terminator (ignored),
         ToWorkspace (pp),
@@ -73,12 +76,11 @@ Hamza:  Abs,
 
 Blocks that has left from Biosentinel:
 
-     ForIterator (Hamza)
-Tapped Delay Line
-Bitwise Operator
+    ForIterator (Hamza)
+    Tapped Delay Line
+    Bitwise Operator
     
-    BusCreator (Hamza), 
-    BusSelector (Hamza), 
+    
     BusAssignment (Hamza)
 
     Using the same algorithm A, B, C, D
@@ -102,7 +104,6 @@ Bitwise Operator
 AVA mission Simulink blocks:
     CombinatorialLogic
     DiscretePulseGenerator
-    SignalConversion (Hamza)
     Signum
     Step (Hamza)
     WhileIterator

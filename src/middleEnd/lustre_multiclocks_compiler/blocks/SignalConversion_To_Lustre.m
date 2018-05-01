@@ -1,5 +1,5 @@
 classdef SignalConversion_To_Lustre < Block_To_Lustre
-    %SignalConversion_To_Lustre translates the Outport block
+    %SignalConversion_To_Lustre translates the SignalConversion block.
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -17,6 +17,8 @@ classdef SignalConversion_To_Lustre < Block_To_Lustre
             [inputs] = SLX2LusUtils.getBlockInputsNames(parent, blk);
             
             codes = {};
+            % Thanks to inlining signals as well as BusCreator and BusSelector, 
+            % Signal Conversion is passing the inputs
             for i=1:numel(outputs)
                 codes{i} = sprintf('%s = %s;\n\t', outputs{i}, inputs{i});
             end
