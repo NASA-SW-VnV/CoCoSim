@@ -57,6 +57,7 @@ Hamza:  Abs,
         RelationalOperator, 
         Relay (pp),
         ResetPort, 
+        SampleTimeMath (pp)
         Scope(ignored)
         Sum,
         Subsystem,
@@ -97,8 +98,8 @@ Blocks that has left from Biosentinel:
     ModelReference (Hamza)
     RandomNumber ( to translate to empty node with contract) (Hamza)
     RateTransition (check the pp, Khanh),
+
     S-Function (Hamza)
-    SampleTimeMath (Hamza)
     StateControl 
     
 AVA mission Simulink blocks:
