@@ -25,10 +25,10 @@ classdef Assignment_To_Lustre < Block_To_Lustre
                 inport_dt = blk.CompiledPortDataTypes.Inport(i);
                 [lusInport_dt, ~] = SLX2LusUtils.get_lustre_dt(inport_dt);
                 
-                % inline second input if it is a scalar
-                if i == 2 && numel(inputs{i}) == 1 && numel(inputs{i}) < max_width
-                    inputs{i} = arrayfun(@(x) {inputs{i}{1}}, (1:max_width));
-                end
+%                 % inline second input if it is a scalar
+%                 if i == 2 && numel(inputs{i}) == 1 && numel(inputs{i}) < max_width
+%                     inputs{i} = arrayfun(@(x) {inputs{i}{1}}, (1:max_width));
+%                 end
                 %converts the input data type(s) to
                 %its accumulator data type
                 if ~strcmp(inport_dt, outputDataType) && i <= 2
@@ -104,7 +104,14 @@ classdef Assignment_To_Lustre < Block_To_Lustre
                     indexPortNumber = indexPortNumber + 1;
                     portNumber = indexPortNumber + 2;   % 1st and 2nd for Y0 and U    
                     indPortNumber(i) = portNumber;
-                    for j=1:in_matrix_dimension{2}.dims(i)                        
+                    
+                    
+                    if in_matrix_dimension{2}.numDs == 1
+                        jend = in_matrix_dimension{2}.dims(1);
+                    else
+                        jend = in_matrix_dimension{2}.dims(i);
+                    end
+                    for j=1:jend                      
                         if j==1
                             if strcmp(IndexMode, 'Zero-based')
                                 ind{i}{j} = sprintf('%s + 1',inputs{portNumber}{1});
@@ -118,8 +125,8 @@ classdef Assignment_To_Lustre < Block_To_Lustre
                                 ind{i}{j} = sprintf('%s + d',inputs{portNumber}{1},(j-1));
                             end
                         end
-                    end                    
-
+                    end   
+                    
                 else
                     % should not be here
                     display_msg(sprintf('IndexOption  %s not recognized in block %s',...
@@ -133,10 +140,23 @@ classdef Assignment_To_Lustre < Block_To_Lustre
                 end
             end
             
+            
+            % inline second input if it is a scalar and user defined index
+            % options to have more than 1 assignment
+            U_size = 0;
+            for i=1:numOutDims
+                U_size = U_size + numel(ind{i});
+            end
+            if numel(inputs{2}) == 1 && numel(inputs{2}) < U_size
+                inputs{2} = arrayfun(@(x) {inputs{2}{1}}, (1:U_size));
+            end     
+            
             U_to_Y0 = zeros(1,numel(inputs{2}));
-            y0_dims = in_matrix_dimension{1}.dims;    % y0_dims = U_dims
+            y0_dims = in_matrix_dimension{1}.dims;    
             U_dims = in_matrix_dimension{2}.dims;
             indexDataType = 'int';
+            
+       
             
             % if index assignment is read in form index port, write mapping
             % code on Lustre side
@@ -227,7 +247,7 @@ classdef Assignment_To_Lustre < Block_To_Lustre
                     curSub(6) = d6;
                     curSub(7) = d7;
 
-                    for j=1:numel(in_matrix_dimension{2}.dims)
+                    for j=1:numel(in_matrix_dimension{1}.dims)
                         str_Y_index{i}{j} = sprintf('%s_str_Y_index_%d_%d',...
                             blk_name,i,j);
                         addVarIndex = addVarIndex + 1;
@@ -239,7 +259,12 @@ classdef Assignment_To_Lustre < Block_To_Lustre
                     end
                     
                     value = '0';
-                    for j=1:numel(in_matrix_dimension{2}.dims)
+%                     if in_matrix_dimension{2}.numDs == 1
+%                         jend = 2;
+%                     else
+%                         jend = in_matrix_dimension{2}.dims(i);
+%                     end                    
+                    for j=1:numel(in_matrix_dimension{1}.dims)
                         if j==1
                             value = sprintf('%s + %s*%d',value,str_Y_index{i}{j}, Y0_dimJump(j));
                         else
