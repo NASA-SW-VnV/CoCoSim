@@ -87,6 +87,7 @@ xml_trace.init();
 
 
 %% Internal representation building %%%%%%
+
 display_msg('Building internal format', MsgType.INFO, 'lustre_multiclocks_compiler', '');
 [ir_struct, ~, ~, ~] = cocosim_IR(model_full_path, 0, output_dir);
 % Pre-process IR
@@ -96,11 +97,11 @@ display_msg('Building internal format', MsgType.INFO, 'lustre_multiclocks_compil
 %% Lustre generation
 display_msg('Lustre generation', Constants.INFO, 'lustre_multiclocks_compiler', '');
 
+global model_struct
+model_struct = ir_struct.(IRUtils.name_format(file_name));
+main_sampleTime = model_struct.CompiledSampleTime;
 
-main_block = ir_struct.(IRUtils.name_format(file_name));
-main_sampleTime = main_block.CompiledSampleTime;
-
-[nodes_code, external_libraries] = recursiveGeneration(main_block, main_sampleTime, xml_trace);
+[nodes_code, external_libraries] = recursiveGeneration(model_struct, main_sampleTime, xml_trace);
 external_lib_code = getExternalLibrariesNodes(external_libraries);
 %% writing code
 fid = fopen(nom_lustre_file, 'a');

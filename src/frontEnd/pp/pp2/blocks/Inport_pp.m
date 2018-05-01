@@ -24,6 +24,9 @@ if ~isempty(inport_list)
     warning on;
     for i=1:length(inport_list)
         dt = port_map(inport_list{i});
+        if strcmp(dt, 'auto')
+            continue;
+        end
         try
             set_param(inport_list{i}, 'OutDataTypeStr', dt{1})
         catch

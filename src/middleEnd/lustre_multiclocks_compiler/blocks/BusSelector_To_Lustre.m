@@ -22,19 +22,33 @@ classdef BusSelector_To_Lustre < Block_To_Lustre
             InportDimensions = blk.CompiledPortDimensions.Inport;
             InputSignals = blk.InputSignals;
             OutputSignals = regexp(blk.OutputSignals, ',', 'split');
+            inputSignalsInlined = BusSelector_To_Lustre.inlineInputSignals(InputSignals);
             if InportDimensions(1) == -2
                 % case of virtual bus
                 inport_cell_dimension =...
                     Assignment_To_Lustre.getInputMatrixDimensions(InportDimensions);
-                inputSignalsInlined = BusSelector_To_Lustre.inlineInputSignals(InputSignals);
-                [SignalsInputsMap, status] = BusSelector_To_Lustre.signalInputsUsingDimensions(...
-                    inport_cell_dimension, inputSignalsInlined, inputs);
-                if status
-                    display_msg(sprintf('Block %s is not supported.', blk.Origin_path),...
-                        MsgType.ERROR, 'BusSelector_To_Lustre', '');
-                end
             else
-                % case of bus object
+                InportDT = blk.CompiledPortDataTypes.Inport{1};
+                try
+                    isBus = evalin('base', sprintf('isa(%s, ''Simulink.Bus'')',char(InportDT)));
+                catch
+                    isBus = false;
+                end
+                if isBus
+                    % case of bus object
+                    inport_cell_dimension = SLX2LusUtils.getDimensionsFromBusObject(InportDT);
+                else
+                    display_msg(sprintf('Block %s with type %s is not supported.', ...
+                        blk.Origin_path,InportDT ),...
+                        MsgType.ERROR, 'BusSelector_To_Lustre', '');
+                    return;
+                end
+            end
+            [SignalsInputsMap, status] = BusSelector_To_Lustre.signalInputsUsingDimensions(...
+                inport_cell_dimension, inputSignalsInlined, inputs);
+            if status
+                display_msg(sprintf('Block %s is not supported.', blk.Origin_path),...
+                    MsgType.ERROR, 'BusSelector_To_Lustre', '');
                 return;
             end
             out_idx = 1;
@@ -42,6 +56,9 @@ classdef BusSelector_To_Lustre < Block_To_Lustre
                 if isKey(SignalsInputsMap, OutputSignals{i})
                     inputs_i = SignalsInputsMap(OutputSignals{i});
                 else
+                    display_msg(sprintf('Block %s with type %s is not supported.',...
+                        blk.Origin_path, OutputSignals{i}),...
+                        MsgType.ERROR, 'BusSelector_To_Lustre', '');
                     continue;
                 end
                 for j=1:numel(inputs_i)
@@ -71,12 +88,23 @@ classdef BusSelector_To_Lustre < Block_To_Lustre
             inputIdx = 1;
             for i=1:numel(inport_cell_dimension)
                 width = inport_cell_dimension{i}.width;
-                SignalsInputsMap(inputSignalsInlined{i}) = ...
-                    inputs(inputIdx:inputIdx + width - 1);
+                tmp_inputs =  inputs(inputIdx:inputIdx + width - 1);
+                tokens = regexp(inputSignalsInlined{i}, '\.', 'split');
+                for j=1:numel(tokens)
+                    prefix = MatlabUtils.strjoin(tokens(1:j), '.');
+                    if isKey(SignalsInputsMap, prefix)
+                        SignalsInputsMap(prefix) = ...
+                            [SignalsInputsMap(prefix), ...
+                            tmp_inputs];
+                    else
+                        SignalsInputsMap(prefix) = ...
+                            tmp_inputs;
+                    end
+                end
                 inputIdx = inputIdx + width;
             end
         end
-            
+        
         % this function takes InputSignals parameter and inline it.
         %example
         % InputSignals = {'x4', {'bus2', {{'bus1', {'chirp', 'sine'}}, 'step'}}}

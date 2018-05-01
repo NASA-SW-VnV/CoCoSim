@@ -126,9 +126,15 @@ classdef SLX2LusUtils < handle
                     && isempty(blk.CompiledPortWidths.Inport))
                 return;
             end
-            if isempty(blk.CompiledPortWidths.Outport) ...
-                    || (numel(blk.CompiledPortDataTypes.Outport) == 1 ...
-                    && strcmp(blk.CompiledPortDataTypes.Outport{1}, 'auto')) 
+            % case of block with 'auto' Type, we need to get the inports
+            % datatypes.
+            if numel(blk.CompiledPortDataTypes.Outport) == 1 ...
+                    && strcmp(blk.CompiledPortDataTypes.Outport{1}, 'auto') ...
+                    && ~isempty(blk.CompiledPortWidths.Inport)
+                width = blk.CompiledPortWidths.Inport;
+                type = 'Inports';
+                
+            elseif isempty(blk.CompiledPortWidths.Outport)
                 width = blk.CompiledPortWidths.Inport;
                 type = 'Inports';
             else
@@ -144,7 +150,7 @@ classdef SLX2LusUtils < handle
                 else
                     slx_dt = blk.CompiledPortDataTypes.Outport{portNumber};
                 end
-                if strcmp(slx_dt, 'auto') && strcmp(type, 'Inports')
+                if strcmp(slx_dt, 'auto')
                     % this is the case of virtual bus, we need to do back
                     % propagation to find the real datatypes
                     lus_dt = SLX2LusUtils.getpreBlockLusDT(parent, blk, portNumber);
@@ -229,6 +235,7 @@ classdef SLX2LusUtils < handle
         end
         %% get pre block for specific port number
         function [src, srcPort] = getpreBlock(parent, blk, Port)
+            
             if ischar(Port)
                 % case of Type: ifaction ...
                 srcBlk = blk.PortConnectivity(...
@@ -251,8 +258,17 @@ classdef SLX2LusUtils < handle
         %% get pre block DataType for specific port, 
         %it is used in the case of 'auto' type.
         function lus_dt = getpreBlockLusDT(parent, blk, portNumber)
-            [srcBlk, blkOutportPort] = SLX2LusUtils.getpreBlock(parent, blk, portNumber);
             lus_dt = {};
+            if strcmp(blk.BlockType, 'Inport')
+                global model_struct
+                if ~isempty(model_struct)
+                    portNumber = str2num(blk.Port);
+                    blk = parent;
+                    parent = model_struct;
+                end
+            end
+            [srcBlk, blkOutportPort] = SLX2LusUtils.getpreBlock(parent, blk, portNumber);
+            
             if isempty(srcBlk) ...
                     || ~strcmp(srcBlk.BlockType, 'BusCreator')
                 lus_dt = {'real'};
@@ -351,6 +367,8 @@ classdef SLX2LusUtils < handle
                 end
             end
         end
+        
+        %% Bus signal Lustre dataType
         function lustreTypes = getLustreTypesFromBusObject(busName)
             bus = evalin('base', char(busName));
             lustreTypes = {};
@@ -378,6 +396,30 @@ classdef SLX2LusUtils < handle
             end
         end
         
+        function in_matrix_dimension = getDimensionsFromBusObject(busName)
+            in_matrix_dimension = {};
+            bus = evalin('base', char(busName));
+            try
+                elems = bus.Elements;
+            catch
+                % Elements is not in bus.
+                return;
+            end
+            for i=1:numel(elems)
+                dt = elems(i).DataType;
+                if strncmp(dt, 'Bus:', 4)
+                    dt = regexprep(dt, 'Bus:\s*', '');
+                    in_matrix_dimension = [in_matrix_dimension,...
+                        SLX2LusUtils.getDimensionsFromBusObject(dt)];
+                else
+                    dimensions = elems(i).Dimensions;
+                    idx = numel(in_matrix_dimension) +1;
+                    in_matrix_dimension{idx}.dims = dimensions;
+                    in_matrix_dimension{idx}.width = prod(dimensions);
+                    in_matrix_dimension{idx}.numDs = numel(dimensions);
+                end
+            end
+        end
         %% Data type conversion node name
         function [external_lib, conv_format] = dataType_conversion(inport_dt, outport_dt, RndMeth)
             lus_in_dt = SLX2LusUtils.get_lustre_dt( inport_dt);

@@ -37,18 +37,36 @@ try
 catch ME
     causes = ME.cause;
     for c=causes'
-        if strcmp(c{1}.identifier,  'Simulink:Engine:BlkInAlgLoopErr')
-            display_msg('Algebraic Loop detected', MsgType.INFO, 'PP', '');
-            msg = c{1}.message;
-            tokens = regexp(msg, 'matlab:open\w+\s*\(''([^''])+''', 'tokens', 'once');
-            subsys = tokens{1};
-            try
-                display_msg(['Turn off atomic in block' subsys], MsgType.INFO, 'PP', '');
-                set_param(subsys,'TreatAsAtomicUnit','off');
-                solveAlgebraicLoops(new_model_base);
-            catch
-            end
-            break;
+        switch c{1}.identifier
+            case 'Simulink:Engine:BlkInAlgLoopErr'
+                display_msg('Algebraic Loop detected', MsgType.INFO, 'PP', '');
+                msg = c{1}.message;
+                tokens = regexp(msg, 'matlab:open\w+\s*\(''([^''])+''', 'tokens', 'once');
+                if isempty(tokens)
+                    continue;
+                end
+                subsys = tokens{1};
+                try
+                    display_msg(['Turn off atomic in block' subsys], MsgType.INFO, 'PP', '');
+                    set_param(subsys,'TreatAsAtomicUnit','off');
+                    solveAlgebraicLoops(new_model_base);
+                catch
+                end
+                break;
+            case 'Simulink:DataType:InputPortCannotAcceptMixedDataTypeWithHint'
+                msg = c{1}.message;
+                tokens = regexp(msg, 'The inport block\s*''([^''])+''', 'tokens', 'once');
+                if isempty(tokens)
+                    continue;
+                end
+                subsys = fileparts(tokens{1});
+                try
+                    display_msg(['Turn off atomic in block' subsys], MsgType.INFO, 'PP', '');
+                    set_param(subsys,'TreatAsAtomicUnit','off');
+                    solveAlgebraicLoops(new_model_base);
+                catch
+                end
+                break;
         end
     end
     return;
