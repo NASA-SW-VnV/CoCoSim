@@ -83,6 +83,8 @@ classdef MatlabUtils
                 return;
             end
         end
+        %%
+        
         %% Concat cell array with a specific delimator
         function joinedStr = strjoin(str, delimiter)
             if nargin < 1 || nargin > 2

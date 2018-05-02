@@ -32,8 +32,25 @@ classdef SLXUtils
         end
         
         
-        
-        
+        %% get the value of a parameter
+        function [paramValue, status] = evalParam(model, param)
+            status = 0;
+            
+            % this is the case of variable from model workspace
+            hws = get_param(model, 'modelworkspace') ;
+            if isvarname(param) && hasVariable(hws, param)
+                paramValue = getVariable(hws, param);
+            else
+                try
+                    paramValue = evalin('base',param);
+                catch
+                    status = 1;
+                    paramValue = 0;
+                    return;
+                end
+            end
+            
+        end
         %% run constants files
         function run_constants_files(const_files)
             const_files_bak = const_files;
