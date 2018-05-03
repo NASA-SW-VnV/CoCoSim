@@ -104,7 +104,11 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                     ExtrapMethod  = 'Clip';                    
                 elseif strcmp(blk.LookUpMeth, 'Use Input Above')
                     InterpMethod = 'Above';
-                    ExtrapMethod  = 'Clip';                       
+                    ExtrapMethod  = 'Clip';            
+                elseif strcmp(blk.InterpMethod, 'Cubic spline')
+                    display_msg(sprintf('Cubic spline interpolation in block %s is not supported',...
+                        blk.Origin_path), ...
+                        MsgType.ERROR, 'Lookup_nD_To_Lustre', '');                                        
                 else
                     InterpMethod = 'Linear';
                     ExtrapMethod = 'Linear';                    
