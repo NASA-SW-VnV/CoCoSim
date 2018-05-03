@@ -220,7 +220,7 @@ classdef Selector_To_Lustre < Block_To_Lustre
                            blk_name,i,j,indexDataType);
                         codeIndex = codeIndex + 1;
                         codes{codeIndex} = sprintf('%s = %s_ind_dim_%d_%d;\n\t',...
-                            str_Y_index{i}{j},SLX2LusUtils.name_format(blk.Name),j,curSub(j)) ;
+                            str_Y_index{i}{j},blk_name,j,curSub(j)) ;
                     end
                     
                     % calculating sub2ind in Lustre
