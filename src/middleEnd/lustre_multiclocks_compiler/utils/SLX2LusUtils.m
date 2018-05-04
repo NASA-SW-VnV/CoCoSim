@@ -421,7 +421,7 @@ classdef SLX2LusUtils < handle
             end
         end
         %% Data type conversion node name
-        function [external_lib, conv_format] = dataType_conversion(inport_dt, outport_dt, RndMeth)
+        function [external_lib, conv_format] = dataType_conversion(inport_dt, outport_dt, RndMeth, SaturateOnIntegerOverflow)
             lus_in_dt = SLX2LusUtils.get_lustre_dt( inport_dt);
             if nargin < 3
                 if strcmp(lus_in_dt, 'int')
@@ -438,6 +438,9 @@ classdef SLX2LusUtils < handle
                 else
                     RndMeth = strcat('_',RndMeth);
                 end
+            end
+            if nargin < 4
+                SaturateOnIntegerOverflow = 'off';
             end
             external_lib = {};
             conv_format = '';
@@ -460,8 +463,11 @@ classdef SLX2LusUtils < handle
                         conv_format = 'bool_to_real(%s)';
                     end
                 case {'int8','uint8','int16','uint16', 'int32','uint32'}
-                    
-                    conv = strcat('int_to_', outport_dt);
+                    if strcmp(SaturateOnIntegerOverflow, 'on')
+                        conv = strcat('int_to_', outport_dt, '_saturate');
+                    else
+                        conv = strcat('int_to_', outport_dt);
+                    end
                     if strcmp(lus_in_dt, 'int')
                         external_lib = {conv};
                         conv_format = strcat(conv,'(%s)');
@@ -473,7 +479,7 @@ classdef SLX2LusUtils < handle
                         conv_format = strcat(conv,'(',RndMeth,'(%s))');
                     end
                     % issue should be solved in Lustrec, if lustrec support
-                    % long int, the following is not important, it is
+                    % int32_t, the following is not important, it is
                     % supported by the previous case (with int16, uint16).
 %                 case {'int32','uint32'}
 %                     % supporting 'int32','uint32' as lustre int.

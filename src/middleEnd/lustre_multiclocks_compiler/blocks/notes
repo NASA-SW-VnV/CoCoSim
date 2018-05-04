@@ -83,7 +83,7 @@ Blocks that has left from Biosentinel:
     
     
     BusAssignment (Hamza)
-
+    **************************** PP ***********************
     Using the same algorithm A, B, C, D
     DiscreteTransferFcn (see TransferFcn in pp) (Khanh)
     DiscreteStateSpace (Khanh).
@@ -91,6 +91,8 @@ Blocks that has left from Biosentinel:
     DiscreteFilter(Khanh)
     DiscreteFir
 
+    **************************** PP ***********************
+    Pulse generator, SignalBuilder pp (they use datatable_process which can be replaced by Lustre code) 
 
     Fcn (partially done in pp) (Khanh)
    
