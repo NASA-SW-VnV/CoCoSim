@@ -104,7 +104,19 @@ classdef Selector_To_Lustre < Block_To_Lustre
                         end                        
                     end
                     
-                elseif strcmp(blk.IndexOptionArray{i}, 'Starting and ending indices (port)')                    
+                elseif strcmp(blk.IndexOptionArray{i}, 'Starting and ending indices (port)')      
+                    isPortIndex = true;
+                    indexPortNumber = indexPortNumber + 1;
+                    portNumber = indexPortNumber + 1;   % 1st is for input
+                    indPortNumber(i) = portNumber;
+                    outputDimsArray(i) = numel(inputs{portNumber});
+                    for j=1:outputDimsArray(i)
+                        if strcmp(IndexMode, 'Zero-based')
+                            ind{i}{j} = sprintf('%s + 1',inputs{portNumber}{j});
+                        else
+                            ind{i}{j} = inputs{portNumber}{j};
+                        end
+                    end                 
                     display_msg(sprintf('Starting and ending indices (port) is not supported in block %s',...
                         blk.Origin_path), ...
                         MsgType.ERROR, 'Selector_To_Lustre', '');    
@@ -220,7 +232,7 @@ classdef Selector_To_Lustre < Block_To_Lustre
                            blk_name,i,j,indexDataType);
                         codeIndex = codeIndex + 1;
                         codes{codeIndex} = sprintf('%s = %s_ind_dim_%d_%d;\n\t',...
-                            str_Y_index{i}{j},SLX2LusUtils.name_format(blk.Name),j,curSub(j)) ;
+                            str_Y_index{i}{j},blk_name,j,curSub(j)) ;
                     end
                     
                     % calculating sub2ind in Lustre

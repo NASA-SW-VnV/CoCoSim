@@ -37,7 +37,14 @@ classdef FromWorkspace_To_Lustre < Block_To_Lustre
             % there is no inputs
             
             VariableName = blk.VariableName;
-            variable = evalin('base',VariableName);
+            [variable, ~, status] = ...
+                Constant_To_Lustre.getValueFromParameter(parent, blk, VariableName);
+            if status
+                display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
+                    VariableName, blk.Origin_path), ...
+                    MsgType.ERROR, 'Constant_To_Lustr', '');
+                return;
+            end
             [outLusDT, zero, ~] = SLX2LusUtils.get_lustre_dt(outputDataType);
             
             

@@ -6,7 +6,7 @@ function [] = DiscreteTransferFcn_pp(model)
 % Copyright (c) 2017 United States Government as represented by the
 % Administrator of the National Aeronautics and Space Administration.
 % All Rights Reserved.
-% Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
+% Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>, Trinh, Khanh V <khanh.v.trinh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Processing Gain blocks
 dtf_list = find_system(model,'LookUnderMasks', 'all', 'BlockType','DiscreteTransferFcn');
@@ -82,7 +82,11 @@ if not(isempty(dtf_list))
                 MsgType.ERROR, 'DiscreteTransferFcn_pp', '');
             continue;
         end
-        
+        [n,~] = size(num);
+        mutliNumerator = 0;
+        if n>1
+            mutliNumerator = 1;
+        end
         blocktype= get_param(dtf_list{i}, 'BlockType');
         if strcmp(blocktype, 'TransferFcn')
             try
@@ -118,8 +122,19 @@ if not(isempty(dtf_list))
             'Value',C);
         set_param(strcat(dtf_list{i},'/DTFScalar/D'),...
             'Value',D);
-        set_param(strcat(dtf_list{i},'/ReverseReshape'),...
-            'OutputDimensions',mat2str(U_dims{i}));
+        if mutliNumerator
+            OutputHandles = get_param(strcat(dtf_list{i},'/Y'), 'PortHandles');
+            DTFHandles = get_param(strcat(dtf_list{i},'/DTFScalar'), 'PortHandles');
+            delete_block(strcat(dtf_list{i},'/ReverseReshape'));
+            line = get_param(OutputHandles.Inport(1), 'line');
+            delete_line(line);
+            line = get_param(DTFHandles.Outport(1), 'line');
+            delete_line(line);
+            add_line(dtf_list{i}, DTFHandles.Outport(1), OutputHandles.Inport(1), 'autorouting', 'on');
+        else
+            set_param(strcat(dtf_list{i},'/ReverseReshape'),...
+                'OutputDimensions',mat2str(U_dims{i}));  
+        end
         set_param(strcat(dtf_list{i},'/DTFScalar/FinalSum'),...
             'RndMeth',RndMeth);
         set_param(strcat(dtf_list{i},'/DTFScalar/FinalSum'),...
