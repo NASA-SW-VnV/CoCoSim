@@ -63,7 +63,7 @@ if not(isempty(dtf_list))
         end
         RndMeth = get_param(dtf_list{i}, 'RndMeth');
         ST = get_param(dtf_list{i},'SampleTime');
-        
+        SaturateOnIntegerOverflow = get_param(dtf_list{i},'SaturateOnIntegerOverflow');
         % Obtaining z-expression parameters
         denum_str = get_param(dtf_list{i}, 'Denominator');
         [denum, status] = SLXUtils.evalParam(model, denum_str);
@@ -139,6 +139,8 @@ if not(isempty(dtf_list))
             'RndMeth',RndMeth);
         set_param(strcat(dtf_list{i},'/DTFScalar/FinalSum'),...
             'OutDataTypeStr',outputDataType);
+        set_param(strcat(dtf_list{i},'/DTFScalar/FinalSum'),...
+            'OutDataTypeStr',SaturateOnIntegerOverflow);
         try
             set_param(strcat(dtf_list{i},'/DTFScalar/X0'),...
                 'InitialCondition',InitialStates);

@@ -15,6 +15,7 @@ if not(isempty(SampleTimeMath_list))
         display_msg(SampleTimeMath_list{i}, MsgType.INFO, 'SampleTimeMath_process', '');
         TsampMathOp = get_param(SampleTimeMath_list{i},'TsampMathOp' );
         weightValue = get_param(SampleTimeMath_list{i},'weightValue' );
+        SaturateOnIntegerOverflow = get_param(SampleTimeMath_list{i},'SaturateOnIntegerOverflow');
         try
             model_sample = SLXUtils.get_BlockDiagram_SampleTime(model);
             if   model_sample==0 || isnan(model_sample) || model_sample==Inf
@@ -24,22 +25,28 @@ if not(isempty(SampleTimeMath_list))
             model_sample = 0.2;
         end
         suffix = TsampMathOp;
+        finalBlockName = 'Product';
         if strcmp(TsampMathOp, '+')
             suffix = 'Plus';
+            finalBlockName = 'Add';
         elseif strcmp(TsampMathOp, '-')
             suffix = 'Minus';
+            finalBlockName = 'Add';
         elseif strcmp(TsampMathOp, '*')
             suffix = 'Multiply';
+            finalBlockName = 'Product';
         elseif strcmp(TsampMathOp, '/')
             suffix = 'Divide';
+            finalBlockName = 'Divide1';
         elseif strcmp(TsampMathOp, '1/Ts Only')
             suffix = 'Ts inverse';
+            finalBlockName = 'Divide1';
         end
         pp_block_name = fullfile('pp_lib', strcat('SampleTimeMath', suffix));
         replace_one_block(SampleTimeMath_list{i},pp_block_name);
         set_param(strcat(SampleTimeMath_list{i},'/weightValue'),'Value', weightValue);
         set_param(strcat(SampleTimeMath_list{i},'/Ts'),'Value', num2str(model_sample));
-        
+        set_param(strcat(SampleTimeMath_list{i},'/', finalBlockName),'SaturateOnIntegerOverflow', SaturateOnIntegerOverflow);
     end
     display_msg('Done\n\n', MsgType.INFO, 'SampleTimeMath_process', '');
 end

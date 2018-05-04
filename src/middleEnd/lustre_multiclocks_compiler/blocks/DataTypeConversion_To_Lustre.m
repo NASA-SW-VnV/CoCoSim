@@ -19,13 +19,15 @@ classdef DataTypeConversion_To_Lustre < Block_To_Lustre
             widths = blk.CompiledPortWidths.Inport;
             outputDataType = blk.CompiledPortDataTypes.Outport{1};
             RndMeth = blk.RndMeth;
+            SaturateOnIntegerOverflow = blk.SaturateOnIntegerOverflow;
+
             for i=1:numel(widths)
                 inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
                 inport_dt = blk.CompiledPortDataTypes.Inport(i);
                 %converts the input data type(s) to
                 %its outputDataType
                 if ~strcmp(inport_dt, outputDataType)
-                    [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, outputDataType, RndMeth);
+                    [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, outputDataType, RndMeth, SaturateOnIntegerOverflow);
                     if ~isempty(external_lib)
                         obj.addExternal_libraries(external_lib);
                         inputs{i} = cellfun(@(x) sprintf(conv_format,x), inputs{i}, 'un', 0);

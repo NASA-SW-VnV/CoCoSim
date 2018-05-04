@@ -423,7 +423,7 @@ classdef SLX2LusUtils < handle
         %% Data type conversion node name
         function [external_lib, conv_format] = dataType_conversion(inport_dt, outport_dt, RndMeth, SaturateOnIntegerOverflow)
             lus_in_dt = SLX2LusUtils.get_lustre_dt( inport_dt);
-            if nargin < 3
+            if nargin < 3 || isempty(RndMeth)
                 if strcmp(lus_in_dt, 'int')
                     RndMeth = 'int_to_real';
                 else
@@ -439,7 +439,7 @@ classdef SLX2LusUtils < handle
                     RndMeth = strcat('_',RndMeth);
                 end
             end
-            if nargin < 4
+            if nargin < 4 || isempty(SaturateOnIntegerOverflow)
                 SaturateOnIntegerOverflow = 'off';
             end
             external_lib = {};

@@ -20,6 +20,7 @@ classdef MinMax_To_Lustre < Block_To_Lustre
             max_width = max(widths);
             LusoutputDataType = SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Outport{1});
             RndMeth = blk.RndMeth;
+            SaturateOnIntegerOverflow = blk.SaturateOnIntegerOverflow;
             for i=1:numInputs
                 inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
                 Lusinport_dt = SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Inport{i});
@@ -30,7 +31,7 @@ classdef MinMax_To_Lustre < Block_To_Lustre
                 %its output data type
                 if ~strcmp(Lusinport_dt, LusoutputDataType)
                     [external_lib, conv_format] = ...
-                        SLX2LusUtils.dataType_conversion(Lusinport_dt, LusoutputDataType, RndMeth);
+                        SLX2LusUtils.dataType_conversion(Lusinport_dt, LusoutputDataType, RndMeth, SaturateOnIntegerOverflow);
                     if ~isempty(external_lib)
                         obj.addExternal_libraries(external_lib);
                         inputs{i} = cellfun(@(x) sprintf(conv_format,x), inputs{i}, 'un', 0);
