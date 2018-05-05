@@ -53,11 +53,27 @@ classdef Assignment_To_Lustre < Block_To_Lustre
             U_dimension = in_matrix_dimension{2};
             % if U input is a scalar and it is to be replicate, U_dimension
             % may not be in_matrix_dimension{2} and need to be calculated.
+            indexPortNumber = 0;
             if numel(inputs{2}) == 1
                 U_dimension.numDs = numOutDims;
                 U_dimension.dims = ones(1,numOutDims);
                 for i=1:numOutDims
-                    %U_dimension.dims = ones(1,numOutDims);
+                    if strcmp(blk.IndexOptionArray{i}, 'Assign all')
+                        U_dimension.dims(i) = in_matrix_dimension{1}.dims(i);
+                    elseif strcmp(blk.IndexOptionArray{i}, 'Index vector (dialog)')
+                        U_dimension.dims(i) = numel(blk.IndexParamArray{i});
+                    elseif strcmp(blk.IndexOptionArray{i}, 'Index vector (port)')
+                        indexPortNumber = indexPortNumber + 1;
+                        portNumber = indexPortNumber + 2; 
+                        U_dimension.dims(i) = numel(inputs{portNumber});
+                    elseif strcmp(blk.IndexOptionArray{i}, 'Starting index (dialog)')
+                        U_dimension.dims(i) = 1;
+                    elseif strcmp(blk.IndexOptionArray{i}, 'Starting index (port)')
+%                         indexPortNumber = indexPortNumber + 1;
+%                         portNumber = indexPortNumber + 2; 
+                        U_dimension.dims(i) = 1;
+                    else
+                    end
                 end
             end
             
@@ -65,7 +81,6 @@ classdef Assignment_To_Lustre < Block_To_Lustre
             for i=1:numOutDims
                 U_size = U_size*U_dimension.dims(i);
             end
-            
             
             if numel(inputs{2}) == 1 && numel(inputs{2}) < U_size
                 inputs{2} = arrayfun(@(x) {inputs{2}{1}}, (1:U_size));
