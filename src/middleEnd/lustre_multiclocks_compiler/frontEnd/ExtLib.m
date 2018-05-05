@@ -202,6 +202,36 @@ classdef ExtLib
             
             
         end
+        function [node, external_nodes_i, opens] = get__NOT_Bitwise_Signed()
+            [node, external_nodes_i, opens] = ExtLib.getNOTBitwiseSigned();
+        end
+        function [node, external_nodes_i, opens] = get__NOT_Bitwise_Unsigned_8()
+            [node, external_nodes_i, opens] = ExtLib.getNOTBitwiseUnsigned(8);
+        end
+        function [node, external_nodes_i, opens] = get__NOT_Bitwise_Unsigned_16()
+            [node, external_nodes_i, opens] = ExtLib.getNOTBitwiseUnsigned(16);
+        end
+        function [node, external_nodes_i, opens] = get__NOT_Bitwise_Unsigned_32()
+            [node, external_nodes_i, opens] = ExtLib.getNOTBitwiseUnsigned(32);
+        end
+        
+        function [node, external_nodes, opens] = getNOTBitwiseUnsigned(n)
+            opens = {};
+            external_nodes = {};
+            v2_pown = 2^n - 1;
+            format = 'node %s (x: int)\nreturns(y:int);\nlet\n\t';
+            format = [format, 'y=  %d - x ;\ntel\n\n'];
+            node_name = strcat('_NOT_Bitwise_Unsigned_', num2str(n));
+            node = sprintf(format, node_name,v2_pown);            
+        end
+        function [node, external_nodes, opens] = getNOTBitwiseSigned()
+            opens = {};
+            external_nodes = {};
+            format = 'node %s (x: int)\nreturns(y:int);\nlet\n\t';
+            format = [format, 'y=   - x - 1;\ntel\n\n'];
+            node_name = strcat('_NOT_Bitwise_Signed');
+            node = sprintf(format, node_name);            
+        end
         %%
         function [node, external_nodes_i, opens] = get_int_to_int8()
             [node, external_nodes_i, opens] = ExtLib.getIntToInt('int8');
