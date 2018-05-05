@@ -67,6 +67,7 @@ classdef Sum_To_Lustre < Block_To_Lustre
             max_width = max(widths);
             inputs = {};
             RndMeth = blk.RndMeth;
+            SaturateOnIntegerOverflow = blk.SaturateOnIntegerOverflow;
             AdditinalVars = {};
             for i=1:numel(widths)
                 inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
@@ -79,7 +80,7 @@ classdef Sum_To_Lustre < Block_To_Lustre
                 %converts the input data type(s) to
                 %its accumulator data type
                 if ~strcmp(inport_dt, AccumDataTypeStr)
-                    [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, AccumDataTypeStr, RndMeth);
+                    [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, AccumDataTypeStr, RndMeth, SaturateOnIntegerOverflow);
                     if ~isempty(external_lib)
                         obj.addExternal_libraries(external_lib);
                         inputs{i} = cellfun(@(x) sprintf(conv_format,x), inputs{i}, 'un', 0);
@@ -95,7 +96,7 @@ classdef Sum_To_Lustre < Block_To_Lustre
                 operator_character = '*';
                 initCode = one;
             end
-            [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(AccumDataTypeStr, OutputDataTypeStr, RndMeth);
+            [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(AccumDataTypeStr, OutputDataTypeStr, RndMeth, SaturateOnIntegerOverflow);
             if ~isempty(external_lib)
                 obj.addExternal_libraries(external_lib);
             end

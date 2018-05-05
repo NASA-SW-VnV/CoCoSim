@@ -17,10 +17,13 @@ if not(isempty(Bias_list))
         display_msg(Bias_list{i}, MsgType.INFO, ...
             'Bias_process', '');
         bias = get_param(Bias_list{i},'Bias');
+        SaturateOnIntegerOverflow = get_param(Bias_list{i},'SaturateOnIntegerOverflow');
         pp_name = 'bias';
         replace_one_block(Bias_list{i},fullfile('pp_lib',pp_name));
         set_param(strcat(Bias_list{i},'/bias'),...
             'Value',bias);
+        set_param(strcat(Bias_list{i},'/Sum'),...
+            'SaturateOnIntegerOverflow',SaturateOnIntegerOverflow);
         
     end
     display_msg('Done\n\n', MsgType.INFO, 'Bias_process', ''); 

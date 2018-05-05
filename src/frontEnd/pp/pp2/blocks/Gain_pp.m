@@ -19,6 +19,7 @@ if not(isempty(Gain_list))
         gain = get_param(Gain_list{i},'Gain');
         outputDataType = get_param(Gain_list{i}, 'OutDataTypeStr');
         Multiplication = get_param(Gain_list{i}, 'Multiplication');
+        SaturateOnIntegerOverflow = get_param(Gain_list{i},'SaturateOnIntegerOverflow');
         if strcmp(Multiplication, 'Element-wise(K.*u)')
             pp_name = 'gain_ElementWise';
         elseif strcmp(Multiplication, 'Matrix(K*u)') ...
@@ -35,9 +36,10 @@ if not(isempty(Gain_list))
         end
         set_param(strcat(Gain_list{i},'/Product'),...
             'OutDataTypeStr',outputDataType);
-
+        set_param(strcat(Gain_list{i},'/Product'),...
+            'SaturateOnIntegerOverflow',SaturateOnIntegerOverflow);
     end
-    display_msg('Done\n\n', MsgType.INFO, 'Gain_process', ''); 
+    display_msg('Done\n\n', MsgType.INFO, 'Gain_process', '');
 end
 end
 

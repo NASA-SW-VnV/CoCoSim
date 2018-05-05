@@ -21,6 +21,7 @@ classdef Math_To_Lustre < Block_To_Lustre
             nbInputs = numel(widths);
             max_width = max(widths);
             outputDataType = blk.CompiledPortDataTypes.Outport{1};
+            SaturateOnIntegerOverflow = blk.SaturateOnIntegerOverflow;
             for i=1:nbInputs
                 inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
                 if numel(inputs{i}) < max_width
@@ -30,7 +31,7 @@ classdef Math_To_Lustre < Block_To_Lustre
                 %converts the input data type(s) to
                 %its accumulator data type
                 if ~strcmp(inport_dt, outputDataType)
-                    [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, outputDataType);
+                    [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, outputDataType, [], SaturateOnIntegerOverflow);
                     if ~isempty(external_lib)
                         obj.addExternal_libraries(external_lib);
                         inputs{i} = cellfun(@(x) sprintf(conv_format,x), inputs{i}, 'un', 0);

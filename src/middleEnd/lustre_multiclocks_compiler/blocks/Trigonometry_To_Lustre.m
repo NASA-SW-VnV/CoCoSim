@@ -19,7 +19,6 @@ classdef Trigonometry_To_Lustre < Block_To_Lustre
             widths = blk.CompiledPortWidths.Inport;
             nbInputs = numel(widths);
             max_width = max(widths);
-            outputDataType = blk.CompiledPortDataTypes.Outport{1};
             for i=1:nbInputs
                 inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
                 if numel(inputs{i}) < max_width

@@ -221,6 +221,24 @@ classdef ExtLib
         function [node, external_nodes_i, opens] = get_int_to_uint32()
             [node, external_nodes_i, opens] = ExtLib.getIntToInt('uint32');
         end
+        function [node, external_nodes_i, opens] = get_int_to_int8_saturate()
+            [node, external_nodes_i, opens] = ExtLib.getIntToIntSaturate('int8');
+        end
+        function [node, external_nodes_i, opens] = get_int_to_uint8_saturate()
+            [node, external_nodes_i, opens] = ExtLib.getIntToIntSaturate('uint8');
+        end
+        function [node, external_nodes_i, opens] = get_int_to_int16_saturate()
+            [node, external_nodes_i, opens] = ExtLib.getIntToIntSaturate('int16');
+        end
+        function [node, external_nodes_i, opens] = get_int_to_uint16_saturate()
+            [node, external_nodes_i, opens] = ExtLib.getIntToIntSaturate('uint16');
+        end
+        function [node, external_nodes_i, opens] = get_int_to_int32_saturate()
+            [node, external_nodes_i, opens] = ExtLib.getIntToIntSaturate('int32');
+        end
+        function [node, external_nodes_i, opens] = get_int_to_uint32_saturate()
+            [node, external_nodes_i, opens] = ExtLib.getIntToIntSaturate('uint32');
+        end
         function [node, external_nodes, opens] = getIntToInt(dt)
             opens = {};
             
@@ -237,6 +255,18 @@ classdef ExtLib
             
             external_nodes = {'rem_int_int'};
             
+        end
+        function [node, external_nodes, opens] = getIntToIntSaturate(dt)
+            opens = {};
+            external_nodes = {};
+
+            format = 'node %s (x: int)\nreturns(y:int);\nlet\n\t';
+            format = [format, 'y= if x > %d then %d  \n\t'];
+            format = [format, 'else if x < %d then %d \n\telse x;\ntel\n\n'];
+            v_max = double(intmax(dt));
+            v_min = double(intmin(dt));
+            node_name = strcat('int_to_', dt, '_saturate');
+            node = sprintf(format, node_name, v_max, v_max, v_min, v_min);            
         end
         
         %%
