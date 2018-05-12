@@ -17,7 +17,7 @@ if nargin < 2
     fcts_map = priority_pp_map;
     ordered_functions = ordered_pp_functions;
 end
-cocoSim_path = regexprep(mfilename('fullpath'), 'cocosim2/.+', 'cocosim2');
+cocoSim_path = fileparts(which('start_cocosim'));
 css_source = fullfile(cocoSim_path, 'lib', 'materialize' , 'css' , 'materialize.css');
 html_text = fileread(fullfile(cocoSim_path, 'src', 'backEnd' , 'html_templates' , 'pp_config.html'));
 html_text = strrep(html_text, '[css_source]', css_source);
@@ -91,6 +91,7 @@ if ~strcmp(html_text, '')
 end
 end
 
+%%
 function msg = divide_msg(original_msg, n)
 msg = '';
 i = 1;

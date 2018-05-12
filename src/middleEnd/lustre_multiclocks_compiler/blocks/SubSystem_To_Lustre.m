@@ -24,8 +24,8 @@ classdef SubSystem_To_Lustre < Block_To_Lustre
             [isActionSS, ~] = SubSystem_To_Lustre.hasActionPort(blk);
             if isEnabledSubsystem || isTriggered || isActionSS
                 [codes, node_name, inputs, EnableCondVar] = ...
-                    SubSystem_To_Lustre.EnabledTriggeredSSCall(parent, blk, ...
-                    node_name, blk_name, inputs, ...
+                    SubSystem_To_Lustre.conditionallyExecutedSSCall(parent, blk, ...
+                    node_name, inputs, ...
                     isEnabledSubsystem, EnableShowOutputPortIsOn, ...
                     isTriggered, TriggerShowOutputPortIsOn, TriggerType, TriggerDT, ...
                     isActionSS);
@@ -143,27 +143,32 @@ classdef SubSystem_To_Lustre < Block_To_Lustre
                 TriggerDT = '';
             end
         end
-        
-        function [codes, node_name, inputs, EnableCondVar] = ...
-                EnabledTriggeredSSCall(parent, blk, ...
-                node_name, blk_name, inputs, ...
+        function ExecutionCondName = getExecutionCondName(blk)
+            blk_name = SLX2LusUtils.node_name_format(blk);
+            ExecutionCondName = sprintf('ExecutionCond_of_%s', blk_name);
+        end
+        function [codes, node_name, inputs, ExecutionCondVar] = ...
+                conditionallyExecutedSSCall(parent, blk, ...
+                node_name, inputs, ...
                 isEnabledSubsystem, EnableShowOutputPortIsOn, ...
                 isTriggered, TriggerShowOutputPortIsOn, TriggerType, TriggerBlockDT, ...
                 isActionSS)
             codes = {};
             node_name = strcat(node_name, '_automaton');
-            EnableCondVar = '';
+            ExecutionCondName = SubSystem_To_Lustre.getExecutionCondName(blk);
+            ExecutionCondVar = sprintf('%s:bool;', ExecutionCondName);
             if isActionSS
                 % The case of Action subsystems
                 [srcBlk, srcPort] = SLX2LusUtils.getpreBlock(parent, blk, 'ifaction');
                 if ~isempty(srcBlk)
                     [IfBlkOutputs, ~] = SLX2LusUtils.getBlockOutputsNames(parent, srcBlk);
-                    EnableCondName = IfBlkOutputs{srcPort};
-                    inputs{end + 1} = EnableCondName;
+                    codes{end + 1} = sprintf('%s = %s;\n\t'...
+                        ,ExecutionCondName,  IfBlkOutputs{srcPort});
+                    inputs{end + 1} = ExecutionCondName;
                 end
             else
                 % the case of enabled/triggered subsystems
-                EnableCondName = sprintf('EnableCond_of_%s', blk_name);
+                
                 if EnableShowOutputPortIsOn
                     [Enableinputs] = SLX2LusUtils.getSubsystemEnableInputsNames(parent, blk);
                     inputs = [inputs, Enableinputs];
@@ -175,13 +180,13 @@ classdef SubSystem_To_Lustre < Block_To_Lustre
                     TriggerinputsExp = {};
                     for i=1:blk.CompiledPortWidths.Trigger
                         TriggerinputsExp{i} = ...
-                            SLX2LusUtils.getTriggerValue(EnableCondName,...
+                            SLX2LusUtils.getTriggerValue(ExecutionCondName,...
                             triggerInputs{i}, TriggerType, lusTriggerportDataType, lusIncomingSignalDataType);
                     end
                     inputs = [inputs, TriggerinputsExp];
                 end
                 
-                EnableCondVar = sprintf('%s:bool;', EnableCondName);
+                
                 EnableCond = '';
                 if isEnabledSubsystem
                     enableportDataType = blk.CompiledPortDataTypes.Enable{1};
@@ -222,8 +227,8 @@ classdef SubSystem_To_Lustre < Block_To_Lustre
                     end
                 end
                 codes{end + 1} = sprintf('%s = %s;\n\t'...
-                    ,EnableCondName,  EnableCond);
-                inputs{end + 1} = EnableCondName;
+                    ,ExecutionCondName,  EnableCond);
+                inputs{end + 1} = ExecutionCondName;
             end
         end
         function [codes, ResetCondVar] = ResettableSSCall(parent, blk, ...

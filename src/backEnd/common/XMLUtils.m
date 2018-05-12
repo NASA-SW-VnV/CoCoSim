@@ -40,6 +40,13 @@ classdef XMLUtils
                             block = output.getElementsByTagName('block_name');
                             block_name = char(block.item(0).getFirstChild.getData);
                             out_port_nb_xml = output.getElementsByTagName('out_port_nb');
+                            if out_port_nb_xml.getLength == 0
+                                out_port_nb_xml = output.getElementsByTagName('in_port_nb');
+                            end
+                            if out_port_nb_xml.getLength == 0
+                                dimension = '';
+                                continue;
+                            end
                             out_port_nb = char(out_port_nb_xml.item(0).getFirstChild.getData);
                             dimension_xml = output.getElementsByTagName('dimension');
                             dimension = char(dimension_xml.item(0).getFirstChild.getData);

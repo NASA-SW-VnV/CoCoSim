@@ -51,6 +51,7 @@ Hamza:  Abs,
         InportShadow(pp),
         Integrator (pp),
         Memory (pp)
+        Merge,
         MinMax,
         Outport,
         Quantizer (pp),
@@ -96,7 +97,7 @@ Blocks that has left from Biosentinel:
 
     Fcn (partially done in pp) (Khanh)
    
-    Merge (Hamza)
+    
     ModelReference (Hamza)
     RandomNumber ( to translate to empty node with contract) (Hamza)
     RateTransition (check the pp, Khanh),

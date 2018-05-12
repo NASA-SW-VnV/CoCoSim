@@ -114,7 +114,7 @@ classdef SLX2LusUtils < handle
             % outputs.
             % Example : an Inport In with dimension [2, 3] will be
             % translated as : In_1, In_2, In_3, In_4, In_5, In_6.
-            % where In_1 = In(1,1), In_2 = In(2,1), In_3 = In(1,2),        
+            % where In_1 = In(1,1), In_2 = In(2,1), In_3 = In(1,2),
             % In_4 = In(2,2), In_5 = In(1,3), In_6 = In(2,3).
             % A block is defined by its outputs, if a block does not
             % have outports, like Outport block, than will be defined by its
@@ -178,7 +178,7 @@ classdef SLX2LusUtils < handle
                 end
             end
             if nargin >= 3 && ~isempty(srcPort)...
-                    && ~strcmp(blk.CompiledPortDataTypes.Outport{srcPort + 1}, 'auto') 
+                    && ~strcmp(blk.CompiledPortDataTypes.Outport{srcPort + 1}, 'auto')
                 port = srcPort + 1;% srcPort starts by zero
                 [names, names_dt] = blockOutputs(port);
             else
@@ -255,7 +255,7 @@ classdef SLX2LusUtils < handle
                 src = get_struct(parent, srcHandle);
             end
         end
-        %% get pre block DataType for specific port, 
+        %% get pre block DataType for specific port,
         %it is used in the case of 'auto' type.
         function lus_dt = getpreBlockLusDT(parent, blk, portNumber)
             lus_dt = {};
@@ -280,7 +280,7 @@ classdef SLX2LusUtils < handle
                 width = srcBlk.CompiledPortWidths.Inport;
                 for port=1:numel(width)
                     slx_dt = srcBlk.CompiledPortDataTypes.Inport{port};
-                    if strcmp(slx_dt, 'auto') 
+                    if strcmp(slx_dt, 'auto')
                         lus_dt = [lus_dt, ...
                             SLX2LusUtils.getpreBlockLusDT(parent, srcBlk, port)];
                     else
@@ -316,7 +316,7 @@ classdef SLX2LusUtils < handle
                     Lustre_type = 'bool';
                 elseif strncmp(slx_dt, 'int', 3) || strncmp(slx_dt, 'uint', 4) || strncmp(slx_dt, 'fixdt(1,16,', 11) || strncmp(slx_dt, 'sfix64', 6)
                     Lustre_type = 'int';
-                elseif strcmp(slx_dt, 'double') || strcmp(slx_dt, 'single') 
+                elseif strcmp(slx_dt, 'double') || strcmp(slx_dt, 'single')
                     Lustre_type = 'real';
                 else
                     % considering enumaration as int
@@ -420,6 +420,54 @@ classdef SLX2LusUtils < handle
                 end
             end
         end
+        
+        %% Get the initial ouput of Outport depending on the dimension.
+        function InitialOutput_cell = getInitialOutput(parent, blk, slx_dt, max_width)
+            lus_outputDataType = SLX2LusUtils.get_lustre_dt(slx_dt);
+            if strcmp(blk.InitialOutput, '[]')
+                InitialOutput = '0';
+            else
+                InitialOutput = blk.InitialOutput;
+            end
+            [InitialOutputValue, InitialOutputType, status] = ...
+                Constant_To_Lustre.getValueFromParameter(parent, blk, InitialOutput);
+            if status
+                display_msg(sprintf('InitialOutput %s in block %s not found neither in Matlab workspace or in Model workspace',...
+                    blk.InitialOutput, blk.Origin_path), ...
+                    MsgType.ERROR, 'Outport_To_Lustre', '');
+                return;
+            end
+            
+            InitialOutput_cell = {};
+            for i=1:numel(InitialOutputValue)
+                if strcmp(lus_outputDataType, 'real')
+                    InitialOutput_cell{i} = sprintf('%.15f', InitialOutputValue(i));
+                elseif strcmp(lus_outputDataType, 'int')
+                    InitialOutput_cell{i} = sprintf('%d', int32(InitialOutputValue(i)));
+                elseif strcmp(lus_outputDataType, 'bool')
+                    if InitialOutputValue(i)
+                        InitialOutput_cell{i} = 'true';
+                    else
+                        InitialOutput_cell{i} = 'false';
+                    end
+                elseif strncmp(InitialOutputType, 'int', 3) ...
+                        || strncmp(InitialOutputType, 'uint', 4)
+                    InitialOutput_cell{i} = num2str(InitialOutputValue(i));
+                elseif strcmp(InitialOutputType, 'boolean') || strcmp(InitialOutputType, 'logical')
+                    if InitialOutputValue(i)
+                        InitialOutput_cell{i} = 'true';
+                    else
+                        InitialOutput_cell{i} = 'false';
+                    end
+                else
+                    InitialOutput_cell{i} = sprintf('%.15f', InitialOutputValue(i));
+                end
+            end
+            if numel(InitialOutput_cell) < max_width
+                InitialOutput_cell = arrayfun(@(x) {InitialOutput_cell{1}}, (1:max_width));
+            end
+            
+        end
         %% Data type conversion node name
         function [external_lib, conv_format] = dataType_conversion(inport_dt, outport_dt, RndMeth, SaturateOnIntegerOverflow)
             lus_in_dt = SLX2LusUtils.get_lustre_dt( inport_dt);
@@ -481,15 +529,15 @@ classdef SLX2LusUtils < handle
                     % issue should be solved in Lustrec, if lustrec support
                     % int32_t, the following is not important, it is
                     % supported by the previous case (with int16, uint16).
-%                 case {'int32','uint32'}
-%                     % supporting 'int32','uint32' as lustre int.
-%                     if strcmp(lus_in_dt, 'bool')
-%                         external_lib = {'bool_to_int'};
-%                         conv_format = 'bool_to_int(%s)';
-%                     elseif strcmp(lus_in_dt, 'real')
-%                         external_lib = {RndMeth};
-%                         conv_format = strcat(RndMeth, '(%s)');
-%                     end
+                    %                 case {'int32','uint32'}
+                    %                     % supporting 'int32','uint32' as lustre int.
+                    %                     if strcmp(lus_in_dt, 'bool')
+                    %                         external_lib = {'bool_to_int'};
+                    %                         conv_format = 'bool_to_int(%s)';
+                    %                     elseif strcmp(lus_in_dt, 'real')
+                    %                         external_lib = {RndMeth};
+                    %                         conv_format = strcat(RndMeth, '(%s)');
+                    %                     end
                     
                 case {'fixdt(1,16,0)', 'fixdt(1,16,2^0,0)'}
                     % DataType conversion not supported yet

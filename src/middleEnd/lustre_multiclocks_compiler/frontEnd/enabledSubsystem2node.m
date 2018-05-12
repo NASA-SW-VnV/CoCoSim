@@ -92,7 +92,8 @@ for i=1:numel(Outportfields)
     outport_blk = subsys.Content.(Outportfields{i});
     [outputs_i, outputs_DT_i] = SLX2LusUtils.getBlockOutputsNames(subsys, outport_blk);
     OutputWhenDisabled = outport_blk.OutputWhenDisabled;
-    InitialOutput_cell = getInitialOutput(subsys, outport_blk);
+    InitialOutput_cell = SLX2LusUtils.getInitialOutput(subsys, outport_blk,...
+        outport_blk.CompiledPortDataTypes.Inport{1}, outport_blk.CompiledPortWidths.Inport);
     for out_idx=1:numel(outputs_i)
         variables_cell{end + 1} = sprintf('pre_%s',outputs_DT_i{out_idx});
         inactiveStatement = sprintf('%s %s = pre_%s;\n\t', ...
@@ -134,51 +135,4 @@ if ~isempty(variables_str)
 end
 end
 
-%% Get the initial ouput of Outport depending on the dimension.
-function InitialOutput_cell = getInitialOutput(parent, blk)
-lus_outputDataType = SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Inport{1});
-if strcmp(blk.InitialOutput, '[]')
-    InitialOutput = '0';
-else
-    InitialOutput = blk.InitialOutput;
-end
-[InitialOutputValue, InitialOutputType, status] = ...
-    Constant_To_Lustre.getValueFromParameter(parent, blk, InitialOutput);
-if status
-    display_msg(sprintf('InitialOutput %s in block %s not found neither in Matlab workspace or in Model workspace',...
-        blk.InitialOutput, blk.Origin_path), ...
-        MsgType.ERROR, 'Outport_To_Lustre', '');
-    return;
-end
-
-InitialOutput_cell = {};
-for i=1:numel(InitialOutputValue)
-    if strcmp(lus_outputDataType, 'real')
-        InitialOutput_cell{i} = sprintf('%.15f', InitialOutputValue(i));
-    elseif strcmp(lus_outputDataType, 'int')
-        InitialOutput_cell{i} = sprintf('%d', int32(InitialOutputValue(i)));
-    elseif strcmp(lus_outputDataType, 'bool')
-        if InitialOutputValue(i)
-            InitialOutput_cell{i} = 'true';
-        else
-            InitialOutput_cell{i} = 'false';
-        end
-    elseif strncmp(InitialOutputType, 'int', 3) ...
-            || strncmp(InitialOutputType, 'uint', 4)
-        InitialOutput_cell{i} = num2str(InitialOutputValue(i));
-    elseif strcmp(InitialOutputType, 'boolean') || strcmp(InitialOutputType, 'logical')
-        if InitialOutputValue(i)
-            InitialOutput_cell{i} = 'true';
-        else
-            InitialOutput_cell{i} = 'false';
-        end
-    else
-        InitialOutput_cell{i} = sprintf('%.15f', InitialOutputValue(i));
-    end
-end
-if numel(InitialOutput_cell) < blk.CompiledPortWidths.Inport
-    InitialOutput_cell = arrayfun(@(x) {InitialOutput_cell{1}}, (1:blk.CompiledPortWidths.Inport));
-end
-
-end
 
