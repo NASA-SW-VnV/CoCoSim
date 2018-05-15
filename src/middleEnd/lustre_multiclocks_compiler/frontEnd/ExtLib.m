@@ -118,7 +118,121 @@ classdef ExtLib
         end
         
         %%
+        function [node, external_nodes_i, opens] = get__AND_Bitwise_8()
+            [node, external_nodes_i, opens] = ExtLib.getANDBitwise(8);
+        end
+        function [node, external_nodes_i, opens] = get__AND_Bitwise_16()
+            [node, external_nodes_i, opens] = ExtLib.getANDBitwise(16);
+        end
+        function [node, external_nodes_i, opens] = get__AND_Bitwise_32()
+            [node, external_nodes_i, opens] = ExtLib.getANDBitwise(32);
+        end
         
+        function [node, external_nodes, opens] = getANDBitwise(n)
+            opens = {};
+            external_nodes = {};
+            
+            code = {};
+            for i=0:n-1
+                v2_pown = 2^i;
+                code{end+1} = sprintf('%d*((x / %d) mod 2)*((y / %d) mod 2)', v2_pown, v2_pown, v2_pown);
+            end
+            code = MatlabUtils.strjoin(code, ' \n\t+ ');
+            node_name = strcat('_AND_Bitwise_', num2str(n));
+            
+            format = 'node %s (x, y: int)\nreturns(z:int);\nlet\n\t';
+            format = [format, 'z = %s;\ntel\n\n'];
+            node = sprintf(format, node_name, code);
+            
+            
+        end
+        function [node, external_nodes_i, opens] = get__OR_Bitwise_8()
+            [node, external_nodes_i, opens] = ExtLib.getORBitwise(8);
+        end
+        function [node, external_nodes_i, opens] = get__OR_Bitwise_16()
+            [node, external_nodes_i, opens] = ExtLib.getORBitwise(16);
+        end
+        function [node, external_nodes_i, opens] = get__OR_Bitwise_32()
+            [node, external_nodes_i, opens] = ExtLib.getORBitwise(32);
+        end
+        function [node, external_nodes, opens] = getORBitwise(n)
+            opens = {};
+            external_nodes = {};
+            
+            code = {};
+            for i=0:n-1
+                v2_pown = 2^i;
+                code{end+1} = sprintf('%d*(((((x / %d) mod 2) + ((y / %d) mod 2) + ((x / %d) mod 2)*((y / %d) mod 2))) mod 2)',...
+                    v2_pown, v2_pown, v2_pown, v2_pown, v2_pown);
+            end
+            code = MatlabUtils.strjoin(code, ' \n\t+ ');
+            node_name = strcat('_OR_Bitwise_', num2str(n));
+            
+            format = 'node %s (x, y: int)\nreturns(z:int);\nlet\n\t';
+            format = [format, 'z = %s;\ntel\n\n'];
+            node = sprintf(format, node_name, code);
+            
+            
+        end
+        function [node, external_nodes_i, opens] = get__XOR_Bitwise_8()
+            [node, external_nodes_i, opens] = ExtLib.getXORBitwise(8);
+        end
+        function [node, external_nodes_i, opens] = get__XOR_Bitwise_16()
+            [node, external_nodes_i, opens] = ExtLib.getXORBitwise(16);
+        end
+        function [node, external_nodes_i, opens] = get__XOR_Bitwise_32()
+            [node, external_nodes_i, opens] = ExtLib.getXORBitwise(32);
+        end
+        
+        function [node, external_nodes, opens] = getXORBitwise(n)
+            opens = {};
+            external_nodes = {};
+            
+            code = {};
+            for i=0:n-1
+                v2_pown = 2^i;
+                code{end+1} = sprintf('%d*(((x / %d) + (y / %d)) mod 2)', v2_pown, v2_pown, v2_pown);
+            end
+            code = MatlabUtils.strjoin(code, ' \n\t+ ');
+            node_name = strcat('_XOR_Bitwise_', num2str(n));
+            
+            format = 'node %s (x, y: int)\nreturns(z:int);\nlet\n\t';
+            format = [format, 'z = %s;\ntel\n\n'];
+            node = sprintf(format, node_name, code);
+            
+            
+        end
+        function [node, external_nodes_i, opens] = get__NOT_Bitwise_Signed()
+            [node, external_nodes_i, opens] = ExtLib.getNOTBitwiseSigned();
+        end
+        function [node, external_nodes_i, opens] = get__NOT_Bitwise_Unsigned_8()
+            [node, external_nodes_i, opens] = ExtLib.getNOTBitwiseUnsigned(8);
+        end
+        function [node, external_nodes_i, opens] = get__NOT_Bitwise_Unsigned_16()
+            [node, external_nodes_i, opens] = ExtLib.getNOTBitwiseUnsigned(16);
+        end
+        function [node, external_nodes_i, opens] = get__NOT_Bitwise_Unsigned_32()
+            [node, external_nodes_i, opens] = ExtLib.getNOTBitwiseUnsigned(32);
+        end
+        
+        function [node, external_nodes, opens] = getNOTBitwiseUnsigned(n)
+            opens = {};
+            external_nodes = {};
+            v2_pown = 2^n - 1;
+            format = 'node %s (x: int)\nreturns(y:int);\nlet\n\t';
+            format = [format, 'y=  %d - x ;\ntel\n\n'];
+            node_name = strcat('_NOT_Bitwise_Unsigned_', num2str(n));
+            node = sprintf(format, node_name,v2_pown);            
+        end
+        function [node, external_nodes, opens] = getNOTBitwiseSigned()
+            opens = {};
+            external_nodes = {};
+            format = 'node %s (x: int)\nreturns(y:int);\nlet\n\t';
+            format = [format, 'y=   - x - 1;\ntel\n\n'];
+            node_name = strcat('_NOT_Bitwise_Signed');
+            node = sprintf(format, node_name);            
+        end
+        %%
         function [node, external_nodes_i, opens] = get_int_to_int8()
             [node, external_nodes_i, opens] = ExtLib.getIntToInt('int8');
         end
@@ -157,16 +271,18 @@ classdef ExtLib
         end
         function [node, external_nodes, opens] = getIntToInt(dt)
             opens = {};
-            format = 'node %s (x: int)\nreturns(y:int);\nlet\n\t';
-            format = [format, 'y= if x > %d then %d + rem_int_int((x - %d - 1),%d) \n\t'];
-            format = [format, 'else if x < %d then %d + rem_int_int((x - (%d) + 1),%d) \n\telse x;\ntel\n\n'];
+            
             v_max = double(intmax(dt));
             v_min = double(intmin(dt));
             nb_int = (v_max - v_min + 1);
             node_name = strcat('int_to_', dt);
             
+            format = 'node %s (x: int)\nreturns(y:int);\nlet\n\t';
+            format = [format, 'y= if x > %d then %d + rem_int_int((x - %d - 1),%d) \n\t'];
+            format = [format, 'else if x < %d then %d + rem_int_int((x - (%d) + 1),%d) \n\telse x;\ntel\n\n'];
             node = sprintf(format, node_name, v_max, v_min, v_max, nb_int,...
                 v_min, v_max, v_min, nb_int);
+            
             external_nodes = {'rem_int_int'};
             
         end

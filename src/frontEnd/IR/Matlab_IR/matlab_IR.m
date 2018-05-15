@@ -8,7 +8,7 @@ function [ fun_ir_path, status ] = matlab_IR( fun_path, dst_path )
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-em_jar_path = which('EM.jar');
+em_jar_path = which('Matlab-Parser.jar');
 
 if isempty(em_jar_path)
     display_msg('EM.jar not found.', MsgType.ERROR, 'matlab_IR', '');

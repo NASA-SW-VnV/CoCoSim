@@ -104,23 +104,10 @@ classdef Selector_To_Lustre < Block_To_Lustre
                         end                        
                     end
                     
-                elseif strcmp(blk.IndexOptionArray{i}, 'Starting and ending indices (port)')      
-                    isPortIndex = true;
-                    indexPortNumber = indexPortNumber + 1;
-                    portNumber = indexPortNumber + 1;   % 1st is for input
-                    indPortNumber(i) = portNumber;
-                    outputDimsArray(i) = numel(inputs{portNumber});
-                    for j=1:outputDimsArray(i)
-                        if strcmp(IndexMode, 'Zero-based')
-                            ind{i}{j} = sprintf('%s + 1',inputs{portNumber}{j});
-                        else
-                            ind{i}{j} = inputs{portNumber}{j};
-                        end
-                    end                 
+                elseif strcmp(blk.IndexOptionArray{i}, 'Starting and ending indices (port)')                      
                     display_msg(sprintf('Starting and ending indices (port) is not supported in block %s',...
                         blk.Origin_path), ...
-                        MsgType.ERROR, 'Selector_To_Lustre', '');    
-                   
+                        MsgType.ERROR, 'Selector_To_Lustre', '');                      
                 else
                     % should not be here
                     display_msg(sprintf('IndexOption  %s not recognized in block %s',...
@@ -319,6 +306,14 @@ classdef Selector_To_Lustre < Block_To_Lustre
             obj.unsupported_options = {};
             [numOutDims, ~, ~] = ...
                 Constant_To_Lustre.getValueFromParameter(parent, blk, blk.NumberOfDimensions);
+            for i=1:numOutDims
+                if strcmp(blk.IndexOptionArray{i}, 'Starting and ending indices (port)')
+                    obj.addUnsupported_options(...
+                        sprintf('Starting and ending indices (port) is not supported in block %s',...
+                        indexBlock.Origin_path), ...
+                        MsgType.ERROR, 'Selector_To_Lustre', '');
+                end
+            end
             if numOutDims>7
                 obj.addUnsupported_options(...
                     sprintf('More than 7 dimensions is not supported in block %s',...
