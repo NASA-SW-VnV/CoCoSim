@@ -62,7 +62,7 @@ xml_trace.init();
 if exist(new_model_path,'file')
     if BUtils.isLastModified(json_path, new_model_path) && ~force
         msg = sprintf('lus2slx file "%s" already generated. It will be used.\n',new_model_path);
-        display_msg(msg, MsgType.DEBUG, 'generate_emf', '');
+        display_msg(msg, MsgType.DEBUG, 'lus2slx', '');
         return;
     end
     if bdIsLoaded(new_model_name)

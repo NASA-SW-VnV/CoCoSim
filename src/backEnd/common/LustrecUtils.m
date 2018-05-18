@@ -72,6 +72,7 @@ classdef LustrecUtils < handle
         function [emf_path, status] = ...
                 generate_emf(lus_file_path, output_dir, ...
                 LUSTREC,...
+                LUSTREC_OPTS,...
                 LUCTREC_INCLUDE_DIR)
             if nargin < 4
                 tools_config;
@@ -97,8 +98,8 @@ classdef LustrecUtils < handle
             end
             msg = sprintf('generating emf "%s"\n',lus_file_path);
             display_msg(msg, MsgType.INFO, 'generate_emf', '');
-            command = sprintf('%s -I "%s" -d "%s" -algebraic-loop-solve -emf  "%s"',...
-                LUSTREC,LUCTREC_INCLUDE_DIR, output_dir, lus_file_path);
+            command = sprintf('%s %s -I "%s" -d "%s"  -emf  "%s"',...
+                LUSTREC, LUSTREC_OPTS, LUCTREC_INCLUDE_DIR, output_dir, lus_file_path);
             msg = sprintf('EMF_LUSTREC_COMMAND : %s\n',command);
             display_msg(msg, MsgType.INFO, 'generate_emf', '');
             [status, emf_out] = system(command);
@@ -149,6 +150,7 @@ classdef LustrecUtils < handle
                 node_name, ...
                 output_dir, ...
                 LUSTREC,...
+                LUSTREC_OPTS, ...
                 LUCTREC_INCLUDE_DIR)
             if nargin < 4
                 tools_config;
@@ -171,8 +173,8 @@ classdef LustrecUtils < handle
                 return;
             end
             %-algebraic-loop-solve should be added
-            command = sprintf('%s -algebraic-loop-solve -I "%s" -d "%s" -node %s "%s"',...
-                LUSTREC,LUCTREC_INCLUDE_DIR, output_dir, node_name, lus_file_path);
+            command = sprintf('%s %s -I "%s" -d "%s" -node %s "%s"',...
+                LUSTREC, LUSTREC_OPTS, LUCTREC_INCLUDE_DIR, output_dir, node_name, lus_file_path);
             msg = sprintf('LUSTREC_COMMAND : %s\n',command);
             display_msg(msg, MsgType.INFO, 'compile_lustre_to_Cbinary', '');
             [err, lustre_out] = system(command);
@@ -294,7 +296,7 @@ classdef LustrecUtils < handle
                 LUCTREC_INCLUDE_DIR)
             main_node_struct = [];
             [contract_path, status] = LustrecUtils.generate_emf(...
-                lus_file_path, '', LUSTREC, LUCTREC_INCLUDE_DIR);
+                lus_file_path, '', LUSTREC, '', LUCTREC_INCLUDE_DIR);
             
             if status==0
                 % extract main node struct from EMF
@@ -485,7 +487,7 @@ classdef LustrecUtils < handle
             %generate emf json
             [emf_path, status] = ...
                 LustrecUtils.generate_emf(lus_file_path, output_dir, ...
-                LUSTREC, LUCTREC_INCLUDE_DIR);
+                LUSTREC, LUSTREC_OPTS, LUCTREC_INCLUDE_DIR);
             if status
                 return;
             end
@@ -793,7 +795,7 @@ classdef LustrecUtils < handle
             %generate emf json
             [emf_path, status] = ...
                 LustrecUtils.generate_emf(lus_file_path, output_dir, ...
-                LUSTREC, LUCTREC_INCLUDE_DIR);
+                LUSTREC, LUSTREC_OPTS, LUCTREC_INCLUDE_DIR);
             if status
                 return;
             end
@@ -1527,7 +1529,7 @@ classdef LustrecUtils < handle
             err = LustrecUtils.compile_lustre_to_Cbinary(lus_file_path,...
                 LusValidateUtils.name_format(node_name), ...
                 output_dir, ...
-                LUSTREC, LUCTREC_INCLUDE_DIR);
+                LUSTREC, LUSTREC_OPTS, LUCTREC_INCLUDE_DIR);
             if err
                 lustrec_failed = 1;
                 return

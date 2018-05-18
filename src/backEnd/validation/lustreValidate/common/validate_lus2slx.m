@@ -38,7 +38,7 @@ status = BUtils.check_files_exist(LUSTREC, LUCTREC_INCLUDE_DIR);
 if status
     return;
 end
-[emf_path, status] = LustrecUtils.generate_emf(lus_file_path, output_dir, LUSTREC, LUCTREC_INCLUDE_DIR);
+[emf_path, status] = LustrecUtils.generate_emf(lus_file_path, output_dir, LUSTREC, LUSTREC_OPTS, LUCTREC_INCLUDE_DIR);
 if status
     return;
 end

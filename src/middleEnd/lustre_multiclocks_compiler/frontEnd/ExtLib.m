@@ -146,6 +146,27 @@ classdef ExtLib
             
             
         end
+        function [node, external_nodes, opens] = getANDBitwiseSigned(n)
+            opens = {};
+            extNode = sprintf('int_to_int%d',n);
+            external_nodes = {extNode};
+            
+            code = {};
+            for i=0:n-1
+                v2_pown = 2^i;
+                code{end+1} = sprintf('%d*((x2 / %d) mod 2)*((y2 / %d) mod 2)', v2_pown, v2_pown, v2_pown);
+            end
+            code = MatlabUtils.strjoin(code, ' \n\t+ ');
+            node_name = strcat('_AND_Bitwise_', num2str(n));
+            v2_pown = 2^n;
+            format = 'node %s (x, y: int)\nreturns(z:int);\nvar x2, y2:int;\nlet\n\t';
+            format = [format, 'x2 = if x < 0 then %d + x - 1 else x;\n\t'];
+            format = [format, 'y2 = if y < 0 then %d + y - 1 else y;\n\t'];
+            format = [format, 'z = %s(%s);\ntel\n\n'];
+            node = sprintf(format, node_name, v2_pown, v2_pown, extNode, code);
+            
+            
+        end
         function [node, external_nodes_i, opens] = get__OR_Bitwise_8()
             [node, external_nodes_i, opens] = ExtLib.getORBitwise(8);
         end

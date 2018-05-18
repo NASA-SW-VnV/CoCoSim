@@ -58,6 +58,10 @@ if ~exist('solvers_path', 'var')
 end
 
 LUSTREC = fullfile(solvers_path, 'lustrec', 'bin', 'lustrec');
+%LUSTREC_OPTS defines options that should be passed to Lustrec when it is
+%called. e.g. "int_div_euclidean" interprets integer division as Euclidean 
+%(default : C division semantics)
+LUSTREC_OPTS = '-int_div_euclidean -algebraic-loop-solve -int "long long int"';
 LUSTRET = fullfile(solvers_path, 'lustrec', 'bin', 'lustret');
 LUCTREC_INCLUDE_DIR = fullfile(solvers_path, 'lustrec', 'include', 'lustrec');
 ZUSTRE = fullfile(solvers_path,'zustre', 'bin', 'zustre');
