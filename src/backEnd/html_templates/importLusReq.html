@@ -1,0 +1,50 @@
+<html>
+<head>
+<!--Import Google Icon Font-->
+<link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<!--Import materialize.css-->
+<link type="text/css" rel="stylesheet" href="[css_source]"  media="screen,projection"/>
+<!-- Compiled and minified CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css">
+<!-- Compiled and minified JavaScript -->
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>    
+<title>Import Lustre Requirements</title>
+<script type="text/javascript">
+function upload() {
+commandURI="matlab://importLusReq('[model_full_path]','" + document.getElementById('LusFile').value + "', '" + document.getElementById('TraceFile').value + "');";
+document.location=commandURI;
+
+}
+</script>
+<head>
+<body>
+<div class="container">
+<div class="collection">
+<form action="#">
+Lustre file path:<br>
+<input type="text" id="LusFile" placeholder="Full path of Lustre requirement file.">
+<br>
+Traceability file path:<br>
+<input type="text" id="TraceFile" placeholder="Full path of traceability file.">
+<br><br>
+<div >
+<input class="waves-effect waves-light btn" type="button" onclick="upload()" value="UPLOAD">
+</div>
+</form>
+</div>
+
+</div>
+
+
+<footer class="page-footer">
+<div class="footer-copyright">
+<div class="container">
+CoCoSim2 copyright 2017
+<a class="grey-text text-lighten-4 right" href="">CoCoSim @ NASA</a>
+</div>
+</div>
+</footer>
+</body>
+</html>
+</body></html>
