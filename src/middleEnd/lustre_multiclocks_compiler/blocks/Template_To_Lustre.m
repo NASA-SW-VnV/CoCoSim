@@ -43,6 +43,7 @@ classdef Template_To_Lustre < Block_To_Lustre
             outputDataType = blk.CompiledPortDataTypes.Outport{1};
             % If "X" has a rounding method, it should be saved.
             RndMeth = blk.RndMeth;
+            SaturateOnIntegerOverflow = blk.SaturateOnIntegerOverflow;
             % Go over inputs, numel(widths) is the number of inputs. In
             % this example is 2 ("In1", "In2").
             for i=1:numel(widths)
@@ -74,7 +75,7 @@ classdef Template_To_Lustre < Block_To_Lustre
                     % this function return if a casting is needed
                     % "conv_format", a library or the name of casting node
                     % will be stored in "external_lib".
-                    [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, outputDataType, RndMeth);
+                    [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, outputDataType, RndMeth, SaturateOnIntegerOverflow);
                     if ~isempty(external_lib)
                         % always add the "external_lib" to the object
                         % external libraries, (so it can be declared in the

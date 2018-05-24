@@ -74,7 +74,7 @@ classdef Sum_To_Lustre < Block_To_Lustre
                 operator_character = '*';
                 initCode = one;
             end
-            [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(AccumDataTypeStr, OutputDataTypeStr, RndMeth, SaturateOnIntegerOverflow);
+            [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(AccumDataTypeStr, OutputDataTypeStr, blk.RndMeth, blk.SaturateOnIntegerOverflow);
             if ~isempty(external_lib)
                 obj.addExternal_libraries(external_lib);
             end
@@ -118,7 +118,20 @@ classdef Sum_To_Lustre < Block_To_Lustre
                     [codes, AdditionalVars] = Product_To_Lustre.matrix_multiply(blk, inputs, outputs, zero, LusOutputDataTypeStr );
                 else
                     % element wise operations
-                    [codes] = Sum_To_Lustre.elementWiseSumProduct(exp, inputs, outputs, widths, initCode, conv_format);
+                    % If it is integer division, we need to call the
+                    % appropriate division methode. We assume Lustre
+                    % division is the Euclidean division for integers.
+                    [LusInputDataTypeStr, ~, ~] = SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Inport{1});
+                    if strcmp(LusOutputDataTypeStr, 'int') ...
+                            && strcmp(LusInputDataTypeStr, 'int') ...
+                            && ~strcmp(blk.RndMeth, 'Floor') 
+                        int_divFun = sprintf('int_div_%s', blk.RndMeth);
+                        obj.addExternal_libraries(int_divFun);
+                    else
+                        int_divFun = '';
+                    end
+                    [codes] = Sum_To_Lustre.elementWiseSumProduct(exp, ...
+                        inputs, outputs, widths, initCode, conv_format, int_divFun);
                 end
             end
         end
@@ -149,12 +162,16 @@ classdef Sum_To_Lustre < Block_To_Lustre
             end
         end
         %%
-        function [codes] = elementWiseSumProduct(exp, inputs, outputs, widths, initCode, conv_format)
+        function [codes] = elementWiseSumProduct(exp, inputs, outputs, widths, initCode, conv_format, int_divFun)
             codes = {};
             for i=1:numel(outputs)
                 code = initCode;
                 for j=1:numel(widths)
-                    code = sprintf('%s %s %s',code, exp(j), inputs{j}{i});
+                    if ~isempty(int_divFun) && strcmp(exp(j), '/')
+                        code = sprintf('%s(%s, %s)',int_divFun, code, inputs{j}{i});
+                    else
+                        code = sprintf('%s %s %s',code, exp(j), inputs{j}{i});
+                    end
                 end
                 if ~isempty(conv_format)
                     code = sprintf(conv_format, code);

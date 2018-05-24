@@ -321,6 +321,44 @@ classdef ExtLib
         end
         
         %%
+        % The following functions assume "/" and "mod" in Lustre as in
+        % euclidean division for integers.
+        function [node, external_nodes_i, opens] = get_abs_int()
+            opens = {};
+            external_nodes_i = {};
+            format = 'node abs_int (x: int)\nreturns(y:int);\nlet\n\t';
+            format = [format, 'y= if x >= 0 then x \n\t'];
+            format = [format, 'else -x;\ntel\n\n'];
+            node = sprintf(format);
+        end
+        function [node, external_nodes_i, opens] = get_int_div_Ceiling()
+            opens = {};
+            external_nodes_i = {'abs_int'};
+            format = '--Rounds positive and negative numbers toward positive infinity\n ';
+            format = [format,  'node int_div_Ceiling (x, y: int)\nreturns(z:int);\nlet\n\t'];
+            format = [format, 'z= if y = 0 then if x>0 then 2147483647 else -2147483648\n\t'];
+            format = [format, 'else if x mod y = 0 then x/y\n\t'];
+            format = [format, 'else if (abs_int(y) > abs_int(x) and x*y>0) then 1 \n\t'];
+            format = [format, 'else if (abs_int(y) > abs_int(x) and x*y<0) then 0 \n\t'];
+            format = [format, 'else if (x>0 and y < 0) then x/y \n\t'];
+            format = [format, 'else if (x<0 and y > 0) then (-x)/(-y) \n\t'];
+            format = [format, 'else if (x<0 and y < 0) then (-x)/(-y) + 1 \n\t'];
+            format = [format, 'else x/y + 1;\ntel\n\n'];
+            node = sprintf(format);
+        end
+        function [node, external_nodes_i, opens] = get_int_div_Nearest()
+            opens = {};
+            external_nodes_i = {};
+            format = '--Rounds number to the nearest representable value. If a tie occurs, rounds toward positive infinity\n ';
+            format = [format,  'node int_div_Nearest (x, y: int)\nreturns(z:int);\nlet\n\t'];
+            format = [format, 'z= if y = 0 then if x>0 then 2147483647 else -2147483648\n\t'];
+            format = [format, 'else if x mod y = 0 then x/y\n\t'];
+            format = [format, 'else if (y > 0) and ((x mod y)*2 >= y ) then x/y+1 \n\t'];
+            format = [format, 'else if (y < 0) and ((x mod y)*2 >= (-y))  then x/y-1 \n\t'];
+            format = [format, 'else x/y;\ntel\n\n'];
+            node = sprintf(format);
+        end
+        %%
         function [node, external_nodes_i, opens] = get__Floor()
             opens = {'conv'};
             external_nodes_i = {};
@@ -467,13 +505,19 @@ classdef ExtLib
             external_nodes_i = {};
             node = '';
         end
-        
         function [node, external_nodes_i, opens] = get_rem_int_int()
             opens = {};
             external_nodes_i = {};
             format = 'node rem_int_int (x, y: int)\nreturns(z:int);\nlet\n\t';
-            format = [format, 'z= if (x < 0) and (y > 0) then (x mod -y) \n\t'];
-            format = [format, 'else (x mod y);\ntel\n\n'];
+            format = [format, 'z = if y=0 then 0\n\t\telse\n\t\t (x mod y) - (if (x mod y <> 0 and x <= 0) then (if y > 0 then y else -y) else 0);\ntel\n\n'];
+            
+            node = sprintf(format);
+        end
+        function [node, external_nodes_i, opens] = get_mod_int_int()
+            opens = {};
+            external_nodes_i = {};
+            format = 'node mod_int_int (x, y: int)\nreturns(z:int);\nlet\n\t';
+            format = [format, 'z = if y=0 then x\n\t\telse\n\t\t (x mod y) - (if (x mod y <> 0 and y <= 0) then (if y > 0 then y else -y) else 0);\ntel\n\n'];
             
             node = sprintf(format);
         end

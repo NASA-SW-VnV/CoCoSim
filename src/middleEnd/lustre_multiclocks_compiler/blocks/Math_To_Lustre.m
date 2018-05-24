@@ -86,27 +86,13 @@ classdef Math_To_Lustre < Block_To_Lustre
                 for i=1:numel(outputs)
                     codes{i} = sprintf('%s = sqrt(%s * %s + %s * %s);\n\t', outputs{i}, inputs{1}{i},inputs{1}{i}, inputs{2}{i},inputs{2}{i});
                 end
-            elseif strcmp(operator, 'rem')
+            elseif strcmp(operator, 'rem') || strcmp(operator, 'mod')
                 if strcmp(outLusDT, 'int')
-                    obj.addExternal_libraries('rem_int_int');
-                    fun = 'rem_int_int';
+                    obj.addExternal_libraries(strcat(operator, '_int_int'));
+                    fun = strcat(operator, '_int_int');
                 else
                     obj.addExternal_libraries('simulink_math_fcn');
-                    fun = 'rem_real';
-                end
-                for i=1:numel(outputs)
-                    codes{i} = sprintf('%s = %s(%s, %s);\n\t',...
-                        outputs{i}, fun, inputs{1}{i}, inputs{2}{i});
-                end
-            
-            elseif strcmp(operator, 'mod')
-                if strcmp(outLusDT, 'int')
-                    obj.addExternal_libraries('simulink_math_fcn');
-                    fun = 'mod_int';
-                else
-                    obj.addExternal_libraries('simulink_math_fcn');
-                    fun = 'mod_real';
-
+                    fun = strcat(operator, '_real');
                 end
                 for i=1:numel(outputs)
                     codes{i} = sprintf('%s = %s(%s, %s);\n\t',...
