@@ -98,10 +98,17 @@ classdef ExtLib
         function [node, external_nodes_i, opens] = get_int_div_Ceiling()
             [node, external_nodes_i, opens] = LustMathLib.get_int_div_Ceiling();
         end
+        function [node, external_nodes_i, opens] = get_int_div_Floor()
+            [node, external_nodes_i, opens] = LustMathLib.get_int_div_Floor();
+        end
         function [node, external_nodes_i, opens] = get_int_div_Nearest()
            [node, external_nodes_i, opens] = LustMathLib.get_int_div_Nearest();
         end
-       
+        function [node, external_nodes_i, opens] = get_int_div_Zero()
+           [node, external_nodes_i, opens] = LustMathLib.get_int_div_Zero();
+        end
+        
+        %
         function [node, external_nodes_i, opens] = get_fmod()
              [node, external_nodes_i, opens] = LustMathLib.get_fmod();
         end

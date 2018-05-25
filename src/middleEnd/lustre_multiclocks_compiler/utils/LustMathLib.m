@@ -178,6 +178,22 @@ classdef LustMathLib
             format = [format, 'else x/y + 1;\ntel\n\n'];
             node = sprintf(format);
         end
+        %Floor: Rounds positive and negative numbers toward negative infinity.
+        function [node, external_nodes_i, opens] = get_int_div_Floor()
+            opens = {};
+            external_nodes_i = {'abs_int'};
+            format = '--Rounds positive and negative numbers toward negative infinity\n ';
+            format = [format,  'node int_div_Floor (x, y: int)\nreturns(z:int);\nlet\n\t'];
+            format = [format, 'z= if y = 0 then if x>0 then 2147483647 else -2147483648\n\t'];
+            format = [format, 'else if x mod y = 0 then x/y\n\t'];
+            format = [format, 'else if (abs_int(y) > abs_int(x) and x*y>0) then 0 \n\t'];
+            format = [format, 'else if (abs_int(y) > abs_int(x) and x*y<0) then -1 \n\t'];
+            format = [format, 'else if (x>0 and y < 0) then x/y - 1\n\t'];
+            format = [format, 'else if (x<0 and y > 0) then (-x)/(-y) - 1\n\t'];
+            format = [format, 'else if (x<0 and y < 0) then (-x)/(-y)\n\t'];
+            format = [format, 'else x/y;\ntel\n\n'];
+            node = sprintf(format);
+        end
         function [node, external_nodes_i, opens] = get_int_div_Nearest()
             opens = {};
             external_nodes_i = {};
@@ -191,7 +207,18 @@ classdef LustMathLib
             node = sprintf(format);
         end
         
-        
+        function [node, external_nodes_i, opens] = get_int_div_Zero()
+            opens = {};
+            external_nodes_i = {'abs_int'};
+            format = '--Rounds positive and negative numbers toward positive infinity\n ';
+            format = [format,  'node int_div_Zero (x, y: int)\nreturns(z:int);\nlet\n\t'];
+            format = [format, 'z= if y = 0 then if x>0 then 2147483647 else -2147483648\n\t'];
+            format = [format, 'else if x mod y = 0 then x/y\n\t'];
+            format = [format, 'else if (abs_int(y) > abs_int(x)) then 0 \n\t'];
+            format = [format, 'else if (x>0) then x/y \n\t'];
+            format = [format, 'else (-x)/(-y);\ntel\n\n'];
+            node = sprintf(format);
+        end
         
         %% fmod, rem, mod
         function [node, external_nodes_i, opens] = get_fmod()

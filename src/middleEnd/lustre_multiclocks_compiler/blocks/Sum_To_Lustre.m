@@ -123,10 +123,17 @@ classdef Sum_To_Lustre < Block_To_Lustre
                     % division is the Euclidean division for integers.
                     [LusInputDataTypeStr, ~, ~] = SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Inport{1});
                     if strcmp(LusOutputDataTypeStr, 'int') ...
-                            && strcmp(LusInputDataTypeStr, 'int') ...
-                            && ~strcmp(blk.RndMeth, 'Floor') 
-                        int_divFun = sprintf('int_div_%s', blk.RndMeth);
-                        obj.addExternal_libraries(int_divFun);
+                            && strcmp(LusInputDataTypeStr, 'int') 
+                        if strcmp(blk.RndMeth, 'Round')...
+                                || strcmp(blk.RndMeth, 'Convergent')...
+                                || strcmp(blk.RndMeth, 'Simplest')
+                            display_msg(sprintf('Rounding method "%s" for integer division is not supported in block "%s".',...
+                                blk.RndMeth, blk.Origin_path), ...
+                                MsgType.WARNING, 'Sum_To_Lustre', '');
+                        else
+                            int_divFun = sprintf('int_div_%s', blk.RndMeth);
+                            obj.addExternal_libraries(int_divFun);
+                        end
                     else
                         int_divFun = '';
                     end
