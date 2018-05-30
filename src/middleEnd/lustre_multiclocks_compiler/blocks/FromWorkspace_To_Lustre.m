@@ -15,7 +15,7 @@ classdef FromWorkspace_To_Lustre < Block_To_Lustre
         function  write_code(obj, parent, blk, varargin)
             model_name = strsplit(blk.Origin_path, '/');
             model_name = model_name{1};
-            SampleTime = SLXUtils.get_BlockDiagram_SampleTime(model_name);
+            SampleTime = SLXUtils.getModelCompiledSampleTime(model_name);
             
             if strcmp(blk.OutputAfterFinalValue, 'Cyclic repetition')...
                     ||  strcmp(blk.OutputAfterFinalValue, 'Extrapolation')
@@ -141,7 +141,7 @@ classdef FromWorkspace_To_Lustre < Block_To_Lustre
             %Sample Time of block variable is different from Model ST
             model_name = strsplit(blk.Origin_path, '/');
             model_name = model_name{1};
-            SampleTime = SLXUtils.get_BlockDiagram_SampleTime(model_name);
+            SampleTime = SLXUtils.getModelCompiledSampleTime(model_name);
             dt = t(2) - t(1);
             if dt ~= SampleTime
                 obj.addUnsupported_options(...

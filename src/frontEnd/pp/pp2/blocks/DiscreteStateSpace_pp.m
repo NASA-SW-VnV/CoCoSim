@@ -31,7 +31,7 @@ if not(isempty(dss_list))
         blocktype= get_param(dss_list{i}, 'BlockType');
         if strcmp(blocktype, 'StateSpace')
             try
-                ST = SLXUtils.get_BlockDiagram_SampleTime(model);
+                ST = SLXUtils.getModelCompiledSampleTime(model);
                 [a, status] = SLXUtils.evalParam(model, A);
                 if status
                     display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...

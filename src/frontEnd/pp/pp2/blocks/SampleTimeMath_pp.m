@@ -17,7 +17,7 @@ if not(isempty(SampleTimeMath_list))
         weightValue = get_param(SampleTimeMath_list{i},'weightValue' );
         SaturateOnIntegerOverflow = get_param(SampleTimeMath_list{i},'SaturateOnIntegerOverflow');
         try
-            model_sample = SLXUtils.get_BlockDiagram_SampleTime(model);
+            model_sample = SLXUtils.getModelCompiledSampleTime(model);
             if   model_sample==0 || isnan(model_sample) || model_sample==Inf
                 model_sample = 0.2;
             end

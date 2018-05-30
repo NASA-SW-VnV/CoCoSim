@@ -1,4 +1,4 @@
-function [ main_node, external_nodes, external_libraries ] = subsystem2node( subsys_struct,  main_sampleTime, xml_trace)
+function [ main_node, external_nodes, external_libraries ] = subsystem2node( subsys_struct,  main_sampleTime, is_main_node, xml_trace)
 %BLOCK_TO_LUSTRE create a lustre node for every Simulink subsystem within
 %subsys_struc.
 %INPUTS:
@@ -15,27 +15,19 @@ function [ main_node, external_nodes, external_libraries ] = subsystem2node( sub
 external_nodes = '';
 main_node = '';
 external_libraries = {};
-
+if ~exist('is_main_node', 'var')
+    is_main_node = 0;
+end
 % Adding lustre comments tracking the original path
 origin_path = regexprep(subsys_struct.Origin_path, '(\\n|\n)', '--');
 comment = sprintf('-- Original block name: %s', origin_path);
 
 % creating node header
-node_name = SLX2LusUtils.node_name_format(subsys_struct);
-node_inputs_cell = SLX2LusUtils.extract_node_InOutputs_withDT(subsys_struct, 'Inport', xml_trace);
-node_inputs = MatlabUtils.strjoin(node_inputs_cell, '\n');
-is_main_node = true;
-if contains(origin_path, '/')
-    node_inputs = [node_inputs, sprintf('%s:real;', SLX2LusUtils.timeStepStr())];
-    is_main_node = false;
-end
-if isempty(node_inputs)
-    node_inputs = '_virtual:bool;';
-end
-node_outputs_cell = SLX2LusUtils.extract_node_InOutputs_withDT(subsys_struct, 'Outport', xml_trace);
-node_outputs = MatlabUtils.strjoin(node_outputs_cell, '\n');
-
-
+isConditionalSubsys = 0;
+[node_name, node_inputs, node_outputs, ~, ~] = ...
+                SLX2LusUtils.extractNodeHeader(subsys_struct, is_main_node, isConditionalSubsys, main_sampleTime, xml_trace);
+node_header = sprintf('node %s (%s)\n returns (%s);',...
+    node_name, node_inputs, node_outputs);
 % creating contract
 contract = '-- Contract In progress';
 
@@ -43,9 +35,7 @@ contract = '-- Contract In progress';
 % Body code
 [body, variables_str, external_nodes, external_libraries] = write_body(subsys_struct, main_sampleTime, xml_trace);
 if is_main_node
-    if isempty(node_outputs)
-        node_outputs = sprintf('%s:real;', SLX2LusUtils.timeStepStr());
-    else
+    if ~isempty(node_outputs)
         if ~isempty(variables_str)
             variables_str = [variables_str sprintf('\n\t%s:real;', SLX2LusUtils.timeStepStr())];
         else
@@ -54,10 +44,31 @@ if is_main_node
     end
     body = [sprintf('%s = 0.0 -> pre %s + %.15f;\n\t', ...
         SLX2LusUtils.timeStepStr(), SLX2LusUtils.timeStepStr(), main_sampleTime(1)), body];
+    %define all clocks if needed
+    clocks = subsys_struct.AllCompiledSampleTimes;
+    if numel(clocks) > 1
+        c = {};
+        for i=1:numel(clocks)
+            T = clocks{i};
+            st_n = T(1)/main_sampleTime(1);
+            ph_n = T(2)/main_sampleTime(1);
+            if ~(st_n == 1 && ph_n == 0)
+                body = [sprintf('%s = _make_clock(%.0f, %.0f);\n\t', ...
+                    SLX2LusUtils.clockName(st_n, ph_n), st_n, ph_n), body];
+                c{end+1} = SLX2LusUtils.clockName(st_n, ph_n);
+            end
+        end
+        c = MatlabUtils.strjoin(c, ', ');
+        if ~isempty(variables_str)
+            variables_str = [variables_str sprintf('\n\t%s:bool clock;', c)];
+        else
+            variables_str = ['var ' sprintf('%s:bool clock;', c)];
+        end
+        external_libraries{end+1} = '_make_clock';
+    end
 end
 
-node_header = sprintf('node %s (%s)\n returns (%s);',...
-    node_name, node_inputs, node_outputs);
+
 
 main_node = sprintf('%s\n%s\n%s\n%s\nlet\n\t%s\ntel\n',...
     comment, node_header, contract, variables_str, body);
@@ -65,13 +76,14 @@ main_node = sprintf('%s\n%s\n%s\n%s\nlet\n\t%s\ntel\n',...
 if SubSystem_To_Lustre.hasEnablePort(subsys_struct) ...
         || SubSystem_To_Lustre.hasActionPort(subsys_struct)...
         || SubSystem_To_Lustre.hasTriggerPort(subsys_struct)
-    automaton_node = enabledSubsystem2node(subsys_struct, xml_trace);
+    automaton_node = enabledSubsystem2node(subsys_struct, main_sampleTime,...
+        xml_trace);
     main_node = [main_node, automaton_node];
 end
 end
 
 
-
+%%
 function [body, variables_str, external_nodes, external_libraries] =...
     write_body(subsys, main_sampleTime, xml_trace)
 variables_str = '';
@@ -90,7 +102,7 @@ for i=1:numel(fields)
     if status
         continue;
     end
-    b.write_code(subsys, blk, xml_trace);
+    b.write_code(subsys, blk, main_sampleTime, xml_trace);
     body = [body, b.getCode()];
     variables_str = [variables_str, char(MatlabUtils.strjoin(b.variables, '\n\t'))];
     external_nodes = [external_nodes, b.external_nodes];

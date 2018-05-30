@@ -91,7 +91,7 @@ if not(isempty(dtf_list))
         if strcmp(blocktype, 'TransferFcn')
             try
                 Hc = tf(num, denum);
-                sampleT = SLXUtils.get_BlockDiagram_SampleTime(model);
+                sampleT = SLXUtils.getModelCompiledSampleTime(model);
                 Hd = c2d(Hc,sampleT);
                 num = Hd.Numerator{:};
                 denum = Hd.Denominator{:};

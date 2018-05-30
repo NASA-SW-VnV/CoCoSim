@@ -24,6 +24,13 @@ classdef MatlabUtils
         end
         
         %%
+        function st = gcd(T)
+            st = 1;
+            for i=1:numel(T)
+                st = gcd(st*10000,T(i)*10000)/10000;
+            end
+        end
+        %%
         function  diff1in2  = setdiff_struct( struct2, struct1, fieldname )
             %return the elements in struct2 that are not in struct1
             if isempty(struct2)

@@ -72,9 +72,12 @@ display_msg('Unsupported blocks detection', Constants.INFO, 'ToLustreUnsupported
 
 main_block = ir_struct.(IRUtils.name_format(file_name));
 main_sampleTime = main_block.CompiledSampleTime;
-
-unsupportedOptions = recursiveGeneration(main_block, main_block, main_sampleTime);
-
+if numel(main_sampleTime) >= 2 && main_sampleTime(2) ~= 0
+    unsupportedOptions{end+1} = sprintf('Your model is running with a CompiledSampleTime [%d, %d], offset time not null is not supported in the root level.',...
+        main_sampleTime(1), main_sampleTime(2));
+else
+    unsupportedOptions = recursiveGeneration(main_block, main_block, main_sampleTime);
+end
 %% display report files
 if isempty(unsupportedOptions)
     if exist('success.png', 'file')

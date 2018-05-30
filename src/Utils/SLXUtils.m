@@ -7,28 +7,48 @@ classdef SLXUtils
     
     methods (Static = true)
         
-        %% Try to calculate Block sample time using GCD
-        function st = get_BlockDiagram_SampleTime(file_name)
+        %% Try to calculate Block sample time using the model
+        function [st, ph, Clocks] = getModelCompiledSampleTime(file_name)
+            st = 1;
+            ph = 0;
+            Clocks = {};
             try
                 warning off;
                 ts = Simulink.BlockDiagram.getSampleTimes(file_name);
                 warning on;
             catch ME
-                display_msg(ME.getReport(), MsgType.ERROR, 'SLXUtils.get_BlockDiagram_SampleTime', '' );
+                display_msg(ME.getReport(), MsgType.ERROR, 'SLXUtils.getModelCompiledSampleTime', '' );
                 st = 1;
                 return;
             end
-            st = 1;
+            T = [];
+            P = [];
             for t=ts
-                if ~isempty(t.Value) && isnumeric(t.Value)
-                    tv = t.Value(1);
-                    if ~(isnan(tv) || tv==Inf)
-                        st = gcd(st*10000,tv*10000)/10000;
-                        
+                v = t.Value;
+                if ~isempty(v) && isnumeric(v)
+                    sv = v(1);
+                    if numel(v) >= 2, pv = v(2); else, pv = 0; end
+                    if ~(isnan(sv) || sv==Inf)
+                        T(end +1) = sv;
+                        P(end +1) = pv;
+                        Clocks{end+1} = [sv, pv];
                     end
                 end
             end
-            
+            if isempty(P)
+                P = 0;
+            end
+            if isempty(T)
+                return;
+            end
+            if prod(P/P(1)) == 1
+                st = MatlabUtils.gcd(T);
+                ph = mod(P(1), st);
+            else
+                st = MatlabUtils.gcd([T, P]);
+                ph = 0;
+            end
+            %st = gcd(st*10000,tv*10000)/10000;
         end
         
         
@@ -153,7 +173,7 @@ classdef SLXUtils
             end
             numberOfInports = numel(inports);
             try
-                min = SLXUtils.get_BlockDiagram_SampleTime(slx_file_name);
+                min = SLXUtils.getModelCompiledSampleTime(slx_file_name);
                 if  min==0 || isnan(min) || min==Inf
                     simulation_step = 1;
                 else
@@ -313,7 +333,7 @@ classdef SLXUtils
                     return;
                 end
                 [~, subsys_name, ~] = fileparts(subsys_path);
-                sampleTime = SLXUtils.get_BlockDiagram_SampleTime(subsys_name);
+                sampleTime = SLXUtils.getModelCompiledSampleTime(subsys_name);
                 if numel(sampleTime) == 1
                     sampleTime = [sampleTime, 0];
                 end

@@ -1,4 +1,4 @@
-function [ main_node] = enabledSubsystem2node( subsys_struct, xml_trace)
+function [ main_node] = enabledSubsystem2node( subsys_struct, main_sampleTime, xml_trace)
 %enabledSubsystem2node create an automaton lustre node for 
 %enabled/triggered/Action subsystem
 %INPUTS:
@@ -17,30 +17,19 @@ origin_path = regexprep(subsys_struct.Origin_path, '(\\n|\n)', '--');
 comment = sprintf('-- Original block name: %s', origin_path);
 
 % creating node header
-blk_name = SLX2LusUtils.node_name_format(subsys_struct);
+isConditionalSubsys = 1;
+is_main_node = 0;
+[blk_name, node_inputs, node_outputs, node_inputs_withoutDT, node_outputs_withoutDT] = ...
+                SLX2LusUtils.extractNodeHeader(subsys_struct, is_main_node, isConditionalSubsys, main_sampleTime, xml_trace);
 node_name = strcat(blk_name, '_automaton');
-[node_inputs_cell, node_inputs_withoutDT_cell] = SLX2LusUtils.extract_node_InOutputs_withDT(subsys_struct, 'Inport', xml_trace);
-
-node_inputs = MatlabUtils.strjoin(node_inputs_cell, '\n');
-node_inputs = [node_inputs, ...
-    strcat(SLX2LusUtils.isEnabledStr() , ':bool;')];
-% add time input
-node_inputs = [node_inputs, sprintf('%s:real;', SLX2LusUtils.timeStepStr())];
-node_inputs_withoutDT_cell{end+1} = SLX2LusUtils.timeStepStr();
-
-[node_outputs_cell, node_outputs_withoutDT_cell] = SLX2LusUtils.extract_node_InOutputs_withDT(subsys_struct, 'Outport', xml_trace);
-node_outputs = MatlabUtils.strjoin(node_outputs_cell, '\n');
-
 node_header = sprintf('node %s (%s)\n returns (%s);',...
     node_name, node_inputs, node_outputs);
 
 % creating contract
 contract = '-- Contract In progress';
-
-
 % Body code
 [body, variables_str] = write_automaton(subsys_struct, blk_name, ...
-    node_inputs_withoutDT_cell, node_outputs_withoutDT_cell, xml_trace);
+    node_inputs_withoutDT, node_outputs_withoutDT, xml_trace);
 
 main_node = sprintf('%s\n%s\n%s\n%s\nlet\n\t%s\ntel',...
     comment, node_header, contract, variables_str, body);
@@ -52,14 +41,14 @@ end
 
 function [body, variables_str] =...
     write_automaton(subsys, blk_name, ...
-    node_inputs_withoutDT_cell, node_outputs_withoutDT_cell, xml_trace)
+    node_inputs_withoutDT, node_outputs_withoutDT, xml_trace)
 
 % get the original node call
 original_node_call = ...
     sprintf('(%s) = %s(%s);\n\t',...
-    MatlabUtils.strjoin(node_outputs_withoutDT_cell, ',\n\t '),...
+    node_inputs_withoutDT,...
     blk_name, ...
-    MatlabUtils.strjoin(node_inputs_withoutDT_cell, ',\n\t\t'));
+    node_outputs_withoutDT);
 
 
 fields = fieldnames(subsys.Content);

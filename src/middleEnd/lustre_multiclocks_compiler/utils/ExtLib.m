@@ -21,6 +21,17 @@ classdef ExtLib
             node = '';
         end
         
+        %% Clocks
+        function [node, external_nodes_i, opens] = get__make_clock()
+            opens = {};
+            external_nodes_i = {};
+            format = 'node _make_clock(per: int; ph: int)\nreturns( clk: bool );\nvar cnt: int;\n';
+            format = [format, 'let\n\t'];
+            format = [format, 'cnt   = ((per - ph) -> (pre(cnt) + 1)) mod per ;\n\t'];
+            format = [format, 'clk = if (cnt = 0) then true else false ;\n'];
+            format = [format, 'tel\n'];
+            node = sprintf(format);
+        end
         %% LustMathLib
         function [node, external_nodes_i, opens] = get__min_int()
             [node, external_nodes_i, opens] = LustMathLib.getMinMax('min', 'int');

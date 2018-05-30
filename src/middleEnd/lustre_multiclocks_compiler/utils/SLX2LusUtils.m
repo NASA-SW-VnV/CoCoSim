@@ -59,6 +59,41 @@ classdef SLX2LusUtils < handle
         end
         
         %% Lustre node inputs, outputs
+        function [node_name, node_inputs, node_outputs, ...
+                node_inputs_withoutDT, node_outputs_withoutDT ] = ...
+                extractNodeHeader(blk, is_main_node, isConditionalSubsys, main_sampleTime, xml_trace)
+            % creating node header
+            node_name = SLX2LusUtils.node_name_format(blk);
+            [node_inputs_cell, node_inputs_withoutDT_cell] = ...
+                SLX2LusUtils.extract_node_InOutputs_withDT(blk, 'Inport', xml_trace);
+            node_inputs = MatlabUtils.strjoin(node_inputs_cell, '\n');
+            if isConditionalSubsys
+                node_inputs = [node_inputs, ...
+                    strcat(SLX2LusUtils.isEnabledStr() , ':bool;')];
+            end
+            if ~is_main_node
+                node_inputs = [node_inputs, sprintf('%s:real;', SLX2LusUtils.timeStepStr())];
+                node_inputs_withoutDT_cell{end+1} = ...
+                    sprintf('%s', SLX2LusUtils.timeStepStr());
+                % add clocks
+                clocks_list = SLX2LusUtils.getRTClocksSTR(blk, main_sampleTime);
+                node_inputs = [node_inputs, sprintf('%s:bool clock;', clocks_list)];
+                node_inputs_withoutDT_cell{end+1} = sprintf('%s', clocks_list);
+            end
+            if isempty(node_inputs)
+                node_inputs = '_virtual:bool;';
+                node_inputs_withoutDT_cell{end+1} = '_virtual';
+            end
+            node_inputs_withoutDT = ...
+                MatlabUtils.strjoin(node_inputs_withoutDT_cell, ',\n\t\t');
+            [node_outputs_cell, node_outputs_withoutDT_cell] = SLX2LusUtils.extract_node_InOutputs_withDT(blk, 'Outport', xml_trace);
+            node_outputs = MatlabUtils.strjoin(node_outputs_cell, '\n');
+            node_outputs_withoutDT = ...
+                MatlabUtils.strjoin(node_outputs_withoutDT_cell, ',\n\t\t');
+            if is_main_node && isempty(node_outputs)
+                node_outputs = sprintf('%s:real;', SLX2LusUtils.timeStepStr());
+            end
+        end
         function [names, names_withNoDT] = extract_node_InOutputs_withDT(subsys, type, xml_trace)
             %get all blocks names
             fields = fieldnames(subsys.Content);
@@ -634,6 +669,27 @@ classdef SLX2LusUtils < handle
                 TriggerinputExp = sprintf(...
                     '%s -> if %s then if (%s) then 1%s else -1%s else 0%s'...
                     ,zero,  Cond, risingCond, suffix, suffix, suffix);
+            end
+        end
+        
+        %% Add clocks of RateTransitions
+        function time_step = clockName(st_n, ph_n)
+            time_step = sprintf('_clk_%.0f_%.0f', st_n, ph_n);
+        end
+        function clocks_list = getRTClocksSTR(blk, main_sampleTime)
+            clocks_list = '';
+            clocks = blk.CompiledSampleTime;
+            if numel(clocks) > 1
+                c = {};
+                for i=1:numel(clocks)
+                    T = clocks{i};
+                    st_n = T(1)/main_sampleTime(1);
+                    ph_n = T(2)/main_sampleTime(1);
+                    if ~(st_n == 1 && ph_n == 0)
+                        c{end+1} = SLX2LusUtils.clockName(st_n, ph_n);
+                    end
+                end
+                clocks_list = MatlabUtils.strjoin(c, ', ');
             end
         end
     end

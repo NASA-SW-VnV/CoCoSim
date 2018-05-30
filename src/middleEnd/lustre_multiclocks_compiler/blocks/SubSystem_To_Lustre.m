@@ -11,7 +11,7 @@ classdef SubSystem_To_Lustre < Block_To_Lustre
     
     methods
         
-        function  write_code(obj, parent, blk, varargin)
+        function  write_code(obj, parent, blk, main_sampleTime, varargin)
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk);
             [inputs] = SLX2LusUtils.getBlockInputsNames(parent, blk);
             node_name = SLX2LusUtils.node_name_format(blk);
@@ -34,6 +34,10 @@ classdef SubSystem_To_Lustre < Block_To_Lustre
             % add time input
             inputs{end + 1} = SLX2LusUtils.timeStepStr();
             x = MatlabUtils.strjoin(inputs, ',\n\t\t');
+            clocks_list = SLX2LusUtils.getRTClocksSTR(blk, main_sampleTime);
+            if ~isempty(clocks_list)
+                x = [x ', ' clocks_list];
+            end
             y = MatlabUtils.strjoin(outputs, ',\n\t');
             
             [isResetSubsystem, ResetType] =SubSystem_To_Lustre.hasResetPort(blk);

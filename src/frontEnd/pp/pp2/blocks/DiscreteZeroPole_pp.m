@@ -63,7 +63,7 @@ if not(isempty(dzp_list))
         % Computing state space representation
         [A,B,C,D]=zp2ss(Zeros,Poles,Gain);
         if strcmp(blocktype, 'ZeroPole')
-            ST = SLXUtils.get_BlockDiagram_SampleTime(model);
+            ST = SLXUtils.getModelCompiledSampleTime(model);
             [A, B] = PPUtils.c2d(A, B ,ST);
             ST = '-1';
         else

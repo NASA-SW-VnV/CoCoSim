@@ -17,7 +17,9 @@ if isfield(ir, field_name)
     end
     
     if ~isfield(ir.(field_name), 'CompiledSampleTime')
-        ir.(field_name).CompiledSampleTime = IRUtils.get_BlockDiagram_SampleTime(file_name);
+        [st, ph, Clocks] = SLXUtils.getModelCompiledSampleTime(file_name);
+        ir.(field_name).CompiledSampleTime = [st, ph];
+        ir.(field_name).AllCompiledSampleTimes = Clocks;
     end 
 
     if ~isfield(ir.(field_name), 'Handle')

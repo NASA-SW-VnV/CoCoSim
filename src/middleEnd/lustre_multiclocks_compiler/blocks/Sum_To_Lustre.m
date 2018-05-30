@@ -64,7 +64,7 @@ classdef Sum_To_Lustre < Block_To_Lustre
             AdditionalVars = {};
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk);
             widths = blk.CompiledPortWidths.Inport;
-            inputs = Sum_To_Lustre.createBlkInputs(obj, parent, blk, widths, AccumDataTypeStr);
+            inputs = Sum_To_Lustre.createBlkInputs(obj, parent, blk, widths, AccumDataTypeStr, isSumBlock);
             
             [LusOutputDataTypeStr, zero, one] = SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Outport(1));
             if (isSumBlock)
@@ -123,13 +123,15 @@ classdef Sum_To_Lustre < Block_To_Lustre
                     % division is the Euclidean division for integers.
                     [LusInputDataTypeStr, ~, ~] = SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Inport{1});
                     if strcmp(LusOutputDataTypeStr, 'int') ...
-                            && strcmp(LusInputDataTypeStr, 'int') 
+                            && strcmp(LusInputDataTypeStr, 'int') ...
+                            && contains(exp, '/')
                         if strcmp(blk.RndMeth, 'Round')...
                                 || strcmp(blk.RndMeth, 'Convergent')...
                                 || strcmp(blk.RndMeth, 'Simplest')
                             display_msg(sprintf('Rounding method "%s" for integer division is not supported in block "%s".',...
                                 blk.RndMeth, blk.Origin_path), ...
                                 MsgType.WARNING, 'Sum_To_Lustre', '');
+                            int_divFun = '';
                         else
                             int_divFun = sprintf('int_div_%s', blk.RndMeth);
                             obj.addExternal_libraries(int_divFun);
@@ -143,7 +145,7 @@ classdef Sum_To_Lustre < Block_To_Lustre
             end
         end
         %%
-        function inputs = createBlkInputs(obj, parent, blk, widths, AccumDataTypeStr)
+        function inputs = createBlkInputs(obj, parent, blk, widths, AccumDataTypeStr, isSumBlock)
             max_width = max(widths);
             inputs = {};
             RndMeth = blk.RndMeth;

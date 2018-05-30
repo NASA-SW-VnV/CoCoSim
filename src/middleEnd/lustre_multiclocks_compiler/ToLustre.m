@@ -100,8 +100,8 @@ display_msg('Lustre generation', Constants.INFO, 'lustre_multiclocks_compiler', 
 global model_struct
 model_struct = ir_struct.(IRUtils.name_format(file_name));
 main_sampleTime = model_struct.CompiledSampleTime;
-
-[nodes_code, external_libraries] = recursiveGeneration(model_struct, main_sampleTime, xml_trace);
+is_main_node = 1;
+[nodes_code, external_libraries] = recursiveGeneration(model_struct, main_sampleTime, is_main_node, xml_trace);
 external_lib_code = getExternalLibrariesNodes(external_libraries);
 %% writing code
 fid = fopen(nom_lustre_file, 'a');
@@ -121,20 +121,20 @@ cd(PWD)
 end
 
 %%
-function [nodes_code, external_libraries] = recursiveGeneration(blk, main_sampleTime, xml_trace)
+function [nodes_code, external_libraries] = recursiveGeneration(blk, main_sampleTime, is_main_node, xml_trace)
 nodes_code = '';
 external_libraries = {};
 if isfield(blk, 'Content')
     field_names = fieldnames(blk.Content);
     for i=1:numel(field_names)
-        [nodes_code_i, external_libraries_i] = recursiveGeneration(blk.Content.(field_names{i}), main_sampleTime, xml_trace);
+        [nodes_code_i, external_libraries_i] = recursiveGeneration(blk.Content.(field_names{i}), main_sampleTime, 0, xml_trace);
         if ~isempty(nodes_code_i)
             nodes_code = sprintf('%s\n%s', nodes_code_i, nodes_code);
         end
         external_libraries = [external_libraries, external_libraries_i];
     end
     if ~isempty(field_names)
-        [main_node, external_nodes, external_libraries_i] = subsystem2node(blk, main_sampleTime, xml_trace);
+        [main_node, external_nodes, external_libraries_i] = subsystem2node(blk, main_sampleTime, is_main_node, xml_trace);
         external_libraries = [external_libraries, external_libraries_i];
         nodes_code = sprintf('%s\n%s\n%s', external_nodes, nodes_code, main_node);
     end
