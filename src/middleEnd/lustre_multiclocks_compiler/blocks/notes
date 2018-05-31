@@ -76,6 +76,7 @@ Hamza:  Abs,
         ToWorkspace (pp),
         TransferFcn (pp),
         TriggerPort, 
+        UnaryMinus, 
         UnitDelay,
         ZeroPole (pp),
         
@@ -86,7 +87,7 @@ Blocks that has left from Biosentinel:
 
     Tapped Delay Line
     Bitwise Operator
-    UnaryMinus
+    
     
     BusAssignment (Hamza)
     **************************** PP ***********************
