@@ -34,6 +34,7 @@ Hamza:  Abs,
         BusSelector, 
         Constant,
         Clock,
+        CombinatorialLogic,
         CompareTo (Masked Subsystem), 
         CompareToConstant (Masked Subsystem),
         Dead Zone (pp)
@@ -55,6 +56,7 @@ Hamza:  Abs,
         MinMax,
         Outport,
         Quantizer (pp),
+        RateTransition,
         RelationalOperator, 
         Relay (pp),
         ResetPort, 
@@ -94,21 +96,19 @@ Blocks that has left from Biosentinel:
     DiscreteFir
 
     **************************** PP ***********************
-    Pulse generator, SignalBuilder pp (they use datatable_process which can be replaced by Lustre code) 
+    Pulse generator, DiscretePulseGenerator, SignalBuilder pp (they use datatable_process which can be replaced by Lustre code) 
 
     Fcn (partially done in pp) (Khanh)
    
     
     ModelReference (Hamza)
     RandomNumber ( to translate to empty node with contract) (Hamza)
-    RateTransition (Hamza),
+    
 
     S-Function (Hamza)
     StateControl 
     
 AVA mission Simulink blocks:
-    CombinatorialLogic
-    DiscretePulseGenerator
     Signum
     Step (Hamza)
     WhileIterator
