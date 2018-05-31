@@ -23,9 +23,10 @@ origin_path = regexprep(subsys_struct.Origin_path, '(\\n|\n)', '--');
 comment = sprintf('-- Original block name: %s', origin_path);
 
 % creating node header
-isConditionalSubsys = 0;
+isEnableORAction = 0;
+isEnableAndTrigger = 0;
 [node_name, node_inputs, node_outputs, ~, ~] = ...
-                SLX2LusUtils.extractNodeHeader(subsys_struct, is_main_node, isConditionalSubsys, main_sampleTime, xml_trace);
+                SLX2LusUtils.extractNodeHeader(subsys_struct, is_main_node, isEnableORAction, isEnableAndTrigger, main_sampleTime, xml_trace);
 node_header = sprintf('node %s (%s)\n returns (%s);',...
     node_name, node_inputs, node_outputs);
 % creating contract
@@ -72,11 +73,11 @@ end
 
 main_node = sprintf('%s\n%s\n%s\n%s\nlet\n\t%s\ntel\n',...
     comment, node_header, contract, variables_str, body);
-
-if SubSystem_To_Lustre.hasEnablePort(subsys_struct) ...
-        || SubSystem_To_Lustre.hasActionPort(subsys_struct)...
-        || SubSystem_To_Lustre.hasTriggerPort(subsys_struct)
-    automaton_node = enabledSubsystem2node(subsys_struct, main_sampleTime,...
+hasEnablePort = SubSystem_To_Lustre.hasEnablePort(subsys_struct);
+hasActionPort = SubSystem_To_Lustre.hasActionPort(subsys_struct);
+hasTriggerPort = SubSystem_To_Lustre.hasTriggerPort(subsys_struct);
+if  hasEnablePort || hasActionPort || hasTriggerPort
+    automaton_node = enabledSubsystem2node(subsys_struct, hasEnablePort, hasActionPort, hasTriggerPort, main_sampleTime,...
         xml_trace);
     main_node = [main_node, automaton_node];
 end

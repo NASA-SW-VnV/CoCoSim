@@ -1,5 +1,5 @@
 classdef SubSystem_To_Lustre < Block_To_Lustre
-    %SubSystem_To_Lustre translates a subsystem call to Lustre.
+    %SubSystem_To_Lustre translates a subsystem (pottentially Conditional SS) call to Lustre.
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -147,6 +147,7 @@ classdef SubSystem_To_Lustre < Block_To_Lustre
                 TriggerDT = '';
             end
         end
+        %%
         function ExecutionCondName = getExecutionCondName(blk)
             blk_name = SLX2LusUtils.node_name_format(blk);
             ExecutionCondName = sprintf('ExecutionCond_of_%s', blk_name);
@@ -159,8 +160,19 @@ classdef SubSystem_To_Lustre < Block_To_Lustre
                 isActionSS)
             codes = {};
             node_name = strcat(node_name, '_automaton');
+            % ExecutionCondName may be used by Merge block, keep it even if
+            % not given as input to the automaton node.
             ExecutionCondName = SubSystem_To_Lustre.getExecutionCondName(blk);
-            ExecutionCondVar = sprintf('%s:bool;', ExecutionCondName);
+            
+            if isTriggered && isEnabledSubsystem
+                blk_name = SLX2LusUtils.node_name_format(blk);
+                EnableCondName = sprintf('EnableCond_of_%s', blk_name);
+                TriggerCondName = sprintf('TriggerCond_of_%s', blk_name);
+                ExecutionCondVar = sprintf('%s, %s, %s:bool;', ...
+                    ExecutionCondName, TriggerCondName, EnableCondName);
+            else
+                ExecutionCondVar = sprintf('%s:bool;', ExecutionCondName);
+            end
             if isActionSS
                 % The case of Action subsystems
                 [srcBlk, srcPort] = SLX2LusUtils.getpreBlock(parent, blk, 'ifaction');
@@ -182,9 +194,14 @@ classdef SubSystem_To_Lustre < Block_To_Lustre
                     [lusTriggerportDataType] = SLX2LusUtils.get_lustre_dt(TriggerBlockDT);
                     [triggerInputs] = SLX2LusUtils.getSubsystemTriggerInputsNames(parent, blk);
                     TriggerinputsExp = {};
+                    if isTriggered && isEnabledSubsystem
+                        condName = TriggerCondName;
+                    else
+                        condName = ExecutionCondName;
+                    end
                     for i=1:blk.CompiledPortWidths.Trigger
                         TriggerinputsExp{i} = ...
-                            SLX2LusUtils.getTriggerValue(ExecutionCondName,...
+                            SLX2LusUtils.getTriggerValue(condName,...
                             triggerInputs{i}, TriggerType, lusTriggerportDataType, lusIncomingSignalDataType);
                     end
                     inputs = [inputs, TriggerinputsExp];
@@ -206,6 +223,7 @@ classdef SubSystem_To_Lustre < Block_To_Lustre
                     end
                     EnableCond = MatlabUtils.strjoin(cond, ' or ');
                 end
+                triggerCond = '';
                 if isTriggered
                     triggerportDataType = blk.CompiledPortDataTypes.Trigger{1};
                     [lusTriggerportDataType, zero] = SLX2LusUtils.get_lustre_dt(triggerportDataType);
@@ -223,16 +241,28 @@ classdef SubSystem_To_Lustre < Block_To_Lustre
                         cond{i} = triggerCode;
                     end
                     triggerCond = MatlabUtils.strjoin(cond, ' or ');
-                    if ~strcmp(EnableCond, '')
-                        EnableCond = sprintf('(%s) and (%s)', ...
-                            EnableCond, triggerCond);
-                    else
-                        EnableCond = triggerCond;
-                    end
                 end
-                codes{end + 1} = sprintf('%s = %s;\n\t'...
-                    ,ExecutionCondName,  EnableCond);
-                inputs{end + 1} = ExecutionCondName;
+                if isTriggered && isEnabledSubsystem
+                    codes{end + 1} = sprintf('%s = %s;\n\t'...
+                        ,EnableCondName,  EnableCond);
+                    codes{end + 1} = sprintf('%s = %s;\n\t'...
+                        ,TriggerCondName,  triggerCond);
+                    inputs{end + 1} = EnableCondName;
+                    inputs{end + 1} = TriggerCondName;
+                    % add ExecutionCondName for Merge block.
+                    codes{end + 1} = sprintf('%s = %s and %s;\n\t'...
+                        ,ExecutionCondName,  EnableCondName, TriggerCondName);
+                else
+                    if isTriggered
+                        codes{end + 1} = sprintf('%s = %s;\n\t'...
+                            ,ExecutionCondName,  triggerCond);
+                    else
+                        codes{end + 1} = sprintf('%s = %s;\n\t'...
+                            ,ExecutionCondName,  EnableCond);
+                    end
+                    inputs{end + 1} = ExecutionCondName;
+                end
+                
             end
         end
         function [codes, ResetCondVar] = ResettableSSCall(parent, blk, ...

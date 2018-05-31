@@ -15,7 +15,7 @@ classdef RateTransition_To_Lustre < Block_To_Lustre
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk);
             obj.addVariable(outputs_dt);
             [inputs] = SLX2LusUtils.getBlockInputsNames(parent, blk);
-            
+            outputDataType = blk.CompiledPortDataTypes.Outport{1};
             %% calculated by rateTransition_ir_pp
             InportCompiledSampleTime = blk.InportCompiledSampleTime;
             OutportCompiledSampleTime = blk.OutportCompiledSampleTime;
@@ -68,10 +68,11 @@ classdef RateTransition_To_Lustre < Block_To_Lustre
                 end
             elseif strcmp(type, '1/z')
                 clockName = SLX2LusUtils.clockName(inTs/main_sampleTime(1), inTsOffset/main_sampleTime(1));
-                init_cond = '0';
+                init_cond = SLX2LusUtils.getInitialOutput(parent, blk,...
+                    blk.InitialCondition, outputDataType, numel(outputs));
                 for i=1:numel(outputs)
                     codes{i} = sprintf('%s = merge %s\n\t (true -> (%s -> pre %s))\n\t (false -> (%s -> pre %s) when false(%s));\n\t', ...
-                        outputs{i}, clockName, init_cond, inputs{i}, init_cond, outputs{i}, clockName);
+                        outputs{i}, clockName, init_cond{i}, inputs{i}, init_cond{i}, outputs{i}, clockName);
                 end
             elseif strcmp(type, 'Copy')
                 for i=1:numel(outputs)

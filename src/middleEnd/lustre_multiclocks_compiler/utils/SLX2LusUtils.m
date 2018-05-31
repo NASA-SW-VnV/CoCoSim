@@ -15,6 +15,9 @@ classdef SLX2LusUtils < handle
         function isEnabled = isEnabledStr()
             isEnabled = '_isEnabled';
         end
+        function isEnabled = isTriggeredStr()
+            isEnabled = '_isTriggered';
+        end
         function time_step = timeStepStr()
             time_step = '__time_step';
         end
@@ -61,15 +64,18 @@ classdef SLX2LusUtils < handle
         %% Lustre node inputs, outputs
         function [node_name, node_inputs, node_outputs, ...
                 node_inputs_withoutDT, node_outputs_withoutDT ] = ...
-                extractNodeHeader(blk, is_main_node, isConditionalSubsys, main_sampleTime, xml_trace)
+                extractNodeHeader(blk, is_main_node, isEnableORAction, isEnableAndTrigger, main_sampleTime, xml_trace)
             % creating node header
             node_name = SLX2LusUtils.node_name_format(blk);
             [node_inputs_cell, node_inputs_withoutDT_cell] = ...
                 SLX2LusUtils.extract_node_InOutputs_withDT(blk, 'Inport', xml_trace);
             node_inputs = MatlabUtils.strjoin(node_inputs_cell, '\n');
-            if isConditionalSubsys
+            if isEnableORAction
                 node_inputs = [node_inputs, ...
                     strcat(SLX2LusUtils.isEnabledStr() , ':bool;')];
+            elseif isEnableAndTrigger
+                node_inputs = sprintf('%s%s,%s:bool;',node_inputs, ...
+                    SLX2LusUtils.isEnabledStr(), SLX2LusUtils.isTriggeredStr() );
             end
             if ~is_main_node
                 node_inputs = [node_inputs, sprintf('%s:real;', SLX2LusUtils.timeStepStr())];
@@ -77,8 +83,10 @@ classdef SLX2LusUtils < handle
                     sprintf('%s', SLX2LusUtils.timeStepStr());
                 % add clocks
                 clocks_list = SLX2LusUtils.getRTClocksSTR(blk, main_sampleTime);
-                node_inputs = [node_inputs, sprintf('%s:bool clock;', clocks_list)];
-                node_inputs_withoutDT_cell{end+1} = sprintf('%s', clocks_list);
+                if ~isempty(clocks_list)
+                    node_inputs = [node_inputs, sprintf('%s:bool clock;', clocks_list)];
+                    node_inputs_withoutDT_cell{end+1} = sprintf('%s', clocks_list);
+                end
             end
             if isempty(node_inputs)
                 node_inputs = '_virtual:bool;';
@@ -457,18 +465,16 @@ classdef SLX2LusUtils < handle
         end
         
         %% Get the initial ouput of Outport depending on the dimension.
-        function InitialOutput_cell = getInitialOutput(parent, blk, slx_dt, max_width)
+        function InitialOutput_cell = getInitialOutput(parent, blk, InitialOutput, slx_dt, max_width)
             lus_outputDataType = SLX2LusUtils.get_lustre_dt(slx_dt);
-            if strcmp(blk.InitialOutput, '[]')
+            if strcmp(InitialOutput, '[]')
                 InitialOutput = '0';
-            else
-                InitialOutput = blk.InitialOutput;
             end
             [InitialOutputValue, InitialOutputType, status] = ...
                 Constant_To_Lustre.getValueFromParameter(parent, blk, InitialOutput);
             if status
                 display_msg(sprintf('InitialOutput %s in block %s not found neither in Matlab workspace or in Model workspace',...
-                    blk.InitialOutput, blk.Origin_path), ...
+                    InitialOutput, blk.Origin_path), ...
                     MsgType.ERROR, 'Outport_To_Lustre', '');
                 return;
             end
@@ -679,7 +685,7 @@ classdef SLX2LusUtils < handle
         function clocks_list = getRTClocksSTR(blk, main_sampleTime)
             clocks_list = '';
             clocks = blk.CompiledSampleTime;
-            if numel(clocks) > 1
+            if iscell(clocks) && numel(clocks) > 1
                 c = {};
                 for i=1:numel(clocks)
                     T = clocks{i};

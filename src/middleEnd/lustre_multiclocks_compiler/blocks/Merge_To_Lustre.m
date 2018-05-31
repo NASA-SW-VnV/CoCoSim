@@ -84,7 +84,7 @@ classdef Merge_To_Lustre < Block_To_Lustre
                 end
             end
             InitialOutput_cell = SLX2LusUtils.getInitialOutput(parent, blk,...
-                outputDataType, numel(outputs));
+                blk.InitialOutput, outputDataType, numel(outputs));
             %% Step 4: start filling the definition of each output
             codes = {};
             % Go over outputs
