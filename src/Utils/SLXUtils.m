@@ -166,10 +166,10 @@ classdef SLXUtils
                 nb_steps = 100;
             end
             if ~exist('IMAX', 'var')
-                IMAX = 100;
+                IMAX = 200;
             end
             if ~exist('IMIN', 'var')
-                IMIN = -100;
+                IMIN = -200;
             end
             numberOfInports = numel(inports);
             try

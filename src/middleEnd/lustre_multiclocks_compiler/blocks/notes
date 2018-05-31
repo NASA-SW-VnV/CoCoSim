@@ -70,6 +70,7 @@ Hamza:  Abs,
         Sigbuilder block (pp),
         SignalConversion,
         Signum,
+        Step, 
         SwitchCase
         Terminator (ignored),
         ToWorkspace (pp),
@@ -110,7 +111,6 @@ Blocks that has left from Biosentinel:
     StateControl 
     
 AVA mission Simulink blocks:
-    Step (Hamza)
     WhileIterator
 
    
