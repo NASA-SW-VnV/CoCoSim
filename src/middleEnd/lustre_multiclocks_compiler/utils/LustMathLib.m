@@ -59,85 +59,99 @@ classdef LustMathLib
             node = sprintf(format);
         end
         %% Bitwise operators
-
-        function [node, external_nodes, opens] = getANDBitwise(n)
+        function [node, external_nodes, opens] = getBitwiseSigned(op, n)
+            opens = {};
+            extNode = sprintf('int_to_int%d',n);
+            UnsignedNode =  sprintf('_%s_Bitwise_Unsigned_%d',op, n);
+            external_nodes = {extNode, UnsignedNode};
+            
+            node_name = sprintf('_%s_Bitwise_Signed_%d', op, n);
+            v2_pown = 2^(n);
+            format = 'node %s (x, y: int)\nreturns(z:int);\nvar x2, y2:int;\nlet\n\t';
+            format = [format, 'x2 = if x < 0 then %d + x else x;\n\t'];
+            format = [format, 'y2 = if y < 0 then %d + y else y;\n\t'];
+            format = [format, 'z = %s(%s(x2, y2));\ntel\n\n'];
+            node = sprintf(format, node_name, v2_pown, v2_pown, extNode, UnsignedNode);
+        end
+        
+        %AND
+        function [node, external_nodes, opens] = getANDBitwiseUnsigned(n)
             opens = {};
             external_nodes = {};
             
             code = {};
-            for i=0:n-1
+            code{1} = sprintf('(x mod 2)*(y mod 2)');
+            for i=1:n-1
                 v2_pown = 2^i;
                 code{end+1} = sprintf('%d*((x / %d) mod 2)*((y / %d) mod 2)', v2_pown, v2_pown, v2_pown);
             end
             code = MatlabUtils.strjoin(code, ' \n\t+ ');
-            node_name = strcat('_AND_Bitwise_', num2str(n));
+            node_name = strcat('_AND_Bitwise_Unsigned_', num2str(n));
             
             format = 'node %s (x, y: int)\nreturns(z:int);\nlet\n\t';
             format = [format, 'z = %s;\ntel\n\n'];
             node = sprintf(format, node_name, code);
-            
-            
-        end
-        function [node, external_nodes, opens] = getANDBitwiseSigned(n)
+        end 
+        %NAND
+        function [node, external_nodes, opens] = getNANDBitwiseUnsigned(n)
             opens = {};
-            extNode = sprintf('int_to_int%d',n);
-            external_nodes = {extNode};
+            notNode = sprintf('_NOT_Bitwise_Unsigned_%d', n);
+            UnsignedNode =  sprintf('_AND_Bitwise_Unsigned_%d', n);
+            external_nodes = {notNode, UnsignedNode};
             
-            code = {};
-            for i=0:n-1
-                v2_pown = 2^i;
-                code{end+1} = sprintf('%d*((x2 / %d) mod 2)*((y2 / %d) mod 2)', v2_pown, v2_pown, v2_pown);
-            end
-            code = MatlabUtils.strjoin(code, ' \n\t+ ');
-            node_name = strcat('_AND_Bitwise_', num2str(n));
-            v2_pown = 2^n;
-            format = 'node %s (x, y: int)\nreturns(z:int);\nvar x2, y2:int;\nlet\n\t';
-            format = [format, 'x2 = if x < 0 then %d + x - 1 else x;\n\t'];
-            format = [format, 'y2 = if y < 0 then %d + y - 1 else y;\n\t'];
-            format = [format, 'z = %s(%s);\ntel\n\n'];
-            node = sprintf(format, node_name, v2_pown, v2_pown, extNode, code);
-            
-            
+            node_name = sprintf('_NAND_Bitwise_Unsigned_%d', n);
+            format = 'node %s (x, y: int)\nreturns(z:int);\nlet\n\t';
+            format = [format, 'z = %s(%s(x, y));\ntel\n\n'];
+            node = sprintf(format, node_name, notNode, UnsignedNode);
         end
-        
-        function [node, external_nodes, opens] = getORBitwise(n)
+        %NOR
+        function [node, external_nodes, opens] = getNORBitwiseUnsigned(n)
+            opens = {};
+            notNode = sprintf('_NOT_Bitwise_Unsigned_%d', n);
+            UnsignedNode =  sprintf('_OR_Bitwise_Unsigned_%d', n);
+            external_nodes = {notNode, UnsignedNode};
+            
+            node_name = sprintf('_NOR_Bitwise_Unsigned_%d', n);
+            format = 'node %s (x, y: int)\nreturns(z:int);\nlet\n\t';
+            format = [format, 'z = %s(%s(x, y));\ntel\n\n'];
+            node = sprintf(format, node_name, notNode, UnsignedNode);
+        end
+        %OR
+        function [node, external_nodes, opens] = getORBitwiseUnsigned(n)
             opens = {};
             external_nodes = {};
             
             code = {};
-            for i=0:n-1
+            code{1} = sprintf('((((x mod 2) + (y mod 2) + (x mod 2)*(y mod 2))) mod 2)');
+            for i=1:n-1
                 v2_pown = 2^i;
                 code{end+1} = sprintf('%d*(((((x / %d) mod 2) + ((y / %d) mod 2) + ((x / %d) mod 2)*((y / %d) mod 2))) mod 2)',...
                     v2_pown, v2_pown, v2_pown, v2_pown, v2_pown);
             end
             code = MatlabUtils.strjoin(code, ' \n\t+ ');
-            node_name = strcat('_OR_Bitwise_', num2str(n));
+            node_name = strcat('_OR_Bitwise_Unsigned_', num2str(n));
             
             format = 'node %s (x, y: int)\nreturns(z:int);\nlet\n\t';
             format = [format, 'z = %s;\ntel\n\n'];
-            node = sprintf(format, node_name, code);
-            
-            
+            node = sprintf(format, node_name, code);            
         end
-        
-        
-        function [node, external_nodes, opens] = getXORBitwise(n)
+        %XOR
+        function [node, external_nodes, opens] = getXORBitwiseUnsigned(n)
             opens = {};
             external_nodes = {};
             
             code = {};
-            for i=0:n-1
+            code{1} = sprintf('((x + y) mod 2)');
+            for i=1:n-1
                 v2_pown = 2^i;
                 code{end+1} = sprintf('%d*(((x / %d) + (y / %d)) mod 2)', v2_pown, v2_pown, v2_pown);
             end
             code = MatlabUtils.strjoin(code, ' \n\t+ ');
-            node_name = strcat('_XOR_Bitwise_', num2str(n));
+            node_name = strcat('_XOR_Bitwise_Unsigned_', num2str(n));
             
             format = 'node %s (x, y: int)\nreturns(z:int);\nlet\n\t';
             format = [format, 'z = %s;\ntel\n\n'];
             node = sprintf(format, node_name, code);
-            
-            
         end
         
         

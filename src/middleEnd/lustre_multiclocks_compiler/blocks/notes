@@ -71,7 +71,8 @@ Hamza:  Abs,
         SignalConversion,
         Signum,
         Step, 
-        SwitchCase
+        SwitchCase,
+        TappedDelayLine,
         Terminator (ignored),
         ToWorkspace (pp),
         TransferFcn (pp),
@@ -84,12 +85,10 @@ Hamza:  Abs,
 Blocks that has left from Biosentinel:
 
     ForIterator (Hamza)
-
-    Tapped Delay Line
     Bitwise Operator
-    
-    
     BusAssignment (Hamza)
+
+
     **************************** PP ***********************
     Using the same algorithm A, B, C, D
     DiscreteTransferFcn (see TransferFcn in pp) (Khanh)
@@ -100,6 +99,8 @@ Blocks that has left from Biosentinel:
 
     **************************** PP ***********************
     Pulse generator, DiscretePulseGenerator, SignalBuilder pp (they use datatable_process which can be replaced by Lustre code) 
+
+
 
     Fcn (partially done in pp) (Khanh)
    

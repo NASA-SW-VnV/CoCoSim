@@ -66,16 +66,20 @@ classdef MinMax_To_Lustre < Block_To_Lustre
     methods (Static = true)
         function res = recursiveMinMax(inputs, op)
             n = numel(inputs);
-            params = {};
-            closedParent = '';
-            for i=1:n-1
-                params{i} = sprintf('%s(%s ', op , inputs{i});
-                closedParent = [closedParent ')'];
+            if n==1
+                res = sprintf('%s(%s)', op, inputs{1});
+            else
+                params = {};
+                closedParent = '';
+                for i=1:n-1
+                    params{i} = sprintf('%s(%s ', op , inputs{i});
+                    closedParent = [closedParent ')'];
+                end
+                params{n} = sprintf('%s ', inputs{n});
+                
+                res = sprintf('%s%s', ...
+                    MatlabUtils.strjoin(params, ', '), closedParent);
             end
-            params{n} = sprintf('%s ', inputs{n});
-            
-            res = sprintf('%s%s', ...
-                MatlabUtils.strjoin(params, ', '), closedParent);
         end
         
     end
