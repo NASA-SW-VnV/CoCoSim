@@ -121,7 +121,7 @@ end
 end
 
 function [tree, expr] = parseNum(expr)
-regex = '^-?\+?[0-9]+(\.[0-9]+)?';
+regex = '^-?\+?[0-9]+(\.[0-9]+)?(e-?[0-9]+)?';
 match = regexp(expr, regex, 'match', 'once');
 if ~isempty(match)
     tree = match;
@@ -137,22 +137,41 @@ regex = '^[A-Za-z0-9]+(\(|\[)';
 match = regexp(expr, regex, 'match', 'once');
 if ~isempty(match)
     funcname = regexp(expr, '^[A-Za-z0-9]+', 'match', 'once');
-    if (strcmp(funcname, 'power') ...
-            ||strcmp(funcname, 'hypot')...
-            ||strcmp(funcname, 'rem')...
-            ||strcmp(funcname, 'atan2'))
-        regex = strcat('^',funcname, '\(([^\)]+)\)');
-        token = regexp(expr, regex, 'tokens', 'once');
-        args = split(token, ',');
-        [arg1, ~] = parseEA(args{1});
-        [arg2, ~] = parseEA(args{2});
-        tree = {funcname, arg1, arg2};
-        expr = regexprep(expr, regex, '');
-    else
-        expr = regexprep(expr, regex,'');
+    expr = regexprep(expr, regex,'');
+    if strcmp(funcname, 'u')
         [arg, expr] = parseEA(expr);
         expr = regexprep(expr, '^(\)|\])','');
         tree = {'Func',funcname,arg};
+    else
+        tree = {'Func', funcname};
+        nbPar = 1;
+        i = 1;
+        args = {};
+        while(nbPar ~= 0)
+            if strcmp(expr(i), '(')
+                nbPar = nbPar + 1;
+                i = i+1;
+            elseif strcmp(expr(i), ')')
+                nbPar = nbPar - 1;
+                if nbPar == 0
+                    args{end+1} = expr(1:i-1);
+                    expr = expr(i+1:end);
+                    i = 1;
+                else
+                    i = i+1;
+                end
+            elseif strcmp(expr(i), ',') && nbPar == 1
+                args{end+1} = expr(1:i-1);
+                expr = expr(i+1:end);
+                i = 1;
+            else
+                i = i+1;
+            end
+        end
+        for i=1:numel(args)
+            [argi, ~] = parseEA(args{i});
+            tree = [tree, {argi}];
+        end
     end
 else
     tree = '';
@@ -238,7 +257,7 @@ end
 end
 %% > < <= >=, == !=, && ||
 function [tree, expr] = parseRO(expr)
-regex = '^(<=?|>=?|==|!=|&&|\|\|)';
+regex = '^(<=?|>=?|==|!=|~=|&&?|\|\|?)';
 match = regexp(expr, regex, 'match', 'once');
 if ~isempty(match)
     tree = match;

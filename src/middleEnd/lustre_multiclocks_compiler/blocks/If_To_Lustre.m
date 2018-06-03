@@ -9,6 +9,8 @@ classdef If_To_Lustre < Block_To_Lustre
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     properties
+        % needed for Fcn_To_Lustre.tree2code
+        isBooleanExpr = 1;
     end
     
     methods
@@ -53,7 +55,7 @@ classdef If_To_Lustre < Block_To_Lustre
                 IfExp{end+1} = '';
             end
             %% Step 4: start filling the definition of each output
-            code = If_To_Lustre.ifElseCode(parent, blk, outputs, ...
+            code = If_To_Lustre.ifElseCode(obj, parent, blk, outputs, ...
                 inputs, inports_dt, IfExp);
             obj.setCode(code);
             
@@ -67,12 +69,12 @@ classdef If_To_Lustre < Block_To_Lustre
         
     end
     methods(Static)
-        function code = ifElseCode(parent, blk, outputs, inputs, inports_dt, IfExp)
+        function code = ifElseCode(obj, parent, blk, outputs, inputs, inports_dt, IfExp)
             codes = {};
             % Go over outputs
             nbOutputs=numel(outputs);
             for j=1:nbOutputs
-                lusCond = If_To_Lustre.formatConditionToLustre(...
+                lusCond = If_To_Lustre.formatConditionToLustre(obj, ...
                     IfExp{j}, inputs, inports_dt, parent, blk);
                 if j==nbOutputs && isempty(IfExp{j})
                     %default condition
@@ -99,7 +101,24 @@ classdef If_To_Lustre < Block_To_Lustre
             end
             exp = sprintf('(%s)', MatlabUtils.strjoin(values, ', '));
         end
-        function exp = formatConditionToLustre(cond, inputs_cell, inputs_dt, parent, blk)
+        
+        
+        %% new version of parsing Lustre expression.
+        function exp = formatConditionToLustre(obj, cond, inputs_cell, inputs_dt, parent, blk)
+            display_msg(cond, MsgType.DEBUG, 'If_To_Lustre', '');
+            exp = '';
+            [tree, status, unsupportedExp] = Fcn_Exp_Parser(cond);
+            if status
+                display_msg(sprintf('ParseError  character unsupported  %s in block %s', ...
+                    unsupportedExp, blk.Origin_path), ...
+                    MsgType.ERROR, 'Fcn_To_Lustre', '');
+                return;
+            end
+            exp = Fcn_To_Lustre.tree2code(obj, tree, parent, blk, inputs_cell, inputs_dt{1});
+        end
+        
+        %% old version of parsing Lustre expression.
+        function exp = formatConditionToLustreV2(cond, inputs_cell, inputs_dt, parent, blk)
             %If Conditions uses only: <, <=, ==, ~=, >, >=, &, |, ~, (), unary-minus
             
             [S,T] = regexp(cond, '(&|\|)', 'split', 'tokens');
@@ -107,7 +126,7 @@ classdef If_To_Lustre < Block_To_Lustre
                 % handling & and |
                 codes = {};
                 for i=1:numel(S)
-                    codes{i} = If_To_Lustre.formatConditionToLustre(S{i}, inputs_cell,inputs_dt, parent, blk);
+                    codes{i} = If_To_Lustre.formatConditionToLustreV2(S{i}, inputs_cell,inputs_dt, parent, blk);
                 end
                 exp = codes{1};
                 for i=1:numel(T)

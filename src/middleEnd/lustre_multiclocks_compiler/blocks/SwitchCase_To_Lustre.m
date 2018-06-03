@@ -9,6 +9,8 @@ classdef SwitchCase_To_Lustre < Block_To_Lustre
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     properties
+        % needed for Fcn_To_Lustre.tree2code
+        isBooleanExpr = 1;
     end
     
     methods
@@ -72,7 +74,7 @@ classdef SwitchCase_To_Lustre < Block_To_Lustre
                 IfExp{end+1} = '';
             end
             %% Step 4: start filling the definition of each output
-            code = If_To_Lustre.ifElseCode(parent, blk, outputs, ...
+            code = If_To_Lustre.ifElseCode(obj, parent, blk, outputs, ...
                 inputs, inports_dt, IfExp);
             obj.setCode(code);
             
