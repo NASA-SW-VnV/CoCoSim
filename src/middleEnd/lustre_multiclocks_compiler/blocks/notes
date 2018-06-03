@@ -30,6 +30,7 @@ Ktrinh: Assignment,
 
 Hamza:  Abs,
         ActionPort,
+        BitwiseOperator,
         BusCreator, 
         BusSelector, 
         Constant,
@@ -84,22 +85,18 @@ Hamza:  Abs,
 
 Blocks that has left from Biosentinel:
 
-    ForIterator (Hamza)
-    Bitwise Operator
-    BusAssignment (Hamza)
-
-
     **************************** PP ***********************
     Using the same algorithm A, B, C, D
-    DiscreteTransferFcn (see TransferFcn in pp) (Khanh)
+    DiscreteTransferFcn (see TransferFcn in pp) (Khanh) ++++
     DiscreteStateSpace (Khanh).
     ZeroPole(Khanh)
-    DiscreteFilter(Khanh)
-    DiscreteFir
+    DiscreteFilter(Khanh) ++
+    DiscreteFir +
 
     **************************** PP ***********************
-    Pulse generator, DiscretePulseGenerator, SignalBuilder pp (they use datatable_process which can be replaced by Lustre code) 
-
+    (they use datatable_process which can be replaced by Lustre code) 
+    DiscretePulseGenerator +
+    SignalBuilder 
 
 
     Fcn (partially done in pp) (Khanh)
@@ -107,12 +104,19 @@ Blocks that has left from Biosentinel:
     
     ModelReference (Hamza)
     RandomNumber ( to translate to empty node with contract) (Hamza)
-    
 
-    S-Function (Hamza)
-    StateControl 
-    
-AVA mission Simulink blocks:
-    WhileIterator
 
    
+Not supported yet:
+    BusAssignment (Hamza)
+
+Blocks difficult to support:
+    ForIterator, WhileIterator: executes a subsystem many times in the same 
+                time step. Impossible to support in Lustre.
+    S-Function: If it is C or Matlab code, it's hard to support.
+                many basic blocks in Simulink has S-Function BlockType, we 
+                support them using their MaskType (such as 'Bitwise Operator', 
+                and 'Tapped Delay Line').
+
+    
+    

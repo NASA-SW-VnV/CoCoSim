@@ -1,5 +1,5 @@
 classdef Abs_To_Lustre < Block_To_Lustre
-    %Abs_To_Lustre 
+    %Abs_To_Lustre
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -23,30 +23,24 @@ classdef Abs_To_Lustre < Block_To_Lustre
             end
             
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk);
-            inputs = {};
-            widths = blk.CompiledPortWidths.Inport;
-            max_width = max(widths);
             outputDataType = blk.CompiledPortDataTypes.Outport{1};
-            RndMeth = blk.RndMeth;
-            SaturateOnIntegerOverflow = blk.SaturateOnIntegerOverflow;
-            for i=1:numel(widths)
-                inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
-                if numel(inputs{i}) < max_width
-                    inputs{i} = arrayfun(@(x) {inputs{i}{1}}, (1:max_width));
-                end
-                inport_dt = blk.CompiledPortDataTypes.Inport(i);
-                %converts the input data type(s) to
-                %its accumulator data type
-                if ~strcmp(inport_dt, outputDataType)
-                    [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, outputDataType, RndMeth, SaturateOnIntegerOverflow);
-                    if ~isempty(external_lib)
-                        obj.addExternal_libraries(external_lib);
-                        inputs{i} = cellfun(@(x) sprintf(conv_format,x), inputs{i}, 'un', 0);
-                    end
+            
+            inputs{1} = SLX2LusUtils.getBlockInputsNames(parent, blk, 1);
+            inport_dt = blk.CompiledPortDataTypes.Inport(1);
+            %converts the input data type(s) to
+            %its accumulator data type
+            if ~strcmp(inport_dt, outputDataType)
+                RndMeth = blk.RndMeth;
+                SaturateOnIntegerOverflow = blk.SaturateOnIntegerOverflow;
+                [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, outputDataType, RndMeth, SaturateOnIntegerOverflow);
+                if ~isempty(external_lib)
+                    obj.addExternal_libraries(external_lib);
+                    inputs{1} = cellfun(@(x) sprintf(conv_format,x), inputs{1}, 'un', 0);
                 end
             end
+            
             [~, zero] = SLX2LusUtils.get_lustre_dt(outputDataType);
-
+            
             codes = {};
             for j=1:numel(inputs{1})
                 code = sprintf('if %s >= %s then %s else -%s', inputs{1}{j}, zero, inputs{1}{j}, inputs{1}{j});
@@ -66,7 +60,7 @@ classdef Abs_To_Lustre < Block_To_Lustre
             if strcmp(blk.SaturateOnIntegerOverflow, 'on')
                 obj.addUnsupported_options(...
                     sprintf('The Saturate on integer overflow option is not support in block %s', blk.Origin_path));
-            end 
+            end
             options = obj.unsupported_options;
         end
     end

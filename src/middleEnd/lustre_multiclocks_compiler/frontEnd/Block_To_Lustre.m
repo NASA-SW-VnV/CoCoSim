@@ -1,6 +1,6 @@
 classdef Block_To_Lustre < handle
     %Block_To_Lustre an interface for all write blocks classes. Any BlockType_write
-    %class inherit from this class. 
+    %class inherit from this class.
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -29,7 +29,7 @@ classdef Block_To_Lustre < handle
         %unsupported_options are the options in the corresponding block
         %that are not supported in the translation. This options are the
         %Dialogue parameters specified by the user. Like DataType
-        %conversion ... 
+        %conversion ...
         unsupported_options = {};
     end
     
@@ -75,8 +75,8 @@ classdef Block_To_Lustre < handle
     end
     methods(Static)
         
-        % Adapt BlockType to the name of the class that will handle its 
-        %translation.  
+        % Adapt BlockType to the name of the class that will handle its
+        %translation.
         function name = blkTypeFormat(name)
             name = strrep(name, ' ', '');
             name = strrep(name, '-', '');
@@ -85,12 +85,21 @@ classdef Block_To_Lustre < handle
         % Return if the block has not a class that handle its translation.
         % e.g Inport block is trivial and does not need a code, its name is given
         % in the node signature.
-        function b = ignored(type)
-            % add blocks that will be ignored because they are supported somehow implicitly.
-            blks = {'Inport', 'Terminator', 'Scope', 'Display', ...
+        function b = ignored(blk)
+            % add blocks that will be ignored because they are supported somehow implicitly or not important for Code generation adn Verification.
+            blksNames = {'Inport', 'Terminator', 'Scope', 'Display', ...
                 'EnablePort','ActionPort', 'ResetPort', 'TriggerPort', 'ToWorkspace', ...
-                'DataTypeDuplicate'};
-            b = ismember(type, blks);
+                'DataTypeDuplicate', 'Data Type Propagation'};
+            type = blk.BlockType;
+            try
+                masktype = sub_blk.MaskType;
+            catch
+                masktype = '';
+            end
+            
+            b = ismember(type, blksNames) || ismember(masktype, blksNames)...
+                || (~strcmp(type, 'Outport') ...
+                && isfield(blk, 'CompiledPortWidths') && isempty(blk.CompiledPortWidths.Outport));
         end
     end
     

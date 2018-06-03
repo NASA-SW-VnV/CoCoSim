@@ -92,6 +92,8 @@ else
         html_path = fullfile(output_dir, strcat(file_name, '_unsupportedOptions.html'));
         if ~exist(output_dir, 'dir'); MatlabUtils.mkdir(output_dir); end
         MenuUtils.createHtmlList('Unsupported options/blocks', unsupportedOptions, html_path);
+        msg = sprintf('HTML report is in : %s', html_path);
+        display_msg(msg, MsgType.RESULT, 'ToLustreUnsupportedBlocks', '');
     catch me
         display_msg(me.getReport(), MsgType.DEBUG, 'unsupportedBlocksMenu', '');
         msg = sprintf('Your model is incompatible with CoCoSim for the following reasons:\n%s', ...
@@ -101,8 +103,8 @@ else
 end
 
 t_finish = toc(t_start);
-msg = sprintf('ToLustreUnsupportedBlocks finished in %f seconds', t_finish);
 display_msg(MatlabUtils.strjoin(unsupportedOptions, '\n'), MsgType.DEBUG, 'ToLustreUnsupportedBlocks', '');
+msg = sprintf('ToLustreUnsupportedBlocks finished in %f seconds', t_finish);
 display_msg(msg, MsgType.RESULT, 'ToLustreUnsupportedBlocks', '');
 cd(PWD)
 end
@@ -129,11 +131,15 @@ function  unsupportedOptions_i  = blockUnsupportedOptions( parent, blk,  main_sa
 %INPUTS:
 %   blk: The internal representation of the subsystem.
 %   main_clock   : The model sample time.
-[b, status, type] = getWriteType(blk);
+[b, status, type, masktype, isIgnored] = getWriteType(blk);
 unsupportedOptions_i = {};
 if status
-    if ~Block_To_Lustre.ignored(type)
-        msg = sprintf('BlockType "%s" is not supported in "%s"', type, blk.Origin_path);
+    if ~isIgnored
+        if isempty(masktype)
+            msg = sprintf('Block "%s" with BlockType "%s" is not supported', blk.Origin_path, type);
+        else
+            msg = sprintf('Block "%s" with BlockType "%s" and MaskType "%s" is not supported', blk.Origin_path, type, masktype);
+        end
         unsupportedOptions_i = {msg};
     end
     return;
