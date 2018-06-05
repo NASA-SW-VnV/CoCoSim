@@ -26,7 +26,7 @@ classdef Switch_To_Lustre < Block_To_Lustre
             outputDataType = blk.CompiledPortDataTypes.Outport{1};
             RndMeth = blk.RndMeth;
             SaturateOnIntegerOverflow = blk.SaturateOnIntegerOverflow;
-            [threshold, thresholdDataType, status] = ...
+            [threshold, ~, status] = ...
                 Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Threshold);
             for i=1:numel(widths)
                 inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
@@ -42,14 +42,22 @@ classdef Switch_To_Lustre < Block_To_Lustre
                         obj.addExternal_libraries(external_lib);
                         inputs{i} = cellfun(@(x) sprintf(conv_format,x), inputs{i}, 'un', 0);
                     end
-                elseif ~strcmp(inport_dt, thresholdDataType) && i==2
+                elseif i==2
                     [lus_inportDataType, ~] = SLX2LusUtils.get_lustre_dt(inport_dt);
-                    if strcmp(lus_inportDataType, 'real')
-                        threshold = sprintf('%.15f', threshold);
-                        thresholdDataType = 'double';
-                    elseif strcmp(lus_inportDataType, 'int')
-                        threshold = sprintf('%d', int32(threshold));
-                        thresholdDataType = 'int';
+                    if strcmp(blk.Criteria, 'u2 ~= 0')
+                        if strcmp(lus_inportDataType, 'real')
+                            threshold = '0.0';
+                        elseif strcmp(lus_inportDataType, 'int')
+                            threshold = '0';
+                        else
+                            threshold = 'false';
+                        end
+                    else
+                        if strcmp(lus_inportDataType, 'real')
+                            threshold = sprintf('%.15f', threshold);
+                        elseif strcmp(lus_inportDataType, 'int')
+                            threshold = sprintf('%d', int32(threshold));
+                        end
                     end
                 end
             end
@@ -62,6 +70,7 @@ classdef Switch_To_Lustre < Block_To_Lustre
                 return;
             end
             codes = {};
+            
             for i=1:numel(outputs)
                 if strcmp(blk.Criteria, 'u2 > Threshold')
                     codes{i} = sprintf('%s = if %s > %s then %s else %s; \n\t', outputs{i}, inputs{2}{i}, threshold, inputs{1}{i},inputs{3}{i});
