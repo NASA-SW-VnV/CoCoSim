@@ -213,7 +213,7 @@ end
 
 
 function [tree, expr] = parseNot(expr)
-regex = '^!';
+regex = '^(!|~)';
 match = regexp(expr, regex, 'match', 'once');
 if ~isempty(match)
     tree = match;

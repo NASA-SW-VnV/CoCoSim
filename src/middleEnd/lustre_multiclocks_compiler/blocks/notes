@@ -46,7 +46,7 @@ Hamza:  Abs,
         DiscreteStateSpace (pp),
         Display (ignored)
         EnablePort,
-        Fcn (pp) (*TODO: need to be translated when pp fails*)
+        Fcn (full support to Lustre directly)
         ForEach (pp),
         From,
         If,
@@ -99,7 +99,6 @@ Blocks that has left from Biosentinel:
     SignalBuilder 
 
 
-    Fcn (partially done in pp) (Khanh)
    
     
     ModelReference (Hamza)

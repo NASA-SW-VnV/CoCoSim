@@ -171,7 +171,7 @@ classdef Fcn_To_Lustre < Block_To_Lustre
                     
                 case 'Func'
                     switch tree{2}
-                        % Handling function declared in ('Func','func_name','arg')
+                        % Handling function declared in ('Func','func_name','arg1', 'arg2, ..,'argn')
                         % with one argument. More than one argument are
                         % handled separately
                         
