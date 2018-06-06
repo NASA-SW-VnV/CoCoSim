@@ -77,7 +77,8 @@ else
         'std_pp/blocks/transfer_function_process.m'}; 
     % 0 means all this functions will be called first.
     
-    pp_order_map(0) = {'pp2/blocks/Inport_pp.m', ...
+    pp_order_map(0) = {'pp2/blocks/ModelReference_pp.m'};
+    pp_order_map(1) = {'pp2/blocks/Inport_pp.m', ...
         'pp2/blocks/Outport_pp.m' ...
         };
     
