@@ -49,6 +49,7 @@ Hamza:  Abs,
         Fcn (full support to Lustre directly)
         ForEach (pp),
         From,
+        Ground,
         If,
         InportShadow(pp),
         Integrator (pp),
@@ -109,7 +110,7 @@ Blocks that has left from Biosentinel:
     Discrete Derivative (check pp in article)
     Rate Limiter
     Transport Delay
-    Ground
+    
    
 Not supported yet:
     BusAssignment (Hamza)

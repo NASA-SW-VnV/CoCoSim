@@ -55,18 +55,24 @@ classdef SLXUtils
         %% get the value of a parameter
         function [paramValue, status] = evalParam(model, param)
             status = 0;
-            
-            % this is the case of variable from model workspace
-            hws = get_param(model, 'modelworkspace') ;
-            if isvarname(param) && hasVariable(hws, param)
-                paramValue = getVariable(hws, param);
+            if isempty(regexp(param, '^[a-zA-Z]', 'match'))
+                paramValue = str2double(param);
+            elseif strcmp(param, 'true') ...
+                    ||strcmp(param, 'false')
+                paramValue = evalin('base', param);
             else
-                try
-                    paramValue = evalin('base',param);
-                catch
-                    status = 1;
-                    paramValue = 0;
-                    return;
+                % this is the case of variable from model workspace
+                hws = get_param(model, 'modelworkspace') ;
+                if isvarname(param) && hasVariable(hws, param)
+                    paramValue = getVariable(hws, param);
+                else
+                    try
+                        paramValue = evalin('base',param);
+                    catch
+                        status = 1;
+                        paramValue = 0;
+                        return;
+                    end
                 end
             end
             

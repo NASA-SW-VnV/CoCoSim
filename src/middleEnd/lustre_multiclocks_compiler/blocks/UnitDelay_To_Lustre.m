@@ -13,10 +13,16 @@ classdef UnitDelay_To_Lustre < Block_To_Lustre
     methods
         
         function  write_code(obj, parent, blk, varargin)
+            InitialConditionSource = 'Dialog';
+            DelayLengthSource = 'Dialog';
+            DelayLength = '1';
+            DelayLengthUpperLimit = '1';
+            ExternalReset = 'None';
+            ShowEnablePort = 'off';
             [lustre_code, delay_node_code, variables, external_libraries, unsupported_options] = ...
                 Delay_To_Lustre.get_code( parent, blk, ...
-                'Dialog', 'Dialog',...
-                '1', '1', 'None', 'off' );
+                InitialConditionSource, DelayLengthSource, DelayLength,...
+                DelayLengthUpperLimit, ExternalReset, ShowEnablePort );
             obj.addVariable(variables);
             obj.addExternal_libraries(external_libraries);
             obj.addUnsupported_options(unsupported_options);
