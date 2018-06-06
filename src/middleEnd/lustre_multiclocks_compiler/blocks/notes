@@ -1,10 +1,13 @@
-(*Please add block in Alphabetic order*)
 Ktrinh: Assignment,
         Bias (pp),
         Concatenate,
         DataTypeConversion 
         DataTypeDuplicate (ignored),
         Demux,
+        DiscretePulseGenerator, 
+        DiscreteTransferFcn (pp),
+        DiscreteStateSpace (pp),
+        ZeroPole(pp),
         DotProduct(pp),
         FromWorkspace,
         Gain (pp), 
@@ -18,15 +21,12 @@ Ktrinh: Assignment,
         Product,
         Reshape,
         Rounding,
-        Selector (see pp) (Khanh)
+        Selector,
         Switch,
         Sqrt, 
         Trigonomery, 
         
-        
-        
-
-
+       
 
 Hamza:  Abs,
         ActionPort,
@@ -43,7 +43,6 @@ Hamza:  Abs,
         Delay,
         DigitalClock,
         DiscreteIntegrator (pp),
-        DiscreteStateSpace (pp),
         Display (ignored)
         EnablePort,
         Fcn (full support to Lustre directly)
@@ -56,6 +55,7 @@ Hamza:  Abs,
         Memory (pp)
         Merge,
         MinMax,
+        ModelReference (pp),
         Outport,
         Quantizer (pp),
         RandomNumber,
@@ -69,7 +69,6 @@ Hamza:  Abs,
         Subsystem,
         Saturation (pp), 
         Saturation dynamic (pp), 
-        Selector (pp),
         Sigbuilder block (pp),
         SignalConversion,
         Signum,
@@ -84,33 +83,14 @@ Hamza:  Abs,
         UnaryMinus, 
         UnitDelay,
         ZeroOrderHold,
-        ZeroPole (pp),
         
 
 Blocks that has left from Biosentinel:
 
-    **************************** PP ***********************
-    Using the same algorithm A, B, C, D
-    DiscreteTransferFcn (see TransferFcn in pp) (Khanh) ++++
-    DiscreteStateSpace (Khanh).
-    ZeroPole(Khanh)
     DiscreteFilter(Khanh) ++
-    DiscreteFir +
+    DiscreteFir(Khanh) +
+    SignalBuilder(Khanh) 
 
-    **************************** PP ***********************
-    (they use datatable_process which can be replaced by Lustre code) 
-    DiscretePulseGenerator +
-    SignalBuilder 
-
-
-   
-    
-    ModelReference (Hamza)
-
-    
-    
-    
-    
    
 Not supported yet:
     BusAssignment (Hamza)
