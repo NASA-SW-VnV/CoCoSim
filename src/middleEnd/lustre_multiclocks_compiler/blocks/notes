@@ -78,6 +78,7 @@ Hamza:  Abs,
         Terminator (ignored),
         ToWorkspace (pp),
         TransferFcn (pp),
+        TransportDelay (pp),
         TriggerPort, 
         UnaryMinus, 
         UnitDelay,
@@ -107,13 +108,16 @@ Blocks that has left from Biosentinel:
     RandomNumber ( to translate to empty node with contract) (Hamza)
 
     
-    Discrete Derivative (check pp in article)
-    Rate Limiter
-    Transport Delay
+    
+    
     
    
 Not supported yet:
     BusAssignment (Hamza)
+    Discrete Derivative (check pp in article)
+    Rate Limiter
+
+
 
 Blocks difficult to support:
     ForIterator, WhileIterator: executes a subsystem many times in the same 
