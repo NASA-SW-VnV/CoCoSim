@@ -1,4 +1,4 @@
-function [ ir ] = rateTransition_ir_pp( ir )
+function [ ir ] = multiClocks_ir_pp( ir )
 %rateTransition_ir_pp add Inport and outport compiledSampleDimension
 
 file_path = ir.meta.file_path;
@@ -8,19 +8,21 @@ field_name = SLX2LusUtils.name_format(file_name);
 if isfield(ir, field_name)
     Cmd = [file_name, '([], [], [], ''compile'');'];
     eval(Cmd);
-    ir.(field_name) = recursiveGeneration(ir.(field_name));
+    ir.(field_name) = recursiveCall(ir.(field_name));
     Cmd = [file_name, '([], [], [], ''term'');'];
     eval(Cmd);
 end
 end
 %
-function blk = recursiveGeneration(blk)
+function blk = recursiveCall(blk)
 if isfield(blk, 'Content')
     field_names = fieldnames(blk.Content);
     for i=1:numel(field_names)
-        blk.Content.(field_names{i}) = recursiveGeneration(blk.Content.(field_names{i}));
+        blk.Content.(field_names{i}) = recursiveCall(blk.Content.(field_names{i}));
     end
-elseif isfield(blk, 'BlockType') && strcmp(blk.BlockType, 'RateTransition')
+elseif isfield(blk, 'BlockType') ...
+        && (strcmp(blk.BlockType, 'RateTransition') ...
+        ||strcmp(blk.BlockType, 'ZeroOrderHold')) 
     ph = get_param(blk.Origin_path, 'PortHandles');
     blk.InportCompiledSampleTime = get_param(ph.Inport(1), 'CompiledSampleTime');
     blk.OutportCompiledSampleTime = get_param(ph.Outport(1), 'CompiledSampleTime');
