@@ -104,7 +104,11 @@ Blocks that has left from Biosentinel:
     ModelReference (Hamza)
     RandomNumber ( to translate to empty node with contract) (Hamza)
 
-
+    Zero-Order Hold (check article)
+    Discrete Derivative (check pp in article)
+    Rate Limiter
+    Transport Delay
+    Ground
    
 Not supported yet:
     BusAssignment (Hamza)

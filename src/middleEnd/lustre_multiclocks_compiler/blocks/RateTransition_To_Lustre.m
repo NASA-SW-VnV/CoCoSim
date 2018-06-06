@@ -1,5 +1,5 @@
 classdef RateTransition_To_Lustre < Block_To_Lustre
-    %SignalConversion_To_Lustre translates the RateTransition block.
+    %RateTransition_To_Lustre translates the RateTransition block.
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -25,7 +25,6 @@ classdef RateTransition_To_Lustre < Block_To_Lustre
             outTsOffset = OutportCompiledSampleTime(2);
             
             %% detect Rate type (see documentation
-            type = '';
             if strcmp(blk.Integrity, 'on') && strcmp(blk.Deterministic, 'on')
                 if inTs == outTs
                     if inTsOffset == outTsOffset
