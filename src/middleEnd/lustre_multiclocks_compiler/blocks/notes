@@ -58,6 +58,7 @@ Hamza:  Abs,
         MinMax,
         Outport,
         Quantizer (pp),
+        RandomNumber,
         RateTransition,
         RelationalOperator, 
         Relay (pp),
@@ -105,7 +106,6 @@ Blocks that has left from Biosentinel:
    
     
     ModelReference (Hamza)
-    RandomNumber ( to translate to empty node with contract) (Hamza)
 
     
     
