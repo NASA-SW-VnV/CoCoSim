@@ -4,7 +4,9 @@ schema.label = 'Prove properties using ...';
 schema.statustip = 'Verify the current model with CoCoSim';
 schema.autoDisableWhen = 'Busy';
 
-verification_config;
+[verif_root, ~, ~] = fileparts(mfilename('fullpath'));
+verification_items{1} = fullfile(verif_root, 'lustreVerify', 'lusVerifyMenu.m');
+verification_items{2} = fullfile(verif_root, 'cocoSpecVerify', 'cocoSpecVerifyMenu.m');
 schema.childrenFcns = cellfun(@MenuUtils.funPath2Handle, verification_items,...
     'UniformOutput', false);
 schema.childrenFcns(numel(schema.childrenFcns)+1) = {@helpItem};

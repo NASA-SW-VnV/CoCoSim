@@ -25,15 +25,33 @@ pp_config;
 fprintf('\n\t Click <a href="matlab: pp_user_config">here</a> to change pre-processing configuration.\n');
 
 %% IR config
-if exist(fullfile(cocoSim_root, 'src', 'frontEnd', 'IR', 'std_IR', 'utils', 'make.m'), 'file')
-    PWD = pwd;
-    cd(fullfile(cocoSim_root, 'src', 'frontEnd', 'IR', 'std_IR', 'utils'));
-    try
-        make
-    catch  ME
-        display_msg(ME.getReport(), MsgType.ERROR, 'cocosim_config', '');
+
+ir_utils_path = fullfile(cocoSim_root, 'src', 'frontEnd', 'IR', 'utils');
+json_encode_file = 'json_encode';
+json_decode_file = 'json_decode';
+
+if ismac
+    json_encode_file = fullfile(ir_utils_path, 'json_encode.mexmaci64');
+    json_decode_file = fullfile(ir_utils_path, 'json_decode.mexmaci64');
+elseif isunix
+    json_encode_file = fullfile(ir_utils_path, 'json_encode.mexa64');
+    json_decode_file = fullfile(ir_utils_path, 'json_decode.mexa64');
+elseif ispc
+    json_encode_file = fullfile(ir_utils_path, 'json_encode.mexw64');
+    json_decode_file = fullfile(ir_utils_path, 'json_decode.mexw64');
+end
+
+if ~ exist(json_encode_file, 'file') || ~ exist(json_decode_file, 'file')
+    if exist(fullfile(ir_utils_path, 'make.m'), 'file')
+        PWD = pwd;
+        cd(ir_utils_path);
+        try
+            make
+        catch  ME
+            display_msg(ME.getReport(), MsgType.ERROR, 'cocosim_config', '');
+        end
+        cd(PWD);
     end
-    cd(PWD);
 end
 
 %% Java external libraries
