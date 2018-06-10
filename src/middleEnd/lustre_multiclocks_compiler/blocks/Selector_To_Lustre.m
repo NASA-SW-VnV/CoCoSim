@@ -61,8 +61,7 @@ classdef Selector_To_Lustre < Block_To_Lustre
             outputDimsArray = ones(1,numOutDims);
 
             for i=1:numel(blk.IndexOptionArray)
-                [outputDimsArray(i), ~, ~] = ...
-                    Constant_To_Lustre.getValueFromParameter(parent, blk, blk.OutputSizeArray{i});
+                
                 if strcmp(blk.IndexOptionArray{i}, 'Select all')
                     ind{i} = (1:in_matrix_dimension{1}.dims(i));
                     outputDimsArray(i) = in_matrix_dimension{1}.dims(i);
@@ -85,6 +84,8 @@ classdef Selector_To_Lustre < Block_To_Lustre
                         end
                     end
                 elseif strcmp(blk.IndexOptionArray{i}, 'Starting index (dialog)')
+                    [outputDimsArray(i), ~, ~] = ...
+                    Constant_To_Lustre.getValueFromParameter(parent, blk, blk.OutputSizeArray{i});
                     [Idx, ~, ~] = ...
                         Constant_To_Lustre.getValueFromParameter(parent, blk, blk.IndexParamArray{i});                    
                     ind{i} = (Idx:Idx+outputDimsArray(i)-1);
@@ -94,7 +95,8 @@ classdef Selector_To_Lustre < Block_To_Lustre
                     indexPortNumber = indexPortNumber + 1;
                     portNumber = indexPortNumber + 1;   % 1st is for input
                     indPortNumber(i) = portNumber;
-
+                    [outputDimsArray(i), ~, ~] = ...
+                    Constant_To_Lustre.getValueFromParameter(parent, blk, blk.OutputSizeArray{i});
                     for j=1:outputDimsArray(i)
                         
                         if strcmp(IndexMode, 'Zero-based')

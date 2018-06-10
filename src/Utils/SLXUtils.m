@@ -56,7 +56,8 @@ classdef SLXUtils
         function [paramValue, status] = evalParam(model, param)
             status = 0;
             if isempty(regexp(param, '^[a-zA-Z]', 'match'))
-                paramValue = str2double(param);
+                %paramValue = str2double(param);
+                paramValue = str2num(param);
             elseif strcmp(param, 'true') ...
                     ||strcmp(param, 'false')
                 paramValue = evalin('base', param);
@@ -497,6 +498,40 @@ classdef SLXUtils
                 display_msg(me.getReport(), MsgType.DEBUG, 'makeharness', '');
                 status = 1;
             end
+        end
+        
+        function U_dims = tf_get_U_dims(model, pp_name, blkList)            
+            %% geting dimensions of U 
+            warning off;
+            code_on=sprintf('%s([], [], [], ''compile'')', model);
+            eval(code_on);
+            try
+                U_dims = {};
+                for i=1:length(blkList)
+                    CompiledPortDimensions = get_param(blkList{i}, 'CompiledPortDimensions');
+                    in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(CompiledPortDimensions.Inport);
+                    if numel(in_matrix_dimension) > 1
+                        display_msg(sprintf('block %s has external numerator/denominator not supported',...
+                            blkList{i}), ...
+                            MsgType.ERROR, pp_name, '');
+                        U_dims{end+1} = [];
+                        continue;
+                    else
+                        U_dims{end+1} = in_matrix_dimension{1}.dims;
+                    end
+                end
+            catch me
+                display_msg(me.getReport(), ...
+                    MsgType.DEBUG, pp_name, '');
+                code_off = sprintf('%s([], [], [], ''term'')', model);
+                eval(code_off);
+                warning on;
+                return;
+            end
+            code_off = sprintf('%s([], [], [], ''term'')', model);
+            eval(code_off);
+            warning on;
+            
         end
     end
     

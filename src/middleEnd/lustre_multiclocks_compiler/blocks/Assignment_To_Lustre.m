@@ -176,7 +176,7 @@ classdef Assignment_To_Lustre < Block_To_Lustre
             y0_dims = in_matrix_dimension{1}.dims;    
             indexDataType = 'int';      
             
-            % if index assignment is read in form index port, write mapping
+            % if index assignment is read in from index port, write mapping
             % code on Lustre side
             if isPortIndex
                 

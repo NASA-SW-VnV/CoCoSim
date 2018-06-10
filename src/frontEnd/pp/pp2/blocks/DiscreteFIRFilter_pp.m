@@ -23,6 +23,38 @@ if not(isempty(dFir_list))
         end
         display_msg(dFir_list{i}, MsgType.INFO, ...
             'DiscreteFIRFilter_pp', '');
+        
+        Filter_structure = get_param(dFir_list{i}, 'FilterStructure');
+        if strcmp(Filter_structure, 'Direct form symmetric')
+            display_msg(sprintf('Filter_structure %s in block %s is not supported',...
+                Filter_structure, blk), ...
+                MsgType.ERROR, 'DiscreteFIRFilter_pp', '');
+            continue;
+        end
+        
+        Filter_structure = get_param(dFir_list{i}, 'FilterStructure');
+        if strcmp(Filter_structure, 'Direct form antisymmetric')
+            display_msg(sprintf('Filter_structure %s in block %s is not supported',...
+                Filter_structure, blk), ...
+                MsgType.ERROR, 'DiscreteFIRFilter_pp', '');
+            continue;
+        end   
+        
+        Filter_structure = get_param(dFir_list{i}, 'FilterStructure');
+        if strcmp(Filter_structure, 'Direct form transposed')
+            display_msg(sprintf('Filter_structure %s in block %s is not supported',...
+                Filter_structure, blk), ...
+                MsgType.ERROR, 'DiscreteFIRFilter_pp', '');
+            continue;
+        end
+        
+        Filter_structure = get_param(dFir_list{i}, 'FilterStructure');
+        if strcmp(Filter_structure, 'Lattice MA')
+            display_msg(sprintf('Filter_structure %s in block %s is not supported',...
+                Filter_structure, blk), ...
+                MsgType.ERROR, 'DiscreteFIRFilter_pp', '');
+            continue;
+        end         
 
         % Obtaining z-expression parameters
         % get numerator
@@ -33,16 +65,9 @@ if not(isempty(dFir_list))
 
         % Computing state space representation
         denum = zeros(1,length(num));
-        disp(num);
         denum(1) = 1;
-        [A,B,C,D]=tf2ss(num,denum);
-        
-        A = mat2str(A);
-        B = mat2str(B);
-        C = mat2str(C);
-        D = mat2str(D);
-        
-        PPUtils.replace_DTF_block(dFir_list{i}, A, B, C, D, U_dims{i} );
+       
+        PPUtils.replace_DTF_block(dFir_list{i}, U_dims{i},num,denum);
     end
     display_msg('Done\n\n', MsgType.INFO, 'DiscreteFIRFilter_pp', '');
 end

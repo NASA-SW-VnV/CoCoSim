@@ -95,8 +95,16 @@ classdef Product_To_Lustre < Block_To_Lustre
             codeIndex = 0;
             initCode = sprintf('%s ',zero);
             m=m1_dim.dims(1,1);
-            n=m1_dim.dims(1,2);
-            l=m2_dim.dims(1,2);
+            if numel(m1_dim.dims) > 1
+                n=m1_dim.dims(1,2);
+            else
+                n = 1;
+            end
+            if numel(m2_dim.dims) > 1
+                l=m2_dim.dims(1,2);
+            else
+                l = 1;
+            end
             addVars = {};
             if numel(output_m) == 0
                 index = 0;
@@ -119,7 +127,7 @@ classdef Product_To_Lustre < Block_To_Lustre
                     for k=1:n
                         aIndex = sub2ind([m,n],i,k);
                         bIndex = sub2ind([n,l],k,j);
-                        code = sprintf('%s + (%s * %s)',code, input_m1{1,aIndex},input_m2{1,bIndex})
+                        code = sprintf('%s + (%s * %s)',code, input_m1{1,aIndex},input_m2{1,bIndex});
                         %                         diag = sprintf('i %d, j %d, k %d, aIndex %d, bIndex %d',i,j,k,aIndex,bIndex);
                     end
                     productOutIndex = sub2ind([m,l],i,j);

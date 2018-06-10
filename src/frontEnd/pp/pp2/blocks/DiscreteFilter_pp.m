@@ -23,6 +23,31 @@ if not(isempty(dFilter_list))
         display_msg(dFilter_list{i}, MsgType.INFO, ...
             'DiscreteFilter_pp', '');
         
+        
+        Filter_structure = get_param(dFilter_list{i}, 'FilterStructure');
+        if strcmp(Filter_structure, 'Direct form I')
+            display_msg(sprintf('Filter_structure %s in block %s is not supported',...
+                Filter_structure, blk), ...
+                MsgType.ERROR, 'DiscreteFilter_pp', '');
+            continue;
+        end
+        
+        Filter_structure = get_param(dFilter_list{i}, 'FilterStructure');
+        if strcmp(Filter_structure, 'Direct form I transposed')
+            display_msg(sprintf('Filter_structure %s in block %s is not supported',...
+                Filter_structure, blk), ...
+                MsgType.ERROR, 'DiscreteFilter_pp', '');
+            continue;
+        end   
+        
+        Filter_structure = get_param(dFilter_list{i}, 'FilterStructure');
+        if strcmp(Filter_structure, 'Direct form II transposed')
+            display_msg(sprintf('Filter_structure %s in block %s is not supported',...
+                Filter_structure, blk), ...
+                MsgType.ERROR, 'DiscreteFilter_pp', '');
+            continue;
+        end
+             
         % Obtaining z-expression parameters
         [denum, status] = PPUtils.getTfDenum(model,dFilter_list{i}, 'DiscreteFilter_pp');
         if status
@@ -34,15 +59,7 @@ if not(isempty(dFilter_list))
             continue;
         end        
         
-        % Computing state space representation
-        [A,B,C,D]=tf2ss(num,denum);
-        
-        A = mat2str(A);
-        B = mat2str(B);
-        C = mat2str(C);
-        D = mat2str(D);
-        
-        PPUtils.replace_DTF_block(dFilter_list{i}, A, B, C, D, U_dims{i} );
+        PPUtils.replace_DTF_block(dFilter_list{i}, U_dims{i},num,denum);
         
     end
     display_msg('Done\n\n', MsgType.INFO, 'DiscreteFilter_pp', '');

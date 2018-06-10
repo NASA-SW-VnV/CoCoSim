@@ -93,7 +93,7 @@ else
     pp_order_map(40) = {'pp2/blocks/BlocksPosition_pp.m'};
     
     
-    
+    pp_order_map(58) = {'pp2/blocks/DiscreteFIRFilter_pp.m'};
     pp_order_map(59) = {'pp2/blocks/DiscreteFilter_pp.m'};
     pp_order_map(60) = {'pp2/blocks/DiscreteTransferFcn_pp.m'};
     pp_order_map(61) = {'pp2/blocks/ForEach_pp.m'};
