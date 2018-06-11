@@ -18,7 +18,7 @@ if nargin < 2
     ordered_functions = ordered_pp_functions;
 end
 cocoSim_path = fileparts(which('start_cocosim'));
-css_source = fullfile(cocoSim_path, 'lib', 'materialize' , 'css' , 'materialize.css');
+css_source = fullfile(cocoSim_path, 'libs', 'materialize' , 'css' , 'materialize.css');
 html_text = fileread(fullfile(cocoSim_path, 'src', 'backEnd' , 'html_templates' , 'pp_config.html'));
 html_text = strrep(html_text, '[css_source]', css_source);
 
@@ -85,7 +85,9 @@ if ~exist(tmp_dir, 'dir')
     mkdir(tmp_dir);
 end
 fid = fopen(html_path, 'w+');
+
 if ~strcmp(html_text, '')
+    html_text = regexprep(html_text, '%+', '');
     fprintf(fid, html_text);
     open(html_path);
 end
@@ -93,6 +95,10 @@ end
 
 %%
 function msg = divide_msg(original_msg, n)
+% divide msg on many lines
+% remove licence
+original_msg = regexprep(original_msg, '%+', '%');
+original_msg = regexprep(original_msg, '%[^%]+%', '');
 msg = '';
 i = 1;
 while (n*i <= length(original_msg))
