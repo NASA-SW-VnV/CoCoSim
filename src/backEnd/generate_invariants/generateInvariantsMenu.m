@@ -34,6 +34,7 @@ catch ME
     display_msg(ME.getReport(),Constants.DEBUG,'viewContract','');
     msg = sprintf('No CoCoSpec Contract for %s \n. First verify the model with Zustre', simulink_name);
     warndlg(msg,'CoCoSim: Warning');
+    return;
 end
 try
     Output_url = generate_invariants_Zustre(model_full_path, char(EMF));

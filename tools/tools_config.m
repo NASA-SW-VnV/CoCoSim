@@ -15,9 +15,9 @@
 % 2- Put them in the default folder and you have nothing
 %   to configure.
 %   defaults folders are
-%   Zustre : cocoSim/tools/verifiers/(osx or linux)/zustre
-%   Kind2  : cocoSim/tools/verifiers/(osx or linux)/kind2
-%   Lustrec: cocoSim/tools/verifiers/(osx or linux)/lustrec
+%   cocoSim/tools/verifiers/(osx or linux)/bin
+%   cocoSim/tools/verifiers/(osx or linux)/include
+%   cocoSim/tools/verifiers/(osx or linux)/lib
 %
 % 3- Set your own paths by redefining the variables : ZUSTRE, LUSTREC,
 %   KIND2
@@ -57,16 +57,16 @@ if ~exist('solvers_path', 'var')
     end
 end
 
-LUSTREC = fullfile(solvers_path, 'lustrec', 'bin', 'lustrec');
+LUSTREC = fullfile(solvers_path, 'bin', 'lustrec');
 %LUSTREC_OPTS defines options that should be passed to Lustrec when it is
 %called. e.g. "int_div_euclidean" interprets integer division as Euclidean 
 %(default : C division semantics)
 LUSTREC_OPTS = '-int_div_euclidean -algebraic-loop-solve -int "long long int"';
-LUSTRET = fullfile(solvers_path, 'lustrec', 'bin', 'lustret');
-LUCTREC_INCLUDE_DIR = fullfile(solvers_path, 'lustrec', 'include', 'lustrec');
-ZUSTRE = fullfile(solvers_path,'zustre', 'bin', 'zustre');
+LUSTRET = fullfile(solvers_path, 'bin', 'lustret');
+LUCTREC_INCLUDE_DIR = fullfile(solvers_path, 'include', 'lustrec');
+ZUSTRE = fullfile(solvers_path, 'bin', 'zustre');
 Z3 = fullfile(solvers_path,'spacer', 'bin', 'z3');
-KIND2 = fullfile(solvers_path, 'kind2', 'bin', 'kind2');
+KIND2 = fullfile(solvers_path, 'bin', 'kind2');
 JKIND = 'Path to Jkind binary';
 SEAHORN = 'PATH';
 

@@ -14,7 +14,7 @@ end
 function RustCallback(callbackInfo)
 model_full_path = MenuUtils.get_file_name(gcs);
 try
-    lus_full_path = lustre_compiler(model_full_path);
+    lus_full_path = cocoSpecCompiler(model_full_path);
     output_dir = fullfile(fileparts(lus_full_path), 'Rust');
     generate_rust(lus_full_path, output_dir);
     

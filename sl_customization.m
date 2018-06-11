@@ -15,5 +15,7 @@ function schemaFcns = getMyMenuItems
 cocosim_menu_path = fullfile(fileparts(mfilename('fullpath')),...
     'src', 'backEnd', 'cocoSim_menu.m');
 cocoSim_menu_handle = MenuUtils.funPath2Handle(cocosim_menu_path);
+%instead of using @cocoSim_menu, we want to make sure we take the right
+%menu
 schemaFcns = {cocoSim_menu_handle};
 end

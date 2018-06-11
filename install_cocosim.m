@@ -4,16 +4,43 @@
 % All Rights Reserved.
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function install_cocosim()
+function install_cocosim(force)
 %INSTALL_COCOSIM is installing tools (such ass lustrec, kind2) and updating
 %the external libraries.
+persistent install_cocosim_already_run;
+if isempty(install_cocosim_already_run)
+    install_cocosim_already_run = 0;
+else
+    install_cocosim_already_run = 1;
+end
+if nargin <  1
+    force = false;
+end
+if install_cocosim_already_run && ~force
+    return;
+end
 PWD = pwd;
+
+%% update cocosim
+updateRepo()
 %% copy files from cocosim in github
 copyCoCoFiles();
 %% install binaries: Zustre, Kind2, Lustrec, Z3 ...
-% install_tools();
+install_tools();
 
 cd(PWD);
+end
+
+%% update repo
+function updateRepo()
+cocosim_path = fileparts(mfilename('fullpath'));
+cd(cocosim_path);
+[status, sys_out] = system('git pull', '-echo'); 
+if status
+    display_msg(sprintf('Can not run git:\n%s ', sys_out), ...
+        MsgType.DEBUG, 'INSTALL_COCOSIM', '');
+    return;
+end
 end
 
 %%
@@ -45,7 +72,7 @@ for i=1:numel(commands)
 end
 if contains(sys_out, 'Already up to date.')
     %no need to copy files, nothing new from github
-%     return;
+    return;
 end
 
 sources = {'doc', 'examples', 'libs', 'PreContextMenu.m', ...
@@ -86,9 +113,18 @@ delete(fullfile(cocosim_path, 'src', 'frontEnd', 'pp', 'std_pp', 'cocosim_pp.m')
 end
 %%
 function install_tools()
+tools_config;
+if exist(LUSTREC,'file') || exist(ZUSTRE,'file') || exist(KIND2,'file')
+    % the user has at least one of the tools.
+    return;
+end
 scripts_path = fullfile(fileparts(mfilename('fullpath')), 'scripts');
 
 if ispc
+    installation_path = fullfile(fileparts(mfilename('fullpath')), 'doc', 'installation.md');
+    display_msg(sprintf('ONLY kind2 can be used in Windows. follow the instructions <a href="matlab: open %s">here</a>', installation_path), ...
+        MsgType.ERROR, 'INSTALL_COCOSIM', '');
+    return;
 elseif ismac
     % create executable script adapted to the user.
     tmp_sh = fullfile(scripts_path, 'install_cocosim_tmp.sh');

@@ -8,14 +8,19 @@
 %% add paths
 [cocoSim_root, ~, ~] = fileparts(mfilename('fullpath'));
 warning off
-addpath(cocoSim_root);
-addpath(genpath(fullfile(cocoSim_root, 'libs')));
-addpath(genpath(fullfile(cocoSim_root, 'scripts')));
-addpath(genpath(fullfile(cocoSim_root, 'src')));
+%add all folders except tools sub-folders
+addpath(genpath(cocoSim_root));
+rmpath(genpath(fullfile(cocoSim_root, 'tools')));
+%add only tools not its sub-folders
 addpath(fullfile(cocoSim_root, 'tools'));
+% addpath(genpath(fullfile(cocoSim_root, 'libs')));
+% addpath(genpath(fullfile(cocoSim_root, 'scripts')));
+% addpath(genpath(fullfile(cocoSim_root, 'src')));
+% addpath(fullfile(cocoSim_root, 'tools'));
 
 %% First configuration, Zustre, Kind2 and Lustrec
 % Go to tools/tools_config and follow instructions
+install_cocosim();
 tools_config;
 
 

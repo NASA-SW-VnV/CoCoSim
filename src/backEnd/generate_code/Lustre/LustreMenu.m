@@ -8,37 +8,23 @@ function schema = LustreMenu(callbackInfo)
 schema = sl_action_schema;
 schema.label = 'Lustre';
 schema.callback = @LusCompilerCallback;
-% schema = sl_container_schema;
-% schema.label = 'Lustre';
-% schema.statustip = 'Generate Lustre code';
-% schema.autoDisableWhen = 'Busy';
-%
-% schema.childrenFcns = {@LusCompiler, @CoCoSpecCompiler};
 end
 
-
-function schema = LusCompiler(callbackInfo)
-schema = sl_action_schema;
-schema.label = 'Lustre compiler';
-schema.callback = @LusCompilerCallback;
-end
 
 function LusCompilerCallback(callbackInfo)
 try
     mdl_full_path = MenuUtils.get_file_name(gcs);
-    ToLustre(mdl_full_path);
+    CoCoSimPreferences = load_coco_preferences();
+    if CoCoSimPreferences.lustreCompiler == 1
+        ToLustre(mdl_full_path);
+    elseif CoCoSimPreferences.lustreCompiler == 2
+        cocoSpecCompiler(mdl_full_path);
+    else
+        lustre_compiler(mdl_full_path);
+    end
 catch ME
     display_msg(ME.getReport(), Constants.DEBUG,'LusCompilerCallback','');
     display_msg(ME.message, Constants.ERROR,'LusCompilerCallback','');
 end
 end
 
-function schema = CoCoSpecCompiler(callbackInfo)
-schema = sl_action_schema;
-schema.label = 'CoCoSpec compiler';
-schema.callback = @CoCoSpecCompilerCallback;
-end
-
-function CoCoSpecCompilerCallback(callbackInfo)
-msgbox('Not implemented yet')
-end

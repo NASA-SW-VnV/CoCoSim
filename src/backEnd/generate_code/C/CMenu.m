@@ -13,7 +13,7 @@ schema.callback = @LusCompilerCallback;
 % schema.label = 'C';
 % schema.statustip = 'Generate C code';
 % schema.autoDisableWhen = 'Busy';
-% 
+%
 % schema.childrenFcns = {@LusCompiler}, @SimulinkCompiler};
 end
 
@@ -26,9 +26,11 @@ end
 
 function LusCompilerCallback(callbackInfo)
 model_full_path = MenuUtils.get_file_name(gcs);
-lus_full_path = lustre_compiler(model_full_path);
+
+lus_full_path = ToLustre(model_full_path);
 output_dir = fullfile(fileparts(lus_full_path), 'C');
 lustrec_C_code(lus_full_path, output_dir);
+
 end
 
 function schema = SimulinkCompiler(callbackInfo)

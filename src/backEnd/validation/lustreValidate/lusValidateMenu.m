@@ -4,44 +4,39 @@
 % All Rights Reserved.
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function schema = lusValidateMenu(callbackInfo)
+function schema = lusValidateMenu(varargin)
 schema = sl_container_schema;
 schema.label = 'Simulink to Lustre compiler using ...';
 schema.statustip = 'Validate Lustre compiler';
 schema.autoDisableWhen = 'Busy';
 
-schema.childrenFcns = {@Validate1, @Validate2, @Validate3, @Validate4};
+validationType = {'Random vector tests', 'Mutation based testing',...
+    'Equivalence Checking using Simulink Design Verifier', ...
+    'Equivalence Checking using Kind2'};
+callbacks = {};
+for i=1:4
+    callbacks{end+1} = @(x) ValidateAction(validationType{i}, i, x);
+end
+schema.childrenFcns = callbacks;
 end
 
-function schema = Validate1(callbackInfo)
+function schema = ValidateAction(vType, vIndex, varargin)
 schema = sl_action_schema;
-schema.label = 'Random vector tests';
-schema.callback = @(x) VCallback(1, x);
+schema.label = vType;
+schema.callback = @(x) VCallback(vIndex, x);
 end
 
-function schema = Validate2(callbackInfo)
-schema = sl_action_schema;
-schema.label = 'Mutation based testing';
-schema.callback = @(x) VCallback(2, x);
-end
-
-function schema = Validate3(callbackInfo)
-schema = sl_action_schema;
-schema.label = 'Equivalence Checking using Simulink Design Verifier';
-schema.callback = @(x) VCallback(3, x);
-end
-
-function schema = Validate4(callbackInfo)
-schema = sl_action_schema;
-schema.label = 'Equivalence Checking using Kind2';
-schema.callback = @(x) VCallback(4, x);
-end
-
-function VCallback(tests_method, callbackInfo)
+function VCallback(tests_method, varargin)
 try
-    model_full_path = MenuUtils.get_file_name(gcs) ;
-    validate_ToLustre(model_full_path, tests_method, 'KIND2', ...
-        1);
+    CoCoSimPreferences = load_coco_preferences();
+    if CoCoSimPreferences.lustreCompiler ~= 1
+        msgbox(...
+            sprintf('This Functionality is only supported by the NASA Lustre compiler.\n Go to Tools -> Preferences -> Lustre Compiler -> NASA Compiler'), 'CoCoSim');
+    else
+        model_full_path = MenuUtils.get_file_name(gcs) ;
+        validate_ToLustre(model_full_path, tests_method, 'KIND2', ...
+            1);
+    end
 catch ME
     display_msg(ME.getReport(), Constants.DEBUG,'Validate_model','');
     display_msg(ME.message, Constants.ERROR,'Validate_model','');

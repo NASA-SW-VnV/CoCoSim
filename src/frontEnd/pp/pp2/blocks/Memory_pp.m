@@ -13,8 +13,14 @@ if not(isempty(memoryBlk_list))
     for i=1:length(memoryBlk_list)
         display_msg(memoryBlk_list{i}, MsgType.INFO, 'Memory_pp', ''); 
         % get block informations
-        InitialCondition = get_param(memoryBlk_list{i},'InitialCondition' );
-        StateName = get_param(memoryBlk_list{i}, 'StateName');
+        try
+            InitialCondition = get_param(memoryBlk_list{i},'InitialCondition' );
+        catch
+            %InitialCondition does not exist in R2015b
+            InitialCondition = get_param(memoryBlk_list{i},'X0' );
+        end
+        %Statename does not exist in R2015b
+        %StateName = get_param(memoryBlk_list{i}, 'StateName');
         StateMustResolveToSignalObject = get_param(memoryBlk_list{i}, 'StateMustResolveToSignalObject');
         StateSignalObject = get_param(memoryBlk_list{i},'StateSignalObject');
         StateStorageClass = get_param(memoryBlk_list{i}, 'StateStorageClass');
@@ -22,7 +28,8 @@ if not(isempty(memoryBlk_list))
         replace_one_block(memoryBlk_list{i},'simulink/Discrete/Unit Delay');
         %restore information
         set_param(memoryBlk_list{i} ,'InitialCondition', InitialCondition);
-        set_param(memoryBlk_list{i} ,'StateName', StateName);
+        %Statename does not exist in R2015b
+        %set_param(memoryBlk_list{i} ,'StateName', StateName);
         set_param(memoryBlk_list{i} ,'StateMustResolveToSignalObject', StateMustResolveToSignalObject);
         set_param(memoryBlk_list{i} ,'StateSignalObject', StateSignalObject);
         set_param(memoryBlk_list{i} ,'StateStorageClass', StateStorageClass);
