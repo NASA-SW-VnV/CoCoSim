@@ -8,9 +8,22 @@ function EnableMultiTasking_pp( new_model_base )
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 configSet = getActiveConfigSet(new_model_base);
-set_param(configSet, 'EnableMultiTasking', 'on');
+
+try
+    param = get_param(configSet, 'EnableMultiTasking');
+    set_param(configSet, 'EnableMultiTasking', 'on');
+catch
+    param = get_param(configSet, 'SolverMode');
+    set_param(configSet, 'SolverMode', 'MultiTasking');
+end
 set_param(configSet, 'AutoInsertRateTranBlk', 'off');
 solveRateTransitions(new_model_base);
+%Go back to user configuration
+try
+    set_param(configSet, 'EnableMultiTasking', param);
+catch
+    set_param(configSet, 'SolverMode', param);
+end
 end
 
 %%

@@ -24,8 +24,7 @@ classdef MenuUtils
         
         %% get file name from the current opened Simulink model.
         function [fpath, fname] = get_file_name(gcs)
-            names = regexp(gcs,'/','split');
-            fname = names{1};
+            fname = bdroot(gcs);
             fpath = get_param(fname,'FileName');
         end
         

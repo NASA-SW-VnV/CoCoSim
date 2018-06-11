@@ -4,10 +4,9 @@ schema.label = 'Validate compiler';
 schema.statustip = 'Validate the translation using one of the validations process';
 schema.autoDisableWhen = 'Busy';
 
-% validation_items = validation_config();
+[validation_root, ~, ~] = fileparts(mfilename('fullpath'));
+validation_items{1} = fullfile(validation_root, 'lustreValidate', 'lusValidateMenu.m');
+schema.childrenFcns = cellfun(@MenuUtils.funPath2Handle, validation_items,...
+                    'UniformOutput', false);
 
-% schema.childrenFcns = cellfun(@MenuUtils.funPath2Handle, validation_items,...
-%                     'UniformOutput', false);
-
-schema.childrenFcns = {@lusValidateMenu};
 end

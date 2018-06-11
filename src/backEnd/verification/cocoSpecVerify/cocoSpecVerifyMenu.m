@@ -1,4 +1,4 @@
-function schema = lusVerifyMenu(callbackInfo)
+function schema = cocoSpecVerifyMenu(callbackInfo)
 schema = sl_container_schema;
 schema.label = 'Compositional Verification';
 schema.statustip = 'Verify the current model with CoCoSim';
@@ -13,6 +13,9 @@ schema.callback = @kindCallback;
 end
 
 function kindCallback(callbackInfo)
-clear;
-msgbox('Kind2 on CoCoSpec compiler is in progress, come back soon!');
+assignin('base', 'SOLVER', 'K');
+[ CoCoSimPreferences ] = loadCoCoSimPreferences();
+CoCoSimPreferences.compositionalAnalysis = true;
+PreferencesMenu.saveCoCoSimPreferences(CoCoSimPreferences);
+VerificationMenu.runCoCoSim;
 end

@@ -92,7 +92,7 @@ if isempty(ordered_pp_functions)
 end
 %% sort functions calls
 oldDir = pwd;
-
+warning off
 for i=1:numel(ordered_pp_functions)
     [dirname, func_name, ~] = fileparts(ordered_pp_functions{i});
     cd(dirname);
@@ -106,6 +106,7 @@ for i=1:numel(ordered_pp_functions)
     end
     
 end
+warning on
 cd(oldDir);
 %% Make sure model compile
 status = CompileModelCheck_pp( new_model_base );

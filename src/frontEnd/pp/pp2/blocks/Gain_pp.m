@@ -31,6 +31,9 @@ if not(isempty(Gain_list))
         replace_one_block(Gain_list{i},fullfile('pp_lib',pp_name));
         set_param(strcat(Gain_list{i},'/K'),...
             'Value',gain);
+        set_param(strcat(Gain_list{i},'/K'),...
+            'OutDataTypeStr','Inherit: Inherit via back propagation');
+        
         if strcmp(outputDataType, 'Inherit: Same as input')
             outputDataType = 'Inherit: Same as first input';
         end

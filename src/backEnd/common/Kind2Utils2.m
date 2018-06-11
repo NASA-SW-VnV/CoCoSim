@@ -1,7 +1,12 @@
-classdef Kind2Utils
+classdef Kind2Utils2
     %KIND2UTILS Summary of this class goes here
     %   Detailed explanation goes here
-    
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Copyright (c) 2017 United States Government as represented by the
+    % Administrator of the National Aeronautics and Space Administration.
+    % All Rights Reserved.
+    % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     properties
     end
     
@@ -16,7 +21,7 @@ classdef Kind2Utils
             IN_struct = [];
             valid = -1;
             if nargin < 1
-                error('Missing arguments to function call: Kind2Utils.run_Kind2')
+                error('Missing arguments to function call: Kind2Utils2.run_Kind2')
             end
             if ~exist('OPTS', 'var')
                 OPTS = '';
@@ -46,17 +51,17 @@ classdef Kind2Utils
             command = sprintf('%s -xml  --z3_bin %s --timeout %s %s "%s"',...
                 KIND2, Z3, timeout, OPTS,  verif_lus_path);
             display_msg(['KIND2_COMMAND ' command],...
-                MsgType.DEBUG, 'Kind2Utils.run_verif', '');
+                MsgType.DEBUG, 'Kind2Utils2.run_verif', '');
             
             [~, solver_output] = system(command );
             display_msg(...
                 solver_output,...
                 MsgType.DEBUG,...
-                'Kind2Utils.run_verif',...
+                'Kind2Utils2.run_verif',...
                 '');
             
             [valid, IN_struct] = ...
-                Kind2Utils.extract_Kind2_Comp_Verif_answer(...
+                Kind2Utils2.extract_Kind2_Comp_Verif_answer(...
                 verif_lus_path, ...
                 solver_output,...
                 file_name,  output_dir);
@@ -94,7 +99,7 @@ classdef Kind2Utils
             fid = fopen(tmp_file, 'w');
             if fid == -1
                 display_msg(['Couldn''t create file ' tmp_file],...
-                    MsgType.ERROR, 'Kind2Utils.extract_answer', '');
+                    MsgType.ERROR, 'Kind2Utils2.extract_answer', '');
                 return;
             end
             fprintf(fid, solver_output);
@@ -102,7 +107,7 @@ classdef Kind2Utils
             if strfind(solver_output,'Wallclock timeout')
                 msg = sprintf('Solver Result reached TIMEOUT. Check %s', ...
                     tmp_file);
-                display_msg(msg, MsgType.RESULT, 'Kind2Utils.extract_answer', '');
+                display_msg(msg, MsgType.RESULT, 'Kind2Utils2.extract_answer', '');
                 return;
             end
             
@@ -112,7 +117,7 @@ classdef Kind2Utils
             catch
                 msg = sprintf('Can not read file %s', ...
                     tmp_file);
-                display_msg(msg, MsgType.ERROR, 'Kind2Utils.extract_answer', '');
+                display_msg(msg, MsgType.ERROR, 'Kind2Utils2.extract_answer', '');
                 return
             end
             xAnalysis = xDoc.getElementsByTagName('Analysis');
@@ -146,7 +151,7 @@ classdef Kind2Utils
                         if xml_cex.getLength > 0
                             CEX_XML = xml_cex;
                             [IN_struct_i, ~] =...
-                                Kind2Utils.Kind2CEXTostruct(main_node_struct, ...
+                                Kind2Utils2.Kind2CEXTostruct(main_node_struct, ...
                                 CEX_XML, node_name);
                             IN_struct = [IN_struct, IN_struct_i];
                         else
@@ -161,15 +166,15 @@ classdef Kind2Utils
                     end
                     msg = sprintf('Solver Result for node %s of property %s is %s', ...
                         node_name, prop_name, answer);
-                    display_msg(msg, MsgType.RESULT, 'Kind2Utils.extract_answer', '');
+                    display_msg(msg, MsgType.RESULT, 'Kind2Utils2.extract_answer', '');
                 end
             end
             msg = sprintf('Number of properties SAFE are %d', ...
                 nbSafe);
-            display_msg(msg, MsgType.RESULT, 'Kind2Utils.extract_answer', '');
+            display_msg(msg, MsgType.RESULT, 'Kind2Utils2.extract_answer', '');
             msg = sprintf('Number of properties UNSAFE are %d', ...
                 nbUnsafe);
-            display_msg(msg, MsgType.RESULT, 'Kind2Utils.extract_answer', '');
+            display_msg(msg, MsgType.RESULT, 'Kind2Utils2.extract_answer', '');
         end
         
         function [IN_struct, time_max] = Kind2CEXTostruct(...
@@ -191,7 +196,7 @@ classdef Kind2Utils
             end
             if isempty(node)
                 display_msg('Failed to parse CounterExample',...
-                    MsgType.ERROR, 'Kind2Utils.Kind2CEXTostruct', '');
+                    MsgType.ERROR, 'Kind2Utils2.Kind2CEXTostruct', '');
                 return;
             end
             IN_struct.node_name = node_name;

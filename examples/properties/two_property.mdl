@@ -1,6 +1,6 @@
 Model {
-  Name			  "safe_1_tmp"
-  Version		  8.5
+  Name			  "two_property_tmp"
+  Version		  8.4
   SavedCharacterEncoding  "ISO-8859-1"
   GraphicalInterface {
     NumRootInports	    2
@@ -12,24 +12,19 @@ Model {
       Name		      "In2"
       BusObject		      ""
     }
-    NumRootOutports	    2
+    NumRootOutports	    1
     Outport {
       Name		      "Out1"
       BusObject		      ""
       BusOutputAsStruct	      "off"
     }
-    Outport {
-      Name		      "Out2"
-      BusObject		      ""
-      BusOutputAsStruct	      "off"
-    }
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.61"
+    ComputedModelVersion    "1.30"
     NumModelReferences	    0
     NumTestPointedSignals   0
   }
   ScopeRefreshTime	  0.035000
-  OverrideScopeRefreshTime off
+  OverrideScopeRefreshTime on
   DisableAllScopes	  off
   DataTypeOverride	  "UseLocalSettings"
   DataTypeOverrideAppliesTo "AllNumericTypes"
@@ -46,7 +41,7 @@ Model {
       $ObjectID		      2
       $ClassName	      "Simulink.WindowInfo"
       IsActive		      [1]
-      Location		      [0.0, 23.0, 1440.0, 810.0]
+      Location		      [368.0, 388.0, 757.0, 632.0]
       Object {
 	$PropName		"ModelBrowserInfo"
 	$ObjectID		3
@@ -70,9 +65,9 @@ Model {
 	IsActive		[1]
 	ViewObjType		"SimulinkTopLevel"
 	LoadSaveID		"0"
-	Extents			[1402.0, 634.0]
-	ZoomFactor		[1.2]
-	Offset			[-113.54427083333337, 6.3333333333333144]
+	Extents			[703.0, 439.0]
+	ZoomFactor		[1.0]
+	Offset			[0.0, 0.0]
       }
     }
   }
@@ -82,15 +77,16 @@ Model {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "hbourbou"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Tue Apr 10 12:10:45 2018"
-  RTWModifiedTimeStamp	  445263045
-  ModelVersionFormat	  "1.%<AutoIncrement:61>"
+  LastModifiedDate	  "Thu Mar 09 16:51:08 2017"
+  RTWModifiedTimeStamp	  410979068
+  ModelVersionFormat	  "1.%<AutoIncrement:30>"
+  ConfigurationManager	  "none"
   SampleTimeColors	  off
   SampleTimeAnnotations	  off
   LibraryLinkDisplay	  "none"
   WideLines		  off
   ShowLineDimensions	  off
-  ShowPortDataTypes	  on
+  ShowPortDataTypes	  off
   ShowDesignRanges	  off
   ShowLoopsOnError	  on
   IgnoreBidirectionalLines off
@@ -124,13 +120,13 @@ Model {
   TryForcingSFcnDF	  off
   Object {
     $PropName		    "DataLoggingOverride"
-    $ObjectID		    7
+    $ObjectID		    6
     $ClassName		    "Simulink.SimulationData.ModelLoggingInfo"
-    model_		    "safe_1_tmp"
+    model_		    "two_property_tmp"
     Array {
       Type		      "Cell"
       Dimension		      1
-      Cell		      "safe_1_tmp"
+      Cell		      "two_property_tmp"
       PropName		      "logAsSpecifiedByModels_"
     }
     Array {
@@ -188,19 +184,20 @@ Model {
     Type		    "Handle"
     Dimension		    1
     Simulink.ConfigSet {
-      $ObjectID		      8
-      Version		      "1.15.0"
+      $ObjectID		      7
+      Version		      "1.14.3"
       Array {
 	Type			"Handle"
 	Dimension		9
 	Simulink.SolverCC {
-	  $ObjectID		  9
-	  Version		  "1.15.0"
+	  $ObjectID		  8
+	  Version		  "1.14.3"
 	  StartTime		  "0.0"
 	  StopTime		  "10.0"
 	  AbsTol		  "auto"
 	  FixedStep		  "auto"
 	  InitialStep		  "auto"
+	  MaxNumMinSteps	  "-1"
 	  MaxOrder		  5
 	  ZcThreshold		  "auto"
 	  ConsecutiveZCsStepRelTol "10*128*eps"
@@ -214,8 +211,8 @@ Model {
 	  SolverMode		  "Auto"
 	  EnableConcurrentExecution off
 	  ConcurrentTasks	  off
-	  Solver		  "FixedStepDiscrete"
-	  SolverName		  "FixedStepDiscrete"
+	  Solver		  "VariableStepDiscrete"
+	  SolverName		  "VariableStepDiscrete"
 	  SolverJacobianMethodControl "auto"
 	  ShapePreserveControl	  "DisableAll"
 	  ZeroCrossControl	  "UseLocalSettings"
@@ -228,8 +225,8 @@ Model {
 	  InsertRTBMode		  "Whenever possible"
 	}
 	Simulink.DataIOCC {
-	  $ObjectID		  10
-	  Version		  "1.15.0"
+	  $ObjectID		  9
+	  Version		  "1.14.3"
 	  Decimation		  "1"
 	  ExternalInput		  "[t, u]"
 	  FinalStateName	  "xFinal"
@@ -261,8 +258,8 @@ Model {
 	  Refine		  "1"
 	}
 	Simulink.OptimizationCC {
-	  $ObjectID		  11
-	  Version		  "1.15.0"
+	  $ObjectID		  10
+	  Version		  "1.14.3"
 	  Array {
 	    Type		    "Cell"
 	    Dimension		    8
@@ -280,7 +277,7 @@ Model {
 	  BooleanDataType	  on
 	  ConditionallyExecuteInputs on
 	  InlineParams		  off
-	  UseDivisionForNetSlopeComputation "off"
+	  UseDivisionForNetSlopeComputation "Off"
 	  UseFloatMulNetSlope	  off
 	  DefaultUnderspecifiedDataType	"double"
 	  UseSpecifiedMinMax	  off
@@ -297,7 +294,6 @@ Model {
 	  EnableMemcpy		  on
 	  MemcpyThreshold	  64
 	  PassReuseOutputArgsAs	  "Structure reference"
-	  PassReuseOutputArgsThreshold 12
 	  ExpressionDepthLimit	  2147483647
 	  LocalBlockOutputs	  on
 	  RollThreshold		  5
@@ -314,12 +310,12 @@ Model {
 	  LifeSpan		  "inf"
 	  MaxStackSize		  "Inherit from target"
 	  BufferReusableBoundary  on
-	  SimCompilerOptimization "off"
+	  SimCompilerOptimization "Off"
 	  AccelVerboseBuild	  off
 	}
 	Simulink.DebuggingCC {
-	  $ObjectID		  12
-	  Version		  "1.15.0"
+	  $ObjectID		  11
+	  Version		  "1.14.3"
 	  RTPrefix		  "error"
 	  ConsistencyChecking	  "none"
 	  ArrayBoundsChecking	  "none"
@@ -402,12 +398,12 @@ Model {
 	  SFUnconditionalTransitionShadowingDiag "warning"
 	  SFUndirectedBroadcastEventsDiag "warning"
 	  SFTransitionActionBeforeConditionDiag	"warning"
-	  SFOutputUsedAsStateInMooreChartDiag "error"
 	  IntegerSaturationMsg	  "warning"
+	  ModelReferenceCSMismatchMessage "none"
 	}
 	Simulink.HardwareCC {
-	  $ObjectID		  13
-	  Version		  "1.15.0"
+	  $ObjectID		  12
+	  Version		  "1.14.3"
 	  ProdBitPerChar	  8
 	  ProdBitPerShort	  16
 	  ProdBitPerInt		  32
@@ -446,8 +442,8 @@ Model {
 	  ProdEqTarget		  on
 	}
 	Simulink.ModelReferenceCC {
-	  $ObjectID		  14
-	  Version		  "1.15.0"
+	  $ObjectID		  13
+	  Version		  "1.14.3"
 	  UpdateModelReferenceTargets "IfOutOfDateOrStructuralChange"
 	  CheckModelReferenceTargetMessage "error"
 	  EnableParallelModelReferenceBuilds off
@@ -461,8 +457,8 @@ Model {
 	  SupportModelReferenceSimTargetCustomCode off
 	}
 	Simulink.SFSimCC {
-	  $ObjectID		  15
-	  Version		  "1.15.0"
+	  $ObjectID		  14
+	  Version		  "1.14.3"
 	  SFSimEcho		  on
 	  SimCtrlC		  on
 	  SimIntegrity		  on
@@ -473,8 +469,8 @@ Model {
 	}
 	Simulink.RTWCC {
 	  $BackupClass		  "Simulink.RTWCC"
-	  $ObjectID		  16
-	  Version		  "1.15.0"
+	  $ObjectID		  15
+	  Version		  "1.14.3"
 	  Array {
 	    Type		    "Cell"
 	    Dimension		    13
@@ -532,8 +528,7 @@ Model {
 	  GenerateWebview	  off
 	  GenerateCodeMetricsReport off
 	  GenerateCodeReplacementReport	off
-	  GenerateMissedCodeReplacementReport off
-	  RTWCompilerOptimization "off"
+	  RTWCompilerOptimization "Off"
 	  RTWCustomCompilerOptimizations ""
 	  CheckMdlBeforeBuild	  "Off"
 	  SharedConstantsCachingThreshold 1024
@@ -541,11 +536,11 @@ Model {
 	    Type		    "Handle"
 	    Dimension		    2
 	    Simulink.CodeAppCC {
-	      $ObjectID		      17
-	      Version		      "1.15.0"
+	      $ObjectID		      16
+	      Version		      "1.14.3"
 	      Array {
 		Type			"Cell"
-		Dimension		27
+		Dimension		25
 		Cell			"IgnoreCustomStorageClasses"
 		Cell			"IgnoreTestpoints"
 		Cell			"InsertBlockDesc"
@@ -571,8 +566,6 @@ Model {
 		Cell			"CustomSymbolStrUtil"
 		Cell			"CustomUserTokenString"
 		Cell			"ReqsInCode"
-		Cell			"CustomSymbolStrEmxType"
-		Cell			"CustomSymbolStrEmxFcn"
 		PropName		"DisabledProps"
 	      }
 	      ForceParamTrailComments off
@@ -580,14 +573,17 @@ Model {
 	      CommentStyle	      "Auto"
 	      IgnoreCustomStorageClasses on
 	      IgnoreTestpoints	      off
+	      IncHierarchyInIds	      off
 	      MaxIdLength	      31
 	      PreserveName	      off
 	      PreserveNameWithParent  off
 	      ShowEliminatedStatement off
 	      OperatorAnnotations     off
+	      IncAutoGenComments      off
 	      SimulinkDataObjDesc     off
 	      SFDataObjDesc	      off
 	      MATLABFcnDesc	      off
+	      IncDataTypeInIds	      off
 	      MangleLength	      1
 	      CustomSymbolStrGlobalVar "$R$N$M"
 	      CustomSymbolStrType     "$N$R$M_T"
@@ -613,8 +609,8 @@ Model {
 	    }
 	    Simulink.GRTTargetCC {
 	      $BackupClass	      "Simulink.TargetCC"
-	      $ObjectID		      18
-	      Version		      "1.15.0"
+	      $ObjectID		      17
+	      Version		      "1.14.3"
 	      Array {
 		Type			"Cell"
 		Dimension		17
@@ -626,12 +622,12 @@ Model {
 		Cell			"GenerateTestInterfaces"
 		Cell			"ModelStepFunctionPrototypeControlCompliant"
 		Cell			"CPPClassGenCompliant"
-		Cell			"SupportContinuousTime"
+		Cell			"SupportNonInlinedSFcns"
 		Cell			"PurelyIntegerCode"
 		Cell			"GenerateAllocFcn"
 		Cell			"SupportComplex"
 		Cell			"SupportAbsoluteTime"
-		Cell			"SupportNonInlinedSFcns"
+		Cell			"SupportContinuousTime"
 		Cell			"RemoveResetFunc"
 		Cell			"ExistingSharedCode"
 		Cell			"RemoveDisableFunc"
@@ -645,9 +641,9 @@ Model {
 	      CodeReplacementLibrary  "None"
 	      UtilityFuncGeneration   "Auto"
 	      ERTMultiwordTypeDef     "System defined"
+	      ERTMultiwordLength      256
 	      MultiwordLength	      2048
 	      GenerateFullHeader      on
-	      InferredTypesCompatibility off
 	      GenerateSampleERTMain   off
 	      GenerateTestInterfaces  off
 	      ModelReferenceCompliant on
@@ -659,6 +655,7 @@ Model {
 	      CombineOutputUpdateFcns off
 	      CombineSignalStateStructs	off
 	      SuppressErrorStatus     off
+	      ERTFirstTimeCompliant   off
 	      IncludeFileDelimiter    "Auto"
 	      ERTCustomFileBanners    off
 	      SupportAbsoluteTime     on
@@ -700,8 +697,8 @@ Model {
 	  }
 	}
 	hdlcoderui.hdlcc {
-	  $ObjectID		  20
-	  Version		  "1.15.0"
+	  $ObjectID		  19
+	  Version		  "1.14.3"
 	  Description		  "HDL Coder custom configuration component"
 	  Name			  "HDL Coder"
 	  Array {
@@ -715,19 +712,18 @@ Model {
 	PropName		"Components"
       }
       Name		      "Configuration"
-      ExtraOptions	      "-aIgnoreTestpoints=0 "
       CurrentDlgPage	      "Solver"
-      ConfigPrmDlgPosition    [ 500, 484, 1420, 1210 ]
+      ConfigPrmDlgPosition    [ 500, 484, 1420, 1210 ]  
     }
     PropName		    "ConfigurationSets"
   }
   Simulink.ConfigSet {
     $PropName		    "ActiveConfigurationSet"
-    $ObjectID		    8
+    $ObjectID		    7
   }
   Object {
     $PropName		    "DataTransfer"
-    $ObjectID		    21
+    $ObjectID		    20
     $ClassName		    "Simulink.GlobalDataTransfer"
     DefaultTransitionBetweenSyncTasks "Ensure deterministic transfer (maximum delay)"
     DefaultTransitionBetweenAsyncTasks "Ensure data integrity only"
@@ -788,17 +784,6 @@ Model {
   }
   BlockParameterDefaults {
     Block {
-      BlockType		      Abs
-      ZeroCross		      on
-      SampleTime	      "-1"
-      OutMin		      "[]"
-      OutMax		      "[]"
-      OutDataTypeStr	      "Inherit: Same as input"
-      LockScale		      off
-      RndMeth		      "Floor"
-      SaturateOnIntegerOverflow	on
-    }
-    Block {
       BlockType		      Inport
       Port		      "1"
       OutputFunctionCall      off
@@ -841,7 +826,6 @@ Model {
       SourceOfInitialOutputValue "Dialog"
       OutputWhenDisabled      "held"
       InitialOutput	      "[]"
-      OutputWhenUnConnected   off
     }
     Block {
       BlockType		      RelationalOperator
@@ -878,8 +862,9 @@ Model {
       MaskHideContents	      off
       SFBlockType	      "NONE"
       GeneratePreprocessorConditionals off
+      PropagateVariantConditions off
+      TreatAsGroupedWhenPropagatingVariantConditions on
       ContentPreviewEnabled   off
-      IsWebBlock	      off
     }
     Block {
       BlockType		      Switch
@@ -901,8 +886,8 @@ Model {
     }
   }
   System {
-    Name		    "safe_1_tmp"
-    Location		    [0, 23, 1440, 833]
+    Name		    "two_property_tmp"
+    Location		    [368, 388, 1125, 1020]
     Open		    off
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -914,14 +899,14 @@ Model {
     TiledPaperMargins	    [1.270000, 1.270000, 1.270000, 1.270000]
     TiledPageScale	    1
     ShowPageBoundaries	    off
-    ZoomFactor		    "120"
+    ZoomFactor		    "100"
     ReportName		    "simulink-default.rpt"
-    SIDHighWatermark	    "38"
+    SIDHighWatermark	    "23"
     Block {
       BlockType		      Inport
       Name		      "In1"
       SID		      "1"
-      Position		      [20, 153, 50, 167]
+      Position		      [50, 88, 80, 102]
       ZOrder		      -1
       IconDisplay	      "Port number"
       OutDataTypeStr	      "int32"
@@ -930,35 +915,28 @@ Model {
       BlockType		      Inport
       Name		      "In2"
       SID		      "2"
-      Position		      [20, 238, 50, 252]
+      Position		      [50, 173, 80, 187]
       ZOrder		      -2
       Port		      "2"
       IconDisplay	      "Port number"
-    }
-    Block {
-      BlockType		      Abs
-      Name		      "Abs"
-      SID		      "3"
-      Position		      [515, 280, 545, 310]
-      ZOrder		      9
-      SaturateOnIntegerOverflow	off
+      OutDataTypeStr	      "int32"
     }
     Block {
       BlockType		      RelationalOperator
       Name		      "Relational\nOperator"
-      SID		      "4"
+      SID		      "3"
       Ports		      [2, 1]
-      Position		      [295, 182, 325, 213]
-      ZOrder		      8
+      Position		      [170, 117, 200, 148]
+      ZOrder		      -3
       InputSameDT	      off
       OutDataTypeStr	      "boolean"
     }
     Block {
       BlockType		      Switch
       Name		      "Switch"
-      SID		      "5"
-      Position		      [405, 185, 435, 215]
-      ZOrder		      7
+      SID		      "4"
+      Position		      [280, 120, 310, 150]
+      ZOrder		      -4
       Criteria		      "u2 ~= 0"
       InputSameDT	      off
       SaturateOnIntegerOverflow	off
@@ -966,36 +944,43 @@ Model {
     Block {
       BlockType		      Terminator
       Name		      "Terminator"
-      SID		      "6"
-      Position		      [975, 65, 995, 85]
-      ZOrder		      -6
+      SID		      "5"
+      Position		      [495, 30, 515, 50]
+      ZOrder		      -5
+    }
+    Block {
+      BlockType		      Terminator
+      Name		      "Terminator1"
+      SID		      "23"
+      Position		      [320, 225, 340, 245]
+      ZOrder		      2
     }
     Block {
       BlockType		      SubSystem
       Name		      "observer"
-      SID		      "7"
-      Ports		      [4, 1]
-      Position		      [795, 53, 950, 97]
-      ZOrder		      -7
+      SID		      "6"
+      Ports		      [3, 1]
+      Position		      [315, 18, 470, 62]
+      ZOrder		      -6
       ForegroundColor	      "red"
       TreatAsAtomicUnit	      on
       RequestExecContextInheritance off
       Variant		      off
       Object {
 	$PropName		"MaskObject"
-	$ObjectID		22
+	$ObjectID		21
 	$ClassName		"Simulink.Mask"
 	Type			"Observer"
 	Description		"Set an observer for the system.\nThe annotation type parameter sets the type of observer:\n- requires :"
 	" pre-condition\n- ensures : post-condition\n- assert : an assertion\n- observer : the observer computes a special typ"
 	"e of properties"
-	Display			"color('red');\ntext(0.5, 0.5, 'Observer Block', 'horizontalAlignment', 'center');"
+	Display			"color('red')\ntext(0.5, 0.5, 'Observer Block', 'horizontalAlignment', 'center');"
 	IconUnits		"normalized"
 	Array {
 	  Type			  "Simulink.MaskParameter"
 	  Dimension		  2
 	  Object {
-	    $ObjectID		    23
+	    $ObjectID		    22
 	    Type		    "popup"
 	    Array {
 	      Type		      "Cell"
@@ -1014,7 +999,7 @@ Model {
 	    " set_param(gcb,'MaskVisibilities',{'on';'off'});\nend"
 	  }
 	  Object {
-	    $ObjectID		    24
+	    $ObjectID		    23
 	    Type		    "edit"
 	    Name		    "ObserverType"
 	    Prompt		    "Observer type"
@@ -1030,7 +1015,7 @@ Model {
       }
       System {
 	Name			"observer"
-	Location		[0, 23, 1440, 836]
+	Location		[296, 626, 842, 1070]
 	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -1042,11 +1027,11 @@ Model {
 	TiledPaperMargins	[1.270000, 1.270000, 1.270000, 1.270000]
 	TiledPageScale		1
 	ShowPageBoundaries	off
-	ZoomFactor		"211"
+	ZoomFactor		"100"
 	Block {
 	  BlockType		  Inport
 	  Name			  "In1"
-	  SID			  "8"
+	  SID			  "7"
 	  Position		  [95, 38, 125, 52]
 	  ZOrder		  -1
 	  IconDisplay		  "Port number"
@@ -1054,7 +1039,7 @@ Model {
 	Block {
 	  BlockType		  Inport
 	  Name			  "In2"
-	  SID			  "9"
+	  SID			  "8"
 	  Position		  [95, 128, 125, 142]
 	  ZOrder		  -2
 	  Port			  "2"
@@ -1062,91 +1047,50 @@ Model {
 	}
 	Block {
 	  BlockType		  Inport
-	  Name			  "out1"
-	  SID			  "10"
-	  Position		  [150, 233, 180, 247]
+	  Name			  "Output"
+	  SID			  "9"
+	  Position		  [95, 78, 125, 92]
 	  ZOrder		  -3
 	  Port			  "3"
 	  IconDisplay		  "Port number"
 	}
 	Block {
-	  BlockType		  Inport
-	  Name			  "Out2"
-	  SID			  "11"
-	  Position		  [95, 88, 125, 102]
-	  ZOrder		  -4
-	  Port			  "4"
-	  IconDisplay		  "Port number"
-	}
-	Block {
 	  BlockType		  Logic
 	  Name			  "Logical\nOperator"
-	  SID			  "12"
+	  SID			  "10"
 	  Ports			  [2, 1]
 	  Position		  [325, 92, 355, 123]
-	  ZOrder		  -5
+	  ZOrder		  -4
 	  Operator		  "OR"
-	  AllPortsSameDT	  off
-	  OutDataTypeStr	  "boolean"
-	}
-	Block {
-	  BlockType		  Logic
-	  Name			  "Logical\nOperator1"
-	  SID			  "13"
-	  Ports			  [3, 1]
-	  Position		  [385, 171, 420, 239]
-	  ZOrder		  -6
-	  Inputs		  "3"
 	  AllPortsSameDT	  off
 	  OutDataTypeStr	  "boolean"
 	}
 	Block {
 	  BlockType		  RelationalOperator
 	  Name			  "Relational\nOperator"
-	  SID			  "14"
+	  SID			  "11"
 	  Ports			  [2, 1]
 	  Position		  [250, 22, 280, 53]
-	  ZOrder		  -7
+	  ZOrder		  -5
 	  InputSameDT		  off
 	  OutDataTypeStr	  "boolean"
 	}
 	Block {
 	  BlockType		  RelationalOperator
 	  Name			  "Relational\nOperator1"
-	  SID			  "15"
+	  SID			  "12"
 	  Ports			  [2, 1]
 	  Position		  [245, 112, 275, 143]
-	  ZOrder		  -8
-	  InputSameDT		  off
-	  OutDataTypeStr	  "boolean"
-	}
-	Block {
-	  BlockType		  RelationalOperator
-	  Name			  "Relational\nOperator2"
-	  SID			  "16"
-	  Ports			  [2, 1]
-	  Position		  [275, 187, 305, 218]
-	  ZOrder		  -9
-	  InputSameDT		  off
-	  OutDataTypeStr	  "boolean"
-	}
-	Block {
-	  BlockType		  RelationalOperator
-	  Name			  "Relational\nOperator3"
-	  SID			  "17"
-	  Ports			  [2, 1]
-	  Position		  [275, 257, 305, 288]
-	  ZOrder		  -10
-	  Operator		  "<"
+	  ZOrder		  -6
 	  InputSameDT		  off
 	  OutDataTypeStr	  "boolean"
 	}
 	Block {
 	  BlockType		  Outport
 	  Name			  "Out1"
-	  SID			  "18"
-	  Position		  [460, 198, 490, 212]
-	  ZOrder		  -11
+	  SID			  "13"
+	  Position		  [395, 103, 425, 117]
+	  ZOrder		  -7
 	  IconDisplay		  "Port number"
 	}
 	Line {
@@ -1169,226 +1113,320 @@ Model {
 	  ZOrder		  3
 	  SrcBlock		  "Logical\nOperator"
 	  SrcPort		  1
-	  Points		  [10, 0]
-	  DstBlock		  "Logical\nOperator1"
+	  DstBlock		  "Out1"
 	  DstPort		  1
 	}
 	Line {
 	  ZOrder		  4
-	  SrcBlock		  "In1"
+	  SrcBlock		  "Output"
 	  SrcPort		  1
-	  Points		  [45, 0]
+	  Points		  [55, 0]
 	  Branch {
 	    ZOrder		    5
+	    Points		    [0, -55]
 	    DstBlock		    "Relational\nOperator"
-	    DstPort		    2
+	    DstPort		    1
 	  }
 	  Branch {
 	    ZOrder		    6
-	    Points		    [0, 165]
-	    DstBlock		    "Relational\nOperator2"
-	    DstPort		    2
+	    Points		    [0, 35]
+	    DstBlock		    "Relational\nOperator1"
+	    DstPort		    1
 	  }
 	}
 	Line {
 	  ZOrder		  7
-	  SrcBlock		  "In2"
+	  SrcBlock		  "In1"
 	  SrcPort		  1
-	  Points		  [10, 0]
-	  Branch {
-	    ZOrder		    8
-	    DstBlock		    "Relational\nOperator1"
-	    DstPort		    2
-	  }
-	  Branch {
-	    ZOrder		    9
-	    Points		    [0, 145]
-	    DstBlock		    "Relational\nOperator3"
-	    DstPort		    2
-	  }
+	  DstBlock		  "Relational\nOperator"
+	  DstPort		  2
 	}
 	Line {
-	  ZOrder		  10
-	  SrcBlock		  "Out2"
+	  ZOrder		  8
+	  SrcBlock		  "In2"
 	  SrcPort		  1
-	  Points		  [65, 0]
+	  DstBlock		  "Relational\nOperator1"
+	  DstPort		  2
+	}
+      }
+    }
+    Block {
+      BlockType		      SubSystem
+      Name		      "observer_bis"
+      SID		      "15"
+      Ports		      [3, 1]
+      Position		      [140, 213, 295, 257]
+      ZOrder		      1
+      ForegroundColor	      "red"
+      TreatAsAtomicUnit	      on
+      RequestExecContextInheritance off
+      Variant		      off
+      Object {
+	$PropName		"MaskObject"
+	$ObjectID		24
+	$ClassName		"Simulink.Mask"
+	Type			"Observer"
+	Description		"Set an observer for the system.\nThe annotation type parameter sets the type of observer:\n- requires :"
+	" pre-condition\n- ensures : post-condition\n- assert : an assertion\n- observer : the observer computes a special typ"
+	"e of properties"
+	Display			"color('red')\ntext(0.5, 0.5, 'Observer Block', 'horizontalAlignment', 'center');"
+	IconUnits		"normalized"
+	Array {
+	  Type			  "Simulink.MaskParameter"
+	  Dimension		  2
+	  Object {
+	    $ObjectID		    25
+	    Type		    "popup"
+	    Array {
+	      Type		      "Cell"
+	      Dimension		      4
+	      Cell		      "ensures"
+	      Cell		      "requires"
+	      Cell		      "assert"
+	      Cell		      "observer"
+	      PropName		      "TypeOptions"
+	    }
+	    Name		    "AnnotationType"
+	    Prompt		    "Type of annotation (pre/post...)"
+	    Value		    "ensures"
+	    Callback		    "paramStr = get_param(gcb, 'MaskValues');\n\nif strcmp(paramStr{1}(1),'o')\n    set_param(gcb,'Mask"
+	    "Visibilities',{'on';'on'});\n    paramStr{2} = 'ellipsoid';\n    set_param(gcb,'MaskValues',paramStr);\nelse\n   "
+	    " set_param(gcb,'MaskVisibilities',{'on';'off'});\nend"
+	  }
+	  Object {
+	    $ObjectID		    26
+	    Type		    "edit"
+	    Name		    "ObserverType"
+	    Prompt		    "Observer type"
+	    Value		    "ellipsoid"
+	    Evaluate		    "off"
+	    Visible		    "off"
+	    Callback		    "paramStr = get_param(gcb, 'MaskValues');\n\nif strcmp(paramStr{1}(1),'observer')\n    set_param(gc"
+	    "b,'MaskVisibilities',{'on';'on'});\n    paramStr{2} = 'ellipsoid';\n    set_param(gcb,'MaskValues',paramStr);\nel"
+	    "se\n    set_param(gcb,'MaskVisibilities',{'on';'off'});\nend"
+	  }
+	  PropName		  "Parameters"
+	}
+      }
+      System {
+	Name			"observer_bis"
+	Location		[368, 360, 1125, 992]
+	Open			off
+	ModelBrowserVisibility	off
+	ModelBrowserWidth	200
+	ScreenColor		"white"
+	PaperOrientation	"landscape"
+	PaperPositionMode	"auto"
+	PaperType		"A4"
+	PaperUnits		"centimeters"
+	TiledPaperMargins	[1.270000, 1.270000, 1.270000, 1.270000]
+	TiledPageScale		1
+	ShowPageBoundaries	off
+	ZoomFactor		"100"
+	Block {
+	  BlockType		  Inport
+	  Name			  "In1"
+	  SID			  "16"
+	  Position		  [95, 38, 125, 52]
+	  ZOrder		  -1
+	  IconDisplay		  "Port number"
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "In2"
+	  SID			  "17"
+	  Position		  [95, 128, 125, 142]
+	  ZOrder		  -2
+	  Port			  "2"
+	  IconDisplay		  "Port number"
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "Output"
+	  SID			  "18"
+	  Position		  [95, 78, 125, 92]
+	  ZOrder		  -3
+	  Port			  "3"
+	  IconDisplay		  "Port number"
+	}
+	Block {
+	  BlockType		  Logic
+	  Name			  "Logical\nOperator"
+	  SID			  "19"
+	  Ports			  [2, 1]
+	  Position		  [325, 92, 355, 123]
+	  ZOrder		  -4
+	  AllPortsSameDT	  off
+	  OutDataTypeStr	  "boolean"
+	}
+	Block {
+	  BlockType		  RelationalOperator
+	  Name			  "Relational\nOperator"
+	  SID			  "20"
+	  Ports			  [2, 1]
+	  Position		  [250, 22, 280, 53]
+	  ZOrder		  -5
+	  InputSameDT		  off
+	  OutDataTypeStr	  "boolean"
+	}
+	Block {
+	  BlockType		  RelationalOperator
+	  Name			  "Relational\nOperator1"
+	  SID			  "21"
+	  Ports			  [2, 1]
+	  Position		  [245, 112, 275, 143]
+	  ZOrder		  -6
+	  Operator		  "<"
+	  InputSameDT		  off
+	  OutDataTypeStr	  "boolean"
+	}
+	Block {
+	  BlockType		  Outport
+	  Name			  "Out1"
+	  SID			  "22"
+	  Position		  [395, 103, 425, 117]
+	  ZOrder		  -7
+	  IconDisplay		  "Port number"
+	}
+	Line {
+	  ZOrder		  1
+	  SrcBlock		  "Relational\nOperator"
+	  SrcPort		  1
+	  Points		  [15, 0; 0, 60]
+	  DstBlock		  "Logical\nOperator"
+	  DstPort		  1
+	}
+	Line {
+	  ZOrder		  2
+	  SrcBlock		  "Relational\nOperator1"
+	  SrcPort		  1
+	  Points		  [20, 0; 0, -15]
+	  DstBlock		  "Logical\nOperator"
+	  DstPort		  2
+	}
+	Line {
+	  ZOrder		  3
+	  SrcBlock		  "Logical\nOperator"
+	  SrcPort		  1
+	  DstBlock		  "Out1"
+	  DstPort		  1
+	}
+	Line {
+	  ZOrder		  4
+	  SrcBlock		  "Output"
+	  SrcPort		  1
+	  Points		  [55, 0]
 	  Branch {
-	    ZOrder		    11
-	    Points		    [0, -65]
+	    ZOrder		    5
+	    Points		    [0, -55]
 	    DstBlock		    "Relational\nOperator"
 	    DstPort		    1
 	  }
 	  Branch {
-	    ZOrder		    12
-	    Points		    [0, 25]
+	    ZOrder		    6
+	    Points		    [0, 35]
 	    DstBlock		    "Relational\nOperator1"
 	    DstPort		    1
 	  }
 	}
 	Line {
-	  ZOrder		  13
-	  SrcBlock		  "Relational\nOperator2"
+	  ZOrder		  7
+	  SrcBlock		  "In1"
 	  SrcPort		  1
-	  DstBlock		  "Logical\nOperator1"
+	  DstBlock		  "Relational\nOperator"
 	  DstPort		  2
 	}
 	Line {
-	  ZOrder		  14
-	  SrcBlock		  "Relational\nOperator3"
+	  ZOrder		  8
+	  SrcBlock		  "In2"
 	  SrcPort		  1
-	  Points		  [30, 0; 0, -50]
-	  DstBlock		  "Logical\nOperator1"
-	  DstPort		  3
-	}
-	Line {
-	  ZOrder		  15
-	  SrcBlock		  "out1"
-	  SrcPort		  1
-	  Points		  [10, 0]
-	  Branch {
-	    ZOrder		    16
-	    Points		    [0, -45]
-	    DstBlock		    "Relational\nOperator2"
-	    DstPort		    1
-	  }
-	  Branch {
-	    ZOrder		    17
-	    Points		    [0, 25]
-	    DstBlock		    "Relational\nOperator3"
-	    DstPort		    1
-	  }
-	}
-	Line {
-	  ZOrder		  18
-	  SrcBlock		  "Logical\nOperator1"
-	  SrcPort		  1
-	  DstBlock		  "Out1"
-	  DstPort		  1
+	  DstBlock		  "Relational\nOperator1"
+	  DstPort		  2
 	}
       }
     }
     Block {
       BlockType		      Outport
       Name		      "Out1"
-      SID		      "19"
-      Position		      [675, 193, 705, 207]
-      ZOrder		      -8
+      SID		      "14"
+      Position		      [375, 128, 405, 142]
+      ZOrder		      -7
       IconDisplay	      "Port number"
-    }
-    Block {
-      BlockType		      Outport
-      Name		      "Out2"
-      SID		      "20"
-      Position		      [775, 288, 805, 302]
-      ZOrder		      -9
-      Port		      "2"
-      IconDisplay	      "Port number"
-    }
-    Line {
-      ZOrder		      12
-      SrcBlock		      "observer"
-      SrcPort		      1
-      DstBlock		      "Terminator"
-      DstPort		      1
-    }
-    Line {
-      ZOrder		      77
-      SrcBlock		      "Abs"
-      SrcPort		      1
-      Points		      [175, 0]
-      Branch {
-	ZOrder			86
-	DstBlock		"Out2"
-	DstPort			1
-      }
-      Branch {
-	ZOrder			69
-	Points			[0, -205]
-	DstBlock		"observer"
-	DstPort			4
-      }
-    }
-    Line {
-      ZOrder		      22
-      SrcBlock		      "Switch"
-      SrcPort		      1
-      Points		      [5, 0]
-      Branch {
-	ZOrder			79
-	Points			[194, 0]
-	Branch {
-	  ZOrder		  84
-	  DstBlock		  "Out1"
-	  DstPort		  1
-	}
-	Branch {
-	  ZOrder		  67
-	  Points		  [0, -120]
-	  DstBlock		  "observer"
-	  DstPort		  3
-	}
-      }
-      Branch {
-	ZOrder			25
-	Points			[0, 95]
-	DstBlock		"Abs"
-	DstPort			1
-      }
     }
     Line {
       ZOrder		      1
       SrcBlock		      "In1"
       SrcPort		      1
-      Points		      [180, 0]
+      Points		      [10, 0]
       Branch {
-	ZOrder			87
-	Points			[0, -100]
-	DstBlock		"observer"
-	DstPort			1
+	ZOrder			2
+	Points			[22, 0]
+	Branch {
+	  ZOrder		  18
+	  Points		  [0, 125]
+	  DstBlock		  "observer_bis"
+	  DstPort		  1
+	}
+	Branch {
+	  ZOrder		  17
+	  Points		  [8, 0]
+	  Branch {
+	    ZOrder		    3
+	    Points		    [0, 30]
+	    DstBlock		    "Relational\nOperator"
+	    DstPort		    1
+	  }
+	  Branch {
+	    ZOrder		    4
+	    Points		    [140, 0]
+	    DstBlock		    "Switch"
+	    DstPort		    1
+	  }
+	}
       }
       Branch {
-	ZOrder			80
-	Points			[15, 0]
-	Branch {
-	  ZOrder		  3
-	  Points		  [0, 30]
-	  DstBlock		  "Relational\nOperator"
-	  DstPort		  1
-	}
-	Branch {
-	  ZOrder		  4
-	  Points		  [140, 0]
-	  DstBlock		  "Switch"
-	  DstPort		  1
-	}
+	ZOrder			5
+	Points			[0, -70]
+	DstBlock		"observer"
+	DstPort			1
       }
     }
     Line {
       ZOrder		      6
       SrcBlock		      "In2"
       SrcPort		      1
-      Points		      [55, 0]
+      Points		      [12, 0]
       Branch {
-	ZOrder			78
-	Points			[140, 0]
-	Branch {
-	  ZOrder		  8
-	  Points		  [0, -40]
-	  DstBlock		  "Relational\nOperator"
-	  DstPort		  2
-	}
-	Branch {
-	  ZOrder		  9
-	  Points		  [140, 0]
-	  DstBlock		  "Switch"
-	  DstPort		  3
-	}
+	ZOrder			20
+	Points			[0, 55]
+	DstBlock		"observer_bis"
+	DstPort			2
       }
       Branch {
-	ZOrder			68
-	Points			[0, -175]
-	DstBlock		"observer"
-	DstPort			2
+	ZOrder			19
+	Points			[8, 0]
+	Branch {
+	  ZOrder		  7
+	  Points		  [20, 0]
+	  Branch {
+	    ZOrder		    8
+	    Points		    [0, -40]
+	    DstBlock		    "Relational\nOperator"
+	    DstPort		    2
+	  }
+	  Branch {
+	    ZOrder		    9
+	    Points		    [140, 0]
+	    DstBlock		    "Switch"
+	    DstPort		    3
+	  }
+	}
+	Branch {
+	  ZOrder		  10
+	  Points		  [0, -140]
+	  DstBlock		  "observer"
+	  DstPort		  2
+	}
       }
     }
     Line {
@@ -1398,20 +1436,46 @@ Model {
       DstBlock		      "Switch"
       DstPort		      2
     }
-    Annotation {
-      SID		      "21"
-      Name		      "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-      "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\np, li { white-space: pre-wrap; }"
-      "\n</style></head><body style=\" font-family:'Helvetica'; font-size:10px; font-weight:400; font-style:normal;\">\n"
-      "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-inden"
-      "t:0px;\"><span style=\" font-size:18px;\">Go to Tools -&gt; CoCoSim -&gt; Verify with -&gt; Zuste (or Kind2 or J"
-      "Kind)</span></p></body></html>"
-      Position		      [227, 508, 229, 526]
-      InternalMargins	      [0, 0, 0, 0]
-      HorizontalAlignment     "left"
-      VerticalAlignment	      "top"
-      Interpreter	      "rich"
-      ZOrder		      -1
+    Line {
+      ZOrder		      12
+      SrcBlock		      "observer"
+      SrcPort		      1
+      DstBlock		      "Terminator"
+      DstPort		      1
+    }
+    Line {
+      ZOrder		      16
+      SrcBlock		      "observer_bis"
+      SrcPort		      1
+      DstBlock		      "Terminator1"
+      DstPort		      1
+    }
+    Line {
+      ZOrder		      13
+      SrcBlock		      "Switch"
+      SrcPort		      1
+      Points		      [20, 0]
+      Branch {
+	ZOrder			14
+	Points			[25, 0]
+	Branch {
+	  ZOrder		  23
+	  Points		  [0, 151; -243, 0; 0, -36]
+	  DstBlock		  "observer_bis"
+	  DstPort		  3
+	}
+	Branch {
+	  ZOrder		  22
+	  DstBlock		  "Out1"
+	  DstPort		  1
+	}
+      }
+      Branch {
+	ZOrder			15
+	Points			[0, -45; -35, 0]
+	DstBlock		"observer"
+	DstPort			3
+      }
     }
   }
 }

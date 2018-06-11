@@ -4,8 +4,10 @@ schema.label = 'Extra options';
 schema.statustip = 'Options can be helpful for developpers';
 schema.autoDisableWhen = 'Busy';
 
-options_items = extraOptions_config();
+[validation_root, ~, ~] = fileparts(mfilename('fullpath'));
+options_items{1} = fullfile(validation_root, 'pp', 'ppMenu.m');
+options_items{2} = fullfile(validation_root, 'IR', 'IRMenu.m');
 
 schema.childrenFcns = cellfun(@MenuUtils.funPath2Handle, options_items,...
-                    'UniformOutput', false);
+    'UniformOutput', false);
 end

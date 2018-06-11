@@ -52,9 +52,10 @@ end
 function kindCallback(callbackInfo)
 clear;
 assignin('base', 'SOLVER', 'K');
-assignin('base', 'RUST_GEN', 0);
-assignin('base', 'C_GEN', 0);
-runCoCoSim;
+[ CoCoSimPreferences ] = loadCoCoSimPreferences();
+CoCoSimPreferences.compositionalAnalysis = false;
+PreferencesMenu.saveCoCoSimPreferences(CoCoSimPreferences);
+VerificationMenu.runCoCoSim;
 end
 
 function schema = getJKind(callbackInfo)
