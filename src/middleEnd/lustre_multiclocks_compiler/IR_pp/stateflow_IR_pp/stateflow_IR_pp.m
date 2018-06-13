@@ -23,13 +23,6 @@ if nargin ==0 || isempty(old_ir)
     display_msg('please provide Stateflow IR while calling stateflow_IR_pp',...
         MsgType.ERROR, 'stateflow_IR_pp', '');
     return;
-elseif ischar(old_ir);
-    % extract IR first.
-    new_ir =  stateflow_IR( old_ir , print_in_file, output_dir);
-elseif ~isa(old_ir, 'Program')
-    display_msg('please provide Stateflow IR while calling stateflow_IR_pp',...
-        MsgType.ERROR, 'stateflow_IR_pp', '');
-    return;
 else
     new_ir = old_ir;
 end
@@ -53,7 +46,6 @@ for i=1:numel(ordered_sfIR_pp_functions)
         display_msg(['runing ' func2str(fh)], MsgType.INFO, 'Stateflow_IRPP', '');
         [new_ir, status] = fh(new_ir);
         if status
-            
              display_msg('Stateflow_IR_PP has been interrupted', MsgType.ERROR, 'Stateflow_IRPP', '');
              cd(oldDir);
              return;
@@ -98,5 +90,5 @@ if print_in_file
 end
 
 
-display_msg('Done with the pre-processing', MsgType.INFO, 'Stateflow_IRPP', '');
+display_msg('Done with the SFIR pre-processing', MsgType.INFO, 'Stateflow_IRPP', '');
 end

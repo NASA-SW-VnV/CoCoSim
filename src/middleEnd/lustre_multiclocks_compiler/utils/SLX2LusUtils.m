@@ -691,7 +691,7 @@ classdef SLX2LusUtils < handle
                     T = clocks{i};
                     st_n = T(1)/main_sampleTime(1);
                     ph_n = T(2)/main_sampleTime(1);
-                    if ~(st_n == 1 && ph_n == 0)
+                    if ~((st_n == 1 || st_n == 0) && ph_n == 0)
                         c{end+1} = SLX2LusUtils.clockName(st_n, ph_n);
                     end
                 end

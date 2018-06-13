@@ -34,8 +34,8 @@ sfIR_pp_order_map = containers.Map('KeyType', 'int32', 'ValueType', 'any');
 
 sfIR_pp_order_map(-1) = {}; % -1 means not to call
 
-sfIR_pp_order_map(0) = {'stateflow_fields/*.m'};% 0 means all functions inside fields will be called first.
-
+sfIR_pp_order_map(0) = {'stateflow_fields/SFunction_SFIR_PP.m'};
+sfIR_pp_order_map(1) = {'stateflow_fields/*.m'};
 
 
 

@@ -16,6 +16,8 @@ classdef SubSystem_To_Lustre < Block_To_Lustre
             [inputs] = SLX2LusUtils.getBlockInputsNames(parent, blk);
             node_name = SLX2LusUtils.node_name_format(blk);
             codes = {};
+            
+            %% Check Enable, Trigger, Action case
             [isEnabledSubsystem, EnableShowOutputPortIsOn] = ...
                 SubSystem_To_Lustre.hasEnablePort(blk);
             [isTriggered, TriggerShowOutputPortIsOn, TriggerType, TriggerDT] = ...
@@ -31,7 +33,8 @@ classdef SubSystem_To_Lustre < Block_To_Lustre
                     isActionSS);
                 obj.addVariable(EnableCondVar);
             end
-            % add time input
+            
+            %% add time input and clocks
             inputs{end + 1} = SLX2LusUtils.timeStepStr();
             x = MatlabUtils.strjoin(inputs, ',\n\t\t');
             clocks_list = SLX2LusUtils.getRTClocksSTR(blk, main_sampleTime);
@@ -40,8 +43,8 @@ classdef SubSystem_To_Lustre < Block_To_Lustre
             end
             y = MatlabUtils.strjoin(outputs, ',\n\t');
             
+            %% Check Resettable SS case
             [isResetSubsystem, ResetType] =SubSystem_To_Lustre.hasResetPort(blk);
-            
             if isResetSubsystem
                 [codes, ResetCondVar] = ...
                     SubSystem_To_Lustre.ResettableSSCall(parent, blk, ...

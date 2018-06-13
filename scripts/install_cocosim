@@ -33,7 +33,7 @@ lustrec_branch="unstable"
 git_dir="$build_dir/github"
 
 cocosim_url="https://github.com/coco-team/cocoSim2.git"
-cocosim_branch="master"
+cocosim_branch="cocosim_nasa"
 
 
 cocoSim2_dir=$(abs_path "..")

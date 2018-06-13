@@ -53,7 +53,7 @@ if is_main_node
             T = clocks{i};
             st_n = T(1)/main_sampleTime(1);
             ph_n = T(2)/main_sampleTime(1);
-            if ~(st_n == 1 && ph_n == 0)
+            if ~((st_n == 1 || st_n == 0) && ph_n == 0)
                 body = [sprintf('%s = _make_clock(%.0f, %.0f);\n\t', ...
                     SLX2LusUtils.clockName(st_n, ph_n), st_n, ph_n), body];
                 c{end+1} = SLX2LusUtils.clockName(st_n, ph_n);
@@ -65,7 +65,7 @@ if is_main_node
         else
             variables_str = ['var ' sprintf('%s:bool clock;', c)];
         end
-        external_libraries{end+1} = '_make_clock';
+        if ~isempty(c), external_libraries{end+1} = '_make_clock'; end
     end
 end
 

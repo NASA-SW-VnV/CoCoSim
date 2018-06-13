@@ -54,6 +54,7 @@ classdef SFIRPPUtils
             if nargin < 3
                 isCondition = false;
             end            
+            data_names = cellfun(@(x) x.Name, data, 'UniformOutput', false);
             for act_idx=1:numel(actions)
                 action = actions{act_idx};
                 
@@ -76,12 +77,12 @@ classdef SFIRPPUtils
                 if isempty(data) && ~isCondition
                     return;
                 end
-                d = data(strcmp({data.name},left_operand));
+                d = data(strcmp(data_names,left_operand));
                 data_found = 0;
                 if isempty(d)
                     if contains(action, '[')
                         vec = regexp(action,'\[','split');
-                        d = data(strcmp({data.name},vec{1}));
+                        d = data(strcmp(data_names,vec{1}));
                         if ~isempty(d)
                             data_found = 1;
                         end
@@ -98,24 +99,24 @@ classdef SFIRPPUtils
                 expression = '([a-zA-Z_]\w*)';
                 tokens = regexp(right_expression, expression, 'tokens');
                 for i=1:numel(tokens)
-                    d = data(strcmp({data.name},tokens{i}));
+                    d = data(strcmp(data_names,tokens{i}));
                     if ~isempty(d)
-                        actions_struct.inputs{numel(actions_struct.inputs)+1}= d;
+                        actions_struct.inputs{end+1}= d{1};
                     end
                 end
                 
                 
                 %END
-                d_idx = find(strcmp({data.name},left_operand));
+                d_idx = find(strcmp(data_names,left_operand));
                if ~isempty(d_idx)
-                actions_struct.outputs{numel(actions_struct.outputs)+1} = data(d_idx);
+                actions_struct.outputs{end+1} = data{d_idx};
                end
 
             end
         end
         %%
         function [action_updated, data, actions_struct, external_nodes] = adapt_action(action, data, actions_struct_in, isCondition)
-            
+            data_names = cellfun(@(x) x.Name, data, 'UniformOutput', false);
             external_nodes = [];
             if nargin < 3 || isempty(actions_struct_in)
                 actions_struct.inputs = {};
@@ -194,12 +195,12 @@ classdef SFIRPPUtils
             if isempty(data) && ~isCondition
                 return;
             end
-            d = data(strcmp({data.name},left_operand));
+            d = data(strcmp(data_names,left_operand));
             data_found = 0;
             if isempty(d)
                 if contains(action, '[')
                     vec = regexp(action,'\[','split');
-                    d = data(strcmp({data.name},vec{1}));
+                    d = data(strcmp(data_names,vec{1}));
                     if ~isempty(d)
                         data_found = 1;
                     end
@@ -251,14 +252,14 @@ classdef SFIRPPUtils
             expression = '([a-zA-Z_]\w*)';
             tokens = regexp(right_expression, expression, 'tokens');
             for i=1:numel(tokens)
-                d = data(strcmp({data.name},tokens{i}));
+                d = data(strcmp(data_names,tokens{i}));
                 if isempty(d)
                     %possibly tokens{i} is an array and as its name has changed we should
                     %extract the old name
                     vec = regexp(tokens{i},'(\<[a-zA-Z][a-zA-Z0-9]*)_\d*','tokens','once');
-                    d = data(strcmp({data.name},char(vec{1})));
+                    d = data(strcmp(data_names,char(vec{1})));
                     if ~isempty(d)
-                        vector_size = d.array_size;
+                        vector_size = d{1}.array_size;
                         if isempty(vector_size)
                             d = [];
                         end
@@ -267,9 +268,9 @@ classdef SFIRPPUtils
                 if ~isempty(d)
                     % found a variable that should be indexed with its
                     % current index
-                    dataScope = d.scope;
-                    if isfield(d, 'index')
-                        data_index = d.index;
+                    dataScope = d{1}.scope;
+                    if isfield(d{1}, 'index')
+                        data_index = d{1}.index;
                     else
                         data_index = 1;
                     end
@@ -277,9 +278,9 @@ classdef SFIRPPUtils
                         expression = strcat(operator,'(', char(tokens{i}), ')',operator);
                         replace = strcat('$1 $2__', num2str(data_index), ' $3');
                         right_expression = regexprep(right_expression,expression,replace);
-                        actions_struct.inputs{numel(actions_struct.inputs)+1}= d;
+                        actions_struct.inputs{numel(actions_struct.inputs)+1}= d{1};
                     elseif strcmp(dataScope,'Input') || strcmp(dataScope,'Constant') || strcmp(dataScope,'Parameter')
-                        actions_struct.inputs{numel(actions_struct.inputs)+1}= d;
+                        actions_struct.inputs{numel(actions_struct.inputs)+1}= d{1};
                     else
                         error('DataScope :%s is not supported yet',dataScope)
                     end
@@ -302,19 +303,19 @@ classdef SFIRPPUtils
             
             %END
             if ~isCondition
-                d_idx = find(strcmp({data.name},left_operand));
-                if isfield(data(d_idx), 'index') && ~isempty(data(d_idx).index)
-                    index = data(d_idx).index + 1;
+                d_idx = find(strcmp(data_names,left_operand));
+                if isfield(data{d_idx}, 'index') && ~isempty(data{d_idx}.index)
+                    index = data{d_idx}.index + 1;
                 else
                     index = 2;
                 end
-                data(d_idx).index = index;
+                data{d_idx}.index = index;
                 A = cellfun(@(x) {x.name}, actions_struct.outputs);
                 idx = find(strcmp(A,left_operand));
                 if isempty(idx)
-                    actions_struct.outputs{numel(actions_struct.outputs)+1} = data(d_idx);
+                    actions_struct.outputs{numel(actions_struct.outputs)+1} = data{d_idx};
                 else
-                    actions_struct.outputs{idx} = data(d_idx);
+                    actions_struct.outputs{idx} = data{d_idx};
                 end
                 action_updated = [left_operand, '__', num2str(index), ' = ' right_expression ';'];
             else

@@ -24,7 +24,7 @@ PWD = pwd;
 %% update cocosim
 updateRepo()
 %% copy files from cocosim in github
-copyCoCoFiles();
+copyCoCoFiles(force);
 %% install binaries: Zustre, Kind2, Lustrec, Z3 ...
 install_tools();
 
@@ -44,16 +44,16 @@ end
 end
 
 %%
-function copyCoCoFiles()
+function copyCoCoFiles(force)
 cocosim_path = fileparts(mfilename('fullpath'));
 build_dir = fullfile(cocosim_path, 'tools', 'build');
 coco_git_dir = fullfile(build_dir, 'github', 'cocosim');
 cocosim_url = 'https://github.com/coco-team/cocoSim2.git';
-cocosim_branch = 'master';
+cocosim_branch = 'cocosim_nasa';
 
 if exist(coco_git_dir, 'dir')
     cd(coco_git_dir);
-    commands = {sprintf('git checkout %s', cocosim_branch), ...
+    commands = {sprintf('git pull; git checkout %s', cocosim_branch), ...
         sprintf('git pull origin %s', cocosim_branch)};
 else
     MatlabUtils.mkdir(coco_git_dir);
@@ -70,11 +70,12 @@ for i=1:numel(commands)
         return;
     end
 end
-if contains(sys_out, 'Already up to date.')
+if ~force && contains(sys_out, 'Already up to date.')
     %no need to copy files, nothing new from github
     return;
 end
-
+display_msg(sprintf('Copying files from cocosim2 in tools/build'), ...
+            MsgType.INFO, 'INSTALL_COCOSIM', '');
 sources = {'doc', 'examples', 'libs', 'PreContextMenu.m', ...
     fullfile('src', 'gui'), ...
     fullfile('src', 'miscellaneous'), ...

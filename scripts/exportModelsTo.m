@@ -22,8 +22,10 @@ for i=1:numel(models)
     full_path = fullfile(m.folder, m.name);
     try
         info = Simulink.MDLInfo(full_path);
-        
-        if str2double(info.SimulinkVersion)> 8.5
+        version_year = str2double(...
+            regexp(info.ReleaseName, '\d+', 'match', 'once'));
+
+        if version_year > 2015
             
             fprintf('saving model %s in %s format\n', m.name, version);
             load_system(full_path);

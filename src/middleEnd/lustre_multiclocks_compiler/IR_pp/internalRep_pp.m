@@ -21,6 +21,7 @@ functions = dir(fullfile(lib_dir , '*.m'));
 oldDir = pwd;
 if isstruct(functions) && isfield(functions, 'name')
     for i=1:numel(functions)
+        display_msg(['runing ' functions(i).name(1:end-2)], MsgType.INFO, 'internalRep_pp', '');
         cd(lib_dir);
         fh = str2func(functions(i).name(1:end-2));
         cd(oldDir);
@@ -65,5 +66,7 @@ if json_export
     catch
     end
 end
+display_msg('Done with the IR pre-processing', MsgType.INFO, 'internalRep_pp', '');
+
 end
 

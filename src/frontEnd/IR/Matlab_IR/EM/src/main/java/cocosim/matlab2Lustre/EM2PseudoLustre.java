@@ -32,11 +32,6 @@ import cocosim.matlab2Lustre.domain.ExternalLib;
 import cocosim.matlab2Lustre.domain.Variable;
 
 /*################################################################################
-#
-# Installation script for cocoSim dependencies :
-# - lustrec, zustre, kind2 in the default folder /tools/verifiers.
-# - downloading standard libraries PP, IR and ME from github version of CoCoSim
-#
 # Author: Hamza BOURBOUH <hamza.bourbouh@nasa.gov>
 #
 # Copyright (c) 2017 United States Government as represented by the
@@ -829,6 +824,9 @@ public class EM2PseudoLustre {
 		}
 		public ArrayList<String> getParametersDataType(EMParser.Function_parameter_listContext ctx){
 			ArrayList<String> params = new ArrayList<String>();
+			if (ctx == null || ctx.function_parameter() == null) {
+				return params;
+			}
 			int n = ctx.function_parameter().size();
 
 			for (int i = 0; i < n; i++) {
@@ -1380,11 +1378,12 @@ public class EM2PseudoLustre {
 			}
 		}
 		StringBuilder buf = new StringBuilder();
-		buf.append("%@DeclareType x: real;\n");
-		buf.append("x == 1 > x + 2\n");
-		PseudoLusEmitter converter = InputStreamToLustre(is);
-//		LusEmitter converter = StringToLustre(buf.toString());
-		if (args.length > 0) {
+		buf.append("function [] = fun()\n");
+		buf.append("setHighestAlarm();\ncancelAlarm=0;\n");
+		buf.append("end\n");
+//		PseudoLusEmitter converter = InputStreamToLustre(is);
+		PseudoLusEmitter converter = StringToLustre(buf.toString());
+//		if (args.length > 0) {
 			try {
 				PrintWriter out = new PrintWriter(file_name);
 				out.println(converter.getLus(converter.getTree()));
@@ -1394,7 +1393,7 @@ public class EM2PseudoLustre {
 				System.out.println(converter.getOutputsStr());
 				System.out.println("Variables are: ");
 				System.out.println(converter.getVariablesStr());
-				System.out.println("Lustre Fun is: ");
+				System.out.println("Lustre Body is: ");
 				System.out.println(converter.getLus_body());//.getLus(converter.getTree()));
 				System.out.println("External Functions are: ");
 				System.out.println(converter.getExternal_fun_str());
@@ -1405,7 +1404,7 @@ public class EM2PseudoLustre {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		}
+//		}
 	}
 
 
