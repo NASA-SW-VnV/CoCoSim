@@ -91,6 +91,7 @@ else
     
     pp_order_map(30) = {'std_pp/blocks/goto_process.m'};
     pp_order_map(40) = {'pp2/blocks/BlocksPosition_pp.m'};
+    pp_order_map(45) = {'pp2/blocks/Sigbuilderblock_pp.m'};
     
     
     pp_order_map(58) = {'pp2/blocks/DiscreteFIRFilter_pp.m'};
