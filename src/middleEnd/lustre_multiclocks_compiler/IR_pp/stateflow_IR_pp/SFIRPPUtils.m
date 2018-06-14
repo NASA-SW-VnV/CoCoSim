@@ -14,20 +14,19 @@ classdef SFIRPPUtils
         
         
         function new_name = adapt_root_name(name)
-            new_name = regexprep(name, '/', '_');
+            new_name = regexprep(...
+                SLX2LusUtils.name_format(name), '/', '_');
         end
         
+        function action_Array = split_actions(actions)
+            delim = '(;|\n)';
+            action_Array = regexp(actions, delim, 'split');
+            action_Array = action_Array(~strcmp(action_Array,''));
+            action_Array = action_Array(~strcmp(action_Array,' '));
+        end%split_actions
+        
         function [dt_str] = to_lustre_dt(simulink_dt)
-            
-            if strcmp(simulink_dt, 'logical') || strcmp(simulink_dt, 'boolean')
-                dt_str = 'bool';
-            elseif strncmp(simulink_dt, 'int', 3) || strncmp(simulink_dt, 'uint', 4) || strncmp(simulink_dt, 'fixdt(1,16,', 11) || strncmp(simulink_dt, 'sfix64', 6)
-                dt_str = 'int';
-            elseif strcmp(simulink_dt, 'real') || strcmp(simulink_dt, 'int') || strcmp(simulink_dt, 'bool')
-                dt_str = simulink_dt;
-            else
-                dt_str = 'real';
-            end
+            dt_str = SLX2LusUtils.get_lustre_dt( simulink_dt);
         end
         
         function [init] = default_InitialValue(v, dt)

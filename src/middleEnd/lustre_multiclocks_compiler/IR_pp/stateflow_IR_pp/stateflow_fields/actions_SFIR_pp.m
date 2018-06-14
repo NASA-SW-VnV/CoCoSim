@@ -128,7 +128,7 @@ if isempty(actions)
 end
 if ~iscell(actions)
     % adaptation from old IR to new IR
-    actions{1} = SFIRUtils.split_actions(actions);
+    actions{1} = SFIRPPUtils.split_actions(actions);
 end
 for i=1:numel(actions)
     [new_actions{i}, data, node_struct, external_nodes_i] = ...

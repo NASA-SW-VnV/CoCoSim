@@ -13,6 +13,7 @@ status = 0;
 if isfield(new_ir, 'GraphicalFunctions')
     for i=1:numel(new_ir.GraphicalFunctions)
         new_ir.GraphicalFunctions{i}.GraphicalFunctions = {};
+        new_ir.GraphicalFunctions{i}.States = {};
     end
 end
 end

@@ -35,7 +35,6 @@ if isempty(ordered_sfIR_pp_functions)
 end
 
 % transform Program to struct
-new_ir = SFIRUtils.objToStruct(new_ir);
 %% sort functions calls
 oldDir = pwd;
 for i=1:numel(ordered_sfIR_pp_functions)
@@ -63,8 +62,8 @@ if print_in_file
     try
         json_text = json_encode(new_ir);
         json_text = regexprep(json_text, '\\/','/');
-        fname = fullfile(output_dir, strcat(SFIRPPUtils.adapt_root_name(new_ir.name),'_SFIR_pp_tmp.json'));
-        fname_formatted = fullfile(output_dir, strcat(SFIRPPUtils.adapt_root_name(new_ir.name),'_SFIR_pp.json'));
+        fname = fullfile(output_dir, sprintf('%s_SFIR_pp_tmp.json', SFIRPPUtils.adapt_root_name(new_ir.Name{1})));
+        fname_formatted = fullfile(output_dir, sprintf('%s_SFIR_pp.json', SFIRPPUtils.adapt_root_name(new_ir.Name{1})));
         fid = fopen(fname, 'w');
         if fid==-1
             display_msg(['Couldn''t create file ' fname], MsgType.ERROR, 'Stateflow_IRPP', '');
