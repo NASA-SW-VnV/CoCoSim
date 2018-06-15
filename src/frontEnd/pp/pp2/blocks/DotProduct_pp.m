@@ -9,7 +9,8 @@ function [] = DotProduct_pp(model)
 % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Processing DotProduct blocks
-DotProduct_list = find_system(model,'LookUnderMasks', 'all', 'BlockType','DotProduct');
+DotProduct_list = find_system(model,'FollowLinks', 'on', ...
+    'LookUnderMasks', 'all', 'BlockType','DotProduct');
 if not(isempty(DotProduct_list))
     display_msg('Replacing DotProduct blocks...', MsgType.INFO,...
         'DotProduct_process', '');

@@ -9,7 +9,8 @@ function [] = DiscreteFilter_pp(model)
 % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Processing Gain blocks
-dFilter_list = find_system(model,'LookUnderMasks', 'all', 'BlockType','DiscreteFilter');
+dFilter_list = find_system(model,'FollowLinks', 'on', ...
+    'LookUnderMasks', 'all', 'BlockType','DiscreteFilter');
 if not(isempty(dFilter_list))
     display_msg('Replacing DiscreteFilter blocks...', MsgType.INFO,...
         'DiscreteFilter_pp', '');

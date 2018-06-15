@@ -7,7 +7,8 @@ function [] = Sigbuilderblock_pp(model)
 % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Processing Sigbuilderblock blocks
-sigBuilder_list = find_system(model,'LookUnderMasks', 'all', 'MaskType','Sigbuilder block');
+sigBuilder_list = find_system(model,'FollowLinks', 'on', ...
+    'LookUnderMasks', 'all', 'MaskType','Sigbuilder block');
 
 if not(isempty(sigBuilder_list))
     display_msg('Replacing Signal Builder blocks...', MsgType.INFO,...

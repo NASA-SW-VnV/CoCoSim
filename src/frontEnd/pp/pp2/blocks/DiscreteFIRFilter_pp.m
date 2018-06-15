@@ -9,7 +9,8 @@ function [] = DiscreteFIRFilter_pp(model)
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>, Trinh, Khanh V <khanh.v.trinh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Processing Gain blocks
-dFir_list = find_system(model,'LookUnderMasks', 'all', 'BlockType','DiscreteFir');
+dFir_list = find_system(model,'FollowLinks', 'on', ...
+    'LookUnderMasks', 'all', 'BlockType','DiscreteFir');
 if not(isempty(dFir_list))
     display_msg('Replacing DiscreteFIRFilter blocks...', MsgType.INFO,...
         'DiscreteFIRFilter_pp_pp', '');

@@ -9,7 +9,8 @@ function [] = Bias_pp(model)
 % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Processing Bias blocks
-Bias_list = find_system(model,'LookUnderMasks', 'all', 'BlockType','Bias');
+Bias_list = find_system(model,'FollowLinks', 'on', ...
+    'LookUnderMasks', 'all', 'BlockType','Bias');
 if not(isempty(Bias_list))
     display_msg('Replacing Bias blocks...', MsgType.INFO,...
         'Bias_process', '');

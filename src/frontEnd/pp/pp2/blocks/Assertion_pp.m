@@ -8,7 +8,8 @@ function [  ] = Assertion_pp( model )
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-assertion_list = find_system(model,'BlockType','Assertion');
+assertion_list = find_system(model,'FollowLinks', 'on', ...
+    'LookUnderMasks', 'all','BlockType','Assertion');
 if not(isempty(assertion_list))
     display_msg('Processing Assetions...', MsgType.INFO, 'assertion_process', '');
     for i=1:numel(assertion_list)

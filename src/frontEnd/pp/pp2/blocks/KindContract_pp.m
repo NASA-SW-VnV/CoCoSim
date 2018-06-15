@@ -7,9 +7,11 @@ function KindContract_pp( model )
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Configure any subsystem to be treated as Atomic
-masked_sys_list = find_system(model,'LookUnderMasks', 'all', 'BlockType','SubSystem', 'Mask', 'on');
+masked_sys_list = find_system(model,'FollowLinks', 'on', ...
+    'LookUnderMasks', 'all', 'BlockType','SubSystem', 'Mask', 'on');
 masked_sys_list = [masked_sys_list;...
-    find_system(model,'LookUnderMasks', 'all', 'BlockType','M-S-Function', 'Mask', 'on')];
+    find_system(model,'FollowLinks', 'on', ...
+    'LookUnderMasks', 'all', 'BlockType','M-S-Function', 'Mask', 'on')];
     
 % take only contract blocks
 masked_sys_list = masked_sys_list(cellfun(@(x) ismember('ContractBlockType', get_param(x, 'MaskNames')), masked_sys_list));
