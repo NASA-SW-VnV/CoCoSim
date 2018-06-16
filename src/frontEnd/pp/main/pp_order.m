@@ -93,6 +93,8 @@ else
     pp_order_map(40) = {'pp2/blocks/BlocksPosition_pp.m'};
     pp_order_map(45) = {'pp2/blocks/Sigbuilderblock_pp.m'};
     
+    pp_order_map(50) = {'pp2/blocks/DiscreteDerivative_pp.m'};
+    pp_order_map(51) = {'pp2/blocks/SampleTimeMath_pp.m'};
     
     pp_order_map(58) = {'pp2/blocks/DiscreteFIRFilter_pp.m'};
     pp_order_map(59) = {'pp2/blocks/DiscreteFilter_pp.m'};

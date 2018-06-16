@@ -9,7 +9,8 @@ function [] = DiscreteTransferFcn_pp(model)
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>, Trinh, Khanh V <khanh.v.trinh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Processing DiscreteTransferFcn blocks
-dtf_list = find_system(model,'LookUnderMasks', 'all', 'BlockType','DiscreteTransferFcn');
+dtf_list = find_system(model,'FollowLinks', 'on', ...
+    'LookUnderMasks', 'all', 'BlockType','DiscreteTransferFcn');
 dtf_list = [dtf_list; find_system(model,'BlockType','TransferFcn')];
 
 if not(isempty(dtf_list))

@@ -15,7 +15,8 @@ if ~exist('depth', 'var')
 end
 %Take the list of all blocks that has no outport so they can be at one
 %level. Blocks such Outports, displays ...
-allBlocks = find_system(model, 'SearchDepth', 1);
+allBlocks = find_system(model, 'FollowLinks', 'on', ...
+    'SearchDepth', 1);
 levels_map =  [];
 currentDepth = 0;
 for i=2:length(allBlocks)

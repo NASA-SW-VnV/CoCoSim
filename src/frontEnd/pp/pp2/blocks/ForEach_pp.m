@@ -8,7 +8,8 @@ function [] = ForEach_pp(model)
 % All Rights Reserved.
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-ForEach_list = find_system(model,'LookUnderMasks', 'all', 'BlockType','ForEach');
+ForEach_list = find_system(model,'FollowLinks', 'on', ...
+    'LookUnderMasks', 'all', 'BlockType','ForEach');
 if not(isempty(ForEach_list))
     display_msg('Processing ForEach blocks...', MsgType.INFO, 'ForEach_process', '');
     for i=1:length(ForEach_list)
