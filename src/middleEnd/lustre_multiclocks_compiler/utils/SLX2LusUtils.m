@@ -65,35 +65,41 @@ classdef SLX2LusUtils < handle
         function [node_name, node_inputs, node_outputs, ...
                 node_inputs_withoutDT, node_outputs_withoutDT ] = ...
                 extractNodeHeader(blk, is_main_node, isEnableORAction, isEnableAndTrigger, main_sampleTime, xml_trace)
+            
             % creating node header
             node_name = SLX2LusUtils.node_name_format(blk);
+            
+            %creating inputs
             [node_inputs_cell, node_inputs_withoutDT_cell] = ...
                 SLX2LusUtils.extract_node_InOutputs_withDT(blk, 'Inport', xml_trace);
-            node_inputs = MatlabUtils.strjoin(node_inputs_cell, '\n');
+            
             if isEnableORAction
-                node_inputs = [node_inputs, ...
-                    strcat(SLX2LusUtils.isEnabledStr() , ':bool;')];
+                node_inputs_cell{end + 1} = strcat(SLX2LusUtils.isEnabledStr() , ':bool;');
             elseif isEnableAndTrigger
-                node_inputs = sprintf('%s%s,%s:bool;',node_inputs, ...
-                    SLX2LusUtils.isEnabledStr(), SLX2LusUtils.isTriggeredStr() );
+                node_inputs_cell{end + 1} = strcat(SLX2LusUtils.isEnabledStr() , ':bool;');
+                node_inputs_cell{end + 1} = sprintf('%s:bool;', ...
+                    SLX2LusUtils.isTriggeredStr() );
             end
             if ~is_main_node
-                node_inputs = [node_inputs, sprintf('%s:real;', SLX2LusUtils.timeStepStr())];
+                node_inputs_cell{end + 1} = sprintf('%s:real;', SLX2LusUtils.timeStepStr());
                 node_inputs_withoutDT_cell{end+1} = ...
                     sprintf('%s', SLX2LusUtils.timeStepStr());
                 % add clocks
                 clocks_list = SLX2LusUtils.getRTClocksSTR(blk, main_sampleTime);
                 if ~isempty(clocks_list)
-                    node_inputs = [node_inputs, sprintf('%s:bool clock;', clocks_list)];
+                    node_inputs_cell{end + 1} = sprintf('%s:bool clock;', clocks_list);
                     node_inputs_withoutDT_cell{end+1} = sprintf('%s', clocks_list);
                 end
             end
-            if isempty(node_inputs)
-                node_inputs = '_virtual:bool;';
+            if isempty(node_inputs_cell)
+                node_inputs_cell{end + 1} = '_virtual:bool;';
                 node_inputs_withoutDT_cell{end+1} = '_virtual';
             end
+            node_inputs = MatlabUtils.strjoin(node_inputs_cell, '\n');
             node_inputs_withoutDT = ...
                 MatlabUtils.strjoin(node_inputs_withoutDT_cell, ',\n\t\t');
+            
+            % creating outputs
             [node_outputs_cell, node_outputs_withoutDT_cell] = SLX2LusUtils.extract_node_InOutputs_withDT(blk, 'Outport', xml_trace);
             node_outputs = MatlabUtils.strjoin(node_outputs_cell, '\n');
             node_outputs_withoutDT = ...

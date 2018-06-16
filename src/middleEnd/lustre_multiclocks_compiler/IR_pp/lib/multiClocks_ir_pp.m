@@ -1,10 +1,16 @@
 function [ ir ] = multiClocks_ir_pp( ir )
 %rateTransition_ir_pp add Inport and outport compiledSampleDimension
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Copyright (c) 2017 United States Government as represented by the
+% Administrator of the National Aeronautics and Space Administration.
+% All Rights Reserved.
+% Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 file_path = ir.meta.file_path;
 load_system(file_path);
 [~, file_name, ~] = fileparts(file_path);
-field_name = SLX2LusUtils.name_format(file_name);
+field_name = IRUtils.name_format(file_name);
 if isfield(ir, field_name)
     Cmd = [file_name, '([], [], [], ''compile'');'];
     eval(Cmd);

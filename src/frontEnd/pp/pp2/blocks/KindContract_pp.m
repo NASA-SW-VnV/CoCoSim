@@ -1,5 +1,6 @@
 function KindContract_pp( model )
 %KindContract_pp add MaskType to Kind contract blocks from old version.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Copyright (c) 2017 United States Government as represented by the
 % Administrator of the National Aeronautics and Space Administration.
@@ -8,6 +9,7 @@ function KindContract_pp( model )
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Configure any subsystem to be treated as Atomic
 masked_sys_list = find_system(model,'LookUnderMasks', 'all', 'BlockType','SubSystem', 'Mask', 'on');
+%add validator to the list
 masked_sys_list = [masked_sys_list;...
     find_system(model,'LookUnderMasks', 'all', 'BlockType','M-S-Function', 'Mask', 'on')];
     
@@ -18,12 +20,14 @@ if not(isempty(masked_sys_list))
     
     for i=1:length(masked_sys_list)
         display_msg(masked_sys_list{i}, MsgType.DEBUG, 'KindContract_pp', '');
+        % setting the MaskType
         try
             set_param(masked_sys_list{i},'MaskType',...
                 get_param(masked_sys_list{i}, 'ContractBlockType'));
         catch me
             display_msg(me.getReport(), MsgType.DEBUG, 'KindContract_pp', '');
         end
+        
     end
     display_msg('Done\n\n', MsgType.INFO, 'PP', '');
 end

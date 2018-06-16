@@ -32,7 +32,17 @@ node_header = sprintf('node %s (%s)\n returns (%s);',...
     node_name, node_inputs, node_outputs);
 
 % creating contract
-contract = '-- Contract In progress';
+contract = '';
+if isfield(subsys_struct, 'ContractNodeNames')
+    contractCell = {};
+    contractCell{1} = '(*@contract';
+    for i=1:numel(subsys_struct.ContractNodeNames)
+        contractCell{end+1} = sprintf('import %s( %s ) returns (%s);', ...
+            subsys_struct.ContractNodeNames{i}, node_inputs_withoutDT, node_outputs_withoutDT);
+    end
+    contractCell{end+1} = '*)';
+    contract = MatlabUtils.strjoin(contractCell, '\n');
+end
 % Body code
 if isEnableAndTrigger
     % the case of enabledTriggered subsystem

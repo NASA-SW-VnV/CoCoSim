@@ -37,7 +37,7 @@ classdef LustrecUtils < handle
                 fclose(fid);
             else
                 new_mcdc_file = mcdc_file;
-            end 
+            end
         end
         %%
         function [lusi_path, status] = generate_lusi(lus_file_path, LUSTREC )
@@ -162,7 +162,7 @@ classdef LustrecUtils < handle
                 end
             end
             [~, file_name, ~] = fileparts(lus_file_path);
-           
+            
             binary_name = fullfile(output_dir,...
                 strcat(file_name,'_', node_name));
             % generate C code
@@ -546,8 +546,8 @@ classdef LustrecUtils < handle
                 eval(code_off);
                 isMatrix = false;
                 if numel(dim_struct.Outport)==1
-                     dim = dim_struct.Outport;
-                elseif numel(dim_struct.Outport)==2 
+                    dim = dim_struct.Outport;
+                elseif numel(dim_struct.Outport)==2
                     if (dim_struct.Outport(1)==1 || dim_struct.Outport(2)==1)
                         dim = dim_struct.Outport(1) * dim_struct.Outport(2);
                     else
@@ -716,8 +716,8 @@ classdef LustrecUtils < handle
                 eval(code_off);
                 isMatrix = false;
                 if numel(dim_struct)==1
-                     dim = dim_struct;
-                elseif numel(dim_struct)==2 
+                    dim = dim_struct;
+                elseif numel(dim_struct)==2
                     if (dim_struct(1)==1 || dim_struct(2)==1)
                         dim = dim_struct(1) * dim_struct(2);
                     else
@@ -749,15 +749,15 @@ classdef LustrecUtils < handle
                         portHandlesEMF, VerifportHandles, 1, 1 );
                 elseif isMatrix
                     concat_path = strcat(new_model_name,'/Concatenate_',...
-                            strcat('Out',num2str(i)));
-                        NumInputs = dim(3);
-                        h = add_block('simulink/Math Operations/Vector Concatenate',...
-                            concat_path,...
-                            'MakeNameUnique', 'on', ...
-                            'NumInputs', num2str(NumInputs), ...
-                            'ConcatenateDimension', '2',...
-                            'Mode','Multidimensional array');
-                        concat_Porthandl = get_param(h, 'PortHandles');
+                        strcat('Out',num2str(i)));
+                    NumInputs = dim(3);
+                    h = add_block('simulink/Math Operations/Vector Concatenate',...
+                        concat_path,...
+                        'MakeNameUnique', 'on', ...
+                        'NumInputs', num2str(NumInputs), ...
+                        'ConcatenateDimension', '2',...
+                        'Mode','Multidimensional array');
+                    concat_Porthandl = get_param(h, 'PortHandles');
                     for colon=1:dim(3)
                         
                         muxID = strcat('Out',num2str(i),'_', num2str(colon));
@@ -765,9 +765,9 @@ classdef LustrecUtils < handle
                             portHandlesEMF, concat_Porthandl, dim(3), colon );
                     end
                     add_line(new_model_name,...
-                                concat_Porthandl.Outport(1),...
-                                VerifportHandles.Inport(2*i), ...
-                                'autorouting', 'on');
+                        concat_Porthandl.Outport(1),...
+                        VerifportHandles.Inport(2*i), ...
+                        'autorouting', 'on');
                     outport_idx = last_index;
                 end
             end
@@ -943,8 +943,8 @@ classdef LustrecUtils < handle
             if status
                 UseLusi = false;
             end
-
-
+            
+            
             data = BUtils.read_json(emf_path);
             nodes = data.nodes;
             emf_nodes_names = fieldnames(nodes)';
@@ -1035,7 +1035,7 @@ classdef LustrecUtils < handle
                 header, functions_call);
         end
         
-       
+        
         
         
         %% run Zustre or kind2 on verification file
@@ -1287,7 +1287,7 @@ classdef LustrecUtils < handle
                 index = 0;
                 for i=0:nb_steps-1
                     for j=1:numel(input_struct.signals)
-                        [signal_values, width] = LustrecUtils.inline_array(input_struct.signals(j), i);                        
+                        [signal_values, width] = LustrecUtils.inline_array(input_struct.signals(j), i);
                         index2 = index + width;
                         lustre_input_values(index+1:index2) = signal_values;
                         index = index2;
@@ -1361,7 +1361,7 @@ classdef LustrecUtils < handle
             for i=0:nb_steps-1
                 for k=1:numberOfOutputs
                     [yout_values, width] = LustrecUtils.inline_array(yout_signals(k), i);
-     
+                    
                     for j=1:width
                         index_out = index_out + 1;
                         output_value = ...
@@ -1409,7 +1409,7 @@ classdef LustrecUtils < handle
         function [y_inlined, width, status] = inline_array(y_struct, time_step)
             % this function inline a multi-dimension array to a vector, it
             % follows the cullumn convention.
-
+            
             status = 0;
             dim = y_struct.dimensions;
             if numel(dim)==1

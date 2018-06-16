@@ -23,16 +23,19 @@ origin_path = regexprep(subsys_struct.Origin_path, '(\\n|\n)', '--');
 comment = sprintf('-- Original block name: %s', origin_path);
 
 % creating node header
+isContractBlk = isfield(subsys_struct, 'MaskType') ...
+        && strcmp(subsys_struct.MaskType, 'ContractBlock');
 isEnableORAction = 0;
 isEnableAndTrigger = 0;
-[node_name, node_inputs, node_outputs, ~, ~] = ...
+[node_name, node_inputs, node_outputs, node_inputs_withoutDT, node_outputs_withoutDT] = ...
                 SLX2LusUtils.extractNodeHeader(subsys_struct, is_main_node, isEnableORAction, isEnableAndTrigger, main_sampleTime, xml_trace);
-node_header = sprintf('node %s (%s)\n returns (%s);',...
-    node_name, node_inputs, node_outputs);
-% creating contract
-contract = '-- Contract In progress';
-
-
+if isContractBlk
+    node_header = sprintf('contract %s (%s)\n returns (%s);',...
+        node_name, node_inputs, node_outputs);
+else
+    node_header = sprintf('node %s (%s)\n returns (%s);',...
+        node_name, node_inputs, node_outputs);
+end
 % Body code
 [body, variables_str, external_nodes, external_libraries] = write_body(subsys_struct, main_sampleTime, xml_trace);
 if is_main_node
@@ -69,14 +72,28 @@ if is_main_node
     end
 end
 
+hasEnablePort = SubSystem_To_Lustre.hasEnablePort(subsys_struct);
+hasActionPort = SubSystem_To_Lustre.hasActionPort(subsys_struct);
+hasTriggerPort = SubSystem_To_Lustre.hasTriggerPort(subsys_struct);
+isConditialSS = hasEnablePort || hasActionPort || hasTriggerPort;
+% creating contract
+contract = '';
+if ~isConditialSS && isfield(subsys_struct, 'ContractNodeNames')
+    contractCell = {};
+    contractCell{1} = '(*@contract';
+    for i=1:numel(subsys_struct.ContractNodeNames)
+        contractCell{end+1} = sprintf('import %s( %s ) returns (%s);', ...
+            subsys_struct.ContractNodeNames{i}, node_inputs_withoutDT, node_outputs_withoutDT);
+    end
+    contractCell{end+1} = '*)';
+    contract = MatlabUtils.strjoin(contractCell, '\n');
+end
 
 
 main_node = sprintf('%s\n%s\n%s\n%s\nlet\n\t%s\ntel\n',...
     comment, node_header, contract, variables_str, body);
-hasEnablePort = SubSystem_To_Lustre.hasEnablePort(subsys_struct);
-hasActionPort = SubSystem_To_Lustre.hasActionPort(subsys_struct);
-hasTriggerPort = SubSystem_To_Lustre.hasTriggerPort(subsys_struct);
-if  hasEnablePort || hasActionPort || hasTriggerPort
+
+if  isConditialSS
     automaton_node = enabledSubsystem2node(subsys_struct, hasEnablePort, hasActionPort, hasTriggerPort, main_sampleTime,...
         xml_trace);
     main_node = [main_node, automaton_node];

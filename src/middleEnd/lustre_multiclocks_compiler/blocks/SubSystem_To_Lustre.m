@@ -16,7 +16,18 @@ classdef SubSystem_To_Lustre < Block_To_Lustre
             [inputs] = SLX2LusUtils.getBlockInputsNames(parent, blk);
             node_name = SLX2LusUtils.node_name_format(blk);
             codes = {};
-            
+            isInsideContract = isfield(parent, 'MaskType') ...
+                && isequal(parent.MaskType, 'ContractBlock');
+            maskType = '';
+            if isInsideContract && isfield(blk, 'MaskType')
+                maskType = blk.MaskType;
+            end
+            if isInsideContract && numel(outputs) > 1
+                display_msg(...
+                    sprintf('Subsystem %s has more than one outputs. All Subsystems inside Contract should have one output.', ...
+                    blk.Origin_path), MsgType.ERROR, 'SubSystem_To_Lustre', '')
+                return;
+            end
             %% Check Enable, Trigger, Action case
             [isEnabledSubsystem, EnableShowOutputPortIsOn] = ...
                 SubSystem_To_Lustre.hasEnablePort(blk);
@@ -30,8 +41,10 @@ classdef SubSystem_To_Lustre < Block_To_Lustre
                     node_name, inputs, ...
                     isEnabledSubsystem, EnableShowOutputPortIsOn, ...
                     isTriggered, TriggerShowOutputPortIsOn, TriggerType, TriggerDT, ...
-                    isActionSS);
-                obj.addVariable(EnableCondVar);
+                    isActionSS, isInsideContract);
+                if ~isInsideContract
+                    obj.addVariable(EnableCondVar);
+                end
             end
             
             %% add time input and clocks
@@ -49,16 +62,33 @@ classdef SubSystem_To_Lustre < Block_To_Lustre
                 [codes, ResetCondVar] = ...
                     SubSystem_To_Lustre.ResettableSSCall(parent, blk, ...
                     node_name, blk_name, ...
-                    ResetType, codes, x, y);
+                    ResetType, codes, x, y, isInsideContract, outputs_dt{1});
                 obj.addVariable(ResetCondVar);
             else
-                codes{numel(codes) + 1} = ...
-                    sprintf('(%s) = %s(%s);\n\t', y, node_name, x);
+                if isInsideContract
+                    if isequal(maskType, 'ContractGuaranteeBlock')
+                        codes{end + 1} = ...
+                            sprintf('guarantee "%s"  %s(%s);\n\t', ...
+                            y, node_name, x);
+                    elseif isequal(maskType, 'ContractAssumeBlock')
+                        codes{end + 1} = ...
+                            sprintf('assume "%s"  %s(%s);\n\t', ...
+                            y, node_name, x);
+                    else
+                        codes{end + 1} = ...
+                            sprintf('var %s = %s(%s);\n\t', ...
+                            strrep(outputs_dt{1}, ';', ''), node_name, x);
+                    end
+                else
+                    codes{end + 1} = ...
+                        sprintf('(%s) = %s(%s);\n\t', ...
+                        y, node_name, x);
+                end
             end
             
             
             obj.setCode( MatlabUtils.strjoin(codes, ''));
-            obj.addVariable(outputs_dt);
+            if ~isInsideContract, obj.addVariable(outputs_dt); end
         end
         
         function options = getUnsupportedOptions(obj, parent, blk, varargin)
@@ -70,6 +100,13 @@ classdef SubSystem_To_Lustre < Block_To_Lustre
                 obj.addUnsupported_options(...
                     sprintf('Subsystem %s has an EnablePort and TriggerPort, in this scenario we do not support "reset" option in the EnablePort. Please use held', ...
                     blk.Origin_path));
+            end
+            isInsideContract = isfield(parent, 'MaskType') ...
+                && isequal(parent.MaskType, 'ContractBlock');
+            if isInsideContract && numel(outputs) > 1
+                obj.addUnsupported_options(...
+                    sprintf('Subsystem %s has more than one outputs. All Subsystems inside Contract should have one output.', ...
+                    blk.Origin_path))
             end
             % add your unsuported options list here
             options = obj.unsupported_options;
@@ -160,7 +197,7 @@ classdef SubSystem_To_Lustre < Block_To_Lustre
                 node_name, inputs, ...
                 isEnabledSubsystem, EnableShowOutputPortIsOn, ...
                 isTriggered, TriggerShowOutputPortIsOn, TriggerType, TriggerBlockDT, ...
-                isActionSS)
+                isActionSS, isInsideContract)
             codes = {};
             node_name = strcat(node_name, '_automaton');
             % ExecutionCondName may be used by Merge block, keep it even if
@@ -181,8 +218,13 @@ classdef SubSystem_To_Lustre < Block_To_Lustre
                 [srcBlk, srcPort] = SLX2LusUtils.getpreBlock(parent, blk, 'ifaction');
                 if ~isempty(srcBlk)
                     [IfBlkOutputs, ~] = SLX2LusUtils.getBlockOutputsNames(parent, srcBlk);
-                    codes{end + 1} = sprintf('%s = %s;\n\t'...
-                        ,ExecutionCondName,  IfBlkOutputs{srcPort});
+                    if isInsideContract
+                        codes{end + 1} = sprintf('var %s : bool = %s;\n\t'...
+                            ,ExecutionCondName,  IfBlkOutputs{srcPort});
+                    else
+                        codes{end + 1} = sprintf('%s = %s;\n\t'...
+                            ,ExecutionCondName,  IfBlkOutputs{srcPort});
+                    end
                     inputs{end + 1} = ExecutionCondName;
                 end
             else
@@ -246,22 +288,42 @@ classdef SubSystem_To_Lustre < Block_To_Lustre
                     triggerCond = MatlabUtils.strjoin(cond, ' or ');
                 end
                 if isTriggered && isEnabledSubsystem
-                    codes{end + 1} = sprintf('%s = %s;\n\t'...
-                        ,EnableCondName,  EnableCond);
-                    codes{end + 1} = sprintf('%s = %s;\n\t'...
-                        ,TriggerCondName,  triggerCond);
+                    if isInsideContract
+                        codes{end + 1} = sprintf('var %s :bool = %s;\n\t'...
+                            ,EnableCondName,  EnableCond);
+                        codes{end + 1} = sprintf('var %s :bool = %s;\n\t'...
+                            ,TriggerCondName,  triggerCond);
+                        codes{end + 1} = sprintf('var %s :bool = %s and %s;\n\t'...
+                            ,ExecutionCondName,  EnableCondName, TriggerCondName);
+                    else
+                        codes{end + 1} = sprintf('%s = %s;\n\t'...
+                            ,EnableCondName,  EnableCond);
+                        codes{end + 1} = sprintf('%s = %s;\n\t'...
+                            ,TriggerCondName,  triggerCond);
+                        codes{end + 1} = sprintf('%s = %s and %s;\n\t'...
+                            ,ExecutionCondName,  EnableCondName, TriggerCondName);
+                    end
                     inputs{end + 1} = EnableCondName;
                     inputs{end + 1} = TriggerCondName;
                     % add ExecutionCondName for Merge block.
-                    codes{end + 1} = sprintf('%s = %s and %s;\n\t'...
-                        ,ExecutionCondName,  EnableCondName, TriggerCondName);
+                    
                 else
                     if isTriggered
-                        codes{end + 1} = sprintf('%s = %s;\n\t'...
-                            ,ExecutionCondName,  triggerCond);
+                        if isInsideContract
+                            codes{end + 1} = sprintf('var %s :bool = %s;\n\t'...
+                                ,ExecutionCondName,  triggerCond);
+                        else
+                            codes{end + 1} = sprintf('%s = %s;\n\t'...
+                                ,ExecutionCondName,  triggerCond);
+                        end
                     else
-                        codes{end + 1} = sprintf('%s = %s;\n\t'...
-                            ,ExecutionCondName,  EnableCond);
+                        if isInsideContract
+                            codes{end + 1} = sprintf('var %s :bool= %s;\n\t'...
+                                ,ExecutionCondName,  EnableCond);
+                        else
+                            codes{end + 1} = sprintf('%s = %s;\n\t'...
+                                ,ExecutionCondName,  EnableCond);
+                        end
                     end
                     inputs{end + 1} = ExecutionCondName;
                 end
@@ -270,7 +332,7 @@ classdef SubSystem_To_Lustre < Block_To_Lustre
         end
         function [codes, ResetCondVar] = ResettableSSCall(parent, blk, ...
                 node_name, blk_name, ...
-                ResetType, codes, inputs, outputs)
+                ResetType, codes, inputs, outputs, isInsideContract, output_dt)
             ResetCondName = sprintf('ResetCond_of_%s', blk_name);
             ResetCondVar = sprintf('%s:bool;', ResetCondName);
             resetportDataType = blk.CompiledPortDataTypes.Reset{1};
@@ -291,10 +353,16 @@ classdef SubSystem_To_Lustre < Block_To_Lustre
             ResetCond = MatlabUtils.strjoin(cond, ' or ');
             codes{numel(codes) + 1} = sprintf('%s = %s;\n\t'...
                 ,ResetCondName,  ResetCond);
-            
-            codes{numel(codes) + 1} = ...
-                sprintf('(%s) = %s(%s) every %s;\n\t', ...
-                outputs, node_name, inputs, ResetCondName);
+            if isInsideContract
+                strrep(y, ';', '')
+                codes{end + 1} = ...
+                    sprintf('var %s = %s(%s) every %s;\n\t', ...
+                    strrep(output_dt, ';', ''), node_name, inputs, ResetCondName);
+            else
+                codes{end + 1} = ...
+                    sprintf('(%s) = %s(%s) every %s;\n\t', ...
+                    outputs, node_name, inputs, ResetCondName);
+            end
         end
     end
 end
