@@ -22,8 +22,20 @@ classdef ContractBlock_To_Lustre < Block_To_Lustre
         
         function options = getUnsupportedOptions(obj,parent, blk, varargin)
             % add your unsuported options list here
-           options = obj.unsupported_options;
-           
+            associatedBlkHandle = blk.AssociatedBlkHandle;
+            associatedBlk = get_struct(parent, associatedBlkHandle);
+            if ~(isempty(associatedBlk.CompiledPortWidths.Enable) ...
+                    && isempty(associatedBlk.CompiledPortWidths.Ifaction)...
+                    && isempty(associatedBlk.CompiledPortWidths.Reset)...
+                    && isempty(associatedBlk.CompiledPortWidths.Trigger))
+                format = 'Contract "%s" can not be associated with "%s" which is Conditionally Executed Subsystem.\n';
+                format = [format, ...
+                    'Please Create a Subsystem from the block and linked it again to the contract.'];
+                obj.addUnsupported_options(...
+                    sprintf(format, blk.Origin_path, associatedBlk.Origin_path));
+            end
+            options = obj.unsupported_options;
+            
         end
     end
     

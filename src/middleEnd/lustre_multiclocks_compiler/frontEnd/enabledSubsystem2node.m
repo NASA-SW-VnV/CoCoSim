@@ -1,4 +1,4 @@
-function [ main_node] = enabledSubsystem2node( subsys_struct, hasEnablePort, hasActionPort, hasTriggerPort, main_sampleTime, xml_trace)
+function [ main_node] = enabledSubsystem2node( parent_ir, ss_ir, hasEnablePort, hasActionPort, hasTriggerPort, isContractBlk, main_sampleTime, xml_trace)
 %enabledSubsystem2node create an automaton lustre node for
 %enabled/triggered/Action subsystem
 %INPUTS:
@@ -13,7 +13,7 @@ function [ main_node] = enabledSubsystem2node( subsys_struct, hasEnablePort, has
 
 
 % Adding lustre comments tracking the original path
-origin_path = regexprep(subsys_struct.Origin_path, '(\\n|\n)', '--');
+origin_path = regexprep(ss_ir.Origin_path, '(\\n|\n)', '--');
 comment = sprintf('-- Original block name: %s', origin_path);
 
 % creating node header
@@ -25,31 +25,34 @@ else
     isEnableAndTrigger = 0;
 end
 is_main_node = 0;
-[blk_name, node_inputs, node_outputs, node_inputs_withoutDT, node_outputs_withoutDT] = ...
-    SLX2LusUtils.extractNodeHeader(subsys_struct, is_main_node, isEnableORAction, isEnableAndTrigger, main_sampleTime, xml_trace);
+[blk_name, node_inputs_cell, node_outputs_cell,...
+    node_inputs_withoutDT_cell, node_outputs_withoutDT_cell] = ...
+    SLX2LusUtils.extractNodeHeader(parent_ir, ss_ir, is_main_node, ...
+    isEnableORAction, isEnableAndTrigger, isContractBlk,...
+    main_sampleTime, xml_trace);
+% concatenate inputs and outputs
+node_inputs = MatlabUtils.strjoin(node_inputs_cell, '\n');
+node_inputs_withoutDT = ...
+    MatlabUtils.strjoin(node_inputs_withoutDT_cell, ',\n\t\t');
+node_outputs = MatlabUtils.strjoin(node_outputs_cell, '\n');
+node_outputs_withoutDT = ...
+    MatlabUtils.strjoin(node_outputs_withoutDT_cell, ',\n\t\t');
+
+
 node_name = strcat(blk_name, '_automaton');
 node_header = sprintf('node %s (%s)\n returns (%s);',...
     node_name, node_inputs, node_outputs);
 
 % creating contract
 contract = '';
-if isfield(subsys_struct, 'ContractNodeNames')
-    contractCell = {};
-    contractCell{1} = '(*@contract';
-    for i=1:numel(subsys_struct.ContractNodeNames)
-        contractCell{end+1} = sprintf('import %s( %s ) returns (%s);', ...
-            subsys_struct.ContractNodeNames{i}, node_inputs_withoutDT, node_outputs_withoutDT);
-    end
-    contractCell{end+1} = '*)';
-    contract = MatlabUtils.strjoin(contractCell, '\n');
-end
+
 % Body code
 if isEnableAndTrigger
     % the case of enabledTriggered subsystem
-    [body, variables_str] = write_enabled_AND_triggered_action_SS(subsys_struct, blk_name, ...
+    [body, variables_str] = write_enabled_AND_triggered_action_SS(ss_ir, blk_name, ...
         node_inputs_withoutDT, node_outputs_withoutDT, xml_trace);
 else
-    [body, variables_str] = write_enabled_OR_triggered_OR_action_SS(subsys_struct, blk_name, ...
+    [body, variables_str] = write_enabled_OR_triggered_OR_action_SS(ss_ir, blk_name, ...
         node_inputs_withoutDT, node_outputs_withoutDT, hasEnablePort, hasActionPort, hasTriggerPort, xml_trace);
     
 end

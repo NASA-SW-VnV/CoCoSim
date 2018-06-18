@@ -16,8 +16,7 @@ classdef SubSystem_To_Lustre < Block_To_Lustre
             [inputs] = SLX2LusUtils.getBlockInputsNames(parent, blk);
             node_name = SLX2LusUtils.node_name_format(blk);
             codes = {};
-            isInsideContract = isfield(parent, 'MaskType') ...
-                && isequal(parent.MaskType, 'ContractBlock');
+            isInsideContract = SLX2LusUtils.isContractBlk(parent);
             maskType = '';
             if isInsideContract && isfield(blk, 'MaskType')
                 maskType = blk.MaskType;
@@ -101,8 +100,8 @@ classdef SubSystem_To_Lustre < Block_To_Lustre
                     sprintf('Subsystem %s has an EnablePort and TriggerPort, in this scenario we do not support "reset" option in the EnablePort. Please use held', ...
                     blk.Origin_path));
             end
-            isInsideContract = isfield(parent, 'MaskType') ...
-                && isequal(parent.MaskType, 'ContractBlock');
+            isInsideContract = SLX2LusUtils.isContractBlk(parent);
+            [outputs, ~] = SLX2LusUtils.getBlockOutputsNames(parent, blk);
             if isInsideContract && numel(outputs) > 1
                 obj.addUnsupported_options(...
                     sprintf('Subsystem %s has more than one outputs. All Subsystems inside Contract should have one output.', ...

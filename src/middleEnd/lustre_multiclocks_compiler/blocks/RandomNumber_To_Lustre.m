@@ -44,6 +44,8 @@ classdef RandomNumber_To_Lustre < Block_To_Lustre
             codes = {};
             codes{1} = sprintf('%s = _make_clock(%.0f, %.0f);\n\t', ...
                 clk_name, 100, 0);
+            % generating 100 random random that will be repeated each 100
+            % steps
             codes{2} = sprintf('%s = %s(true) every %s;\n\t', outputs{1},...
                 blk_name, clk_name);
             

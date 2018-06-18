@@ -21,6 +21,10 @@ classdef SLX2LusUtils < handle
         function time_step = timeStepStr()
             time_step = '__time_step';
         end
+        function res = isContractBlk(ss_ir)
+            res = isfield(ss_ir, 'MaskType') ...
+                && strcmp(ss_ir.MaskType, 'ContractBlock');
+        end
         %% adapt blocks names to be a valid lustre names.
         function str_out = name_format(str)
             newline = sprintf('\n');
@@ -62,17 +66,25 @@ classdef SLX2LusUtils < handle
         end
         
         %% Lustre node inputs, outputs
-        function [node_name, node_inputs, node_outputs, ...
-                node_inputs_withoutDT, node_outputs_withoutDT ] = ...
-                extractNodeHeader(blk, is_main_node, isEnableORAction, isEnableAndTrigger, main_sampleTime, xml_trace)
-            
+        function [node_name,  node_inputs_cell, node_outputs_cell,...
+                node_inputs_withoutDT_cell, node_outputs_withoutDT_cell ] = ...
+                extractNodeHeader(parent_ir, blk, is_main_node, isEnableORAction, isEnableAndTrigger, isContractBlk, main_sampleTime, xml_trace)
+            % this function is used to get the Lustre node inputs and
+            % outputs.
             % creating node header
             node_name = SLX2LusUtils.node_name_format(blk);
-            
+            if isContractBlk
+                [ node_inputs_cell, node_outputs_cell,...
+                    node_inputs_withoutDT_cell, node_outputs_withoutDT_cell ] = ...
+                    SLX2LusUtils.extractContractHeader(parent_ir, blk, main_sampleTime, xml_trace);
+                return;
+            end
             %creating inputs
             [node_inputs_cell, node_inputs_withoutDT_cell] = ...
                 SLX2LusUtils.extract_node_InOutputs_withDT(blk, 'Inport', xml_trace);
             
+            % add the execution condition is it is a conditionally executed
+            % SS
             if isEnableORAction
                 node_inputs_cell{end + 1} = strcat(SLX2LusUtils.isEnabledStr() , ':bool;');
             elseif isEnableAndTrigger
@@ -80,34 +92,26 @@ classdef SLX2LusUtils < handle
                 node_inputs_cell{end + 1} = sprintf('%s:bool;', ...
                     SLX2LusUtils.isTriggeredStr() );
             end
+            %add simulation time input and clocks
             if ~is_main_node
-                node_inputs_cell{end + 1} = sprintf('%s:real;', SLX2LusUtils.timeStepStr());
-                node_inputs_withoutDT_cell{end+1} = ...
-                    sprintf('%s', SLX2LusUtils.timeStepStr());
-                % add clocks
-                clocks_list = SLX2LusUtils.getRTClocksSTR(blk, main_sampleTime);
-                if ~isempty(clocks_list)
-                    node_inputs_cell{end + 1} = sprintf('%s:bool clock;', clocks_list);
-                    node_inputs_withoutDT_cell{end+1} = sprintf('%s', clocks_list);
-                end
+                [node_inputs_cell, node_inputs_withoutDT_cell] = ...
+                SLX2LusUtils.getTimeClocksInputs(blk, main_sampleTime, node_inputs_cell, node_inputs_withoutDT_cell);
             end
+            % if the node has no inputs, add virtual input for Lustrec.
             if isempty(node_inputs_cell)
                 node_inputs_cell{end + 1} = '_virtual:bool;';
                 node_inputs_withoutDT_cell{end+1} = '_virtual';
             end
-            node_inputs = MatlabUtils.strjoin(node_inputs_cell, '\n');
-            node_inputs_withoutDT = ...
-                MatlabUtils.strjoin(node_inputs_withoutDT_cell, ',\n\t\t');
-            
+           
             % creating outputs
             [node_outputs_cell, node_outputs_withoutDT_cell] = SLX2LusUtils.extract_node_InOutputs_withDT(blk, 'Outport', xml_trace);
-            node_outputs = MatlabUtils.strjoin(node_outputs_cell, '\n');
-            node_outputs_withoutDT = ...
-                MatlabUtils.strjoin(node_outputs_withoutDT_cell, ',\n\t\t');
-            if is_main_node && isempty(node_outputs)
-                node_outputs = sprintf('%s:real;', SLX2LusUtils.timeStepStr());
+            
+            if is_main_node && isempty(node_outputs_cell)
+                node_outputs_cell{end+1} = sprintf('%s:real;', SLX2LusUtils.timeStepStr());
+                node_outputs_withoutDT_cell{end+1} = SLX2LusUtils.timeStepStr();
             end
         end
+        
         function [names, names_withNoDT] = extract_node_InOutputs_withDT(subsys, type, xml_trace)
             %get all blocks names
             fields = fieldnames(subsys.Content);
@@ -156,7 +160,107 @@ classdef SLX2LusUtils < handle
             end
             
         end
-        
+        function [node_inputs_cell, node_inputs_withoutDT_cell] = ...
+                getTimeClocksInputs(blk, main_sampleTime, node_inputs_cell, node_inputs_withoutDT_cell)
+            node_inputs_cell{end + 1} = sprintf('%s:real;', SLX2LusUtils.timeStepStr());
+            node_inputs_withoutDT_cell{end+1} = ...
+                sprintf('%s', SLX2LusUtils.timeStepStr());
+            % add clocks
+            clocks_list = SLX2LusUtils.getRTClocksSTR(blk, main_sampleTime);
+            if ~isempty(clocks_list)
+                node_inputs_cell{end + 1} = sprintf('%s:bool clock;', clocks_list);
+                node_inputs_withoutDT_cell{end+1} = sprintf('%s', clocks_list);
+            end
+        end
+        %% Contract header
+        function [node_inputs, node_outputs, ...
+                    node_inputs_withoutDT, node_outputs_withoutDT ] = ...
+                    extractContractHeader(parent_ir, blk, main_sampleTime, xml_trace)
+                % This function is creating the header of the contract.
+                % A contract is different from a node by having the same
+                % signature of the abstracted node. So we need to divide
+                % the actual Contracts inputs to inputs and outputs to
+                % match the abstracted node associated to. We can also
+                % allow a contract that does not take all inputs/outputs of
+                % the abstracted node by extending it's signature with
+                % unused inputs/outputs.
+                % The order of inputs in contract in Simulink may have
+                % different order from the verified SS.
+                node_inputs = {};
+                node_outputs = {};
+                node_inputs_withoutDT = {};
+                node_outputs_withoutDT = {};
+                % Get the actual inputs of Contract block as a simple SS
+                is_main_node = 0; isEnableORAction=0; isEnableAndTrigger=0;
+                isContractBlk = 0;
+                [~, contract_inputs, contract_outputs, ...
+                    contract_inputs_withoutDT, contract_outputs_withoutDT ] = ...
+                    SLX2LusUtils.extractNodeHeader(parent_ir, blk, is_main_node, ...
+                    isEnableORAction, isEnableAndTrigger, isContractBlk, main_sampleTime, xml_trace);
+                %change
+                % get Associated SS
+                if ~isfield(blk, 'AssociatedBlkHandle')
+                    display_msg(sprintf('Can not find AssociatedBlkHandle parameter in contract %s.', ...
+                        blk.Origin_path), MsgType.DEBUG, 'extractContractHeader', '');
+                    % keep the same contract signature
+                    node_inputs = contract_inputs;
+                    node_outputs = contract_outputs;
+                    node_inputs_withoutDT = contract_inputs_withoutDT;
+                    node_outputs_withoutDT = contract_outputs_withoutDT;
+                    return;
+                end
+                % we assume PortConnectivity is ordered by the graphical
+                % order of inputs.
+                associatedBlkHandle = blk.AssociatedBlkHandle;
+                associatedBlk = get_struct(parent_ir, associatedBlkHandle);
+                if isempty(associatedBlk)
+                    display_msg(sprintf('Can not find AssociatedBlkHandle parameter in contract %s.', ...
+                        blk.Origin_path), MsgType.DEBUG, 'extractContractHeader', '');
+                    % keep the same contract signature
+                    node_inputs = contract_inputs;
+                    node_outputs = contract_outputs;
+                    node_inputs_withoutDT = contract_inputs_withoutDT;
+                    node_outputs_withoutDT = contract_outputs_withoutDT;
+                    return;
+                end
+                curr_idx = 1;
+                for j=1:numel(blk.PortConnectivity)
+                    srcBlkHandle = blk.PortConnectivity(j).SrcBlock;
+                    if isempty(srcBlkHandle)
+                        % skip "valid" output
+                        continue;
+                    end
+                    SrcPort = blk.PortConnectivity(j).SrcPort;
+                    if srcBlkHandle ~= associatedBlkHandle
+                        srcBlk = get_struct(parent_ir, srcBlkHandle);
+                        if isempty(srcBlk)
+                            continue;
+                        end
+                        % input
+                        for i=1:srcBlk.CompiledPortWidths.Outport(SrcPort+1)
+                            node_inputs{end + 1} = contract_inputs{curr_idx};
+                            node_inputs_withoutDT{end+1} =...
+                                contract_inputs_withoutDT{curr_idx};
+                            curr_idx = curr_idx + 1;
+                        end
+                    else
+                        % output
+                        for i=1:associatedBlk.CompiledPortWidths.Outport(SrcPort+1)
+                            node_outputs{end + 1} = contract_inputs{curr_idx};
+                            node_outputs_withoutDT{end+1} =...
+                                contract_inputs_withoutDT{curr_idx};
+                            curr_idx = curr_idx + 1;
+                        end
+                    end
+                end
+                % add additional inputs such as simulation time and clocks
+                for i=curr_idx:numel(contract_inputs)
+                    node_inputs{end + 1} = contract_inputs{i};
+                    node_inputs_withoutDT{end+1} =...
+                        contract_inputs_withoutDT{i};
+                end
+                
+        end
         %% get block outputs names: inlining dimension
         function [names, names_dt] = getBlockOutputsNames(parent, blk, srcPort)
             % This function return the names of the block
@@ -257,6 +361,9 @@ classdef SLX2LusUtils < handle
                 srcPort = b.SrcPort;
                 srcHandle = b.SrcBlock;
                 src = get_struct(parent, srcHandle);
+                if isempty(src)
+                    continue;
+                end
                 n_i = SLX2LusUtils.getBlockOutputsNames(parent, src, srcPort);
                 inputs = [inputs, n_i];
             end
@@ -278,6 +385,9 @@ classdef SLX2LusUtils < handle
                 srcPort = b.SrcPort;
                 srcHandle = b.SrcBlock;
                 src = get_struct(parent, srcHandle);
+                if isempty(src)
+                    continue;
+                end
                 n_i = SLX2LusUtils.getBlockOutputsNames(parent, src, srcPort);
                 inputs = [inputs, n_i];
             end
