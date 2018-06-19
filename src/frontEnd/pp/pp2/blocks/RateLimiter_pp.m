@@ -22,16 +22,31 @@ if not(isempty(rateLimiter_list))
         
         RisingSlewLimit = get_param(rateLimiter_list{i},'RisingSlewLimit' );
         FallingSlewLimit = get_param(rateLimiter_list{i},'FallingSlewLimit' );
-        
+        Init = get_param(rateLimiter_list{i},'InitialCondition');
         % replace it
         replace_one_block(rateLimiter_list{i},'pp_lib/RateLimiter');
         %restore information
-        set_param(rateLimiter_list{i} ,'/UB', RisingSlewLimit);
-        set_param(rateLimiter_list{i} ,'/LB', FallingSlewLimit);
+        set_param(strcat(...
+            rateLimiter_list{i} ,'/R'),...
+            'Value', ...
+            RisingSlewLimit);
+        set_param(strcat(...
+            rateLimiter_list{i} ,'/F'), ...
+            'Value', ...
+            FallingSlewLimit);
         ST = SLXUtils.getModelCompiledSampleTime(model);
-        set_param(rateLimiter_list{i} ,'/TS', ST);
-        set_param(rateLimiter_list{i} ,'/R', RisingSlewLimit);
-        set_param(rateLimiter_list{i} ,'/F', FallingSlewLimit);
+        set_param(...
+            strcat(rateLimiter_list{i} ,'/TS'),...
+            'Value', ...
+            num2str(ST));
+        try
+            set_param(strcat(rateLimiter_list{i},'/UD'),...
+                'InitialCondition',Init);
+        catch
+            % the parameter is called X0 in previous verfsions of Simulink
+            set_param(strcat(rateLimiter_list{i},'/UD'),...
+                'X0',Init);
+        end
         
     end
     display_msg('Done\n\n', MsgType.INFO, 'RateLimiter_pp', '');
