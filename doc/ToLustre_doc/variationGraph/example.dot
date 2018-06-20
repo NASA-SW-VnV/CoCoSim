@@ -1,0 +1,12 @@
+digraph finite_state_machine {
+        rankdir=LR;
+        size="8,5"
+        node [shape = circle];
+        AND [shape=box];
+        S0 -> AND 
+        AND -> S0 
+        AND -> S2 
+        S2 -> S0 
+        S2 -> S3 
+        S3 -> S2 
+}

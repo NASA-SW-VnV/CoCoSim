@@ -37,7 +37,7 @@ if not(isempty(dFir_list))
         if strcmp(Filter_structure, 'Direct form antisymmetric')
             display_msg(sprintf('Filter_structure %s in block %s is not supported',...
                 Filter_structure, blk), ...
-                MsgType.ERROR, ````'DiscreteFIRFilter_pp', '');
+                MsgType.ERROR, 'DiscreteFIRFilter_pp', '');
             continue;
         end   
         

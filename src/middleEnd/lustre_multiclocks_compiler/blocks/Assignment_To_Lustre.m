@@ -14,7 +14,30 @@ classdef Assignment_To_Lustre < Block_To_Lustre
     % the index assignment logic is done by Matlab and the array of that dimension are numeric.  
     % If a dimension is aport
     % input, the logic is done by Lustre and the array of that dimension are string to be used in Lustre. 
-    
+    % Example (assignment6.slx):
+    % blk.CompiledPortDimensions =  "Inport": [ 1, 3,  2, 1, 1, 1, 1  ],
+    %                              "Outport": [ 1, 3 ]
+    % blk.CompiledPortWidths = "Inport": [ 3, 1, 1 ], "Outport": 3
+    % blk.IndexMode: "One-based",
+    % blk.IndexOptionArray: "Index vector (port)",
+    % blk.IndexOptions: "Index vector (port)",
+    % blk.IndexParamArray: "1",
+    % blk.Indices: "1",
+    % blk.NumberOfDimensions: "1",
+    % Lustre generated:
+    %           -- Calculate first ind_dim which helps in...            
+    %           ind_dim_1_1 = Idx1;
+    %           str_Y_index_1_1 = ind_dim_1_1;
+    %           U_index_1 = 0 + str_Y_index_1_1*1;
+    %           Assignment_1 =
+    %               if(U_index_1 = 1) then U_1
+    %               else Y0_1 ;
+    %           Assignment_2 =
+    %               if(U_index_1 = 2) then U_1
+    %               else Y0_2 ;
+    %           Assignment_3 =
+    %               if(U_index_1 = 3) then U_1
+    %               else Y0_3 ;
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -32,14 +55,30 @@ classdef Assignment_To_Lustre < Block_To_Lustre
         function  write_code(obj, parent, blk, xml_trace, varargin)
             
             % getBlockInputsOutputs
+            % e.g for the example above (assignment6.slx): 
+            % outputs = {'Assignment_1', 'Assignment_2', 'Assignment_3'}
+            % outputs_dt = {'Assignment_1: real;', 'Assignment_2: real;',
+            %               'Assignment_3: real;'}
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+            
+            % For the exmple above:
+            % inputs{1} = 'In1_1'    'In1_2'    'In1_3'
+            % inputs{2} = 'Gain_1'
+            % inputs{3} = 'real_to_int(Saturation_1)'
             [inputs] = ...
                 getBlockInputsNames_convInType2AccType(obj, parent, blk);
         
+            % For the example above
+            % numOutDims = 1
             [numOutDims, ~, ~] = ...
                 Constant_To_Lustre.getValueFromParameter(parent, blk, blk.NumberOfDimensions);   
             
             % get matrix dimension of all inputs, and expand U if needed.
+            % For the example above
+            % in_matrix_dimension{1} =struct( "numDs": 1, "dims": 3, "width": 3)
+            % in_matrix_dimension{1} =struct( "numDs": 2, "dims": [1 1], "width": 1)
+            % in_matrix_dimension{1} =struct( "numDs": 1, "dims": 1, "width": 1)
+            % U_expanded_dims = struct( "numDs": 1, "dims": 1, "width": 1)
             [in_matrix_dimension, U_expanded_dims] = get_In_U_expanded_dims(obj,parent,blk,inputs,numOutDims);
             
             % inputs is also expanded if U is expanded
@@ -47,15 +86,21 @@ classdef Assignment_To_Lustre < Block_To_Lustre
             for i=1:numOutDims
                 U_size = U_size*U_expanded_dims.dims(i);
             end
+            % expanding second input
             if numel(inputs{2}) == 1 && numel(inputs{2}) < U_size
                 inputs{2} = arrayfun(@(x) {inputs{2}{1}}, (1:U_size));
             end             
             
             % define mapping array ind
+             % For the example above
+            % isPortIndex = 1
+            %ind{1} = 'real_to_int(Saturation_1)'
             [isPortIndex,ind] = defineMapInd(obj,parent,blk,U_expanded_dims,inputs);
            
             % if index assignment is read in from index port, write mapping
             % code on Lustre side
+            % For the example above
+            % isPortIndex = 1
             if isPortIndex
                 [codes] = getWriteCodeForPortInput(obj, in_matrix_dimension,inputs,outputs,numOutDims,U_expanded_dims,ind,blk);                
             else  % no port input
