@@ -11,33 +11,59 @@ classdef Assignment_To_Lustre < Block_To_Lustre
     %      definition of ind doesn't change.  
     %      
     % There are 2 different coding schemes.  If a dimension is not a port input,
-    % the index assignment logic is done by Matlab and the array of that dimension are numeric.  
-    % If a dimension is aport
+    % the index assignment logic is done by Matlab and the array of that dimension are numeric. Key here
+    % is the use of the matlab function ind2sub and sub2ind to convert from
+    % matrix subscripts to inline indices.
+    % If a dimension is a port
     % input, the logic is done by Lustre and the array of that dimension are string to be used in Lustre. 
-    % Example (assignment6.slx):
-    % blk.CompiledPortDimensions =  "Inport": [ 1, 3,  2, 1, 1, 1, 1  ],
-    %                              "Outport": [ 1, 3 ]
-    % blk.CompiledPortWidths = "Inport": [ 3, 1, 1 ], "Outport": 3
+    % The work of the matlab function ind2sub and sub2ind must be done on
+    % the Lustre side.
+    %
+    % Example (assignment_mixed_port_u_expanded.slx):
+    % blk.CompiledPortDimensions =  "Inport": [2,3,2,1,1,1,1],
+    %                              "Outport": [2,3,2]
+    % blk.CompiledPortWidths = "Inport": [ 6, 1, 1 ], "Outport": 6
     % blk.IndexMode: "One-based",
-    % blk.IndexOptionArray: "Index vector (port)",
-    % blk.IndexOptions: "Index vector (port)",
-    % blk.IndexParamArray: "1",
-    % blk.Indices: "1",
-    % blk.NumberOfDimensions: "1",
+    % blk.IndexOptionArray: ["Index vector (dialog)","Starting index (port)"],
+    % blk.IndexOptions: "Index vector (dialog),Starting index (port)",
+    % blk.IndexParamArray: ["[1 3]","2"],
+    % blk.Indices: "[1 3],2",
+    % blk.NumberOfDimensions: "2",
     % Lustre generated:
     %           -- Calculate first ind_dim which helps in...            
-    %           ind_dim_1_1 = Idx1;
-    %           str_Y_index_1_1 = ind_dim_1_1;
-    %           U_index_1 = 0 + str_Y_index_1_1*1;
-    %           Assignment_1 =
-    %               if(U_index_1 = 1) then U_1
-    %               else Y0_1 ;
-    %           Assignment_2 =
-    %               if(U_index_1 = 2) then U_1
-    %               else Y0_2 ;
-    %           Assignment_3 =
-    %               if(U_index_1 = 3) then U_1
-    %               else Y0_3 ;
+    % 	ind_dim_1_1 = 1;
+    % 	ind_dim_1_2 = 3;
+    % 	ind_dim_2_1 = real_to_int(Saturation_1);
+    % 	str_Y_index_1_1 = ind_dim_1_1;
+    % 	str_Y_index_1_2 = ind_dim_2_1;
+    % 	U_index_1 = 0 + str_Y_index_1_1*1 + (str_Y_index_1_2-1)*3;
+    % 	str_Y_index_2_1 = ind_dim_1_2;
+    % 	str_Y_index_2_2 = ind_dim_2_1;
+    % 	U_index_2 = 0 + str_Y_index_2_1*1 + (str_Y_index_2_2-1)*3;
+    % 	Assignment_1 = 
+    % 	  if(U_index_2 = 1) then Constant1_1
+    % 	  else if(U_index_1 = 1) then Constant1_1
+    % 	  else In1_1 ;
+    % 	Assignment_2 = 
+    % 	  if(U_index_2 = 2) then Constant1_1
+    % 	  else if(U_index_1 = 2) then Constant1_1
+    % 	  else In1_2 ;
+    % 	Assignment_3 = 
+    % 	  if(U_index_2 = 3) then Constant1_1
+    % 	  else if(U_index_1 = 3) then Constant1_1
+    % 	  else In1_3 ;
+    % 	Assignment_4 = 
+    % 	  if(U_index_2 = 4) then Constant1_1
+    % 	  else if(U_index_1 = 4) then Constant1_1
+    % 	  else In1_4 ;
+    % 	Assignment_5 = 
+    % 	  if(U_index_2 = 5) then Constant1_1
+    % 	  else if(U_index_1 = 5) then Constant1_1
+    % 	  else In1_5 ;
+    % 	Assignment_6 = 
+    % 	  if(U_index_2 = 6) then Constant1_1
+    % 	  else if(U_index_1 = 6) then Constant1_1
+    % 	  else In1_6 ;
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -55,52 +81,50 @@ classdef Assignment_To_Lustre < Block_To_Lustre
         function  write_code(obj, parent, blk, xml_trace, varargin)
             
             % getBlockInputsOutputs
-            % e.g for the example above (assignment6.slx): 
-            % outputs = {'Assignment_1', 'Assignment_2', 'Assignment_3'}
-            % outputs_dt = {'Assignment_1: real;', 'Assignment_2: real;',
-            %               'Assignment_3: real;'}
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+            % for the example above (assignment_mixed_port_u_expanded.slx): 
+            % outputs = {{'Assignment_1'}    {'Assignment_2'}    {'Assignment_3'}    {'Assignment_4'}    {'Assignment_5'}  {'Assignment_6'}}
+            % outputs_dt = {'Assignment_1: real;', 'Assignment_2: real;',
+            %               'Assignment_3: real;','Assignment_4: real;', 'Assignment_5: real;',
+            %               'Assignment_6: real;'}            
             
-            % For the exmple above:
-            % inputs{1} = 'In1_1'    'In1_2'    'In1_3'
-            % inputs{2} = 'Gain_1'
-            % inputs{3} = 'real_to_int(Saturation_1)'
             [inputs] = ...
                 getBlockInputsNames_convInType2AccType(obj, parent, blk);
-        
-            % For the example above
-            % numOutDims = 1
+            % For the exmple above:
+            % inputs{1} = 'In1_1'    'In1_2'    'In1_3'  'In1_4'    'In1_5'    'In1_6'
+            % inputs{2} = 'Constant1_1'
+            % inputs{3} = 'real_to_int(Saturation_1)'
+   
             [numOutDims, ~, ~] = ...
                 Constant_To_Lustre.getValueFromParameter(parent, blk, blk.NumberOfDimensions);   
+            % For the example above
+            % numOutDims = 2
             
             % get matrix dimension of all inputs, and expand U if needed.
-            % For the example above
-            % in_matrix_dimension{1} =struct( "numDs": 1, "dims": 3, "width": 3)
-            % in_matrix_dimension{1} =struct( "numDs": 2, "dims": [1 1], "width": 1)
-            % in_matrix_dimension{1} =struct( "numDs": 1, "dims": 1, "width": 1)
-            % U_expanded_dims = struct( "numDs": 1, "dims": 1, "width": 1)
             [in_matrix_dimension, U_expanded_dims] = get_In_U_expanded_dims(obj,parent,blk,inputs,numOutDims);
+            % For the example above
+            % in_matrix_dimension{1} =struct( "numDs": 2, "dims": [3,2], "width": 6)
+            % in_matrix_dimension{2} =struct( "numDs": 1, "dims": 1, "width": 1)
+            % in_matrix_dimension{3} =struct( "numDs": 1, "dims": 1, "width": 1)
+            % U_expanded_dims = struct( "numDs": 2, "dims": [2,1], "width": 2)            
             
             % inputs is also expanded if U is expanded
-            U_size = 1;   
-            for i=1:numOutDims
-                U_size = U_size*U_expanded_dims.dims(i);
-            end
             % expanding second input
-            if numel(inputs{2}) == 1 && numel(inputs{2}) < U_size
-                inputs{2} = arrayfun(@(x) {inputs{2}{1}}, (1:U_size));
-            end             
+            if numel(inputs{2}) == 1 && numel(inputs{2}) < U_expanded_dims.width
+                inputs{2} = arrayfun(@(x) {inputs{2}{1}}, (1:U_expanded_dims.width));
+            end     
+            % For the example above, inputs{2} changed to
+            % inputs{2} = 'Constant1_1'  'Constant1_1'
             
             % define mapping array ind
-             % For the example above
-            % isPortIndex = 1
-            %ind{1} = 'real_to_int(Saturation_1)'
             [isPortIndex,ind] = defineMapInd(obj,parent,blk,U_expanded_dims,inputs);
+            % For the example above
+            % isPortIndex = 1
+            % ind{1} = [1,3]  
+            % ind{2} = 'real_to_int(Saturation_1)' 
            
             % if index assignment is read in from index port, write mapping
             % code on Lustre side
-            % For the example above
-            % isPortIndex = 1
             if isPortIndex
                 [codes] = getWriteCodeForPortInput(obj, in_matrix_dimension,inputs,outputs,numOutDims,U_expanded_dims,ind,blk);                
             else  % no port input
@@ -244,6 +268,7 @@ classdef Assignment_To_Lustre < Block_To_Lustre
             if numel(inputs{2}) == 1
                 U_expanded_dims.numDs = numOutDims;   
                 U_expanded_dims.dims = ones(1,numOutDims);
+                U_expanded_dims.width = 1;
                 for i=1:numOutDims
                     if strcmp(blk.IndexOptionArray{i}, 'Assign all')
                         U_expanded_dims.dims(i) = in_matrix_dimension{1}.dims(i);
@@ -257,11 +282,10 @@ classdef Assignment_To_Lustre < Block_To_Lustre
                     elseif strcmp(blk.IndexOptionArray{i}, 'Starting index (dialog)')
                         U_expanded_dims.dims(i) = 1;
                     elseif strcmp(blk.IndexOptionArray{i}, 'Starting index (port)')
-                        %  indexPortNumber = indexPortNumber + 1;
-                        %  portNumber = indexPortNumber + 2;
                         U_expanded_dims.dims(i) = 1;
                     else
                     end
+                    U_expanded_dims.width = U_expanded_dims.width*U_expanded_dims.dims(i);
                 end
             end
         end        
@@ -371,6 +395,7 @@ classdef Assignment_To_Lustre < Block_To_Lustre
                     end
                 end
             end   
+            % dimJump is needed to do sub2ind
             Y0_dimJump = ones(1,numel(in_matrix_dimension{1}.dims));
             for i=2:numel(in_matrix_dimension{1}.dims)
                 for j=1:i-1

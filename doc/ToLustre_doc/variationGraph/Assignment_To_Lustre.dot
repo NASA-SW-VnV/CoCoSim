@@ -1,0 +1,12 @@
+digraph Assignment {
+        rankdir=LR;
+        size="8,5"
+        node [shape = polygon, sides=5];
+        Assignment [shape=ellipse];
+        code_for_index_port [shape=box];
+        code_for_no_index_port [shape=box];
+        Assignment -> index_port 
+        Assignment -> no_index_port 
+        index_port -> code_for_index_port 
+        no_index_port -> code_for_no_index_port 
+}
