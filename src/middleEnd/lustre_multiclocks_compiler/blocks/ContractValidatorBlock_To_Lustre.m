@@ -12,7 +12,7 @@ classdef ContractValidatorBlock_To_Lustre < Block_To_Lustre
     
     methods
         
-        function  write_code(obj, parent, blk, varargin)
+        function  write_code(varargin)
             % Validator block willl be ignored as it will be
             % supported in its contract
             

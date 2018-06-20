@@ -13,7 +13,7 @@ classdef ContractBlock_To_Lustre < Block_To_Lustre
     
     methods
         
-        function  write_code(obj, parent, blk, varargin)
+        function  write_code(varargin)
             % Contracts Subsystems willl be ignored as they will be
             % imported in the node definition of the associate Simulink
             % Subsystem.

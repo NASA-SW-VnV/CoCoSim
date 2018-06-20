@@ -61,7 +61,7 @@ LUSTREC = fullfile(solvers_path, 'bin', 'lustrec');
 %LUSTREC_OPTS defines options that should be passed to Lustrec when it is
 %called. e.g. "int_div_euclidean" interprets integer division as Euclidean 
 %(default : C division semantics)
-LUSTREC_OPTS = '-int_div_euclidean -algebraic-loop-solve -int "long long int"';
+LUSTREC_OPTS = '';%'-int_div_euclidean -algebraic-loop-solve -int "long long int"';
 LUSTRET = fullfile(solvers_path, 'bin', 'lustret');
 LUCTREC_INCLUDE_DIR = fullfile(solvers_path, 'include', 'lustrec');
 ZUSTRE = fullfile(solvers_path, 'bin', 'zustre');

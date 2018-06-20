@@ -12,11 +12,11 @@ classdef Delay_To_Lustre < Block_To_Lustre
     
     methods
         
-        function  write_code(obj, parent, blk, varargin)
+        function  write_code(obj, parent, blk, xml_trace, varargin)
             [lustre_code, delay_node_code, variables, external_libraries, unsupported_options] = ...
                 Delay_To_Lustre.get_code( parent, blk, ...
                 blk.InitialConditionSource, blk.DelayLengthSource,...
-                blk.DelayLength, blk.DelayLengthUpperLimit, blk.ExternalReset, blk.ShowEnablePort );
+                blk.DelayLength, blk.DelayLengthUpperLimit, blk.ExternalReset, blk.ShowEnablePort, xml_trace );
             obj.addVariable(variables);
             obj.addExternal_libraries(external_libraries);
             obj.addExtenal_node(delay_node_code);
@@ -67,13 +67,13 @@ classdef Delay_To_Lustre < Block_To_Lustre
     methods(Static = true)
         function [lustre_code, delay_node_code, variables, external_libraries, unsupported_options] = ...
                 get_code( parent, blk, InitialConditionSource, DelayLengthSource,...
-                DelayLength, DelayLengthUpperLimit, ExternalReset, ShowEnablePort )
+                DelayLength, DelayLengthUpperLimit, ExternalReset, ShowEnablePort, xml_trace )
             %initialize outputs
             external_libraries = {};
             unsupported_options = {};
             lustre_code = '';
             delay_node_code = '';
-            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk);
+            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             variables = outputs_dt;
             inputs = {};
             

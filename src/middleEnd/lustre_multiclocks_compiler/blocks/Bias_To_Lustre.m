@@ -12,9 +12,9 @@ classdef Bias_To_Lustre < Block_To_Lustre
     
     methods
         
-        function  write_code(obj, parent, blk, varargin)
+        function  write_code(obj, parent, blk, xml_trace, varargin)
             bias = blk.Bias;
-            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk);
+            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             inputs = {};
             widths = blk.CompiledPortWidths.Inport;
             nbInputs = numel(widths);

@@ -12,7 +12,7 @@ classdef Abs_To_Lustre < Block_To_Lustre
     
     methods
         
-        function  write_code(obj, parent, blk, varargin)
+        function  write_code(obj, parent, blk, xml_trace, varargin)
             if ~strcmp(blk.OutMax, '[]') || ~strcmp(blk.OutMin, '[]')
                 display_msg(sprintf('The minimum/maximum value is not supported in block %s',...
                     blk.Origin_path), MsgType.WARNING, 'Abs_To_Lustre', '');
@@ -22,7 +22,7 @@ classdef Abs_To_Lustre < Block_To_Lustre
                     blk.Origin_path), MsgType.WARNING, 'Abs_To_Lustre', '');
             end
             
-            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk);
+            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             outputDataType = blk.CompiledPortDataTypes.Outport{1};
             
             inputs{1} = SLX2LusUtils.getBlockInputsNames(parent, blk, 1);

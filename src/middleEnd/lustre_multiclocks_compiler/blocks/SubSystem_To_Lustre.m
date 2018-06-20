@@ -11,8 +11,8 @@ classdef SubSystem_To_Lustre < Block_To_Lustre
     
     methods
         
-        function  write_code(obj, parent, blk, main_sampleTime, varargin)
-            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk);
+        function  write_code(obj, parent, blk, xml_trace, main_sampleTime, varargin)
+            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             [inputs] = SLX2LusUtils.getBlockInputsNames(parent, blk);
             node_name = SLX2LusUtils.node_name_format(blk);
             codes = {};
@@ -68,11 +68,11 @@ classdef SubSystem_To_Lustre < Block_To_Lustre
                     if isequal(maskType, 'ContractGuaranteeBlock')
                         codes{end + 1} = ...
                             sprintf('guarantee "%s"  %s(%s);\n\t', ...
-                            y, node_name, x);
+                            node_name, node_name, x);
                     elseif isequal(maskType, 'ContractAssumeBlock')
                         codes{end + 1} = ...
                             sprintf('assume "%s"  %s(%s);\n\t', ...
-                            y, node_name, x);
+                            node_name, node_name, x);
                     else
                         codes{end + 1} = ...
                             sprintf('var %s = %s(%s);\n\t', ...

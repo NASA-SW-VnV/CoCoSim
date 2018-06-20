@@ -11,7 +11,9 @@ classdef SS_To_LustreNode
     end
     
     methods(Static)
-        function [ main_node, external_nodes, external_libraries ] = subsystem2node(parent_ir,  ss_ir,  main_sampleTime, is_main_node, xml_trace)
+        function [ main_node, external_nodes, external_libraries ] = ...
+                subsystem2node(parent_ir,  ss_ir,  main_sampleTime, ...
+                is_main_node, xml_trace)
             %BLOCK_TO_LUSTRE create a lustre node for every Simulink subsystem within
             %subsys_struc.
             %INPUTS:
@@ -43,11 +45,8 @@ classdef SS_To_LustreNode
                 main_sampleTime, xml_trace);
             % concatenate inputs and outputs
             node_inputs = MatlabUtils.strjoin(node_inputs_cell, '\n');
-            node_inputs_withoutDT = ...
-                MatlabUtils.strjoin(node_inputs_withoutDT_cell, ',\n\t\t');
             node_outputs = MatlabUtils.strjoin(node_outputs_cell, '\n');
-            node_outputs_withoutDT = ...
-                MatlabUtils.strjoin(node_outputs_withoutDT_cell, ',\n\t\t');
+
             
             if isContractBlk
                 node_header = sprintf('contract %s (%s)\n returns (%s);',...
@@ -136,14 +135,16 @@ classdef SS_To_LustreNode
             fields = fieldnames(subsys.Content);
             fields = ...
                 fields(cellfun(@(x) isfield(subsys.Content.(x),'BlockType'), fields));
-            
+            if numel(fields)>=1
+                xml_trace.create_Variables_Element();
+            end
             for i=1:numel(fields)
                 blk = subsys.Content.(fields{i});
                 [b, status] = getWriteType(blk);
                 if status
                     continue;
                 end
-                b.write_code(subsys, blk, main_sampleTime, xml_trace);
+                b.write_code(subsys, blk, xml_trace, main_sampleTime);
                 body = [body, b.getCode()];
                 variables_str = [variables_str, char(MatlabUtils.strjoin(b.variables, '\n\t'))];
                 external_nodes = [external_nodes, b.external_nodes];
@@ -219,10 +220,10 @@ classdef SS_To_LustreNode
                             node_outputs_withoutDT(I)];
                         continue;
                     end
-                    % case of Action inputs                    
+                    % case of Action inputs are ignored for the moment.                    
                 end
-                [contract_inputs, ~] = ...
-                    SLX2LusUtils.getTimeClocksInputs(ss_ir, main_sampleTime, contract_inputs, {});
+                [~, contract_inputs] = ...
+                    SLX2LusUtils.getTimeClocksInputs(ss_ir, main_sampleTime, {}, contract_inputs);
                 contract_inputs = MatlabUtils.strjoin(contract_inputs, ', ');
                 contract_outputs =  MatlabUtils.strjoin(contract_outputs, ', ');
                 contractCell{end+1} = sprintf('import %s( %s ) returns (%s);', ...

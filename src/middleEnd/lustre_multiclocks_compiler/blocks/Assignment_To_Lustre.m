@@ -29,10 +29,10 @@ classdef Assignment_To_Lustre < Block_To_Lustre
     methods
               
         
-        function  write_code(obj, parent, blk, varargin)
+        function  write_code(obj, parent, blk, xml_trace, varargin)
             
             % getBlockInputsOutputs
-            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk);
+            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             [inputs] = ...
                 getBlockInputsNames_convInType2AccType(obj, parent, blk);
         

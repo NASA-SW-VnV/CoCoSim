@@ -11,8 +11,8 @@ classdef Sqrt_To_Lustre < Block_To_Lustre
     end
     
     methods
-        function  write_code(obj, parent, blk, varargin)
-            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk);
+        function  write_code(obj, parent, blk, xml_trace, varargin)
+            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             inputs = {};
             if ~strcmp(blk.OutMax, '[]') || ~strcmp(blk.OutMin, '[]')
                 display_msg(sprintf('The minimum/maximum value is not support in block %s',...

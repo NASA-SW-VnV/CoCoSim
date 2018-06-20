@@ -18,7 +18,7 @@ classdef Sum_To_Lustre < Block_To_Lustre
     
     methods
         
-        function  write_code(obj, parent, blk, varargin)
+        function  write_code(obj, parent, blk, xml_trace, varargin)
             
             OutputDataTypeStr = blk.OutDataTypeStr;
             AccumDataTypeStr = blk.AccumDataTypeStr;
@@ -37,7 +37,9 @@ classdef Sum_To_Lustre < Block_To_Lustre
             end
             
             isSumBlock = true;
-            [codes, outputs_dt, additionalVars] = Sum_To_Lustre.getSumProductCodes(obj, parent, blk, OutputDataTypeStr,isSumBlock,AccumDataTypeStr);
+            [codes, outputs_dt, additionalVars] = ...
+                Sum_To_Lustre.getSumProductCodes(obj, parent, blk, ...
+                OutputDataTypeStr,isSumBlock,AccumDataTypeStr, xml_trace);
             
             obj.setCode(MatlabUtils.strjoin(codes, ''));
             obj.addVariable(outputs_dt);
@@ -60,9 +62,11 @@ classdef Sum_To_Lustre < Block_To_Lustre
     end
     
     methods(Static)
-        function [codes, outputs_dt, AdditionalVars] = getSumProductCodes(obj, parent, blk, OutputDataTypeStr,isSumBlock,AccumDataTypeStr)
+        function [codes, outputs_dt, AdditionalVars] = getSumProductCodes(...
+                obj, parent, blk, OutputDataTypeStr,isSumBlock, ...
+                AccumDataTypeStr, xml_trace)
             AdditionalVars = {};
-            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk);
+            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             widths = blk.CompiledPortWidths.Inport;
             inputs = Sum_To_Lustre.createBlkInputs(obj, parent, blk, widths, AccumDataTypeStr, isSumBlock);
             
@@ -117,7 +121,7 @@ classdef Sum_To_Lustre < Block_To_Lustre
                     end
                     [codes, AdditionalVars] = Product_To_Lustre.matrix_multiply(blk, inputs, outputs, zero, LusOutputDataTypeStr );
                 else
-                    % element wise operations
+                    % element wise operations / Sum 
                     % If it is integer division, we need to call the
                     % appropriate division methode. We assume Lustre
                     % division is the Euclidean division for integers.

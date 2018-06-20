@@ -12,14 +12,14 @@ classdef Demux_To_Lustre < Block_To_Lustre
     
     methods
         
-        function  write_code(obj, parent, blk, varargin)
+        function  write_code(obj, parent, blk, xml_trace, varargin)
             
             if strcmp(blk.BusSelectionMode, 'on')
                 display_msg(sprintf('BusSelectionMode on is not supported in block %s',...
                     blk.Origin_path), ...
                     MsgType.ERROR, 'Demux_To_Lustre', '');
             end
-            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk);
+            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             inputs = {};
             
             widths = blk.CompiledPortWidths.Inport;  

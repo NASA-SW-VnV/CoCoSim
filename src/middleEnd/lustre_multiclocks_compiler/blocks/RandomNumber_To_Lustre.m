@@ -12,8 +12,8 @@ classdef RandomNumber_To_Lustre < Block_To_Lustre
     
     methods
         
-        function  write_code(obj, parent, blk, varargin)
-            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk);
+        function  write_code(obj, parent, blk, xml_trace, varargin)
+            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             obj.addVariable(outputs_dt);
             [mean, ~, status] = ...
                 Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Mean);

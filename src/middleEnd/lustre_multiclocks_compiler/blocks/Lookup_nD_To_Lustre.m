@@ -12,11 +12,11 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
     
     methods
         
-        function  write_code(obj, parent, blk, varargin)
+        function  write_code(obj, parent, blk, xml_trace, varargin)
             
             isLookupTableDynamic = 0;
             [external_lib, codes, vars, nodeCodes] =  ...
-                Lookup_nD_To_Lustre.get_code_to_write(parent, blk, varargin,isLookupTableDynamic);
+                Lookup_nD_To_Lustre.get_code_to_write(parent, blk, xml_trace, isLookupTableDynamic);
             if ~isempty(external_lib)
                 obj.addExternal_libraries(external_lib);
             end
@@ -46,9 +46,9 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
     methods(Static)
         
         function [external_lib, codes, vars, nodeCodes] =  ...
-                get_code_to_write(parent, blk, varargin,isLookupTableDynamic)
+                get_code_to_write(parent, blk, xml_trace,isLookupTableDynamic)
             external_lib = '';
-            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk);
+            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             inputs = {};
             
             widths = blk.CompiledPortWidths.Inport;

@@ -18,11 +18,13 @@ classdef Product_To_Lustre < Block_To_Lustre
     
     methods
         
-        function  write_code(obj, parent, blk, varargin)
+        function  write_code(obj, parent, blk, xml_trace, varargin)
             
             OutputDataTypeStr = blk.CompiledPortDataTypes.Outport{1};
             isSumBlock = false;
-            [codes, outputs_dt, additionalVars] = Sum_To_Lustre.getSumProductCodes(obj, parent, blk, OutputDataTypeStr,isSumBlock, OutputDataTypeStr);
+            [codes, outputs_dt, additionalVars] = ...
+                Sum_To_Lustre.getSumProductCodes(obj, parent, blk, ...
+                OutputDataTypeStr,isSumBlock, OutputDataTypeStr, xml_trace);
             
             obj.setCode(MatlabUtils.strjoin(codes, ''));
             obj.addVariable(outputs_dt);

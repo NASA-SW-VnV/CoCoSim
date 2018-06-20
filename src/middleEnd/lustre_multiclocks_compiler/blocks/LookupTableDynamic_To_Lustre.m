@@ -12,11 +12,11 @@ classdef LookupTableDynamic_To_Lustre < Block_To_Lustre
     
     methods
         
-        function  write_code(obj, parent, blk, varargin)
+        function  write_code(obj, parent, blk, xml_trace, varargin)
 
             isLookupTableDynamic = 1;
             [external_lib, codes, vars, nodeCodes] =  ...
-                Lookup_nD_To_Lustre.get_code_to_write(parent, blk, varargin, isLookupTableDynamic);
+                Lookup_nD_To_Lustre.get_code_to_write(parent, blk, xml_trace, isLookupTableDynamic);
             
             obj.addExternal_libraries(external_lib);
             obj.setCode(codes);

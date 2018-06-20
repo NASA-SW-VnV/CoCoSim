@@ -36,15 +36,25 @@ classdef Block_To_Lustre < handle
     methods (Abstract)
         %these functions should be implemented by all classes inherit from
         %this class
-        write_code(obj, parent, blk, main_sampleTime, varargin)
-        getUnsupportedOptions(obj, parent, blk, main_sampleTime, varargin)
+        write_code(obj, parent, blk, xml_trace, main_sampleTime, varargin)
+        getUnsupportedOptions(obj, parent, blk, main_sampleTime, xml_trace, varargin)
     end
     methods
-        function addVariable(obj, varname)
+        function addVariable(obj, varname, ...
+                xml_trace, originPath, port, width, index, isInsideContract, IsNotInSimulink)
             if iscell(varname)
                 obj.variables = [obj.variables, varname];
             else
-                obj.variables{numel(obj.variables) +1} = varname;
+                obj.variables{end +1} = varname;
+            end
+            if nargin >= 3
+                if iscell(varname)
+                    for i=1:numel(varname)
+                        xml_trace.add_InputOutputVar('Variable', varname{i}, originPath, port, width, i, isInsideContract, IsNotInSimulink);
+                    end
+                else
+                    xml_trace.add_InputOutputVar('Variable', varname, originPath, port, width, index, isInsideContract, IsNotInSimulink);
+                end
             end
         end
         function addUnsupported_options(obj, option)

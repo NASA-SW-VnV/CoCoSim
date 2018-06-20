@@ -68,18 +68,32 @@ classdef SLX2LusUtils < handle
         %% Lustre node inputs, outputs
         function [node_name,  node_inputs_cell, node_outputs_cell,...
                 node_inputs_withoutDT_cell, node_outputs_withoutDT_cell ] = ...
-                extractNodeHeader(parent_ir, blk, is_main_node, isEnableORAction, isEnableAndTrigger, isContractBlk, main_sampleTime, xml_trace)
+                extractNodeHeader(parent_ir, blk, is_main_node, ...
+                isEnableORAction, isEnableAndTrigger, isContractBlk, ...
+                main_sampleTime, xml_trace)
             % this function is used to get the Lustre node inputs and
             % outputs.
+            
+            
             % creating node header
             node_name = SLX2LusUtils.node_name_format(blk);
+            
+            
+            % contract handling
             if isContractBlk
                 [ node_inputs_cell, node_outputs_cell,...
                     node_inputs_withoutDT_cell, node_outputs_withoutDT_cell ] = ...
                     SLX2LusUtils.extractContractHeader(parent_ir, blk, main_sampleTime, xml_trace);
                 return;
             end
+             % create traceability
+            xml_trace.create_Node_Element(blk.Origin_path, node_name,...
+                SLX2LusUtils.isContractBlk(blk)); % not using isContractBlk 
+            %variable because it may be 0 if the functions is called from SLX2LusUtils.extractContractHeader
+            
+            
             %creating inputs
+            xml_trace.create_Inputs_Element();
             [node_inputs_cell, node_inputs_withoutDT_cell] = ...
                 SLX2LusUtils.extract_node_InOutputs_withDT(blk, 'Inport', xml_trace);
             
@@ -104,7 +118,9 @@ classdef SLX2LusUtils < handle
             end
            
             % creating outputs
-            [node_outputs_cell, node_outputs_withoutDT_cell] = SLX2LusUtils.extract_node_InOutputs_withDT(blk, 'Outport', xml_trace);
+            xml_trace.create_Outputs_Element();
+            [node_outputs_cell, node_outputs_withoutDT_cell] =...
+                SLX2LusUtils.extract_node_InOutputs_withDT(blk, 'Outport', xml_trace);
             
             if is_main_node && isempty(node_outputs_cell)
                 node_outputs_cell{end+1} = sprintf('%s:real;', SLX2LusUtils.timeStepStr());
@@ -126,7 +142,7 @@ classdef SLX2LusUtils < handle
                 fields(...
                 cellfun(@(x) strcmp(subsys.Content.(x).BlockType,type), fields));
             
-            
+            isInsideContract = SLX2LusUtils.isContractBlk(subsys);
             % sort the blocks by order of their ports
             ports = cellfun(@(x) str2num(subsys.Content.(x).Port), Portsfields);
             [~, I] = sort(ports);
@@ -134,12 +150,21 @@ classdef SLX2LusUtils < handle
             names = {};
             names_withNoDT = {};
             for i=1:numel(Portsfields)
-                [names_withNoDT_i, names_i] = SLX2LusUtils.getBlockOutputsNames(subsys, subsys.Content.(Portsfields{i}));
+                block = subsys.Content.(Portsfields{i});
+                [names_withNoDT_i, names_i] = SLX2LusUtils.getBlockOutputsNames(subsys, block);
                 names = [names, names_i];
                 names_withNoDT = [names_withNoDT, names_withNoDT_i];
+                % traceability
+                width = numel(names_withNoDT);
+                IsNotInSimulink = false;
+                for index=1:numel(names_withNoDT)
+                    xml_trace.add_InputOutputVar( type, names_withNoDT{index}, ...
+                        block.Origin_path, 1, width, index, isInsideContract, IsNotInSimulink);
+                end
             end
             if strcmp(type, 'Inport')
-                % add enable port to the node inputs, its value may be used
+                % add enable port to the node inputs, if ShowOutputPort is
+                % on
                 enablePortsFields = fields(...
                     cellfun(@(x) strcmp(subsys.Content.(x).BlockType,'EnablePort'), fields));
                 if ~isempty(enablePortsFields) ...
@@ -147,8 +172,17 @@ classdef SLX2LusUtils < handle
                     [names_withNoDT_i, names_i] = SLX2LusUtils.getBlockOutputsNames(subsys, subsys.Content.(enablePortsFields{1}));
                     names = [names, names_i];
                     names_withNoDT = [names_withNoDT, names_withNoDT_i];
+                    % traceability
+                    width = numel(names_withNoDT);
+                    IsNotInSimulink = false;
+                    block = subsys.Content.(enablePortsFields{1});
+                    for index=1:numel(names_withNoDT)
+                        xml_trace.add_InputOutputVar( type, names_withNoDT{index}, ...
+                            block.Origin_path, 1, width, index, isInsideContract, IsNotInSimulink);
+                    end
                 end
-                % add trigger port to the node inputs, its value may be used
+                % add trigger port to the node inputs, if ShowOutputPort is
+                % on
                 triggerPortsFields = fields(...
                     cellfun(@(x) strcmp(subsys.Content.(x).BlockType,'TriggerPort'), fields));
                 if ~isempty(triggerPortsFields) ...
@@ -156,6 +190,14 @@ classdef SLX2LusUtils < handle
                     [names_withNoDT_i, names_i] = SLX2LusUtils.getBlockOutputsNames(subsys, subsys.Content.(triggerPortsFields{1}));
                     names = [names, names_i];
                     names_withNoDT = [names_withNoDT, names_withNoDT_i];
+                    % traceability
+                    width = numel(names_withNoDT);
+                    IsNotInSimulink = false;
+                    block = subsys.Content.(triggerPortsFields{1});
+                    for index=1:numel(names_withNoDT)
+                        xml_trace.add_InputOutputVar( type, names_withNoDT{index}, ...
+                            block.Origin_path, 1, width, index, isInsideContract, IsNotInSimulink);
+                    end
                 end
             end
             
@@ -262,7 +304,8 @@ classdef SLX2LusUtils < handle
                 
         end
         %% get block outputs names: inlining dimension
-        function [names, names_dt] = getBlockOutputsNames(parent, blk, srcPort)
+        function [names, names_dt] = getBlockOutputsNames(parent, blk, ...
+                srcPort, xml_trace)
             % This function return the names of the block
             % outputs.
             % Example : an Inport In with dimension [2, 3] will be
@@ -272,6 +315,12 @@ classdef SLX2LusUtils < handle
             % A block is defined by its outputs, if a block does not
             % have outports, like Outport block, than will be defined by its
             % inports. E.g, Outport Out with width 2 -> Out_1, out_2
+            needToLogTraceability = 0;
+            if nargin > 3
+                % this function is only called with "xml_trace" variable in
+                % Block_To_Lustre classes. 
+                needToLogTraceability = 1;
+            end
             names = {};
             names_dt = {};
             if isempty(blk) ...
@@ -330,15 +379,30 @@ classdef SLX2LusUtils < handle
                     idx = idx + 1;
                 end
             end
+            isInsideContract = SLX2LusUtils.isContractBlk(parent);
+            IsNotInSimulink = false;
             if nargin >= 3 && ~isempty(srcPort)...
                     && ~strcmp(blk.CompiledPortDataTypes.Outport{srcPort + 1}, 'auto')
                 port = srcPort + 1;% srcPort starts by zero
                 [names, names_dt] = blockOutputs(port);
+                 % traceability
+                 if needToLogTraceability
+                     for index=1:numel(names)
+                         xml_trace.add_InputOutputVar( 'Variable', names{index}, ...
+                             blk.Origin_path, port, numel(names), index, isInsideContract, IsNotInSimulink);
+                     end
+                 end
             else
                 for port=1:numel(width)
                     [names_i, names_dt_i] = blockOutputs(port);
                     names = [names, names_i];
                     names_dt = [names_dt, names_dt_i];
+                    if needToLogTraceability
+                        for index=1:numel(names_i)
+                            xml_trace.add_InputOutputVar( 'Variable', names_i{index}, ...
+                                blk.Origin_path, port, numel(names_i), index, isInsideContract, IsNotInSimulink);
+                        end
+                    end
                 end
             end
         end

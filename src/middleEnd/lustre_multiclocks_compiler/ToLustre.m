@@ -81,9 +81,10 @@ create_file_meta_info(nom_lustre_file);
 
 %% Create traceability informations in XML format
 display_msg('Start tracebility', MsgType.INFO, 'lustre_multiclocks_compiler', '');
-trace_file_name = fullfile(output_dir, strcat(file_name, '.cocosim2.trace.xml'));
-xml_trace = XML_Trace(model_full_path, trace_file_name);
-xml_trace.init();
+xml_trace_file_name = fullfile(output_dir, strcat(file_name, '.toLustre.trace.xml'));
+json_trace_file_name = fullfile(output_dir, strcat(file_name, '_mapping.json'));
+xml_trace = SLX2Lus_Trace(model_full_path,...
+    xml_trace_file_name, json_trace_file_name);
 
 
 %% Internal representation building %%%%%%
@@ -112,6 +113,9 @@ if fid==-1
 end
 fprintf(fid, '--external libraries\n%s--Simulink code\n%s',external_lib_code, nodes_code);
 fclose(fid);
+
+%% writing traceability
+xml_trace.write();
 
 %% display report files
 t_finish = toc(t_start);
