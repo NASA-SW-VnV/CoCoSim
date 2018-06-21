@@ -1,5 +1,13 @@
 classdef Selector_To_Lustre < Block_To_Lustre
     % Selector_To_Lustre
+    % U and Y (inputs{1} and outputs) are inline.  In writing the Lustre
+    % code, we loop over the inline outputs.  For each outputs element, we use the
+    % map array ind and the ind2sub and sub2ind to seclect which element of U
+    % to use.  If there is a port input, then the ind2sub and sub2ind can't be use 
+    % and these tasks are done on the Lustre side.
+    % This class is similiar to the Assign_To_Lustre class.  See comments
+    % in the Assignment_To_Lustre.m class for definition of array ind
+    
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -13,128 +21,94 @@ classdef Selector_To_Lustre < Block_To_Lustre
     methods
         
         function  write_code(obj, parent, blk, xml_trace, varargin)
+            
+            % share code with Assignment_To_Lustre
+            isSelector = 1;
+            % getBlockInputsOutputs
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
-            inputs = {};
             
-            widths = blk.CompiledPortWidths.Inport;
-            outputDataType = blk.CompiledPortDataTypes.Outport{1};
-            
-            for i=1:numel(widths)
-                inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
-                inport_dt = blk.CompiledPortDataTypes.Inport(i);
-                [lusInport_dt, ~] = SLX2LusUtils.get_lustre_dt(inport_dt);
-                %converts the input data type(s) to
-                %its accumulator data type
-                if ~strcmp(inport_dt, outputDataType) && i <= 2
-                    [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, outputDataType);
-                    if ~isempty(external_lib)
-                        obj.addExternal_libraries(external_lib);
-                        inputs{i} = cellfun(@(x) sprintf(conv_format,x), inputs{i}, 'un', 0);
-                    end
-                elseif i > 1 && ~strcmp(lusInport_dt, 'int')
-                    % convert index values to int for Lustre code
-                    [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, 'int');
-                    if ~isempty(external_lib)
-                        obj.addExternal_libraries(external_lib);
-                        inputs{i} = cellfun(@(x) sprintf(conv_format,x), inputs{i}, 'un', 0);
-                    end
-                end
-            end
+            [inputs] = ...
+                Assignment_To_Lustre.getBlockInputsNames_convInType2AccType(obj, parent, blk,isSelector);            
             
             [numOutDims, ~, ~] = ...
                 Constant_To_Lustre.getValueFromParameter(parent, blk, blk.NumberOfDimensions);
             
-            codes = {};
-            codeIndex = 0;
             in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(blk.CompiledPortDimensions.Inport);
-
-            % reading and assigning index map ind{i}
-            % ind{i} is the mapping i for dimension i.   e.g.   ind{1} =
-            % [1,3] means for dimension 1, select row 1 and 3.
-            % for non "port" row i, ind{i} is an array of integer
-            % for "port" row i, ind{i} is an array of string for Lustre
-            % code
-            indexPortNumber = 0;
-            isPortIndex = false;
-            IndexMode = blk.IndexMode;
-            indPortNumber = zeros(1,numel(blk.IndexOptionArray));
-            outputDimsArray = ones(1,numOutDims);
-
-            for i=1:numel(blk.IndexOptionArray)
-                
-                if strcmp(blk.IndexOptionArray{i}, 'Select all')
-                    ind{i} = (1:in_matrix_dimension{1}.dims(i));
-                    outputDimsArray(i) = in_matrix_dimension{1}.dims(i);
-                elseif strcmp(blk.IndexOptionArray{i}, 'Index vector (dialog)')
-                    [Idx, ~, ~] = ...
-                        Constant_To_Lustre.getValueFromParameter(parent, blk, blk.IndexParamArray{i});
-                    ind{i} = Idx;
-                    outputDimsArray(i) = numel(Idx);
-                elseif strcmp(blk.IndexOptionArray{i}, 'Index vector (port)')
-                    isPortIndex = true;
-                    indexPortNumber = indexPortNumber + 1;
-                    portNumber = indexPortNumber + 1;   % 1st is for input
-                    indPortNumber(i) = portNumber;
-                    outputDimsArray(i) = numel(inputs{portNumber});
-                    for j=1:outputDimsArray(i)
-                        if strcmp(IndexMode, 'Zero-based')
-                            ind{i}{j} = sprintf('%s + 1',inputs{portNumber}{j});
-                        else
-                            ind{i}{j} = inputs{portNumber}{j};
-                        end
-                    end
-                elseif strcmp(blk.IndexOptionArray{i}, 'Starting index (dialog)')
-                    [outputDimsArray(i), ~, ~] = ...
-                    Constant_To_Lustre.getValueFromParameter(parent, blk, blk.OutputSizeArray{i});
-                    [Idx, ~, ~] = ...
-                        Constant_To_Lustre.getValueFromParameter(parent, blk, blk.IndexParamArray{i});                    
-                    ind{i} = (Idx:Idx+outputDimsArray(i)-1);
-                    
-                elseif strcmp(blk.IndexOptionArray{i}, 'Starting index (port)')
-                    isPortIndex = true;
-                    indexPortNumber = indexPortNumber + 1;
-                    portNumber = indexPortNumber + 1;   % 1st is for input
-                    indPortNumber(i) = portNumber;
-                    [outputDimsArray(i), ~, ~] = ...
-                    Constant_To_Lustre.getValueFromParameter(parent, blk, blk.OutputSizeArray{i});
-                    for j=1:outputDimsArray(i)
                         
-                        if strcmp(IndexMode, 'Zero-based')
-                            ind{i}{j} = sprintf('%s + 1 + %d',inputs{portNumber}{1},(j-1));
-                        else
-                            ind{i}{j} = sprintf('%s + %d',inputs{portNumber}{1},(j-1));
-                        end                        
-                    end
-                    
-                elseif strcmp(blk.IndexOptionArray{i}, 'Starting and ending indices (port)')                      
-                    display_msg(sprintf('Starting and ending indices (port) is not supported in block %s',...
-                        blk.Origin_path), ...
-                        MsgType.ERROR, 'Selector_To_Lustre', '');                      
-                else
-                    % should not be here
-                    display_msg(sprintf('IndexOption  %s not recognized in block %s',...
-                        blk.IndexOptionArray{i}, indexBlock.Origin_path), ...
-                        MsgType.ERROR, 'Selector_To_Lustre', '');
-                end
-                if strcmp(IndexMode, 'Zero-based') && indPortNumber(i) == 0
-                    if ~strcmp(blk.IndexOptionArray{i}, 'Select all')
-                        ind{i} = ind{i} + 1;
-                    end
-                end
-            end
-            
-            indexDataType = 'int';
+            % define mapping array ind
+            %outputDimsArray = in_matrix_dimension{1};   % assume full selection, will update after below function
+            [isPortIndex,ind,outputDimsArray] = Assignment_To_Lustre.defineMapInd(obj,parent,blk,inputs,in_matrix_dimension{1},isSelector);                
             
             % if index assignment is read in form index port, write mapping
             % code on Lustre side
             if isPortIndex   
                 
+                [codes] = getWriteCodeForPortInput(obj,blk,numOutDims,inputs,outputs,ind,outputDimsArray,in_matrix_dimension);
+                
+            else   % no port input.  Mapping is done in Matlab.
+                
+                [codes] = getWriteCodeForNonPortInput(obj,numOutDims,inputs,outputs,ind,outputDimsArray,in_matrix_dimension);
+                
+            end
+            
+            obj.setCode(MatlabUtils.strjoin(codes, ''));
+            obj.addVariable(outputs_dt);
+        end
+        
+        function [codes] = getWriteCodeForNonPortInput(obj, numOutDims,inputs,outputs,ind,outputDimsArray,in_matrix_dimension)
+            % initialization
+            codes = {};
+            codeIndex = 0;
+            if numOutDims > 7
+                display_msg(sprintf('More than 7 dimensions is not supported in block %s',...
+                    indexBlock.Origin_path), ...
+                    MsgType.ERROR, 'Selector_To_Lustre', '');
+            elseif numOutDims == 1
+                for i=1:numel(outputs)
+                    codeIndex = codeIndex + 1;
+                    U_index = ind{1}(i);
+                    codes{codeIndex} = sprintf('%s = %s ;\n\t', outputs{i}, inputs{1}{U_index});
+                end
+            else
+                % support max dimensions = 7
+                for i=1:numel(outputs)
+                    codeIndex = codeIndex + 1;
+                    [d1, d2, d3, d4, d5, d6, d7 ] = ind2sub(outputDimsArray,i);
+                    d = [d1, d2, d3, d4, d5, d6, d7 ];
+                    
+                    sub2ind_string = 'U_index = sub2ind(in_matrix_dimension{1}.dims';
+                    dString = {'[ ', '[ ', '[ ', '[ ', '[ ', '[ ', '[ '};
+                    for j=1:numOutDims
+                        Ud(j) = ind{j}(d(j));
+                        if i==1
+                            dString{j}  = sprintf('%s%d', dString{j}, Ud(j));
+                        else
+                            dString{j}  = sprintf('%s, %d', dString{j}, Ud(j));
+                        end
+                    end
+                    
+                    for j=1:numOutDims
+                        sub2ind_string = sprintf('%s, %s]',sub2ind_string,dString{j});
+                    end
+                    
+                    sub2ind_string = sprintf('%s);',sub2ind_string);
+                    eval(sub2ind_string);
+                    codes{codeIndex} = sprintf('%s = %s ;\n\t', outputs{i}, inputs{1}{U_index});
+                end
+                
+            end
+            
+        end
+        
+        function [codes] = getWriteCodeForPortInput(obj,blk,numOutDims,inputs,outputs,ind,outputDimsArray,in_matrix_dimension)
                 if numOutDims>7
-                    display_msg(sprintf('For index option %s, more than 7 dimensions is not supported in block %s',...
-                        blk.IndexOptionArray{i}, indexBlock.Origin_path), ...
+                    display_msg(sprintf('More than 7 dimensions is not supported in block %s',...
+                        indexBlock.Origin_path), ...
                         MsgType.ERROR, 'Selector_To_Lustre', '');
                 end
                 
+                indexDataType = 'int';
+                codeIndex = 0;
                 U_index = {};
                 addVars = {};
                 addVarIndex = 0;
@@ -158,7 +132,7 @@ classdef Selector_To_Lustre < Block_To_Lustre
                         end
                     else
                         % port
-                        portNum = indPortNumber(i);
+                        %portNum = indPortNumber(i);
                         if strcmp(blk.IndexOptionArray{i}, 'Starting index (port)')
                             for j=1:numel(ind{i})
                                 addVarIndex = addVarIndex + 1;
@@ -257,51 +231,7 @@ classdef Selector_To_Lustre < Block_To_Lustre
                     
                 end
                 
-                obj.addVariable(addVars);
-                
-            else   % no port input.  Mapping is done in Matlab.
-                if numOutDims > 7
-                    display_msg(sprintf('For index option %s, more than 7 dimensions is not supported in block %s',...
-                        blk.IndexOptionArray{i}, indexBlock.Origin_path), ...
-                        MsgType.ERROR, 'Selector_To_Lustre', '');
-                elseif numOutDims == 1
-                    for i=1:numel(outputs)
-                        codeIndex = codeIndex + 1;
-                        U_index = ind{1}(i);
-                        codes{codeIndex} = sprintf('%s = %s ;\n\t', outputs{i}, inputs{1}{U_index});
-                    end                    
-                else
-                    % support max dimensions = 7                    
-                    for i=1:numel(outputs)
-                        codeIndex = codeIndex + 1;
-                        [d1, d2, d3, d4, d5, d6, d7 ] = ind2sub(outputDimsArray,i);
-                        d = [d1, d2, d3, d4, d5, d6, d7 ];
-                        
-                        sub2ind_string = 'U_index = sub2ind(in_matrix_dimension{1}.dims';
-                        dString = {'[ ', '[ ', '[ ', '[ ', '[ ', '[ ', '[ '};
-                        for j=1:numOutDims
-                            Ud(j) = ind{j}(d(j));
-                            if i==1
-                                dString{j}  = sprintf('%s%d', dString{j}, Ud(j));
-                            else
-                                dString{j}  = sprintf('%s, %d', dString{j}, Ud(j));
-                            end
-                        end
-                        
-                        for j=1:numOutDims
-                            sub2ind_string = sprintf('%s, %s]',sub2ind_string,dString{j});
-                        end
-                        
-                        sub2ind_string = sprintf('%s);',sub2ind_string);
-                        eval(sub2ind_string);
-                        codes{codeIndex} = sprintf('%s = %s ;\n\t', outputs{i}, inputs{1}{U_index});
-                    end
-                    
-                end
-            end
-            
-            obj.setCode(MatlabUtils.strjoin(codes, ''));
-            obj.addVariable(outputs_dt);
+                obj.addVariable(addVars);            
         end
         
         function options = getUnsupportedOptions(obj, parent, blk, varargin)

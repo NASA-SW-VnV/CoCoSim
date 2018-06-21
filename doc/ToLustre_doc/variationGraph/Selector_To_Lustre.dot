@@ -1,0 +1,12 @@
+digraph Selector {
+        rankdir=LR;
+        size="8,5"
+        node [shape = polygon, sides=5];
+        Selector [shape=ellipse];
+        code_for_index_port [shape=box];
+        code_for_no_index_port [shape=box];
+        Selector -> index_port 
+        Selector -> no_index_port 
+        index_port -> code_for_index_port 
+        no_index_port -> code_for_no_index_port 
+}
