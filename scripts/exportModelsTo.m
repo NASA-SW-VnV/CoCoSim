@@ -30,6 +30,9 @@ for i=1:numel(models)
             fprintf('saving model %s in %s format\n', m.name, version);
             load_system(full_path);
             [path, base_name, ext] = fileparts(full_path);
+            if bdIsLibrary(base_name)
+                continue;
+            end
             get_param(base_name,'Modelversionformat')
             target_filename = fullfile(path, strcat(base_name, '_tmp',ext));
             

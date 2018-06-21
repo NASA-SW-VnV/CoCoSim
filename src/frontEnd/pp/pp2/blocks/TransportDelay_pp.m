@@ -10,7 +10,7 @@ function [] = TransportDelay_pp(model)
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 tdlyBlk_list = find_system(model,'FollowLinks', 'on', ...
-    'BlockType','TransportDelay');
+    'LookUnderMasks','all', 'BlockType','TransportDelay');
 if not(isempty(tdlyBlk_list))
     display_msg('Processing TransportDelay blocks...', MsgType.INFO, 'TransportDelay_pp', ''); 
     main_sampleTime = SLXUtils.getModelCompiledSampleTime(model);

@@ -5,7 +5,8 @@ function ModelReference_pp(topLevelModel)
 
 % Find Model Reference Blocks in the top level model:
 topLevelModelHandle = get_param( topLevelModel , 'Handle' );
-mdlRefsHandles = find_system( topLevelModelHandle , 'findall' , 'on' , 'blocktype' , 'ModelReference' );
+mdlRefsHandles = find_system( topLevelModelHandle , 'LookUnderMasks','all', ...
+    'findall' , 'on' , 'blocktype' , 'ModelReference' );
 
 if( ~isempty( mdlRefsHandles ) )
     for k = 1 : length( mdlRefsHandles )

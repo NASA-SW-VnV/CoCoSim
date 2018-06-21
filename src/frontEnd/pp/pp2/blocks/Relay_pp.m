@@ -9,7 +9,7 @@ function [] = Relay_pp(model)
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Relay_list = find_system(model,'FollowLinks', 'on', ...
-    'BlockType','Relay');
+    'LookUnderMasks','all', 'BlockType','Relay');
 if not(isempty(Relay_list))
     display_msg('Processing Relay blocks...', MsgType.INFO, 'Relay_process', ''); 
     for i=1:length(Relay_list)

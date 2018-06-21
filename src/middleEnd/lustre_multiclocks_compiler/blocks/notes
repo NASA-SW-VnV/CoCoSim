@@ -9,7 +9,6 @@ Ktrinh: Assignment,
         DiscreteStateSpace (pp),
         DiscreteFilter(pp),
         DiscreteFir(pp),
-        ZeroPole(pp),
         DotProduct(pp),
         FromWorkspace,
         Gain (pp), 
@@ -28,6 +27,7 @@ Ktrinh: Assignment,
         Switch,
         Sqrt, 
         Trigonomery, 
+        ZeroPole(pp),
         
        
 
@@ -93,7 +93,10 @@ Not supported yet:
     BusAssignment (Hamza)
     Discrete Derivative (check pp in article)
     Rate Limiter
-
+    ManualSwitch
+    Derivative (discretize it by DiscreteDerivative in pp or pre-process it with DiscreteDerivative)
+    InitialCondition
+    UniformRandomNumber ( see RandomNumber)
 
 
 Blocks difficult to support:

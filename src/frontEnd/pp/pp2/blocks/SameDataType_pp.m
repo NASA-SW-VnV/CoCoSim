@@ -7,7 +7,7 @@ function SameDataType_pp( new_model_base )
 % All Rights Reserved.
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-ssys_list = find_system(new_model_base,'BlockType','Logic');
+ssys_list = find_system(new_model_base,'LookUnderMasks','all', 'BlockType','Logic');
 if not(isempty(ssys_list))
     display_msg('Processing Logical Operators to ensure inputs have the same DatType'...
         , MsgType.INFO, 'PP', '');
@@ -19,21 +19,21 @@ end
 
 
 ssys_list = ...
-    find_system(new_model_base,'BlockType','RelationalOperator');
+    find_system(new_model_base,'LookUnderMasks','all', 'BlockType','RelationalOperator');
 ssys_list = [ssys_list; ...
-    find_system(new_model_base,'BlockType','Lookup_n-D')];
+    find_system(new_model_base,'LookUnderMasks','all', 'BlockType','Lookup_n-D')];
 ssys_list = [ssys_list; ...
-    find_system(new_model_base,'BlockType','Sum')];
+    find_system(new_model_base,'LookUnderMasks','all', 'BlockType','Sum')];
 ssys_list = [ssys_list; ...
-    find_system(new_model_base,'BlockType','Product')];
+    find_system(new_model_base,'LookUnderMasks','all', 'BlockType','Product')];
 ssys_list = [ssys_list; ...
-    find_system(new_model_base,'BlockType','DotProduct')];
+    find_system(new_model_base,'LookUnderMasks','all', 'BlockType','DotProduct')];
 ssys_list = [ssys_list; ...
-    find_system(new_model_base,'BlockType','MinMax')];
+    find_system(new_model_base,'LookUnderMasks','all', 'BlockType','MinMax')];
 ssys_list = [ssys_list; ...
-    find_system(new_model_base,'BlockType','MultiPortSwitch')];
+    find_system(new_model_base,'LookUnderMasks','all', 'BlockType','MultiPortSwitch')];
 ssys_list = [ssys_list; ...
-    find_system(new_model_base,'BlockType','Switch')];
+    find_system(new_model_base,'LookUnderMasks','all', 'BlockType','Switch')];
 
 
 

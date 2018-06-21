@@ -3,6 +3,13 @@ function [report] = get_BlocksInfo(folder)
 %and get information about the blocks used. It does not care about the
 %architecture of your models, it is generating information only about
 %BlockType, the dimensions used and the DataTypes.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Copyright (c) 2017 United States Government as represented by the
+% Administrator of the National Aeronautics and Space Administration.
+% All Rights Reserved.
+% Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 bdclose('all')
 addpath(genpath(folder));
 slx_files = dir(fullfile(folder,'**', '*.slx'));

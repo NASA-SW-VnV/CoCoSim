@@ -6,7 +6,7 @@ function ExpandNonAtomicSubsystems_pp( new_model_base )
 % All Rights Reserved.
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-ssys_list = find_system(new_model_base,'BlockType','SubSystem');
+ssys_list = find_system(new_model_base,'LookUnderMasks','all', 'BlockType','SubSystem');
 if not(isempty(ssys_list))
     
     for i=1:length(ssys_list)

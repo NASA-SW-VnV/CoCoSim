@@ -55,7 +55,7 @@ display_msg('Pre-processing', MsgType.INFO, 'lustre_multiclocks_compiler', '');
 % else
 %     varargin = 'nodisplay';
 % end
-[new_file_name, status] = cocosim_pp(model_full_path ,'nodisplay',  varargin{:});
+[new_file_name, status] = cocosim_pp(model_full_path ,  varargin{:});
 if status
     return;
 end
