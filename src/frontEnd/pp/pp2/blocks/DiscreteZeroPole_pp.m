@@ -9,7 +9,7 @@ function [] = DiscreteZeroPole_pp(model)
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Processing Gain blocks
-dzp_list = find_system(model,'FollowLinks', 'on', ...
+dzp_list = find_system(model,...
     'LookUnderMasks', 'all', 'BlockType','DiscreteZeroPole');
 dzp_list = [dzp_list; find_system(model,'BlockType','ZeroPole')];
 if not(isempty(dzp_list))

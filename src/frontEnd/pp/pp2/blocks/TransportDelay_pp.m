@@ -9,7 +9,7 @@ function [] = TransportDelay_pp(model)
 % All Rights Reserved.
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-tdlyBlk_list = find_system(model,'FollowLinks', 'on', ...
+tdlyBlk_list = find_system(model,...
     'LookUnderMasks','all', 'BlockType','TransportDelay');
 if not(isempty(tdlyBlk_list))
     display_msg('Processing TransportDelay blocks...', MsgType.INFO, 'TransportDelay_pp', ''); 

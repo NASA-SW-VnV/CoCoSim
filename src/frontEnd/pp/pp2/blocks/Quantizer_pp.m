@@ -8,7 +8,7 @@ function [] = Quantizer_pp(model)
 % All Rights Reserved.
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Quantizer_list = find_system(model,'FollowLinks', 'on', ...
+Quantizer_list = find_system(model, ...
     'LookUnderMasks','all', 'BlockType','Quantizer');
 if not(isempty(Quantizer_list))
     display_msg('Processing Quantizer blocks...', MsgType.INFO, 'Quantizer_process', ''); 

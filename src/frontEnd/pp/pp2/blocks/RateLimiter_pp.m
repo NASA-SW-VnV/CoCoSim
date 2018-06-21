@@ -7,7 +7,7 @@ function [] = RateLimiter_pp(model)
 % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Processing RateLimiter blocks
-rateLimiter_list = find_system(model,'FollowLinks', 'on', ...
+rateLimiter_list = find_system(model, ...
     'LookUnderMasks', 'all', 'BlockType','RateLimiter');
 
 if not(isempty(rateLimiter_list))

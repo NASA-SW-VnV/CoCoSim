@@ -9,7 +9,7 @@ function [] = DiscreteStateSpace_pp(model)
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Processing Gain blocks
-dss_list = find_system(model,'FollowLinks', 'on', ...
+dss_list = find_system(model, ...
     'LookUnderMasks', 'all', 'BlockType','DiscreteStateSpace');
 dss_list = [dss_list; find_system(model,'BlockType','StateSpace')];
 if not(isempty(dss_list))

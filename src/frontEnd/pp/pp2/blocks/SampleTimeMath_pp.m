@@ -8,7 +8,7 @@ function [] = SampleTimeMath_pp(model)
 % All Rights Reserved.
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-SampleTimeMath_list = find_system(model,'FollowLinks', 'on', ...
+SampleTimeMath_list = find_system(model,...
     'LookUnderMasks', 'all', 'BlockType','SampleTimeMath');
 if not(isempty(SampleTimeMath_list))
     display_msg('Processing SampleTimeMath blocks...', MsgType.INFO, 'SampleTimeMath_process', '');

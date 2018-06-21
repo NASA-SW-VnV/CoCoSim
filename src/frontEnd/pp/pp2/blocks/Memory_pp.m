@@ -7,7 +7,7 @@ function [] = Memory_pp(model)
 % All Rights Reserved.
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-memoryBlk_list = find_system(model, 'LookUnderMasks','all', 'FollowLinks', 'on', ...
+memoryBlk_list = find_system(model, 'LookUnderMasks','all', ...
     'BlockType','Memory');
 if not(isempty(memoryBlk_list))
     display_msg('Processing Memory blocks...', MsgType.INFO, 'Memory_pp', ''); 
