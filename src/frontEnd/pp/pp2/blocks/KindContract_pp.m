@@ -15,16 +15,35 @@ masked_sys_list = [masked_sys_list;...
     'LookUnderMasks', 'all', 'BlockType','M-S-Function', 'Mask', 'on')];
     
 % take only contract blocks
-masked_sys_list = masked_sys_list(cellfun(@(x) ismember('ContractBlockType', get_param(x, 'MaskNames')), masked_sys_list));
-if not(isempty(masked_sys_list))
+contractBlocks_list = masked_sys_list(cellfun(@(x) ismember('ContractBlockType', get_param(x, 'MaskNames')), masked_sys_list));
+if not(isempty(contractBlocks_list))
     display_msg('Processing Contract blocks', MsgType.INFO, 'PP', '');
     
-    for i=1:length(masked_sys_list)
-        display_msg(masked_sys_list{i}, MsgType.DEBUG, 'KindContract_pp', '');
+    for i=1:length(contractBlocks_list)
+        display_msg(contractBlocks_list{i}, MsgType.DEBUG, 'KindContract_pp', '');
         % setting the MaskType
         try
-            set_param(masked_sys_list{i},'MaskType',...
-                get_param(masked_sys_list{i}, 'ContractBlockType'));
+            set_param(contractBlocks_list{i},'MaskType',...
+                get_param(contractBlocks_list{i}, 'ContractBlockType'));
+        catch me
+            display_msg(me.getReport(), MsgType.DEBUG, 'KindContract_pp', '');
+        end
+        
+    end
+    display_msg('Done\n\n', MsgType.INFO, 'PP', '');
+end
+
+% take only contract blocks
+LusOperator_list = masked_sys_list(cellfun(@(x) ismember('LustreOperatorBlock', get_param(x, 'MaskNames')), masked_sys_list));
+if not(isempty(LusOperator_list))
+    display_msg('Processing LustreOperator blocks', MsgType.INFO, 'PP', '');
+    
+    for i=1:length(LusOperator_list)
+        display_msg(LusOperator_list{i}, MsgType.DEBUG, 'KindContract_pp', '');
+        % setting the MaskType
+        try
+            set_param(LusOperator_list{i},'MaskType',...
+                get_param(LusOperator_list{i}, 'LustreOperatorBlock'));
         catch me
             display_msg(me.getReport(), MsgType.DEBUG, 'KindContract_pp', '');
         end

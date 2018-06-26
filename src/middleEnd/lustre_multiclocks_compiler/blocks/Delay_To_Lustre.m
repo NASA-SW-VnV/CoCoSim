@@ -73,8 +73,13 @@ classdef Delay_To_Lustre < Block_To_Lustre
             unsupported_options = {};
             lustre_code = '';
             delay_node_code = '';
+            isInsideContract = SLX2LusUtils.isContractBlk(parent);
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
-            variables = outputs_dt;
+            if isInsideContract
+                variables = {};
+            else
+                variables = outputs_dt;
+            end
             inputs = {};
             
             widths = blk.CompiledPortWidths.Inport;
@@ -201,9 +206,7 @@ classdef Delay_To_Lustre < Block_To_Lustre
                 resetportDataType = blk.CompiledPortDataTypes.Inport{resetPort};
                 [resetDT, zero] = SLX2LusUtils.get_lustre_dt(resetportDataType);
                 resetValue = inputs{resetPort};
-                reset_var = sprintf('Reset_%s', blk_name);
-                variables{numel(variables) + 1} = sprintf ('%s:bool;',...
-                    reset_var);
+                
                 [resetCode, status] = SLX2LusUtils.getResetCode( ...
                     ExternalReset,resetDT, char(resetValue) , zero);
                 if status
@@ -212,8 +215,17 @@ classdef Delay_To_Lustre < Block_To_Lustre
                         MsgType.ERROR, 'Constant_To_Lustre', '');
                     return;
                 end
-                codes{numel(codes) + 1} = sprintf('%s = %s;\n\t'...
-                    ,reset_var , resetCode);
+                reset_var = sprintf('Reset_%s', blk_name);
+                
+                if isInsideContract
+                    codes{end + 1} = sprintf('var %s = %s;\n\t',...
+                        strrep(reset_var, ';', '') , resetCode);
+                else
+                    codes{end + 1} = sprintf('%s = %s;\n\t'...
+                        ,reset_var , resetCode);
+                    variables{end + 1} = sprintf ('%s:bool;',...
+                        reset_var);
+                end
             end
             isEnabe = strcmp(ShowEnablePort, 'on');
             if isEnabe
@@ -232,16 +244,22 @@ classdef Delay_To_Lustre < Block_To_Lustre
                 % construct additional variables
                 for i=1:numel(u)
                     varName = sprintf('%s_%s', u{i}, blk_name);
-                    
-                    variables{numel(variables) + 1} = ...
-                        sprintf ('%s:%s;',...
-                        varName, SLX2LusUtils.get_lustre_dt(inportDataType));
-                    codes{numel(codes) + 1} = sprintf(...
-                        '%s = if  %s then %s\n\t\t\t', ...
-                        varName, enableCondition, u{i} );
-                    codes{numel(codes) + 1} = sprintf(...
-                        'else %s -> pre %s;\n\t', x0{i}, varName);
                     u{i} = varName;
+                    dt = SLX2LusUtils.get_lustre_dt(inportDataType);
+                    
+                    if isInsideContract
+                        lhs = sprintf('var %s:%s', varName, dt);
+                    else
+                        lhs = varName;
+                        variables{numel(variables) + 1} = ...
+                            sprintf ('%s:%s;',...
+                            varName, dt);
+                    end
+                    codes{end + 1} = sprintf(...
+                        '%s = if  %s then %s\n\t\t\t', ...
+                        lhs, enableCondition, u{i} );
+                    codes{end + 1} = sprintf(...
+                        'else %s -> pre %s;\n\t', x0{i}, varName);
                 end
             end
             pre_u = {};
@@ -275,8 +293,13 @@ classdef Delay_To_Lustre < Block_To_Lustre
             end
             
             for i=1:numel(u)
+                if isInsideContract
+                    lhs = sprintf('var %s', strrep(outputs_dt{i}, ';', ''));
+                else
+                    lhs = outputs{i};
+                end
                 codes{numel(codes) + 1} = sprintf('%s = %s;\n\t',...
-                    outputs{i} , pre_u{i} );
+                    lhs , pre_u{i} );
             end
             lustre_code = MatlabUtils.strjoin(codes, '');
             

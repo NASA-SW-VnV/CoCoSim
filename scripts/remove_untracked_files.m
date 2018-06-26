@@ -23,7 +23,7 @@ if status==0
     lines = regexp(untrackFiles, '\n', 'split');
     for i=1:numel(lines)
         if ~strncmp(lines{i}, 'tools/', 6)
-            cmd = sprintf('rm -rf "%s"', lines{i});
+            cmd = sprintf('mv -f "%s" ~/.Trash/', lines{i});
             [status, ~] = system(cmd);
             if status == 0
                 fprintf('file/repository %s has been successfully removed.\n', lines{i});

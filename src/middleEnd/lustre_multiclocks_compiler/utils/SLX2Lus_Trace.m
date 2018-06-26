@@ -161,7 +161,7 @@ classdef SLX2Lus_Trace < handle
         end
         
         
-        % add property for IOWA traceability
+        % add property for IOWA traceability used in cocoSpecKind2.m
         function  add_Property(obj,...
                 origin_path, ContractName, PropertyName, PropertyIndex, propertyType)
             %JSON

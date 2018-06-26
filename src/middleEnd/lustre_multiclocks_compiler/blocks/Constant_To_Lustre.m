@@ -13,7 +13,10 @@ classdef Constant_To_Lustre < Block_To_Lustre
     methods
         function  write_code(obj, parent, blk, xml_trace, varargin)
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
-            obj.addVariable(outputs_dt);
+            isInsideContract = SLX2LusUtils.isContractBlk(parent);
+            if ~isInsideContract
+                obj.addVariable(outputs_dt);
+            end
             lus_outputDataType = SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Outport{1});
             [Value, valueDataType, status] = ...
                 Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Value);
@@ -53,7 +56,13 @@ classdef Constant_To_Lustre < Block_To_Lustre
             
             
             for j=1:numel(outputs)
-                codes{j} = sprintf('%s = %s;\n\t', outputs{j}, values_str{j});
+                if isInsideContract
+                    codes{j} = sprintf('var %s = %s;\n\t', ...
+                        strrep(outputs_dt{j}, ';', ''), values_str{j});
+                else
+                    codes{j} = sprintf('%s = %s;\n\t',...
+                        outputs{j}, values_str{j});
+                end
             end
             
             obj.setCode(MatlabUtils.strjoin(codes, ''));

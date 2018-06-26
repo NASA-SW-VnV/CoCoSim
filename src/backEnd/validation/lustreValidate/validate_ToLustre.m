@@ -20,20 +20,20 @@ if nargin < 3
 elseif show_model
     open(model_full_path);
 end
-if ~exist('min_max_constraints', 'var')
+if ~exist('min_max_constraints', 'var') || isempty(min_max_constraints)
     min_max_constraints = [];
 end
 
-if ~exist('deep_CEX', 'var')
+if ~exist('deep_CEX', 'var') || isempty(deep_CEX)
     deep_CEX = 0;
 end
-if ~exist('tests_method', 'var')
+if ~exist('tests_method', 'var') || isempty(tests_method)
     tests_method = 1;
 end
-if ~exist('model_checker', 'var')
-    model_checker = 'KIND2';
+if ~exist('model_checker', 'var') || isempty(model_checker)
+    model_checker = 'KIND2'; 
 end
-if ~exist('options', 'var')
+if ~exist('options', 'var') || isempty(options)
     options = '';
 end
 

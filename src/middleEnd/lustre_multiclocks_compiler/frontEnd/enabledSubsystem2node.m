@@ -2,7 +2,8 @@ function [ main_node] = enabledSubsystem2node( parent_ir, ss_ir, hasEnablePort, 
 %enabledSubsystem2node create an automaton lustre node for
 %enabled/triggered/Action subsystem
 %INPUTS:
-%   subsys_struct: The internal representation of the subsystem.
+%   ss_ir: The internal representation of the subsystem.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Copyright (c) 2017 United States Government as represented by the
 % Administrator of the National Aeronautics and Space Administration.

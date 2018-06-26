@@ -75,15 +75,16 @@ else
         'std_pp/blocks/selector_process.m', ...
         'std_pp/blocks/to_workspace_process.m',...
         'std_pp/blocks/transfer_function_process.m'}; 
-    % 0 means all this functions will be called first.
+    % small number has the highest priority starting from zero
     
     pp_order_map(0) = {'pp2/blocks/ModelReference_pp.m'};
-    pp_order_map(1) = {'pp2/blocks/Inport_pp.m', ...
+    pp_order_map(1) = {'pp2/blocks/LinkStatus_pp.m'};
+    pp_order_map(2) = {'pp2/blocks/Inport_pp.m', ...
         'pp2/blocks/Outport_pp.m' ...
         };
     
-    pp_order_map(10) = {'std_pp/blocks/integrator_process.m',...
-        'std_pp/blocks/discrete_integrator_process.m'};
+    pp_order_map(10) = {'std_pp/blocks/integrator_process.m'};
+    pp_order_map(11) = {'std_pp/blocks/discrete_integrator_process.m'};
     % '*.m' means all std_pp functions have the same priority 3,
     % if a function already defined it will keep its highest priority.
     pp_order_map(20) = {'pp2/blocks/*.m', ...
@@ -108,9 +109,9 @@ else
     
     pp_order_map(80) = {'pp2/blocks/Gain_pp.m'};
     
-    pp_order_map(90) = {'pp2/blocks/FixedStepDiscreteSolver_pp.m',...
-        'pp2/blocks/AlgebraicLoops_pp.m'};
-    pp_order_map(91) = {'pp2/blocks/EnableMultiTasking_pp.m'};
+    pp_order_map(90) = {'pp2/blocks/FixedStepDiscreteSolver_pp.m'};
+    pp_order_map(91) = {'pp2/blocks/AlgebraicLoops_pp.m'};
+    pp_order_map(92) = {'pp2/blocks/EnableMultiTasking_pp.m'};
     
     pp_order_map(100) = {'pp2/blocks/CompileModelCheck_pp.m'};
     

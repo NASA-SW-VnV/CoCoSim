@@ -31,6 +31,12 @@ classdef Block_To_Lustre < handle
         %Dialogue parameters specified by the user. Like DataType
         %conversion ...
         unsupported_options = {};
+        
+        %For masked Subsystems, they will be treated as normal Subsystem
+        %(so they will be defined as external node). To disable this
+        %behavior set this attribute to False. So you can define the
+        %definition of the Masked SS in MaskType_To_Lustre.
+        ContentNeedToBeTranslated = 1;
     end
     
     methods (Abstract)
@@ -81,6 +87,9 @@ classdef Block_To_Lustre < handle
         
         function code = getCode(obj)
             code = obj.lustre_code;
+        end
+        function res = isContentNeedToBeTranslated(obj)
+            res = obj.ContentNeedToBeTranslated;
         end
     end
     methods(Static)

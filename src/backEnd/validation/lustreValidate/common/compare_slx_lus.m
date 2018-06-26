@@ -33,7 +33,7 @@ function [valid, ...
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-if ~exist('show_models', 'var')
+if ~exist('show_models', 'var') || isempty(show_models)
     show_models = 0;
 elseif show_models && ~isempty(model_full_path)
     open(model_full_path);

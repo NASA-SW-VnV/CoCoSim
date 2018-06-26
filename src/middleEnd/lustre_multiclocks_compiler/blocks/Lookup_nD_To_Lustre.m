@@ -1,6 +1,6 @@
 classdef Lookup_nD_To_Lustre < Block_To_Lustre
     % Lookup_nD_To_Lustre
-    % This class will do linear interpolation for up to 7 dimensions.  For 
+    % This class will do linear interpolation for up to 7 dimensions.  For
     % some options like flat and nearest, values at the breakpoints are
     % returned.  For the "linear" option, the interpolation
     % technique used here is based on using shape functions (using finite
@@ -12,7 +12,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
     % dimension 2 respectively.
     % We can obtain y from the interpolation equation
     % y(u1,u2,u3,...) = u1*N1(u1) + u2*N2(u2) + u3*N3(u3) + ... + u7*N7(u7)
-    % N1,N2 are shape functions for dimension 1 and 2.  The shape functions 
+    % N1,N2 are shape functions for dimension 1 and 2.  The shape functions
     % are defined by coordinates of the polytope with nodes (breakpoints in
     % simulink dialog) surrounding the point of interest.
     % The interpolation code are done on the Lustre side.  In this
@@ -29,8 +29,8 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
     %         mesh, then the polytop is a rectangle containing the
     %         interpolation point.  Defining the bounding nodes is done in
     %         the function addBoundNodeCode.
-    %         3. defining dimJump.  table breakpoints and values are inline in Lustre, the 
-    %         interpolation formulation uses index for each dimension.  We 
+    %         3. defining dimJump.  table breakpoints and values are inline in Lustre, the
+    %         interpolation formulation uses index for each dimension.  We
     %         need to get the inline data from the dimension subscript.
     %         Function addDimJumpCode calculate the index jump in the inline when we
     %         change dimension subscript.  For example dimJump(2) = 3 means
@@ -44,7 +44,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
     %         bounding node for each dimension is used.  We are not
     %         calculating the distance from the interpolated point to each
     %         of the bounding node on the polytop containing the
-    %         interpolated point. For the "clipped" extrapolation option, the nearest 
+    %         interpolated point. For the "clipped" extrapolation option, the nearest
     %         breakpoint in each dimension is used. Cubic spline is not
     %         supported
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -82,13 +82,13 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
             if NumberOfTableDimensions >= 7
                 obj.unsupported_options{numel(obj.unsupported_options) + 1} = ...
                     sprintf('More than 7 dimensions is not support in block %s', blk.Origin_path);
-            end 
+            end
             if strcmp(blk.InterpMethod, 'Cubic spline')
                 obj.unsupported_options{numel(obj.unsupported_options) + 1} = ...
                     sprintf('Cubic spline interpolation is not support in block %s', blk.Origin_path);
-            end            
+            end
             options = obj.unsupported_options;
-        end      
+        end
         
     end
     
@@ -106,11 +106,11 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
             % get block inputs
             [inputs,lusInport_dt,zero,one] = ...
                 Lookup_nD_To_Lustre.getBlockInputsNames_convInType2AccType(parent, blk,isLookupTableDynamic);
-
+            
             % read block parameters
             [BreakpointsForDimension,skipInterpolation,InterpMethod,ExtrapMethod,NumberOfTableDimensions,Table]=...
                 Lookup_nD_To_Lustre.readBlk(parent,blk,isLookupTableDynamic);
-                
+            
             % For n-D Lookup Table, if UseOneInputPortForAllInputData is
             % selected, Combine all input data to one input port
             inputs = Lookup_nD_To_Lustre.useOneInputPortForAllInputData(blk,isLookupTableDynamic,inputs,NumberOfTableDimensions);
@@ -118,10 +118,10 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
             % writing external node code
             %node header
             blk_name = SLX2LusUtils.node_name_format(blk);
-            ext_node_name = sprintf('%s_ext_node',blk_name);                        
+            ext_node_name = sprintf('%s_ext_node',blk_name);
             node_header = Lookup_nD_To_Lustre.getNodeCodeHeader(isLookupTableDynamic,...
                 inputs,blk_name,outputs,ext_node_name);
-                       
+            
             % declaring and defining table values
             [body, vars,table_elem] = Lookup_nD_To_Lustre.addTableCode(Table,blk_name,...
                 lusInport_dt,isLookupTableDynamic,inputs);
@@ -130,13 +130,13 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                 vars,BreakpointsForDimension,blk_name,lusInport_dt,isLookupTableDynamic,...
                 inputs,NumberOfTableDimensions);
             
-            % get bounding nodes (corners of polygon surrounding input point)            
+            % get bounding nodes (corners of polygon surrounding input point)
             [body, vars,numBoundNodes,u_node,N_shape_node,coords_node,index_node] = ...
                 Lookup_nD_To_Lustre.addBoundNodeCode(body,vars,NumberOfTableDimensions,...
                 blk_name,Breakpoints,skipInterpolation,lusInport_dt,indexDataType,...
                 BreakpointsForDimension,inputs);
             
-            % defining u            
+            % defining u
             % doing subscripts to index in Lustre.  Need subscripts, and
             % dimension jump.
             shapeNodeSign = Lookup_nD_To_Lustre.getShapeBoundingNodeSign(NumberOfTableDimensions);
@@ -155,12 +155,12 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                 InterpMethod,NumberOfTableDimensions,numBoundNodes,blk,...
                 N_shape_node,coords_node,lusInport_dt,ExtrapMethod,one,...
                 zero,shapeNodeSign,u_node);
-
+            
             nodeCodes = sprintf('%s%slet\n\t%s\ntel',...
-                node_header, vars, body);   
+                node_header, vars, body);
             main_vars = outputs_dt;
             mainCodes = Lookup_nD_To_Lustre.getMainCode(outputs,inputs,ext_node_name,isLookupTableDynamic);
-
+            
         end
         
         function [body, vars] = addFinalInterpCode(body, vars,outputs,inputs,...
@@ -168,16 +168,16 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                 NumberOfTableDimensions,numBoundNodes,blk,N_shape_node,...
                 coords_node,lusInport_dt,ExtrapMethod,one,zero,shapeNodeSign,...
                 u_node)
-        % This function carries out the interpolation depending on algorithm
-        % option.  For the flat option, the value at the lower bounding
-        % breakpoint is used. For the nearest option, the closest
-        % bounding node for each dimension is used.  We are not
-        % calculating the distance from the interpolated point to each
-        % of the bounding node on the polytop containing the
-        % interpolated point.  For the "clipped" extrapolation option, the nearest 
-        % breakpoint in each dimension is used. Cubic spline is not
-        % supported
-            if skipInterpolation            
+            % This function carries out the interpolation depending on algorithm
+            % option.  For the flat option, the value at the lower bounding
+            % breakpoint is used. For the nearest option, the closest
+            % bounding node for each dimension is used.  We are not
+            % calculating the distance from the interpolated point to each
+            % of the bounding node on the polytop containing the
+            % interpolated point.  For the "clipped" extrapolation option, the nearest
+            % breakpoint in each dimension is used. Cubic spline is not
+            % supported
+            if skipInterpolation
                 returnTableIndex{1} =  sprintf('%s_retTableInd_%d',blk_name,1);
                 vars = sprintf('%s\t%s:%s;\n',vars,returnTableIndex{1},indexDataType);
                 
@@ -197,23 +197,23 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                     % defining returnTableIndex{1}
                     disFromTableNode = {};
                     nearestIndex = {};
-                    for i=1:NumberOfTableDimensions                        
+                    for i=1:NumberOfTableDimensions
                         disFromTableNode{i,1} = sprintf('%s_disFromTableNode_dim_%d_1',blk_name,i);
                         vars = sprintf('%s\t%s:%s;\n',vars,disFromTableNode{i,1},lusInport_dt);
                         disFromTableNode{i,2} = sprintf('%s_disFromTableNode_dim_%d_2',blk_name,i);
                         vars = sprintf('%s\t%s:%s;\n',vars,disFromTableNode{i,2},lusInport_dt);
-                        body = sprintf('%s%s = %s - %s ;\n\t', body,disFromTableNode{i,1},inputs{i}{1},coords_node{i,1});    
+                        body = sprintf('%s%s = %s - %s ;\n\t', body,disFromTableNode{i,1},inputs{i}{1},coords_node{i,1});
                         body = sprintf('%s%s = %s - %s ;\n\t', body,disFromTableNode{i,2},coords_node{i,2},inputs{i}{1});
                         
                         nearestIndex{i} = sprintf('%s_nearestIndex_dim_%d',blk_name,i);
-                        vars = sprintf('%s%s:%s;\n',vars,nearestIndex{i},indexDataType);     
-
+                        vars = sprintf('%s%s:%s;\n',vars,nearestIndex{i},indexDataType);
+                        
                         code = sprintf('%s = if(%s <= %s) then %s\n\t', nearestIndex{i},disFromTableNode{i,2},disFromTableNode{i,1},index_node{i,2});
                         body = sprintf('%s%s  else %s;\n\t', body,code, index_node{i,1});
                     end
-                         
+                    
                     value = '0';
-                    for j=1:NumberOfTableDimensions   
+                    for j=1:NumberOfTableDimensions
                         if j==1
                             value = sprintf('%s + %s*%d',value,nearestIndex{j}, dimJump(j));
                         else
@@ -232,7 +232,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                     end
                 end
                 body = sprintf('%s%s  else %s ;\n\t', body,code,table_elem{numel(table_elem)});
- 
+                
             else
                 % clipping
                 clipped_inputs = {};
@@ -245,10 +245,10 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                         code = sprintf('%s  else if(%s > %s) then %s\n\t', code, inputs{i}{1}, coords_node{i,2}, coords_node{i,2});
                         body = sprintf('%s%s  else %s ;\n\t', body,code,inputs{i}{1});
                     else
-                        body = sprintf('%s%s = %s ;\n\t', body,clipped_inputs{i},inputs{i}{1});  
-                    end                    
+                        body = sprintf('%s%s = %s ;\n\t', body,clipped_inputs{i},inputs{i}{1});
+                    end
                 end
-                                
+                
                 if strcmp(InterpMethod,'Linear')
                     % calculating linear shape function value
                     denom = one;
@@ -277,26 +277,26 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                 for i=1:numBoundNodes
                     code = sprintf('%s+%s*%s ',code,N_shape_node{i},u_node{i});
                 end
-
+                
                 body = sprintf('%s%s =  %s ;\n\t', body, outputs{1}, code);
-            end            
+            end
         end
         
         function [body, vars] = addShapeFunctionCode(body, vars,numBoundNodes,...
                 shapeNodeSign,blk_name,indexDataType,table_elem,...
                 NumberOfTableDimensions,index_node,dimJump,skipInterpolation,u_node)
-        % This function defines and calculating shape function values for the
-        % interpolation point
+            % This function defines and calculating shape function values for the
+            % interpolation point
             boundingNodeIndex = {};
             nodeIndex = 0;
             for i=1:numBoundNodes
                 nodeIndex= nodeIndex+1;
-                dimSign = shapeNodeSign(nodeIndex,:);  
+                dimSign = shapeNodeSign(nodeIndex,:);
                 
                 % declaring boundingNodeIndex{nodeIndex}
                 boundingNodeIndex{nodeIndex} = sprintf('%s_bound_node_index_%d',blk_name,nodeIndex);
                 vars = sprintf('%s\t%s:%s;\n',vars,boundingNodeIndex{nodeIndex},indexDataType);
-
+                
                 % defining boundingNodeIndex{nodeIndex}
                 value = '0';
                 for j=1:NumberOfTableDimensions
@@ -313,7 +313,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                     end
                 end
                 body = sprintf('%s%s = %s;\n\t', body,boundingNodeIndex{nodeIndex}, value);
-                                
+                
                 if ~skipInterpolation
                     % defining u_node{nodeIndex}
                     code = sprintf('%s = \n\t', u_node{nodeIndex});
@@ -326,20 +326,20 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                     end
                     body = sprintf('%s%s  else %s ;\n\t', body,code,table_elem{numel(table_elem)});
                 end
-
-            end               
+                
+            end
         end
         
         function [body, vars,dimJump] = ...
                 addDimJumpCode(body,vars,NumberOfTableDimensions,blk_name,...
                 indexDataType,BreakpointsForDimension)
-        %  This function defines dimJump.  table breakpoints and values are inline in Lustre, the 
-        %  interpolation formulation uses index for each dimension.  We 
-        %  need to get the inline data from the dimension subscript.
-        %  Function addDimJumpCode calculate the index jump in the inline when we
-        %  change dimension subscript.  For example dimJump(2) = 3 means
-        %  to increase subscript dimension 2 by 1, we have to jump 3
-        %  spaces in the inline storage.            
+            %  This function defines dimJump.  table breakpoints and values are inline in Lustre, the
+            %  interpolation formulation uses index for each dimension.  We
+            %  need to get the inline data from the dimension subscript.
+            %  Function addDimJumpCode calculate the index jump in the inline when we
+            %  change dimension subscript.  For example dimJump(2) = 3 means
+            %  to increase subscript dimension 2 by 1, we have to jump 3
+            %  spaces in the inline storage.
             dimJump = ones(1,NumberOfTableDimensions)
             L_dimjump = {};
             L_dimjump{1} =  sprintf('%s_dimJump_%d',blk_name,1);
@@ -359,13 +359,13 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                 addBoundNodeCode(body,vars,NumberOfTableDimensions,...
                 blk_name,Breakpoints,skipInterpolation,lusInport_dt,indexDataType,...
                 BreakpointsForDimension,inputs)
-        %  This function finds the bounding polytop which is required to define
-        %  the shape functions.  For each dimension, there will be 2
-        %  breakpoints that surround the coordinate of the interpolation
-        %  point in that dimension.  For 2 dimensions, if the table is a
-        %  mesh, then the polytop is a rectangle containing the
-        %  interpolation point.
-
+            %  This function finds the bounding polytop which is required to define
+            %  the shape functions.  For each dimension, there will be 2
+            %  breakpoints that surround the coordinate of the interpolation
+            %  point in that dimension.  For 2 dimensions, if the table is a
+            %  mesh, then the polytop is a rectangle containing the
+            %  interpolation point.
+            
             numBoundNodes = 2^NumberOfTableDimensions;
             % defining nodes bounding element (coords_node{NumberOfTableDimensions,2}: dim1_low, dim1_high,
             % dim2_low, dim2_high,... dimn_low, dimn_high)
@@ -454,7 +454,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
         
         function [body,vars,table_elem] = ...
                 addTableCode(Table,blk_name,lusInport_dt,isLookupTableDynamic,inputs)
-        % This function defines the table values defined by users.
+            % This function defines the table values defined by users.
             table_elem = {};
             body = '';
             vars = 'var';
@@ -468,14 +468,14 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                 end
                 
                 
-            end            
+            end
         end
         
         function [body,vars,Breakpoints] = ...
                 addBreakpointCode(body,vars,BreakpointsForDimension,blk_name,...
                 lusInport_dt,isLookupTableDynamic,inputs,NumberOfTableDimensions)
-        % This function define the breakpoints defined by
-        % users.
+            % This function define the breakpoints defined by
+            % users.
             for j = 1:NumberOfTableDimensions
                 Breakpoints{j} = {};
                 for i=1:numel(BreakpointsForDimension{j})
@@ -488,33 +488,33 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                     end
                     
                 end
-            end            
+            end
         end
         
         function node_header = getNodeCodeHeader(isLookupTableDynamic,inputs,blk_name,outputs,ext_node_name)
             node_inputs = '';
-             if ~isLookupTableDynamic
+            if ~isLookupTableDynamic
                 for i=1:numel(inputs)
                     node_inputs = sprintf('%s%s:real;\n', node_inputs,inputs{i}{1});
                 end
-             else
-                 node_inputs = {};
-                 node_inputs{1} = sprintf('%s:real', inputs{1}{1});
-                 for i=2:3
-                     for j=1:numel(inputs{i})
-                         node_inputs{end+1} = sprintf('%s:real', inputs{i}{j});
-                     end
-                 end
-                 node_inputs = MatlabUtils.strjoin(node_inputs, '; ');
-             end
-            node_returns = '';            
+            else
+                node_inputs = {};
+                node_inputs{1} = sprintf('%s:real', inputs{1}{1});
+                for i=2:3
+                    for j=1:numel(inputs{i})
+                        node_inputs{end+1} = sprintf('%s:real', inputs{i}{j});
+                    end
+                end
+                node_inputs = MatlabUtils.strjoin(node_inputs, '; ');
+            end
+            node_returns = '';
             node_returns = sprintf('%s%s:real;\n', node_returns, outputs{1});
             node_header = sprintf('node %s(%s)\nreturns(%s);\n',...
-                ext_node_name, node_inputs, node_returns);            
+                ext_node_name, node_inputs, node_returns);
         end
         
         function codes = getMainCode(outputs,inputs,ext_node_name,isLookupTableDynamic)
-            codes = {}; 
+            codes = {};
             for outIdx=1:numel(outputs)
                 nodeCall_inputs = {};
                 if isLookupTableDynamic
@@ -528,7 +528,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                     end
                 end
                 nodeCall_inputs = MatlabUtils.strjoin(nodeCall_inputs, ', ');
-                              
+                
                 codes{outIdx} = sprintf('%s =  %s(%s) ;\n\t', outputs{outIdx}, ext_node_name, nodeCall_inputs);
             end
             codes = MatlabUtils.strjoin(codes, '');
@@ -553,7 +553,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
             BreakpointsForDimension = {};
             skipInterpolation = 0;
             
-            % read blk            
+            % read blk
             if isLookupTableDynamic
                 NumberOfTableDimensions = 1;
                 BreakpointsForDimension{1} = inputs{2};
@@ -712,7 +712,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                 inport_dt = blk.CompiledPortDataTypes.Inport(i);
                 [lusInport_dt, zero, one] = SLX2LusUtils.get_lustre_dt(inport_dt);
                 %converts the input data type(s) to real
-
+                
                 if ~strcmp(lusInport_dt, 'real')
                     [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, 'real', RndMeth);
                     if ~isempty(external_lib)
@@ -720,9 +720,9 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                         inputs{i} = cellfun(@(x) sprintf(conv_format,x), inputs{i}, 'un', 0);
                     end
                 end
-            end            
+            end
         end
     end
-        
+    
 end
 

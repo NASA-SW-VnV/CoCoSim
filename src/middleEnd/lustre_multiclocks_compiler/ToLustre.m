@@ -141,6 +141,10 @@ if isfield(blk, 'Content')
         external_libraries = [external_libraries, external_libraries_i];
     end
     if ~isempty(field_names)
+        [b, status] = getWriteType(blk);
+        if status || ~b.isContentNeedToBeTranslated()
+            return;
+        end
         [main_node, external_nodes, external_libraries_i] = SS_To_LustreNode.subsystem2node(parent, blk, main_sampleTime, is_main_node, xml_trace);
         external_libraries = [external_libraries, external_libraries_i];
         nodes_code = sprintf('%s\n%s\n%s', external_nodes, nodes_code, main_node);
