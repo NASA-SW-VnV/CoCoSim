@@ -131,7 +131,7 @@ end
 function [nodes_code, external_libraries] = recursiveGeneration(parent, blk, main_sampleTime, is_main_node, xml_trace)
 nodes_code = '';
 external_libraries = {};
-if isfield(blk, 'Content')
+if isfield(blk, 'Content') && ~isempty(blk.Content)
     field_names = fieldnames(blk.Content);
     for i=1:numel(field_names)
         [nodes_code_i, external_libraries_i] = recursiveGeneration(blk, blk.Content.(field_names{i}), main_sampleTime, 0, xml_trace);
@@ -140,16 +140,19 @@ if isfield(blk, 'Content')
         end
         external_libraries = [external_libraries, external_libraries_i];
     end
-    if ~isempty(field_names)
-        [b, status] = getWriteType(blk);
-        if status || ~b.isContentNeedToBeTranslated()
-            return;
-        end
-        [main_node, external_nodes, external_libraries_i] = SS_To_LustreNode.subsystem2node(parent, blk, main_sampleTime, is_main_node, xml_trace);
-        external_libraries = [external_libraries, external_libraries_i];
-        nodes_code = sprintf('%s\n%s\n%s', external_nodes, nodes_code, main_node);
+    [b, status] = getWriteType(blk);
+    if status || ~b.isContentNeedToBeTranslated()
+        return;
     end
+    [main_node, external_nodes, external_libraries_i] = SS_To_LustreNode.subsystem2node(parent, blk, main_sampleTime, is_main_node, xml_trace);
+    external_libraries = [external_libraries, external_libraries_i];
+    nodes_code = sprintf('%s\n%s\n%s', external_nodes, nodes_code, main_node);
     
+elseif isfield(blk, 'SFBlockType') && isequal(blk.SFBlockType, 'Chart')
+    % Stateflow chart example
+    [main_node, external_nodes, external_libraries_i] = SS_To_LustreNode.subsystem2node(parent, blk, main_sampleTime, is_main_node, xml_trace);
+    external_libraries = [external_libraries, external_libraries_i];
+    nodes_code = sprintf('%s\n%s\n%s', external_nodes, nodes_code, main_node);
 end
 end
 

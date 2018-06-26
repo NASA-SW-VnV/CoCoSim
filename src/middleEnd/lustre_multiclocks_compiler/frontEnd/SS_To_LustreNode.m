@@ -21,6 +21,7 @@ classdef SS_To_LustreNode
             %   main_clock   : The model sample time.
             
             
+            
             % Initializing outputs
             external_nodes = '';
             main_node = '';
@@ -28,6 +29,18 @@ classdef SS_To_LustreNode
             if ~exist('is_main_node', 'var')
                 is_main_node = 0;
             end
+            
+            %% handling Stateflow
+            if isfield(ss_ir, 'SFBlockType') && isequal(ss_ir.SFBlockType, 'Chart')
+                rt = sfroot;
+                m = rt.find('-isa', 'Simulink.BlockDiagram', 'Name',bdroot(ss_ir.Origin_path));
+                chart = m.find('-isa','Stateflow.Chart', 'Path', ss_ir.Origin_path);
+                [ char_node, chart_external_nodes] = write_Chart( chart, 0, xml_trace,'' );
+                main_node = sprintf(char_node);
+                external_nodes = sprintf(chart_external_nodes);
+                return;
+            end
+            %%
             % Adding lustre comments tracking the original path
             origin_path = regexprep(ss_ir.Origin_path, '(\\n|\n)', '--');
             comment = sprintf('-- Original block name: %s', origin_path);
