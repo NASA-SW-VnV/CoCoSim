@@ -15,38 +15,8 @@ classdef MultiPortSwitch_To_Lustre < Block_To_Lustre
         function  write_code(obj, parent, blk, xml_trace, varargin)
             
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
-            inputs = {};
-            
-            widths = blk.CompiledPortWidths.Inport;
-            nbInputs = numel(widths);
-            max_width = max(widths);
+            [inputs] = getBlockInputsNames_convInType2AccType(obj, parent, blk);
             outputDataType = blk.CompiledPortDataTypes.Outport{1};
-            RndMeth = blk.RndMeth;
-            SaturateOnIntegerOverflow = blk.SaturateOnIntegerOverflow;
-            for i=1:nbInputs
-                inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
-                if numel(inputs{i}) < max_width
-                    inputs{i} = arrayfun(@(x) {inputs{i}{1}}, (1:max_width));
-                end
-                inport_dt = blk.CompiledPortDataTypes.Inport(i);
-                [inLusDT] = SLX2LusUtils.get_lustre_dt(inport_dt);
-                %converts the input data type(s) to
-                %its accumulator data type
-                if ~strcmp(inport_dt, outputDataType) && i~=1
-                    [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, outputDataType, RndMeth, SaturateOnIntegerOverflow);
-                    if ~isempty(external_lib)
-                        obj.addExternal_libraries(external_lib);
-                        inputs{i} = cellfun(@(x) sprintf(conv_format,x), inputs{i}, 'un', 0);
-                    end
-                elseif i==1 && ~strcmp(inLusDT, 'int')
-                    [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, 'int');
-                    if ~isempty(external_lib)
-                        obj.addExternal_libraries(external_lib);
-                        inputs{i} = cellfun(@(x) sprintf(conv_format,x), inputs{i}, 'un', 0);
-                    end
-                end
-            end
-
             [outLusDT, ~, one] = SLX2LusUtils.get_lustre_dt(outputDataType);
             
             [numInputs, ~, ~] = ...
@@ -89,6 +59,40 @@ classdef MultiPortSwitch_To_Lustre < Block_To_Lustre
             obj.setCode(MatlabUtils.strjoin(codes, ''));
             obj.addVariable(outputs_dt);
             obj.addVariable(addVars);
+        end
+        
+        function [inputs] = getBlockInputsNames_convInType2AccType(obj, parent, blk)
+            inputs = {};
+            
+            widths = blk.CompiledPortWidths.Inport;
+            nbInputs = numel(widths);
+            max_width = max(widths);
+            outputDataType = blk.CompiledPortDataTypes.Outport{1};
+            RndMeth = blk.RndMeth;
+            SaturateOnIntegerOverflow = blk.SaturateOnIntegerOverflow;
+            for i=1:nbInputs
+                inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
+                if numel(inputs{i}) < max_width
+                    inputs{i} = arrayfun(@(x) {inputs{i}{1}}, (1:max_width));
+                end
+                inport_dt = blk.CompiledPortDataTypes.Inport(i);
+                [inLusDT] = SLX2LusUtils.get_lustre_dt(inport_dt);
+                %converts the input data type(s) to
+                %its accumulator data type
+                if ~strcmp(inport_dt, outputDataType) && i~=1
+                    [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, outputDataType, RndMeth, SaturateOnIntegerOverflow);
+                    if ~isempty(external_lib)
+                        obj.addExternal_libraries(external_lib);
+                        inputs{i} = cellfun(@(x) sprintf(conv_format,x), inputs{i}, 'un', 0);
+                    end
+                elseif i==1 && ~strcmp(inLusDT, 'int')
+                    [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, 'int');
+                    if ~isempty(external_lib)
+                        obj.addExternal_libraries(external_lib);
+                        inputs{i} = cellfun(@(x) sprintf(conv_format,x), inputs{i}, 'un', 0);
+                    end
+                end
+            end
         end
         
         function options = getUnsupportedOptions(obj, parent, blk, varargin)
