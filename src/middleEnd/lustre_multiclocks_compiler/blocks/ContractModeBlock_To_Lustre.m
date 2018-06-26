@@ -20,7 +20,7 @@ classdef ContractModeBlock_To_Lustre < Block_To_Lustre
         function obj = ContractModeBlock_To_Lustre()
             obj.ContentNeedToBeTranslated = 0;
         end
-        function  write_code(obj, parent, blk)
+        function  write_code(obj, parent, blk, varargin)
             
             if ~SLX2LusUtils.isContractBlk(parent)
                 display_msg(sprintf('Mode block "%s" should not be outside a Contract Subsystem', blk.Origin_path),...
@@ -67,7 +67,7 @@ classdef ContractModeBlock_To_Lustre < Block_To_Lustre
             end
             ensure = MatlabUtils.strjoin(ensure, '');
             blk_name = SLX2LusUtils.node_name_format(blk);
-            code = sprintf('mode %s(%s%s);\n', blk_name, require, ensure);
+            code = sprintf('mode %s(\n\t%s%s);\n\t', blk_name, require, ensure);
             % join the lines and set the block code.
             obj.setCode(code);
             

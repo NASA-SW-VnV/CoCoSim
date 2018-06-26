@@ -1,4 +1,11 @@
 function schema = verifyMenu(varargin)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Copyright (c) 2017 United States Government as represented by the
+% Administrator of the National Aeronautics and Space Administration.
+% All Rights Reserved.
+% Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 schema = sl_container_schema;
 schema.label = 'Prove properties using ...';
 schema.statustip = 'Verify the current model with CoCoSim';
@@ -42,7 +49,7 @@ if CoCoSimPreferences.lustreCompiler ==1
     toLustreVerify(model_full_path);
 elseif CoCoSimPreferences.lustreCompiler
     assignin('base', 'SOLVER', 'K');
-    VerificationMenu.runCoCoSim;    
+    VerificationMenu.runCoCoSim;
 end
 end
 
