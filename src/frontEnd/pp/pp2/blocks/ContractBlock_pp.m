@@ -22,7 +22,11 @@ if not(isempty(contractBlocks_list))
                 MsgType.ERROR, 'ContractBlock_pp', '');
             continue;
         end
-        ceateSubsystemFromBlk(blk);
+        try
+            ceateSubsystemFromBlk(blk);
+        catch me
+            display_msg(me.getReport(), MsgType.DEBUG, 'ContractBlock_pp', '');
+        end
     end
     display_msg('Done\n\n', MsgType.INFO, 'ContractBlock_pp', '');
 end
@@ -51,7 +55,7 @@ if ~ ( isequal(blkType, 'SubSystem') ...
         && isempty(blkObj.CompiledPortWidths.Trigger)...
         && isempty(blkObj.CompiledPortWidths.Reset))
     % if it is not Subsystem, we need to create a Subsystem on top of it
-    
+    SLXUtils.createSubsystemFromBlk(blkH);
 end
 
 end

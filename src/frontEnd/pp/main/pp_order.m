@@ -91,8 +91,11 @@ else
         'std_pp/blocks/*.m'};
     
     pp_order_map(30) = {'std_pp/blocks/goto_process.m'};
-    pp_order_map(40) = {'pp2/blocks/BlocksPosition_pp.m'};
-    pp_order_map(45) = {'pp2/blocks/Sigbuilderblock_pp.m'};
+    pp_order_map(31) = {'pp2/blocks/BlocksPosition_pp.m'};
+    pp_order_map(32) = {'pp2/blocks/Sigbuilderblock_pp.m'};
+    
+    pp_order_map(40) = {'pp2/blocks/KindContract_pp.m'};
+    pp_order_map(41) = {'pp2/blocks/ContractBlock_pp.m'};
     
     pp_order_map(50) = {'pp2/blocks/DiscreteDerivative_pp.m'};
     pp_order_map(51) = {'pp2/blocks/SampleTimeMath_pp.m'};
