@@ -33,7 +33,7 @@ if not(isempty(contractBlocks_list))
     display_msg('Done\n\n', MsgType.INFO, 'PP', '');
 end
 
-% take only contract blocks
+% take only LustreOperator blocks
 LusOperator_list = masked_sys_list(cellfun(@(x) ismember('LustreOperatorBlock', get_param(x, 'MaskNames')), masked_sys_list));
 if not(isempty(LusOperator_list))
     display_msg('Processing LustreOperator blocks', MsgType.INFO, 'PP', '');

@@ -123,7 +123,7 @@ classdef Assignment_To_Lustre < Block_To_Lustre
             % numOutDims = 2
             
             % get matrix dimension of all inputs, and expand U if needed.
-            [in_matrix_dimension, U_expanded_dims] = get_In_U_expanded_dims(obj,parent,blk,inputs,numOutDims);
+            [in_matrix_dimension, U_expanded_dims] = obj.get_In_U_expanded_dims(parent,blk,inputs,numOutDims);
             % For the example above
             % in_matrix_dimension{1} =struct( "numDs": 2, "dims": [3,2], "width": 6)
             % in_matrix_dimension{2} =struct( "numDs": 1, "dims": 1, "width": 1)
@@ -158,20 +158,23 @@ classdef Assignment_To_Lustre < Block_To_Lustre
             obj.addVariable(outputs_dt);
         end
         
-        function options = getUnsupportedOptions(obj, parent, blk, varargin)
+        function options = getUnsupportedOptions(obj, ~, blk, varargin)
             obj.unsupported_options = {};
             in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(blk.CompiledPortDimensions.Inport);
             if in_matrix_dimension{1}.numDs>7
-                obj.addUnsupported_options(...
-                    sprintf('More than 7 dimensions is not supported in block %s',...
-                    blk.Origin_path), ...
-                    MsgType.ERROR, 'Assignment_To_Lustre', '');
+                msg = sprintf('More than 7 dimensions is not supported in block %s',...
+                    blk.Origin_path);
+                obj.addUnsupported_options(msg);
             end
-            
+            if isequal(blk.OutputInitialize, 'Specify size for each dimension in table')
+                msg = sprintf('OutputInitialize Parameter in block %s is not supported. It should be set to "Initialize using input port <Y0>"',...
+                    blk.Origin_path);
+                obj.addUnsupported_options(msg);
+            end
             options = obj.unsupported_options;
         end   
         
-        function [in_matrix_dimension, U_expanded_dims] = get_In_U_expanded_dims(obj, parent,blk,inputs,numOutDims)
+        function [in_matrix_dimension, U_expanded_dims] = get_In_U_expanded_dims(~, parent,blk,inputs,numOutDims)
             in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(blk.CompiledPortDimensions.Inport);
             U_expanded_dims = in_matrix_dimension{2};
             % if U input is a scalar and it is to be expanded, U_expanded_dims
@@ -377,7 +380,7 @@ classdef Assignment_To_Lustre < Block_To_Lustre
         
     end
     
-    
+    %%
     methods(Static)
         function in_matrix_dimension = getInputMatrixDimensions(inport_dimensions)
             if inport_dimensions(1) == -2

@@ -5,85 +5,59 @@ digraph Assignment {
 
 
         Assignment_main [shape=ellipse];
-        scalarU [shape=ellipse];
-        matrixU [shape=ellipse];
+        U_Input_Is_Scalare [shape=ellipse];
+        U_Input_Is_Matrix [shape=ellipse];
         NoInputPort [shape=ellipse];
-        matrixU_NoInputPort_mode [shape=box];
+        getWriteCodeForNonPortInput [shape=box];
+        getWriteCodeForPortInput [shape=box];
         InputPort [shape=ellipse];
         Inititalize_using_input_port_Y0 [shape=ellipse];
         Specify_size_for_each_table_dimension [shape=ellipse];
-        matrixU_InputPort_Inititalize_using_input_port_Y0_Mode [shape=box];
-        matrixU_InputPort_Specify_size_for_each_table_dimension_Mode [shape=box];
+        NOT_SUPPORTED [shape=box, color=red];
 
 
         NoInputPort1 [shape=ellipse];
-        NoInputPort2 [shape=ellipse];
         InputPort1 [shape=ellipse];
-        Inititalize_using_input_port_Y0_1 [shape=ellipse];
-        Specify_size_for_each_table_dimension_1 [shape=ellipse];
         
         expand_U [shape=box];
-        scalarU_NoInputPort_Mode [shape=box];
-        U_dimension_more_than_1 [shape=ellipse];
-        U_dimension_is_1 [shape=ellipse];
+        U_Dialogue_Width_Is_More_Than_1 [shape=ellipse];
+        U_Dialogue_Width_Is_1 [shape=ellipse];
 
         expanded_U [shape=ellipse];
-        scalarU_NoInputPort_Mode [shape=box];
-        scalarU_expanded_NoInputPort_Mode [shape=box];
-        scalarU_expanded_InputPort_Inititalize_using_input_port_Y0_Mode [shape=box];
-        scalarU_expanded_InputPort_Specify_size_for_each_table_dimension_Mode [shape=box];
+
         
-        Assignment_main -> and 
-        and -> matrixU
-        matrixU -> and2
-        and2 ->  NoInputPort
-        NoInputPort -> and3
-        and3 -> matrixU_NoInputPort_mode
-
-        matrixU -> and4
-        and4 ->  InputPort
-        InputPort -> and5
-        and5 -> Inititalize_using_input_port_Y0
-        Inititalize_using_input_port_Y0 -> and6
-        and6 -> matrixU_InputPort_Inititalize_using_input_port_Y0_Mode
-
-        InputPort -> and7
-        and7 -> Specify_size_for_each_table_dimension
-        Specify_size_for_each_table_dimension -> and8
-        and8 ->  matrixU_InputPort_Specify_size_for_each_table_dimension_Mode
-
-        Assignment_main -> and9
-        and9 -> scalarU
-        scalarU -> and10
-        and10 -> U_dimension_is_1
-        U_dimension_is_1 -> and11
-        and11 -> NoInputPort1
-        NoInputPort1 -> and12
-        and12 -> scalarU_NoInputPort_Mode
-
-        scalarU -> and13
-        and13 -> U_dimension_more_than_1
-        U_dimension_more_than_1 -> and14
-        and14 -> expand_U
-        expand_U -> and15
-        and15 -> expanded_U
-        expanded_U -> and16
-        and16 -> NoInputPort2
-        NoInputPort2 -> and17
-        and17 -> scalarU_expanded_NoInputPort_Mode
-
-        expanded_U -> and18
-        and18 -> InputPort1
-        InputPort1 -> and19
-        and19 -> Inititalize_using_input_port_Y0_1
-        Inititalize_using_input_port_Y0_1 -> and20
-        and20 -> scalarU_expanded_InputPort_Inititalize_using_input_port_Y0_Mode
 
 
-        InputPort1 -> and21
-        and21 -> Specify_size_for_each_table_dimension_1
-        Specify_size_for_each_table_dimension_1 -> and22
-        and22 -> scalarU_expanded_InputPort_Specify_size_for_each_table_dimension_Mode
+        Assignment_main -> U_Input_Is_Matrix 
+        Assignment_main -> U_Input_Is_Scalare
+
+        //U_Input_Is_Scalare case
+        U_Input_Is_Scalare -> NoInputPort1
+        U_Input_Is_Scalare -> InputPort1
+        InputPort1 -> expanded_U
+        //U_Input_Is_Matrix case 
+        NoInputPort -> getWriteCodeForNonPortInput
+        expanded_U -> xor
+        U_Input_Is_Matrix -> xor
+        xor ->  InputPort
+        xor ->  NoInputPort
+        InputPort ->  Inititalize_using_input_port_Y0
+        Inititalize_using_input_port_Y0 ->  getWriteCodeForPortInput
+
+        InputPort ->  Specify_size_for_each_table_dimension
+        Specify_size_for_each_table_dimension ->  NOT_SUPPORTED
+
+        NoInputPort1 -> U_Dialogue_Width_Is_1
+        U_Dialogue_Width_Is_1 -> getWriteCodeForNonPortInput
+
+        NoInputPort1 -> U_Dialogue_Width_Is_More_Than_1
+        U_Dialogue_Width_Is_More_Than_1 ->  expand_U
+        expand_U ->  expanded_U
+
+
+
+        
+        
 
 
 

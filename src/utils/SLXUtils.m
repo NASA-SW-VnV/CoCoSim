@@ -500,8 +500,9 @@ classdef SLXUtils
             end
         end
         
-        function U_dims = tf_get_U_dims(model, pp_name, blkList)            
-            %% geting dimensions of U 
+        %%
+        function U_dims = tf_get_U_dims(model, pp_name, blkList)
+            % geting dimensions of U
             warning off;
             code_on=sprintf('%s([], [], [], ''compile'')', model);
             eval(code_on);
@@ -532,6 +533,52 @@ classdef SLXUtils
             eval(code_off);
             warning on;
             
+        end
+        
+        %%
+        function status = createSubsystemFromBlk(blk_path)
+            status = 0;
+            try
+                % No need for this function in R2017b. But we do it for R2015b
+                blk_name = get_param(blk_path, 'Name');
+                blokPortHandles = get_param(blk_path, 'PortHandles');
+                parent = get_param(blk_path, 'Parent');
+                ss_path = fullfile(parent, strcat(blk_name,'_tmp'));
+                ss_handle = add_block('built-in/Subsystem',ss_path,...
+                    'MakeNameUnique', 'on');
+                Simulink.ModelReference.DeleteContent.deleteContents(ss_handle);
+                ss_path = get_param(ss_handle, 'Path');
+                blk_new_path = fillfile(ss_path, blk_name);
+                add_block(blk_path, blk_new_path);
+                newBlokPortHandles = get_param(blk_new_path, 'PortHandles');
+                
+                for i=1:numel(newBlokPortHandles.Enable)
+                    addInport(newBlokPortHandles.Enable(i), blokPortHandles.Enable(i))
+                end
+            catch
+                status = 1;
+            end
+        end
+        function status = addInport(newBlkPort, origBlkPort)
+            status = 0;
+            inport_name = fillfile(ss_path, 'In1');
+            inport_handle = add_block('simulink/Ports & Subsystems/In1',...
+                inport_name,...
+                'MakeNameUnique', 'on');
+            inportPortHandles = get_param(inport_handle, 'PortHandles');
+            add_line(ss_path,...
+                inportPortHandles.Outport(1), newBlkPort,...
+                'autorouting', 'on');
+            ssBlockHandles = get_param(ss_path, 'PortHandles');
+            sourceLine = get_param(origBlkPort, 'line');
+            if sourceLine == -1
+                % no connected line
+                return;
+            end
+            srcPortHandle = get_param(sourceLine, 'SrcPortHandle');
+            add_line(parent,...
+                srcPortHandle, ssBlockHandles.Inport(end),...
+                'autorouting', 'on');
         end
     end
     

@@ -40,8 +40,8 @@ if isfield(blk, 'Content') && ~isempty(blk.Content)
     for i=1:numel(field_names)
         % aplly the recursiveCall on all blocks
         blk.Content.(field_names{i}) = recursiveCall(blk.Content.(field_names{i}));
-        if isfield(blk.Content.(field_names{i}), 'PortConnectivity')...
-                && ~isempty(contract_names)
+        if ~isempty(contract_names) && isfield(blk.Content.(field_names{i}), 'PortConnectivity')
+            
             DstBlock = [];
             for j=1:numel(blk.Content.(field_names{i}).PortConnectivity)
                 DstBlock = [DstBlock,...
@@ -49,20 +49,33 @@ if isfield(blk, 'Content') && ~isempty(blk.Content)
             end
             contract_idx = find(ismember(contract_handles, DstBlock));
             if ~isempty(contract_idx)
-                % add contract node names to block information of the
-                % abstracted block.
-                blk.Content.(field_names{i}).ContractNodeNames = ...
-                    arrayfun(@(x) ...
-                    {SLX2LusUtils.node_name_format(...
-                    blk.Content.(contract_names{x}))}, contract_idx);
-                blk.Content.(field_names{i}).ContractHandles = ...
-                    arrayfun(@(x) ...
-                    blk.Content.(contract_names{x}).Handle, contract_idx);
-                % add to the contract block the handle of the abstracted
-                % block
                 for x=contract_idx'
-                    blk.Content.(contract_names{x}).AssociatedBlkHandle = ...
-                        blk.Content.(field_names{i}).Handle;
+                    if SLX2LusUtils.isAbstractedByContract(blk.Content.(field_names{i}),...
+                            blk.Content.(contract_names{x}))
+                        % add contract node names to block information of the
+                        % abstracted block.
+                        if isfield(blk.Content.(field_names{i}), 'ContractNodeNames')
+                            blk.Content.(field_names{i}).ContractNodeNames{end + 1} = ...
+                                SLX2LusUtils.node_name_format(...
+                                blk.Content.(contract_names{x}));
+                        else
+                            blk.Content.(field_names{i}).ContractNodeNames{1} = ...
+                                SLX2LusUtils.node_name_format(...
+                                blk.Content.(contract_names{x}));
+                        end
+                        if isfield(blk.Content.(field_names{i}), 'ContractHandles')
+                            blk.Content.(field_names{i}).ContractHandles(end+1) = ...
+                                blk.Content.(contract_names{x}).Handle;
+                        else
+                            blk.Content.(field_names{i}).ContractHandles(1) = ...
+                                blk.Content.(contract_names{x}).Handle;
+                        end
+                        % add to the contract block the handle of the abstracted
+                        % block
+                        
+                        blk.Content.(contract_names{x}).AssociatedBlkHandle = ...
+                            blk.Content.(field_names{i}).Handle;
+                    end
                 end
             end
         end

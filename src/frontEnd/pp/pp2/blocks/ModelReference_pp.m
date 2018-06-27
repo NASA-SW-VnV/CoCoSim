@@ -14,28 +14,30 @@ if( ~isempty( mdlRefsHandles ) )
         mdlName =  get_param( mdlRefsHandles(k) , 'Name' );
         % Create a blank subsystem, fill it with the modelref's contents:
         
-        
-        ref_block_path = getfullname(mdlRefsHandles);
-        ssName = [ ref_block_path '_SS_' num2str(k) ];
-        ssHandle = add_block( 'built-in/SubSystem' , ssName,...
-            'MakeNameUnique', 'on');  % Create empty SubSystem
-        
-        slcopy_mdl2subsys( mdlRefName , ssName );   % This function copies contents of the referenced model into the SubSystem
-
-        Orient=get_param(ssHandle,'orientation');
-        blockPosition = get_param( mdlRefsHandles(k) , 'Position' );
-        delete_block( mdlRefsHandles(k) );
-        set_param( ssHandle , ...
-            'Name', mdlName, ...
-            'Orientation',Orient, ...
-            'Position' , blockPosition );
-        
-        % Assigning Model Reference Callbacks to the new subsystem:
-        Replace_Callbacks( mdlRefName , ssHandle );
-        
+        try
+            ref_block_path = getfullname(mdlRefsHandles);
+            ssName = [ ref_block_path '_SS_' num2str(k) ];
+            ssHandle = add_block( 'built-in/SubSystem' , ssName,...
+                'MakeNameUnique', 'on');  % Create empty SubSystem
+            
+            slcopy_mdl2subsys( mdlRefName , ssName );   % This function copies contents of the referenced model into the SubSystem
+            
+            Orient=get_param(ssHandle,'orientation');
+            blockPosition = get_param( mdlRefsHandles(k) , 'Position' );
+            delete_block( mdlRefsHandles(k) );
+            set_param( ssHandle , ...
+                'Name', mdlName, ...
+                'Orientation',Orient, ...
+                'Position' , blockPosition );
+            
+            % Assigning Model Reference Callbacks to the new subsystem:
+            Replace_Callbacks( mdlRefName , ssHandle );
+        catch me
+            display_msg(me.getReport(), MsgType.DEBUG, 'KindContract_pp', '');
+        end
     end
     % Recursive searching of nested model references:
-     ModelReference_pp(topLevelModel)
+    ModelReference_pp(topLevelModel)
 end
 end
 
@@ -77,7 +79,7 @@ try
     load_system(model);
     
     modelName = get_param(model, 'name');
-
+    
     obj = get_param(subsysBlk,'object');
     %obj.deleteContent;
     Simulink.SubSystem.deleteContents(subsysBlk)
