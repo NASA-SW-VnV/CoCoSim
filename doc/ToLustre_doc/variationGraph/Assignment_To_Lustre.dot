@@ -5,7 +5,7 @@ digraph Assignment {
 
 
         Assignment_main [shape=ellipse];
-        U_Input_Is_Scalare [shape=ellipse];
+        U_Input_Is_Scalar [shape=ellipse];
         U_Input_Is_Matrix [shape=ellipse];
         NoInputPort [shape=ellipse];
         getWriteCodeForNonPortInput [shape=box];
@@ -14,10 +14,11 @@ digraph Assignment {
         Inititalize_using_input_port_Y0 [shape=ellipse];
         Specify_size_for_each_table_dimension [shape=ellipse];
         NOT_SUPPORTED [shape=box, color=red];
+        defineMapInd [shape=box];
 
 
-        NoInputPort1 [shape=ellipse];
-        InputPort1 [shape=ellipse];
+        NoInputPort1 [shape=ellipse, label=NoInputPort];
+        InputPort1 [shape=ellipse, label=InputPort];
         
         expand_U [shape=box];
         U_Dialogue_Width_Is_More_Than_1 [shape=ellipse];
@@ -29,18 +30,18 @@ digraph Assignment {
 
 
         Assignment_main -> U_Input_Is_Matrix 
-        Assignment_main -> U_Input_Is_Scalare
+        Assignment_main -> U_Input_Is_Scalar
 
-        //U_Input_Is_Scalare case
-        U_Input_Is_Scalare -> NoInputPort1
-        U_Input_Is_Scalare -> InputPort1
-        InputPort1 -> expanded_U
+        //U_Input_Is_Scalar case
+        U_Input_Is_Scalar -> NoInputPort1
+        U_Input_Is_Scalar -> InputPort1
+        InputPort1 -> expand_U
         //U_Input_Is_Matrix case 
         NoInputPort -> getWriteCodeForNonPortInput
-        expanded_U -> xor
-        U_Input_Is_Matrix -> xor
-        xor ->  InputPort
-        xor ->  NoInputPort
+        expanded_U -> defineMapInd
+        U_Input_Is_Matrix -> defineMapInd
+        defineMapInd ->  InputPort
+        defineMapInd ->  NoInputPort
         InputPort ->  Inititalize_using_input_port_Y0
         Inititalize_using_input_port_Y0 ->  getWriteCodeForPortInput
 
@@ -48,7 +49,7 @@ digraph Assignment {
         Specify_size_for_each_table_dimension ->  NOT_SUPPORTED
 
         NoInputPort1 -> U_Dialogue_Width_Is_1
-        U_Dialogue_Width_Is_1 -> getWriteCodeForNonPortInput
+        U_Dialogue_Width_Is_1 -> defineMapInd
 
         NoInputPort1 -> U_Dialogue_Width_Is_More_Than_1
         U_Dialogue_Width_Is_More_Than_1 ->  expand_U

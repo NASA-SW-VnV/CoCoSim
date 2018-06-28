@@ -29,6 +29,16 @@ classdef BusCreator_To_Lustre < Block_To_Lustre
         
         function options = getUnsupportedOptions(obj, parent, blk, varargin)
             options = obj.unsupported_options;
+            if isequal(blk.OutDataTypeStr, 'Bus: <object name>')
+                msg = sprintf('OutDataTypeStr "Bus: <object name>" in block %s is not supported. ',...
+                    blk.Origin_path);
+                obj.addUnsupported_options(msg);
+            end  
+            if isequal(blk.OutDataTypeStr, 'Enum: <class name>')
+                msg = sprintf('OutDataTypeStr "Enum: <class name>" in block %s is not supported. ',...
+                    blk.Origin_path);
+                obj.addUnsupported_options(msg);
+            end             
         end
     end
     

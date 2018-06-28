@@ -90,14 +90,12 @@ classdef Assignment_To_Lustre < Block_To_Lustre
     % All Rights Reserved.
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
-    
+      
     properties
     end
     
     methods
               
-        
         function  write_code(obj, parent, blk, xml_trace, varargin)
             
             % share code with Selector_To_Lustre
@@ -123,21 +121,18 @@ classdef Assignment_To_Lustre < Block_To_Lustre
             % numOutDims = 2
             
             % get matrix dimension of all inputs, and expand U if needed.
-            [in_matrix_dimension, U_expanded_dims] = obj.get_In_U_expanded_dims(parent,blk,inputs,numOutDims);
+            % inputs is also expanded if U is expanded
+            % expanding second input            
+            [in_matrix_dimension, U_expanded_dims,inputs] = ...
+                obj.expand_U(parent,blk,inputs,numOutDims);
             % For the example above
             % in_matrix_dimension{1} =struct( "numDs": 2, "dims": [3,2], "width": 6)
             % in_matrix_dimension{2} =struct( "numDs": 1, "dims": 1, "width": 1)
             % in_matrix_dimension{3} =struct( "numDs": 1, "dims": 1, "width": 1)
-            % U_expanded_dims = struct( "numDs": 2, "dims": [2,1], "width": 2)            
-            
-            % inputs is also expanded if U is expanded
-            % expanding second input
-            if numel(inputs{2}) == 1 && numel(inputs{2}) < U_expanded_dims.width
-                inputs{2} = arrayfun(@(x) {inputs{2}{1}}, (1:U_expanded_dims.width));
-            end     
-            % For the example above, inputs{2} changed to
+            % U_expanded_dims = struct( "numDs": 2, "dims": [2,1], "width": 2) 
+            % inputs{2} changed to
             % inputs{2} = 'Constant1_1'  'Constant1_1'
-            
+                
             % define mapping array ind
             isSelector = 0;
             [isPortIndex,ind,~] = Assignment_To_Lustre.defineMapInd(obj,parent,blk,inputs,U_expanded_dims,isSelector);
@@ -174,7 +169,8 @@ classdef Assignment_To_Lustre < Block_To_Lustre
             options = obj.unsupported_options;
         end   
         
-        function [in_matrix_dimension, U_expanded_dims] = get_In_U_expanded_dims(~, parent,blk,inputs,numOutDims)
+        function [in_matrix_dimension, U_expanded_dims,inputs] = ...
+                expand_U(~, parent,blk,inputs,numOutDims)
             in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(blk.CompiledPortDimensions.Inport);
             U_expanded_dims = in_matrix_dimension{2};
             % if U input is a scalar and it is to be expanded, U_expanded_dims
@@ -203,9 +199,13 @@ classdef Assignment_To_Lustre < Block_To_Lustre
                     U_expanded_dims.width = U_expanded_dims.width*U_expanded_dims.dims(i);
                 end
             end
+            
+            if numel(inputs{2}) == 1 && numel(inputs{2}) < U_expanded_dims.width
+                inputs{2} = arrayfun(@(x) {inputs{2}{1}}, (1:U_expanded_dims.width));
+            end             
         end        
         
-        function [codes] = getWriteCodeForNonPortInput(obj, in_matrix_dimension,inputs,outputs,U_expanded_dims,ind)
+        function [codes] = getWriteCodeForNonPortInput(~, in_matrix_dimension,inputs,outputs,U_expanded_dims,ind)
             %% function get code for noPortInput
             
             % initialization
@@ -458,7 +458,7 @@ classdef Assignment_To_Lustre < Block_To_Lustre
         end
         
         function [isPortIndex,ind,selectorOutputDimsArray] = ...
-                defineMapInd(obj,parent,blk,inputs,U_expanded_dims,isSelector)
+                defineMapInd(~,parent,blk,inputs,U_expanded_dims,isSelector)
             % if isSelector then U_expanded_dims should be in_matrix_dimension{1}
             indexPortNumber = 0;
             isPortIndex = false;
