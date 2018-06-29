@@ -60,7 +60,9 @@ function isBus = HasBusPort(CompiledPortDataTypes)
 isBus = false;
 for i=1:numel(CompiledPortDataTypes.Outport)
     try
-        isBus_i = evalin('base', sprintf('isa(%s, ''Simulink.Bus'')',CompiledPortDataTypes.Outport{i}));
+        isBus_i = isequal(CompiledPortDataTypes.Outport{i}, 'auto') ...
+            || evalin('base', sprintf('isa(%s, ''Simulink.Bus'')',...
+            CompiledPortDataTypes.Outport{i}));
     catch
         isBus_i = false;
     end
@@ -68,7 +70,9 @@ for i=1:numel(CompiledPortDataTypes.Outport)
 end
 for i=1:numel(CompiledPortDataTypes.Inport)
     try
-        isBus_i = evalin('base', sprintf('isa(%s, ''Simulink.Bus'')',CompiledPortDataTypes.Inport{i}));
+        isBus_i = isequal(CompiledPortDataTypes.Inport{i}, 'auto') ...
+            || evalin('base', sprintf('isa(%s, ''Simulink.Bus'')',...
+            CompiledPortDataTypes.Inport{i}));
     catch
         isBus_i = false;
     end

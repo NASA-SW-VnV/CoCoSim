@@ -21,7 +21,7 @@ classdef SS_To_LustreNode
             %   main_clock   : The model sample time.
             
             
-            
+            display_msg(['Compiling ', ss_ir.Path], MsgType.INFO, 'subsystem2node', '');
             % Initializing outputs
             external_nodes = '';
             main_node = '';
