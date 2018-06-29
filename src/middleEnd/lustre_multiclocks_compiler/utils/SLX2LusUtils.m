@@ -699,7 +699,7 @@ classdef SLX2LusUtils < handle
         
         %% Get the initial ouput of Outport depending on the dimension.
         function InitialOutput_cell = getInitialOutput(parent, blk, InitialOutput, slx_dt, max_width)
-            lus_outputDataType = SLX2LusUtils.get_lustre_dt(slx_dt);
+            [lus_outputDataType] = SLX2LusUtils.get_lustre_dt(slx_dt);
             if strcmp(InitialOutput, '[]')
                 InitialOutput = '0';
             end
@@ -711,36 +711,54 @@ classdef SLX2LusUtils < handle
                     MsgType.ERROR, 'Outport_To_Lustre', '');
                 return;
             end
-            
-            InitialOutput_cell = {};
+            if iscell(lus_outputDataType)...
+                    && numel(InitialOutputValue) < numel(lus_outputDataType)
+                % in the case of bus type, lus_outputDataType is inlined to
+                % the basic types of the bus. We need to inline
+                % InitialOutputValue as well
+                InitialOutputValue = arrayfun(@(x) InitialOutputValue, (1:numel(lus_outputDataType)));
+            else
+                lus_outputDataType = arrayfun(@(x) {lus_outputDataType}, (1:numel(InitialOutputValue)));
+            end
+            %
+            InitialOutput_cell = cell(1, numel(InitialOutputValue));
             for i=1:numel(InitialOutputValue)
-                if strcmp(lus_outputDataType, 'real')
-                    InitialOutput_cell{i} = sprintf('%.15f', InitialOutputValue(i));
-                elseif strcmp(lus_outputDataType, 'int')
-                    InitialOutput_cell{i} = sprintf('%d', int32(InitialOutputValue(i)));
-                elseif strcmp(lus_outputDataType, 'bool')
-                    if InitialOutputValue(i)
-                        InitialOutput_cell{i} = 'true';
-                    else
-                        InitialOutput_cell{i} = 'false';
-                    end
-                elseif strncmp(InitialOutputType, 'int', 3) ...
-                        || strncmp(InitialOutputType, 'uint', 4)
-                    InitialOutput_cell{i} = num2str(InitialOutputValue(i));
-                elseif strcmp(InitialOutputType, 'boolean') || strcmp(InitialOutputType, 'logical')
-                    if InitialOutputValue(i)
-                        InitialOutput_cell{i} = 'true';
-                    else
-                        InitialOutput_cell{i} = 'false';
-                    end
-                else
-                    InitialOutput_cell{i} = sprintf('%.15f', InitialOutputValue(i));
-                end
+                InitialOutput_cell{i} = SLX2LusUtils.num2str(...
+                    InitialOutputValue(i), lus_outputDataType{i}, InitialOutputType);
             end
             if numel(InitialOutput_cell) < max_width
                 InitialOutput_cell = arrayfun(@(x) {InitialOutput_cell{1}}, (1:max_width));
             end
             
+        end
+        
+        %% change numerical value to string based on DataType dt.
+        function str = num2str(v, dt, InitialOutputType)
+            if nargin < 3
+                InitialOutputType = dt;
+            end
+            if strcmp(dt, 'real')
+                str = sprintf('%.15f', v);
+            elseif strcmp(dt, 'int')
+                str = sprintf('%d', int32(v));
+            elseif strcmp(dt, 'bool')
+                if v
+                    str = 'true';
+                else
+                    str = 'false';
+                end
+            elseif strncmp(InitialOutputType, 'int', 3) ...
+                    || strncmp(InitialOutputType, 'uint', 4)
+                str = num2str(v);
+            elseif strcmp(InitialOutputType, 'boolean') || strcmp(InitialOutputType, 'logical')
+                if v
+                    str = 'true';
+                else
+                    str = 'false';
+                end
+            else
+                str = sprintf('%.15f', v);
+            end
         end
         %% Data type conversion node name
         function [external_lib, conv_format] = dataType_conversion(inport_dt, outport_dt, RndMeth, SaturateOnIntegerOverflow)
