@@ -45,12 +45,14 @@ function kindCallback(varargin)
 clear;
 model_full_path = MenuUtils.get_file_name(gcs);
 [ CoCoSimPreferences ] = loadCoCoSimPreferences();
+warning('off')
 if CoCoSimPreferences.lustreCompiler ==1
     toLustreVerify(model_full_path);
 elseif CoCoSimPreferences.lustreCompiler
     assignin('base', 'SOLVER', 'K');
     VerificationMenu.runCoCoSim;
 end
+warning('on')
 end
 
 function schema = getJKind(varargin)
