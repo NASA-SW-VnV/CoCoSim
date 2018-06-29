@@ -12,7 +12,12 @@ if( ~isempty( mdlRefsHandles ) )
     for k = 1 : length( mdlRefsHandles )
         mdlRefName = get_param( mdlRefsHandles(k) , 'ModelName' );
         mdlName =  get_param( mdlRefsHandles(k) , 'Name' );
-        % Create a blank subsystem, fill it with the modelref's contents:
+        [CompiledPortDataTypes] = SLXUtils.getCompiledParam(mdlRefsHandles(k), 'CompiledPortDataTypes');
+        if HasBusPort(CompiledPortDataTypes)
+            display_msg([mdlRefName ' will be handled directly in the compiler ToLustre as it has Bus Ports.'], MsgType.INFO, 'ModelReference_pp', '');
+            continue;
+        end
+        %Create a blank subsystem, fill it with the modelref's contents:
         
         try
             ref_block_path = getfullname(mdlRefsHandles);
@@ -33,7 +38,7 @@ if( ~isempty( mdlRefsHandles ) )
             % Assigning Model Reference Callbacks to the new subsystem:
             Replace_Callbacks( mdlRefName , ssHandle );
         catch me
-            display_msg(me.getReport(), MsgType.DEBUG, 'KindContract_pp', '');
+            display_msg(me.getReport(), MsgType.DEBUG, 'ModelReference_pp', '');
         end
     end
     % Recursive searching of nested model references:
@@ -41,6 +46,26 @@ if( ~isempty( mdlRefsHandles ) )
 end
 end
 
+
+function isBus = HasBusPort(CompiledPortDataTypes)
+isBus = false;
+for i=1:numel(CompiledPortDataTypes.Outport)
+    try
+        isBus_i = evalin('base', sprintf('isa(%s, ''Simulink.Bus'')',CompiledPortDataTypes.Outport{i}));
+    catch
+        isBus_i = false;
+    end
+    isBus = isBus || isBus_i;
+end
+for i=1:numel(CompiledPortDataTypes.Inport)
+    try
+        isBus_i = evalin('base', sprintf('isa(%s, ''Simulink.Bus'')',CompiledPortDataTypes.Inport{i}));
+    catch
+        isBus_i = false;
+    end
+    isBus = isBus || isBus_i;
+end
+end
 %%
 function Replace_Callbacks( mdlRefName , ssHandle )
 %Replace_Callbacks Copies the callbacks of the referenced model to the

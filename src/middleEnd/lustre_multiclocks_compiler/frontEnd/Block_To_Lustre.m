@@ -85,8 +85,18 @@ classdef Block_To_Lustre < handle
             obj.lustre_code = code;
         end
         
+        % Getters
         function code = getCode(obj)
             code = obj.lustre_code;
+        end
+        function variables = getVariables(obj)
+            variables = obj.variables;
+        end
+        function res = getExternalLibraries(obj)
+            res = obj.external_libraries;
+        end
+        function res = getExternalNodes(obj)
+            res = obj.external_nodes;
         end
         function res = isContentNeedToBeTranslated(obj)
             res = obj.ContentNeedToBeTranslated;

@@ -78,6 +78,23 @@ classdef SLXUtils
             end
             
         end
+        
+        %% Get compiled params: CompiledPortDataTypes ...
+        function [res] = getCompiledParam(h, param)
+            res = [];
+            slx_file_name = get_param(bdroot(h), 'Name');
+            code_on=sprintf('%s([], [], [], ''compile'')', slx_file_name);
+            try
+                evalin('base',code_on);
+                res = get_param(h, param);
+                code_off=sprintf('%s([], [], [], ''term'')', slx_file_name);
+                evalin('base',code_off);
+            catch me
+                display_msg(me.getReport(), MsgType.DEBUG, 'getCompiledParam', '');
+                code_off=sprintf('%s([], [], [], ''term'')', slx_file_name);
+                evalin('base',code_off);
+            end
+        end
         %% run constants files
         function run_constants_files(const_files)
             const_files_bak = const_files;
@@ -235,7 +252,11 @@ classdef SLXUtils
                 stop_time,...
                 numberOfInports,...
                 show_models)
-            configSet = Simulink.ConfigSet;
+            try
+                configSet = getActiveConfigSet(slx_file_name);
+            catch
+                configSet = Simulink.ConfigSet;
+            end
             set_param(configSet, 'Solver', 'FixedStepDiscrete');
             set_param(configSet, 'FixedStep', num2str(simulation_step));
             set_param(configSet, 'StartTime', '0.0');

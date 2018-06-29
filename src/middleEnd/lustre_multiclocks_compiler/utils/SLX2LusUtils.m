@@ -539,29 +539,35 @@ classdef SLX2LusUtils < handle
             end
             [srcBlk, blkOutportPort] = SLX2LusUtils.getpreBlock(parent, blk, portNumber);
             
-            if isempty(srcBlk) ...
-                    || ~strcmp(srcBlk.BlockType, 'BusCreator')
+            if isempty(srcBlk)
                 lus_dt = {'real'};
                 display_msg(sprintf('Bock %s has an auto dataType and is not supported',...
                     srcBlk.Origin_path), MsgType.ERROR, '', '');
                 return;
             end
             if strcmp(srcBlk.CompiledPortDataTypes.Outport{blkOutportPort}, 'auto')
-                width = srcBlk.CompiledPortWidths.Inport;
-                for port=1:numel(width)
-                    slx_dt = srcBlk.CompiledPortDataTypes.Inport{port};
-                    if strcmp(slx_dt, 'auto')
-                        lus_dt = [lus_dt, ...
-                            SLX2LusUtils.getpreBlockLusDT(parent, srcBlk, port)];
-                    else
-                        lus_dt_tmp = SLX2LusUtils.get_lustre_dt(slx_dt);
-                        if iscell(lus_dt_tmp)
-                            lus_dt = [lus_dt, lus_dt_tmp];
+                if strcmp(srcBlk.BlockType, 'BusCreator')
+                    width = srcBlk.CompiledPortWidths.Inport;
+                    for port=1:numel(width)
+                        slx_dt = srcBlk.CompiledPortDataTypes.Inport{port};
+                        if strcmp(slx_dt, 'auto')
+                            lus_dt = [lus_dt, ...
+                                SLX2LusUtils.getpreBlockLusDT(parent, srcBlk, port)];
                         else
-                            lus_dt_tmp = arrayfun(@(x) {lus_dt_tmp}, (1:width(port)), 'UniformOutput',false);
-                            lus_dt = [lus_dt, lus_dt_tmp];
+                            lus_dt_tmp = SLX2LusUtils.get_lustre_dt(slx_dt);
+                            if iscell(lus_dt_tmp)
+                                lus_dt = [lus_dt, lus_dt_tmp];
+                            else
+                                lus_dt_tmp = arrayfun(@(x) {lus_dt_tmp}, (1:width(port)), 'UniformOutput',false);
+                                lus_dt = [lus_dt, lus_dt_tmp];
+                            end
                         end
                     end
+                else
+                    lus_dt = {'real'};
+                    display_msg(sprintf('Bock %s has an auto dataType and is not supported',...
+                        srcBlk.Origin_path), MsgType.ERROR, '', '');
+                    return;
                 end
             else
                 width = srcBlk.CompiledPortWidths.Outport;
