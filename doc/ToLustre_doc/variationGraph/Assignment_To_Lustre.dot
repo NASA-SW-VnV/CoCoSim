@@ -1,5 +1,5 @@
 digraph Assignment {
-        rankdir=LR;
+        rankdir=UD;
         size="8,5"
         node [shape = polygon, sides=5];
 
