@@ -1,15 +1,32 @@
 digraph Lookup_nD {
-        rankdir=LR;
+        rankdir=UD;
         size="8,5"
         node [shape = polygon, sides=5];
         Lookup_nD [shape=ellipse];
-        code_for_index_port [shape=box];
-        code_for_no_index_port [shape=box];
-        read_in_out_breakpoints_table_value [shape=box];
+        addTableCode [shape=box];
+        addBreakpointCode [shape=box];
+        read_inputs_outputs [shape=box];
+        readBlkParams [shape=box];
+        useOneInputPortForAllInputData [shape=box];
+        getNodeCodeHeader  [shape=box];
+        addBoundNodeCode  [shape=box];
+        getShapeBoundingNodeSign  [shape=box];
+        addShapeFunctionCode  [shape=box];
+        addFinalInterpCode  [shape=box];
 
 
-        Lookup_nD -> read_in_out_breakpoints_table_value 
-        read_in_out_breakpoints_table_value -> no_index_port 
-        index_port -> code_for_index_port 
-        no_index_port -> code_for_no_index_port 
+        Lookup_nD -> read_inputs_outputs 
+        read_inputs_outputs -> readBlkParams 
+        readBlkParams -> isUseOneInputPortForAllInputData
+        isUseOneInputPortForAllInputData -> useOneInputPortForAllInputData
+        useOneInputPortForAllInputData -> getNodeCodeHeader
+        readBlkParams -> getNodeCodeHeader 
+        getNodeCodeHeader -> addTableCode
+        addTableCode -> addBreakpointCode
+        addBreakpointCode -> addBoundNodeCode
+        addBoundNodeCode -> getShapeBoundingNodeSign
+        getShapeBoundingNodeSign -> addDimJumpCode
+        addDimJumpCode -> addShapeFunctionCode
+        addShapeFunctionCode -> addFinalInterpCode
+
 }
