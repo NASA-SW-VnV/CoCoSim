@@ -13,23 +13,15 @@ classdef Concatenate_To_Lustre < Block_To_Lustre
     methods
         
         function  write_code(obj, parent, blk, xml_trace, varargin)
-            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
-            [inputs,widths] = getBlockInputsNames_convInType2AccType(obj, parent, blk);
-    
-            isVector = strcmp(blk.Mode,'Vector');
-            % Users may specified Multidimensional array but define vector
-            % for inputs.  This case is equivalent to Vector.  
-            if ~isVector
-                in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(blk.CompiledPortDimensions.Inport);
-                if in_matrix_dimension{1}.numDs == 1
-                    isVector = 1;
-                end
-            end
+            [outputs, outputs_dt] = ...
+                SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+            [inputs,widths] = ...
+                Concatenate_To_Lustre.getBlockInputsNames_convInType2AccType(obj, parent, blk);
+            [blkParams,in_matrix_dimension] = Concatenate_To_Lustre.readBlkParams(blk);
             
-            if isVector
-                [codes] = concatenateVector(obj,widths, inputs, outputs);
+            if blkParams.isVector
+                [codes] = Concatenate_To_Lustre.concatenateVector(widths, inputs, outputs);
             else
-                in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(blk.CompiledPortDimensions.Inport);
                 [ConcatenateDimension, ~, status] = ...
                 Constant_To_Lustre.getValueFromParameter(parent, blk, blk.ConcatenateDimension);
                 if status
@@ -45,9 +37,9 @@ classdef Concatenate_To_Lustre < Block_To_Lustre
                     return;
                 end                
                 if ConcatenateDimension == 2    %concat matrix in row direction
-                    [codes] = concatenateDimension2(obj, inputs, outputs);
+                    [codes] = Concatenate_To_Lustre.concatenateDimension2(inputs, outputs,in_matrix_dimension);
                 elseif ConcatenateDimension == 1    %concat matrix in column direction
-                    [codes] = concatenateDimension1(obj, inputs, outputs,in_matrix_dimension);                    
+                    [codes] = Concatenate_To_Lustre.concatenateDimension1(inputs, outputs,in_matrix_dimension);                    
                 else
                     display_msg(sprintf('ConcatenateDimension > 2 in block %s',...
                         blk.Origin_path), ...
@@ -59,8 +51,25 @@ classdef Concatenate_To_Lustre < Block_To_Lustre
             obj.setCode(MatlabUtils.strjoin(codes, ''));
             obj.addVariable(outputs_dt);
         end
+    end
+    
+    methods(Static)
         
-        function [codes] = concatenateDimension1(obj, inputs, outputs,in_matrix_dimension)
+        function [blkParams,in_matrix_dimension] = readBlkParams(blk)
+            blkParams = struct;
+            blkParams.isVector = strcmp(blk.Mode,'Vector');
+            in_matrix_dimension = ...
+                Assignment_To_Lustre.getInputMatrixDimensions(blk.CompiledPortDimensions.Inport);
+            % Users may specified Multidimensional array but define vector
+            % for inputs.  This case is equivalent to Vector.
+            if ~blkParams.isVector
+                if in_matrix_dimension{1}.numDs == 1
+                    blkParams.isVector = 1;
+                end
+            end   
+        end
+        
+        function [codes] = concatenateDimension1(inputs, outputs,in_matrix_dimension)
             codes = {};
             sizeD1 = 0;
             for i=1:numel(in_matrix_dimension)
@@ -97,7 +106,6 @@ classdef Concatenate_To_Lustre < Block_To_Lustre
         function [inputs,widths] = getBlockInputsNames_convInType2AccType(obj, parent, blk)
             inputs = {};
             widths = blk.CompiledPortWidths.Inport;
-            max_width = max(widths);
             outputDataType = blk.CompiledPortDataTypes.Outport{1};
             for i=1:numel(widths)
                 inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
@@ -114,7 +122,7 @@ classdef Concatenate_To_Lustre < Block_To_Lustre
             end            
         end        
         
-        function [codes] = concatenateDimension2(obj, inputs, outputs)
+        function [codes] = concatenateDimension2(inputs, outputs,in_matrix_dimension)
             codes = {};
             index = 0;
             for i=1:numel(in_matrix_dimension)       %loop over number of inports
@@ -125,7 +133,7 @@ classdef Concatenate_To_Lustre < Block_To_Lustre
             end
         end
         
-        function [codes] = concatenateVector(obj,widths, inputs, outputs)
+        function [codes] = concatenateVector(widths, inputs, outputs)
             codes = {};
             outputIndex = 0;
             for i=1:numel(widths)
