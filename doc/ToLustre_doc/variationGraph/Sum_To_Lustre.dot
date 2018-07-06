@@ -1,0 +1,26 @@
+digraph Sum {
+        rankdir=UD;
+        size="8,5"
+        node [shape = polygon, sides=5];
+        Sum [shape=ellipse];
+        SumOutputDataTypeStr [shape=box];
+        oneInputSumProductCodes [shape=box];
+        expand_InputsOutputsExpression_initialization[shape=box];
+        elementWiseSumProduct [shape=box];
+
+        
+        Sum -> is_SumBlock;
+        is_SumBlock -> SumOutputDataTypeStr;
+        SumOutputDataTypeStr -> expand_InputsOutputsExpression_initialization;
+
+        expand_InputsOutputsExpression_initialization -> is_1_input
+        is_1_input -> is_1_expression
+        is_1_expression -> oneInputSumProductCodes
+
+        expand_InputsOutputsExpression_initialization -> is_not_1_expression;
+        is_not_1_expression -> elementWiseSumProduct;
+
+        expand_InputsOutputsExpression_initialization -> is_not_1_input;
+        is_not_1_input -> elementWiseSumProduct;
+
+}
