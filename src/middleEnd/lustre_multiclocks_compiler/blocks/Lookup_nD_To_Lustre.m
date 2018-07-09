@@ -35,7 +35,10 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
     %         Function addDimJumpCode calculate the index jump in the inline when we
     %         change dimension subscript.  For example dimJump(2) = 3 means
     %         to increase subscript dimension 2 by 1, we have to jump 3
-    %         spaces in the inline storage (addDimJumpCode).
+    %         spaces in the inline storage (addDimJumpCode).  See comments
+    %         at the top of Assignment_To_Lustre.m for code example of
+    %         getting inline index from subscripts of a multidimensional
+    %         array.
     %         4. defining and calculating shape function values for the
     %         interpolation point (addShapeFunctionCode).
     %         5. carrying out the interpolation depending on algorithm

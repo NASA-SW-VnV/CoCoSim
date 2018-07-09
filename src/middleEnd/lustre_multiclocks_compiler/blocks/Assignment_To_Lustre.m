@@ -38,6 +38,16 @@ classdef Assignment_To_Lustre < Block_To_Lustre
     % input, the logic is done by Lustre and the array of that dimension are string to be used in Lustre. 
     % The work of the matlab function ind2sub and sub2ind must be done on
     % the Lustre side.
+    % 
+    % Using dimJump to get inline index from subscritps of a multidimensional array
+    %   index = '0';
+    %   for j=1:numel(dims)      % looping through number of dimensions
+    %       if j==1
+    %          index = index + subscript(j)*dimJump(j);
+    %       else
+    %          index = index + (subscript(j)-1)*dimJump(j);
+    %       end
+    %   end
     %
     % Example (assignment_mixed_port_u_expanded.slx):
     % blk.CompiledPortDimensions =  "Inport": [2,3,2,1,1,1,1],
@@ -50,7 +60,8 @@ classdef Assignment_To_Lustre < Block_To_Lustre
     % blk.Indices: "[1 3],2",
     % blk.NumberOfDimensions: "2",
     % Lustre generated:
-    %           -- Calculate first ind_dim which helps in...            
+    %           -- Calculate first ind_dim which helps in converting matrix 
+    %              subscripts to inline index.            
     % 	ind_dim_1_1 = 1;
     % 	ind_dim_1_2 = 3;
     % 	ind_dim_2_1 = real_to_int(Saturation_1);
