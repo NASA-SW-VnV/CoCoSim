@@ -40,7 +40,7 @@ classdef LusValidateUtils
         function st = get_BlockDiagram_SampleTime(file_name)
             warning off;
             ts = Simulink.BlockDiagram.getSampleTimes(file_name);
-            warning on;
+            %warning on;
             st = 1;
             for t=ts
                 if ~isempty(t.Value) && isnumeric(t.Value)

@@ -14,7 +14,7 @@ try
     
     code_off=sprintf('%s([], [], [], ''term'')', new_model_base);
     evalin('base',code_off);
-    warning on;
+%     warning on;
 catch
     code_off=sprintf('%s([], [], [], ''term'')', new_model_base);
     evalin('base',code_off);

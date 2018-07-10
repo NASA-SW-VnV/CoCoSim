@@ -24,6 +24,7 @@ cocosim_pp_gen_verif = 0;
 cocosim_pp_gen_verif_dir = '';
 
 skip_pp = 0;
+use_backup = 0 ;
 for i=1:numel(varargin)
 %     disp(varargin{i})
     if strcmp(varargin{i}, 'nodisplay')
@@ -32,6 +33,9 @@ for i=1:numel(varargin)
         cocosim_pp_gen_verif = 1;
     elseif strcmp(varargin{i}, 'skip_pp')
         skip_pp = 1;
+    elseif strcmp(varargin{i}, 'use_backup')
+        % use backup model, if a pp function failed, skip it.
+        use_backup = 1;
     end
 end
 if skip_pp
@@ -78,9 +82,8 @@ if ~already_pp
     hws.assignin('already_pp', 1);
 end
 
-display_msg('Loading library', MsgType.INFO, 'PP', '');
+display_msg('Loading libraries', MsgType.INFO, 'PP', '');
 if ~bdIsLoaded('gal_lib'); load_system('gal_lib.slx'); end
-
 if ~bdIsLoaded('pp_lib'); load_system('pp_lib.slx'); end
 
 
@@ -96,17 +99,24 @@ warning off
 for i=1:numel(ordered_pp_functions)
     [dirname, func_name, ~] = fileparts(ordered_pp_functions{i});
     cd(dirname);
+    if use_backup
+        save_ppmodel(new_model_base, new_file_path);
+    end
     fh = str2func(func_name);
     try
         display_msg(['runing ' func2str(fh)], MsgType.INFO, 'PP', '');
         fh(new_model_base);
     catch me
-        display_msg(['can not run ' func2str(fh)], MsgType.ERROR, 'PP', '');
+        display_msg(['can not run ' func2str(fh)], MsgType.WARNING, 'PP', '');
         display_msg(me.getReport(), MsgType.DEBUG, 'PP', '');
+        if use_backup
+            display_msg(['Skipping ' func2str(fh)], MsgType.INFO, 'PP', '');
+            restore_ppmodel(new_model_base, new_file_path);
+        end
     end
     
 end
-warning on
+% warning on
 cd(oldDir);
 %% Make sure model compile
 status = CompileModelCheck_pp( new_model_base );
@@ -119,11 +129,21 @@ display_msg('Saving simplified model', MsgType.INFO, 'PP', '');
 display_msg(['Simplified model path: ' new_file_path], MsgType.INFO, 'PP', '');
 
 
-save_system(new_model_base,new_file_path,'OverwriteIfChangedOnDisk',true);
+save_ppmodel(new_model_base, new_file_path)
 if ~nodisplay
     open(new_file_path);
 end
     
 
 display_msg('Done with the simplification', MsgType.INFO, 'PP', '');
+end
+
+%%
+function save_ppmodel(new_model_base, new_file_path)
+save_system(new_model_base,new_file_path,'OverwriteIfChangedOnDisk',true);
+end
+function restore_ppmodel(new_model_base, new_file_path)
+% close without saving
+close_system(new_model_base, 0);
+load_system(new_file_path);
 end

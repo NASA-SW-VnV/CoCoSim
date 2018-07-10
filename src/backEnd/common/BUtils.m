@@ -103,7 +103,7 @@ classdef BUtils
                 end
                 code_off = sprintf('%s([], [], [], ''term'')', model);
                 eval(code_off);
-                warning on;
+                %warning on;
                 for i=1:length(inport_list)
                     dt = port_map(inport_list{i});
                     set_param(inport_list{i}, 'OutDataTypeStr', dt{1})

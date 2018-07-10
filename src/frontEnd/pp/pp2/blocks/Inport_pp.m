@@ -14,16 +14,19 @@ if ~isempty(inport_list)
     warning off;
     code_on=sprintf('%s([], [], [], ''compile'')', model);
     eval(code_on);
-    port_map = containers.Map();
+    dt_map = containers.Map();
+    dim_map = containers.Map();
     for i=1:length(inport_list)
         port_dt = get_param(inport_list{i}, 'CompiledPortDataTypes');
-        port_map(inport_list{i}) = port_dt.Outport;
+        dt_map(inport_list{i}) = port_dt.Outport;
+        port_dim = get_param(inport_list{i}, 'CompiledPortDimensions');
+        dim_map(inport_list{i}) = port_dim.Outport(2:end);
     end
     code_off = sprintf('%s([], [], [], ''term'')', model);
     eval(code_off);
-    warning on;
+%     warning on;
     for i=1:length(inport_list)
-        dt = port_map(inport_list{i});
+        dt = dt_map(inport_list{i});
         if strcmp(dt, 'auto')
             continue;
         end
@@ -31,6 +34,12 @@ if ~isempty(inport_list)
             set_param(inport_list{i}, 'OutDataTypeStr', dt{1})
         catch
             % case of bus signals is ignored.
+        end
+        dim = dim_map(inport_list{i});
+        try
+            set_param(inport_list{i}, 'PortDimensions', mat2str(dim))
+        catch me
+            display_msg(me.getReport(), MsgType.ERROR, 'Inport_pp', '');
         end
     end
 end

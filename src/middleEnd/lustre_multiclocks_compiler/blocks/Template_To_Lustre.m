@@ -14,12 +14,15 @@ classdef Template_To_Lustre < Block_To_Lustre
     methods
         
         function  write_code(obj, parent, blk, xml_trace, varargin)
+            % get if the block is inside contract or not.
+            isInsideContract = SLX2LusUtils.isContractBlk(parent);
             %% Step 1: Get the block outputs names, If a block is called X
             % and has one outport with width 3 and datatype double, 
             % then outputs = {'X_1', 'X_2', 'X_3'}
             % and outputs_dt = {'X_1:real;', 'X_2:real;', 'X_3:real;'}
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
-            
+            % variables are not added if the block is inside Contract
+            if ~isInsideContract, obj.addVariable(outputs_dt);end
             %% Step 2: add outputs_dt to the list of variables to be declared
             % in the var section of the node.
             obj.addVariable(outputs_dt);
@@ -90,7 +93,7 @@ classdef Template_To_Lustre < Block_To_Lustre
             
             %% Step 4: start filling the definition of each output
             codes = {};
-            isInsideContract = SLX2LusUtils.isContractBlk(parent);
+            
             % Go over outputs
             for j=1:numel(outputs)
                 % example of lement wise product block.

@@ -107,7 +107,7 @@ classdef Sum_To_Lustre < Block_To_Lustre
                         MsgType.ERROR, 'Sum_To_Lustre', '');
                     return;
                 end
-                [codes] = Sum_To_Lustre.oneInputSumProduct(blk, outputs, inputs, CollapseDim, widths, exp, initCode);
+                [codes] = Sum_To_Lustre.oneInputSumProduct(blk, outputs, inputs, CollapseDim, widths, exp, initCode, isSumBlock, conv_format);
             else
                 if ~isSumBlock && strcmp(blk.Multiplication, 'Matrix(*)')
                     %This is a matrix multiplication, only applies to
@@ -193,7 +193,7 @@ classdef Sum_To_Lustre < Block_To_Lustre
             end
         end
         %%
-        function [codes] = oneInputSumProduct(blk, outputs, inputs, CollapseDim, widths, exp, initCode)
+        function [codes] = oneInputSumProduct(blk, outputs, inputs, CollapseDim, widths, exp, initCode, isSumBlock, conv_format)
             if ~isSumBlock && strcmp(blk.Multiplication, 'Matrix(*)')    % product, 1 input, 1 exp, Matrix(x), matrix remains unchanged.
                 for i=1:numel(outputs)
                     codes{i} = sprintf('%s = %s;\n\t', outputs{i}, inputs{1}{i});

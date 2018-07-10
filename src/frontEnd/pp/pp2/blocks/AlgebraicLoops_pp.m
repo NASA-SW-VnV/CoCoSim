@@ -9,6 +9,7 @@ function err = AlgebraicLoops_pp( new_model_base )
 code_on=sprintf('%s([], [], [], ''compile'')', new_model_base);
 warning off;
 evalin('base',code_on);
+
 try
     loops = Simulink.BlockDiagram.getAlgebraicLoops(new_model_base);
 catch
@@ -18,9 +19,10 @@ code_on=sprintf('%s([], [], [], ''term'')', new_model_base);
 evalin('base',code_on);
 if numel(loops) > 0
     err = 1;
-    errordlg('Please fix these algebric loops (maybe by adding unit Delays)', 'CocoSim')
+    display_msg('Please fix these algebric loops (maybe by adding unit Delays)',...
+        MsgType.ERROR, 'AlgebraicLoops_pp', '')
     return;
 end
-warning on;
+% warning on;
 end
 

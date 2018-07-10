@@ -19,7 +19,7 @@ catch me
     try
         code_off=sprintf('%s([], [], [], ''term'')', new_model_base);
         evalin('base',code_off);
-        warning on;
+%         warning on;
     catch
     end
     display_msg(['Please set your model to FixedStepDiscrete'], MsgType.ERROR, 'PP', '');

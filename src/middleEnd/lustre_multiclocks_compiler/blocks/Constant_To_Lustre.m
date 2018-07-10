@@ -94,7 +94,7 @@ classdef Constant_To_Lustre < Block_To_Lustre
                 getValueFromParameter(parent, blk, param)
             status = 0;
             valueDataType = 'double';
-            if isempty(regexp(param, '^[a-zA-Z]', 'match'))
+            if isempty(regexp(param, '[a-zA-Z]', 'match'))
                 Value = str2num(param);
                 if contains(param, '.')
                     valueDataType = 'double';

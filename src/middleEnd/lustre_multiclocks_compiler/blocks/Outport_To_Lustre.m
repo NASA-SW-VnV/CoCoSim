@@ -14,12 +14,23 @@ classdef Outport_To_Lustre < Block_To_Lustre
         function  write_code(obj, parent, blk, varargin)
             [outputs, ~] = SLX2LusUtils.getBlockOutputsNames(parent, blk);
             [inputs] = SLX2LusUtils.getBlockInputsNames(parent, blk);
-            isInsideContract = isfield(parent, 'MaskType') ...
-                && isequal(parent.MaskType, 'ContractBlock');
+            isInsideContract = SLX2LusUtils.isContractBlk(parent);
             if isInsideContract
                 % ignore output "valid" in contract
                 return;
             end
+            %% the case of non connected outport block.
+            if isempty(inputs)
+                if isempty(blk.CompiledPortDataTypes)
+                    lus_outputDataType = 'real';
+                else
+                    lus_outputDataType = SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Inport{1});
+                end
+                zero = SLX2LusUtils.num2str(...
+                    0, lus_outputDataType);
+                inputs = arrayfun(@(x) {zero}, (1:numel(outputs)));
+            end
+            %% 
             codes = {};
             for i=1:numel(outputs)
                 codes{i} = sprintf('%s = %s;\n\t', outputs{i}, inputs{i});

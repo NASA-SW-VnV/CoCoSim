@@ -53,7 +53,9 @@ classdef SLX2Lus_Trace < handle
         function fname = getJsonMappingFileName(obj)
             fname = obj.json_file_path;
         end
-        
+        function traceRootNode = getTraceRootNode(obj)
+            traceRootNode = obj.traceRootNode;
+        end
         function write(obj)
             %XML
             xmlwrite(obj.xml_file_path, obj.traceDOM);
@@ -191,5 +193,26 @@ classdef SLX2Lus_Trace < handle
             %Use add_InputOutputVar for ToLustre function
             element = obj.add_InputOutputVar('Outport', var_name, originPath, port, width, 1, 0, 0);
         end
+    end
+    
+    methods(Static)
+       function node_name = get_lustre_node_from_Simulink_block_name(trace_root,Simulink_block_name)
+            if isa(trace_root, 'char')
+                DOMNODE = xmlread(trace_root);
+                xRoot = DOMNODE.getDocumentElement;
+            else
+                xRoot = trace_root;
+            end
+            xml_nodes = xRoot.getElementsByTagName('Node');
+            node_name = '';
+            for idx_node=0:xml_nodes.getLength-1
+                block_name = xml_nodes.item(idx_node).getAttribute('OriginPath');
+                if strcmp(block_name, Simulink_block_name)
+                    node_name = char(xml_nodes.item(idx_node).getAttribute('NodeName'));
+                    break;
+                end
+                
+            end
+        end 
     end
 end
