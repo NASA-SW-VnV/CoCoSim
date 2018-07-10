@@ -107,7 +107,8 @@ classdef Sum_To_Lustre < Block_To_Lustre
                         MsgType.ERROR, 'Sum_To_Lustre', '');
                     return;
                 end
-                [codes] = Sum_To_Lustre.oneInputSumProduct(blk, outputs, inputs, CollapseDim, widths, exp, initCode, isSumBlock, conv_format);
+                [codes] = Sum_To_Lustre.oneInputSumProduct(blk, outputs, ...
+                    inputs, CollapseDim, widths, exp, initCode,isSumBlock, conv_format);
             else
                 if ~isSumBlock && strcmp(blk.Multiplication, 'Matrix(*)')
                     %This is a matrix multiplication, only applies to
@@ -121,7 +122,7 @@ classdef Sum_To_Lustre < Block_To_Lustre
                     end
                     [codes, AdditionalVars] = Product_To_Lustre.matrix_multiply(blk, inputs, outputs, zero, LusOutputDataTypeStr );
                 else
-                    % element wise operations / Sum 
+                    % element wise operations / Sum
                     % If it is integer division, we need to call the
                     % appropriate division methode. We assume Lustre
                     % division is the Euclidean division for integers.
@@ -193,7 +194,9 @@ classdef Sum_To_Lustre < Block_To_Lustre
             end
         end
         %%
-        function [codes] = oneInputSumProduct(blk, outputs, inputs, CollapseDim, widths, exp, initCode, isSumBlock, conv_format)
+        
+        function [codes] = oneInputSumProduct(blk, outputs, inputs, CollapseDim, ...
+                widths, exp, initCode,isSumBlock, conv_format)
             if ~isSumBlock && strcmp(blk.Multiplication, 'Matrix(*)')    % product, 1 input, 1 exp, Matrix(x), matrix remains unchanged.
                 for i=1:numel(outputs)
                     codes{i} = sprintf('%s = %s;\n\t', outputs{i}, inputs{1}{i});
@@ -215,7 +218,7 @@ classdef Sum_To_Lustre < Block_To_Lustre
             elseif numel(outputs)>1        % needed for collapsing of matrix
                 in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(blk.CompiledPortDimensions.Inport);
                 [numelCollapseDim, delta, collapseDims] = Sum_To_Lustre.collapseMatrix(in_matrix_dimension, CollapseDim);
-                
+                matSize = in_matrix_dimension{1}.dims;
                 for i=1:numel(outputs)
                     code = initCode;
                     

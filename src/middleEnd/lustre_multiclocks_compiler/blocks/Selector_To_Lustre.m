@@ -162,6 +162,11 @@ classdef Selector_To_Lustre < Block_To_Lustre
                 %calculating U_index{i}
                 % 1D
                 
+                % See comments
+                % at the top of Assignment_To_Lustre.m for code example of
+                % getting inline index from subscripts of a multidimensional
+                % array.                
+                
                 Y_dimJump = ones(1,numel(outputDimsArray));
                 for i=2:numel(outputDimsArray)
                     for j=1:i-1
