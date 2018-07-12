@@ -43,8 +43,14 @@ classdef Logic_To_Lustre < Block_To_Lustre
             codes = {};
             for i=1:numel(outputs)
                 scalars = {};
-                for j=1:nbInputs
-                    scalars{j} = inputs{j}{i};
+                if nbInputs==1
+                    for j=1:numel(inputs{1})
+                        scalars{j} = inputs{1}{j};
+                    end
+                else
+                    for j=1:nbInputs
+                        scalars{j} = inputs{j}{i};
+                    end
                 end
                 if strcmp(blk.Operator, 'AND')
                     codes{i} = sprintf('%s = %s; \n\t', outputs{i}, MatlabUtils.strjoin(scalars, ' and '));

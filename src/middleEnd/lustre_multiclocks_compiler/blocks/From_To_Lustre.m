@@ -14,7 +14,7 @@ classdef From_To_Lustre < Block_To_Lustre
         function  write_code(obj, parent, blk, xml_trace, varargin)
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             goToPath = find_system(parent.Origin_path,'SearchDepth',1,...
-                'BlockType','Goto','GotoTag',blk.GotoTag);
+                'LookUnderMasks', 'all', 'BlockType','Goto','GotoTag',blk.GotoTag);
             if ~isempty(goToPath)
                 GotoHandle = get_param(goToPath{1}, 'Handle');
             else
@@ -36,7 +36,7 @@ classdef From_To_Lustre < Block_To_Lustre
         
         function options = getUnsupportedOptions(obj, parent, blk, varargin)
             goToPath = find_system(parent.Origin_path,'SearchDepth',1,...
-                'BlockType','Goto','GotoTag',blk.GotoTag);
+                'LookUnderMasks', 'all', 'BlockType','Goto','GotoTag',blk.GotoTag);
             if isempty(goToPath)
                 obj.addUnsupported_options...
                     (sprintf('From block %s has no GoTo', blk.Origin_path));

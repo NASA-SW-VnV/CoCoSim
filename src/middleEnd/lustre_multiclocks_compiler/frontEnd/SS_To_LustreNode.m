@@ -71,7 +71,7 @@ classdef SS_To_LustreNode
             %% Body code
             [body, variables_str, external_nodes, external_libraries] = SS_To_LustreNode.write_body(ss_ir, main_sampleTime, xml_trace);
             if is_main_node
-                if ~isempty(node_outputs)
+                if ~ismember(SLX2LusUtils.timeStepStr(), node_outputs_withoutDT_cell)
                     if ~isempty(variables_str)
                         variables_str = [variables_str sprintf('\n\t%s:real;', SLX2LusUtils.timeStepStr())];
                     else

@@ -108,6 +108,10 @@ function validate_componentsV2(file_path, file_name, block_path, output_dir, ...
 % different from the Subsystem.
 ss = find_system(block_path, 'SearchDepth',1, 'BlockType','SubSystem');
 [~, mdl_name, ~] = fileparts(file_path);
+if numel(ss) == 1
+    ss = find_system(ss{1}, 'SearchDepth',1, 'BlockType','SubSystem');
+    ss = ss(2:end);
+end
 for i=1:numel(ss)
     if strcmp(ss{i}, block_path)
         continue;
