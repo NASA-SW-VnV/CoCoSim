@@ -25,13 +25,13 @@ cmake_install_version="3.7.2"
 m4_install_version="1.4.18"
 python_required_version="2.7"
 python_install_version="2.7.13"
-ocaml_required_version="4.03.0"
-ocaml_install_version="4.03.0"
+ocaml_required_version="4.06.0"
+# ocaml_install_version="4.03.0"
 autoconf_install_version="2.69"
 automake_install_version="1.15"
-ocamlfind_install_version="1.7.1"
-ocamlbuild_install_version="0.9.3"
-ocamlgraph_install_version="1.8.7"
+# ocamlfind_install_version="1.7.1"
+# ocamlbuild_install_version="0.9.3"
+# ocamlgraph_install_version="1.8.7"
 menhir_install_version="20170101"
 
 # Default parameters
@@ -1065,7 +1065,7 @@ progress "Installing OCaml $ocaml_required_version, ocamlfind, ocamlbuild, cmdli
 progress_run opam init -y --comp  $ocaml_required_version || error_install opam
 progress_run opam switch -y $ocaml_required_version
 progress_run eval `opam config env` || error_install opam
-progress_run opam install -y  ocamlfind ocamlbuild ocamlgraph fmt logs topkg cmdliner|| error_install ocaml
+progress_run opam install -y  ocamlfind ocamlbuild ocamlgraph fmt logs topkg cmdliner num yojson|| error_install ocaml
 
 
 ################
@@ -1120,28 +1120,28 @@ fi
 # Install spacer #
 ##################
 
-if [[ -x "$install_dir/spacer/bin/z3" ]]; then
-    progress "Using already built ${cgreen}spacer"
+if [[ -x "$install_dir/z3/bin/z3" ]]; then
+    progress "Using already built ${cgreen}z3"
 else
-    progress "Installing ${cgreen}spacer${coff}${cbold} from upstream repository"
+    progress "Installing ${cgreen}z3${coff}${cbold} from upstream repository"
 
-    git_clone "https://bitbucket.org/spacer/code.git" "spacer" \
-        "$build_dir/spacer"
+    git_clone "https://github.com/Z3Prover/z3.git" "master" \
+        "$build_dir/z3"
 
-    cd "$build_dir/spacer"
+    cd "$build_dir/z3"
 
     progress_run python scripts/mk_make.py \
-        --prefix="$install_dir/spacer" || error_configure spacer
+        --prefix="$install_dir/z3" || error_configure spacer
 
-    cd "$build_dir/spacer/build"
+    cd "$build_dir/z3/build"
 
     progress_run make || error_make spacer
 
     progress_run make install || error_install spacer
 fi
 
-prepend_path "$install_dir/spacer/bin"
-prepend_python_path "$install_dir/spacer/lib/python"*"/dist-packages"
+prepend_path "$install_dir/z3/bin"
+prepend_python_path "$install_dir/z3/lib/python"*"/dist-packages"
 
 command_exists z3 || assert_failed "spacer is not properly installed"
 version=$(spacer_parse_version z3) || error_parse_version spacer
@@ -1152,7 +1152,7 @@ success "${cgreen}spacer $version${coff}${cbold} successfully installed"
 # Install lustrec #
 ###################
 
-if [[ -x "$install_dir/lustrec/bin/lustrec" ]]; then
+if [[ -x "$install_dir/bin/lustrec" ]]; then
     progress "Using already built ${cgreen}lustrec"
 else
     progress "Installing ${cgreen}lustrec${coff}${cbold} from upstream repository"
@@ -1164,17 +1164,17 @@ else
     progress_run autoconf || error_configure lustrec
 
     progress_run ./configure \
-        --prefix="$install_dir/lustrec" || error_configure lustrec
+        --prefix="$install_dir" || error_configure lustrec
 
     progress_run make || error_make lustrec
     # this hack because lustrec was broken
-    #mkdir "$install_dir/lustrec/include/"
-    #mkdir "$install_dir/lustrec/include/lustrec/"
-    #cp -r "$build_dir/lustrec/include/"* "$install_dir/lustrec/include/lustrec/"
+    #mkdir "$install_dir/include/"
+    #mkdir "$install_dir/include/lustrec/"
+    #cp -r "$build_dir/lustrec/include/"* "$install_dir/include/lustrec/"
     progress_run make install || error_install lustrec
 fi
 
-prepend_path "$install_dir/lustrec/bin"
+prepend_path "$install_dir/bin"
 
 command_exists lustrec || assert_failed "lustrec is not properly installed"
 version=$(lustrec_parse_version lustrec) #|| error_parse_version lustrec
@@ -1185,7 +1185,7 @@ success "${cgreen}lustrec $version${coff}${cbold} successfully installed"
 # Install zustre #
 ##################
 
-if [[ -x "$install_dir/zustre/bin/zustre" ]]; then
+if [[ -x "$install_dir/bin/zustre" ]]; then
     progress "Using already built ${cgreen}zustre"
 else
     progress "Installing ${cgreen}zustre${coff}${cbold} from upstream repository"
@@ -1199,10 +1199,10 @@ else
 
     progress_run cmake \
         -DCMAKE_BUILD_TYPE=Release \
-        -DCMAKE_INSTALL_PREFIX="$install_dir/zustre" \
-        -DLUSTREC_ROOT="$install_dir/lustrec" \
-        -DLUSTREC_INCLUDE_DIR="$install_dir/lustrec/include/lustrec" \
-        -DZ3_ROOT="$install_dir/spacer" \
+        -DCMAKE_INSTALL_PREFIX="$install_dir" \
+        -DLUSTREC_ROOT="$install_dir" \
+        -DLUSTREC_INCLUDE_DIR="$install_dir/include/lustrec" \
+        -DZ3_ROOT="$install_dir/z3" \
         .. || error_configure zustre
 
     progress_run cmake --build . || error_make zustre
@@ -1210,7 +1210,8 @@ else
     progress_run cmake --build . --target install || error_install zustre
 fi
 
-prepend_path "$install_dir/zustre/bin"
+#already added in lustrec
+#prepend_path "$install_dir/bin"
 
 command_exists zustre || assert_failed "zustre is not properly installed"
 
@@ -1227,7 +1228,7 @@ fi
 # Install kind2 #
 #################
 
-if [[ -x "$install_dir/kind2/bin/kind2" ]]; then
+if [[ -x "$install_dir/bin/kind2" ]]; then
     progress "Using already built ${cgreen}kind2"
 else
     progress "Installing ${cgreen}kind2${coff}${cbold} from upstream repository"
@@ -1300,12 +1301,13 @@ EOF
 
     progress_run ./autogen.sh || error_configure kind2
 
-    progress_run ./build.sh --prefix="$install_dir/kind2" || error_make kind2
+    progress_run ./build.sh --prefix="$install_dir" || error_make kind2
 
     progress_run make install || error_install kind2
 fi
 
-prepend_path "$install_dir/kind2/bin"
+#already added in lustrec
+#prepend_path "$install_dir/bin"
 
 command_exists kind2 || assert_failed "kind2 is not properly installed"
 version=$(kind2_parse_version kind2) || error_parse_version kind2
