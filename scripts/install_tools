@@ -1065,7 +1065,7 @@ progress "Installing OCaml $ocaml_required_version, ocamlfind, ocamlbuild, cmdli
 progress_run opam init -y --comp  $ocaml_required_version || error_install opam
 progress_run opam switch -y $ocaml_required_version
 progress_run eval `opam config env` || error_install opam
-progress_run opam install -y  ocamlfind ocamlbuild ocamlgraph fmt logs topkg cmdliner|| error_install ocaml
+progress_run opam install -y  ocamlfind ocamlbuild ocamlgraph fmt logs topkg cmdliner num yojson|| error_install ocaml
 
 
 ################
@@ -1120,28 +1120,28 @@ fi
 # Install spacer #
 ##################
 
-if [[ -x "$install_dir/spacer/bin/z3" ]]; then
-    progress "Using already built ${cgreen}spacer"
+if [[ -x "$install_dir/z3/bin/z3" ]]; then
+    progress "Using already built ${cgreen}z3"
 else
-    progress "Installing ${cgreen}spacer${coff}${cbold} from upstream repository"
+    progress "Installing ${cgreen}z3${coff}${cbold} from upstream repository"
 
-    git_clone "https://bitbucket.org/spacer/code.git" "spacer" \
-        "$build_dir/spacer"
+    git_clone "https://github.com/Z3Prover/z3.git" "master" \
+        "$build_dir/z3"
 
-    cd "$build_dir/spacer"
+    cd "$build_dir/z3"
 
     progress_run python scripts/mk_make.py \
-        --prefix="$install_dir/spacer" || error_configure spacer
+        --prefix="$install_dir/z3" || error_configure spacer
 
-    cd "$build_dir/spacer/build"
+    cd "$build_dir/z3/build"
 
     progress_run make || error_make spacer
 
     progress_run make install || error_install spacer
 fi
 
-prepend_path "$install_dir/spacer/bin"
-prepend_python_path "$install_dir/spacer/lib/python"*"/dist-packages"
+prepend_path "$install_dir/z3/bin"
+prepend_python_path "$install_dir/z3/lib/python"*"/dist-packages"
 
 command_exists z3 || assert_failed "spacer is not properly installed"
 version=$(spacer_parse_version z3) || error_parse_version spacer
@@ -1202,7 +1202,7 @@ else
         -DCMAKE_INSTALL_PREFIX="$install_dir" \
         -DLUSTREC_ROOT="$install_dir" \
         -DLUSTREC_INCLUDE_DIR="$install_dir/include/lustrec" \
-        -DZ3_ROOT="$install_dir/spacer" \
+        -DZ3_ROOT="$install_dir/z3" \
         .. || error_configure zustre
 
     progress_run cmake --build . || error_make zustre
