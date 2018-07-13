@@ -13,7 +13,7 @@ classdef SS_To_LustreNode
     methods(Static)
         function [ main_node, external_nodes, external_libraries ] = ...
                 subsystem2node(parent_ir,  ss_ir,  main_sampleTime, ...
-                is_main_node, xml_trace)
+                is_main_node, backend, xml_trace)
             %BLOCK_TO_LUSTRE create a lustre node for every Simulink subsystem within
             %subsys_struc.
             %INPUTS:
@@ -41,12 +41,17 @@ classdef SS_To_LustreNode
                 return;
             end
             %%
+            isContractBlk = SLX2LusUtils.isContractBlk(ss_ir);
+            if isContractBlk && ~BackendType.isKIND2(backend)
+                %generate contracts only for KIND2 backend
+                return;
+            end
             % Adding lustre comments tracking the original path
             origin_path = regexprep(ss_ir.Origin_path, '(\\n|\n)', '--');
             comment = sprintf('-- Original block name: %s', origin_path);
             
             %% creating node header
-            isContractBlk = SLX2LusUtils.isContractBlk(ss_ir);
+            
             % The case of Enable/Trigger/Action is handled in the end of this function
             % by creating an additional automaton node.
             isEnableORAction = 0;
@@ -69,7 +74,7 @@ classdef SS_To_LustreNode
                     node_name, node_inputs, node_outputs);
             end
             %% Body code
-            [body, variables_str, external_nodes, external_libraries] = SS_To_LustreNode.write_body(ss_ir, main_sampleTime, xml_trace);
+            [body, variables_str, external_nodes, external_libraries] = SS_To_LustreNode.write_body(ss_ir, main_sampleTime, backend, xml_trace);
             if is_main_node
                 if ~ismember(SLX2LusUtils.timeStepStr(), node_outputs_withoutDT_cell)
                     if ~isempty(variables_str)
@@ -138,7 +143,7 @@ classdef SS_To_LustreNode
         
         %% Go over SS Content
         function [body, variables_str, external_nodes, external_libraries] =...
-                write_body(subsys, main_sampleTime, xml_trace)
+                write_body(subsys, main_sampleTime, backend, xml_trace)
             variables_str = '';
             body = '';
             external_nodes = '';
@@ -157,7 +162,7 @@ classdef SS_To_LustreNode
                 if status
                     continue;
                 end
-                b.write_code(subsys, blk, xml_trace, main_sampleTime);
+                b.write_code(subsys, blk, xml_trace, main_sampleTime, backend);
                 body = [body, b.getCode()];
                 variables_str = [variables_str, char(MatlabUtils.strjoin(b.variables, '\n\t'))];
                 external_nodes = [external_nodes, b.external_nodes];

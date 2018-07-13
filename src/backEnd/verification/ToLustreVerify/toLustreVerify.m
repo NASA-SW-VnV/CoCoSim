@@ -1,4 +1,4 @@
-function [ ] = toLustreVerify(model_full_path,  const_files, mode_display, varargin)
+function [ ] = toLustreVerify(model_full_path,  const_files, varargin)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Copyright (c) 2017 United States Government as represented by the
 % Administrator of the National Aeronautics and Space Administration.
@@ -8,11 +8,9 @@ function [ ] = toLustreVerify(model_full_path,  const_files, mode_display, varar
 if ~exist('const_files', 'var') || isempty(const_files)
     const_files = {};
 end
-if ~exist('mode_display', 'var') || isempty(mode_display)
-    mode_display = 0;
-end
 
-[nom_lustre_file, xml_trace]= ToLustre(model_full_path, const_files, mode_display, varargin);
+[nom_lustre_file, xml_trace]= ToLustre(model_full_path, const_files,...
+    BackendType.KIND2, varargin);
 
 
 % Get start time

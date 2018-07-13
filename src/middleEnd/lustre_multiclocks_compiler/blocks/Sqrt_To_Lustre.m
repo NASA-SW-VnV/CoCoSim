@@ -11,14 +11,18 @@ classdef Sqrt_To_Lustre < Block_To_Lustre
     end
     
     methods
-        function  write_code(obj, parent, blk, xml_trace, varargin)
+        function  write_code(obj, parent, blk, xml_trace, ~, backend, varargin)
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             inputs = {};
             if ~strcmp(blk.OutMax, '[]') || ~strcmp(blk.OutMin, '[]')
                 display_msg(sprintf('The minimum/maximum value is not support in block %s',...
-                    blk.Origin_path), MsgType.ERROR, 'Sqrt_To_Lustre', '');
+                    blk.Origin_path), MsgType.WARNING, 'Sqrt_To_Lustre', '');
             end
-            obj.addExternal_libraries('lustrec_math');
+            if BackendType.isKIND2(backend)
+                obj.addExternal_libraries('KIND2_sqrt');
+            else
+                obj.addExternal_libraries('lustrec_math');
+            end
             widths = blk.CompiledPortWidths.Inport;
             max_width = max(widths);
             outputDataType = blk.CompiledPortDataTypes.Outport{1};
