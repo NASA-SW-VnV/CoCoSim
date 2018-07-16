@@ -1124,8 +1124,8 @@ if [[ -x "$install_dir/z3/bin/z3" ]]; then
     progress "Using already built ${cgreen}z3"
 else
     progress "Installing ${cgreen}z3${coff}${cbold} from upstream repository"
-
-    git_clone "https://github.com/Z3Prover/z3.git" "master" \
+    #git_clone "https://github.com/Z3Prover/z3.git" "master" \
+    git_clone "https://bitbucket.org/spacer/code.git" "spacer"\
         "$build_dir/z3"
 
     cd "$build_dir/z3"
