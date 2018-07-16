@@ -47,21 +47,35 @@ classdef Switch_To_Lustre < Block_To_Lustre
                     [lus_inportDataType, ~] = SLX2LusUtils.get_lustre_dt(inport_dt);
                     if strcmp(blk.Criteria, 'u2 ~= 0')
                         if strcmp(lus_inportDataType, 'real')
-                            threshold_str = '0.0';
+                            threshold_str_temp = '0.0';
                         elseif strcmp(lus_inportDataType, 'int')
-                            threshold_str = '0';
+                            threshold_str_temp = '0';
                         else
-                            threshold_str = 'false';
+                            threshold_str_temp = 'false';
                             secondInputIsBoolean = 1;
                         end
+                        for j=1:max_width
+                            threshold_str{j} = threshold_str_temp;
+                        end
+                            
                     else
-                        if strcmp(lus_inportDataType, 'real')
-                            threshold_str = sprintf('%.15f', threshold);
-                        elseif strcmp(lus_inportDataType, 'int')
-                            threshold_str = sprintf('%d', int32(threshold));
-                        else
-                            secondInputIsBoolean = 1;
+                        for j=1:numel(threshold)
+                            if strcmp(lus_inportDataType, 'real')
+                                threshold_str{j} = sprintf('%.15f', threshold(j));
+                            elseif strcmp(lus_inportDataType, 'int')
+                                threshold_str{j} = sprintf('%d', int32(threshold(j)));
+                            else
+                                secondInputIsBoolean = 1;
+                            end
                         end
+                        if numel(threshold) < max_width
+                            for j=1:max_width
+                                threshold_str{j} = threshold_str{1};
+                            end
+                        end
+                        if numel(inputs{i}) < max_width
+                            inputs{i} = arrayfun(@(x) {inputs{i}{1}}, (1:max_width));
+                        end                        %
                     end
                 end
             end
@@ -82,11 +96,11 @@ classdef Switch_To_Lustre < Block_To_Lustre
                     cond = sprintf(' %s ', inputs{2}{i});
                 else
                     if strcmp(blk.Criteria, 'u2 > Threshold')
-                        cond = sprintf(' %s > %s ',inputs{2}{i}, threshold_str);
+                        cond = sprintf(' %s > %s ',inputs{2}{i}, threshold_str{i});
                     elseif strcmp(blk.Criteria, 'u2 >= Threshold')
-                        cond = sprintf(' %s >= %s ',inputs{2}{i}, threshold_str);
+                        cond = sprintf(' %s >= %s ',inputs{2}{i}, threshold_str{i});
                     elseif strcmp(blk.Criteria, 'u2 ~= 0')
-                        cond = sprintf(' not(%s = %s) ',inputs{2}{i}, threshold_str);
+                        cond = sprintf(' not(%s = %s) ',inputs{2}{i}, threshold_str{i});
                     end
                 end
                 codes{i} = sprintf('%s = if %s then %s else %s; \n\t', outputs{i}, cond, inputs{1}{i},inputs{3}{i});

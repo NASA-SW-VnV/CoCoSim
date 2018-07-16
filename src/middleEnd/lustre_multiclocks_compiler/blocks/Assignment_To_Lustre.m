@@ -177,6 +177,14 @@ classdef Assignment_To_Lustre < Block_To_Lustre
                     blk.Origin_path);
                 obj.addUnsupported_options(msg);
             end
+            
+            for i=1:numel(blk.IndexOptionArray)
+                if strcmp(blk.IndexOptionArray{i}, 'Starting and ending indices (port)')
+                    msg = sprintf('IndexOption  %s not supported in block %s',...
+                        blk.IndexOptionArray{i}, blk.Origin_path);
+                    obj.addUnsupported_options(msg);
+                end
+            end
             options = obj.unsupported_options;
         end   
         
@@ -568,7 +576,7 @@ classdef Assignment_To_Lustre < Block_To_Lustre
                         end
                     end
                 elseif strcmp(blk.IndexOptionArray{i}, 'Starting and ending indices (port)')
-                     display_msg(sprintf('IndexOption  %s not recognized in block %s',...
+                     display_msg(sprintf('IndexOption  %s not supported in block %s',...
                         blk.IndexOptionArray{i}, blk.Origin_path), ...
                         MsgType.ERROR, AssignSelectToLustre, '');                   
                 else
