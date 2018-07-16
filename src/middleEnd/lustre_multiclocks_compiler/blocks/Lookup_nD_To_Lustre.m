@@ -161,9 +161,17 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                 blkParams.InterpMethod,blkParams.NumberOfTableDimensions,numBoundNodes,blk,...
                 N_shape_node,coords_node,lusInport_dt,blkParams.ExtrapMethod,one,...
                 zero,shapeNodeSign,u_node,index_node,dimJump,table_elem);
-            
-            nodeCodes = sprintf('%s%slet\n\t%s\ntel',...
-                node_header, vars, body);
+            includeContract = 0;
+            if includeContract
+                contractBody = '';
+                %contractBody = get'guarantee In4_1 >= -5.0 and In4_1 <= -4.0  => xx1_minus_DLookupTable_1 <= 0.283662 and xx1_minus_DLookupTable_1 >= -0.65364;';
+                contract = sprintf('(*@contract\n%s\n*)\n',contractBody);
+                nodeCodes = sprintf('%s%s%slet\n\t%s\ntel',...
+                    node_header, contract,vars, body);
+            else
+                nodeCodes = sprintf('%s%slet\n\t%s\ntel',...
+                    node_header,vars, body);
+            end
             main_vars = outputs_dt;
             mainCodes = Lookup_nD_To_Lustre.getMainCode(outputs,inputs,ext_node_name,isLookupTableDynamic);
             
