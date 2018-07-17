@@ -1144,10 +1144,10 @@ fi
 prepend_path "$install_dir/z3/bin"
 prepend_python_path "$install_dir/z3/lib/python"*"/dist-packages"
 
-command_exists z3 || assert_failed "spacer is not properly installed"
+command_exists z3 || assert_failed "z3 is not properly installed"
 version=$(spacer_parse_version z3) || error_parse_version spacer
 
-success "${cgreen}spacer $version${coff}${cbold} successfully installed"
+success "${cgreen}z3 $version${coff}${cbold} successfully installed"
 
 ###################
 # Install lustrec #
