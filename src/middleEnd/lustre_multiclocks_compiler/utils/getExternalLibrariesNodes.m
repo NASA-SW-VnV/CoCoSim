@@ -20,19 +20,33 @@ external_libraries = unique(external_libraries);
 additional_nodes = {};
 for i=1:numel(external_libraries)
     lib = external_libraries{i};
-    fun_name = sprintf('ExtLib.get_%s',lib);
-    fun_handle = str2func(fun_name);
-    try
-        [node, external_nodes_i, opens] = fun_handle();
-    catch
-        display_msg(sprintf('Library %s not supported', lib),...
-            MsgType.ERROR, 'getExternalLibrariesNodes','');
-        continue;
+    if strncmp(lib, 'KIND2', 5)
+        lib = strrep(lib, 'KIND2_', '');
+        fun_name = sprintf('KIND2MathLib.get_%s',lib);
+        fun_handle = str2func(fun_name);
+        try
+            [node, external_nodes_i] = fun_handle();
+        catch
+            display_msg(sprintf('Library %s not supported', lib),...
+                MsgType.ERROR, 'getExternalLibrariesNodes','');
+            continue;
+        end
+        lustre_code = [lustre_code, node];
+        additional_nodes = [additional_nodes, external_nodes_i];
+    else
+        fun_name = sprintf('ExtLib.get_%s',lib);
+        fun_handle = str2func(fun_name);
+        try
+            [node, external_nodes_i, opens] = fun_handle();
+        catch
+            display_msg(sprintf('Library %s not supported', lib),...
+                MsgType.ERROR, 'getExternalLibrariesNodes','');
+            continue;
+        end
+        lustre_code = [lustre_code, node];
+        open_list = [open_list, opens];
+        additional_nodes = [additional_nodes, external_nodes_i];
     end
-    lustre_code = [lustre_code, node];
-    open_list = [open_list, opens];
-    additional_nodes = [additional_nodes, external_nodes_i];
-    
     
 end
 

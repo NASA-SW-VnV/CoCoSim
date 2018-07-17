@@ -1,4 +1,4 @@
-function [nom_lustre_file, xml_trace]= ToLustre(model_path, const_files, mode_display, varargin)
+function [nom_lustre_file, xml_trace]= ToLustre(model_path, const_files, backend, varargin)
 %lustre_multiclocks_compiler translate Simulink models to Lustre. It is based on
 %article :
 %INPUTS:
@@ -23,11 +23,16 @@ end
 if ~exist('const_files', 'var') || isempty(const_files)
     const_files = {};
 end
-if ~exist('mode_display', 'var') || isempty(mode_display)
-    mode_display = 0;
+
+mode_display = 1;
+for i=1:numel(varargin)
+    if strcmp(varargin{i}, 'nodisplay')
+        mode_display = 0;
+    end
 end
-
-
+if ~exist('backend', 'var') || isempty(backend)
+    backend = BackendType.LUSTREC; 
+end
 
 %% initialize outputs
 nom_lustre_file = '';
@@ -103,7 +108,7 @@ model_struct = ir_struct.(IRUtils.name_format(file_name));
 main_sampleTime = model_struct.CompiledSampleTime;
 is_main_node = 1;
 [nodes_code, external_libraries] = recursiveGeneration(...
-    model_struct, model_struct, main_sampleTime, is_main_node, xml_trace);
+    model_struct, model_struct, main_sampleTime, is_main_node, backend, xml_trace);
 external_lib_code = getExternalLibrariesNodes(external_libraries);
 %% writing code
 fid = fopen(nom_lustre_file, 'a');
@@ -128,15 +133,21 @@ cd(PWD)
 end
 
 %%
-function [nodes_code, external_libraries] = recursiveGeneration(parent, blk, main_sampleTime, is_main_node, xml_trace)
+function [nodes_code, external_libraries] = recursiveGeneration(parent, blk, main_sampleTime, is_main_node, backend, xml_trace)
 nodes_code = '';
+contracts_code = '';
 external_libraries = {};
+
 if isfield(blk, 'Content') && ~isempty(blk.Content)
     field_names = fieldnames(blk.Content);
     for i=1:numel(field_names)
-        [nodes_code_i, external_libraries_i] = recursiveGeneration(blk, blk.Content.(field_names{i}), main_sampleTime, 0, xml_trace);
+        [nodes_code_i, external_libraries_i] = recursiveGeneration(blk, blk.Content.(field_names{i}), main_sampleTime, 0, backend, xml_trace);
         if ~isempty(nodes_code_i)
-            nodes_code = sprintf('%s\n%s', nodes_code_i, nodes_code);
+            if SLX2LusUtils.isContractBlk(blk.Content.(field_names{i}))
+                contracts_code = sprintf('%s\n%s', nodes_code_i, contracts_code);
+            else
+                nodes_code = sprintf('%s\n%s', nodes_code_i, nodes_code);
+            end
         end
         external_libraries = [external_libraries, external_libraries_i];
     end
@@ -144,13 +155,14 @@ if isfield(blk, 'Content') && ~isempty(blk.Content)
     if status || ~b.isContentNeedToBeTranslated()
         return;
     end
-    [main_node, external_nodes, external_libraries_i] = SS_To_LustreNode.subsystem2node(parent, blk, main_sampleTime, is_main_node, xml_trace);
+    [main_node, external_nodes, external_libraries_i] = SS_To_LustreNode.subsystem2node(parent, blk, main_sampleTime, is_main_node, backend, xml_trace);
     external_libraries = [external_libraries, external_libraries_i];
-    nodes_code = sprintf('%s\n%s\n%s', external_nodes, nodes_code, main_node);
+    %contracts should be declared before nodes because of KIND2.
+    nodes_code = sprintf('%s\n%s\n%s\n%s', contracts_code, external_nodes, nodes_code, main_node);
     
 elseif isfield(blk, 'SFBlockType') && isequal(blk.SFBlockType, 'Chart')
     % Stateflow chart example
-    [main_node, external_nodes, external_libraries_i] = SS_To_LustreNode.subsystem2node(parent, blk, main_sampleTime, is_main_node, xml_trace);
+    [main_node, external_nodes, external_libraries_i] = SS_To_LustreNode.subsystem2node(parent, blk, main_sampleTime, is_main_node, backend, xml_trace);
     external_libraries = [external_libraries, external_libraries_i];
     nodes_code = sprintf('%s\n%s\n%s', external_nodes, nodes_code, main_node);
 end
@@ -161,7 +173,7 @@ function display_help_message()
 msg = ' -----------------------------------------------------  \n';
 msg = [msg '  CoCoSim: Automated Analysis Framework for Simulink/Stateflow\n'];
 msg = [msg '   \n Usage:\n'];
-msg = [msg '    >> cocoSim(MODEL_PATH, {MAT_CONSTANTS_FILES})\n'];
+msg = [msg '    >> ToLustre(MODEL_PATH, {MAT_CONSTANTS_FILES}, backend, options)\n'];
 msg = [msg '\n'];
 msg = [msg '      MODEL_PATH: a string containing the full/relative path to the model\n'];
 msg = [msg '        e.g. cocoSim(''test/properties/safe_1.mdl'')\n'];

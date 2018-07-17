@@ -29,6 +29,7 @@ classdef Switch_To_Lustre < Block_To_Lustre
             [threshold, ~, status] = ...
                 Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Threshold);
             secondInputIsBoolean = 0;
+            threshold_str = {};
             for i=1:numel(widths)
                 inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
                 if numel(inputs{i}) < max_width
@@ -47,21 +48,35 @@ classdef Switch_To_Lustre < Block_To_Lustre
                     [lus_inportDataType, ~] = SLX2LusUtils.get_lustre_dt(inport_dt);
                     if strcmp(blk.Criteria, 'u2 ~= 0')
                         if strcmp(lus_inportDataType, 'real')
-                            threshold_str = '0.0';
+                            threshold_str_temp = '0.0';
                         elseif strcmp(lus_inportDataType, 'int')
-                            threshold_str = '0';
+                            threshold_str_temp = '0';
                         else
-                            threshold_str = 'false';
+                            threshold_str_temp = 'false';
                             secondInputIsBoolean = 1;
                         end
+                        for j=1:max_width
+                            threshold_str{j} = threshold_str_temp;
+                        end
+                            
                     else
-                        if strcmp(lus_inportDataType, 'real')
-                            threshold_str = sprintf('%.15f', threshold);
-                        elseif strcmp(lus_inportDataType, 'int')
-                            threshold_str = sprintf('%d', int32(threshold));
-                        else
-                            secondInputIsBoolean = 1;
+                        for j=1:numel(threshold)
+                            if strcmp(lus_inportDataType, 'real')
+                                threshold_str{j} = sprintf('%.15f', threshold(j));
+                            elseif strcmp(lus_inportDataType, 'int')
+                                threshold_str{j} = sprintf('%d', int32(threshold(j)));
+                            else
+                                secondInputIsBoolean = 1;
+                            end
                         end
+                        if numel(threshold) < max_width && ~secondInputIsBoolean
+                            for j=1:max_width
+                                threshold_str{j} = threshold_str{1};
+                            end
+                        end
+                        if numel(inputs{i}) < max_width
+                            inputs{i} = arrayfun(@(x) {inputs{i}{1}}, (1:max_width));
+                        end                        %
                     end
                 end
             end
@@ -77,16 +92,14 @@ classdef Switch_To_Lustre < Block_To_Lustre
             
             for i=1:numel(outputs)
                 if secondInputIsBoolean
-                    %TODO: the case of u2 >= Threshold in the case of
-                    %boolean
                     cond = sprintf(' %s ', inputs{2}{i});
                 else
                     if strcmp(blk.Criteria, 'u2 > Threshold')
-                        cond = sprintf(' %s > %s ',inputs{2}{i}, threshold_str);
+                        cond = sprintf(' %s > %s ',inputs{2}{i}, threshold_str{i});
                     elseif strcmp(blk.Criteria, 'u2 >= Threshold')
-                        cond = sprintf(' %s >= %s ',inputs{2}{i}, threshold_str);
+                        cond = sprintf(' %s >= %s ',inputs{2}{i}, threshold_str{i});
                     elseif strcmp(blk.Criteria, 'u2 ~= 0')
-                        cond = sprintf(' not(%s = %s) ',inputs{2}{i}, threshold_str);
+                        cond = sprintf(' not(%s = %s) ',inputs{2}{i}, threshold_str{i});
                     end
                 end
                 codes{i} = sprintf('%s = if %s then %s else %s; \n\t', outputs{i}, cond, inputs{1}{i},inputs{3}{i});
@@ -99,14 +112,13 @@ classdef Switch_To_Lustre < Block_To_Lustre
         function options = getUnsupportedOptions(obj, parent, blk, varargin)
             obj.unsupported_options = {};
             if ~strcmp(blk.OutMax, '[]') || ~strcmp(blk.OutMin, '[]')
-                obj.unsupported_options{numel(obj.unsupported_options) + 1} = sprintf('The minimum/maximum value is not support in block %s', blk.Origin_path);
+                obj.addUnsupported_options(...
+                    sprintf('The minimum/maximum value is not support in block %s', blk.Origin_path));
             end
-            if strcmp(blk.SaturateOnIntegerOverflow, 'on')
-                obj.unsupported_options{numel(obj.unsupported_options) + 1} = sprintf('The Saturate on integer overflow option is not support in block %s', blk.Origin_path);
+            if strcmp(blk.AllowDiffInputSizes, 'on')
+                obj.addUnsupported_options(...
+                    sprintf('The Allow different data input sizes option is not support in block %s', blk.Origin_path));
             end
-            %             if strcmp(blk.AllowDiffInputSizes, 'on')
-            %                 obj.unsupported_options{numel(obj.unsupported_options) + 1} = sprintf('The Allow different data input sizes option is not support in block %s', blk.Origin_path);
-            %             end
             options = obj.unsupported_options;
         end
     end

@@ -42,7 +42,7 @@ classdef Block_To_Lustre < handle
     methods (Abstract)
         %these functions should be implemented by all classes inherit from
         %this class
-        write_code(obj, parent, blk, xml_trace, main_sampleTime, varargin)
+        write_code(obj, parent, blk, xml_trace, main_sampleTime, backend, varargin)
         getUnsupportedOptions(obj, parent, blk, main_sampleTime, xml_trace, varargin)
     end
     methods
