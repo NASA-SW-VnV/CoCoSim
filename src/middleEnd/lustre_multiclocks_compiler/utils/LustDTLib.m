@@ -86,6 +86,17 @@ classdef LustDTLib
             node = sprintf(format, node_name, v_max, v_max, v_min, v_min);            
         end
         
+        
+        function [node, external_nodes_i, opens] = get__Floor()
+            opens = {'conv'};
+            external_nodes_i = {};
+            % Round towards minus infinity.
+            format = '--Round towards minus infinity..\n ';
+            format = [format,  'node _Floor (x: real)\nreturns(y:int);\nlet\n\t'];
+            format = [format, 'y= if x < 0.0 then real_to_int(x) - 1 \n\t'];
+            format = [format, 'else real_to_int(x);\ntel\n\n'];
+            node = sprintf(format);
+        end
         % this one for "Rounding" Simulink block, it is different from Floor by
         % returning a real instead of int.
         function [node, external_nodes_i, opens] = get__floor()
