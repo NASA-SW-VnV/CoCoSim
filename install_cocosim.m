@@ -37,8 +37,7 @@ cocosim_path = fileparts(mfilename('fullpath'));
 cd(cocosim_path);
 [status, sys_out] = system('git pull', '-echo'); 
 if status
-    display_msg(sprintf('Can not run git:\n%s ', sys_out), ...
-        MsgType.DEBUG, 'INSTALL_COCOSIM', '');
+    fprintf('Can not run git:\n%s \n', sys_out) ;
     return;
 end
 end
@@ -65,8 +64,7 @@ end
 for i=1:numel(commands)
     [status, sys_out] = system(commands{i}, '-echo');
     if status
-        display_msg(sprintf('Can not run git:\n%s ', sys_out), ...
-            MsgType.ERROR, 'INSTALL_COCOSIM', '');
+        fprintf('Can not run git:\n%s \n', sys_out) ;
         return;
     end
 end
@@ -74,8 +72,7 @@ if ~force && contains(sys_out, 'Already up to date.')
     %no need to copy files, nothing new from github
     return;
 end
-display_msg(sprintf('Copying files from cocosim2 in tools/build'), ...
-            MsgType.INFO, 'INSTALL_COCOSIM', '');
+fprintf('Copying files from cocosim2 in tools/build\n');
 sources = {'doc', 'examples', 'libs', 'PreContextMenu.m', ...
     fullfile('src', 'gui'), ...
     fullfile('src', 'miscellaneous'), ...
@@ -101,13 +98,11 @@ destinations = {'doc', 'examples', 'libs',  'PreContextMenu.m', ...
     fullfile('src', 'backEnd', 'templates'), ...
     fullfile('src', 'backEnd', 'verification')};
 for i=1:numel(sources)
-    display_msg(sprintf('Copying files from tools/build/github/cocosim/%s to %s', sources{i}, destinations{i}), ...
-            MsgType.INFO, 'INSTALL_COCOSIM', '');
+    fprintf('Copying files from tools/build/github/cocosim/%s to %s\n', sources{i}, destinations{i}) ;
     [SUCCESS,MESSAGE,~] = copyfile(fullfile(coco_git_dir, sources{i}), ...
         fullfile(cocosim_path, destinations{i}));
     if ~SUCCESS
-        display_msg(sprintf('copyfile failed:\n%s ', MESSAGE), ...
-            MsgType.ERROR, 'INSTALL_COCOSIM', '');
+        fprintf('copyfile failed:\n%s \n', MESSAGE);
     end
 end
 
@@ -125,22 +120,17 @@ scripts_path = fullfile(fileparts(mfilename('fullpath')), 'scripts');
 
 if ispc
     installation_path = fullfile(fileparts(mfilename('fullpath')), 'doc', 'installation.md');
-    display_msg(sprintf('ONLY kind2 can be used in Windows. follow the instructions <a href="matlab: open %s">here</a>', installation_path), ...
-        MsgType.ERROR, 'INSTALL_COCOSIM', '');
+    fprintf('ONLY kind2 can be used in Windows. follow the instructions <a href="matlab: open %s">here</a>\n', installation_path) ;
     return;
 elseif ismac
     % create executable script adapted to the user.
     tmp_sh = fullfile(scripts_path, 'install_cocosim_tmp.sh');
     fid = fopen(tmp_sh,'w+');
     if fid < 0
-        display_msg(sprintf('Can not creat file %s', tmp_sh), ...
-            MsgType.ERROR, 'INSTALL_COCOSIM', '');
-        display_msg('Please run the following commands in your terminal.', ...
-            MsgType.ERROR, 'INSTALL_COCOSIM', '');
-        display_msg(sprintf('>> cd %s', scripts_path), ...
-            MsgType.ERROR, 'INSTALL_COCOSIM', '');
-        display_msg('>> ./install_cocosim', ...
-            MsgType.ERROR, 'INSTALL_COCOSIM', '');
+        fprintf('Can not creat file %s\n', tmp_sh) ;
+        fprintf('Please run the following commands in your terminal.\n' );
+        fprintf('>> cd %s\n', scripts_path) ;
+        fprintf('>> ./install_cocosim\n' );
         return;
     end
     fprintf(fid, 'cd %s;\n', scripts_path);
@@ -148,24 +138,19 @@ elseif ismac
     fclose(fid);
     [status,~] = system(sprintf('chmod +x %s', tmp_sh), '-echo');
     if status
-        display_msg(sprintf('Can not chmod file %s to executable', tmp_sh), ...
-            MsgType.ERROR, 'INSTALL_COCOSIM', '');
+        fprintf('Can not chmod file %s to executable\n', tmp_sh) ;
         return;
     end
     [status,~] = system(sprintf('open -a Terminal %s', tmp_sh), '-echo');
     if status
-        display_msg(sprintf('Can not launch executable %s', tmp_sh), ...
-            MsgType.ERROR, 'INSTALL_COCOSIM', '');
+        fprintf('Can not launch executable %s\n', tmp_sh) ;
         return;
     end
     
 else
     % Unix case
-    display_msg('Please run the following commands in your terminal.', ...
-        MsgType.ERROR, 'INSTALL_COCOSIM', '');
-    display_msg(sprintf('>> cd %s', scripts_path), ...
-        MsgType.ERROR, 'INSTALL_COCOSIM', '');
-    display_msg('>> ./install_cocosim', ...
-        MsgType.ERROR, 'INSTALL_COCOSIM', '');
+    fprintf('Please run the following commands in your terminal.\n' );
+    fprintf('>> cd %s\n', scripts_path);
+    fprintf('>> ./install_cocosim\n');
 end
 end
