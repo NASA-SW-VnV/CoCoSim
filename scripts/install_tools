@@ -458,7 +458,7 @@ function spacer_parse_version() {
 
     debug "'$1 --version':\n$version_output"
 
-    echo "$version_output" | match "^Z3 version ($version_regex)$" 1
+    echo "$version_output" | match "^Z3 version ($version_regex).*$" 1
 }
 
 # Parse and detect the version of lustrec, given the command name
