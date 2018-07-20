@@ -667,12 +667,16 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
             else
                 % if u is inside "outer most" polytop, then y is also
                 % bounded by table min and max
+                code1 = 'guarantee ';
+                code2 = 'guarantee ';
                 for i=1:numel(inputs)
-                    contractBody{end+1} = sprintf('assume  %s >= %.15f;\n',inputs{i},min(blkParams.BreakpointsForDimension{i}));
-                    contractBody{end+1} = sprintf('assume  %s <= %.15f;\n',inputs{i},max(blkParams.BreakpointsForDimension{i}));
-                end
-                contractBody{end+1} = sprintf('guarantee  => %s >= %.15f;\n',outputs{1},blkParams.tableMin);
-                contractBody{end+1} = sprintf('guarantee  %s <= %.15f;',outputs{1},blkParams.tableMax);                
+                    code1 = sprintf('%s %s >= %.15f and ',code1,inputs{i}{1},min(blkParams.BreakpointsForDimension{i}));
+                    code1 = sprintf('%s %s <= %.15f ',code1,inputs{i}{1},max(blkParams.BreakpointsForDimension{i}));
+                    code2 = sprintf('%s %s >= %.15f and ',code2,inputs{i}{1},min(blkParams.BreakpointsForDimension{i}));
+                    code2 = sprintf('%s %s <= %.15f ',code2,inputs{i}{1},max(blkParams.BreakpointsForDimension{i}));                    
+                end       
+                contractBody{end+1} = sprintf('%s => %s >= %.15f;',code1,outputs{1},blkParams.tableMin);
+                contractBody{end+1} = sprintf('%s => %s <= %.15f;',code2,outputs{1},blkParams.tableMax);              
             end
             contractBody = MatlabUtils.strjoin(contractBody, '');
         end
