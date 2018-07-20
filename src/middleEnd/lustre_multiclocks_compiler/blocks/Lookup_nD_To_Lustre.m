@@ -50,6 +50,16 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
     %         interpolated point. For the "clipped" extrapolation option, the nearest
     %         breakpoint in each dimension is used. Cubic spline is not
     %         supported
+    %
+    %         contract
+    %         if u (interpolation point) lies inside the polytop, then y >=
+    %         smallest table value and y <= largest table value.
+    %         if interpolation method = 'Flat',  then y >=
+    %         smallest table value and y <= largest table value.
+    %         if interpolation method = 'Nearest',  then y >=
+    %         smallest table value and y <= largest table value.    
+    %         if extrapolation method = 'Clip',  then y >=
+    %         smallest table value and y <= largest table value.        
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -62,13 +72,13 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
     
     methods
         
-        function  write_code(obj, parent, blk, xml_trace, varargin)
-            
+        function  write_code(obj, parent, blk, xml_trace, ~, backend, varargin)
+                    
             % codes are shared between Lookup_nD_To_Lustre and LookupTableDynamic
             isLookupTableDynamic = 0;
             external_lib = '';
             [mainCodes, main_vars, nodeCodes] =  ...
-                Lookup_nD_To_Lustre.get_code_to_write(parent, blk, xml_trace, isLookupTableDynamic);
+                Lookup_nD_To_Lustre.get_code_to_write(parent, blk, xml_trace, isLookupTableDynamic,backend);
             if ~isempty(external_lib)
                 obj.addExternal_libraries(external_lib);
             end
@@ -102,7 +112,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
     methods(Static)
         
         function [ mainCodes, main_vars, nodeCodes] =  ...
-                get_code_to_write(parent, blk, xml_trace,isLookupTableDynamic)
+                get_code_to_write(parent, blk, xml_trace,isLookupTableDynamic,backend)
             
             % initialize
             indexDataType = 'int';
@@ -161,10 +171,9 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                 blkParams.InterpMethod,blkParams.NumberOfTableDimensions,numBoundNodes,blk,...
                 N_shape_node,coords_node,lusInport_dt,blkParams.ExtrapMethod,one,...
                 zero,shapeNodeSign,u_node,index_node,dimJump,table_elem);
-            includeContract = 0;
-            if includeContract
-                contractBody = '';
-                %contractBody = get'guarantee In4_1 >= -5.0 and In4_1 <= -4.0  => xx1_minus_DLookupTable_1 <= 0.283662 and xx1_minus_DLookupTable_1 >= -0.65364;';
+                       
+            if BackendType.isKIND2(backend)
+                contractBody = Lookup_nD_To_Lustre.getContractBody(blkParams,inputs,outputs);
                 contract = sprintf('(*@contract\n%s\n*)\n',contractBody);
                 nodeCodes = sprintf('%s%s%slet\n\t%s\ntel',...
                     node_header, contract,vars, body);
@@ -354,7 +363,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
             %  change dimension subscript.  For example dimJump(2) = 3 means
             %  to increase subscript dimension 2 by 1, we have to jump 3
             %  spaces in the inline storage.
-            dimJump = ones(1,NumberOfTableDimensions)
+            dimJump = ones(1,NumberOfTableDimensions);
             L_dimjump = {};
             L_dimjump{1} =  sprintf('%s_dimJump_%d',blk_name,1);
             vars = sprintf('%s\t%s:%s;\n',vars,L_dimjump{1},indexDataType);
@@ -566,6 +575,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
             blkParams = struct;
             blkParams.BreakpointsForDimension = {};
             blkParams.skipInterpolation = 0;
+            blkParams.yIsBounded = 0;
             
             if strcmp(blk.DataSpecification, 'Lookup table object')
                 display_msg(sprintf('Lookup table object fir DataSpecification in block %s is not supported',...
@@ -586,15 +596,19 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                 elseif strcmp(blk.LookUpMeth, 'Interpolation-Use End Values')
                     blkParams.InterpMethod = 'Linear';
                     blkParams.ExtrapMethod  = 'Clip';
+                    blkParams.yIsBounded = 1;
                 elseif strcmp(blk.LookUpMeth, 'Use Input Nearest')
                     blkParams.InterpMethod = 'Nearest';
                     blkParams.ExtrapMethod  = 'Clip';
+                    blkParams.yIsBounded = 1;
                 elseif strcmp(blk.LookUpMeth, 'Use Input Below')
                     blkParams.InterpMethod = 'Flat';
                     blkParams.ExtrapMethod  = 'Clip';
+                    blkParams.yIsBounded = 1;
                 elseif strcmp(blk.LookUpMeth, 'Use Input Above')
                     blkParams.InterpMethod = 'Above';
                     blkParams.ExtrapMethod  = 'Clip';
+                    blkParams.yIsBounded = 1;
                 elseif strcmp(blk.InterpMethod, 'Cubic spline')
                     display_msg(sprintf('Cubic spline interpolation in block %s is not supported',...
                         blk.Origin_path), ...
@@ -635,8 +649,32 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                 blkParams.skipInterpolation = 0;
                 if strcmp(blkParams.InterpMethod,'Flat') || strcmp(blkParams.InterpMethod,'Nearest')
                     blkParams.skipInterpolation = 1;
+                    blkParams.yIsBounded = 1;
+                end
+                if strcmp(blkParams.ExtrapMethod,'Clip')
+                    blkParams.yIsBounded = 1;
                 end
             end
+            blkParams.tableMin = min(blkParams.Table(:));
+            blkParams.tableMax = max(blkParams.Table(:));
+        end
+        
+        function contractBody = getContractBody(blkParams,inputs,outputs)
+            contractBody = {};
+            if blkParams.yIsBounded
+                contractBody{end+1} = sprintf('guarantee  %s >= %.15f;\n',outputs{1},blkParams.tableMin);
+                contractBody{end+1} = sprintf('guarantee  %s <= %.15f;',outputs{1},blkParams.tableMax);
+            else
+                % if u is inside "outer most" polytop, then y is also
+                % bounded by table min and max
+                for i=1:numel(inputs)
+                    contractBody{end+1} = sprintf('assume  %s >= %.15f;\n',inputs{i},min(blkParams.BreakpointsForDimension{i}));
+                    contractBody{end+1} = sprintf('assume  %s <= %.15f;\n',inputs{i},max(blkParams.BreakpointsForDimension{i}));
+                end
+                contractBody{end+1} = sprintf('guarantee  => %s >= %.15f;\n',outputs{1},blkParams.tableMin);
+                contractBody{end+1} = sprintf('guarantee  %s <= %.15f;',outputs{1},blkParams.tableMax);                
+            end
+            contractBody = MatlabUtils.strjoin(contractBody, '');
         end
         
         function shapeNodeSign = getShapeBoundingNodeSign(dims)

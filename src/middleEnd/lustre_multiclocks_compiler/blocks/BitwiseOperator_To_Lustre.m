@@ -11,7 +11,9 @@ classdef BitwiseOperator_To_Lustre < Block_To_Lustre
     end
     
     methods
-        
+        function obj = BitwiseOperator_To_Lustre()
+            obj.ContentNeedToBeTranslated = 0;
+        end
         function  write_code(obj, parent, blk, xml_trace, varargin)
             %% Step 1: Get the block outputs names
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
