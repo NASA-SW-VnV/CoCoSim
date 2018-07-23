@@ -96,7 +96,7 @@ else
     IMIN = -100;
     IMAX = 100;
 end
-eps = 1e-4;
+eps = SLXUtils.getLustrescSlxEps(model_full_path);
 T = [];
 %% equivalence testing
 if tests_method == 2
