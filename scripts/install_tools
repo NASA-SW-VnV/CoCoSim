@@ -1139,7 +1139,7 @@ else
     progress_run make install || error_install spacer
 fi
 
-#prepend_path "$install_dir/z3/bin"
+prepend_path "$install_dir/spacer/bin"
 prepend_python_path "$install_dir/spacer/lib/python"*"/dist-packages"
 
 command_exists z3 || assert_failed "z3 is not properly installed"
