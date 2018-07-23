@@ -1117,7 +1117,39 @@ if (( ! found_menhir )); then
 fi
 
 ##################
-# Install spacer #
+# Install spacer for Zustre #
+##################
+
+if [[ -x "$install_dir/spacer/bin/z3" ]]; then
+    progress "Using already built ${cgreen}z3"
+else
+    progress "Installing ${cgreen}z3${coff}${cbold} from upstream repository"
+    git_clone "https://bitbucket.org/spacer/code.git" "spacer"\
+        "$build_dir/spacer"
+
+    cd "$build_dir/spacer"
+
+    progress_run python scripts/mk_make.py \
+        --prefix="$install_dir/spacer" || error_configure spacer
+
+    cd "$build_dir/spacer/build"
+
+    progress_run make || error_make spacer
+
+    progress_run make install || error_install spacer
+fi
+
+#prepend_path "$install_dir/z3/bin"
+prepend_python_path "$install_dir/spacer/lib/python"*"/dist-packages"
+
+command_exists z3 || assert_failed "z3 is not properly installed"
+version=$(spacer_parse_version z3) || error_parse_version spacer
+
+success "${cgreen}spacer $version${coff}${cbold} successfully installed"
+
+
+##################
+# Install Z3 #
 ##################
 
 if [[ -x "$install_dir/z3/bin/z3" ]]; then
@@ -1203,7 +1235,7 @@ else
         -DCMAKE_INSTALL_PREFIX="$install_dir" \
         -DLUSTREC_ROOT="$install_dir" \
         -DLUSTREC_INCLUDE_DIR="$install_dir/include/lustrec" \
-        -DZ3_ROOT="$install_dir/z3" \
+        -DZ3_ROOT="$install_dir/spacer" \
         .. || error_configure zustre
 
     progress_run cmake --build . || error_make zustre
