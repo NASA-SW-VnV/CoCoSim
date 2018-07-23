@@ -118,11 +118,23 @@ classdef Delay_To_Lustre < Block_To_Lustre
                     end
                 end
                 x0Port = numel(inputs) + 1;
+                if ischar(lus_inportDataType)
+                    %change it to cell array
+                    lus_inportDataType{1} = lus_inportDataType;
+                end
+                %inline ICValue
+                if numel(ICValue) == 1 && numel(lus_inportDataType) > 1
+                    ICValue = arrayfun(@(x) ICValue, (1:numel(lus_inportDataType)));
+                end
+                %inline lus_inportDataType
+                if numel(lus_inportDataType) == 1 && numel(ICValue) > 1
+                    lus_inportDataType = arrayfun(@(x) {lus_inportDataType{1}}, (1:numel(ICValue)));
+                end
                 for i=1:numel(ICValue)
-                    if strcmp(lus_inportDataType, 'real')
+                    if strcmp(lus_inportDataType{i}, 'real')
                         InitialCondition = sprintf('%.15f', ICValue(i));
                         x0DataType = 'double';
-                    elseif strcmp(lus_inportDataType, 'int')
+                    elseif strcmp(lus_inportDataType{i}, 'int')
                         InitialCondition = sprintf('%d', int32(ICValue(i)));
                         x0DataType = 'int';
                     elseif strncmp(x0DataType, 'int', 3) ...

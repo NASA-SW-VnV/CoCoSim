@@ -159,6 +159,8 @@ classdef SLX2Lus_Trace < handle
             end
             s.VariableName = var_name;
             s.VariableType = varType;
+            s.Width = num2str(width);
+            s.Index = num2str(index);
             obj.addStructMapping(s);
         end
         
@@ -196,7 +198,7 @@ classdef SLX2Lus_Trace < handle
     end
     
     methods(Static)
-       function node_name = get_lustre_node_from_Simulink_block_name(trace_root,Simulink_block_name)
+        function node_name = get_lustre_node_from_Simulink_block_name(trace_root,Simulink_block_name)
             if isa(trace_root, 'char')
                 DOMNODE = xmlread(trace_root);
                 xRoot = DOMNODE.getDocumentElement;
@@ -213,6 +215,6 @@ classdef SLX2Lus_Trace < handle
                 end
                 
             end
-        end 
+        end
     end
 end

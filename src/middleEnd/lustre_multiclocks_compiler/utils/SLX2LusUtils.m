@@ -157,8 +157,8 @@ classdef SLX2LusUtils < handle
                 % traceability
                 width = numel(names_withNoDT);
                 IsNotInSimulink = false;
-                for index=1:numel(names_withNoDT)
-                    xml_trace.add_InputOutputVar( type, names_withNoDT{index}, ...
+                for index=1:numel(names_withNoDT_i)
+                    xml_trace.add_InputOutputVar( type, names_withNoDT_i{index}, ...
                         block.Origin_path, 1, width, index, isInsideContract, IsNotInSimulink);
                 end
             end
@@ -176,8 +176,8 @@ classdef SLX2LusUtils < handle
                     width = numel(names_withNoDT);
                     IsNotInSimulink = false;
                     block = subsys.Content.(enablePortsFields{1});
-                    for index=1:numel(names_withNoDT)
-                        xml_trace.add_InputOutputVar( type, names_withNoDT{index}, ...
+                    for index=1:numel(names_withNoDT_i)
+                        xml_trace.add_InputOutputVar( type, names_withNoDT_i{index}, ...
                             block.Origin_path, 1, width, index, isInsideContract, IsNotInSimulink);
                     end
                 end
@@ -194,8 +194,8 @@ classdef SLX2LusUtils < handle
                     width = numel(names_withNoDT);
                     IsNotInSimulink = false;
                     block = subsys.Content.(triggerPortsFields{1});
-                    for index=1:numel(names_withNoDT)
-                        xml_trace.add_InputOutputVar( type, names_withNoDT{index}, ...
+                    for index=1:numel(names_withNoDT_i)
+                        xml_trace.add_InputOutputVar( type, names_withNoDT_i{index}, ...
                             block.Origin_path, 1, width, index, isInsideContract, IsNotInSimulink);
                     end
                 end

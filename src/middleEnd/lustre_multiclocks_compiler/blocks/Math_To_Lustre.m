@@ -1,5 +1,5 @@
 classdef Math_To_Lustre < Block_To_Lustre
-    %Math_To_Lustre 
+    %Math_To_Lustre
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -20,7 +20,14 @@ classdef Math_To_Lustre < Block_To_Lustre
             widths = blk.CompiledPortWidths.Inport;
             nbInputs = numel(widths);
             max_width = max(widths);
-            outputDataType = blk.CompiledPortDataTypes.Outport{1};
+            operator = blk.Operator;
+            needs_real_inputs = {'exp', 'log', 'log10', '10^u', 'sqrt', ...
+                'pow', 'hypot'};
+            if ismember(operator, needs_real_inputs)
+                outputDataType = 'real';
+            else
+                outputDataType = blk.CompiledPortDataTypes.Outport{1};
+            end
             SaturateOnIntegerOverflow = blk.SaturateOnIntegerOverflow;
             for i=1:nbInputs
                 inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
@@ -38,53 +45,74 @@ classdef Math_To_Lustre < Block_To_Lustre
                     end
                 end
             end
-
-            [outLusDT, ~, one] = SLX2LusUtils.get_lustre_dt(outputDataType);
+            
+            [outLusDT, ~, one] = SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Outport{1});
+            if ismember(operator, needs_real_inputs)...
+                    && ~isequal(outLusDT, 'real')
+                [external_lib, conv_format] = SLX2LusUtils.dataType_conversion( 'real', outLusDT, [], SaturateOnIntegerOverflow);
+                if ~isempty(external_lib)
+                    obj.addExternal_libraries(external_lib);
+                end
+            else
+                conv_format = '%s';
+            end
+                
             codes = {};
-            operator = blk.Operator;
+            
             if strcmp(operator, 'exp') || strcmp(operator, 'log')...
-                    || strcmp(operator, 'log10') 
+                    || strcmp(operator, 'log10') ...
+                    || strcmp(operator, 'sqrt')
                 
                 obj.addExternal_libraries('lustrec_math');
                 for i=1:numel(outputs)
-                    codes{i} = sprintf('%s = %s(%s);\n\t', outputs{i}, operator,inputs{1}{i});
+                    rhs = sprintf(conv_format, ...
+                        sprintf('%s(%s)', operator,inputs{1}{i}));
+                    codes{i} = sprintf('%s = %s;\n\t', outputs{i}, rhs);
                 end
                 
             elseif strcmp(operator, '10^u')
                 obj.addExternal_libraries('lustrec_math');
                 for i=1:numel(outputs)
-                    codes{i} = sprintf('%s = pow(10.0, %s);\n\t', outputs{i}, inputs{1}{i});
+                    rhs = sprintf(conv_format, ...
+                        sprintf('pow(10.0, %s)', inputs{1}{i}));
+                    codes{i} = sprintf('%s = %s;\n\t', outputs{i}, rhs);
                 end
-
+                
                 
             elseif strcmp(operator, 'square') || strcmp(operator, 'magnitude^2')
                 % for real variables (not complexe) magnitude is the same
                 % as square
                 for i=1:numel(outputs)
-                     codes{i} = sprintf('%s = %s * %s;\n\t', outputs{i}, inputs{1}{i},inputs{1}{i});
+                    codes{i} = sprintf('%s = %s * %s;\n\t', outputs{i}, inputs{1}{i},inputs{1}{i});
                 end
+
             elseif strcmp(operator, 'pow')
                 
                 obj.addExternal_libraries('lustrec_math');
                 for i=1:numel(outputs)
-                    codes{i} = sprintf('%s = %s(%s, %s);\n\t', ...
-                        outputs{i}, operator, inputs{1}{i}, inputs{2}{i});
-                end   
+                    rhs = sprintf(conv_format, ...
+                        sprintf('%s(%s, %s)', operator,inputs{1}{i}, inputs{2}{i}));
+                    codes{i} = sprintf('%s = %s;\n\t', ...
+                        outputs{i}, rhs);
+                end
             elseif strcmp(operator, 'conj')
                 % assume input is real not complex
                 for i=1:numel(outputs)
-                    codes{i} = sprintf('%s = %s;\n\t', outputs{i}, inputs{1}{i});  
+                    codes{i} = sprintf('%s = %s;\n\t', outputs{i}, inputs{1}{i});
                 end
-            
+                
             elseif strcmp(operator, 'reciprocal')
                 for i=1:numel(outputs)
                     codes{i} = sprintf('%s = %s / %s;\n\t', outputs{i}, one, inputs{1}{i});
                 end
-            
+                
             elseif strcmp(operator, 'hypot')
                 obj.addExternal_libraries('lustrec_math');
                 for i=1:numel(outputs)
-                    codes{i} = sprintf('%s = sqrt(%s * %s + %s * %s);\n\t', outputs{i}, inputs{1}{i},inputs{1}{i}, inputs{2}{i},inputs{2}{i});
+                    rhs = sprintf(conv_format, ...
+                        sprintf('sqrt(%s * %s + %s * %s)', ...
+                        inputs{1}{i}, inputs{1}{i}, inputs{2}{i}, inputs{2}{i}));
+                    codes{i} = sprintf('%s = %s;\n\t', outputs{i}, rhs);
                 end
             elseif strcmp(operator, 'rem') || strcmp(operator, 'mod')
                 if strcmp(outLusDT, 'int')
@@ -98,7 +126,7 @@ classdef Math_To_Lustre < Block_To_Lustre
                     codes{i} = sprintf('%s = %s(%s, %s);\n\t',...
                         outputs{i}, fun, inputs{1}{i}, inputs{2}{i});
                 end
-            elseif  strcmp(operator, 'transpose') || strcmp(operator, 'hermitian')          
+            elseif  strcmp(operator, 'transpose') || strcmp(operator, 'hermitian')
                 in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(blk.CompiledPortDimensions.Inport);
                 if in_matrix_dimension{1}.numDs > 2
                     display_msg(sprintf('Matrix size > 2 is not supported for transpose/hermitian operator in block %s',...
@@ -112,9 +140,9 @@ classdef Math_To_Lustre < Block_To_Lustre
                     for i=1:in_matrix_dimension{1}.dims(2)
                         outIndex = outIndex + 1;
                         inIndex = sub2ind(in_matrix_dimension{1}.dims,j,i);
-                        codes{outIndex} = sprintf('%s = %s;\n\t', outputs{outIndex}, inputs{1}{inIndex});  
+                        codes{outIndex} = sprintf('%s = %s;\n\t', outputs{outIndex}, inputs{1}{inIndex});
                     end
-                end 
+                end
             end
             
             obj.setCode(MatlabUtils.strjoin(codes, ''));
@@ -123,8 +151,8 @@ classdef Math_To_Lustre < Block_To_Lustre
         
         function options = getUnsupportedOptions(obj, parent, blk, varargin)
             obj.unsupported_options = {};
-
-           
+            
+            
             options = obj.unsupported_options;
         end
     end
