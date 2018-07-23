@@ -1121,9 +1121,9 @@ fi
 ##################
 
 if [[ -x "$install_dir/spacer/bin/z3" ]]; then
-    progress "Using already built ${cgreen}z3"
+    progress "Using already built ${cgreen}spacer"
 else
-    progress "Installing ${cgreen}z3${coff}${cbold} from upstream repository"
+    progress "Installing ${cgreen}spacer${coff}${cbold} from upstream repository"
     git_clone "https://bitbucket.org/spacer/code.git" "spacer"\
         "$build_dir/spacer"
 
