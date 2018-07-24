@@ -1,5 +1,5 @@
 classdef Trigonometry_To_Lustre < Block_To_Lustre
-    %Abs_To_Lustre 
+    %Abs_To_Lustre
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -35,16 +35,13 @@ classdef Trigonometry_To_Lustre < Block_To_Lustre
                     end
                 end
             end
-
-            operator = blk.Operator;       
-            codes = {};
             
-            if strcmp(operator, 'cos + jsin')
-                display_msg(sprintf('The cos + jsin operator is not support in block %s',...
-                    blk.Origin_path), MsgType.ERROR, 'Trigonometry_To_Lustre', '');
-            elseif strcmp(operator, 'tanh')
-                display_msg(sprintf('The tanh operator is not support in block %s',...
-                    blk.Origin_path), MsgType.ERROR, 'Trigonometry_To_Lustre', '');                
+            operator = blk.Operator;
+            codes = {};
+            unsupportedOp = {'cos + jsin'};
+            if ismember(operator, unsupportedOp)
+                display_msg(sprintf('The "%s" operator is not supported in block %s',...
+                    operator, blk.Origin_path), MsgType.ERROR, 'Trigonometry_To_Lustre', '');
             elseif strcmp(operator, 'sincos')
                 index = 0;
                 for i=1:widths
@@ -56,6 +53,10 @@ classdef Trigonometry_To_Lustre < Block_To_Lustre
                     index = index + 1;
                     operator = 'cos';
                     codes{index} = sprintf('%s = %s(%s);\n\t', outputs{index}, operator,inputs{1}{i});
+                end
+            elseif strcmp(operator, 'atan2')
+                for i=1:numel(outputs)
+                    codes{i} = sprintf('%s = %s(%s, %s);\n\t', outputs{i}, operator,inputs{1}{i}, inputs{2}{i});
                 end
             else
                 for i=1:numel(outputs)
@@ -69,18 +70,12 @@ classdef Trigonometry_To_Lustre < Block_To_Lustre
         
         function options = getUnsupportedOptions(obj, parent, blk, varargin)
             obj.unsupported_options = {};
-            if strcmp(blk.Operator, 'cos + jsin')
+            unsupportedOp = {'cos + jsin', 'tanh'};
+            if ismember(blk.Operator, unsupportedOp)
                 obj.addUnsupported_options(...
-                    sprintf('The cos + jsin option is not support in block %s', blk.Origin_path));
-            end 
-            if strcmp(blk.Operator, 'atanh')
-                obj.addUnsupported_options(...
-                    sprintf('The atanh option is not support in block %s', blk.Origin_path));
-            end   
-            if strcmp(blk.Operator, 'tanh')
-                obj.addUnsupported_options(...
-                    sprintf('The tanh option is not support in block %s', blk.Origin_path));
-            end             
+                    sprintf('The "%s" option is not supported in block %s', blk.Operator, blk.Origin_path));
+            end
+           
             options = obj.unsupported_options;
         end
     end
