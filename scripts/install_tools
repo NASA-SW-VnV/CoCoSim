@@ -50,7 +50,7 @@ lustrec_branch="master"
 zustre_url="https://github.com/coco-team/zustre.git"
 zustre_branch="master"
 kind2_url="https://github.com/kind2-mc/kind2.git"
-kind2_branch="develop"
+kind2_branch="master"
 
 #####################
 # General functions #
@@ -614,29 +614,29 @@ function error_patch() {
 
 function error_configure() {
     if (( verbose == 0 )); then
-        error "Error while configuring $1. see $log_file_orig for more details."
+        echo "Error while configuring $1. see $log_file_orig for more details."
     else
-        error "Error while configuring $1."
+        echo "Error while configuring $1."
     fi
-    exit 9
+    # exit 9
 }
 
 function error_make() {
     if (( verbose == 0 )); then
-        error "Error while building $1. see $log_file_orig for more details."
+        echo "Error while building $1. see $log_file_orig for more details."
     else
-        error "Error while building $1."
+        echo "Error while building $1."
     fi
-    exit 10
+    # exit 10
 }
 
 function error_install() {
     if (( verbose == 0 )); then
-        error "Error while installing $1. see $log_file_orig for more details."
+        echo "Error while installing $1. see $log_file_orig for more details."
     else
-        error "Error while installing $1."
+        echo "Error while installing $1."
     fi
-    exit 11
+    # exit 11
 }
 
 function error_test() {
@@ -1117,16 +1117,49 @@ if (( ! found_menhir )); then
 fi
 
 ##################
-# Install spacer #
+# Install spacer for Zustre #
+##################
+
+if [[ -x "$install_dir/spacer/bin/z3" ]]; then
+    progress "Using already built ${cgreen}spacer"
+else
+    progress "Installing ${cgreen}spacer${coff}${cbold} from upstream repository"
+    git_clone "https://bitbucket.org/spacer/code.git" "spacer"\
+        "$build_dir/spacer"
+
+    cd "$build_dir/spacer"
+
+    progress_run python scripts/mk_make.py \
+        --prefix="$install_dir/spacer" || error_configure spacer
+
+    cd "$build_dir/spacer/build"
+
+    progress_run make || error_make spacer
+
+    progress_run make install || error_install spacer
+fi
+
+prepend_path "$install_dir/spacer/bin"
+prepend_python_path "$install_dir/spacer/lib/python"*"/dist-packages"
+
+command_exists z3 || assert_failed "z3 is not properly installed"
+version=$(spacer_parse_version z3) || error_parse_version spacer
+
+success "${cgreen}spacer $version${coff}${cbold} successfully installed"
+
+
+##################
+# Install Z3 #
 ##################
 
 if [[ -x "$install_dir/z3/bin/z3" ]]; then
     progress "Using already built ${cgreen}z3"
 else
     progress "Installing ${cgreen}z3${coff}${cbold} from upstream repository"
-
     git_clone "https://github.com/Z3Prover/z3.git" "master" \
-        "$build_dir/z3"
+    	"$build_dir/z3"
+    #git_clone "https://bitbucket.org/spacer/code.git" "spacer"\
+    #    "$build_dir/z3"
 
     cd "$build_dir/z3"
 
@@ -1143,10 +1176,10 @@ fi
 prepend_path "$install_dir/z3/bin"
 prepend_python_path "$install_dir/z3/lib/python"*"/dist-packages"
 
-command_exists z3 || assert_failed "spacer is not properly installed"
+command_exists z3 || assert_failed "z3 is not properly installed"
 version=$(spacer_parse_version z3) || error_parse_version spacer
 
-success "${cgreen}spacer $version${coff}${cbold} successfully installed"
+success "${cgreen}z3 $version${coff}${cbold} successfully installed"
 
 ###################
 # Install lustrec #
@@ -1202,7 +1235,7 @@ else
         -DCMAKE_INSTALL_PREFIX="$install_dir" \
         -DLUSTREC_ROOT="$install_dir" \
         -DLUSTREC_INCLUDE_DIR="$install_dir/include/lustrec" \
-        -DZ3_ROOT="$install_dir/z3" \
+        -DZ3_ROOT="$install_dir/spacer" \
         .. || error_configure zustre
 
     progress_run cmake --build . || error_make zustre
