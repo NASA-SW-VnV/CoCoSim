@@ -12,18 +12,18 @@ classdef LookupTableDynamic_To_Lustre < Block_To_Lustre
     
     methods
         
-        function  write_code(obj, parent, blk, xml_trace, varargin)
+        function  write_code(obj, parent, blk, xml_trace, ~, backend, varargin)
 
             isLookupTableDynamic = 1;
-            [external_lib, codes, vars, nodeCodes] =  ...
-                Lookup_nD_To_Lustre.get_code_to_write(parent, blk, xml_trace, isLookupTableDynamic);
-            
-            obj.addExternal_libraries(external_lib);
-            obj.setCode(codes);
-            obj.addVariable(vars);
-            obj.addExtenal_node(nodeCodes);            
-            
-            
+            external_lib = '';
+            [mainCodes, main_vars, nodeCodes] =  ...
+                Lookup_nD_To_Lustre.get_code_to_write(parent, blk, xml_trace, isLookupTableDynamic,backend);
+            if ~isempty(external_lib)
+                obj.addExternal_libraries(external_lib);
+            end
+            obj.setCode(mainCodes);
+            obj.addVariable(main_vars);
+            obj.addExtenal_node(nodeCodes);
         end
         
         function options = getUnsupportedOptions(obj, blk, varargin)
