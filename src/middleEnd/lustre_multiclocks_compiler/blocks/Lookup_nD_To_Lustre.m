@@ -127,7 +127,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                 Lookup_nD_To_Lustre.getBlockInputsNames_convInType2AccType(parent, blk,isLookupTableDynamic);
             
             % read block parameters
-            blkParams = Lookup_nD_To_Lustre.readBlkParams(parent,blk,isLookupTableDynamic);
+            blkParams = Lookup_nD_To_Lustre.readBlkParams(parent,blk,isLookupTableDynamic,inputs);
             
             % For n-D Lookup Table, if UseOneInputPortForAllInputData is
             % selected, Combine all input data to one input port
@@ -570,17 +570,19 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
             end
         end
         
-        function blkParams = readBlkParams(parent,blk,isLookupTableDynamic)
+        function blkParams = readBlkParams(parent,blk,isLookupTableDynamic,inputs)
             
             blkParams = struct;
             blkParams.BreakpointsForDimension = {};
             blkParams.skipInterpolation = 0;
             blkParams.yIsBounded = 0;
             
-            if strcmp(blk.DataSpecification, 'Lookup table object')
-                display_msg(sprintf('Lookup table object fir DataSpecification in block %s is not supported',...
-                    blk.Origin_path), ...
-                    MsgType.ERROR, 'Lookup_nD_To_Lustre', '');
+            if ~isLookupTableDynamic
+                if strcmp(blk.DataSpecification, 'Lookup table object')
+                    display_msg(sprintf('Lookup table object fir DataSpecification in block %s is not supported',...
+                        blk.Origin_path), ...
+                        MsgType.ERROR, 'Lookup_nD_To_Lustre', '');
+                end
             end
             
             % read blk
@@ -655,8 +657,10 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                     blkParams.yIsBounded = 1;
                 end
             end
-            blkParams.tableMin = min(blkParams.Table(:));
-            blkParams.tableMax = max(blkParams.Table(:));
+            if ~isLookupTableDynamic
+                blkParams.tableMin = min(blkParams.Table(:));
+                blkParams.tableMax = max(blkParams.Table(:));
+            end
         end
         
         function contractBody = getContractBody(blkParams,inputs,outputs)
