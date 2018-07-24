@@ -1,5 +1,5 @@
-function [ main_node] = enabledSubsystem2node( parent_ir, ss_ir, hasEnablePort, hasActionPort, hasTriggerPort, isContractBlk, main_sampleTime, xml_trace)
-%enabledSubsystem2node create an automaton lustre node for
+function [ main_node] = condExecSS_To_LusAutomaton( parent_ir, ss_ir, hasEnablePort, hasActionPort, hasTriggerPort, isContractBlk, main_sampleTime, xml_trace)
+%condExecSS_To_LusAutomaton create an automaton lustre node for
 %enabled/triggered/Action subsystem
 %INPUTS:
 %   ss_ir: The internal representation of the subsystem.

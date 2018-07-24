@@ -908,6 +908,11 @@ classdef SLX2LusUtils < handle
                 suffix = '';
                 zero = '0';
             end
+            if strcmp(IncomingSignalDT, 'real')
+                IncomingSignalzero = '0.0';
+            else
+                IncomingSignalzero = '0';
+            end
             if strcmp(TriggerType, 'rising')
                 TriggerinputExp = sprintf(...
                     '0%s -> if %s then 1%s else 0%s'...
@@ -922,7 +927,7 @@ classdef SLX2LusUtils < handle
                     ,suffix, Cond, suffix, suffix );
             else
                 risingCond = SLX2LusUtils.getResetCode(...
-                    'rising', IncomingSignalDT, triggerInput, zero );
+                    'rising', IncomingSignalDT, triggerInput, IncomingSignalzero );
                 TriggerinputExp = sprintf(...
                     '%s -> if %s then if (%s) then 1%s else -1%s else 0%s'...
                     ,zero,  Cond, risingCond, suffix, suffix, suffix);
