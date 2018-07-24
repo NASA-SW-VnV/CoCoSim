@@ -244,7 +244,7 @@ classdef LustMathLib
             opens = {};
             external_nodes_i = {};
             format = 'node rem_int_int (x, y: int)\nreturns(z:int);\nlet\n\t';
-            format = [format, 'z = if y=0 then 0\n\t\telse\n\t\t (x mod y) - (if (x mod y <> 0 and x <= 0) then (if y > 0 then y else -y) else 0);\ntel\n\n'];
+            format = [format, 'z = if (y = 0 or x = 0) then 0\n\t\telse\n\t\t (x mod y) - (if (x mod y <> 0 and x <= 0) then (if y > 0 then y else -y) else 0);\ntel\n\n'];
             
             node = sprintf(format);
         end
@@ -252,7 +252,7 @@ classdef LustMathLib
             opens = {};
             external_nodes_i = {};
             format = 'node mod_int_int (x, y: int)\nreturns(z:int);\nlet\n\t';
-            format = [format, 'z = if y=0 then x\n\t\telse\n\t\t (x mod y) - (if (x mod y <> 0 and y <= 0) then (if y > 0 then y else -y) else 0);\ntel\n\n'];
+            format = [format, 'z = if (y = 0) then x else if (x = 0) then 0\n\t\telse\n\t\t (x mod y) - (if (x mod y <> 0 and y <= 0) then (if y > 0 then y else -y) else 0);\ntel\n\n'];
             
             node = sprintf(format);
         end

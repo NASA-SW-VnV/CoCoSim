@@ -120,21 +120,23 @@ classdef Delay_To_Lustre < Block_To_Lustre
                 x0Port = numel(inputs) + 1;
                 if ischar(lus_inportDataType)
                     %change it to cell array
-                    lus_inportDataType{1} = lus_inportDataType;
+                    lus_inportDataType_cell{1} = lus_inportDataType;
+                else
+                    lus_inportDataType_cell = lus_inportDataType;
                 end
                 %inline ICValue
-                if numel(ICValue) == 1 && numel(lus_inportDataType) > 1
-                    ICValue = arrayfun(@(x) ICValue, (1:numel(lus_inportDataType)));
+                if numel(ICValue) == 1 && numel(lus_inportDataType_cell) > 1
+                    ICValue = arrayfun(@(x) ICValue, (1:numel(lus_inportDataType_cell)));
                 end
                 %inline lus_inportDataType
-                if numel(lus_inportDataType) == 1 && numel(ICValue) > 1
-                    lus_inportDataType = arrayfun(@(x) {lus_inportDataType{1}}, (1:numel(ICValue)));
+                if numel(lus_inportDataType_cell) == 1 && numel(ICValue) > 1
+                    lus_inportDataType_cell = arrayfun(@(x) {lus_inportDataType_cell{1}}, (1:numel(ICValue)));
                 end
                 for i=1:numel(ICValue)
-                    if strcmp(lus_inportDataType{i}, 'real')
+                    if strcmp(lus_inportDataType_cell{i}, 'real')
                         InitialCondition = sprintf('%.15f', ICValue(i));
                         x0DataType = 'double';
-                    elseif strcmp(lus_inportDataType{i}, 'int')
+                    elseif strcmp(lus_inportDataType_cell{i}, 'int')
                         InitialCondition = sprintf('%d', int32(ICValue(i)));
                         x0DataType = 'int';
                     elseif strncmp(x0DataType, 'int', 3) ...
@@ -256,7 +258,7 @@ classdef Delay_To_Lustre < Block_To_Lustre
                 % construct additional variables
                 for i=1:numel(u)
                     varName = sprintf('%s_%s', u{i}, blk_name);
-                    u{i} = varName;
+                    
                     dt = SLX2LusUtils.get_lustre_dt(inportDataType);
                     
                     if isInsideContract
@@ -272,16 +274,45 @@ classdef Delay_To_Lustre < Block_To_Lustre
                         lhs, enableCondition, u{i} );
                     codes{end + 1} = sprintf(...
                         'else %s -> pre %s;\n\t', x0{i}, varName);
+                    u{i} = varName;
                 end
             end
             pre_u = {};
             if isReset || isDelayVariable || isEnabe
-                delay_node_name = sprintf('Delay_%s', blk_name);
-                [delay_node_code] = ...
-                    Delay_To_Lustre.getDelayNode(delay_node_name, lus_inportDataType, delayLength, isDelayVariable, isReset, isEnabe);
+                %if the input is a bus with different DataTypes, we need to
+                %create an external node for each dataType
+                if numel(unique(lus_inportDataType_cell)) == 1
+                    delay_node_name = sprintf('Delay_%s', blk_name);
+                    [delay_node_code] = ...
+                        Delay_To_Lustre.getDelayNode(delay_node_name, ...
+                        lus_inportDataType_cell{1}, delayLength,...
+                        isDelayVariable, isReset, isEnabe);
+                    isBus = false;
+                else
+                    isBus = true;
+                    uniqueDT = unique(lus_inportDataType_cell);
+                    delay_node_code = '';
+                    for i=1:numel(uniqueDT)
+                        delay_node_name = sprintf('Delay_%s_%s', ...
+                            blk_name, uniqueDT{i});
+                        [delay_node_code_i] = ...
+                            Delay_To_Lustre.getDelayNode(delay_node_name, ...
+                            uniqueDT{i}, delayLength,...
+                            isDelayVariable, isReset, isEnabe);
+                        delay_node_code = sprintf('%s\n%s',delay_node_code, delay_node_code_i);
+                    end
+                end
                 
                 for i=1:numel(u)
-                    node_call_format = sprintf('%s(%s, %s', delay_node_name, u{i}, x0{i});
+                    if isBus
+                        delay_node_name = sprintf('Delay_%s_%s', ...
+                            blk_name, lus_inportDataType_cell{i});
+                        node_call_format = sprintf('%s(%s, %s',...
+                            delay_node_name, u{i}, x0{i});
+                    else
+                        node_call_format = sprintf('%s(%s, %s',...
+                            delay_node_name, u{i}, x0{i});
+                    end
                     if isDelayVariable
                         node_call_format = sprintf('%s, %s',...
                             node_call_format, inputs{2}{1});
