@@ -380,7 +380,16 @@ classdef SLX2LusUtils < handle
             if numel(blk.CompiledPortDataTypes.Outport) == 1 ...
                     && strcmp(blk.CompiledPortDataTypes.Outport{1}, 'auto') ...
                     && ~isempty(blk.CompiledPortWidths.Inport)
-                width = blk.CompiledPortWidths.Inport;
+                
+                if numel(blk.CompiledPortWidths.Inport) > 1 ...
+                        && isequal(blk.BlockType, 'BusCreator') 
+                    % e,g BusCreator DT is defined by all its inputs
+                    width = blk.CompiledPortWidths.Inport;
+                else
+                    % e,g BusAssignment and other blocks DT are
+                    % defined by their first input
+                    width = blk.CompiledPortWidths.Inport(1);
+                end
                 type = 'Inports';
                 
             elseif isempty(blk.CompiledPortWidths.Outport)
@@ -528,9 +537,10 @@ classdef SLX2LusUtils < handle
         %% get pre block DataType for specific port,
         %it is used in the case of 'auto' type.
         function lus_dt = getpreBlockLusDT(parent, blk, portNumber)
+            global model_struct
             lus_dt = {};
             if strcmp(blk.BlockType, 'Inport')
-                global model_struct
+                
                 if ~isempty(model_struct)
                     portNumber = str2num(blk.Port);
                     blk = parent;
