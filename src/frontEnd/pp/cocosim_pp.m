@@ -106,11 +106,23 @@ for i=1:numel(ordered_pp_functions)
     try
         display_msg(['runing ' func2str(fh)], MsgType.INFO, 'PP', '');
         fh(new_model_base);
+        % check if the model still compiles
+        code_on=sprintf('%s([], [], [], ''compile'')', new_model_base);
+        try
+            warning off;
+            evalin('base',code_on);
+        catch
+            display_msg(['Skipping ' func2str(fh)], MsgType.WARNING, 'PP', '');
+            restore_ppmodel(new_model_base, new_file_path);
+            continue;
+        end
+        code_off=sprintf('%s([], [], [], ''term'')', new_model_base);
+        evalin('base',code_off);
     catch me
         display_msg(['can not run ' func2str(fh)], MsgType.WARNING, 'PP', '');
         display_msg(me.getReport(), MsgType.DEBUG, 'PP', '');
         if use_backup
-            display_msg(['Skipping ' func2str(fh)], MsgType.INFO, 'PP', '');
+            display_msg(['Skipping ' func2str(fh)], MsgType.WARNING, 'PP', '');
             restore_ppmodel(new_model_base, new_file_path);
         end
     end

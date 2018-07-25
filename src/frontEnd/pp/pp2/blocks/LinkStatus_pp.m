@@ -9,7 +9,11 @@ function LinkStatus_pp( new_model_base )
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-all_blocks = find_system(new_model_base,'LookUnderMasks', 'all', 'FollowLinks', 'on');
+all_blocks = find_system(new_model_base,'LookUnderMasks', 'all',...
+    'FollowLinks', 'on', 'LinkStatus', 'resolved' );
+all_blocks = [all_blocks; ...
+    find_system(new_model_base,'LookUnderMasks', 'all',...
+    'FollowLinks', 'on', 'LinkStatus', 'unresolved' )];
 if not(isempty(all_blocks))
     
     for i=1:length(all_blocks)

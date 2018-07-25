@@ -16,6 +16,7 @@ if not(isempty(ssys_list))
         try
             set_param(ssys_list{i},'TreatAsAtomicUnit','on');
             set_param(ssys_list{i},'MinAlgLoopOccurrences','on');
+            
         catch
         end
     end
