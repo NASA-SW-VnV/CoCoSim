@@ -16,6 +16,8 @@
 #   bash, basename, dirname, mkdir, touch, sed, date
 #
 ################################################################################
+####### Utils ###############
+source bash_utils
 
 progname=$(basename "$0")
 
@@ -50,434 +52,11 @@ lustrec_branch="master"
 zustre_url="https://github.com/coco-team/zustre.git"
 zustre_branch="master"
 kind2_url="https://github.com/kind2-mc/kind2.git"
-kind2_branch="master"
+kind2_branch="develop"
 
-#####################
-# General functions #
-#####################
 
-function init_colors() {
-    if (( use_colors )); then
-        coff="\033[0m"
-        cbold="\033[1m"
-        cred="\033[31m"
-        cgreen="\033[32m"
-        cyellow="\033[33m"
-        cblue="\033[34m"
-        cpurple="\033[35m"
-        ccyan="\033[36m"
-        cwhite="\033[37m"
-    else
-        coff=""
-        cbold=""
-        cred=""
-        cgreen=""
-        cyellow=""
-        cblue=""
-        cpurple=""
-        ccyan=""
-        cwhite=""
-    fi
-}
 
-function usage() {
-    echo "usage: $progname [OPTION]..."
-    echo ""
-    echo "Build and install cocosim dependencies without root access."
-    echo ""
-    echo "Defaults for the options are specified in brackets."
-    echo ""
-    echo "Configuration:"
-    echo "  --prefix=PREFIX      install files in PREFIX"
-    echo "  --builddir=BUILDDIR  configure for building on BUILDDIR [$build_dir]"
-    echo ""
-    echo "Optional arguments:"
-    echo "  -h, --help           display this help and exit"
-    echo "  -v, --verbose        make this script more verbose"
-    echo "  -f, --force          force"
-    echo "  --no-colors          disable colors"
-    echo "  --jobs=N             allow N jobs at once [$njobs]"
-    echo "  --lustrec-url=URL    lustrec git repository url [$lustrec_url]"
-    echo "  --lustrec-branch=BR  lustrec branch [$lustrec_branch]"
-    echo "  --zustre-url=URL     zustre git repository url [$zustre_url]"
-    echo "  --zustre-branch=BR   zustre branch [$zustre_branch]"
-    echo "  --kind2-url=URL      kind2 git repository url [$kind2_url]"
-    echo "  --kind2-branch=BR    kind2 branch [$kind2_branch]"
-}
 
-function short_help() {
-    echo "Try '$progname -h' for more information." >&2
-}
-
-function error() {
-    echo "$progname: error: $1" >&2
-}
-
-# Split command line arguments, i.e:
-#   -ab -> -a -b
-#   --foo=bar -> --foo bar
-#
-# Split arguments are stored in the ARGS array
-#
-# Parameters:
-#   $1,$2,$3,...,$n: arguments to split
-function explode_args() {
-    unset ARGS
-    local arg=$1 key value
-
-    while [[ $arg ]]; do
-        [[ $arg = "--" ]] && ARGS+=("$@") && break
-
-        # Short options
-        if [[ ${arg:0:1} = "-" && ${arg:1:1} != "-" ]]; then
-            ARGS+=("-${arg:1:1}")
-            (( ${#arg} > 2 )) && arg="-${arg:2}" || { shift; arg=$1; }
-        # Long options
-        elif [[ ${arg:0:2} = "--" ]]; then
-            # Split argument at '=':
-            # e.g --foo=bar -> key=--foo, value=bar
-            key=${arg%%=*}; value=${arg#*=}
-            ARGS+=("$key")
-            [[ "$key" != "$value" ]] && ARGS+=("$value")
-            shift; arg=$1
-        else
-            ARGS+=("$arg"); shift; arg=$1
-        fi
-    done
-}
-
-# Return a concatenation of strings separated by a given separator, i.e:
-#   , a b c -> a,b,c
-#
-# Parameters:
-#   $1: separator
-#   $2,$2,$4,...,$n: arguments to join
-function join() {
-    local sep=$1; shift
-    echo -n "$1"; shift
-    printf "%s" "${@/#/$sep}"
-}
-
-# Check if a command exists
-function command_exists() {
-    command -v "$1" >/dev/null 2>&1
-}
-
-# Return the absolute path of the given filename
-function abs_path() {
-    local arg=${1/#\~/$HOME}
-    local dirname=$(dirname "$arg") basename=$(basename "$arg")
-
-    while [[ ! -d "$dirname" ]]; do
-        basename="$(basename "$dirname")/$basename"
-        dirname=$(dirname "$dirname")
-    done
-
-    pushd . >/dev/null
-    cd "$dirname"
-    dirname=$(pwd)
-    popd >/dev/null
-
-    if [[ "$dirname" = "/" ]]; then
-        echo -n "/$basename"
-    else
-        echo -n "$dirname/$basename"
-    fi
-}
-
-# Find a pattern within the standard input
-#
-# If found, return 0 and print the given captured group
-# Otherwise, return 1
-#
-# Parameters:
-#   $1: regular expression
-#   $2: parenthesis group number to capture
-function match() {
-    while read -r line; do
-        if [[ "$line" =~ $1 ]]; then
-            echo -n "${BASH_REMATCH[$2]}"
-            return 0
-        fi
-    done
-
-    return 1
-}
-
-# Return the name of all binaries in the PATH matching a regular expression
-function glob_binaries() {
-    local IFS=:
-    find $PATH \
-        -maxdepth 1 \
-        -regex ".*/$1" \
-        -exec basename {} \; 2>/dev/null | sort -u
-}
-
-########################
-# Download and extract #
-########################
-
-# Download a file from an URL.
-#
-# The file is stored under $download_dir and is named after the remote file
-function download() {
-    local url=$1 filename=$(basename "$1")
-
-    cd "$download_dir"
-    if [[ -f "$filename" ]]; then
-        progress "Using already downloaded $filename from $url"
-    else
-        progress "Downloading $url"
-
-        # Note: do not try to capture curl/wget output because it contains
-        # the progress bar
-        $download_agent "$url" || {
-            rm -f "$filename"; error "Error while fetching $filename"; exit 6;
-        }
-    fi
-}
-
-# Download a file from an URL.
-#
-# Parameters:
-#   $1: url
-#   $2: new name for the archive
-function download_rename() {
-    local url=$1 filename=$2
-
-    cd "$download_dir"
-    if [[ -f "$filename" ]]; then
-        progress "Using already downloaded $filename from $url"
-    else
-        progress "Downloading $url"
-
-        # Note: do not try to capture curl/wget output because it contains
-        # the progress bar
-        $download_agent "$url" || {
-            rm -f "$(basename "$1")"; error "Error while fetching $filename"; exit 6;
-        }
-
-        mv "$(basename "$1")" "$filename"
-    fi
-}
-
-# Extract an archive and move the root directory
-#
-# Parameters:
-#   $1: path to the archive
-#   $2: destination path
-function extract() {
-    local archive_path=$1 destination_path=$2
-    local archive_filename=$(basename "$archive_path")
-    local archive_directory=$(dirname "$archive_path")
-
-    progress "Extracting $archive_filename"
-
-    cd "$archive_directory"
-    run_log_debug tar xf "$archive_filename" || {
-        error "Error while extracting $archive_filename"; exit 7;
-    }
-
-    root_directory=$archive_filename
-    for ext in .gz .xz .bz2 .tar; do
-        root_directory=${root_directory%$ext}
-    done
-
-    [[ -d "$root_directory" ]] || assert_failed "$root_directory does not exist"
-
-    rm -rf "$destination_path"
-    mv "$root_directory" "$destination_path"
-}
-
-# Download an archive from an URL and extract it at the given location
-#
-# Parameters:
-#   $1: URL
-#   $2: destination path
-function download_extract() {
-    local url=$1 destination_path=$2
-    download "$url"
-    extract "$download_dir/$(basename "$url")" "$destination_path"
-}
-
-# Clone a git repository in the download directory, and copy it at the given
-# location
-#
-# Parameters:
-#   $1: URL
-#   $2: branch name (e.g, master)
-#   $3: destination path
-function git_clone() {
-    local url=$1 branch=$2 destination_path=$3 dirname=$(basename "$3")
-
-    # download
-    cd "$download_dir"
-    if [[ -d "$dirname" ]]; then
-        progress "Using already downloaded $dirname from $url branch $branch"
-        git checkout $branch
-    else
-        progress "Downloading $url branch $branch"
-
-        if (( verbose == 0 )); then
-            run_log_quiet git clone --depth 1 --branch "$branch" "$url" "$dirname"
-        else
-            git clone --depth 1 --branch "$branch" "$url" "$dirname"
-        fi || {
-            rm -rf "$dirname"; error "Error while fetching $dirname"; exit 6;
-        }
-    fi
-
-    # copy
-    rm -rf "$destination_path"
-    cp -r "$download_dir/$dirname" "$destination_path"
-}
-
-######################
-# Version comparison #
-######################
-
-# Compare two version numbers
-#
-# Return 0 if $1 is equal to $2,
-#        1 if $1 is greater than $2 and
-#        2 if $1 is lower than $2
-function version_compare() {
-    [[ $1 == $2 ]] && return 0
-
-    local IFS=.
-    local i ver1=($1) ver2=($2)
-
-    # fill empty fields in ver1 with zeros
-    for ((i = ${#ver1[@]}; i < ${#ver2[@]}; i++)); do
-        ver1[i]=0
-    done
-
-    for ((i = 0; i < ${#ver1[@]}; i++)); do
-        if [[ -z ${ver2[i]} ]]; then
-            # fill empty fields in ver2 with zeros
-            ver2[i]=0
-        fi
-        if (( 10#${ver1[i]} > 10#${ver2[i]} )); then
-            return 1
-        fi
-        if (( 10#${ver1[i]} < 10#${ver2[i]} )); then
-            return 2
-        fi
-    done
-
-    return 0
-}
-
-# Compare two version numbers
-#
-# Return 0 iff $1 is greater or equal to $2
-function version_ge() {
-    version_compare "$1" "$2"; (( $? <= 1 ))
-}
-
-#####################
-# Version detection #
-#####################
-
-version_regex='[0-9]+(\.[0-9]+)*'
-
-# Parse and detect the version of cmake, given the command name
-function cmake_parse_version() {
-    local version_output=$("$1" --version 2>&1)
-
-    debug "'$1 --version':\n$version_output"
-
-    echo "$version_output" | match "^cmake version ($version_regex)$" 1
-}
-
-# Parse and detect the version of m4, given the command name
-function m4_parse_version() {
-    local version_output=$("$1" --version 2>&1)
-
-    debug "'$1 --version':\n$version_output"
-
-    echo "$version_output" | match "^((GNU M4)|(m4 \(GNU M4\))) ($version_regex)$" 4
-}
-
-# Parse and detect the version of python, given the command name
-function python_parse_version() {
-    local version_output=$("$1" --version 2>&1)
-
-    debug "'$1 --version':\n$version_output"
-
-    echo "$version_output" | match "^Python ($version_regex)$" 1
-}
-
-# Check if a python version satisfies cocosim requirements
-function python_satisfies_requirements() {
-    local version=$1
-
-    # enforce python 2
-    [[ ${version:0:1} = 2 ]] && version_ge "$version" "$python_required_version"
-}
-
-# Parse and detect the version of autoconf, given the command name
-function autoconf_parse_version() {
-    local version_output=$("$1" --version 2>&1)
-
-    debug "'$1 --version':\n$version_output"
-
-    echo "$version_output" | match "^autoconf ((GNU Autoconf)) ($version_regex)$" 4
-}
-
-# Parse and detect the version of ocaml, given the command name
-function ocaml_parse_version() {
-    local version_output=$("$1" -version 2>&1)
-
-    debug "'$1 -version':\n$version_output"
-
-    echo "$version_output" | match "^The ((OCaml)|(Objective Caml)) toplevel, version ($version_regex)$" 4
-}
-
-# Parse and detect the version of ocamlbuild, given the command name
-function ocamlbuild_parse_version() {
-    local version_output=$("$1" -version 2>&1)
-
-    debug "'$1 -version':\n$version_output"
-
-    echo "$version_output" | match "^ocamlbuild ($version_regex)$" 1
-}
-
-# Parse and detect the version of menhir, given the command name
-function menhir_parse_version() {
-    local version_output=$("$1" --version 2>&1)
-
-    debug "'$1 --version':\n$version_output"
-
-    echo "$version_output" | match "^menhir, version ($version_regex)$" 1
-}
-
-# Parse and detect the version of spacer, given the command name
-function spacer_parse_version() {
-    local version_output=$("$1" --version 2>&1)
-
-    debug "'$1 --version':\n$version_output"
-
-    echo "$version_output" | match "^Z3 version ($version_regex).*$" 1
-}
-
-# Parse and detect the version of lustrec, given the command name
-function lustrec_parse_version() {
-    local version_output=$("$1" -version 2>&1)
-
-    debug "'$1 -version':\n$version_output"
-
-    echo "$version_output" | match "^Lustrec compiler, version ($version_regex)(\-[ \n\t]*[0-9]+)? \(.+\)$" 1
-}
-
-# Parse and detect the version of kind2, given the command name
-function kind2_parse_version() {
-    local version_output=$("$1" --version 2>&1)
-
-    debug "'$1 --version':\n$version_output"
-
-    echo "$version_output" | match "^kind2 v($version_regex)(\-[0-9]+)?(\-[a-zA-Z0-9]+)?$" 1
-}
 
 ################
 # Main program #
@@ -555,126 +134,7 @@ mkdir -p "$download_dir" 2>/dev/null || { error "cannot create directory '$downl
 touch "$log_file" 2>/dev/null || { error "cannot create '$log_file_orig'"; exit 2; }
 #initialize the log file
 echo "" > "$log_file"
-######################
-# Output and logging #
-######################
 
-function strip_colors() {
-    echo -en "$1" | sed -E 's#'$(echo -en '\x1B')'\[([0-9]{1,3}((;[0-9]{1,3})*)?)?[m|K]##g'
-}
-
-function log() {
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] [$1] $(strip_colors "$2")" >> "$log_file"
-}
-
-function error() {
-    echo -e "${cbold}${cred}$1${coff}" >&2
-    log error "$1"
-}
-
-function warning() {
-    echo -e "${cbold}${cyellow}==> Warning: $1${coff}"
-    log warning "$1"
-}
-
-function success() {
-    echo -e "${cbold}${cgreen}==> ${coff}${cbold}$1${coff}"
-    log success "$1"
-}
-
-function progress() {
-    echo -e "${cbold}${cblue}==> ${coff}${cbold}$1${coff}"
-    log progress "$1"
-}
-
-function info() {
-    echo -e "$1${coff}"
-    log info "$1"
-}
-
-function debug() {
-    if (( verbose >= 1 )); then
-        echo -e "$1${coff}" >&2
-    fi
-    log debug "$1"
-}
-
-function assert_failed() {
-    error "Assertion failed: $1"; exit 3;
-}
-
-function error_parse_version() {
-    error "Unable to detect the version of '$1'"; exit 5;
-}
-
-function error_patch() {
-    error "Error while patching $1. see $log_file_orig for more details."
-    exit 8
-}
-
-function error_configure() {
-    if (( verbose == 0 )); then
-        echo "Error while configuring $1. see $log_file_orig for more details."
-    else
-        echo "Error while configuring $1."
-    fi
-    # exit 9
-}
-
-function error_make() {
-    if (( verbose == 0 )); then
-        echo "Error while building $1. see $log_file_orig for more details."
-    else
-        echo "Error while building $1."
-    fi
-    # exit 10
-}
-
-function error_install() {
-    if (( verbose == 0 )); then
-        echo "Error while installing $1. see $log_file_orig for more details."
-    else
-        echo "Error while installing $1."
-    fi
-    # exit 11
-}
-
-function error_test() {
-    if (( verbose == 0 )); then
-        error "Error while testing $1. see $log_file_orig for more details."
-    else
-        error "Error while testing $1."
-    fi
-    exit 12
-}
-
-# log everything, display everything
-function run_log_debug() {
-    "$@" 2>&1 | tee -a "$log_file" >&2
-    return ${PIPESTATUS[0]}
-}
-
-# log everything, only display stderr
-function run_log_verbose() {
-    { "$@" >> "$log_file" 2>&3; } 3>&1 | tee -a "$log_file" >&2
-    return ${PIPESTATUS[0]}
-}
-
-# log everything, do not display anything
-function run_log_quiet() {
-    "$@" >> "$log_file" 2>&1
-}
-
-function progress_run() {
-    progress "$*"
-    if (( verbose >= 2 )); then
-        run_log_debug "$@"
-    elif (( verbose == 1 )); then
-        run_log_verbose "$@"
-    else
-        run_log_quiet "$@"
-    fi
-}
 
 ######################
 # Activation scripts #
@@ -685,33 +145,6 @@ unset act_prepend_manpath
 unset act_prepend_infopath
 unset act_prepend_python_path
 
-function prepend_path() {
-    PATH="$1:$PATH"
-    act_prepend_path+=("$1")
-}
-
-function prepend_manpath() {
-    export MANPATH="$1${MANPATH:+:$MANPATH}"
-    act_prepend_manpath+=("$1")
-}
-
-function prepend_infopath() {
-    export INFOPATH="$1${INFOPATH:+:$INFOPATH}"
-    act_prepend_infopath+=("$1")
-}
-
-function prepend_python_path() {
-    export PYTHONPATH="$1${PYTHONPATH:+:$PYTHONPATH}"
-    act_prepend_python_path+=("$1")
-}
-
-function generate_env_path_line() {
-    local var_name=$1; shift
-
-    if (( $# > 0 )); then
-        echo "export ${var_name}=\"$(join ':' "$@")\${${var_name}:+:\$${var_name}}\""
-    fi
-}
 
 ################################
 # Check required dependencies  #
@@ -1084,7 +517,7 @@ fi
 ###############################
 # Install menhir if necessary #
 ###############################
-
+menhir_failed=0
 if (( ! found_menhir )); then
     progress "Could NOT find Menhir"
 
@@ -1100,26 +533,36 @@ if (( ! found_menhir )); then
 
         progress_run make \
             PREFIX="$install_dir/menhir-$menhir_install_version" \
-            all -j1 || error_make menhir
-
-        progress_run make \
-            PREFIX="$install_dir/menhir-$menhir_install_version" \
-            install || error_install menhir
+            all -j1 || {
+            error_make menhir;
+            menhir_failed=1;
+        }
+        if (( ! menhir_failed )); then
+            progress_run make \
+                PREFIX="$install_dir/menhir-$menhir_install_version" \
+                install || {
+                error_install menhir;
+                menhir_failed=1;
+            }
+        fi
     fi
+    if (( ! menhir_failed )); then
+        prepend_path "$install_dir/menhir-$menhir_install_version/bin"
 
-    prepend_path "$install_dir/menhir-$menhir_install_version/bin"
+        (command_exists menhir && version=$(menhir_parse_version menhir) &&
+            [[ "$version" = "$menhir_install_version" ]]) ||
+            error_msg "menhir is not properly installed"
 
-    (command_exists menhir && version=$(menhir_parse_version menhir) &&
-        [[ "$version" = "$menhir_install_version" ]]) ||
-        assert_failed "menhir is not properly installed"
-
-    success "${cgreen}menhir $menhir_install_version${coff}${cbold} successfully installed"
+        success "${cgreen}menhir $menhir_install_version${coff}${cbold} successfully installed"
+    else
+        error_msg "Skipping menhir: menhir installation, failed"
+    fi
 fi
 
 ##################
 # Install spacer for Zustre #
 ##################
-
+spacer_failed=0
 if [[ -x "$install_dir/spacer/bin/z3" ]]; then
     progress "Using already built ${cgreen}spacer"
 else
@@ -1130,61 +573,100 @@ else
     cd "$build_dir/spacer"
 
     progress_run python scripts/mk_make.py \
-        --prefix="$install_dir/spacer" || error_configure spacer
-
-    cd "$build_dir/spacer/build"
-
-    progress_run make || error_make spacer
-
-    progress_run make install || error_install spacer
+        --prefix="$install_dir/spacer" || {
+        error_configure spacer;
+        spacer_failed=1;
+    }
+    if (( ! spacer_failed )); then
+        cd "$build_dir/spacer/build"
+        progress_run make || {
+            error_make spacer;
+            spacer_failed=1;
+        }
+    fi
+    if (( ! spacer_failed )); then
+        progress_run make install || {
+            error_install spacer;
+            spacer_failed=1;
+        }
+    fi
 fi
-
-prepend_path "$install_dir/spacer/bin"
-prepend_python_path "$install_dir/spacer/lib/python"*"/dist-packages"
-
-command_exists z3 || assert_failed "z3 is not properly installed"
-version=$(spacer_parse_version z3) || error_parse_version spacer
-
-success "${cgreen}spacer $version${coff}${cbold} successfully installed"
-
+if (( ! spacer_failed )); then
+    prepend_path "$install_dir/spacer/bin"
+    prepend_python_path "$install_dir/spacer/lib/python"*"/dist-packages"
+    command_exists z3 || {
+        error_msg "spacer is not properly installed";
+        spacer_failed=1;
+    }
+    if (( ! spacer_failed )); then
+        version=$(spacer_parse_version z3) || {
+            error_parse_version spacer;
+            spacer_failed=1;
+        }
+    fi
+    if (( ! spacer_failed )); then
+        success "${cgreen}spacer $version${coff}${cbold} successfully installed"
+    fi
+else
+    error_msg "Skipping spacer: spacer installation, failed"
+fi
 
 ##################
 # Install Z3 #
 ##################
-
+z3_failed=0
 if [[ -x "$install_dir/z3/bin/z3" ]]; then
     progress "Using already built ${cgreen}z3"
 else
     progress "Installing ${cgreen}z3${coff}${cbold} from upstream repository"
     git_clone "https://github.com/Z3Prover/z3.git" "master" \
     	"$build_dir/z3"
-    #git_clone "https://bitbucket.org/spacer/code.git" "spacer"\
-    #    "$build_dir/z3"
 
     cd "$build_dir/z3"
 
     progress_run python scripts/mk_make.py \
-        --prefix="$install_dir/z3" || error_configure spacer
-
-    cd "$build_dir/z3/build"
-
-    progress_run make || error_make spacer
-
-    progress_run make install || error_install spacer
+        --prefix="$install_dir/z3" || {
+        error_configure z3;
+        z3_failed=1;
+    }
+    if (( ! z3_failed )); then
+        cd "$build_dir/z3/build"
+        progress_run make || {
+            error_make z3;
+            z3_failed=1;
+        }
+    fi
+    if (( ! z3_failed )); then
+        progress_run make install || {
+            error_install z3;
+            z3_failed=1;
+        }
+    fi
 fi
+if (( ! z3_failed )); then
+    prepend_path "$install_dir/z3/bin"
+    prepend_python_path "$install_dir/z3/lib/python"*"/dist-packages"
 
-prepend_path "$install_dir/z3/bin"
-prepend_python_path "$install_dir/z3/lib/python"*"/dist-packages"
-
-command_exists z3 || assert_failed "z3 is not properly installed"
-version=$(spacer_parse_version z3) || error_parse_version spacer
-
-success "${cgreen}z3 $version${coff}${cbold} successfully installed"
-
+    command_exists z3 || {
+        error_msg "z3 is not properly installed";
+        z3_failed=1;
+    }
+    if (( ! z3_failed )); then
+        version=$(spacer_parse_version z3) || {
+            error_parse_version z3;
+            z3_failed=1;
+        }
+    fi
+    if (( ! z3_failed )); then
+        success "${cgreen}z3 $version${coff}${cbold} successfully installed"
+    fi
+else
+    error_msg "Skipping z3: z3 installation, failed"
+fi
 ###################
 # Install lustrec #
 ###################
-
+lustrec_failed=0
 if [[ -x "$install_dir/bin/lustrec" ]]; then
     progress "Using already built ${cgreen}lustrec"
 else
@@ -1194,166 +676,167 @@ else
 
     cd "$build_dir/lustrec"
 
-    progress_run autoconf || error_configure lustrec
-
-    progress_run ./configure \
-        --prefix="$install_dir" || error_configure lustrec
-
-    progress_run make || error_make lustrec
+    progress_run autoconf || {
+        error_configure lustrec; lustrec_failed=1;
+    }
+    
+    if (( ! lustrec_failed )); then
+        progress_run ./configure \
+            --prefix="$install_dir" || {
+            error_configure lustrec; lustrec_failed=1;
+        }
+    fi
+    if (( ! lustrec_failed )); then
+        progress_run make || {
+            error_make lustrec; lustrec_failed=1;
+        }
+    fi
     # this hack because lustrec was broken
     #mkdir "$install_dir/include/"
     #mkdir "$install_dir/include/lustrec/"
     #cp -r "$build_dir/lustrec/include/"* "$install_dir/include/lustrec/"
-    progress_run make install || error_install lustrec
+    if (( ! lustrec_failed )); then
+        progress_run make install || {
+            error_install lustrec; lustrec_failed=1;
+        }
+    fi
 fi
-
-prepend_path "$install_dir/bin"
-
-command_exists lustrec || assert_failed "lustrec is not properly installed"
-version=$(lustrec_parse_version lustrec) #|| error_parse_version lustrec
-
-success "${cgreen}lustrec $version${coff}${cbold} successfully installed"
-
+if (( ! lustrec_failed )); then
+    prepend_path "$install_dir/bin"
+    command_exists lustrec || {
+        error_msg "lustrec is not properly installed";
+        lustrec_failed=1;
+    }
+    if (( ! lustrec_failed )); then
+        success "${cgreen}lustrec $version${coff}${cbold} successfully installed"
+    fi
+else
+    error_msg "Skipping Lustrec: lustrec installation, failed"
+fi
 ##################
 # Install zustre #
 ##################
-
-if [[ -x "$install_dir/bin/zustre" ]]; then
-    progress "Using already built ${cgreen}zustre"
+zustre_failed=0
+if [ $lustrec_failed -eq 1 -o $spacer_failed -eq 1 ]; then
+    error_msg "Skipping Zustre: dependancies Lustrec or spacer installation has failed"
 else
-    progress "Installing ${cgreen}zustre${coff}${cbold} from upstream repository"
+    if [[ -x "$install_dir/bin/zustre" ]]; then
+        progress "Using already built ${cgreen}zustre"
+    else
+        progress "Installing ${cgreen}zustre${coff}${cbold} from upstream repository"
 
-    git_clone "$zustre_url" "$zustre_branch" "$build_dir/zustre"
+        git_clone "$zustre_url" "$zustre_branch" "$build_dir/zustre"
 
-    cd "$build_dir/zustre"
+        cd "$build_dir/zustre"
 
-    mkdir build
-    cd build
+        mkdir build
+        cd build
 
-    progress_run cmake \
-        -DCMAKE_BUILD_TYPE=Release \
-        -DCMAKE_INSTALL_PREFIX="$install_dir" \
-        -DLUSTREC_ROOT="$install_dir" \
-        -DLUSTREC_INCLUDE_DIR="$install_dir/include/lustrec" \
-        -DZ3_ROOT="$install_dir/spacer" \
-        .. || error_configure zustre
+        progress_run cmake \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX="$install_dir" \
+            -DLUSTREC_ROOT="$install_dir" \
+            -DLUSTREC_INCLUDE_DIR="$install_dir/include/lustrec" \
+            -DZ3_ROOT="$install_dir/spacer" \
+            .. || {
+            error_configure zustre;
+            zustre_failed=1;
+        }
+        if (( ! zustre_failed )); then
+            progress_run cmake --build . || {
+                error_make zustre;
+                zustre_failed=1;
+            }
+        fi
+        if (( ! zustre_failed )); then
+            progress_run cmake --build . --target install || {
+                error_install zustre;
+                zustre_failed=1;
+            }
+        fi
+    fi
 
-    progress_run cmake --build . || error_make zustre
+    
+    if (( ! zustre_failed )); then
+        command_exists zustre || error_msg "zustre is not properly installed"
 
-    progress_run cmake --build . --target install || error_install zustre
+        success "${cgreen}zustre${coff}${cbold} successfully installed"
+
+        if [[ -f "$build_dir/zustre/tests/two_counters.lus" ]]; then
+            progress "Testing zustre on a simple example"
+            zustre_output=$(run_log_debug zustre --xml "$build_dir/zustre/tests/two_counters.lus" 2>&1) || {
+                error_test zustre;
+                zustre_failed=1;
+            }
+            (( verbose >= 1 )) && echo "$zustre_output"
+            if (( ! zustre_failed )); then
+                [[ "$zustre_output" == *"<Answer>SAFE</Answer>"* ]] || {
+                    error_test zustre;
+                    zustre_failed=1;
+                }
+            fi
+        fi
+    else
+        error_msg "Skipping Zustre: zustre installation, failed"
+    fi
 fi
-
-#already added in lustrec
-#prepend_path "$install_dir/bin"
-
-command_exists zustre || assert_failed "zustre is not properly installed"
-
-success "${cgreen}zustre${coff}${cbold} successfully installed"
-
-if [[ -f "$build_dir/zustre/tests/two_counters.lus" ]]; then
-    progress "Testing zustre on a simple example"
-    zustre_output=$(run_log_debug zustre --xml "$build_dir/zustre/tests/two_counters.lus" 2>&1) || error_test zustre
-    (( verbose >= 1 )) && echo "$zustre_output"
-    [[ "$zustre_output" == *"<Answer>SAFE</Answer>"* ]] || error_test zustre
-fi
-
 #################
 # Install kind2 #
 #################
-
-if [[ -x "$install_dir/bin/kind2" ]]; then
-    progress "Using already built ${cgreen}kind2"
+kind2_failed=0
+if [ $z3_failed -eq 1 -o $menhir_failed -eq 1 ]; then
+    error_msg "Skipping Kind2: dependancies z3 or menhir installation has failed"
 else
-    progress "Installing ${cgreen}kind2${coff}${cbold} from upstream repository"
-
-    git_clone "$kind2_url" "$kind2_branch" "$build_dir/kind2"
-
-    cd "$build_dir/kind2"
-
-    # issue #455, fixed in 33a09c5, waiting for it to be in the master branch
-    cat > issue-455.patch <<'EOF'
---- Makefile.in
-+++ Makefile.in
-@@ -81,9 +81,11 @@
- install:
- 	mkdir -p ${bindir}
- 	for i in $(install_files); do \
--		install -m 0755 $(addprefix $(LOCAL_BINDIR)/,$$i) $(addsuffix ${bin_suffix},$(addprefix ${bindir}/,$$i)); \
--	 done
--	if [ -n ${bin_suffix} ]; then echo "Suffix for binaries is ${bin_suffix}"; fi
-+	  if [ -f $(addprefix $(LOCAL_BINDIR)/,$$i) ]; then \
-+	    install -m 0755 $(addprefix $(LOCAL_BINDIR)/,$$i) $(addsuffix ${bin_suffix},$(addprefix ${bindir}/,$$i)); \
-+	  fi \
-+	done
-+	if [ -n "${bin_suffix}" ]; then echo "Suffix for binaries is ${bin_suffix}"; fi
-
- test: all
- 	./tests/run.sh $(LOCAL_REGRESSIONDIR) $(LOCAL_BINDIR)/kind2 "${ARGS}"
-EOF
-
-    progress "Applying patch issue-455.patch"
-    run_log_quiet patch -p0 < issue-455.patch
-
-    # issue #458: "undefined reference to `uuid_generate`"
-    patch_issue_458=0
-
-    if run_log_quiet pkg-config --exists --print-errors "uuid >= 0.0.0"; then
-        patch_issue_458=1
+    if [[ -x "$install_dir/bin/kind2" ]]; then
+        progress "Using already built ${cgreen}kind2"
     else
-        cat > test_uuid.c <<EOF
-#include <uuid/uuid.h>
+        progress "Installing ${cgreen}kind2${coff}${cbold} from upstream repository"
 
-int main() {
-    uuid_t uuid;
-    uuid_generate(uuid);
-    return 0;
-}
-EOF
-        if run_log_quiet "$CC" $CPPFLAGS $CFLAGS $LDFLAGS -luuid -o test_uuid test_uuid.c; then
-            patch_issue_458=1
+        git_clone "$kind2_url" "$kind2_branch" "$build_dir/kind2"
+
+        cd "$build_dir/kind2"
+
+        progress_run ./autogen.sh || {
+            error_configure kind2;
+            kind2_failed=1;
+        }
+        if (( ! kind2_failed )); then
+            progress_run ./build.sh --prefix="$install_dir" || {
+                error_make kind2;
+                kind2_failed=1;
+            }
         fi
-
-        rm -f test_uuid test_uuid.c
+        if (( ! kind2_failed )); then
+            progress_run make install || {
+                error_install kind2;
+                kind2_failed=1;
+            }
+        fi
     fi
 
-    if (( patch_issue_458 )); then
-        cat > issue-458.patch <<EOF
---- src/Makefile.in
-+++ src/Makefile.in
-@@ -1,4 +1,4 @@
--OCAMLBUILD=@OCAMLBUILD@ -j 0 -cflags -w,@P@U@F
-+OCAMLBUILD=@OCAMLBUILD@ -j 0 -cflags -w,@P@U@F -lflags="-cclib -luuid"
+    if (( ! kind2_failed )); then
+        command_exists kind2 || error_msg "kind2 is not properly installed"
+        version=$(kind2_parse_version kind2) || {
+            error_parse_version kind2;
+            kind2_failed=1;
+        }
+        if (( ! kind2_failed )); then
+            success "${cgreen}kind2 $version${coff}${cbold} successfully installed"
 
- # Check if git is installed and use output of git describe as version
- # number, else use version number from configure
-EOF
-        
-        progress "Applying patch issue-458.patch"
-        run_log_quiet patch -p0 < issue-458.patch
+            if [[ -f "$build_dir/zustre/tests/two_counters.lus" ]]; then
+                progress "Testing kind2 on a simple example"
+                kind2_output=$(run_log_debug kind2 "$build_dir/zustre/tests/two_counters.lus" 2>&1)
+                (( verbose >= 1 )) && echo "$kind2_output"
+                [[ $kind2_output == *"Success"* ]] || {
+                    error_test kind2;
+                    kind2_failed=1;
+                }
+            fi
+        fi
+    else
+        error_msg "Skipping Kind2: kind2 installation, failed"
     fi
-
-    progress_run ./autogen.sh || error_configure kind2
-
-    progress_run ./build.sh --prefix="$install_dir" || error_make kind2
-
-    progress_run make install || error_install kind2
 fi
-
-#already added in lustrec
-#prepend_path "$install_dir/bin"
-
-command_exists kind2 || assert_failed "kind2 is not properly installed"
-version=$(kind2_parse_version kind2) || error_parse_version kind2
-
-success "${cgreen}kind2 $version${coff}${cbold} successfully installed"
-
-if [[ -f "$build_dir/zustre/tests/two_counters.lus" ]]; then
-    progress "Testing kind2 on a simple example"
-    kind2_output=$(run_log_debug kind2 "$build_dir/zustre/tests/two_counters.lus" 2>&1)
-    (( verbose >= 1 )) && echo "$kind2_output"
-    [[ $kind2_output == *"Success"* ]] || error_test kind2
-fi
-
 ##################################
 # Generate the activation script #
 ##################################
