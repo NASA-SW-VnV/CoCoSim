@@ -45,11 +45,11 @@ if skip_pp
 end
 %% Creat the new model name
 [model_parent, model, ext] = fileparts(model_path);
-already_pp = 0;
+already_pp = false;
 load_system(model_path);
 
 if SLXUtils.isAlreadyPP(model_path)
-    already_pp = 1;
+    already_pp = true;
     new_model_base = model;
     new_file_path = model_path;
 else

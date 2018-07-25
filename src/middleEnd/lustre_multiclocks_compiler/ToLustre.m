@@ -61,7 +61,7 @@ display_msg('Pre-processing', MsgType.INFO, 'lustre_multiclocks_compiler', '');
 %     varargin = 'nodisplay';
 % end
 varargin{end+1} = 'use_backup';
-[new_file_name, status] = cocosim_pp(model_full_path , varargin);
+[new_file_name, status] = cocosim_pp(model_full_path , varargin{:});
 if status
     return;
 end
