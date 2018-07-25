@@ -51,7 +51,7 @@ cocosim_url = 'https://github.com/coco-team/cocoSim2.git';
 cocosim_branch = 'cocosim_nasa';
 
 if exist(coco_git_dir, 'dir')
-    cd(coco_git_dir);
+    cd(coco_git_dir); 
     commands = {sprintf('git pull; git checkout %s', cocosim_branch), ...
         sprintf('git pull origin %s', cocosim_branch)};
 else
