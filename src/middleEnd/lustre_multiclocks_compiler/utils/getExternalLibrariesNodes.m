@@ -31,7 +31,7 @@ for i=1:numel(external_libraries)
                 MsgType.ERROR, 'getExternalLibrariesNodes','');
             continue;
         end
-        lustre_code = [lustre_code, node];
+        lustre_code = [node, lustre_code];
         additional_nodes = [additional_nodes, external_nodes_i];
     else
         fun_name = sprintf('ExtLib.get_%s',lib);
@@ -43,7 +43,7 @@ for i=1:numel(external_libraries)
                 MsgType.ERROR, 'getExternalLibrariesNodes','');
             continue;
         end
-        lustre_code = [lustre_code, node];
+        lustre_code = [node, lustre_code];
         open_list = [open_list, opens];
         additional_nodes = [additional_nodes, external_nodes_i];
     end
@@ -54,7 +54,7 @@ already_handled = unique([already_handled, external_libraries]);
 additional_nodes = unique(additional_nodes);
 additional_nodes = additional_nodes(~ismember(additional_nodes, already_handled));
 [ additional_code, additional_open_list ] = recursive_call( additional_nodes, already_handled );
-lustre_code = [lustre_code, additional_code];
+lustre_code = [additional_code, lustre_code];
 open_list = [open_list, additional_open_list];
 
 

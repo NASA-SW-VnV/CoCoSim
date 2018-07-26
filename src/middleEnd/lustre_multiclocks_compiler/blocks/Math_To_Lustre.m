@@ -12,7 +12,7 @@ classdef Math_To_Lustre < Block_To_Lustre
     
     methods
         
-        function  write_code(obj, parent, blk, xml_trace, varargin)
+        function  write_code(obj, parent, blk, xml_trace, ~, backend, varargin)
             
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             inputs = {};
@@ -119,8 +119,12 @@ classdef Math_To_Lustre < Block_To_Lustre
                     obj.addExternal_libraries(strcat(operator, '_int_int'));
                     fun = strcat(operator, '_int_int');
                 else
-                    obj.addExternal_libraries('simulink_math_fcn');
                     fun = strcat(operator, '_real');
+                    if BackendType.isKIND2(backend)
+                        obj.addExternal_libraries(strcat('KIND2_', fun));
+                    else
+                        obj.addExternal_libraries('simulink_math_fcn');
+                    end
                 end
                 for i=1:numel(outputs)
                     codes{i} = sprintf('%s = %s(%s, %s);\n\t',...

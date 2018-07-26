@@ -172,6 +172,9 @@ classdef ExtLib
         
         % The following functions assume "/" and "mod" in Lustre as in
         % euclidean division for integers.
+        function [node, external_nodes_i, opens] = get_abs_real()
+            [node, external_nodes_i, opens] = LustMathLib.get_abs_real();
+        end
         function [node, external_nodes_i, opens] = get_abs_int()
             [node, external_nodes_i, opens] = LustMathLib.get_abs_int();
         end

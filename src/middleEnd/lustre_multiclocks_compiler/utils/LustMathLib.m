@@ -58,6 +58,15 @@ classdef LustMathLib
             format = [format, 'else -x;\ntel\n\n'];
             node = sprintf(format);
         end
+        
+        function [node, external_nodes_i, opens] = get_abs_real()
+            opens = {};
+            external_nodes_i = {};
+            format = 'node abs_real (x: real)\nreturns(y:real);\nlet\n\t';
+            format = [format, 'y= if x >= 0.0 then x \n\t'];
+            format = [format, 'else -x;\ntel\n\n'];
+            node = sprintf(format);
+        end
         %% Bitwise operators
         function [node, external_nodes, opens] = getBitwiseSigned(op, n)
             opens = {};

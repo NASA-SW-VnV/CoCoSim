@@ -34,6 +34,7 @@ Ktrinh: Assignment,
 Hamza:  Abs,
         ActionPort,
         BitwiseOperator,
+        BusAssignment,
         BusCreator, 
         BusSelector, 
         Constant,
@@ -55,6 +56,7 @@ Hamza:  Abs,
         If,
         InportShadow(pp),
         Integrator (pp),
+        ManualSwitch,
         Memory (pp)
         Merge,
         MinMax,
@@ -90,10 +92,8 @@ Hamza:  Abs,
 
    
 Not supported yet:
-    BusAssignment (Hamza)
     Discrete Derivative (check pp in article)
     Rate Limiter
-    ManualSwitch
     Derivative (discretize it by DiscreteDerivative in pp or pre-process it with DiscreteDerivative)
     InitialCondition
     UniformRandomNumber ( see RandomNumber)

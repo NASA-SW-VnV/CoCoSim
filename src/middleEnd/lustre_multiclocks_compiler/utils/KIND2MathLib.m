@@ -32,7 +32,41 @@ classdef KIND2MathLib
             format = [format, '*)\nlet\ntel\n'];
             node = sprintf(format);
         end
-       
+        %% mod_real
+        function [node, external_nodes_i] = get_mod_real()
+            external_nodes_i = {};
+            format = 'node mod_real(x, y: real;)\nreturns( z: real );\n';
+            format = [format, '(*@contract\n\t'];
+            format = [format, 'guarantee x=0.0 => z = 0.0;\n\t'];
+            format = [format, 'guarantee y=0.0 => z = x;\n\t'];
+            format = [format, '--sign(x) = sign(y) and abs(x) < abs(y)\n\t'];% because z takes the sign of y
+            format = [format, 'guarantee 0.0 < x and x < y => z = x ;\n\t'];
+            format = [format, 'guarantee y < x and x < 0.0 => z = x ;\n\t'];
+            format = [format, '--sign(x) <> sign(y) and abs(x) < abs(y)\n\t'];% because z takes the sign of y
+            format = [format, 'guarantee 0.0 < x and x < -y => z = x + y ;\n\t'];
+            format = [format, 'guarantee -y < x and x < 0.0 => z = x + y;\n\t'];
+            
+            format = [format, '-- sign(z) = sign(y) and abs(z) < abs(y)\n\t'];
+            format = [format, 'guarantee y > 0.0 => 0.0 <= z and z < y;\n\t'];
+            format = [format, 'guarantee y < 0.0 => y < z and z <= 0.0;\n\t'];
+            format = [format, '*)\nlet\ntel\n'];
+            node = sprintf(format);
+        end
+        %% rem_real
+        function [node, external_nodes_i] = get_rem_real()
+            external_nodes_i = {'abs_real'};
+            format = 'node rem_real(x, y: real;)\nreturns( z: real );\n';
+            format = [format, '(*@contract\n\t'];
+            format = [format, 'guarantee x=0.0 => z = 0.0;\n\t'];
+            format = [format, 'guarantee y=0.0 => z = x;\n\t'];
+            format = [format, 'guarantee abs_real(x) < abs_real(y) => z = x;\n\t'];
+            format = [format, 'guarantee abs_real(z) < abs_real(y);\n\t'];
+            format = [format, '-- sign(z) = sign(x) \n\t'];
+            format = [format, 'guarantee x > 0.0 => z >= 0.0;\n\t'];
+            format = [format, 'guarantee x < 0.0 => z <= 0.0;\n\t'];
+            format = [format, '*)\nlet\ntel\n'];
+            node = sprintf(format);
+        end
     end
     
 end
