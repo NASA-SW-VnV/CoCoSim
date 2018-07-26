@@ -663,82 +663,86 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
             end
         end
         
-        function contractBody = getContractBody_boundaryBox(blkParams,inputs,outputs)
+        function contractBody = getContractBody(blkParams,inputs,outputs)
             contractBody = {};
             % y is bounded when there is no extrapolation
             if blkParams.yIsBounded
-                contractBody{end+1} = sprintf('guarantee  %s >= %.15f;\n',outputs{1},blkParams.tableMin);
-                contractBody{end+1} = sprintf('guarantee  %s <= %.15f;',outputs{1},blkParams.tableMax);
+                contractBody{end+1} = sprintf('guarantee  %s >= %.15f and %s <= %.15f;',outputs{1},blkParams.tableMin, outputs{1},blkParams.tableMax);
             else
                 % if u is inside boundary polytop, then y is also
                 % bounded by table min and max
                 code = {};
                 for i=1:numel(inputs)
                     code{end + 1} = sprintf('%s >= %.15f',inputs{i}{1},min(blkParams.BreakpointsForDimension{i}));
-                    code{end + 1} = sprintf('%s <= %.15f',inputs{i}{1},max(blkParams.BreakpointsForDimension{i}));    
-                end       
+                    code{end + 1} = sprintf('%s <= %.15f',inputs{i}{1},max(blkParams.BreakpointsForDimension{i}));
+                end
                 P = MatlabUtils.strjoin(code, ' and ');
                 Q = sprintf('%s >= %.15f and  %s <= %.15f', outputs{1},blkParams.tableMin, outputs{1},blkParams.tableMax);
                 contractBody{end+1} = sprintf('guarantee %s => %s;', P, Q);
             end
-            contractBody = MatlabUtils.strjoin(contractBody, '\n\t');
-%         end
-%         
-%         function contractBody = getContractBody(blkParams,inputs,outputs)
-%             contract_boundaryBox = getContractBody_boundaryBox(blkParams,inputs,outputs);
-%             contract_allElements = getContractBody_boundaryBox(blkParams,inputs,outputs);
-%             contractBody = MatlabUtils.strjoin(contractBody, '\n\t');
-%         end
-%         
-%         function contractBody = getContractBody_allElements(blkParams,inputs,outputs)
-%             contractBody = {};
-            
+                       
             % contract for each element in total mesh
-            for i=1:numel(blkParams.BreakpointsForDimension{i})-1
-                for j=1:numel(blkParams.BreakpointsForDimension{j})-1
-                    if j > blkParams.NumberOfTableDimensions
-                        continue;
+            
+            if blkParams.NumberOfTableDimensions == 1
+                curTable = [];
+                for i=1:numel(blkParams.BreakpointsForDimension{1})-1
+                    code = {};
+                    for j=1:numel(inputs)
+                        code{end + 1} = sprintf('%s >= %.15f and %s <= %.15f',inputs{j}{1},blkParams.BreakpointsForDimension{1}(i),inputs{j}{1},blkParams.BreakpointsForDimension{1}(i+1));
+                        curTable(end+1) = blkParams.Table(j,i);
+                        curTable(end+1) = blkParams.Table(j,i+1);
                     end
-                    for k=1:numel(blkParams.BreakpointsForDimension{k})-1
-                        if k > blkParams.NumberOfTableDimensions
-                            continue;
-                        end
-                        for l=1:numel(blkParams.BreakpointsForDimension{l})-1
-                            if l > blkParams.NumberOfTableDimensions
-                                continue;
-                            end
-                            for m=1:numel(blkParams.BreakpointsForDimension{m})-1
-                                if m > blkParams.NumberOfTableDimensions
-                                    continue;
-                                end
-                                for n=1:numel(blkParams.BreakpointsForDimension{n})-1
-                                    if n > blkParams.NumberOfTableDimensions
-                                        continue;
-                                    end
-                                    for o=1:numel(blkParams.BreakpointsForDimension{o})-1
-                                        if o > blkParams.NumberOfTableDimensions
-                                            continue;
-                                        end
-                                        
-                                        % element boundary and min and max of element 
-                                        code = {};
-                                        for i=1:numel(inputs)
-                                            code{end + 1} = sprintf('%s >= %.15f',inputs{i}{1},min(blkParams.BreakpointsForDimension{i}));
-                                            code{end + 1} = sprintf('%s <= %.15f',inputs{i}{1},max(blkParams.BreakpointsForDimension{i}));
-                                        end
-                                        P = MatlabUtils.strjoin(code, ' and ');
-                                        Q = sprintf('%s >= %.15f and  %s <= %.15f', outputs{1},blkParams.tableMin, outputs{1},blkParams.tableMax);
-                                        contractBody{end+1} = sprintf('guarantee %s => %s;', P, Q);
-                                    end
-                                end
-                            end
-                        end
+                    P = MatlabUtils.strjoin(code, ' and ');
+                    Q = sprintf('%s >= %.15f and  %s <= %.15f', outputs{1},min(curTable), outputs{1},max(curTable));
+                    contractBody{end+1} = sprintf('guarantee %s => %s;', P, Q);
+                end
+                
+                
+            elseif blkParams.NumberOfTableDimensions == 2
+                curTable = [];
+                for i=1:numel(blkParams.BreakpointsForDimension{1})-1
+                    for j=1:numel(blkParams.BreakpointsForDimension{2})-1
+                        code = {};
+                        code{end + 1} = sprintf('%s >= %.15f and %s <= %.15f',inputs{1}{1},blkParams.BreakpointsForDimension{1}(i),inputs{1}{1},blkParams.BreakpointsForDimension{1}(i+1));
+                        code{end + 1} = sprintf('%s >= %.15f and %s <= %.15f',inputs{2}{1},blkParams.BreakpointsForDimension{2}(j),inputs{2}{1},blkParams.BreakpointsForDimension{2}(j+1));
+                        curTable(end+1) = blkParams.Table(i,j);
+                        curTable(end+1) = blkParams.Table(i,j+1);
+                        curTable(end+1) = blkParams.Table(i+1,j);
+                        curTable(end+1) = blkParams.Table(i+1,j+1);
+                        P = MatlabUtils.strjoin(code, ' and ');
+                        Q = sprintf('%s >= %.15f and  %s <= %.15f', outputs{1},min(curTable), outputs{1},max(curTable));
+                        contractBody{end+1} = sprintf('guarantee %s => %s;', P, Q);
                     end
                 end
+            elseif blkParams.NumberOfTableDimensions == 3
+                curTable = [];
+                for i=1:numel(blkParams.BreakpointsForDimension{1})-1
+                    for j=1:numel(blkParams.BreakpointsForDimension{2})-1
+                        for k=1:numel(blkParams.BreakpointsForDimension{3})-1
+                            code = {};
+                            code{end + 1} = sprintf('%s >= %.15f and %s <= %.15f',inputs{1}{1},blkParams.BreakpointsForDimension{1}(i),inputs{1}{1},blkParams.BreakpointsForDimension{1}(i+1));
+                            code{end + 1} = sprintf('%s >= %.15f and %s <= %.15f',inputs{2}{1},blkParams.BreakpointsForDimension{2}(j),inputs{2}{1},blkParams.BreakpointsForDimension{2}(j+1));
+                            code{end + 1} = sprintf('%s >= %.15f and %s <= %.15f',inputs{3}{1},blkParams.BreakpointsForDimension{3}(k),inputs{3}{1},blkParams.BreakpointsForDimension{3}(k+1));
+                            P = MatlabUtils.strjoin(code, ' and ');                            
+                            curTable(end+1) = blkParams.Table(i,j,k);
+                            curTable(end+1) = blkParams.Table(i,j,k+1);
+                            curTable(end+1) = blkParams.Table(i,j+1,k);
+                            curTable(end+1) = blkParams.Table(i,j+1,k+1);
+                            curTable(end+1) = blkParams.Table(i+1,j,k);
+                            curTable(end+1) = blkParams.Table(i+1,j,k+1);
+                            curTable(end+1) = blkParams.Table(i+1,j+1,k);
+                            curTable(end+1) = blkParams.Table(i+1,j+1,k+1);                            
+                            Q = sprintf('%s >= %.15f and  %s <= %.15f', outputs{1},min(curTable), outputs{1},max(curTable));
+                            contractBody{end+1} = sprintf('guarantee %s => %s;', P, Q);
+                        end
+                    end
+                end                
+            else
+                display_msg(sprintf('More than 3 dimensions is not supported for contract in block %s',...
+                    blk.Origin_path), MsgType.ERROR, 'Lookup_nD_To_Lustre', '');
             end
-            
-            contractBody = MatlabUtils.strjoin(contractBody, '\n\t');
-        end        
+            contractBody = MatlabUtils.strjoin(contractBody, '\n');
+        end
         
         function shapeNodeSign = getShapeBoundingNodeSign(dims)
             % generating sign for nodes bounding element for up to 7
