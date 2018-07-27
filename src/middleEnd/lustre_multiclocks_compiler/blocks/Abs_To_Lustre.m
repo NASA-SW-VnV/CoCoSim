@@ -40,7 +40,11 @@ classdef Abs_To_Lustre < Block_To_Lustre
             
             codes = {};
             for j=1:numel(inputs{1})
-                code = sprintf('if %s >= %s then %s else -%s', inputs{1}{j}, zero, inputs{1}{j}, inputs{1}{j});
+%                 code = sprintf('if %s >= %s then %s else -%s', inputs{1}{j}, zero, inputs{1}{j}, inputs{1}{j});
+                cond = BinaryExpr(BinaryOp.GTE, LusIdExp(inputs{1}{j}), LusIdExp(zero)); % inputs{1}{j} >= zero
+                thenExp = LusIdExp(inputs{1}{j});
+                ElseExpr = UnaryExpr(LusIdExp(inputs{1}{j}));
+                code = IteExpr(cond, thenExp, ElseExpr);
                 if isInsideContract
                     codes{j} = sprintf('var %s = %s;\n\t', ...
                         strrep(outputs_dt{j}, ';', ''), code);
