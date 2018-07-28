@@ -67,7 +67,7 @@ for node_idx =1:numel(emf_nodes_names)
     original_name = nodes.(name).original_name;
     pattern = strcat('(node|function)\s+',original_name,'\s*\(');
     tokens = regexp(lusi_text, pattern,'match');
-    if ~isempty(tokens) && ~(endsWith(original_name, '_unless') || endsWith(original_name, '_handler_until'))
+    if ~isempty(tokens) && ~(MatlabUtils.endsWith(original_name, '_unless') || MatlabUtils.endsWith(original_name, '_handler_until'))
         nodes_names{numel(nodes_names) + 1} = name;
     end
 end

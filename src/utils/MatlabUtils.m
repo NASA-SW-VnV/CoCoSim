@@ -49,7 +49,7 @@ classdef MatlabUtils
         function res = structUnique(struct2, fieldname)
             
             res = struct2;
-            if isempty(struct2) 
+            if isempty(struct2)
                 return;
             end
             if iscell(struct2)
@@ -91,7 +91,39 @@ classdef MatlabUtils
             end
         end
         %%
-        
+        function tf = startsWith(s, pattern)
+            try
+                %use Matlab startsWith for Matlab versions > 2015
+                tf = startsWithw(s, pattern);
+            catch
+                try
+                    res = regexp(s, strcat('^', pattern), 'match', 'once');
+                    if ischar(res)
+                        res = {res};
+                    end
+                    tf = cellfun(@(x) ~isempty(x), res);
+                catch E
+                    throw(E);
+                end
+            end
+        end
+        %%
+        function tf = endsWith(s, pattern)
+            try
+                %use Matlab startsWith for Matlab versions > 2015
+                tf = endsWith(s, pattern);
+            catch
+                try
+                    res = regexp(s, strcat(pattern, '$'), 'match', 'once');
+                    if ischar(res)
+                        res = {res};
+                    end
+                    tf = cellfun(@(x) ~isempty(x), res);
+                catch E
+                    throw(E);
+                end
+            end
+        end
         %% Concat cell array with a specific delimator
         function joinedStr = strjoin(str, delimiter)
             if nargin < 1 || nargin > 2

@@ -15,6 +15,10 @@ classdef RealExpr < LustreExpr
             obj.value = v;
         end
         
+        function code = print(obj, ~)
+            %TODO: check if LUSTREC syntax is OK for the other backends.
+            code = obj.print_lustrec();
+        end
         
         function code = print_lustrec(obj)
             if isnumeric(obj.value)

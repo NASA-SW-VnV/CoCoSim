@@ -63,7 +63,7 @@ classdef Math_To_Lustre < Block_To_Lustre
                     || strcmp(operator, 'log10') ...
                     || strcmp(operator, 'sqrt')
                 
-                obj.addExternal_libraries('lustrec_math');
+                obj.addExternal_libraries('LustMathLib_lustrec_math');
                 for i=1:numel(outputs)
                     rhs = sprintf(conv_format, ...
                         sprintf('%s(%s)', operator,inputs{1}{i}));
@@ -71,7 +71,7 @@ classdef Math_To_Lustre < Block_To_Lustre
                 end
                 
             elseif strcmp(operator, '10^u')
-                obj.addExternal_libraries('lustrec_math');
+                obj.addExternal_libraries('LustMathLib_lustrec_math');
                 for i=1:numel(outputs)
                     rhs = sprintf(conv_format, ...
                         sprintf('pow(10.0, %s)', inputs{1}{i}));
@@ -88,7 +88,7 @@ classdef Math_To_Lustre < Block_To_Lustre
 
             elseif strcmp(operator, 'pow')
                 
-                obj.addExternal_libraries('lustrec_math');
+                obj.addExternal_libraries('LustMathLib_lustrec_math');
                 for i=1:numel(outputs)
                     rhs = sprintf(conv_format, ...
                         sprintf('%s(%s, %s)', operator,inputs{1}{i}, inputs{2}{i}));
@@ -107,7 +107,7 @@ classdef Math_To_Lustre < Block_To_Lustre
                 end
                 
             elseif strcmp(operator, 'hypot')
-                obj.addExternal_libraries('lustrec_math');
+                obj.addExternal_libraries('LustMathLib_lustrec_math');
                 for i=1:numel(outputs)
                     rhs = sprintf(conv_format, ...
                         sprintf('sqrt(%s * %s + %s * %s)', ...
@@ -116,14 +116,14 @@ classdef Math_To_Lustre < Block_To_Lustre
                 end
             elseif strcmp(operator, 'rem') || strcmp(operator, 'mod')
                 if strcmp(outLusDT, 'int')
-                    obj.addExternal_libraries(strcat(operator, '_int_int'));
+                    obj.addExternal_libraries(strcat('LustMathLib_', operator, '_int_int'));
                     fun = strcat(operator, '_int_int');
                 else
                     fun = strcat(operator, '_real');
                     if BackendType.isKIND2(backend)
-                        obj.addExternal_libraries(strcat('KIND2_', fun));
+                        obj.addExternal_libraries(strcat('KIND2MathLib_', fun));
                     else
-                        obj.addExternal_libraries('simulink_math_fcn');
+                        obj.addExternal_libraries('LustMathLib_simulink_math_fcn');
                     end
                 end
                 for i=1:numel(outputs)

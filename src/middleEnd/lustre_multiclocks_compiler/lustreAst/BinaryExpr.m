@@ -18,24 +18,27 @@ classdef BinaryExpr < LustreExpr
             obj.left = left;
             obj.right = right;
         end
-        function code = print_lustrec(obj)
+        function code = print(obj, backend)
+            code = obj.print_lustrec(backend);
+        end
+        function code = print_lustrec(obj, backend)
             code = sprintf('%s %s %s', ...
-                obj.left.print_lustre(),...
-                obj.op.print_lustre(), ...
-                obj.right.print_lustre());
+                obj.left.print(backend),...
+                obj.op.print(backend), ...
+                obj.right.print(backend));
         end
         
         function code = print_kind2(obj)
-            code = obj.print_lustrec();
+            code = obj.print_lustrec(BackendType.KIND2);
         end
         function code = print_zustre(obj)
-            code = obj.print_lustrec();
+            code = obj.print_lustrec(BackendType.ZUSTRE);
         end
         function code = print_jkind(obj)
-            code = obj.print_lustrec();
+            code = obj.print_lustrec(BackendType.JKIND);
         end
         function code = print_prelude(obj)
-            code = obj.print_lustrec();
+            code = obj.print_lustrec(BackendType.PRELUDE);
         end
     end
 

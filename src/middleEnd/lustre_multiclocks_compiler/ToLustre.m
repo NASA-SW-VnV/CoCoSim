@@ -108,16 +108,21 @@ global model_struct
 model_struct = ir_struct.(IRUtils.name_format(file_name));
 main_sampleTime = model_struct.CompiledSampleTime;
 is_main_node = 1;
-[nodes_code, external_libraries] = recursiveGeneration(...
+[nodes_ast, contracts_ast, external_libraries] = recursiveGeneration(...
     model_struct, model_struct, main_sampleTime, is_main_node, backend, xml_trace);
-external_lib_code = getExternalLibrariesNodes(external_libraries);
+[external_lib_code, open_list] = getExternalLibrariesNodes(external_libraries);
+%TODO: change it to AST
+nodes_ast{end+1} = RawLustreCode(external_lib_code);
+%% create LustreProgram
+program =  LustreProgram(open_list, nodes_ast, contracts_ast);
 %% writing code
 fid = fopen(nom_lustre_file, 'a');
 if fid==-1
     msg = sprintf('Opening file "%s" is not possible', nom_lustre_file);
     display_msg(msg, MsgType.ERROR, 'lustre_multiclocks_compiler', '');
 end
-fprintf(fid, '--external libraries\n%s--Simulink code\n%s',external_lib_code, nodes_code);
+
+fprintf(fid, '%s', program.print(backend));
 fclose(fid);
 
 %% writing traceability
@@ -134,21 +139,20 @@ cd(PWD)
 end
 
 %%
-function [nodes_code, external_libraries] = recursiveGeneration(parent, blk, main_sampleTime, is_main_node, backend, xml_trace)
-nodes_code = '';
-contracts_code = '';
+function [nodes_ast, contracts_ast, external_libraries] = recursiveGeneration(parent, blk, main_sampleTime, is_main_node, backend, xml_trace)
+nodes_ast = {};
+contracts_ast = {};
 external_libraries = {};
 
 if isfield(blk, 'Content') && ~isempty(blk.Content)
     field_names = fieldnames(blk.Content);
     for i=1:numel(field_names)
-        [nodes_code_i, external_libraries_i] = recursiveGeneration(blk, blk.Content.(field_names{i}), main_sampleTime, 0, backend, xml_trace);
+        [nodes_code_i, contracts_ast_i, external_libraries_i] = recursiveGeneration(blk, blk.Content.(field_names{i}), main_sampleTime, 0, backend, xml_trace);
         if ~isempty(nodes_code_i)
-            if SLX2LusUtils.isContractBlk(blk.Content.(field_names{i}))
-                contracts_code = sprintf('%s\n%s', nodes_code_i, contracts_code);
-            else
-                nodes_code = sprintf('%s\n%s', nodes_code_i, nodes_code);
-            end
+            nodes_ast{end + 1} = nodes_code_i;
+        end
+        if ~isempty(contracts_ast_i)
+            contracts_ast{end + 1} = contracts_ast_i;
         end
         external_libraries = [external_libraries, external_libraries_i];
     end
@@ -156,16 +160,20 @@ if isfield(blk, 'Content') && ~isempty(blk.Content)
     if status || ~b.isContentNeedToBeTranslated()
         return;
     end
-    [main_node, external_nodes, external_libraries_i] = SS_To_LustreNode.subsystem2node(parent, blk, main_sampleTime, is_main_node, backend, xml_trace);
+    [main_node, is_contract, external_nodes, external_libraries_i] = SS_To_LustreNode.subsystem2node(parent, blk, main_sampleTime, is_main_node, backend, xml_trace);
     external_libraries = [external_libraries, external_libraries_i];
-    %contracts should be declared before nodes because of KIND2.
-    nodes_code = sprintf('%s\n%s\n%s\n%s', contracts_code, external_nodes, nodes_code, main_node);
-    
+    nodes_ast = [ nodes_ast, external_nodes];
+    if is_contract
+        contracts_ast{end + 1} = main_node;
+    else
+        nodes_ast{end + 1} = main_node;
+    end    
 elseif isfield(blk, 'SFBlockType') && isequal(blk.SFBlockType, 'Chart')
     % Stateflow chart example
-    [main_node, external_nodes, external_libraries_i] = SS_To_LustreNode.subsystem2node(parent, blk, main_sampleTime, is_main_node, backend, xml_trace);
+    [main_node, ~, external_nodes, external_libraries_i] = SS_To_LustreNode.subsystem2node(parent, blk, main_sampleTime, is_main_node, backend, xml_trace);
     external_libraries = [external_libraries, external_libraries_i];
-    nodes_code = sprintf('%s\n%s\n%s', external_nodes, nodes_code, main_node);
+    nodes_ast = [ nodes_ast, external_nodes];
+    nodes_ast{end + 1} = main_node;
 end
 end
 

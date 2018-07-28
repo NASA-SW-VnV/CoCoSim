@@ -15,7 +15,7 @@ classdef Trigonometry_To_Lustre < Block_To_Lustre
         function  write_code(obj, parent, blk,xml_trace,  varargin)
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             inputs = {};
-            obj.addExternal_libraries('lustrec_math');
+            obj.addExternal_libraries('LustMathLib_lustrec_math');
             widths = blk.CompiledPortWidths.Inport;
             nbInputs = numel(widths);
             max_width = max(widths);

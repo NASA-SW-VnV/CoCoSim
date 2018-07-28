@@ -10,6 +10,7 @@ classdef LustreExpr < LustreAst
     end
     
     methods (Abstract)
+        print(obj, backend)
         print_lustrec(obj)
         print_kind2(obj)
         print_zustre(obj)

@@ -9,7 +9,7 @@ else
         errordlg('Lustre file or traceability can not be Found');
         return;
     else
-        if ~endsWith(LusFilePath, '.lus') || ~endsWith(Traceability, '.xml')
+        if ~MatlabUtils.endsWith(LusFilePath, '.lus') || ~MatlabUtils.endsWith(Traceability, '.xml')
             errordlg('Lustre file extension is ".lus", traceability extension is ".xml"');
             return;
         else

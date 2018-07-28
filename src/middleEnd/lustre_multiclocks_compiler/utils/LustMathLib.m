@@ -12,7 +12,7 @@ classdef LustMathLib
             node = '';
         end
         
-        %%
+        %% Min Max
         function [node, external_nodes_i, opens] = getMinMax(minOrMAx, dt)
             opens = {};
             external_nodes_i = {};
@@ -26,7 +26,23 @@ classdef LustMathLib
             node = sprintf(format, node_name, dt, dt, op);
             
         end
-        %
+        function [node, external_nodes_i, opens] = get__min_int()
+            [node, external_nodes_i, opens] = LustMathLib.getMinMax('min', 'int');
+        end
+        
+        function [node, external_nodes_i, opens] = get__min_real()
+            [node, external_nodes_i, opens] = LustMathLib.getMinMax('min', 'real');
+        end
+        
+        function [node, external_nodes_i, opens] = get__max_int()
+            [node, external_nodes_i, opens] = LustMathLib.getMinMax('max', 'int');
+        end
+        
+        function [node, external_nodes_i, opens] = get__max_real()
+            [node, external_nodes_i, opens] = LustMathLib.getMinMax('max', 'real');
+        end
+        
+        %%
         function [node, external_nodes_i, opens] = get_lustrec_math()
             opens = {'lustrec_math'};
             external_nodes_i = {};
@@ -180,6 +196,118 @@ classdef LustMathLib
             format = [format, 'y=   - x - 1;\ntel\n\n'];
             node_name = strcat('_NOT_Bitwise_Signed');
             node = sprintf(format, node_name);
+        end
+        
+        %AND
+        function [node, external_nodes_i, opens] = get__AND_Bitwise_Unsigned_8()
+            [node, external_nodes_i, opens] = LustMathLib.getANDBitwiseUnsigned(8);
+        end
+        function [node, external_nodes_i, opens] = get__AND_Bitwise_Unsigned_16()
+            [node, external_nodes_i, opens] = LustMathLib.getANDBitwiseUnsigned(16);
+        end
+        function [node, external_nodes_i, opens] = get__AND_Bitwise_Unsigned_32()
+            [node, external_nodes_i, opens] = LustMathLib.getANDBitwiseUnsigned(32);
+        end
+        function [node, external_nodes_i, opens] = get__AND_Bitwise_Signed_8()
+            [node, external_nodes_i, opens] = LustMathLib.getBitwiseSigned('AND', 8);
+        end
+        function [node, external_nodes_i, opens] = get__AND_Bitwise_Signed_16()
+            [node, external_nodes_i, opens] = LustMathLib.getBitwiseSigned('AND', 16);
+        end
+        function [node, external_nodes_i, opens] = get__AND_Bitwise_Signed_32()
+            [node, external_nodes_i, opens] = LustMathLib.getBitwiseSigned('AND', 32);
+        end
+        %NAND
+        function [node, external_nodes_i, opens] = get__NAND_Bitwise_Unsigned_8()
+            [node, external_nodes_i, opens] = LustMathLib.getNANDBitwiseUnsigned(8);
+        end
+        function [node, external_nodes_i, opens] = get__NAND_Bitwise_Unsigned_16()
+            [node, external_nodes_i, opens] = LustMathLib.getNANDBitwiseUnsigned(16);
+        end
+        function [node, external_nodes_i, opens] = get__NAND_Bitwise_Unsigned_32()
+            [node, external_nodes_i, opens] = LustMathLib.getNANDBitwiseUnsigned(32);
+        end
+        function [node, external_nodes_i, opens] = get__NAND_Bitwise_Signed_8()
+            [node, external_nodes_i, opens] = LustMathLib.getBitwiseSigned('NAND', 8);
+        end
+        function [node, external_nodes_i, opens] = get__NAND_Bitwise_Signed_16()
+            [node, external_nodes_i, opens] = LustMathLib.getBitwiseSigned('NAND', 16);
+        end
+        function [node, external_nodes_i, opens] = get__NAND_Bitwise_Signed_32()
+            [node, external_nodes_i, opens] = LustMathLib.getBitwiseSigned('NAND', 32);
+        end
+       
+        %OR
+        function [node, external_nodes_i, opens] = get__OR_Bitwise_Unsigned_8()
+            [node, external_nodes_i, opens] = LustMathLib.getORBitwiseUnsigned(8);
+        end
+        function [node, external_nodes_i, opens] = get__OR_Bitwise_Unsigned_16()
+            [node, external_nodes_i, opens] = LustMathLib.getORBitwiseUnsigned(16);
+        end
+        function [node, external_nodes_i, opens] = get__OR_Bitwise_Unsigned_32()
+            [node, external_nodes_i, opens] = LustMathLib.getORBitwiseUnsigned(32);
+        end
+        function [node, external_nodes_i, opens] = get__OR_Bitwise_Signed_8()
+            [node, external_nodes_i, opens] = LustMathLib.getBitwiseSigned('OR', 8);
+        end
+        function [node, external_nodes_i, opens] = get__OR_Bitwise_Signed_16()
+            [node, external_nodes_i, opens] = LustMathLib.getBitwiseSigned('OR', 16);
+        end
+        function [node, external_nodes_i, opens] = get__OR_Bitwise_Signed_32()
+            [node, external_nodes_i, opens] = LustMathLib.getBitwiseSigned('OR', 32);
+        end
+        %NOR
+        function [node, external_nodes_i, opens] = get__NOR_Bitwise_Unsigned_8()
+            [node, external_nodes_i, opens] = LustMathLib.getNORBitwiseUnsigned(8);
+        end
+        function [node, external_nodes_i, opens] = get__NOR_Bitwise_Unsigned_16()
+            [node, external_nodes_i, opens] = LustMathLib.getNORBitwiseUnsigned(16);
+        end
+        function [node, external_nodes_i, opens] = get__NOR_Bitwise_Unsigned_32()
+            [node, external_nodes_i, opens] = LustMathLib.getNORBitwiseUnsigned(32);
+        end
+        function [node, external_nodes_i, opens] = get__NOR_Bitwise_Signed_8()
+            [node, external_nodes_i, opens] = LustMathLib.getBitwiseSigned('NOR', 8);
+        end
+        function [node, external_nodes_i, opens] = get__NOR_Bitwise_Signed_16()
+            [node, external_nodes_i, opens] = LustMathLib.getBitwiseSigned('NOR', 16);
+        end
+        function [node, external_nodes_i, opens] = get__NOR_Bitwise_Signed_32()
+            [node, external_nodes_i, opens] = LustMathLib.getBitwiseSigned('NOR', 32);
+        end
+       
+        %XOR
+        function [node, external_nodes_i, opens] = get__XOR_Bitwise_Unsigned_8()
+            [node, external_nodes_i, opens] = LustMathLib.getXORBitwiseUnsigned(8);
+        end
+        function [node, external_nodes_i, opens] = get__XOR_Bitwise_Unsigned_16()
+            [node, external_nodes_i, opens] = LustMathLib.getXORBitwiseUnsigned(16);
+        end
+        function [node, external_nodes_i, opens] = get__XOR_Bitwise_Unsigned_32()
+            [node, external_nodes_i, opens] = LustMathLib.getXORBitwiseUnsigned(32);
+        end
+        function [node, external_nodes_i, opens] = get__XOR_Bitwise_Signed_8()
+            [node, external_nodes_i, opens] = LustMathLib.getBitwiseSigned('XOR', 8);
+        end
+        function [node, external_nodes_i, opens] = get__XOR_Bitwise_Signed_16()
+            [node, external_nodes_i, opens] = LustMathLib.getBitwiseSigned('XOR', 16);
+        end
+        function [node, external_nodes_i, opens] = get__XOR_Bitwise_Signed_32()
+            [node, external_nodes_i, opens] = LustMathLib.getBitwiseSigned('XOR', 32);
+        end
+        
+        %NOT
+        function [node, external_nodes_i, opens] = get__NOT_Bitwise_Signed()
+            [node, external_nodes_i, opens] = LustMathLib.getNOTBitwiseSigned();
+        end
+        function [node, external_nodes_i, opens] = get__NOT_Bitwise_Unsigned_8()
+            [node, external_nodes_i, opens] = LustMathLib.getNOTBitwiseUnsigned(8);
+        end
+        function [node, external_nodes_i, opens] = get__NOT_Bitwise_Unsigned_16()
+            [node, external_nodes_i, opens] = LustMathLib.getNOTBitwiseUnsigned(16);
+        end
+        function [node, external_nodes_i, opens] = get__NOT_Bitwise_Unsigned_32()
+            [node, external_nodes_i, opens] = LustMathLib.getNOTBitwiseUnsigned(32);
         end
         %% Integer division
         

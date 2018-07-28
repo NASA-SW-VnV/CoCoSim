@@ -11,19 +11,9 @@ classdef LustDTLib
             node = '';
         end
               
-        function [node, external_nodes_i, opens] = get_int_to_real()
-            opens = {'conv'};
-            external_nodes_i = {};
-            node = '';
-        end
-        
-        function [node, external_nodes_i, opens] = get_real_to_int()
-            opens = {'conv'};
-            external_nodes_i = {};
-            node = '';
-        end
         
         
+        %%
         function [node, external_nodes_i, opens] = getToBool(dt)
             opens = {};
             external_nodes_i = {};
@@ -56,6 +46,23 @@ classdef LustDTLib
             
         end
        
+        function [node, external_nodes_i, opens] = get_real_to_bool()
+            [node, external_nodes_i, opens] = LustDTLib.getToBool('real');
+        end
+        
+        function [node, external_nodes_i, opens] = get_int_to_bool()
+            [node, external_nodes_i, opens] = LustDTLib.getToBool('int');
+        end
+        
+        function [node, external_nodes_i, opens] = get_bool_to_int()
+            [node, external_nodes_i, opens] = LustDTLib.getBoolTo('int');
+        end
+        
+        function [node, external_nodes_i, opens] = get_bool_to_real()
+            [node, external_nodes_i, opens] = LustDTLib.getBoolTo('real');
+        end
+        
+        %%
         function [node, external_nodes, opens] = getIntToInt(dt)
             opens = {};
             
@@ -86,6 +93,56 @@ classdef LustDTLib
             node = sprintf(format, node_name, v_max, v_max, v_min, v_min);            
         end
         
+                
+        function [node, external_nodes_i, opens] = get_int_to_int8()
+            [node, external_nodes_i, opens] = LustDTLib.getIntToInt('int8');
+        end
+        function [node, external_nodes_i, opens] = get_int_to_uint8()
+            [node, external_nodes_i, opens] = LustDTLib.getIntToInt('uint8');
+        end
+        function [node, external_nodes_i, opens] = get_int_to_int16()
+            [node, external_nodes_i, opens] = LustDTLib.getIntToInt('int16');
+        end
+        function [node, external_nodes_i, opens] = get_int_to_uint16()
+            [node, external_nodes_i, opens] = LustDTLib.getIntToInt('uint16');
+        end
+        function [node, external_nodes_i, opens] = get_int_to_int32()
+            [node, external_nodes_i, opens] = LustDTLib.getIntToInt('int32');
+        end
+        function [node, external_nodes_i, opens] = get_int_to_uint32()
+            [node, external_nodes_i, opens] = LustDTLib.getIntToInt('uint32');
+        end
+        function [node, external_nodes_i, opens] = get_int_to_int8_saturate()
+            [node, external_nodes_i, opens] = LustDTLib.getIntToIntSaturate('int8');
+        end
+        function [node, external_nodes_i, opens] = get_int_to_uint8_saturate()
+            [node, external_nodes_i, opens] = LustDTLib.getIntToIntSaturate('uint8');
+        end
+        function [node, external_nodes_i, opens] = get_int_to_int16_saturate()
+            [node, external_nodes_i, opens] = LustDTLib.getIntToIntSaturate('int16');
+        end
+        function [node, external_nodes_i, opens] = get_int_to_uint16_saturate()
+            [node, external_nodes_i, opens] = LustDTLib.getIntToIntSaturate('uint16');
+        end
+        function [node, external_nodes_i, opens] = get_int_to_int32_saturate()
+            [node, external_nodes_i, opens] = LustDTLib.getIntToIntSaturate('int32');
+        end
+        function [node, external_nodes_i, opens] = get_int_to_uint32_saturate()
+            [node, external_nodes_i, opens] = LustDTLib.getIntToIntSaturate('uint32');
+        end
+       
+        %%
+        function [node, external_nodes_i, opens] = get_int_to_real()
+            opens = {'conv'};
+            external_nodes_i = {};
+            node = '';
+        end
+        
+        function [node, external_nodes_i, opens] = get_real_to_int()
+            opens = {'conv'};
+            external_nodes_i = {};
+            node = '';
+        end
         
         function [node, external_nodes_i, opens] = get__Floor()
             opens = {'conv'};

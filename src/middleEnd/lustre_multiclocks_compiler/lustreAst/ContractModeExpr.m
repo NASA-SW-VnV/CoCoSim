@@ -18,19 +18,27 @@ classdef ContractModeExpr < LustreExpr
             obj.requires = requires;
             obj.ensures = ensures;
         end
+        
+        function code = print(obj, backend)
+            %TODO: check if KIND2 syntax is OK for the other backends.
+            code = obj.print_kind2(backend);
+        end
+        
         function code = print_lustrec(obj)
             code = '';
         end
-        function code = print_kind2(obj)
+        function code = print_kind2(obj, backend)
             require = {};
             for j=1:numel(obj.requires)
-                require{j} = sprintf('\t\trequire %s;\n', obj.requires{j});
+                require{j} = sprintf('\t\trequire %s;\n', ...
+                    obj.requires{j}.print(backend));
             end
             require = MatlabUtils.strjoin(require, '');
             
             ensure = {};
             for j=1:numel(obj.ensures)
-                ensure{j} = sprintf('\t\tensure %s;\n', obj.ensures{j});
+                ensure{j} = sprintf('\t\tensure %s;\n', ...
+                    obj.ensures{j}.print(backend));
             end
             ensure = MatlabUtils.strjoin(ensure, '');
             code = sprintf('\tmode %s(\n%s%s\t);\n', obj.name, require, ensure);

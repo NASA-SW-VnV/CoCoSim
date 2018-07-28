@@ -139,7 +139,8 @@ classdef Sum_To_Lustre < Block_To_Lustre
                             int_divFun = '';
                         else
                             int_divFun = sprintf('int_div_%s', blk.RndMeth);
-                            obj.addExternal_libraries(int_divFun);
+                            obj.addExternal_libraries(strcat('LustMathLib_',...
+                                int_divFun));
                         end
                     else
                         int_divFun = '';

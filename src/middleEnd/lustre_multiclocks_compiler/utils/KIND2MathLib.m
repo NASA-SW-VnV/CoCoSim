@@ -15,13 +15,15 @@ classdef KIND2MathLib
     
     methods(Static)
         
-        function [node, external_nodes_i] = template()
+        function [node, external_nodes_i, opens] = template()
+            opens = {};
             external_nodes_i = {};
             node = '';
         end
         
         %% sqrt
         function [node, external_nodes_i] = get_sqrt()
+            opens = {};
             external_nodes_i = {};
             format = 'node sqrt(x: real;)\nreturns( y: real );\n';
             format = [format, '(*@contract\n\t'];
@@ -33,7 +35,8 @@ classdef KIND2MathLib
             node = sprintf(format);
         end
         %% mod_real
-        function [node, external_nodes_i] = get_mod_real()
+        function [node, external_nodes_i, opens] = get_mod_real()
+            opens = {};
             external_nodes_i = {};
             format = 'node mod_real(x, y: real;)\nreturns( z: real );\n';
             format = [format, '(*@contract\n\t'];
@@ -53,7 +56,8 @@ classdef KIND2MathLib
             node = sprintf(format);
         end
         %% rem_real
-        function [node, external_nodes_i] = get_rem_real()
+        function [node, external_nodes_i, opens] = get_rem_real()
+            opens = {};
             external_nodes_i = {'abs_real'};
             format = 'node rem_real(x, y: real;)\nreturns( z: real );\n';
             format = [format, '(*@contract\n\t'];

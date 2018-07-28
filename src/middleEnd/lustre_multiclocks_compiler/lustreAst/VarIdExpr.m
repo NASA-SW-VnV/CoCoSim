@@ -7,13 +7,19 @@ classdef VarIdExpr < LustreExpr
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     properties
-        id;
+        id;%String
     end
 
     methods 
         function obj = VarIdExpr(id)
             obj.id = id;
         end
+        
+        function code = print(obj, ~)
+            %TODO: check if LUSTREC syntax is OK for the other backends.
+            code = obj.print_lustrec();
+        end
+        
         function code = print_lustrec(obj)
             code = obj.id;
         end

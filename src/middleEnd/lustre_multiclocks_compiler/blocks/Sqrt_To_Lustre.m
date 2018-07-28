@@ -19,9 +19,9 @@ classdef Sqrt_To_Lustre < Block_To_Lustre
                     blk.Origin_path), MsgType.WARNING, 'Sqrt_To_Lustre', '');
             end
             if BackendType.isKIND2(backend)
-                obj.addExternal_libraries('KIND2_sqrt');
+                obj.addExternal_libraries('KIND2MathLib_sqrt');
             else
-                obj.addExternal_libraries('lustrec_math');
+                obj.addExternal_libraries('LustMathLib_lustrec_math');
             end
             widths = blk.CompiledPortWidths.Inport;
             max_width = max(widths);

@@ -16,17 +16,24 @@ classdef ContractGuaranteeExpr < LustreExpr
             obj.id = id;
             obj.exp = exp;
         end
+        
+        function code = print(obj, backend)
+            %TODO: check if KIND2 syntax is OK for the other backends.
+            code = obj.print_kind2(backend);
+        end
+        
+        
         function code = print_lustrec(obj)
             code = '';
         end
-        function code = print_kind2(obj)
+        function code = print_kind2(obj, backend)
             if isempty(obj.id)
                 code = sprintf('guarantee %s', ...
-                    obj.exp.print_lustre());
+                    obj.exp.print(backend));
             else
                 code = sprintf('guarantee "%s" %s', ...
                     obj.id, ...
-                    obj.exp.print_lustre());
+                    obj.exp.print(backend));
             end
         end
         function code = print_zustre(obj)

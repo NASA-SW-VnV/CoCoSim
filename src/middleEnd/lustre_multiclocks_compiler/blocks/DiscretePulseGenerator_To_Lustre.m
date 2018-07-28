@@ -91,7 +91,7 @@ classdef DiscretePulseGenerator_To_Lustre < Block_To_Lustre
             end
             codes{end+1} = sprintf('%s = fmod((__time_step - %.15f + %f),%.15f);\n\t',dtc,PhaseDelay,epsilon, Period);
             
-            obj.addExternal_libraries('lustrec_math');
+            obj.addExternal_libraries('LustMathLib_lustrec_math');
             obj.setCode(MatlabUtils.strjoin(codes, ''));
             
         end

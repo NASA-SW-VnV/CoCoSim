@@ -25,30 +25,33 @@ classdef AutomatonTransExpr < LustreExpr
                 obj.resume_state = state_name;
             end
         end
-        
-        function code = print_lustrec(obj)
+        function code = print(obj, backend)
+            %TODO: check if lustrec syntax is OK for jkind and prelude.
+            code = obj.print_lustrec(backend);
+        end
+        function code = print_lustrec(obj, backend)
             if obj.is_restart
                 code = sprintf('%s restart %s\n',...
-                    obj.condition.print_lustre(), ...
-                    obj.restart_state.print_lustre());
+                    obj.condition.print(backend), ...
+                    obj.restart_state);
             else
                 code = sprintf('%s resume %s\n',...
-                    obj.condition.print_lustre(), ...
-                    obj.resume_state.print_lustre());
+                    obj.condition.print(backend), ...
+                    obj.resume_state);
             end
         end
         
         function code = print_kind2(obj)
-            code = obj.print_lustrec();
+            code = obj.print_lustrec(BackendType.KIND2);
         end
         function code = print_zustre(obj)
-            code = obj.print_lustrec();
+            code = obj.print_lustrec(BackendType.ZUSTRE);
         end
         function code = print_jkind(obj)
-            code = obj.print_lustrec();
+            code = obj.print_lustrec(BackendType.JKIND);
         end
         function code = print_prelude(obj)
-            code = obj.print_lustrec();
+            code = obj.print_lustrec(BackendType.PRELUDE);
         end
 
     end

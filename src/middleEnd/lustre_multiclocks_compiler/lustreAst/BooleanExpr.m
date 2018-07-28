@@ -15,6 +15,10 @@ classdef BooleanExpr < LustreExpr
             obj.value = v;
         end
         
+        function code = print(obj, ~)
+            %TODO: check if LUSTREC syntax is OK for the other backends.
+            code = obj.print_lustrec();
+        end
         
         function code = print_lustrec(obj)
             if isnumeric(obj.value)
@@ -39,6 +43,8 @@ classdef BooleanExpr < LustreExpr
                 code = obj.value;
             end
         end
+        
+        
         
         function code = print_kind2(obj)
             code = obj.print_lustrec();

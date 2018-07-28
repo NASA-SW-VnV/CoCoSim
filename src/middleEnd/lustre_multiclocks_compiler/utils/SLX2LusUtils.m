@@ -97,14 +97,22 @@ classdef SLX2LusUtils < handle
             [node_inputs_cell, node_inputs_withoutDT_cell] = ...
                 SLX2LusUtils.extract_node_InOutputs_withDT(blk, 'Inport', xml_trace);
             
-            % add the execution condition is it is a conditionally executed
+            % add the execution condition if it is a conditionally executed
             % SS
             if isEnableORAction
-                node_inputs_cell{end + 1} = strcat(SLX2LusUtils.isEnabledStr() , ':bool;');
+                node_inputs_cell{end + 1} = LustreVar(...
+                    SLX2LusUtils.isEnabledStr() , 'bool');
+                node_inputs_withoutDT_cell{end + 1} = VarIdExpr(...
+                    SLX2LusUtils.isEnabledStr());
             elseif isEnableAndTrigger
-                node_inputs_cell{end + 1} = strcat(SLX2LusUtils.isEnabledStr() , ':bool;');
-                node_inputs_cell{end + 1} = sprintf('%s:bool;', ...
-                    SLX2LusUtils.isTriggeredStr() );
+                node_inputs_cell{end + 1} = LustreVar(...
+                    SLX2LusUtils.isEnabledStr() , 'bool');
+                node_inputs_withoutDT_cell{end + 1} = VarIdExpr(...
+                    SLX2LusUtils.isEnabledStr());
+                node_inputs_cell{end + 1} = LustreVar(...
+                    SLX2LusUtils.isTriggeredStr() , 'bool');
+                node_inputs_withoutDT_cell{end + 1} = VarIdExpr(...
+                    SLX2LusUtils.isTriggeredStr());
             end
             %add simulation time input and clocks
             if ~is_main_node
@@ -113,8 +121,8 @@ classdef SLX2LusUtils < handle
             end
             % if the node has no inputs, add virtual input for Lustrec.
             if isempty(node_inputs_cell)
-                node_inputs_cell{end + 1} = '_virtual:bool;';
-                node_inputs_withoutDT_cell{end+1} = '_virtual';
+                node_inputs_cell{end + 1} = LustreVar('_virtual', 'bool');
+                node_inputs_withoutDT_cell{end+1} = VarIdExpr('_virtual');
             end
            
             % creating outputs
@@ -123,8 +131,9 @@ classdef SLX2LusUtils < handle
                 SLX2LusUtils.extract_node_InOutputs_withDT(blk, 'Outport', xml_trace);
             
             if is_main_node && isempty(node_outputs_cell)
-                node_outputs_cell{end+1} = sprintf('%s:real;', SLX2LusUtils.timeStepStr());
-                node_outputs_withoutDT_cell{end+1} = SLX2LusUtils.timeStepStr();
+                node_outputs_cell{end+1} = LustreVar(...
+                    SLX2LusUtils.timeStepStr(), 'real');
+                node_outputs_withoutDT_cell{end+1} = VarIdExpr(SLX2LusUtils.timeStepStr());
             end
         end
         
@@ -204,14 +213,19 @@ classdef SLX2LusUtils < handle
         end
         function [node_inputs_cell, node_inputs_withoutDT_cell] = ...
                 getTimeClocksInputs(blk, main_sampleTime, node_inputs_cell, node_inputs_withoutDT_cell)
-            node_inputs_cell{end + 1} = sprintf('%s:real;', SLX2LusUtils.timeStepStr());
+            node_inputs_cell{end + 1} = LustreVar(...
+                SLX2LusUtils.timeStepStr(), 'real');
             node_inputs_withoutDT_cell{end+1} = ...
-                sprintf('%s', SLX2LusUtils.timeStepStr());
+                VarIdExpr(SLX2LusUtils.timeStepStr());
             % add clocks
             clocks_list = SLX2LusUtils.getRTClocksSTR(blk, main_sampleTime);
             if ~isempty(clocks_list)
-                node_inputs_cell{end + 1} = sprintf('%s:bool clock;', clocks_list);
-                node_inputs_withoutDT_cell{end+1} = sprintf('%s', clocks_list);
+                for i=1:numel(clocks_list)
+                    node_inputs_cell{end + 1} = LustreVar(...
+                        clocks_list{i}, 'bool clock');
+                    node_inputs_withoutDT_cell{end+1} = VarIdExpr(...
+                        clocks_list{i});
+                end
             end
         end
         %% Contract header
@@ -422,15 +436,18 @@ classdef SLX2LusUtils < handle
                 for i=1:width(portNumber)
                     if isBus
                         for k=1:numel(lus_dt)
-                            names{end+1} = SLX2LusUtils.name_format(strcat(blk.Name, '_', num2str(idx), '_BusElem', num2str(k)));
-                            names_dt{end+1} = strcat(names{end} , ': ', lus_dt{k}, ';');
+                            names{end+1} = VarIdExpr(...
+                                SLX2LusUtils.name_format(strcat(blk.Name, '_', num2str(idx), '_BusElem', num2str(k))));
+                            names_dt{end+1} = LustreVar(names{end} , lus_dt{k});
                         end
                     elseif iscell(lus_dt) && numel(lus_dt) == width(portNumber)
-                        names{end+1} = SLX2LusUtils.name_format(strcat(blk.Name, '_', num2str(idx)));
-                        names_dt{end+1} = sprintf('%s: %s;', names{end}, char(lus_dt{i}));
+                        names{end+1} = VarIdExpr(...
+                            SLX2LusUtils.name_format(strcat(blk.Name, '_', num2str(idx))));
+                        names_dt{end+1} = LustreVar(names{end}, char(lus_dt{i}));
                     else
-                        names{end+1} = SLX2LusUtils.name_format(strcat(blk.Name, '_', num2str(idx)));
-                        names_dt{end+1} = sprintf('%s: %s;', names{end}, char(lus_dt));
+                        names{end+1} = VarIdExpr(...
+                            SLX2LusUtils.name_format(strcat(blk.Name, '_', num2str(idx))));
+                        names_dt{end+1} = LustreVar(names{end}, char(lus_dt));
                     end
                     idx = idx + 1;
                 end
@@ -798,18 +815,18 @@ classdef SLX2LusUtils < handle
             switch outport_dt
                 case 'boolean'
                     if strcmp(lus_in_dt, 'int')
-                        external_lib = {'int_to_bool'};
+                        external_lib = {'LustDTLib_int_to_bool'};
                         conv_format = 'int_to_bool(%s)';
                     elseif strcmp(lus_in_dt, 'real')
-                        external_lib = {'real_to_bool'};
+                        external_lib = {'LustDTLib_real_to_bool'};
                         conv_format = 'real_to_bool(%s)';
                     end
                 case {'double', 'single'}
                     if strcmp(lus_in_dt, 'int')
-                        external_lib = {RndMeth};
+                        external_lib = {strcat('LustDTLib_', RndMeth)};
                         conv_format = strcat(RndMeth, '(%s)');
                     elseif strcmp(lus_in_dt, 'bool')
-                        external_lib = {'bool_to_real'};
+                        external_lib = {'LustDTLib_bool_to_real'};
                         conv_format = 'bool_to_real(%s)';
                     end
                 case {'int8','uint8','int16','uint16', 'int32','uint32'}
@@ -819,36 +836,25 @@ classdef SLX2LusUtils < handle
                         conv = strcat('int_to_', outport_dt);
                     end
                     if strcmp(lus_in_dt, 'int')
-                        external_lib = {conv};
+                        external_lib = {strcat('LustDTLib_',conv)};
                         conv_format = strcat(conv,'(%s)');
                     elseif strcmp(lus_in_dt, 'bool')
-                        external_lib = {'bool_to_int'};
+                        external_lib = {'LustDTLib_bool_to_int'};
                         conv_format = 'bool_to_int(%s)';
                     elseif strcmp(lus_in_dt, 'real')
-                        external_lib = {conv, RndMeth};
+                        external_lib = {strcat('LustDTLib_', conv),...
+                            strcat('LustDTLib_', RndMeth)};
                         conv_format = strcat(conv,'(',RndMeth,'(%s))');
                     end
-                    % issue should be solved in Lustrec, if lustrec support
-                    % int32_t, the following is not important, it is
-                    % supported by the previous case (with int16, uint16).
-                    %                 case {'int32','uint32'}
-                    %                     % supporting 'int32','uint32' as lustre int.
-                    %                     if strcmp(lus_in_dt, 'bool')
-                    %                         external_lib = {'bool_to_int'};
-                    %                         conv_format = 'bool_to_int(%s)';
-                    %                     elseif strcmp(lus_in_dt, 'real')
-                    %                         external_lib = {RndMeth};
-                    %                         conv_format = strcat(RndMeth, '(%s)');
-                    %                     end
                     
                 case {'fixdt(1,16,0)', 'fixdt(1,16,2^0,0)'}
                     % DataType conversion not supported yet
                     % temporal solution is to consider those types as int
                     if strcmp(lus_in_dt, 'bool')
-                        external_lib = { 'bool_to_int'};
+                        external_lib = { 'LustDTLib_bool_to_int'};
                         conv_format = 'bool_to_int(%s)';
                     elseif strcmp(lus_in_dt, 'real')
-                        external_lib = {RndMeth};
+                        external_lib = {strcat('LustDTLib_', RndMeth)};
                         conv_format = strcat(RndMeth, '(%s)');
                     end
                     
@@ -856,26 +862,26 @@ classdef SLX2LusUtils < handle
                     %lustre conversion
                 case 'int'
                     if strcmp(lus_in_dt, 'bool')
-                        external_lib = {'bool_to_int'};
+                        external_lib = {'LustDTLib_bool_to_int'};
                         conv_format = 'bool_to_int(%s)';
                     elseif strcmp(lus_in_dt, 'real')
-                        external_lib = {RndMeth};
+                        external_lib = {strcat('LustDTLib_', RndMeth)};
                         conv_format = strcat(RndMeth, '(%s)');
                     end
                 case 'real'
                     if strcmp(lus_in_dt, 'int')
-                        external_lib = {RndMeth};
+                        external_lib = {strcat('LustDTLib_', RndMeth)};
                         conv_format = strcat(RndMeth, '(%s)');
                     elseif strcmp(lus_in_dt, 'bool')
-                        external_lib = {'bool_to_real'};
+                        external_lib = {'LustDTLib_bool_to_real'};
                         conv_format = 'bool_to_real(%s)';
                     end
                 case 'bool'
                     if strcmp(lus_in_dt, 'int')
-                        external_lib = {'int_to_bool'};
+                        external_lib = {'LustDTLib_int_to_bool'};
                         conv_format = 'int_to_bool(%s)';
                     elseif strcmp(lus_in_dt, 'real')
-                        external_lib = {'real_to_bool'};
+                        external_lib = {'LustDTLib_real_to_bool'};
                         conv_format = 'real_to_bool(%s)';
                     end
             end
@@ -949,20 +955,19 @@ classdef SLX2LusUtils < handle
             time_step = sprintf('_clk_%.0f_%.0f', st_n, ph_n);
         end
         function clocks_list = getRTClocksSTR(blk, main_sampleTime)
-            clocks_list = '';
+            clocks_list = {};
             clocks = blk.CompiledSampleTime;
             if iscell(clocks) && numel(clocks) > 1
-                c = {};
+                clocks_list = {};
                 for i=1:numel(clocks)
                     T = clocks{i};
                     st_n = T(1)/main_sampleTime(1);
                     ph_n = T(2)/main_sampleTime(1);
                     if ~((st_n == 1 || st_n == 0 || isinf(st_n) || isnan(st_n))...
                                 && (ph_n == 0 || isinf(ph_n) || isnan(ph_n)))
-                        c{end+1} = SLX2LusUtils.clockName(st_n, ph_n);
+                        clocks_list{end+1} = SLX2LusUtils.clockName(st_n, ph_n);
                     end
                 end
-                clocks_list = MatlabUtils.strjoin(c, ', ');
             end
         end
     end

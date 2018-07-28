@@ -7,6 +7,7 @@ classdef LustreNode < LustreAst
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     properties
+        metaInfo;%String
         name;%String
         inputs;
         outputs;
@@ -17,8 +18,9 @@ classdef LustreNode < LustreAst
     end
     
     methods
-        function obj = LustreNode(name, inputs, outputs, ...
+        function obj = LustreNode(metaInfo, name, inputs, outputs, ...
                 localContract, localVars, bodyEqs, isMain)
+            obj.metaInfo = metaInfo;
             obj.name = name;
             obj.inputs = inputs;
             obj.outputs = outputs;
@@ -28,15 +30,22 @@ classdef LustreNode < LustreAst
             obj.isMain = isMain;
         end
         
-        
-        function code = print_lustrec(obj)
+        function code = print(obj, backend)
+            %TODO: check if LUSTREC syntax is OK for the other backends.
+            code = obj.print_lustrec(backend);
+        end
+        function code = print_lustrec(obj, backend)
             lines = {};
-            lines{1} = sprintf('node %s(%s)\nreturns(%s);\n', ...
+            if ~isempty(obj.metaInfo)
+                lines{end + 1} = sprintf('(*\n%s\n*)\n',...
+                    obj.metaInfo);
+            end
+            lines{end + 1} = sprintf('node %s(%s)\nreturns(%s);\n', ...
                 obj.name, ...
                 LustreAst.listVarsWithDT(obj.inputs), ...
                 LustreAst.listVarsWithDT(obj.outputs));
             if ~isempty(obj.localContract)
-                lines{end + 1} = obj.localContract.print_lustre();
+                lines{end + 1} = obj.localContract.print(backend);
             end
             if ~isempty(obj.localVars)
                 lines{end + 1} = sprintf('var %s', ...
@@ -47,23 +56,23 @@ classdef LustreNode < LustreAst
             for i=1:numel(obj.bodyEqs)
                 eq = obj.bodyEqs{i};
                 lines{end+1} = sprintf('\t%s\n', ...
-                    eq.print_lustrec());
+                    eq.print(backend));
             end
             lines{end+1} = 'tel\n';
             code = MatlabUtils.strjoin(lines, '');
         end
         
         function code = print_kind2(obj)
-            code = obj.print_lustrec();
+            code = obj.print_lustrec(BackendType.KIND2);
         end
         function code = print_zustre(obj)
-            code = obj.print_lustrec();
+            code = obj.print_lustrec(BackendType.ZUSTRE);
         end
         function code = print_jkind(obj)
-            code = obj.print_lustrec();
+            code = obj.print_lustrec(BackendType.JKIND);
         end
         function code = print_prelude(obj)
-            code = obj.print_lustrec();
+            code = obj.print_lustrec(BackendType.PRELUDE);
         end
     end
     

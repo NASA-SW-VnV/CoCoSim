@@ -32,6 +32,12 @@ classdef BinaryOp < LustreExpr
         function obj = BinaryOp(op)
             obj.op = op;
         end
+        
+        function code = print(obj, ~)
+            %TODO: check if LUSTREC syntax is OK for the other backends.
+            code = obj.print_lustrec();
+        end
+        
         function code = print_lustrec(obj)
             code = obj.op;
         end

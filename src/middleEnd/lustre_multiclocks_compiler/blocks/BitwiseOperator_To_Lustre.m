@@ -49,9 +49,9 @@ classdef BitwiseOperator_To_Lustre < Block_To_Lustre
                 numInputs = numInputs + 1;
             end
             %% Step 4: start filling the definition of each output
-            if endsWith(inputDT, 'int8')
+            if MatlabUtils.endsWith(inputDT, 'int8')
                 intSize = 8;
-            elseif endsWith(inputDT, 'int16')
+            elseif MatlabUtils.endsWith(inputDT, 'int16')
                 intSize = 16;
             else
                 intSize = 32;
@@ -84,8 +84,8 @@ classdef BitwiseOperator_To_Lustre < Block_To_Lustre
                 else
                     not_fun = sprintf('_NOT_Bitwise_%s_%d', signedStr, intSize);
                 end
-                obj.addExternal_libraries(new_fun);
-                obj.addExternal_libraries(not_fun);
+                obj.addExternal_libraries(strcat('LustMathLib_', new_fun));
+                obj.addExternal_libraries(strcat('LustMathLib_', not_fun));
                 res =sprintf('%s(%s)', ...
                     not_fun, MinMax_To_Lustre.recursiveMinMax(scalars, new_fun));
                 codes{1} = sprintf('%s = %s;\n\t', ...
@@ -110,7 +110,7 @@ classdef BitwiseOperator_To_Lustre < Block_To_Lustre
                     codes{j} = sprintf('%s = %s;\n\t', ...
                         outputs{j}, res);
                 end
-                obj.addExternal_libraries(fun);
+                obj.addExternal_libraries(strcat('LustMathLib_', fun));
             end
             % join the lines and set the block code.
             obj.setCode(MatlabUtils.strjoin(codes, ''));

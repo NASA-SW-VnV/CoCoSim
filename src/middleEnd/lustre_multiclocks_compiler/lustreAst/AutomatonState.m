@@ -7,7 +7,7 @@ classdef AutomatonState < LustreExpr
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     properties
-        name;
+        name;%String
         local_vars;
         strongTrans;
         weakTrans;
@@ -22,48 +22,53 @@ classdef AutomatonState < LustreExpr
             obj.weakTrans = weakTrans;
             obj.body = body;
         end
-        function code = print_lustrec(obj)
+        
+        function code = print(obj, backend)
+            %TODO: check if lustrec syntax is OK for jkind and prelude.
+            code = obj.print_lustrec(backend);
+        end
+        function code = print_lustrec(obj, backend)
             lines = {};
-            lines{1} = sprintf('\tstate %s:\n', obj.name.print_lustre());
+            lines{1} = sprintf('\tstate %s:\n', obj.name);
             % Strong transition
             for i=1:numel(obj.strongTrans)
                 lines{end+1} = sprintf('\tunless %s\n', ...
-                        obj.strongTrans{i}.print_lustre());
+                        obj.strongTrans{i}.print(backend));
             end
             %local variables
             if numel(obj.local_vars) > 1
                 lines{end+1} = 'var ';
                 for i=1:obj.local_vars
                     lines{end+1} = sprintf('\t%s;\n', ...
-                        obj.local_vars{i}.print_lustre());
+                        obj.local_vars{i}.print(backend));
                 end
             end
             % body
             lines{end+1} = sprintf('\tlet\n');
             for i=1:numel(obj.body)
                 lines{end+1} = sprintf('\t\t%s\n', ...
-                        obj.body{i}.print_lustre());
+                        obj.body{i}.print(backend));
             end
             lines{end+1} = sprintf('\ttel\n');
             % weak transition
             for i=1:numel(obj.weakTrans)
                 lines{end+1} = sprintf('\tuntil %s\n', ...
-                        obj.weakTrans{i}.print_lustre());
+                        obj.weakTrans{i}.print(backend));
             end
             code = MatlabUtils.strjoin(lines, '');
         end
         
         function code = print_kind2(obj)
-            code = obj.print_lustrec();
+            code = obj.print_lustrec(BackendType.KIND2);
         end
         function code = print_zustre(obj)
-            code = obj.print_lustrec();
+            code = obj.print_lustrec(BackendType.ZUSTRE);
         end
         function code = print_jkind(obj)
-            code = obj.print_lustrec();
+            code = obj.print_lustrec(BackendType.JKIND);
         end
         function code = print_prelude(obj)
-            code = obj.print_lustrec();
+            code = obj.print_lustrec(BackendType.PRELUDE);
         end
     end
 

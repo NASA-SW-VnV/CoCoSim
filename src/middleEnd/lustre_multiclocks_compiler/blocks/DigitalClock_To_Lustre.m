@@ -23,7 +23,7 @@ classdef DigitalClock_To_Lustre < Block_To_Lustre
                     MsgType.ERROR, 'Constant_To_Lustre', '');
                 return;
             end
-            obj.addExternal_libraries('_DigitalClock');
+            obj.addExternal_libraries('BlocksLib__DigitalClock');
             code = sprintf('%s = _DigitalClock(%s, %.15f);\n\t', outputs{1},...
                 SLX2LusUtils.timeStepStr(), digitalsampleTime);
             obj.setCode( code);

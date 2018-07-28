@@ -76,8 +76,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                     
             % codes are shared between Lookup_nD_To_Lustre and LookupTableDynamic
             isLookupTableDynamic = 0;
-            external_lib = '';
-            [mainCodes, main_vars, nodeCodes] =  ...
+            [mainCodes, main_vars, nodeCodes, external_lib] =  ...
                 Lookup_nD_To_Lustre.get_code_to_write(parent, blk, xml_trace, isLookupTableDynamic,backend);
             if ~isempty(external_lib)
                 obj.addExternal_libraries(external_lib);
@@ -111,7 +110,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
     
     methods(Static)
         
-        function [ mainCodes, main_vars, nodeCodes] =  ...
+        function [ mainCodes, main_vars, nodeCodes, external_lib] =  ...
                 get_code_to_write(parent, blk, xml_trace,isLookupTableDynamic,backend)
             
             % initialize
@@ -123,7 +122,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             
             % get block inputs
-            [inputs,lusInport_dt,zero,one] = ...
+            [inputs,lusInport_dt,zero,one,  external_lib] = ...
                 Lookup_nD_To_Lustre.getBlockInputsNames_convInType2AccType(parent, blk,isLookupTableDynamic);
             
             % read block parameters
@@ -836,11 +835,12 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
             end
         end
         
-        function [inputs,lusInport_dt,zero,one] = ...
+        function [inputs,lusInport_dt,zero,one, external_lib] = ...
                 getBlockInputsNames_convInType2AccType(parent, blk,isLookupTableDynamic)
             widths = blk.CompiledPortWidths.Inport;
             RndMeth = blk.RndMeth;
             max_width = max(widths);
+            external_lib = '';
             for i=1:numel(widths)
                 inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
                 if ~isLookupTableDynamic && numel(inputs{i}) < max_width

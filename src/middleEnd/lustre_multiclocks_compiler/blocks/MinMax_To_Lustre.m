@@ -40,7 +40,7 @@ classdef MinMax_To_Lustre < Block_To_Lustre
             end
             codes = {};
             op = strcat('_', blk.Function, '_', LusoutputDataType);
-            obj.addExternal_libraries(op);
+            obj.addExternal_libraries(strcat('LustMathLib_', op));
             if numInputs == 1
                 code = MinMax_To_Lustre.recursiveMinMax(inputs{1} , op);
                 codes{1} = sprintf('%s = %s;\n\t', outputs{1}, code);

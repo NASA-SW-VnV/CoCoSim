@@ -11,7 +11,7 @@ classdef SS_To_LustreNode
     end
     
     methods(Static)
-        function [ main_node, external_nodes, external_libraries ] = ...
+        function [ main_node, isContractBlk, external_nodes, external_libraries ] = ...
                 subsystem2node(parent_ir,  ss_ir,  main_sampleTime, ...
                 is_main_node, backend, xml_trace)
             %BLOCK_TO_LUSTRE create a lustre node for every Simulink subsystem within
@@ -23,9 +23,10 @@ classdef SS_To_LustreNode
             
             display_msg(['Compiling ', ss_ir.Path], MsgType.INFO, 'subsystem2node', '');
             % Initializing outputs
-            external_nodes = '';
-            main_node = '';
+            external_nodes = {};
+            main_node = {};
             external_libraries = {};
+            isContractBlk = SLX2LusUtils.isContractBlk(ss_ir);
             if ~exist('is_main_node', 'var')
                 is_main_node = 0;
             end
@@ -36,19 +37,18 @@ classdef SS_To_LustreNode
                 m = rt.find('-isa', 'Simulink.BlockDiagram', 'Name',bdroot(ss_ir.Origin_path));
                 chart = m.find('-isa','Stateflow.Chart', 'Path', ss_ir.Origin_path);
                 [ char_node, chart_external_nodes] = write_Chart( chart, 0, xml_trace,'' );
-                main_node = sprintf(char_node);
-                external_nodes = sprintf(chart_external_nodes);
+                main_node = RawLustreCode(sprintf(char_node));
+                external_nodes = RawLustreCode(sprintf(chart_external_nodes));
                 return;
             end
             %%
-            isContractBlk = SLX2LusUtils.isContractBlk(ss_ir);
+           
             if isContractBlk && ~BackendType.isKIND2(backend)
                 %generate contracts only for KIND2 backend
                 return;
             end
             % Adding lustre comments tracking the original path
-            origin_path = regexprep(ss_ir.Origin_path, '(\\n|\n)', '--');
-            comment = sprintf('-- Original block name: %s', origin_path);
+            comment = sprintf('Original block name: %s', ss_ir.Origin_path);
             
             %% creating node header
             
@@ -56,23 +56,14 @@ classdef SS_To_LustreNode
             % by creating an additional automaton node.
             isEnableORAction = 0;
             isEnableAndTrigger = 0;
-            [node_name, node_inputs_cell, node_outputs_cell,...
+            [node_name, node_inputs, node_outputs,...
                 node_inputs_withoutDT_cell, node_outputs_withoutDT_cell] = ...
                 SLX2LusUtils.extractNodeHeader(parent_ir, ss_ir, is_main_node,...
                 isEnableORAction, isEnableAndTrigger, isContractBlk, ...
                 main_sampleTime, xml_trace);
-            % concatenate inputs and outputs
-            node_inputs = MatlabUtils.strjoin(node_inputs_cell, '\n');
-            node_outputs = MatlabUtils.strjoin(node_outputs_cell, '\n');
 
             
-            if isContractBlk
-                node_header = sprintf('contract %s (%s)\n returns (%s);',...
-                    node_name, node_inputs, node_outputs);
-            else
-                node_header = sprintf('node %s (%s)\n returns (%s);',...
-                    node_name, node_inputs, node_outputs);
-            end
+            
             %% Body code
             [body, variables_str, external_nodes, external_libraries] = SS_To_LustreNode.write_body(ss_ir, main_sampleTime, backend, xml_trace);
             if is_main_node
@@ -118,7 +109,7 @@ classdef SS_To_LustreNode
             isConditionalSS = hasEnablePort || hasActionPort || hasTriggerPort;
             % creating contract
             contract = '';
-            % the contract of contional SS is done in the automaton node
+            % the contract of conditional SS is done in the automaton node
             if isfield(ss_ir, 'ContractNodeNames')
                 contractCell = {};
                 contractCell{1} = '(*@contract';
@@ -130,8 +121,27 @@ classdef SS_To_LustreNode
             end
             
             
-            main_node = sprintf('%s\n%s\n%s\n%s\nlet\n\t%s\ntel\n',...
-                comment, node_header, contract, variables_str, body);
+            %main_node = sprintf('%s\n%s\n%s\n%s\nlet\n\t%s\ntel\n',...
+            %    comment, node_header, contract, variables_str, body);
+            if isContractBlk
+                main_node = LustreContract(...
+                    comment, ...
+                    node_name,...
+                    node_inputs, ...
+                    node_outputs, ...
+                    variables_str, ...
+                    body);
+            else
+                main_node = LustreNode(...
+                    comment, ...
+                    node_name,...
+                    node_inputs, ...
+                    node_outputs, ...
+                    contract, ...
+                    variables_str, ...
+                    body, ...
+                    is_main_node);
+            end
             
             if  isConditionalSS
                 automaton_node = condExecSS_To_LusAutomaton(parent_ir, ss_ir, ...
