@@ -112,7 +112,7 @@ is_main_node = 1;
     model_struct, model_struct, main_sampleTime, is_main_node, backend, xml_trace);
 [external_lib_code, open_list] = getExternalLibrariesNodes(external_libraries);
 %TODO: change it to AST
-nodes_ast{end+1} = RawLustreCode(external_lib_code);
+nodes_ast = [external_lib_code, nodes_ast];
 %% create LustreProgram
 program =  LustreProgram(open_list, nodes_ast, contracts_ast);
 %% writing code
@@ -121,8 +121,8 @@ if fid==-1
     msg = sprintf('Opening file "%s" is not possible', nom_lustre_file);
     display_msg(msg, MsgType.ERROR, 'lustre_multiclocks_compiler', '');
 end
-
-fprintf(fid, '%s', program.print(backend));
+Lustrecode = program.print(backend);
+fprintf(fid, '%s', Lustrecode);
 fclose(fid);
 
 %% writing traceability
@@ -130,7 +130,7 @@ xml_trace.write();
 
 %% display report files
 t_finish = toc(t_start);
-display_msg([external_lib_code, nodes_code], MsgType.DEBUG, 'lustre_multiclocks_compiler', '');
+display_msg(Lustrecode, MsgType.DEBUG, 'lustre_multiclocks_compiler', '');
 msg = sprintf('Lustre File generated:%s', nom_lustre_file);
 display_msg(msg, MsgType.RESULT, 'lustre_multiclocks_compiler', '');
 msg = sprintf('Lustre generation finished in %f seconds', t_finish);

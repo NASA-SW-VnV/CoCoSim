@@ -167,7 +167,7 @@ classdef SLX2LusUtils < handle
                 width = numel(names_withNoDT);
                 IsNotInSimulink = false;
                 for index=1:numel(names_withNoDT_i)
-                    xml_trace.add_InputOutputVar( type, names_withNoDT_i{index}, ...
+                    xml_trace.add_InputOutputVar( type, names_withNoDT_i{index}.getId(), ...
                         block.Origin_path, 1, width, index, isInsideContract, IsNotInSimulink);
                 end
             end
@@ -186,7 +186,7 @@ classdef SLX2LusUtils < handle
                     IsNotInSimulink = false;
                     block = subsys.Content.(enablePortsFields{1});
                     for index=1:numel(names_withNoDT_i)
-                        xml_trace.add_InputOutputVar( type, names_withNoDT_i{index}, ...
+                        xml_trace.add_InputOutputVar( type, names_withNoDT_i{index}.getId(), ...
                             block.Origin_path, 1, width, index, isInsideContract, IsNotInSimulink);
                     end
                 end
@@ -204,7 +204,7 @@ classdef SLX2LusUtils < handle
                     IsNotInSimulink = false;
                     block = subsys.Content.(triggerPortsFields{1});
                     for index=1:numel(names_withNoDT_i)
-                        xml_trace.add_InputOutputVar( type, names_withNoDT_i{index}, ...
+                        xml_trace.add_InputOutputVar( type, names_withNoDT_i{index}.getId(), ...
                             block.Origin_path, 1, width, index, isInsideContract, IsNotInSimulink);
                     end
                 end
@@ -461,7 +461,7 @@ classdef SLX2LusUtils < handle
                  % traceability
                  if needToLogTraceability
                      for index=1:numel(names)
-                         xml_trace.add_InputOutputVar( 'Variable', names{index}, ...
+                         xml_trace.add_InputOutputVar( 'Variable', names{index}.getId(), ...
                              blk.Origin_path, port, numel(names), index, isInsideContract, IsNotInSimulink);
                      end
                  end
@@ -472,7 +472,7 @@ classdef SLX2LusUtils < handle
                     names_dt = [names_dt, names_dt_i];
                     if needToLogTraceability
                         for index=1:numel(names_i)
-                            xml_trace.add_InputOutputVar( 'Variable', names_i{index}, ...
+                            xml_trace.add_InputOutputVar( 'Variable', names_i{index}.getId(), ...
                                 blk.Origin_path, port, numel(names_i), index, isInsideContract, IsNotInSimulink);
                         end
                     end
@@ -788,6 +788,17 @@ classdef SLX2LusUtils < handle
             end
         end
         %% Data type conversion node name
+        function callObj = setArgInConvFormat(callObj, arg)
+            % this function goes with dataType_conversion funciton to set 
+            % the missing argument in conv_format.
+            args = callObj.getArgs();
+            if isempty(args)
+                callObj.setArgs(arg);
+            elseif isa(args, 'NodeCallExpr')
+                callObj.setArgs(...
+                    SLX2LusUtils.setArgInConvFormat(args, arg));
+            end
+        end
         function [external_lib, conv_format] = dataType_conversion(inport_dt, outport_dt, RndMeth, SaturateOnIntegerOverflow)
             lus_in_dt = SLX2LusUtils.get_lustre_dt( inport_dt);
             if nargin < 3 || isempty(RndMeth)
@@ -810,24 +821,24 @@ classdef SLX2LusUtils < handle
                 SaturateOnIntegerOverflow = 'off';
             end
             external_lib = {};
-            conv_format = '';
+            conv_format = {};
             
             switch outport_dt
                 case 'boolean'
                     if strcmp(lus_in_dt, 'int')
                         external_lib = {'LustDTLib_int_to_bool'};
-                        conv_format = 'int_to_bool(%s)';
+                        conv_format = NodeCallExpr('int_to_bool', {});
                     elseif strcmp(lus_in_dt, 'real')
                         external_lib = {'LustDTLib_real_to_bool'};
-                        conv_format = 'real_to_bool(%s)';
+                        conv_format = NodeCallExpr('real_to_bool', {});
                     end
                 case {'double', 'single'}
                     if strcmp(lus_in_dt, 'int')
                         external_lib = {strcat('LustDTLib_', RndMeth)};
-                        conv_format = strcat(RndMeth, '(%s)');
+                        conv_format = NodeCallExpr(RndMeth, {});
                     elseif strcmp(lus_in_dt, 'bool')
                         external_lib = {'LustDTLib_bool_to_real'};
-                        conv_format = 'bool_to_real(%s)';
+                        conv_format = NodeCallExpr('bool_to_real', {});
                     end
                 case {'int8','uint8','int16','uint16', 'int32','uint32'}
                     if strcmp(SaturateOnIntegerOverflow, 'on')
@@ -837,14 +848,15 @@ classdef SLX2LusUtils < handle
                     end
                     if strcmp(lus_in_dt, 'int')
                         external_lib = {strcat('LustDTLib_',conv)};
-                        conv_format = strcat(conv,'(%s)');
+                        conv_format = NodeCallExpr(conv, {});
                     elseif strcmp(lus_in_dt, 'bool')
                         external_lib = {'LustDTLib_bool_to_int'};
-                        conv_format = 'bool_to_int(%s)';
+                        conv_format = NodeCallExpr('bool_to_int', {});
                     elseif strcmp(lus_in_dt, 'real')
                         external_lib = {strcat('LustDTLib_', conv),...
                             strcat('LustDTLib_', RndMeth)};
-                        conv_format = strcat(conv,'(',RndMeth,'(%s))');
+                        conv_format = NodeCallExpr(conv, ...
+                            NodeCallExpr(RndMeth, {}));
                     end
                     
                 case {'fixdt(1,16,0)', 'fixdt(1,16,2^0,0)'}
@@ -852,10 +864,10 @@ classdef SLX2LusUtils < handle
                     % temporal solution is to consider those types as int
                     if strcmp(lus_in_dt, 'bool')
                         external_lib = { 'LustDTLib_bool_to_int'};
-                        conv_format = 'bool_to_int(%s)';
+                        conv_format = NodeCallExpr('bool_to_int', {});
                     elseif strcmp(lus_in_dt, 'real')
                         external_lib = {strcat('LustDTLib_', RndMeth)};
-                        conv_format = strcat(RndMeth, '(%s)');
+                        conv_format = NodeCallExpr(bool_to_int, {});
                     end
                     
                     
@@ -863,26 +875,26 @@ classdef SLX2LusUtils < handle
                 case 'int'
                     if strcmp(lus_in_dt, 'bool')
                         external_lib = {'LustDTLib_bool_to_int'};
-                        conv_format = 'bool_to_int(%s)';
+                        conv_format = NodeCallExpr('bool_to_int', {});
                     elseif strcmp(lus_in_dt, 'real')
                         external_lib = {strcat('LustDTLib_', RndMeth)};
-                        conv_format = strcat(RndMeth, '(%s)');
+                        conv_format = NodeCallExpr(RndMeth, {});
                     end
                 case 'real'
                     if strcmp(lus_in_dt, 'int')
                         external_lib = {strcat('LustDTLib_', RndMeth)};
-                        conv_format = strcat(RndMeth, '(%s)');
+                        conv_format = NodeCallExpr(RndMeth, {});
                     elseif strcmp(lus_in_dt, 'bool')
                         external_lib = {'LustDTLib_bool_to_real'};
-                        conv_format = 'bool_to_real(%s)';
+                        conv_format = NodeCallExpr('bool_to_real', {});
                     end
                 case 'bool'
                     if strcmp(lus_in_dt, 'int')
                         external_lib = {'LustDTLib_int_to_bool'};
-                        conv_format = 'int_to_bool(%s)';
+                        conv_format = NodeCallExpr('int_to_bool', {});
                     elseif strcmp(lus_in_dt, 'real')
                         external_lib = {'LustDTLib_real_to_bool'};
-                        conv_format = 'real_to_bool(%s)';
+                        conv_format = NodeCallExpr('real_to_bool', {});
                     end
             end
         end

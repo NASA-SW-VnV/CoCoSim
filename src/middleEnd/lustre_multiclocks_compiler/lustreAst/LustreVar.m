@@ -13,9 +13,17 @@ classdef LustreVar < LustreAst
 
     methods 
         function obj = LustreVar(name, type)
-            obj.name = name;
+            if isa(name, 'VarIdExpr')
+                obj.name = name.getId();
+            else
+                obj.name = name;
+            end
             obj.type = type;
         end
+        function id = getId(obj)
+            id = obj.name;
+        end
+        
         function code = print(obj, backend)
             %TODO: check if LUSTREC syntax is OK for the other backends.
             code = obj.print_lustrec(backend);

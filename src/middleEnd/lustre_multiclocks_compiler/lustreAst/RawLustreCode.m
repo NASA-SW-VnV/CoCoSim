@@ -21,7 +21,11 @@ classdef RawLustreCode < LustreAst
         end
         
         function code = print_lustrec(obj)
-            code = obj.code;
+            if ischar(obj.code)
+                code = obj.code;
+            elseif isempty(obj.code)
+                code = '';
+            end
         end
         
         function code = print_kind2(obj)

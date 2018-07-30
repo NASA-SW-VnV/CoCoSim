@@ -20,7 +20,11 @@ if install_cocosim_already_run && ~force
     return;
 end
 PWD = pwd;
-
+[status, ~] = system('ping -c1 -q google.com');
+if status
+    %No netwrok connexion
+    return;
+end
 %% update cocosim
 updateRepo()
 %% copy files from cocosim in github

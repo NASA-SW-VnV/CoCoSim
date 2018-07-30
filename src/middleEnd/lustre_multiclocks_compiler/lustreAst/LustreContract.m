@@ -13,17 +13,19 @@ classdef LustreContract < LustreAst
         outputs;
         localVars;
         localEqs;
+        islocalContract;
     end
     
-    methods 
+    methods
         function obj = LustreContract(metaInfo, name, inputs, ...
-                outputs, localVars, localEqs)
+                outputs, localVars, localEqs, islocalContract)
             obj.metaInfo = metaInfo;
             obj.name = name;
             obj.inputs = inputs;
             obj.outputs = outputs;
             obj.localVars = localVars;
             obj.localEqs = localEqs;
+            obj.islocalContract = islocalContract;
         end
         function dt = getDT(localVars, varID)
             dt = '';
@@ -50,35 +52,21 @@ classdef LustreContract < LustreAst
                 lines{end + 1} = sprintf('(*\n%s\n*)\n',...
                     obj.metaInfo);
             end
-            lines{end + 1} = sprintf('contract %s(%s)\nreturns(%s);\n', ...
-                obj.name, ...
-                LustreAst.listVarsWithDT(obj.inputs), ...
-                LustreAst.listVarsWithDT(obj.outputs));
-            lines{end+1} = 'let\n';
-            % local Eqs
-            for i=1:numel(obj.localEqs)
-                eq = obj.localEqs{i};
-                if ~isa(eq, 'LustreEq')
-                    % assumptions, guarantees, modes...
-                    lines{end+1} = sprintf('\t%s\n', ...
-                        eq.print(backend));
-                    continue;
-                end
-                if numel(eq.lhs) > 1
-                    var = eq.lhs{1};
-                else 
-                    var = eq.lhs;
-                end
-                if ~isa(var, 'LustreVar')
-                    continue;
-                end
-                varDT = getDT(obj.localVars, var.id);
-                
-                lines{end+1} = sprintf('\tvar %s : %s = %s;\n', ...
-                        var.id, varDT, eq.rhs.print(backend));
+            if obj.islocalContract
+                lines{end+1} = '(*@contract\n';
+                lines = obj.getLustreEq( lines, backend);
+                lines{end+1} = '*)\n';
+            else
+                lines{end + 1} = sprintf('contract %s(%s)\nreturns(%s);\n', ...
+                    obj.name, ...
+                    LustreAst.listVarsWithDT(obj.inputs, backend), ...
+                    LustreAst.listVarsWithDT(obj.outputs, backend));
+                lines{end+1} = 'let\n';
+                % local Eqs
+                lines = obj.getLustreEq( lines, backend);
+                lines{end+1} = 'tel\n';
             end
-            lines{end+1} = 'tel\n';
-            code = MatlabUtils.strjoin(lines, '');
+            code = sprintf(MatlabUtils.strjoin(lines, ''));
         end
         function code = print_zustre(obj)
             code = '';
@@ -89,7 +77,32 @@ classdef LustreContract < LustreAst
         function code = print_prelude(obj)
             code = '';
         end
+        
+        %% utils
+        function lines = getLustreEq(obj, lines, backend)
+            for i=1:numel(obj.localEqs)
+                eq = obj.localEqs{i};
+                if ~isa(eq, 'LustreEq')
+                    % assumptions, guarantees, modes...
+                    lines{end+1} = sprintf('\t%s\n', ...
+                        eq.print(backend));
+                    continue;
+                end
+                if numel(eq.lhs) > 1
+                    var = eq.lhs{1};
+                else
+                    var = eq.lhs;
+                end
+                if ~isa(var, 'LustreVar')
+                    continue;
+                end
+                varDT = getDT(obj.localVars, var.id);
+                
+                lines{end+1} = sprintf('\tvar %s : %s = %s;\n', ...
+                    var.id, varDT, eq.rhs.print(backend));
+            end
+        end
     end
-
+    
 end
 

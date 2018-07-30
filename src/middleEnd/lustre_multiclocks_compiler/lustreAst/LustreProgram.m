@@ -38,13 +38,13 @@ classdef LustreProgram < LustreAst
             if BackendType.isKIND2(backend)
                 for i=1:numel(obj.contracts)
                     lines{end+1} = sprintf('%s\n', ...
-                        obj.contracts{i}.print_lustrec());
+                        obj.contracts{i}.print(backend));
                 end
             end
             % modes
             for i=1:numel(obj.nodes)
                 lines{end+1} = sprintf('%s\n', ...
-                    obj.nodes{i}.print_lustrec());
+                    obj.nodes{i}.print(backend));
             end
             code = MatlabUtils.strjoin(lines, '');
         end

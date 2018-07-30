@@ -42,23 +42,23 @@ classdef LustreNode < LustreAst
             end
             lines{end + 1} = sprintf('node %s(%s)\nreturns(%s);\n', ...
                 obj.name, ...
-                LustreAst.listVarsWithDT(obj.inputs), ...
-                LustreAst.listVarsWithDT(obj.outputs));
+                LustreAst.listVarsWithDT(obj.inputs, backend), ...
+                LustreAst.listVarsWithDT(obj.outputs, backend));
             if ~isempty(obj.localContract)
                 lines{end + 1} = obj.localContract.print(backend);
             end
             if ~isempty(obj.localVars)
-                lines{end + 1} = sprintf('var %s', ...
-                    LustreAst.listVarsWithDT(obj.localVars));
+                lines{end + 1} = sprintf('var %s\n', ...
+                    LustreAst.listVarsWithDT(obj.localVars, backend));
             end
-            lines{end+1} = 'let\n';
+            lines{end+1} = sprintf('let\n');
             % local Eqs
             for i=1:numel(obj.bodyEqs)
                 eq = obj.bodyEqs{i};
                 lines{end+1} = sprintf('\t%s\n', ...
                     eq.print(backend));
             end
-            lines{end+1} = 'tel\n';
+            lines{end+1} = sprintf('tel\n');
             code = MatlabUtils.strjoin(lines, '');
         end
         

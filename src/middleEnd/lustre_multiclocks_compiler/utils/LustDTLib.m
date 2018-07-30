@@ -77,7 +77,7 @@ classdef LustDTLib
             node = sprintf(format, node_name, v_max, v_min, v_max, nb_int,...
                 v_min, v_max, v_min, nb_int);
             
-            external_nodes = {'rem_int_int'};
+            external_nodes = {strcat('LustMathLib_', 'rem_int_int')};
             
         end
         function [node, external_nodes, opens] = getIntToIntSaturate(dt)
@@ -158,7 +158,7 @@ classdef LustDTLib
         % returning a real instead of int.
         function [node, external_nodes_i, opens] = get__floor()
             opens = {'conv'};
-            external_nodes_i = {'_Floor'};
+            external_nodes_i = {strcat('LustDTLib_', '_Floor')};
             % Round towards minus infinity.
             format = '--Rounds each element of the input signal to the nearest integer value towards minus infinity.\n ';
             format = [format,  'node _floor (x: real)\nreturns(y:real);\nlet\n\t'];
@@ -181,7 +181,7 @@ classdef LustDTLib
         % returning a real instead of int.
         function [node, external_nodes_i, opens] = get__ceil()
             opens = {'conv'};
-            external_nodes_i = {'_Ceiling'};
+            external_nodes_i = {strcat('LustDTLib_', '_Ceiling')};
             % Round towards minus infinity.
             format = '--Rounds each element of the input signal to the nearest integer towards positive infinity.\n ';
             format = [format,  'node _ceil (x: real)\nreturns(y:real);\nlet\n\t'];
@@ -210,7 +210,9 @@ classdef LustDTLib
             
             
             node = sprintf(format);
-            external_nodes = {'fmod', '_Floor', '_Ceiling'};
+            external_nodes = {strcat('LustMathLib_', 'fmod'), ...
+                strcat('LustDTLib_', '_Floor'),...
+                strcat('LustDTLib_', '_Ceiling')};
             
         end
         
@@ -226,7 +228,9 @@ classdef LustDTLib
             
             
             node = sprintf(format);
-            external_nodes = { '_Floor', '_Ceiling', '_fabs'};
+            external_nodes = {strcat('LustMathLib_', '_fabs'), ...
+                strcat('LustDTLib_', '_Floor'),...
+                strcat('LustDTLib_', '_Ceiling')};
         end
         
         % Round Rounds number to the nearest representable value.
@@ -243,13 +247,14 @@ classdef LustDTLib
             
             
             node = sprintf(format);
-            external_nodes = {'_Floor', '_Ceiling'};
+            external_nodes = {strcat('LustDTLib_', '_Floor'),...
+                strcat('LustDTLib_', '_Ceiling')};
         end
         % this one for "Rounding" block, it is different from Ceiling by
         % returning a real instead of int.
         function [node, external_nodes_i, opens] = get__round()
             opens = {'conv'};
-            external_nodes_i = {'_Round'};
+            external_nodes_i = {strcat('LustDTLib_', '_Round')};
             % Round towards minus infinity.
             format = '--Rounds each element of the input signal to the nearest integer.\n ';
             format = [format,  'node _round (x: real)\nreturns(y:real);\nlet\n\t'];
@@ -269,13 +274,14 @@ classdef LustDTLib
             
             
             node = sprintf(format);
-            external_nodes = {'_Floor', '_Ceiling'};
+            external_nodes = {strcat('LustDTLib_', '_Floor'),...
+                strcat('LustDTLib_', '_Ceiling')};
         end
         % this one for "Rounding" block, it is different from Fix by
         % returning a real instead of int.
         function [node, external_nodes_i, opens] = get__fix()
             opens = {'conv'};
-            external_nodes_i = {'_Fix'};
+            external_nodes_i = {strcat('LustDTLib_', '_Fix')};
             % Round towards minus infinity.
             format = '--Round towards minus infinity..\n ';
             format = [format,  'node _fix (x: real)\nreturns(y:real);\nlet\n\t'];

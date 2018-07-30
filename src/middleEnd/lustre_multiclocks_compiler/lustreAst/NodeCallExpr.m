@@ -17,6 +17,12 @@ classdef NodeCallExpr < LustreExpr
             obj.args = args;
         end
         
+        function args = getArgs(obj)
+            args = obj.args;
+        end
+        function  setArgs(obj, arg)
+            obj.args = arg;
+        end
         function code = print(obj, backend)
             %TODO: check if LUSTREC syntax is OK for the other backends.
             code = obj.print_lustrec(backend);
@@ -26,8 +32,10 @@ classdef NodeCallExpr < LustreExpr
             if numel(obj.args) > 1
                 args_cell = cellfun(@(x) {x.print(backend)}, obj.args, 'UniformOutput', 0);
                 args_str = MatlabUtils.strjoin(args_cell, ', ');
-            else
+            elseif numel(obj.args) == 1
                 args_str = obj.args.print(backend);
+            else
+                args_str = '';
             end
             code = sprintf('%s(%s)', obj.nodeName, args_str);
         end

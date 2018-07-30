@@ -9,11 +9,11 @@ classdef Block_To_Lustre < handle
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     properties
         
-        % the code of the block, e.g. outputs = block_name(inputs);
-        lustre_code = '';
+        % the code of the block, e.g. a list of LustreEq;
+        lustre_code = {};
         
         %The list of variables to be added to node variables list.
-        variables = {};
+        variables = {};% list of LustreVar
         
         %external_libraries defines the list of used nodes, as int_to_int16
         %..., this nodes will be added in the head of the lustre file
@@ -24,13 +24,13 @@ classdef Block_To_Lustre < handle
         %in case the node name is not unique.
         % Example: some block can be coded in many nodes, a main node and
         % some useful nodes. Make sure those useful nodes have unique name.
-        external_nodes = '';
+        external_nodes = {}; %List of LustreNode
         
         %unsupported_options are the options in the corresponding block
         %that are not supported in the translation. This options are the
         %Dialogue parameters specified by the user. Like DataType
         %conversion ...
-        unsupported_options = {};
+        unsupported_options = {};%List of String
         
         %For masked Subsystems, they will be treated as normal Subsystem
         %(so they will be defined as external node). To disable this
@@ -56,10 +56,10 @@ classdef Block_To_Lustre < handle
             if nargin >= 3
                 if iscell(varname)
                     for i=1:numel(varname)
-                        xml_trace.add_InputOutputVar('Variable', varname{i}, originPath, port, width, i, isInsideContract, IsNotInSimulink);
+                        xml_trace.add_InputOutputVar('Variable', varname{i}.getId(), originPath, port, width, i, isInsideContract, IsNotInSimulink);
                     end
                 else
-                    xml_trace.add_InputOutputVar('Variable', varname, originPath, port, width, index, isInsideContract, IsNotInSimulink);
+                    xml_trace.add_InputOutputVar('Variable', varname.getId(), originPath, port, width, index, isInsideContract, IsNotInSimulink);
                 end
             end
         end
@@ -77,9 +77,8 @@ classdef Block_To_Lustre < handle
                 obj.external_libraries{numel(obj.external_libraries) +1} = lib;
             end
         end
-        function addExtenal_node(obj, node_code)
-            obj.external_nodes = sprintf('%s\n%s', ...
-                obj.external_nodes, node_code);
+        function addExtenal_node(obj, nodeAst)
+            obj.external_nodes = [obj.external_nodes, nodeAst];
         end
         function setCode(obj, code)
             obj.lustre_code = code;

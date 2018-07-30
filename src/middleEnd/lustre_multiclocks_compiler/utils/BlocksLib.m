@@ -14,7 +14,7 @@ classdef BlocksLib
         
         function [node, external_nodes_i, opens] = get__DigitalClock()
             opens = {};
-            external_nodes_i = {'_round', '_fabs'};
+            external_nodes_i = {'LustDTLib__round', 'LustMathLib__fabs'};
             format = 'node _DigitalClock (simulationTime, SampleTime:real)\nreturns(q:real);\n';
             format = [format, 'var b:bool;\n'];
             format = [format, 'let\n\t'];

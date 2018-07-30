@@ -13,7 +13,11 @@ classdef LustreEq < LustreAst
     
     methods 
         function obj = LustreEq(lhs, rhs)
-            obj.rhs = rhs;
+            if ischar(rhs)
+                obj.rhs = VarIdExpr(rhs);
+            else
+                obj.rhs = rhs;
+            end
             obj.lhs = lhs;
         end
         

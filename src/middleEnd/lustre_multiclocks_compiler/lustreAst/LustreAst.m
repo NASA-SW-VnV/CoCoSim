@@ -18,8 +18,8 @@ classdef LustreAst < handle
         print_prelude(obj)
     end
     methods(Static)
-        function code = listVarsWithDT(vars)
-            vars_code = cellfun(@(x) {x.print_lustrec()}, vars, 'UniformOutput', 0);
+        function code = listVarsWithDT(vars, backend)
+            vars_code = cellfun(@(x) x.print(backend), vars, 'UniformOutput', 0);
             code = MatlabUtils.strjoin(vars_code, '\n\t');
         end
     end

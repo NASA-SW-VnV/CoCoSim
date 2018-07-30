@@ -10,8 +10,16 @@ classdef UnaryExpr < LustreExpr
         op;
         expr;
     end
-    
-    methods 
+    properties(Constant)
+        NOT = 'not';
+        PRE = 'pre';
+        LAST = 'last';
+        NEG = '-';
+        REAL = 'real';
+        INT = 'int';
+        
+    end
+    methods
         function obj = UnaryExpr(op, expr)
             obj.op = op;
             obj.expr = expr;
@@ -24,7 +32,7 @@ classdef UnaryExpr < LustreExpr
         
         function code = print_lustrec(obj, backend)
             code = sprintf('%s %s', ...
-                obj.op.print(backend), ...
+                obj.op, ...
                 obj.expr.print(backend));
         end
         
@@ -41,6 +49,6 @@ classdef UnaryExpr < LustreExpr
             code = obj.print_lustrec(BackendType.PRELUDE);
         end
     end
-
+    
 end
 

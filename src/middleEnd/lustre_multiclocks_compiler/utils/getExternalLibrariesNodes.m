@@ -41,7 +41,11 @@ for i=1:numel(external_libraries)
             MsgType.ERROR, 'getExternalLibrariesNodes','');
         continue;
     end
-    lustre_nodes{end + 1} = node;
+    if ischar(node)
+        lustre_nodes{end + 1} = RawLustreCode(node);
+    else
+        lustre_nodes{end + 1} = node;
+    end
     open_list = [open_list, opens];
     additional_nodes = [additional_nodes, external_nodes_i];
 end

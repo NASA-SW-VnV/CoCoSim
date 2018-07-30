@@ -14,7 +14,9 @@ classdef VarIdExpr < LustreExpr
         function obj = VarIdExpr(id)
             obj.id = id;
         end
-        
+        function id = getId(obj)
+            id = obj.id;
+        end
         function code = print(obj, ~)
             %TODO: check if LUSTREC syntax is OK for the other backends.
             code = obj.print_lustrec();

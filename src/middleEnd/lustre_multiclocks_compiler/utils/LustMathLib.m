@@ -88,7 +88,8 @@ classdef LustMathLib
             opens = {};
             extNode = sprintf('int_to_int%d',n);
             UnsignedNode =  sprintf('_%s_Bitwise_Unsigned_%d',op, n);
-            external_nodes = {extNode, UnsignedNode};
+            external_nodes = {strcat('LustDTLib_', extNode),...
+                strcat('LustMathLib_', UnsignedNode)};
             
             node_name = sprintf('_%s_Bitwise_Signed_%d', op, n);
             v2_pown = 2^(n);
@@ -122,7 +123,8 @@ classdef LustMathLib
             opens = {};
             notNode = sprintf('_NOT_Bitwise_Unsigned_%d', n);
             UnsignedNode =  sprintf('_AND_Bitwise_Unsigned_%d', n);
-            external_nodes = {notNode, UnsignedNode};
+            external_nodes = {strcat('LustMathLib_', notNode),...
+                strcat('LustMathLib_', UnsignedNode)};
             
             node_name = sprintf('_NAND_Bitwise_Unsigned_%d', n);
             format = 'node %s (x, y: int)\nreturns(z:int);\nlet\n\t';
@@ -134,7 +136,8 @@ classdef LustMathLib
             opens = {};
             notNode = sprintf('_NOT_Bitwise_Unsigned_%d', n);
             UnsignedNode =  sprintf('_OR_Bitwise_Unsigned_%d', n);
-            external_nodes = {notNode, UnsignedNode};
+            external_nodes = {strcat('LustMathLib_', notNode),...
+                strcat('LustMathLib_', UnsignedNode)};
             
             node_name = sprintf('_NOR_Bitwise_Unsigned_%d', n);
             format = 'node %s (x, y: int)\nreturns(z:int);\nlet\n\t';
@@ -316,7 +319,7 @@ classdef LustMathLib
         
         function [node, external_nodes_i, opens] = get_int_div_Ceiling()
             opens = {};
-            external_nodes_i = {'abs_int'};
+            external_nodes_i = {strcat('LustMathLib_', 'abs_int')};
             format = '--Rounds positive and negative numbers toward positive infinity\n ';
             format = [format,  'node int_div_Ceiling (x, y: int)\nreturns(z:int);\nlet\n\t'];
             format = [format, 'z= if y = 0 then if x>0 then 2147483647 else -2147483648\n\t'];
@@ -332,7 +335,7 @@ classdef LustMathLib
         %Floor: Rounds positive and negative numbers toward negative infinity.
         function [node, external_nodes_i, opens] = get_int_div_Floor()
             opens = {};
-            external_nodes_i = {'abs_int'};
+            external_nodes_i = {strcat('LustMathLib_', 'abs_int')};
             format = '--Rounds positive and negative numbers toward negative infinity\n ';
             format = [format,  'node int_div_Floor (x, y: int)\nreturns(z:int);\nlet\n\t'];
             format = [format, 'z= if y = 0 then if x>0 then 2147483647 else -2147483648\n\t'];
@@ -360,7 +363,7 @@ classdef LustMathLib
         
         function [node, external_nodes_i, opens] = get_int_div_Zero()
             opens = {};
-            external_nodes_i = {'abs_int'};
+            external_nodes_i = {strcat('LustMathLib_', 'abs_int')};
             format = '--Rounds positive and negative numbers toward positive infinity\n ';
             format = [format,  'node int_div_Zero (x, y: int)\nreturns(z:int);\nlet\n\t'];
             format = [format, 'z= if y = 0 then if x>0 then 2147483647 else -2147483648\n\t'];

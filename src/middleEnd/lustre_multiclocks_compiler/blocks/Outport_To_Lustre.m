@@ -33,10 +33,11 @@ classdef Outport_To_Lustre < Block_To_Lustre
             %% 
             codes = {};
             for i=1:numel(outputs)
-                codes{i} = sprintf('%s = %s;\n\t', outputs{i}, inputs{i});
+                %codes{i} = sprintf('%s = %s;\n\t', outputs{i}, inputs{i});
+                codes{i} = LustreEq(outputs{i}, inputs{i});
             end
             
-            obj.setCode( MatlabUtils.strjoin(codes, ''));
+            obj.setCode( codes);
         end
         
         function options = getUnsupportedOptions(obj, parent, blk, varargin)

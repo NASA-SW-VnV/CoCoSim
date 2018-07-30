@@ -11,8 +11,26 @@ classdef BinaryExpr < LustreExpr
         left;
         right;
     end
-    
-    methods 
+    properties(Constant)
+        OR = 'or';
+        AND = 'and';
+        XOR = 'xor';
+        IMPLIES = '=>';
+        PLUS = '+';
+        MINUS = '-';
+        MULTIPLY = '*';
+        DIVIDE = '/';
+        MOD = 'mod';
+        EQ = '=';
+        NEQ = '<>';
+        GTE = '>=';
+        LTE = '<=';
+        GT = '>';
+        LT = '<';
+        ARROW = '->';
+        WHEN = 'when';
+    end
+    methods
         function obj = BinaryExpr(op, left, right)
             obj.op = op;
             obj.left = left;
@@ -24,7 +42,7 @@ classdef BinaryExpr < LustreExpr
         function code = print_lustrec(obj, backend)
             code = sprintf('%s %s %s', ...
                 obj.left.print(backend),...
-                obj.op.print(backend), ...
+                obj.op, ...
                 obj.right.print(backend));
         end
         
@@ -41,6 +59,6 @@ classdef BinaryExpr < LustreExpr
             code = obj.print_lustrec(BackendType.PRELUDE);
         end
     end
-
+    
 end
 
