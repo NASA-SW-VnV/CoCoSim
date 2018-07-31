@@ -172,7 +172,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                 N_shape_node,coords_node,lusInport_dt,blkParams.ExtrapMethod,one,...
                 zero,shapeNodeSign,u_node,index_node,dimJump,table_elem);
                        
-            if BackendType.isKIND2(backend)
+            if BackendType.isKIND2(backend) && ~isLookupTableDynamic
                 contractBody = Lookup_nD_To_Lustre.getContractBody(blkParams,inputs,outputs);
                 contract = sprintf('(*@contract\n%s\n*)\n',contractBody);
                 nodeCodes = sprintf('%s%s%slet\n\t%s\ntel',...
