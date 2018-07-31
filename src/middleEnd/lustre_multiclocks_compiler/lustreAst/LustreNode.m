@@ -40,6 +40,9 @@ classdef LustreNode < LustreAst
                 obj.isMain = isMain;
             end
         end
+        function setMetaInfo(obj, metaInfo)
+            obj.metaInfo = metaInfo;
+        end
         function setName(obj, name)
             obj.name = name;
         end

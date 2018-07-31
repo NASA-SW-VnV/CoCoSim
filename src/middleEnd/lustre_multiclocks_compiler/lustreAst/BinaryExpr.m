@@ -10,6 +10,7 @@ classdef BinaryExpr < LustreExpr
         op;
         left;
         right;
+        withPar; %with parentheses
     end
     properties(Constant)
         OR = 'or';
@@ -31,19 +32,31 @@ classdef BinaryExpr < LustreExpr
         WHEN = 'when';
     end
     methods
-        function obj = BinaryExpr(op, left, right)
+        function obj = BinaryExpr(op, left, right, withPar)
             obj.op = op;
             obj.left = left;
             obj.right = right;
+            if exist('withPar', 'var')
+                obj.withPar = withPar;
+            else
+                obj.withPar = true;
+            end
         end
         function code = print(obj, backend)
             code = obj.print_lustrec(backend);
         end
         function code = print_lustrec(obj, backend)
-            code = sprintf('(%s %s %s)', ...
-                obj.left.print(backend),...
-                obj.op, ...
-                obj.right.print(backend));
+            if obj.withPar
+                code = sprintf('(%s %s %s)', ...
+                    obj.left.print(backend),...
+                    obj.op, ...
+                    obj.right.print(backend));
+            else
+                code = sprintf('%s %s %s', ...
+                    obj.left.print(backend),...
+                    obj.op, ...
+                    obj.right.print(backend));
+            end
         end
         
         function code = print_kind2(obj)
@@ -60,5 +73,34 @@ classdef BinaryExpr < LustreExpr
         end
     end
     
+    
+    methods(Static)
+        % Given many args, this function return the binary operation
+        % applied on all arguments.
+        function exp = BinaryMultiArgs(op, args, isFirstTime)
+            if nargin < 3
+                isFirstTime = 1;
+            end
+            if isempty(args) || numel(args) == 1
+                exp = args;
+            elseif numel(args) == 2
+                exp = BinaryExpr(op, ...
+                    args{1}, ...
+                    args{2},...
+                    false);
+                if isFirstTime
+                    exp = ParenthesesExpr(exp);
+                end
+            else
+                exp = BinaryExpr(op, ...
+                    args{1}, ...
+                    BinaryExpr.BinaryMultiArgs(op, args(2:end), false), ...
+                    false);
+                if isFirstTime
+                    exp = ParenthesesExpr(exp);
+                end
+            end
+        end
+    end
 end
 

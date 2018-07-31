@@ -1,5 +1,5 @@
-classdef UnaryExpr < LustreExpr
-    %UnaryExpr
+classdef ParenthesesExpr < LustreExpr
+    %ParenthesesExpr
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -7,46 +7,23 @@ classdef UnaryExpr < LustreExpr
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     properties
-        op;
-        expr;
-        withPar; %with parentheses
+        expr;%String
     end
-    properties(Constant)
-        NOT = 'not';
-        PRE = 'pre';
-        LAST = 'last';
-        NEG = '-';
-        REAL = 'real';
-        INT = 'int';
-        
-    end
-    methods
-        function obj = UnaryExpr(op, expr, withPar)
-            obj.op = op;
+
+    methods 
+        function obj = ParenthesesExpr(expr)
             obj.expr = expr;
-            if exist('withPar', 'var')
-                obj.withPar = withPar;
-            else
-                obj.withPar = true;
-            end
         end
-        
+        function expr = getExp(obj)
+            expr = obj.expr;
+        end
         function code = print(obj, backend)
             %TODO: check if LUSTREC syntax is OK for the other backends.
             code = obj.print_lustrec(backend);
         end
         
         function code = print_lustrec(obj, backend)
-            if obj.withPar
-                code = sprintf('(%s %s)', ...
-                    obj.op, ...
-                    obj.expr.print(backend));
-            else
-                code = sprintf('%s %s', ...
-                    obj.op, ...
-                    obj.expr.print(backend));
-            end
-            
+            code = sprintf('( %s )', obj.expr.print(backend));
         end
         
         function code = print_kind2(obj)
@@ -62,6 +39,6 @@ classdef UnaryExpr < LustreExpr
             code = obj.print_lustrec(BackendType.PRELUDE);
         end
     end
-    
+
 end
 

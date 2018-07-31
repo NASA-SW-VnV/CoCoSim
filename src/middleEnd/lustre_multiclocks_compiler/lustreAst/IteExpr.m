@@ -10,13 +10,19 @@ classdef IteExpr < LustreExpr
         condition;
         thenExpr;
         ElseExpr;
+        OneLine;% to print it in one line
     end
     
     methods 
-        function obj = IteExpr(condition, thenExpr, ElseExpr)
+        function obj = IteExpr(condition, thenExpr, ElseExpr, OneLine)
             obj.condition = condition;
             obj.thenExpr = thenExpr;
             obj.ElseExpr = ElseExpr;
+            if exist('OneLine', 'var')
+                obj.OneLine = OneLine;
+            else
+                obj.OneLine = false;
+            end
         end
         
         function code = print(obj, backend)
@@ -26,10 +32,17 @@ classdef IteExpr < LustreExpr
         
         
         function code = print_lustrec(obj, backend)
-            code = sprintf('if %s then\n\t\t%s\n\t\telse %s', ...
-                obj.condition.print(backend),...
-                obj.thenExpr.print(backend), ...
-                obj.ElseExpr.print(backend));
+            if obj.OneLine
+                code = sprintf('(if %s then %s else %s)', ...
+                    obj.condition.print(backend),...
+                    obj.thenExpr.print(backend), ...
+                    obj.ElseExpr.print(backend));
+            else
+                code = sprintf('if %s then\n\t\t%s\n\t    else %s', ...
+                    obj.condition.print(backend),...
+                    obj.thenExpr.print(backend), ...
+                    obj.ElseExpr.print(backend));
+            end
         end
         
         function code = print_kind2(obj)
@@ -45,6 +58,32 @@ classdef IteExpr < LustreExpr
             code = obj.print_lustrec(BackendType.PRELUDE);
         end
     end
-    
+     methods(Static)
+        % This function return the IteExpr object
+        % representing nested if-else.
+        function exp = nestedIteExpr(conds, thens)
+            if numel(thens) ~= numel(conds) + 1
+                display_msg('Number of Thens expressions should be equal to Numbers of Conds + 1',...
+                    MsgType.ERROR, 'IteExpr.nestedIteExpr', '');
+                exp = VarIdExpr('');
+                return;
+            end
+            if isempty(conds)
+                exp = thens;
+            elseif numel(conds) == 1
+                if iscell(conds)
+                    c = conds{1};
+                else
+                    c = conds;
+                end
+                exp = IteExpr(c, thens{1}, thens{2});
+            else
+                exp = IteExpr(conds{1}, ...
+                    thens{1}, ...
+                    IteExpr.nestedIteExpr( conds(2:end), thens(2:end)) ...
+                    );
+            end
+        end
+    end
 end
 
