@@ -30,7 +30,7 @@ classdef NodeCallExpr < LustreExpr
         
         function code = print_lustrec(obj, backend)
             if numel(obj.args) > 1
-                args_cell = cellfun(@(x) {x.print(backend)}, obj.args, 'UniformOutput', 0);
+                args_cell = cellfun(@(x) x.print(backend), obj.args, 'UniformOutput', 0);
                 args_str = MatlabUtils.strjoin(args_cell, ', ');
             elseif numel(obj.args) == 1
                 args_str = obj.args.print(backend);

@@ -19,13 +19,27 @@ classdef LustreContract < LustreAst
     methods
         function obj = LustreContract(metaInfo, name, inputs, ...
                 outputs, localVars, localEqs, islocalContract)
-            obj.metaInfo = metaInfo;
-            obj.name = name;
-            obj.inputs = inputs;
-            obj.outputs = outputs;
-            obj.localVars = localVars;
+            if nargin == 0
+                obj.metaInfo = '';
+                obj.name = '';
+                obj.inputs = {};
+                obj.outputs = {};
+                obj.localVars = {};
+                obj.localEqs = {};
+                obj.islocalContract = 1;
+            else
+                obj.metaInfo = metaInfo;
+                obj.name = name;
+                obj.inputs = inputs;
+                obj.outputs = outputs;
+                obj.localVars = localVars;
+                obj.localEqs = localEqs;
+                obj.islocalContract = islocalContract;
+            end
+        end
+        
+        function setBody(obj, localEqs)
             obj.localEqs = localEqs;
-            obj.islocalContract = islocalContract;
         end
         function dt = getDT(localVars, varID)
             dt = '';
@@ -49,8 +63,12 @@ classdef LustreContract < LustreAst
         function code = print_kind2(obj, backend)
             lines = {};
             if ~isempty(obj.metaInfo)
-                lines{end + 1} = sprintf('(*\n%s\n*)\n',...
-                    obj.metaInfo);
+                if ischar(obj.metaInfo)
+                    lines{end + 1} = sprintf('(*\n%s\n*)\n',...
+                        obj.metaInfo);
+                else
+                    lines{end + 1} = obj.metaInfo.print(backend);
+                end
             end
             if obj.islocalContract
                 lines{end+1} = '(*@contract\n';

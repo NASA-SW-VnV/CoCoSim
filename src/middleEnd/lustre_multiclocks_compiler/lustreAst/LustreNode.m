@@ -20,15 +20,48 @@ classdef LustreNode < LustreAst
     methods
         function obj = LustreNode(metaInfo, name, inputs, outputs, ...
                 localContract, localVars, bodyEqs, isMain)
-            obj.metaInfo = metaInfo;
+            if nargin==0
+                obj.metaInfo = '';
+                obj.name = '';
+                obj.inputs = {};
+                obj.outputs = {};
+                obj.localContract = {};
+                obj.localVars = {};
+                obj.bodyEqs = {};
+                obj.isMain = false;
+            else
+                obj.metaInfo = metaInfo;
+                obj.name = name;
+                obj.inputs = inputs;
+                obj.outputs = outputs;
+                obj.localContract = localContract;
+                obj.localVars = localVars;
+                obj.bodyEqs = bodyEqs;
+                obj.isMain = isMain;
+            end
+        end
+        function setName(obj, name)
             obj.name = name;
+        end
+        function setInputs(obj, inputs)
             obj.inputs = inputs;
+        end
+        function setOutputs(obj, outputs)
             obj.outputs = outputs;
+        end
+        function setLocalContract(obj, localContract)
             obj.localContract = localContract;
+        end
+        function setLocalVars(obj, localVars)
             obj.localVars = localVars;
+        end
+        function setBodyEqs(obj, bodyEqs)
             obj.bodyEqs = bodyEqs;
+        end
+        function setIsMain(obj, isMain)
             obj.isMain = isMain;
         end
+        
         
         function code = print(obj, backend)
             %TODO: check if LUSTREC syntax is OK for the other backends.
@@ -37,8 +70,12 @@ classdef LustreNode < LustreAst
         function code = print_lustrec(obj, backend)
             lines = {};
             if ~isempty(obj.metaInfo)
-                lines{end + 1} = sprintf('(*\n%s\n*)\n',...
-                    obj.metaInfo);
+                if ischar(obj.metaInfo)
+                    lines{end + 1} = sprintf('(*\n%s\n*)\n',...
+                        obj.metaInfo);
+                else
+                    lines{end + 1} = obj.metaInfo.print(backend);
+                end
             end
             lines{end + 1} = sprintf('node %s(%s)\nreturns(%s);\n', ...
                 obj.name, ...
@@ -53,10 +90,15 @@ classdef LustreNode < LustreAst
             end
             lines{end+1} = sprintf('let\n');
             % local Eqs
-            for i=1:numel(obj.bodyEqs)
-                eq = obj.bodyEqs{i};
+            if iscell(obj.bodyEqs)
+                for i=1:numel(obj.bodyEqs)
+                    eq = obj.bodyEqs{i};
+                    lines{end+1} = sprintf('\t%s\n', ...
+                        eq.print(backend));
+                end
+            elseif ~isempty(obj.bodyEqs)
                 lines{end+1} = sprintf('\t%s\n', ...
-                    eq.print(backend));
+                    obj.bodyEqs.print(backend));
             end
             lines{end+1} = sprintf('tel\n');
             code = MatlabUtils.strjoin(lines, '');

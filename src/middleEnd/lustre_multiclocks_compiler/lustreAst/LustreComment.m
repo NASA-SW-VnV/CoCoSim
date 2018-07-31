@@ -20,11 +20,14 @@ classdef LustreComment < LustreExpr
             code = obj.print_lustrec(backend);
         end
         function code = print_lustrec(obj, ~)
+            if isempty(obj.text)
+                return;
+            end
             if obj.isMultiLine
                 code = sprintf('(*\n%s\n*)', ...
                     obj.text);
             else
-                code = sprintf('--%s\n', ...
+                code = sprintf('--%s', ...
                     obj.text);
             end
         end

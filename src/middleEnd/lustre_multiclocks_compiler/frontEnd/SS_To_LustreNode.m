@@ -125,7 +125,8 @@ classdef SS_To_LustreNode
             end
             
             % Adding lustre comments tracking the original path
-            comment = sprintf('Original block name: %s', ss_ir.Origin_path);
+            comment = LustreComment(...
+                sprintf('Original block name: %s', ss_ir.Origin_path), true);
             %main_node = sprintf('%s\n%s\n%s\n%s\nlet\n\t%s\ntel\n',...
             %    comment, node_header, contract, variables_str, body);
             if isContractBlk

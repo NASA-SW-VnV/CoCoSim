@@ -16,15 +16,26 @@ classdef LustMathLib
         function [node, external_nodes_i, opens] = getMinMax(minOrMAx, dt)
             opens = {};
             external_nodes_i = {};
-            format = 'node %s (x, y: %s)\nreturns(z:%s);\nlet\n\t z = if (x %s y) then x else y;\ntel\n\n';
             node_name = strcat('_', minOrMAx, '_', dt);
             if strcmp(minOrMAx, 'min')
-                op = '<';
+                op = BinaryExpr.LT;
             else
-                op = '>';
+                op = BinaryExpr.GT;
             end
-            node = sprintf(format, node_name, dt, dt, op);
-            
+            %format = 'node %s (x, y: %s)\nreturns(z:%s);\nlet\n\t z = if (x %s y) then x else y;\ntel\n\n';
+            bodyElts = LustreEq(...
+                VarIdExpr('z'), ...
+                IteExpr(...
+                    BinaryExpr(op, VarIdExpr('x'), VarIdExpr('y')), ...
+                    VarIdExpr('x'), ...
+                    VarIdExpr('y'))...
+                );
+            node = LustreNode();
+            node.setName(node_name);
+            node.setInputs({LustreVar('x', dt), LustreVar('y', dt)});
+            node.setOutputs(LustreVar('z', dt));
+            node.setBodyEqs(bodyElts);           
+            node.setIsMain(false);
         end
         function [node, external_nodes_i, opens] = get__min_int()
             [node, external_nodes_i, opens] = LustMathLib.getMinMax('min', 'int');
@@ -59,29 +70,65 @@ classdef LustMathLib
         function [node, external_nodes_i, opens] = get__fabs()
             opens = {};
             external_nodes_i = {};
-            format = 'node _fabs (x:real)\nreturns(z:real);\nlet\n\t';
-            format = [format, 'z= if (x >= 0.0)  then x \n\t'];
-            format = [format, 'else -x;\ntel\n\n'];
+            %             format = 'node _fabs (x:real)\nreturns(z:real);\nlet\n\t';
+            %             format = [format, 'z= if (x >= 0.0)  then x \n\t'];
+            %             format = [format, 'else -x;\ntel\n\n'];
             
-            node = sprintf(format);
+            bodyElts{1} = LustreEq(...
+                VarIdExpr('z'), ...
+                IteExpr(...
+                    BinaryExpr(BinaryExpr.GTE, VarIdExpr('x'), VarIdExpr('0.0')), ...
+                    VarIdExpr('x'), ...
+                    UnaryExpr(UnaryExpr.NEG, VarIdExpr('x')))...
+                );
+            node = LustreNode();
+            node.setName('_fabs');
+            node.setInputs(LustreVar('x', 'real'));
+            node.setOutputs(LustreVar('z', 'real'));
+            node.setBodyEqs(bodyElts);           
+            node.setIsMain(false);
         end
         
         function [node, external_nodes_i, opens] = get_abs_int()
             opens = {};
             external_nodes_i = {};
-            format = 'node abs_int (x: int)\nreturns(y:int);\nlet\n\t';
-            format = [format, 'y= if x >= 0 then x \n\t'];
-            format = [format, 'else -x;\ntel\n\n'];
-            node = sprintf(format);
+            %             format = 'node abs_int (x: int)\nreturns(y:int);\nlet\n\t';
+            %             format = [format, 'y= if x >= 0 then x \n\t'];
+            %             format = [format, 'else -x;\ntel\n\n'];
+            bodyElts{1} = LustreEq(...
+                VarIdExpr('y'), ...
+                IteExpr(...
+                    BinaryExpr(BinaryExpr.GTE, VarIdExpr('x'), VarIdExpr('0')), ...
+                    VarIdExpr('x'), ...
+                    UnaryExpr(UnaryExpr.NEG, VarIdExpr('x')))...
+                );
+            node = LustreNode();
+            node.setName('abs_int');
+            node.setInputs(LustreVar('x', 'int'));
+            node.setOutputs(LustreVar('y', 'int'));
+            node.setBodyEqs(bodyElts);           
+            node.setIsMain(false);
         end
         
         function [node, external_nodes_i, opens] = get_abs_real()
             opens = {};
             external_nodes_i = {};
-            format = 'node abs_real (x: real)\nreturns(y:real);\nlet\n\t';
-            format = [format, 'y= if x >= 0.0 then x \n\t'];
-            format = [format, 'else -x;\ntel\n\n'];
-            node = sprintf(format);
+%             format = 'node abs_real (x: real)\nreturns(y:real);\nlet\n\t';
+%             format = [format, 'y= if x >= 0.0 then x \n\t'];
+%             format = [format, 'else -x;\ntel\n\n'];
+            bodyElts{1} = LustreEq(...
+                VarIdExpr('y'), ...
+                IteExpr(...
+                    BinaryExpr(BinaryExpr.GTE, VarIdExpr('x'), VarIdExpr('0.0')), ...
+                    VarIdExpr('x'), ...
+                    UnaryExpr(UnaryExpr.NEG, VarIdExpr('x')))...
+                );
+            node = LustreNode();
+            node.setName('abs_real');
+            node.setInputs(LustreVar('x', 'real'));
+            node.setOutputs(LustreVar('y', 'real'));
+            node.setBodyEqs(bodyElts);           
+            node.setIsMain(false);
         end
         %% Bitwise operators
         function [node, external_nodes, opens] = getBitwiseSigned(op, n)
@@ -93,11 +140,38 @@ classdef LustMathLib
             
             node_name = sprintf('_%s_Bitwise_Signed_%d', op, n);
             v2_pown = 2^(n);
-            format = 'node %s (x, y: int)\nreturns(z:int);\nvar x2, y2:int;\nlet\n\t';
-            format = [format, 'x2 = if x < 0 then %d + x else x;\n\t'];
-            format = [format, 'y2 = if y < 0 then %d + y else y;\n\t'];
-            format = [format, 'z = %s(%s(x2, y2));\ntel\n\n'];
-            node = sprintf(format, node_name, v2_pown, v2_pown, extNode, UnsignedNode);
+%             format = 'node %s (x, y: int)\nreturns(z:int);\nvar x2, y2:int;\nlet\n\t';
+%             format = [format, 'x2 = if x < 0 then %d + x else x;\n\t'];
+%             format = [format, 'y2 = if y < 0 then %d + y else y;\n\t'];
+%             format = [format, 'z = %s(%s(x2, y2));\ntel\n\n'];
+%             node = sprintf(format, node_name, v2_pown, v2_pown, extNode, UnsignedNode);
+            bodyElts{1} = LustreEq(...
+                VarIdExpr('x2'), ...
+                IteExpr(...
+                    BinaryExpr(BinaryExpr.LT, VarIdExpr('x'), VarIdExpr('0')), ...
+                    BinaryExpr(BinaryExpr.PLUS, IntExpr(v2_pown),VarIdExpr('x')), ...
+                    VarIdExpr('x'))...
+                );
+            bodyElts{end + 1} = LustreEq(...
+                VarIdExpr('y2'), ...
+                IteExpr(...
+                    BinaryExpr(BinaryExpr.LT, VarIdExpr('y'), VarIdExpr('0')), ...
+                    BinaryExpr(BinaryExpr.PLUS, IntExpr(v2_pown),VarIdExpr('y')), ...
+                    VarIdExpr('y'))...
+                );
+            bodyElts{end + 1} = LustreEq(...
+                VarIdExpr('z'), ...
+                NodeCallExpr(extNode, ...
+                            NodeCallExpr(UnsignedNode, ...
+                                   {VarIdExpr('x2'), VarIdExpr('y2')}))...
+                );
+            node = LustreNode();
+            node.setName(node_name);
+            node.setInputs({LustreVar('x', 'int'), LustreVar('y', 'int')});
+            node.setOutputs(LustreVar('z', 'int'));
+            node.setLocalVars({LustreVar('x2', 'int'), LustreVar('y2', 'int')})
+            node.setBodyEqs(bodyElts);           
+            node.setIsMain(false);
         end
         
         %AND
@@ -105,18 +179,47 @@ classdef LustMathLib
             opens = {};
             external_nodes = {};
             
-            code = {};
-            code{1} = sprintf('(x mod 2)*(y mod 2)');
+            args = {};
+            %code{1} = sprintf('(x mod 2)*(y mod 2)');
+            args{1} = BinaryExpr(...
+                BinaryExpr.MULTIPLY, ...
+                BinaryExpr(BinaryExpr.MOD, VarIdExpr('x'), IntExpr(2)), ...
+                BinaryExpr(BinaryExpr.MOD, VarIdExpr('y'), IntExpr(2)));
             for i=1:n-1
                 v2_pown = 2^i;
-                code{end+1} = sprintf('%d*((x / %d) mod 2)*((y / %d) mod 2)', v2_pown, v2_pown, v2_pown);
+                %code{end+1} = sprintf('%d*((x / %d) mod 2)*((y / %d) mod 2)', v2_pown, v2_pown, v2_pown);
+                x_term = BinaryExpr(...
+                    BinaryExpr.MOD, ...
+                    BinaryExpr(BinaryExpr.DIVIDE, VarIdExpr('x'), IntExpr(v2_pown)),...
+                    IntExpr(2));
+                y_term = BinaryExpr(...
+                    BinaryExpr.MOD, ...
+                    BinaryExpr(BinaryExpr.DIVIDE, VarIdExpr('y'), IntExpr(v2_pown)),...
+                    IntExpr(2));
+                args{end + 1} = BinaryExpr(...
+                    BinaryExpr.MULTIPLY, ...
+                    IntExpr(v2_pown),...
+                    BinaryExpr(...
+                        BinaryExpr.MULTIPLY, ...
+                    	x_term, ...
+                    	y_term));
             end
-            code = MatlabUtils.strjoin(code, ' \n\t+ ');
+            %code = MatlabUtils.strjoin(code, ' \n\t+ ');
+            rhs = LustreAst.BinaryMultiArgs(BinaryExpr.PLUS, args);
             node_name = strcat('_AND_Bitwise_Unsigned_', num2str(n));
             
-            format = 'node %s (x, y: int)\nreturns(z:int);\nlet\n\t';
-            format = [format, 'z = %s;\ntel\n\n'];
-            node = sprintf(format, node_name, code);
+            %             format = 'node %s (x, y: int)\nreturns(z:int);\nlet\n\t';
+            %             format = [format, 'z = %s;\ntel\n\n'];
+            %             node = sprintf(format, node_name, code);
+            bodyElts = LustreEq(...
+                VarIdExpr('z'), ...
+                rhs);
+            node = LustreNode();
+            node.setName(node_name);
+            node.setInputs({LustreVar('x', 'int'), LustreVar('y', 'int')});
+            node.setOutputs(LustreVar('z', 'int'));
+            node.setBodyEqs(bodyElts);           
+            node.setIsMain(false);
         end 
         %NAND
         function [node, external_nodes, opens] = getNANDBitwiseUnsigned(n)

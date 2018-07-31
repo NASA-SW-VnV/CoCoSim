@@ -19,8 +19,27 @@ classdef LustreAst < handle
     end
     methods(Static)
         function code = listVarsWithDT(vars, backend)
-            vars_code = cellfun(@(x) x.print(backend), vars, 'UniformOutput', 0);
-            code = MatlabUtils.strjoin(vars_code, '\n\t');
+            if iscell(vars)
+                vars_code = cellfun(@(x) x.print(backend), vars, 'UniformOutput', 0);
+                code = MatlabUtils.strjoin(vars_code, '\n\t');
+            else
+                code = vars.print(backend);
+            end
+        end
+        % Given many args, this function return the binary operation
+        % applied on all arguments.
+        function exp = BinaryMultiArgs(op, args)
+            if isempty(args) || numel(args) == 1
+                exp = args;
+            elseif numel(args) == 2
+                exp = BinaryExpr(op, ...
+                    args{1}, ...
+                    args{2});
+            else
+                exp = BinaryExpr(op, ...
+                    args{1}, ...
+                    LustreAst.BinaryMultiArgs(op, args(2:end)));
+            end
         end
     end
 end
