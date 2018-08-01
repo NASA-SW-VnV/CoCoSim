@@ -647,26 +647,26 @@ classdef SLX2LusUtils < handle
                 one = {};
                 for i=1:numel(Lustre_type)
                     if strcmp(Lustre_type{i}, 'bool')
-                        zero{i} = 'false';
-                        one{i} = 'true';
+                        zero{i} = BooleanExpr('false');
+                        one{i} = BooleanExpr('true') ;
                     elseif strcmp(Lustre_type{i}, 'int')
-                        zero{i} = '0';
-                        one{i} = '1';
+                        zero{i} = IntExpr('0');
+                        one{i} = IntExpr('1');
                     else
-                        zero{i} = '0.0';
-                        one{i} = '1.0';
+                        zero{i} = RealExpr('0.0');
+                        one{i} = RealExpr('1.0');
                     end
                 end
             else
                 if strcmp(Lustre_type, 'bool')
-                    zero = 'false';
-                    one = 'true';
+                    zero = BooleanExpr('false');
+                    one = BooleanExpr('true');
                 elseif strcmp(Lustre_type, 'int')
-                    zero = '0';
-                    one = '1';
+                    zero = IntExpr('0');
+                    one = IntExpr('1');
                 else
-                    zero = '0.0';
-                    one = '1.0';
+                    zero = RealExpr('0.0');
+                    one = RealExpr('1.0');
                 end
             end
         end
@@ -725,6 +725,8 @@ classdef SLX2LusUtils < handle
         end
         
         %% Get the initial ouput of Outport depending on the dimension.
+        % the function returns a list of LustreExp objects: IntExpr,
+        % RealExpr or BooleanExpr
         function InitialOutput_cell = getInitialOutput(parent, blk, InitialOutput, slx_dt, max_width)
             [lus_outputDataType] = SLX2LusUtils.get_lustre_dt(slx_dt);
             if strcmp(InitialOutput, '[]')
@@ -750,41 +752,33 @@ classdef SLX2LusUtils < handle
             %
             InitialOutput_cell = cell(1, numel(InitialOutputValue));
             for i=1:numel(InitialOutputValue)
-                InitialOutput_cell{i} = SLX2LusUtils.num2str(...
+                InitialOutput_cell{i} = SLX2LusUtils.num2LusExp(...
                     InitialOutputValue(i), lus_outputDataType{i}, InitialOutputType);
             end
             if numel(InitialOutput_cell) < max_width
-                InitialOutput_cell = arrayfun(@(x) {InitialOutput_cell{1}}, (1:max_width));
+                InitialOutput_cell = arrayfun(@(x) InitialOutput_cell(1), (1:max_width));
             end
             
         end
         
-        %% change numerical value to string based on DataType dt.
-        function str = num2str(v, dt, InitialOutputType)
+        %% change numerical value to Lustre Expr string based on DataType dt.
+        function lustreExp = num2LusExp(v, dt, InitialOutputType)
             if nargin < 3
                 InitialOutputType = dt;
             end
             if strcmp(dt, 'real')
-                str = sprintf('%.15f', v);
+                lustreExp = RealExpr(v);
             elseif strcmp(dt, 'int')
-                str = sprintf('%d', int32(v));
+                lustreExp = IntExpr(v);
             elseif strcmp(dt, 'bool')
-                if v
-                    str = 'true';
-                else
-                    str = 'false';
-                end
+                lustreExp = BooleanExpr(v);
             elseif strncmp(InitialOutputType, 'int', 3) ...
                     || strncmp(InitialOutputType, 'uint', 4)
-                str = num2str(v);
+                lustreExp = IntExpr(v);
             elseif strcmp(InitialOutputType, 'boolean') || strcmp(InitialOutputType, 'logical')
-                if v
-                    str = 'true';
-                else
-                    str = 'false';
-                end
+               lustreExp = BooleanExpr(v);
             else
-                str = sprintf('%.15f', v);
+                lustreExp = RealExpr(v);
             end
         end
         %% Data type conversion node name

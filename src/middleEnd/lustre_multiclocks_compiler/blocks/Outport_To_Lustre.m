@@ -26,7 +26,7 @@ classdef Outport_To_Lustre < Block_To_Lustre
                 else
                     lus_outputDataType = SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Inport{1});
                 end
-                zero = SLX2LusUtils.num2str(...
+                zero = SLX2LusUtils.num2LusExp(...
                     0, lus_outputDataType);
                 inputs = arrayfun(@(x) {zero}, (1:numel(outputs)));
             end
