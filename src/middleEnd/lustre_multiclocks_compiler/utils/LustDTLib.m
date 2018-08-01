@@ -17,14 +17,24 @@ classdef LustDTLib
         function [node, external_nodes_i, opens] = getToBool(dt)
             opens = {};
             external_nodes_i = {};
-            format = 'node %s (x: %s)\nreturns(y:bool);\nlet\n\t y= (x <> %s);\ntel\n\n';
             node_name = strcat(dt, '_to_bool');
             if strcmp(dt, 'int')
-                zero = '0';
+                zero = IntExpr(0);
             else
-                zero = '0.0';
+                zero = RealExpr(0);
             end
-            node = sprintf(format, node_name, dt, zero);
+            %format = 'node %s (x: %s)\nreturns(y:bool);\nlet\n\t y= (x <> %s);\ntel\n\n';
+            %node = sprintf(format, node_name, dt, zero);
+            bodyElts{1} = LustreEq(...
+                VarIdExpr('y'), BinaryExpr(BinaryExpr.NEQ,VarIdExpr('x'),zero));
+            
+            node = LustreNode();
+            node.setName(node_name);
+            node.setInputs(LustreVar('x', dt));
+            node.setOutputs(LustreVar('y', 'bool'));
+            node.setBodyEqs(bodyElts);           
+            node.setIsMain(false);            
+            
             
         end
         
@@ -33,17 +43,31 @@ classdef LustDTLib
         function [node, external_nodes_i, opens] = getBoolTo(dt)
             opens = {};
             external_nodes_i = {};
-            format = 'node %s (x: bool)\nreturns(y:%s);\nlet\n\t y= if x then %s else %s;\ntel\n\n';
+            
             node_name = strcat('bool_to_', dt);
             if strcmp(dt, 'int')
-                zero = '0';
-                one = '1';
+                zero = IntExpr(0);
+                one = IntExpr('1');
             else
-                zero = '0.0';
-                one = '1.0';
+                zero = RealExpr('0.0');
+                one = RealExpr('1.0');
             end
-            node = sprintf(format, node_name, dt, one, zero);
+            %format = 'node %s (x: bool)\nreturns(y:%s);\nlet\n\t y= if x then %s else %s;\ntel\n\n';
+            %node = sprintf(format, node_name, dt, one, zero);
+ 
+            bodyElts{1} = LustreEq(...
+                VarIdExpr('y'), ...
+                IteExpr(VarIdExpr('x'),...
+                        one,...
+                        zero)...
+            );
             
+            node = LustreNode();
+            node.setName(node_name);
+            node.setInputs(LustreVar('x', 'bool'));
+            node.setOutputs(LustreVar('y', dt));
+            node.setBodyEqs(bodyElts);           
+            node.setIsMain(false);             
         end
        
         function [node, external_nodes_i, opens] = get_real_to_bool()
