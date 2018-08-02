@@ -40,7 +40,7 @@ classdef TappedDelayLine_To_Lustre < Block_To_Lustre
                 blk.vinit, outputDataType, n_vinit);
             
             
-            codes = {};
+            codes = cell(1, numel(outputs));
             
             if strcmp(delayOrder, 'Oldest')
                 % flip names
@@ -48,30 +48,46 @@ classdef TappedDelayLine_To_Lustre < Block_To_Lustre
             end
             
             if strcmp(includeCurrent, 'on')
-                prefix = '';
                 vindex = 0;
             else
-                prefix = sprintf('%s -> pre ', vinit{1});
                 vindex = 1;
             end
             
             for j=1:numel(outputs)
                 if j==1
-                    codes{j} = sprintf('%s = %s %s;\n\t', ...
-                        outputs{j}, prefix, inputs{1}{1});
+                    if strcmp(includeCurrent, 'on')
+                        %codes{j} = sprintf('%s =  %s;\n\t', ...
+                        %    outputs{j}, inputs{1}{1});
+                        codes{j} = LustreEq(outputs{j}, inputs{1}{1});
+                    else
+                        %codes{j} = sprintf('%s = %s -> pre %s;\n\t', ...
+                        %    outputs{j}, vinit{1}, inputs{1}{1});
+                        codes{j} = LustreEq(...
+                            outputs{j}, ...
+                            BinaryExpr(BinaryExpr.ARROW,...
+                                       vinit{1},...
+                                       UnaryExpr(UnaryExpr.PRE,...
+                                                inputs{1}{1})));
+                    end
                 else
-                    codes{j} = sprintf('%s = %s -> pre %s;\n\t', ...
-                        outputs{j}, vinit{vindex}, outputs{j-1});
+                    %codes{j} = sprintf('%s = %s -> pre %s;\n\t', ...
+                     %   outputs{j}, vinit{vindex}, outputs{j-1});
+                    codes{j} = LustreEq(...
+                            outputs{j}, ...
+                            BinaryExpr(BinaryExpr.ARROW,...
+                                       vinit{vindex},...
+                                       UnaryExpr(UnaryExpr.PRE,...
+                                                outputs{j-1})));
                 end
                 vindex = vindex + 1;
             end
-
+            
             % join the lines and set the block code.
-            obj.setCode(MatlabUtils.strjoin(codes, ''));
+            obj.setCode( codes );
             
         end
         
-        function options = getUnsupportedOptions(obj,parent, blk, varargin)
+        function options = getUnsupportedOptions(obj, varargin)
             % add your unsuported options list here
             options = obj.unsupported_options;
             
