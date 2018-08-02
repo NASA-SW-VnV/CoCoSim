@@ -49,7 +49,8 @@ classdef UnaryMinus_To_Lustre < Block_To_Lustre
                     obj.addExternal_libraries(external_lib);
                     % cast the input to the conversion format. In our
                     % example conv_format = 'int_to_real(%s)'.
-                    inputs{1} = cellfun(@(x) sprintf(conv_format,x), inputs{1}, 'un', 0);
+                    inputs{1} = cellfun(@(x) ...
+                        SLX2LusUtils.setArgInConvFormat(conv_format,x), inputs{1}, 'un', 0);
                 end
             end
             

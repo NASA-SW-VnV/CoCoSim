@@ -86,7 +86,8 @@ classdef Template_To_Lustre < Block_To_Lustre
                         obj.addExternal_libraries(external_lib);
                         % cast the input to the conversion format. In our
                         % example conv_format = 'int_to_real(%s)'. 
-                        inputs{i} = cellfun(@(x) sprintf(conv_format,x), inputs{i}, 'un', 0);
+                        inputs{i} = cellfun(@(x) ...
+                            SLX2LusUtils.setArgInConvFormat(conv_format,x), inputs{i}, 'un', 0);
                     end
                 end
             end

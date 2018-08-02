@@ -40,7 +40,9 @@ classdef Sqrt_To_Lustre < Block_To_Lustre
                     [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, 'double', RndMeth, SaturateOnIntegerOverflow);
                     if ~isempty(external_lib)
                         obj.addExternal_libraries(external_lib);
-                        inputs{i} = cellfun(@(x) sprintf(conv_format,x), inputs{i}, 'un', 0);
+                        inputs{i} = cellfun(@(x) ...
+                            SLX2LusUtils.setArgInConvFormat(conv_format,x),...
+                            inputs{i}, 'un', 0);
                     end
                 end
             end
@@ -61,7 +63,7 @@ classdef Sqrt_To_Lustre < Block_To_Lustre
                     [external_lib, conv_format] = SLX2LusUtils.dataType_conversion('real', outputDataType);
                     if ~isempty(external_lib)
                         obj.addExternal_libraries(external_lib);
-                        code = sprintf(conv_format,code);
+                        code = SLX2LusUtils.setArgInConvFormat(conv_format, code);
                     end
                 end
                 codes{j} = sprintf('%s = %s;\n\t', outputs{j}, code);

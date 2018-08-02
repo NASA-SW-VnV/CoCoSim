@@ -50,7 +50,8 @@ classdef SwitchCase_To_Lustre < Block_To_Lustre
                     [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inports_dt{i}, 'int');
                     if ~isempty(external_lib)
                         obj.addExternal_libraries(external_lib);
-                        inputs{i} = cellfun(@(x) sprintf(conv_format,x), inputs{i}, 'un', 0);
+                        inputs{i} = cellfun(@(x) ...
+                            SLX2LusUtils.setArgInConvFormat(conv_format,x), inputs{i}, 'un', 0);
                     end
                     inports_dt{i} = 'int';
                 end

@@ -791,6 +791,10 @@ classdef SLX2LusUtils < handle
         function callObj = setArgInConvFormat(callObj, arg)
             % this function goes with dataType_conversion funciton to set 
             % the missing argument in conv_format.
+            if isempty(callObj)
+                callObj = arg;
+                return;
+            end
             args = callObj.getArgs();
             if isempty(args)
                 callObj.setArgs(arg);

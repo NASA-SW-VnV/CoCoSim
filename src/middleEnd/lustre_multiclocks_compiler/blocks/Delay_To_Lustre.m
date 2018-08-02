@@ -172,7 +172,8 @@ classdef Delay_To_Lustre < Block_To_Lustre
                     SLX2LusUtils.dataType_conversion(x0DataType, inportDataType);
                 if ~isempty(external_lib)
                     external_libraries = [external_libraries, external_lib];
-                    inputs{end} = cellfun(@(x) sprintf(conv_format,x), inputs{end}, 'un', 0);
+                    inputs{end} = cellfun(@(x) ...
+                        SLX2LusUtils.setArgInConvFormat(conv_format,x), inputs{end}, 'un', 0);
                 end
             end
             if strcmp(DelayLengthSource, 'Dialog')
@@ -192,7 +193,9 @@ classdef Delay_To_Lustre < Block_To_Lustre
                     SLX2LusUtils.dataType_conversion(delayDataType, delayLengthDT);
                 if ~isempty(external_lib)
                     external_libraries = [external_libraries, external_lib];
-                    inputs{2} = cellfun(@(x) sprintf(conv_format,x), inputs{2}, 'un', 0);
+                    inputs{2} = cellfun(@(x) ...
+                        SLX2LusUtils.setArgInConvFormat(conv_format,x),...
+                        inputs{2}, 'un', 0);
                 end
             end
             x0 =  inputs{end};

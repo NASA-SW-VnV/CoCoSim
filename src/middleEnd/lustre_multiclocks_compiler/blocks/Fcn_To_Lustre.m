@@ -27,7 +27,8 @@ classdef Fcn_To_Lustre < Block_To_Lustre
                 [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, outputDataType, RndMeth, SaturateOnIntegerOverflow);
                 if ~isempty(external_lib)
                     obj.addExternal_libraries(external_lib);
-                    inputs{1} = cellfun(@(x) sprintf(conv_format,x), inputs{1}, 'un', 0);
+                    inputs{1} = cellfun(@(x) ...
+                        SLX2LusUtils.setArgInConvFormat(conv_format,x), inputs{1}, 'un', 0);
                 end
             end
             
