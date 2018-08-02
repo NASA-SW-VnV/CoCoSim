@@ -29,6 +29,7 @@ classdef BinaryExpr < LustreExpr
         GT = '>';
         LT = '<';
         ARROW = '->';
+        MERGEARROW = '->'; % the arrow used in Merge expressions to indicate the clock Value
         WHEN = 'when';
     end
     methods

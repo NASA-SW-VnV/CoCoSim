@@ -24,8 +24,8 @@ classdef MergeExpr < LustreExpr
         end
         
         function code = print_lustrec(obj, backend)
-            if numel(obj.exprs) > 1
-                exprs_cell = cellfun(@(x) {sprintf('(%s)', x.print(backend))},...
+            if iscell(obj.exprs)
+                exprs_cell = cellfun(@(x) sprintf('(%s)', x.print(backend)),...
                     obj.exprs, 'UniformOutput', 0);
                 exprs_str = MatlabUtils.strjoin(exprs_cell, '\n\t\t');
             else

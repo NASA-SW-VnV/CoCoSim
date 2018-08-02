@@ -11,7 +11,7 @@ classdef RateTransition_To_Lustre < Block_To_Lustre
     
     methods
         
-        function  write_code(obj, parent, blk, xml_trace, main_sampleTime, varargin)
+        function  write_code(obj, parent, blk, xml_trace, main_sampleTime, backend, varargin)
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             obj.addVariable(outputs_dt);
             [inputs] = SLX2LusUtils.getBlockInputsNames(parent, blk);
@@ -58,33 +58,59 @@ classdef RateTransition_To_Lustre < Block_To_Lustre
             end
             
             %%
-            codes = {};
+            codes = cell(1, numel(outputs));
             
             if strcmp(type, 'ZOH')
                 clockName = SLX2LusUtils.clockName(outTs/main_sampleTime(1), outTsOffset/main_sampleTime(1));
                 for i=1:numel(outputs)
-                    codes{i} = sprintf('%s = %s when %s;\n\t', outputs{i}, inputs{i}, clockName);
+                    %sprintf('%s = %s when %s;\n\t', outputs{i}, inputs{i}, clockName);
+                    codes{i} = LustreEq(outputs{i}, ...
+                        BinaryExpr(BinaryExpr.WHEN, inputs{i}, VarIdExpr(clockName)));
                 end
             elseif strcmp(type, '1/z')
                 clockName = SLX2LusUtils.clockName(inTs/main_sampleTime(1), inTsOffset/main_sampleTime(1));
                 init_cond = SLX2LusUtils.getInitialOutput(parent, blk,...
                     blk.InitialCondition, outputDataType, numel(outputs));
                 for i=1:numel(outputs)
-                    codes{i} = sprintf('%s = merge %s\n\t (true -> (%s -> pre %s))\n\t (false -> (%s -> pre %s) when false(%s));\n\t', ...
-                        outputs{i}, clockName, init_cond{i}, inputs{i}, init_cond{i}, outputs{i}, clockName);
+                    %codes{i} = sprintf('%s = merge %s\n\t (true -> (%s -> pre %s))\n\t (false -> (%s -> pre %s) when false(%s));\n\t', ...
+                    %    outputs{i}, clockName, init_cond{i}, inputs{i}, init_cond{i}, outputs{i}, clockName);
+                    true_terms = BinaryExpr(...
+                        BinaryExpr.MERGEARROW, ...
+                        BooleanExpr('true'), ...
+                        BinaryExpr(BinaryExpr.ARROW, ...
+                                   init_cond{i}, ...
+                                   UnaryExpr(UnaryExpr.PRE, inputs{i})),...
+                        false);
+                    if BackendType.isKIND2(backend) ...
+                            || BackendType.isJKIND(backend)
+                        false_clock = UnaryExpr(UnaryExpr.NOT, VarIdExpr(clockName));
+                    else
+                        false_clock = NodeCallExpr('false', VarIdExpr(clockName));
+                    end
+                    false_term = BinaryExpr(...
+                        BinaryExpr.MERGEARROW, ...
+                        BooleanExpr('false'), ...
+                        BinaryExpr(BinaryExpr.WHEN, ...
+                                   BinaryExpr(BinaryExpr.ARROW, ...
+                                               init_cond{i}, ...
+                                               UnaryExpr(UnaryExpr.PRE, outputs{i})),...
+                                    false_clock),...
+                         false);
+                    codes{i} = LustreEq(outputs{i}, ...
+                        MergeExpr(VarIdExpr(clockName), ...
+                        {true_terms, false_term}));
                 end
             elseif strcmp(type, 'Copy')
                 for i=1:numel(outputs)
-                    codes{i} = sprintf('%s = %s;\n\t', outputs{i}, inputs{i});
+                    %codes{i} = sprintf('%s = %s;\n\t', outputs{i}, inputs{i});
+                    codes{i} = LustreEq(outputs{i}, inputs{i});
                 end
             end
             
-            
-            
-            obj.setCode( MatlabUtils.strjoin(codes, ''));
+            obj.setCode( codes );
         end
         %%
-        function options = getUnsupportedOptions(obj, parent, blk, varargin)
+        function options = getUnsupportedOptions(obj, ~, blk, varargin)
             if strcmp(blk.Integrity, 'on') && strcmp(blk.Deterministic, 'on')
                 if inTs == outTs
                     if inTsOffset ~= outTsOffset
