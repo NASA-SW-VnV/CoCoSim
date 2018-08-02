@@ -28,14 +28,21 @@ classdef LustreEq < LustreAst
         
         
         function code = print_lustrec(obj, backend)
-            if numel(obj.lhs) > 1
-                lhs_cell = cellfun(@(x) {x.print(backend)}, obj.lhs, 'UniformOutput', 0);
+            if numel(obj.lhs) > 1 || iscell(obj.lhs)
+                lhs_cell = cellfun(@(x) x.print(backend), obj.lhs, 'UniformOutput', 0);
                 lhs_str = sprintf('(%s)', ...
                     MatlabUtils.strjoin(lhs_cell, ', '));
             else
+                
                 lhs_str = obj.lhs.print(backend);
+                
             end
-            rhs_str = obj.rhs.print(backend);
+            if iscell(obj.rhs)
+                rhs_str = obj.rhs{1}.print(backend);
+            else
+                rhs_str = obj.rhs.print(backend);
+            end
+            
             code = sprintf('%s = %s;', lhs_str, rhs_str);
         end
         

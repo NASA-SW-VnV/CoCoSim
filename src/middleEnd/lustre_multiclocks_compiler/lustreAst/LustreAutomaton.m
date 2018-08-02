@@ -7,7 +7,7 @@ classdef LustreAutomaton < LustreExpr
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     properties
-        name;
+        name;%String
         states
     end
     
@@ -24,7 +24,7 @@ classdef LustreAutomaton < LustreExpr
         
         function code = print_lustrec(obj, backend)
             lines = {};
-            lines{1} = sprintf('\tautomaton %s\n', obj.name.print(backend));
+            lines{1} = sprintf('automaton %s\n', obj.name);
             % Strong transition
             for i=1:numel(obj.states)
                 lines{end+1} = sprintf('%s\n', ...

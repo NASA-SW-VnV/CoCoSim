@@ -40,20 +40,21 @@ classdef SubSystem_To_Lustre < Block_To_Lustre
                     node_name, inputs, ...
                     isEnabledSubsystem, EnableShowOutputPortIsOn, ...
                     isTriggered, TriggerShowOutputPortIsOn, TriggerType, TriggerDT, ...
-                    isActionSS, isInsideContract);
-                if ~isInsideContract
+                    isActionSS);
                     obj.addVariable(EnableCondVar);
-                end
             end
             
             %% add time input and clocks
-            inputs{end + 1} = SLX2LusUtils.timeStepStr();
-            x = MatlabUtils.strjoin(inputs, ',\n\t\t');
+            inputs{end + 1} = VarIdExpr(SLX2LusUtils.timeStepStr());
             clocks_list = SLX2LusUtils.getRTClocksSTR(blk, main_sampleTime);
             if ~isempty(clocks_list)
-                x = [x ', ' clocks_list];
+                clocks_var = cell(1, numel(clocks_list));
+                for i=1:numel(clocks_list)
+                    clocks_var{i} = VarIdExpr(...
+                        clocks_list{i});
+                end
+                inputs = [inputs, clocks_var];
             end
-            y = MatlabUtils.strjoin(outputs, ',\n\t');
             
             %% Check Resettable SS case
             [isResetSubsystem, ResetType] =SubSystem_To_Lustre.hasResetPort(blk);
@@ -61,22 +62,21 @@ classdef SubSystem_To_Lustre < Block_To_Lustre
                 [codes, ResetCondVar] = ...
                     SubSystem_To_Lustre.ResettableSSCall(parent, blk, ...
                     node_name, blk_name, ...
-                    ResetType, codes, x, y, isInsideContract, outputs_dt{1});
+                    ResetType, codes, inputs, outputs);
                 obj.addVariable(ResetCondVar);
             else
                 if isInsideContract
                     codes{end + 1} = SubSystem_To_Lustre.contractBlkCode(...
-                        parent, blk, node_name, x, outputs_dt, maskType, xml_trace);
+                        parent, blk, node_name, inputs, outputs, maskType, xml_trace);
                 else
-                    codes{end + 1} = ...
-                        sprintf('(%s) = %s(%s);\n\t', ...
-                        y, node_name, x);
+                    codes{end + 1} = LustreEq(outputs,...
+                        NodeCallExpr(node_name, inputs));
                 end
             end
             
             
-            obj.setCode( MatlabUtils.strjoin(codes, ''));
-            if ~isInsideContract, obj.addVariable(outputs_dt); end
+            obj.setCode( codes );
+            obj.addVariable(outputs_dt); 
         end
         
         function options = getUnsupportedOptions(obj, parent, blk, varargin)
@@ -102,18 +102,16 @@ classdef SubSystem_To_Lustre < Block_To_Lustre
     end
     methods (Static = true)
         %%
-        function code = contractBlkCode(parent, blk, node_name, x, outputs_dt, maskType, xml_trace)
+        function code = contractBlkCode(parent, blk, node_name, inputs, outputs, maskType, xml_trace)
             if isequal(maskType, 'ContractGuaranteeBlock')
-                code = ...
-                    sprintf('guarantee "%s"  %s(%s);\n\t', ...
-                    node_name, node_name, x);
+                code = ContractGuaranteeExpr(node_name, ...
+                    NodeCallExpr(node_name, inputs));
                 xml_trace.add_Property(...
                     blk.Origin_path, ...
                     SLX2LusUtils.node_name_format(parent), node_name, 1, 'guarantee')
             elseif isequal(maskType, 'ContractAssumeBlock')
-                code = ...
-                    sprintf('assume "%s"  %s(%s);\n\t', ...
-                    node_name, node_name, x);
+                code = ContractAssumeExpr(node_name, ...
+                    NodeCallExpr(node_name, inputs));
                 xml_trace.add_Property(...
                     blk.Origin_path, ...
                     SLX2LusUtils.node_name_format(parent), node_name, 1, 'assume')
@@ -127,9 +125,8 @@ classdef SubSystem_To_Lustre < Block_To_Lustre
                         blk.Origin_path, ...
                         SLX2LusUtils.node_name_format(parent), node_name, 1, 'require')
                 end
-                code = ...
-                    sprintf('var %s = %s(%s);\n\t', ...
-                    strrep(outputs_dt{1}, ';', ''), node_name, x);
+                code = LustreEq(outputs, ...
+                    NodeCallExpr(node_name, inputs));
             end
         end
         %%
@@ -217,7 +214,7 @@ classdef SubSystem_To_Lustre < Block_To_Lustre
                 node_name, inputs, ...
                 isEnabledSubsystem, EnableShowOutputPortIsOn, ...
                 isTriggered, TriggerShowOutputPortIsOn, TriggerType, TriggerBlockDT, ...
-                isActionSS, isInsideContract)
+                isActionSS)
             codes = {};
             node_name = strcat(node_name, '_automaton');
             % ExecutionCondName may be used by Merge block, keep it even if
@@ -228,24 +225,24 @@ classdef SubSystem_To_Lustre < Block_To_Lustre
                 blk_name = SLX2LusUtils.node_name_format(blk);
                 EnableCondName = sprintf('EnableCond_of_%s', blk_name);
                 TriggerCondName = sprintf('TriggerCond_of_%s', blk_name);
-                ExecutionCondVar = sprintf('%s, %s, %s:bool;', ...
-                    ExecutionCondName, TriggerCondName, EnableCondName);
+                ExecutionCondVar = {LustreVar(ExecutionCondName, 'bool'), ...
+                    LustreVar(TriggerCondName, 'bool'), ...
+                    LustreVar(EnableCondName, 'bool')};
             else
-                ExecutionCondVar = sprintf('%s:bool;', ExecutionCondName);
+                ExecutionCondVar = LustreVar(ExecutionCondName, 'bool');...
             end
             if isActionSS
                 % The case of Action subsystems
                 [srcBlk, srcPort] = SLX2LusUtils.getpreBlock(parent, blk, 'ifaction');
                 if ~isempty(srcBlk)
                     [IfBlkOutputs, ~] = SLX2LusUtils.getBlockOutputsNames(parent, srcBlk);
-                    if isInsideContract
-                        codes{end + 1} = sprintf('var %s : bool = %s;\n\t'...
-                            ,ExecutionCondName,  IfBlkOutputs{srcPort});
-                    else
-                        codes{end + 1} = sprintf('%s = %s;\n\t'...
-                            ,ExecutionCondName,  IfBlkOutputs{srcPort});
-                    end
-                    inputs{end + 1} = ExecutionCondName;
+
+                    %codes{end + 1} = sprintf('%s = %s;\n\t'...
+                    %   ,ExecutionCondName,  IfBlkOutputs{srcPort});
+                    codes{end + 1} = LustreEq(...
+                        VarIdExpr(ExecutionCondName), ...
+                        IfBlkOutputs{srcPort});
+                    inputs{end + 1} = VarIdExpr(ExecutionCondName);
                 end
             else
                 % the case of enabled/triggered subsystems
@@ -258,42 +255,44 @@ classdef SubSystem_To_Lustre < Block_To_Lustre
                     lusIncomingSignalDataType = SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Trigger{1});
                     [lusTriggerportDataType] = SLX2LusUtils.get_lustre_dt(TriggerBlockDT);
                     [triggerInputs] = SLX2LusUtils.getSubsystemTriggerInputsNames(parent, blk);
-                    TriggerinputsExp = {};
+                    TriggerinputsExp = cell(1, blk.CompiledPortWidths.Trigger);
                     if isTriggered && isEnabledSubsystem
-                        condName = TriggerCondName;
+                        Triggercond = VarIdExpr(TriggerCondName);
                     else
-                        condName = ExecutionCondName;
+                        Triggercond = VarIdExpr(ExecutionCondName);
                     end
                     for i=1:blk.CompiledPortWidths.Trigger
                         TriggerinputsExp{i} = ...
-                            SLX2LusUtils.getTriggerValue(condName,...
+                            SubSystem_To_Lustre.getTriggerValue(Triggercond,...
                             triggerInputs{i}, TriggerType, lusTriggerportDataType, lusIncomingSignalDataType);
                     end
                     inputs = [inputs, TriggerinputsExp];
                 end
                 
                 
-                EnableCond = '';
+                EnableCond = {};
                 if isEnabledSubsystem
                     enableportDataType = blk.CompiledPortDataTypes.Enable{1};
                     [lusEnableportDataType, zero] = SLX2LusUtils.get_lustre_dt(enableportDataType);
                     enableInputs = SLX2LusUtils.getSubsystemEnableInputsNames(parent, blk);
-                    cond = {};
+                    cond = cell(1, blk.CompiledPortWidths.Enable);
                     for i=1:blk.CompiledPortWidths.Enable
                         if strcmp(lusEnableportDataType, 'bool')
-                            cond{i} = sprintf('%s', enableInputs{i});
+                            cond{i} =  enableInputs{i};
                         else
-                            cond{i} = sprintf('%s > %s', enableInputs{i}, zero);
+                            cond{i} = BinaryExpr(BinaryExpr.GT, ...
+                                                enableInputs{i}, ...
+                                                zero);
                         end
                     end
-                    EnableCond = MatlabUtils.strjoin(cond, ' or ');
+                    EnableCond = BinaryExpr.BinaryMultiArgs(BinaryExpr.OR, cond);
                 end
-                triggerCond = '';
+                triggerCond = {};
                 if isTriggered
                     triggerportDataType = blk.CompiledPortDataTypes.Trigger{1};
                     [lusTriggerportDataType, zero] = SLX2LusUtils.get_lustre_dt(triggerportDataType);
                     [triggerInputs] = SLX2LusUtils.getSubsystemTriggerInputsNames(parent, blk);
-                    cond = {};
+                    cond = cell(1, blk.CompiledPortWidths.Trigger);
                     for i=1:blk.CompiledPortWidths.Trigger
                         [triggerCode, status] = SLX2LusUtils.getResetCode(...
                             TriggerType, lusTriggerportDataType, triggerInputs{i} , zero);
@@ -305,60 +304,59 @@ classdef SubSystem_To_Lustre < Block_To_Lustre
                         end
                         cond{i} = triggerCode;
                     end
-                    triggerCond = MatlabUtils.strjoin(cond, ' or ');
+                    triggerCond = BinaryExpr.BinaryMultiArgs(BinaryExpr.OR, cond);
                 end
                 if isTriggered && isEnabledSubsystem
-                    if isInsideContract
-                        codes{end + 1} = sprintf('var %s :bool = %s;\n\t'...
-                            ,EnableCondName,  EnableCond);
-                        codes{end + 1} = sprintf('var %s :bool = %s;\n\t'...
-                            ,TriggerCondName,  triggerCond);
-                        codes{end + 1} = sprintf('var %s :bool = %s and %s;\n\t'...
-                            ,ExecutionCondName,  EnableCondName, TriggerCondName);
-                    else
-                        codes{end + 1} = sprintf('%s = %s;\n\t'...
-                            ,EnableCondName,  EnableCond);
-                        codes{end + 1} = sprintf('%s = %s;\n\t'...
-                            ,TriggerCondName,  triggerCond);
-                        codes{end + 1} = sprintf('%s = %s and %s;\n\t'...
-                            ,ExecutionCondName,  EnableCondName, TriggerCondName);
-                    end
-                    inputs{end + 1} = EnableCondName;
-                    inputs{end + 1} = TriggerCondName;
+
+                    %codes{end + 1} = sprintf('%s = %s;\n\t'...
+                    %    ,EnableCondName,  EnableCond);
+                    codes{end + 1} = LustreEq(...
+                        VarIdExpr(EnableCondName), ...
+                        EnableCond);
+                    %codes{end + 1} = sprintf('%s = %s;\n\t'...
+                    %    ,TriggerCondName,  triggerCond);
+                    codes{end + 1} = LustreEq(...
+                        VarIdExpr(TriggerCondName), ...
+                        triggerCond);
+                    %codes{end + 1} = sprintf('%s = %s and %s;\n\t'...
+                    %    ,ExecutionCondName,  EnableCondName, TriggerCondName);
+                    codes{end + 1} = LustreEq(...
+                        VarIdExpr(ExecutionCondName), ...
+                        BinaryExpr( BinaryExpr.AND, ...
+                                    VarIdExpr(EnableCondName),...
+                                    VarIdExpr(TriggerCondName)));
+                    inputs{end + 1} = VarIdExpr(EnableCondName);
+                    inputs{end + 1} = VarIdExpr(TriggerCondName);
                     % add ExecutionCondName for Merge block.
                     
                 else
                     if isTriggered
-                        if isInsideContract
-                            codes{end + 1} = sprintf('var %s :bool = %s;\n\t'...
-                                ,ExecutionCondName,  triggerCond);
-                        else
-                            codes{end + 1} = sprintf('%s = %s;\n\t'...
-                                ,ExecutionCondName,  triggerCond);
-                        end
+                        %codes{end + 1} = sprintf('%s = %s;\n\t'...
+                        %    ,ExecutionCondName,  triggerCond);
+                        codes{end + 1} = LustreEq(...
+                            VarIdExpr(ExecutionCondName), ...
+                            triggerCond);
                     else
-                        if isInsideContract
-                            codes{end + 1} = sprintf('var %s :bool= %s;\n\t'...
-                                ,ExecutionCondName,  EnableCond);
-                        else
-                            codes{end + 1} = sprintf('%s = %s;\n\t'...
-                                ,ExecutionCondName,  EnableCond);
-                        end
+                        %codes{end + 1} = sprintf('%s = %s;\n\t'...
+                        %    ,ExecutionCondName,  EnableCond);
+                        codes{end + 1} = LustreEq(...
+                            VarIdExpr(ExecutionCondName), ...
+                            EnableCond);
                     end
-                    inputs{end + 1} = ExecutionCondName;
+                    inputs{end + 1} = VarIdExpr(ExecutionCondName);
                 end
                 
             end
         end
         function [codes, ResetCondVar] = ResettableSSCall(parent, blk, ...
                 node_name, blk_name, ...
-                ResetType, codes, inputs, outputs, isInsideContract, output_dt)
+                ResetType, codes, inputs, outputs)
             ResetCondName = sprintf('ResetCond_of_%s', blk_name);
-            ResetCondVar = sprintf('%s:bool;', ResetCondName);
+            ResetCondVar = LustreVar(ResetCondName, 'bool');
             resetportDataType = blk.CompiledPortDataTypes.Reset{1};
             [lusResetportDataType, zero] = SLX2LusUtils.get_lustre_dt(resetportDataType);
             resetInputs = SLX2LusUtils.getSubsystemResetInputsNames(parent, blk);
-            cond = {};
+            cond = cell(1, blk.CompiledPortWidths.Reset);
             for i=1:blk.CompiledPortWidths.Reset
                 [resetCode, status] = SLX2LusUtils.getResetCode(...
                     ResetType, lusResetportDataType, resetInputs{i} , zero);
@@ -370,18 +368,72 @@ classdef SubSystem_To_Lustre < Block_To_Lustre
                 end
                 cond{i} = resetCode;
             end
-            ResetCond = MatlabUtils.strjoin(cond, ' or ');
-            codes{numel(codes) + 1} = sprintf('%s = %s;\n\t'...
-                ,ResetCondName,  ResetCond);
-            if isInsideContract
-                strrep(y, ';', '')
-                codes{end + 1} = ...
-                    sprintf('var %s = %s(%s) every %s;\n\t', ...
-                    strrep(output_dt, ';', ''), node_name, inputs, ResetCondName);
+            ResetCond = BinaryExpr.BinaryMultiArgs(BinaryExpr.OR, cond);
+            %codes{end + 1} = sprintf('%s = %s;\n\t'...
+            %    ,ResetCondName,  ResetCond);
+            codes{end + 1} = LustreEq(VarIdExpr(ResetCondName), ResetCond);
+            codes{end + 1} = ...
+                LustreEq(outputs, ...
+                EveryExpr(node_name, inputs, VarIdExpr(ResetCondName)));
+        end
+        %% trigger value
+        function TriggerinputExp = getTriggerValue(Cond, triggerInput, TriggerType, TriggerBlockDt, IncomingSignalDT)
+            if strcmp(TriggerBlockDt, 'real')
+                %suffix = '.0';
+                zero = RealExpr('0.0');
+                one = RealExpr('1.0');
+                two = RealExpr('2.0');
             else
-                codes{end + 1} = ...
-                    sprintf('(%s) = %s(%s) every %s;\n\t', ...
-                    outputs, node_name, inputs, ResetCondName);
+                %suffix = '';
+                zero = IntExpr(0);
+                one = IntExpr(1);
+                two = IntExpr(2);
+            end
+            if strcmp(IncomingSignalDT, 'real')
+                IncomingSignalzero = RealExpr('0.0');
+            else
+                IncomingSignalzero = IntExpr(0);
+            end
+            if strcmp(TriggerType, 'rising')
+%                 sprintf(...
+%                     '0%s -> if %s then 1%s else 0%s'...
+%                     ,suffix, Cond, suffix, suffix );
+                TriggerinputExp = ...
+                    BinaryExpr(BinaryExpr.ARROW, ...
+                    zero, ...
+                    IteExpr(Cond, one, zero)) ;
+            elseif strcmp(TriggerType, 'falling')
+%                 TriggerinputExp = sprintf(...
+%                     '0%s -> if %s then -1%s else 0%s'...
+%                     ,suffix, Cond, suffix, suffix );
+                TriggerinputExp = ...
+                    BinaryExpr(BinaryExpr.ARROW, ...
+                    zero, ...
+                    IteExpr(Cond, ...
+                            UnaryExpr(UnaryExpr.NEG, one),...
+                            zero)) ;
+            elseif strcmp(TriggerType, 'function-call')
+%                 TriggerinputExp = sprintf(...
+%                     '0%s -> if %s then 2%s else 0%s'...
+%                     ,suffix, Cond, suffix, suffix );
+                TriggerinputExp = ...
+                    BinaryExpr(BinaryExpr.ARROW, ...
+                    zero, ...
+                    IteExpr(Cond, ...
+                            two,...
+                            zero)) ;
+            else
+                risingCond = SLX2LusUtils.getResetCode(...
+                    'rising', IncomingSignalDT, triggerInput, IncomingSignalzero );
+%                 TriggerinputExp = sprintf(...
+%                     '%s -> if %s then (if (%s) then 1%s else -1%s) else 0%s'...
+%                     ,zero,  Cond, risingCond, suffix, suffix, suffix);
+                TriggerinputExp = ...
+                    BinaryExpr(BinaryExpr.ARROW, ...
+                    zero, ...
+                    IteExpr(Cond, ...
+                            IteExpr(risingCond, one, UnaryExpr(UnaryExpr.NEG, one)),...
+                            zero)) ;
             end
         end
     end

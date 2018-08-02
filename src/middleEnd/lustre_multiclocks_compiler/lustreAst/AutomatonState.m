@@ -31,17 +31,21 @@ classdef AutomatonState < LustreExpr
             lines = {};
             lines{1} = sprintf('\tstate %s:\n', obj.name);
             % Strong transition
-            for i=1:numel(obj.strongTrans)
-                lines{end+1} = sprintf('\tunless %s\n', ...
+            if iscell(obj.strongTrans)
+                for i=1:numel(obj.strongTrans)
+                    lines{end+1} = sprintf('\tunless %s', ...
                         obj.strongTrans{i}.print(backend));
+                end
+            else
+                for i=1:numel(obj.strongTrans)
+                    lines{end+1} = sprintf('\tunless %s', ...
+                        obj.strongTrans(i).print(backend));
+                end
             end
             %local variables
-            if numel(obj.local_vars) > 1
-                lines{end+1} = 'var ';
-                for i=1:obj.local_vars
-                    lines{end+1} = sprintf('\t%s;\n', ...
-                        obj.local_vars{i}.print(backend));
-                end
+            if ~isempty(obj.local_vars)
+                lines{end + 1} = sprintf('var %s\n', ...
+                    LustreAst.listVarsWithDT(obj.local_vars, backend));
             end
             % body
             lines{end+1} = sprintf('\tlet\n');
@@ -51,9 +55,16 @@ classdef AutomatonState < LustreExpr
             end
             lines{end+1} = sprintf('\ttel\n');
             % weak transition
-            for i=1:numel(obj.weakTrans)
-                lines{end+1} = sprintf('\tuntil %s\n', ...
+            if iscell(obj.weakTrans)
+                for i=1:numel(obj.weakTrans)
+                    lines{end+1} = sprintf('\tuntil %s\n', ...
                         obj.weakTrans{i}.print(backend));
+                end
+            else
+                for i=1:numel(obj.weakTrans)
+                    lines{end+1} = sprintf('\tuntil %s\n', ...
+                        obj.weakTrans(i).print(backend));
+                end
             end
             code = MatlabUtils.strjoin(lines, '');
         end

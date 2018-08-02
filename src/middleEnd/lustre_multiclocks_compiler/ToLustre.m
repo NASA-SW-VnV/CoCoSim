@@ -149,7 +149,7 @@ if isfield(blk, 'Content') && ~isempty(blk.Content)
     for i=1:numel(field_names)
         [nodes_code_i, contracts_ast_i, external_libraries_i] = recursiveGeneration(blk, blk.Content.(field_names{i}), main_sampleTime, 0, backend, xml_trace);
         if ~isempty(nodes_code_i)
-            nodes_ast{end + 1} = nodes_code_i;
+            nodes_ast = [ nodes_ast, nodes_code_i];
         end
         if ~isempty(contracts_ast_i)
             contracts_ast{end + 1} = contracts_ast_i;

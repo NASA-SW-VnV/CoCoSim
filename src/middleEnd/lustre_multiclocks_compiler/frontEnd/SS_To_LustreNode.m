@@ -38,7 +38,7 @@ classdef SS_To_LustreNode
                 chart = m.find('-isa','Stateflow.Chart', 'Path', ss_ir.Origin_path);
                 [ char_node, chart_external_nodes] = write_Chart( chart, 0, xml_trace,'' );
                 main_node = RawLustreCode(sprintf(char_node));
-                external_nodes = RawLustreCode(sprintf(chart_external_nodes));
+                external_nodes{1} = RawLustreCode(sprintf(chart_external_nodes));
                 return;
             end
             %%
@@ -153,15 +153,15 @@ classdef SS_To_LustreNode
                 automaton_node = condExecSS_To_LusAutomaton(parent_ir, ss_ir, ...
                     hasEnablePort, hasActionPort, hasTriggerPort, isContractBlk, ...
                     main_sampleTime, xml_trace);
-                main_node = [main_node, automaton_node];
+                external_nodes{end+1} = automaton_node;
             end
         end
         
         
         %% Go over SS Content
-        function [body, variables_str, external_nodes, external_libraries] =...
+        function [body, variables, external_nodes, external_libraries] =...
                 write_body(subsys, main_sampleTime, backend, xml_trace)
-            variables_str = {};
+            variables = {};
             body = {};
             external_nodes = {};
             external_libraries = {};
@@ -181,7 +181,7 @@ classdef SS_To_LustreNode
                 end
                 b.write_code(subsys, blk, xml_trace, main_sampleTime, backend);
                 body = [body, b.getCode()];
-                variables_str = [variables_str, b.getVariables()];
+                variables = [variables, b.getVariables()];
                 external_nodes = [external_nodes, b.getExternalNodes()];
                 external_libraries = [external_libraries, b.getExternalLibraries()];
             end
