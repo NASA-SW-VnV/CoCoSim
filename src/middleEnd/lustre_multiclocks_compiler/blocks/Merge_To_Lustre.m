@@ -21,9 +21,10 @@ classdef Merge_To_Lustre < Block_To_Lustre
                 return;
             end
             widths = blk.CompiledPortWidths.Inport;
+            nb_input = numel(widths);
             is_supported = true;
-            pre_blksConds = {};
-            for i=1:numel(widths)
+            pre_blksConds = cell(1, nb_input);
+            for i=1:nb_input
                 pre_blk = SLX2LusUtils.getpreBlock(parent, blk, i);
                 if isempty(pre_blk) 
                     is_supported = false;
@@ -34,7 +35,8 @@ classdef Merge_To_Lustre < Block_To_Lustre
                     is_supported = false;
                     break;
                 end
-                pre_blksConds{i} = SubSystem_To_Lustre.getExecutionCondName(pre_blk);
+                pre_blksConds{i} = VarIdExpr(...
+                    SubSystem_To_Lustre.getExecutionCondName(pre_blk));
             end
             if ~is_supported
                 display_msg(sprintf('Merge block "%s" is not supported. CoCoSim supports only Merge blocks that are connected to conditionally-executed subsystem', ...
@@ -51,14 +53,13 @@ classdef Merge_To_Lustre < Block_To_Lustre
             %% Step 3: construct the inputs names
             
             % we initialize the inputs by empty cell.
-            inputs = {};
-            max_width = max(widths);
+            inputs = cell(1, nb_input);
             % save the information of the outport dataType, 
             outputDataType = blk.CompiledPortDataTypes.Outport{1};
 
             % Go over inputs, numel(widths) is the number of inputs. 
             
-            for i=1:numel(widths)
+            for i=1:nb_input
                 inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
                 
                 
@@ -79,29 +80,32 @@ classdef Merge_To_Lustre < Block_To_Lustre
                         obj.addExternal_libraries(external_lib);
                         % cast the input to the conversion format. In our
                         % example conv_format = 'int_to_real(%s)'. 
-                        inputs{i} = cellfun(@(x) sprintf(conv_format,x), inputs{i}, 'un', 0);
+                        inputs{i} = cellfun(@(x) ...
+                            SLX2LusUtils.setArgInConvFormat(conv_format,x),...
+                            inputs{i}, 'un', 0);
                     end
                 end
             end
             InitialOutput_cell = SLX2LusUtils.getInitialOutput(parent, blk,...
                 blk.InitialOutput, outputDataType, numel(outputs));
             %% Step 4: start filling the definition of each output
-            codes = {};
+            codes = cell(1, numel(outputs));
             % Go over outputs
             for i=1:numel(outputs)
-                code = '';
+                conds = cell(1, numel(pre_blksConds));
+                thens = cell(1, numel(pre_blksConds) + 1);
                 for j=1:numel(pre_blksConds)
-                    code = sprintf('%s if %s then %s\n\t\telse', ...
-                        code, pre_blksConds{j}, inputs{j}{i});
+                    conds{j} = pre_blksConds{j};
+                    thens{j} = inputs{j}{i};
                 end
-                code = sprintf('%s %s -> pre %s', ...
-                        code, InitialOutput_cell{i}, outputs{i});
-                % example of lement wise product block.
-                codes{i} = sprintf('%s = %s;\n\t', ...
-                    outputs{i}, code);
+                thens{j+1} = BinaryExpr(BinaryExpr.ARROW,...
+                    InitialOutput_cell{i}, ...
+                    UnaryExpr(UnaryExpr.PRE,  outputs{i}));
+                codes{i} = LustreEq(outputs{i},...
+                    IteExpr.nestedIteExpr(conds, thens));
             end
             % join the lines and set the block code.
-            obj.setCode(MatlabUtils.strjoin(codes, ''));
+            obj.setCode( codes );
             
         end
         
