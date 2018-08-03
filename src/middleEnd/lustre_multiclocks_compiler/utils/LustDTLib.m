@@ -19,12 +19,15 @@ classdef LustDTLib
             if strcmp(dt, 'int')
                 zero = IntExpr(0);
             else
-                zero = RealExpr(0);
+                zero = RealExpr('0.0');
             end
             %format = 'node %s (x: %s)\nreturns(y:bool);\nlet\n\t y= (x <> %s);\ntel\n\n';
             %node = sprintf(format, node_name, dt, zero);
             bodyElts{1} = LustreEq(...
-                VarIdExpr('y'), BinaryExpr(BinaryExpr.NEQ,VarIdExpr('x'),zero));
+                VarIdExpr('y'), ...
+                BinaryExpr(BinaryExpr.NEQ, ...
+                            VarIdExpr('x'),...
+                            zero));
             
             node = LustreNode();
             node.setName(node_name);
@@ -42,7 +45,7 @@ classdef LustDTLib
             node_name = strcat('bool_to_', dt);
             if strcmp(dt, 'int')
                 zero = IntExpr(0);
-                one = IntExpr('1');
+                one = IntExpr(1);
             else
                 zero = RealExpr('0.0');
                 one = RealExpr('1.0');
@@ -90,15 +93,18 @@ classdef LustDTLib
             nb_int = (v_max - v_min + 1);
             node_name = strcat('int_to_', dt);
             
-%             format = 'node %s (x: int)\nreturns(y:int);\nlet\n\t';
-%             format = [format, 'y= if x > v_max then v_min + rem_int_int((x - v_max - 1),nb_int) \n\t'];
-%             format = [format, 'else if x < v_min then v_max + rem_int_int((x - (v_min) + 1),nb_int) \n\telse x;\ntel\n\n'];
-%             node = sprintf(format, node_name, v_max, v_min, v_max, nb_int,...
-%                 v_min, v_max, v_min, nb_int);
-%             
-%             external_nodes = {strcat('LustMathLib_', 'rem_int_int')};
-            conds{1} = BinaryExpr(BinaryExpr.GT, VarIdExpr('x'),IntExpr(v_max));
-            conds{2} = BinaryExpr(BinaryExpr.LT, VarIdExpr('x'),IntExpr(v_min));
+            % format = 'node %s (x: int)\nreturns(y:int);\nlet\n\t';
+            % format = [format, 'y= if x > v_max then v_min + rem_int_int((x - v_max - 1),nb_int) \n\t'];
+            % format = [format, 'else if x < v_min then v_max + rem_int_int((x - (v_min) + 1),nb_int) \n\telse x;\ntel\n\n'];
+            % node = sprintf(format, node_name, v_max, v_min, v_max, nb_int,...
+            %     v_min, v_max, v_min, nb_int);
+             
+            conds{1} = BinaryExpr(BinaryExpr.GT, ...
+                                  VarIdExpr('x'), ...
+                                  IntExpr(v_max));
+            conds{2} = BinaryExpr(BinaryExpr.LT, ...
+                                  VarIdExpr('x'), ...
+                                  IntExpr(v_min));
             %  %d + rem_int_int((x - %d - 1),%d)
             thens{1} = BinaryExpr(...
                 BinaryExpr.PLUS, ...
@@ -139,20 +145,22 @@ classdef LustDTLib
             opens = {};
             external_nodes = {};
             node_name = sprintf('int_to_%s_saturate', dt);
-%             format = 'node %s (x: int)\nreturns(y:int);\nlet\n\t';
-%             format = [format, 'y= if x > %d then %d  \n\t'];
-%             format = [format, 'else if x < %d then %d \n\telse x;\ntel\n\n'];
-            v_max = double(intmax(dt));
-            v_min = double(intmin(dt));
-%             node_name = strcat('int_to_', dt, '_saturate');
-%             node = sprintf(format, node_name, v_max, v_max, v_min, v_min);            
+            % format = 'node %s (x: int)\nreturns(y:int);\nlet\n\t';
+            % format = [format, 'y= if x > %d then %d  \n\t'];
+            % format = [format, 'else if x < %d then %d \n\telse x;\ntel\n\n'];
+            % 
+            % node = sprintf(format, node_name, v_max, v_max, v_min, v_min);       
 
-            bodyElts{1} = LustreEq(...
-                VarIdExpr('y'), ...
-                IteExpr.nestedIteExpr({...
-                                        BinaryExpr(BinaryExpr.GT, VarIdExpr('x'),v_max),...
-                                        BinaryExpr(BinaryExpr.LT, VarIdExpr('x'), v_min)},...
-                                        {v_max,v_min,VarIdExpr('x')}));
+            v_max = IntExpr(intmax(dt));
+            v_min = IntExpr(intmin(dt));
+            conds{1} = BinaryExpr(BinaryExpr.GT, VarIdExpr('x'),v_max);
+            conds{2} = BinaryExpr(BinaryExpr.LT, VarIdExpr('x'), v_min);
+            thens{1} = v_max;
+            thens{2} = v_min;
+            thens{3} = VarIdExpr('x');
+            bodyElts{1} =   LustreEq(...
+                            VarIdExpr('y'), ...
+                            IteExpr.nestedIteExpr(conds, thens));
 
             node = LustreNode();
             node.setName(node_name);
@@ -218,21 +226,22 @@ classdef LustDTLib
             opens = {'conv'};
             external_nodes_i = {};
             % Round towards minus infinity.
-%             format = '--Round towards minus infinity..\n ';
-%             format = [format,  'node _Floor (x: real)\nreturns(y:int);\nlet\n\t'];
-%             format = [format, 'y= if x < 0.0 then real_to_int(x) - 1 \n\t'];
-%             format = [format, 'else real_to_int(x);\ntel\n\n'];
-%             node = sprintf(format);
+            % format = '--Round towards minus infinity..\n ';
+            % format = [format,  'node _Floor (x: real)\nreturns(y:int);\nlet\n\t'];
+            % format = [format, 'y= if x < 0.0 then real_to_int(x) - 1 \n\t'];
+            % format = [format, 'else real_to_int(x);\ntel\n\n'];
+            % node = sprintf(format);
 
             node_name = '_Floor';
         
             bodyElts{1} = LustreEq(...
                 VarIdExpr('y'), ...
-                IteExpr(BinaryExpr(BinaryExpr.LT,VarIdExpr('x'),IntExpr(0)),...
-                        BinaryExpr(BinaryExpr.MINUS, NodeCallExpr('real_to_int', VarIdExpr('x')),IntExpr(1)),...
+                IteExpr(BinaryExpr(BinaryExpr.LT, VarIdExpr('x'), RealExpr('0.0')),...
+                        BinaryExpr(BinaryExpr.MINUS, NodeCallExpr('real_to_int', VarIdExpr('x')), IntExpr(1)),...
                         NodeCallExpr('real_to_int', VarIdExpr('x'))));            
 
             node = LustreNode();
+            node.setMetaInfo('--Round towards minus infinity. ');
             node.setName(node_name);
             node.setInputs(LustreVar('x', 'real'));
             node.setOutputs(LustreVar('y', 'int'));
@@ -246,10 +255,10 @@ classdef LustDTLib
             opens = {'conv'};
             external_nodes_i = {strcat('LustDTLib_', '_Floor')};
             % Round towards minus infinity.
-%             format = '--Rounds each element of the input signal to the nearest integer value towards minus infinity.\n ';
-%             format = [format,  'node _floor (x: real)\nreturns(y:real);\nlet\n\t'];
-%             format = [format, 'y= int_to_real(_Floor(x));\ntel\n\n'];
-%             node = sprintf(format);
+            % format = '--Rounds each element of the input signal to the nearest integer value towards minus infinity.\n ';
+            % format = [format,  'node _floor (x: real)\nreturns(y:real);\nlet\n\t'];
+            % format = [format, 'y= int_to_real(_Floor(x));\ntel\n\n'];
+            % node = sprintf(format);
 
             node_name = '_floor';
         
@@ -270,23 +279,26 @@ classdef LustDTLib
             opens = {'conv'};
             external_nodes_i = {};
             % Round towards plus infinity.
-%             format = '--Round towards plus infinity.\n ';
-%             format = [ format ,'node _Ceiling (x: real)\nreturns(y:int);\nlet\n\t'];
-%             format = [format, 'y= if x < 0.0 then real_to_int(x) \n\t'];
-%             format = [format, 'else real_to_int(x) + 1;\ntel\n\n'];
-%             node = sprintf(format);
+            % format = '--Round towards plus infinity.\n ';
+            % format = [ format ,'node _Ceiling (x: real)\nreturns(y:int);\nlet\n\t'];
+            % format = [format, 'y= if x < 0.0 then real_to_int(x) \n\t'];
+            % format = [format, 'else real_to_int(x) + 1;\ntel\n\n'];
+            % node = sprintf(format);
 
             node_name = '_Ceiling';
             bodyElts{1} = LustreEq(...
                 VarIdExpr('y'), ...
-                IteExpr(BinaryExpr(BinaryExpr.LT,VarIdExpr('x'),RealExpr(0.0)),...
+                IteExpr(BinaryExpr(BinaryExpr.LT,...
+                                   VarIdExpr('x'),...
+                                   RealExpr(0.0)),...
                         NodeCallExpr('real_to_int', VarIdExpr('x')),...
-                        BinaryExpr(BinaryExpr.MINUS,...
+                        BinaryExpr(BinaryExpr.PLUS,...
                                     NodeCallExpr('real_to_int', ...
                                                 VarIdExpr('x')),...
                                     IntExpr(1))));
 
             node = LustreNode();
+            node.setMetaInfo('--Round towards plus infinity. ');
             node.setName(node_name);
             node.setInputs(LustreVar('x', 'real'));
             node.setOutputs(LustreVar('y', 'int'));
@@ -302,10 +314,10 @@ classdef LustDTLib
             opens = {'conv'};
             external_nodes_i = {strcat('LustDTLib_', '_Ceiling')};
             % Round towards minus infinity.
-%             format = '--Rounds each element of the input signal to the nearest integer towards positive infinity.\n ';
-%             format = [format,  'node _ceil (x: real)\nreturns(y:real);\nlet\n\t'];
-%             format = [format, 'y= int_to_real(_Ceiling(x));\ntel\n\n'];
-%             node = sprintf(format);
+            % format = '--Rounds each element of the input signal to the nearest integer towards positive infinity.\n ';
+            % format = [format,  'node _ceil (x: real)\nreturns(y:real);\nlet\n\t'];
+            % format = [format, 'y= int_to_real(_Ceiling(x));\ntel\n\n'];
+            % node = sprintf(format);
 
             node_name = '_ceil';
             bodyElts{1} = LustreEq(...
@@ -314,6 +326,7 @@ classdef LustDTLib
                             NodeCallExpr('_Ceiling', VarIdExpr('x'))));
 
             node = LustreNode();
+            node.setMetaInfo('--Rounds each element of the input signal to the nearest integer towards positive infinity. ');
             node.setName(node_name);
             node.setInputs(LustreVar('x', 'real'));
             node.setOutputs(LustreVar('y', 'real'));
@@ -328,30 +341,41 @@ classdef LustDTLib
             %If a tie occurs, rounds to the nearest even integer.
             %Equivalent to the Fixed-Point Designer? convergent function.
             opens = {};
-%             format = '--Rounds number to the nearest representable value.\n ';
-%             format = [ format ,'node _Convergent (x: real)\nreturns(y:int);\nlet\n\t'];
-%             format = [ format , 'y = if (x > 0.5) then\n\t\t\t'];
-%             format = [ format ,           'if (fmod(x, 2.0) = 0.5) '];
-%             format = [ format ,               ' then _Floor(x)\n\t\t\t'];
-%             format = [ format ,           ' else _Floor(x + 0.5)\n\t\t'];
-%             format = [ format ,      ' else\n\t\t'];
-%             format = [ format ,           ' if (x >= -0.5) then 0 \n\t\t'];
-%             format = [ format ,             ' else \n\t\t\t'];
-%             format = [ format ,                   ' if (fmod(x, 2.0) = -0.5) then _Ceiling(x)\n\t\t\t'];
-%             format = [ format ,                   ' else _Ceiling(x - 0.5);'];
-%             format = [ format , '\ntel\n\n'];
-%             
-%             node = sprintf(format);
+            % format = '--Rounds number to the nearest representable value.\n ';
+            % format = [ format ,'node _Convergent (x: real)\nreturns(y:int);\nlet\n\t'];
+            % format = [ format , 'y = if (x > 0.5) then\n\t\t\t'];
+            % format = [ format ,           'if (fmod(x, 2.0) = 0.5) '];
+            % format = [ format ,               ' then _Floor(x)\n\t\t\t'];
+            % format = [ format ,           ' else _Floor(x + 0.5)\n\t\t'];
+            % format = [ format ,      ' else\n\t\t'];
+            % format = [ format ,           ' if (x >= -0.5) then 0 \n\t\t'];
+            % format = [ format ,             ' else \n\t\t\t'];
+            % format = [ format ,                   ' if (fmod(x, 2.0) = -0.5) then _Ceiling(x)\n\t\t\t'];
+            % format = [ format ,                   ' else _Ceiling(x - 0.5);'];
+            % format = [ format , '\ntel\n\n'];
+            % 
+            % node = sprintf(format);
 
-            cond1 = BinaryExpr(BinaryExpr.GT,VarIdExpr('x'),RealExpr(0.5));
-            cond2 = BinaryExpr(BinaryExpr.EQ,NodeCallExpr('fmod', {VarIdExpr('x'),RealExpr(2.0)}),RealExpr(0.5));
-            cond3 = BinaryExpr(BinaryExpr.GTE,VarIdExpr('x'),RealExpr(-0.5));
-            cond4 = BinaryExpr(BinaryExpr.EQ,NodeCallExpr('fmod', {VarIdExpr('x'),RealExpr(2.0)}),RealExpr(-0.5));
+            cond1 = BinaryExpr(BinaryExpr.GT,VarIdExpr('x'),RealExpr('0.5'));
+            cond2 = BinaryExpr(BinaryExpr.EQ, ...
+                NodeCallExpr('fmod', {VarIdExpr('x'),RealExpr('2.0')}), ...
+                RealExpr('0.5'));
+            cond3 = BinaryExpr(BinaryExpr.GTE,...
+                VarIdExpr('x'),...
+                UnaryExpr(UnaryExpr.NEG, RealExpr('0.5')));
+            cond4 = BinaryExpr(BinaryExpr.EQ, ...
+                NodeCallExpr('fmod', {VarIdExpr('x'),RealExpr('2.0')}),...
+                UnaryExpr(UnaryExpr.NEG, RealExpr('0.5')));
             then1 = NodeCallExpr('_Floor', VarIdExpr('x'));
-            then2 = NodeCallExpr('_Floor', BinaryExpr(BinaryExpr.PLUS,VarIdExpr('x'),RealExpr(0.5)));
-            then3 = RealExpr(0.0);
+            then2 = NodeCallExpr('_Floor', ...
+                BinaryExpr(BinaryExpr.PLUS,VarIdExpr('x'), ...
+                RealExpr('0.5')));
+            then3 = RealExpr('0.0');
             then4 = NodeCallExpr('_Ceiling', VarIdExpr('x'));
-            then5 = NodeCallExpr('_Ceiling', BinaryExpr(BinaryExpr.MINUS,VarIdExpr('x'),RealExpr(0.5)));
+            then5 = NodeCallExpr('_Ceiling', ...
+                BinaryExpr(BinaryExpr.MINUS, ...
+                            VarIdExpr('x'),...
+                            RealExpr('0.5')));
             
             ite1_cond = cond1;
             ite1_then = IteExpr(cond2,...
@@ -372,6 +396,7 @@ classdef LustDTLib
                         ite1_else));
 
             node = LustreNode();
+            node.setMetaInfo('--Rounds number to the nearest representable value.');
             node.setName(node_name);
             node.setInputs(LustreVar('x', 'real'));
             node.setOutputs(LustreVar('y', 'int'));
@@ -388,28 +413,29 @@ classdef LustDTLib
         %If a tie occurs, rounds toward positive infinity. Equivalent to the Fixed-Point Designer nearest function.
         function [node, external_nodes, opens] = get__Nearest()
             opens = {};
-%             format = '--Rounds number to the nearest representable value.\n--If a tie occurs, rounds toward positive infinity\n ';
-%             format = [ format ,'node _Nearest (x: real)\nreturns(y:int);\nlet\n\t'];
-%             format = [ format , 'y = if (_fabs(x) >= 0.5) then _Floor(x + 0.5)\n\t'];
-%             format = [ format , ' else 0;'];
-%             format = [ format , '\ntel\n\n'];
-%             
-%             
-%             node = sprintf(format);
+            % format = '--Rounds number to the nearest representable value.\n--If a tie occurs, rounds toward positive infinity\n ';
+            % format = [ format ,'node _Nearest (x: real)\nreturns(y:int);\nlet\n\t'];
+            % format = [ format , 'y = if (_fabs(x) >= 0.5) then _Floor(x + 0.5)\n\t'];
+            % format = [ format , ' else 0;'];
+            % format = [ format , '\ntel\n\n'];
+            % 
+            % 
+            % node = sprintf(format);
 
             node_name = '_Nearest';
             bodyElts{1} = LustreEq(...
                 VarIdExpr('y'), ...
                 IteExpr(BinaryExpr(BinaryExpr.GTE,...
                                    NodeCallExpr('_fabs', VarIdExpr('x')),...
-                                   RealExpr(0.5)),... % cond
+                                   RealExpr('0.5')),... % cond
                         NodeCallExpr('_Floor', ...
                                      BinaryExpr(BinaryExpr.PLUS, ...
                                                 VarIdExpr('x'),...
-                                                RealExpr(0.5))),...
+                                                RealExpr('0.5'))),...
                         IntExpr(0)));
 
             node = LustreNode();
+            node.setMetaInfo('Rounds number to the nearest representable value.\n--If a tie occurs, rounds toward positive infinity');
             node.setName(node_name);
             node.setInputs(LustreVar('x', 'real'));
             node.setOutputs(LustreVar('y', 'int'));
@@ -425,14 +451,14 @@ classdef LustDTLib
         %If a tie occurs, rounds positive numbers toward positive infinity and rounds negative numbers toward negative infinity. Equivalent to the Fixed-Point Designer round function.
         function [node, external_nodes, opens] = get__Round()
             opens = {};
-%             format = '--Rounds number to the nearest representable value.\n';
-%             format = [format , '--If a tie occurs,rounds positive numbers toward positive infinity and rounds negative numbers toward negative infinity\n '];
-%             format = [ format ,'node _Round (x: real)\nreturns(y:int);\nlet\n\t'];
-%             format = [ format , 'y = if (x >= 0.5) then _Floor(x + 0.5)\n\t\t'];
-%             format = [ format , ' else if (x > -0.5) then 0 \n\t\t'];
-%             format = [ format , ' else _Ceiling(x - 0.5);'];
-%             format = [ format , '\ntel\n\n'];       
-%             node = sprintf(format);
+            % format = '--Rounds number to the nearest representable value.\n';
+            % format = [format , '--If a tie occurs,rounds positive numbers toward positive infinity and rounds negative numbers toward negative infinity\n '];
+            % format = [ format ,'node _Round (x: real)\nreturns(y:int);\nlet\n\t'];
+            % format = [ format , 'y = if (x >= 0.5) then _Floor(x + 0.5)\n\t\t'];
+            % format = [ format , ' else if (x > -0.5) then 0 \n\t\t'];
+            % format = [ format , ' else _Ceiling(x - 0.5);'];
+            % format = [ format , '\ntel\n\n'];       
+            % node = sprintf(format);
 
             node_name = '_Round';
             bodyElts{1} = LustreEq(...
@@ -440,16 +466,23 @@ classdef LustDTLib
                 IteExpr.nestedIteExpr({...
                     BinaryExpr(BinaryExpr.GTE, ...
                                 VarIdExpr('x'),...
-                                RealExpr(0.5)),...
+                                RealExpr('0.5')),...
                     BinaryExpr(BinaryExpr.GT, ...
                                 VarIdExpr('x'),...
-                                RealExpr(-0.5))},...
+                                RealExpr('-0.5'))},...
                     {...
-                    NodeCallExpr('_Floor', VarIdExpr('x')),...
+                    NodeCallExpr('_Floor', ...
+                             BinaryExpr(BinaryExpr.PLUS, ...
+                                        VarIdExpr('x'),...
+                                        RealExpr('0.5'))),...
                     IntExpr(0),...
-                    NodeCallExpr('_Ceiling', VarIdExpr('x'))}));
+                    NodeCallExpr('_Ceiling', ...
+                                BinaryExpr(BinaryExpr.MINUS, ...
+                                                    VarIdExpr('x'),...
+                                                    RealExpr('0.5')))}));
             
             node = LustreNode();
+            node.setMetaInfo('If a tie occurs,rounds positive numbers toward positive infinity and rounds negative numbers toward negative infinity');
             node.setName(node_name);
             node.setInputs(LustreVar('x', 'real'));
             node.setOutputs(LustreVar('y', 'int'));
@@ -465,10 +498,10 @@ classdef LustDTLib
             opens = {'conv'};
             external_nodes_i = {strcat('LustDTLib_', '_Round')};
             % Round towards minus infinity.
-%             format = '--Rounds each element of the input signal to the nearest integer.\n ';
-%             format = [format,  'node _round (x: real)\nreturns(y:real);\nlet\n\t'];
-%             format = [format, 'y= int_to_real(_Round(x));\ntel\n\n'];
-%             node = sprintf(format);
+            % format = '--Rounds each element of the input signal to the nearest integer.\n ';
+            % format = [format,  'node _round (x: real)\nreturns(y:real);\nlet\n\t'];
+            % format = [format, 'y= int_to_real(_Round(x));\ntel\n\n'];
+            % node = sprintf(format);
 
             node_name = '_round';
             bodyElts{1} = LustreEq(...
@@ -477,6 +510,7 @@ classdef LustDTLib
                             NodeCallExpr('_Round', VarIdExpr('x'))));
 
             node = LustreNode();
+            node.setMetaInfo('Rounds each element of the input signal to the nearest integer');
             node.setName(node_name);
             node.setInputs(LustreVar('x', 'real'));
             node.setOutputs(LustreVar('y', 'real'));
@@ -488,26 +522,30 @@ classdef LustDTLib
         % Rounds each element of the input signal to the nearest integer towards zero.
         function [node, external_nodes, opens] = get__Fix()
             opens = {};
-%             format = '--Rounds number to the nearest integer towards zero.\n';
-%             format = [ format ,'node _Fix (x: real)\nreturns(y:int);\nlet\n\t'];
-%             format = [ format , 'y = if (x >= 0.5) then _Floor(x)\n\t\t'];
-%             format = [ format , ' else if (x > -0.5) then 0 \n\t\t'];
-%             format = [ format , ' else _Ceiling(x);'];
-%             format = [ format , '\ntel\n\n'];
-%             node = sprintf(format);
+            % format = '--Rounds number to the nearest integer towards zero.\n';
+            % format = [ format ,'node _Fix (x: real)\nreturns(y:int);\nlet\n\t'];
+            % format = [ format , 'y = if (x >= 0.5) then _Floor(x)\n\t\t'];
+            % format = [ format , ' else if (x > -0.5) then 0 \n\t\t'];
+            % format = [ format , ' else _Ceiling(x);'];
+            % format = [ format , '\ntel\n\n'];
+            % node = sprintf(format);
 
             node_name = '_Fix';
             bodyElts{1} = LustreEq(...
                 VarIdExpr('y'), ...
-                IteExpr.nestedIteExpr({...
-                        BinaryExpr(BinaryExpr.GTE, VarIdExpr('x'),RealExpr(0.5)),...
-                        BinaryExpr(BinaryExpr.GT, VarIdExpr('x'),RealExpr(-0.5))},...
+                IteExpr.nestedIteExpr(...
+                        {...
+                        BinaryExpr(BinaryExpr.GTE, VarIdExpr('x'),RealExpr('0.5')),...
+                        BinaryExpr(BinaryExpr.GT, VarIdExpr('x'),RealExpr('-0.5'))...
+                        },...
                         {...
                         NodeCallExpr('_Floor', VarIdExpr('x')),...
                         IntExpr(0),...
-                        NodeCallExpr('_Ceiling', VarIdExpr('x'))}));
+                        NodeCallExpr('_Ceiling', VarIdExpr('x'))...
+                        }));
 
             node = LustreNode();
+            node.setMetaInfo('Rounds number to the nearest integer towards zero');
             node.setName(node_name);
             node.setInputs(LustreVar('x', 'real'));
             node.setOutputs(LustreVar('y', 'int'));
@@ -523,16 +561,17 @@ classdef LustDTLib
             opens = {'conv'};
             external_nodes_i = {strcat('LustDTLib_', '_Fix')};
             % Round towards minus infinity.
-%             format = '--Round towards minus infinity..\n ';
-%             format = [format,  'node _fix (x: real)\nreturns(y:real);\nlet\n\t'];
-%             format = [format, 'y= int_to_real(_Fix(x));\ntel\n\n'];
-%             node = sprintf(format);
+            % format = '--Round towards minus infinity..\n ';
+            % format = [format,  'node _fix (x: real)\nreturns(y:real);\nlet\n\t'];
+            % format = [format, 'y= int_to_real(_Fix(x));\ntel\n\n'];
+            % node = sprintf(format);
 
 
             node_name = '_fix';
             bodyElts{1} = LustreEq(...
                 VarIdExpr('y'), ...
-                NodeCallExpr('int_to_real', VarIdExpr('x')));
+                NodeCallExpr('int_to_real', ...
+                            NodeCallExpr('_Fix', VarIdExpr('x'))));
 
             node = LustreNode();
             node.setName(node_name);
