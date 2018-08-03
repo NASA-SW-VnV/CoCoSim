@@ -15,19 +15,20 @@ classdef BusCreator_To_Lustre < Block_To_Lustre
     methods
         
         function  write_code(obj, parent, blk, xml_trace, varargin)
-            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+            [outputs, outputs_dt] = ...
+                SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             obj.addVariable(outputs_dt);
             [inputs] = SLX2LusUtils.getBlockInputsNames(parent, blk);
-            codes = {};
+            codes = cell(1, numel(outputs));
             % everything is inlined
             for i=1:numel(outputs)
-                codes{i} = sprintf('%s = %s;\n\t', outputs{i}, inputs{i});
+                codes{i} = LustreEq(outputs{i}, inputs{i});
             end
             
             obj.setCode( MatlabUtils.strjoin(codes, ''));
         end
         
-        function options = getUnsupportedOptions(obj, parent, blk, varargin)
+        function options = getUnsupportedOptions(obj, ~, blk, varargin)
             options = obj.unsupported_options;
             if isequal(blk.OutDataTypeStr, 'Bus: <object name>')
                 msg = sprintf('OutDataTypeStr "Bus: <object name>" in block %s is not supported. ',...

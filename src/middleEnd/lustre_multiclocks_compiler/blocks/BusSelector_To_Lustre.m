@@ -17,7 +17,7 @@ classdef BusSelector_To_Lustre < Block_To_Lustre
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             obj.addVariable(outputs_dt);
             [inputs] = SLX2LusUtils.getBlockInputsNames(parent, blk);
-            codes = {};
+            
             % everything is inlined
             InportDimensions = blk.CompiledPortDimensions.Inport;
             InputSignals = blk.InputSignals;
@@ -52,6 +52,7 @@ classdef BusSelector_To_Lustre < Block_To_Lustre
                 return;
             end
             out_idx = 1;
+            codes = {};
             for i=1:numel(OutputSignals)
                 if isKey(SignalsInputsMap, OutputSignals{i})
                     inputs_i = SignalsInputsMap(OutputSignals{i});
@@ -62,12 +63,12 @@ classdef BusSelector_To_Lustre < Block_To_Lustre
                     continue;
                 end
                 for j=1:numel(inputs_i)
-                    codes{end+1} = sprintf('%s = %s;\n\t', outputs{out_idx}, inputs_i{j});
+                    codes{end+1} = LustreEq(outputs{out_idx}, inputs_i{j});
                     out_idx = out_idx + 1;
                 end
             end
             
-            obj.setCode( MatlabUtils.strjoin(codes, ''));
+            obj.setCode( codes );
         end
         
         function options = getUnsupportedOptions(obj, parent, blk, varargin)

@@ -160,7 +160,7 @@ classdef Assignment_To_Lustre < Block_To_Lustre
                 [codes] = getWriteCodeForNonPortInput(obj,in_matrix_dimension,inputs,outputs,U_expanded_dims,ind);                
             end
             
-            obj.setCode(MatlabUtils.strjoin(codes, ''));
+            obj.setCode( codes );
             obj.addVariable(outputs_dt);
         end
         
@@ -228,7 +228,7 @@ classdef Assignment_To_Lustre < Block_To_Lustre
             %% function get code for noPortInput
             
             % initialization
-            codes = {};           
+                     
             if in_matrix_dimension{1}.numDs == 1   % for 1D
                 U_to_Y0 = ind{1};
             else
@@ -258,14 +258,13 @@ classdef Assignment_To_Lustre < Block_To_Lustre
             end
             
             % U_to_Y0 should be defined at this point
-            codeIndex = 0;
+            codes = cell(1, numel(outputs));  
             for i=1:numel(outputs)
-                codeIndex = codeIndex + 1;
                 if find(U_to_Y0==i)
                     Uindex = find(U_to_Y0==i);
-                    codes{codeIndex} = sprintf('%s = %s ;\n\t', outputs{i}, inputs{2}{Uindex});
+                    codes{i} = LustreEq(outputs{i}, inputs{2}{Uindex});
                 else
-                    codes{codeIndex} = sprintf('%s = %s ;\n\t', outputs{i}, inputs{1}{i});
+                    codes{i} = LustreEq(outputs{i}, inputs{1}{i});
                 end
             end
         end
@@ -275,8 +274,7 @@ classdef Assignment_To_Lustre < Block_To_Lustre
             % initialization
             blk_name = SLX2LusUtils.node_name_format(blk);
             indexDataType = 'int';    
-            codes = {};
-            codeIndex = 0;            
+            
             if numOutDims>7
                 display_msg(sprintf('More than 7 dimensions is not supported in block %s',...
                     blk.Origin_path), ...
@@ -286,46 +284,46 @@ classdef Assignment_To_Lustre < Block_To_Lustre
             addVars = {};
             addVarIndex = 0;
             for i=1:numel(inputs{2})
-                U_index{i} = sprintf('%s_U_index_%d',...
-                    blk_name,i);
-                addVarIndex = addVarIndex + 1;
-                addVars{addVarIndex} = sprintf('%s:%s;',U_index{i},indexDataType);
+                U_index{i} = VarIdExpr(sprintf('%s_U_index_%d',...
+                    blk_name,i));
+                addVars{end + 1} = LustreVar(U_index{i},indexDataType);
             end            
             % pass to Lustre ind
+            codes = {};
             for i=1:numel(ind)
                 if ~contains(blk.IndexOptionArray{i}, '(port)')
                     for j=1:numel(ind{i})
-                        addVarIndex = addVarIndex + 1;
-                        addVars{addVarIndex} = sprintf('%s_ind_dim_%d_%d:%s;',...
-                            blk_name,i,j,indexDataType);
-                        codeIndex = codeIndex + 1;
-                        codes{codeIndex} = sprintf('%s_ind_dim_%d_%d = %d;\n\t',...
-                            blk_name,i,j, ind{i}(j)) ;
+                        v_name =  sprintf('%s_ind_dim_%d_%d',...
+                            blk_name,i,j);
+                        addVars{end + 1} = LustreVar(v_name, indexDataType);
+                        codes{end + 1} = LustreEq(v_name, IntExpr(ind{i}(j))) ;
                     end
                 else
                     % port
                     if strcmp(blk.IndexOptionArray{i}, 'Starting index (port)')
                         for j=1:numel(ind{i})
-                            addVarIndex = addVarIndex + 1;
-                            addVars{addVarIndex} = sprintf('%s_ind_dim_%d_%d:%s;',...
-                                blk_name,i,j,indexDataType);
-                            codeIndex = codeIndex + 1;
+                            v_name = sprintf('%s_ind_dim_%d_%d',...
+                                blk_name,i,j);
+                            addVars{end + 1} = LustreVar(v_name, indexDataType);
                             if j==1
-                                codes{codeIndex} = sprintf('%s_ind_dim_%d_%d = %s;\n\t',...
-                                    blk_name,i,j, ind{i}{1}) ;
+                                codes{end + 1} = LustreEq(v_name, IntExpr(ind{i}{1})) ;
                             else
-                                codes{codeIndex} = sprintf('%s_ind_dim_%d_%d = %s + %d;\n\t',...
-                                    blk_name,i,j, ind{i}{1}, (j-1)) ;
+                                codes{end + 1} = LustreEq(v_name,...
+                                    BinaryExpr(BinaryExpr.PLUS,...
+                                    IntExpr(ind{i}{1}), ...
+                                    IntExpr(j-1))) ;
+                                %sprintf('%s_ind_dim_%d_%d = %s + %d;\n\t',...
+                                %    blk_name,i,j, ind{i}{1}, (j-1)) ;
                             end
                         end
                     else   % 'Index vector (port)'
                         for j=1:numel(ind{i})
-                            addVarIndex = addVarIndex + 1;
-                            addVars{addVarIndex} = sprintf('%s_ind_dim_%d_%d:%s;',...
-                                blk_name,i,j,indexDataType);
-                            codeIndex = codeIndex + 1;
-                            codes{codeIndex} = sprintf('%s_ind_dim_%d_%d = %s;\n\t',...
-                                blk_name,i,j, ind{i}{j}) ;
+                            v_name = sprintf('%s_ind_dim_%d_%d',...
+                                blk_name,i,j);
+                            addVars{end + 1} = LustreVar(v_name, indexDataType);
+                            codes{end + 1} =  LustreEq(v_name, IntExpr(ind{i}{j}));
+                            %sprintf('%s_ind_dim_%d_%d = %s;\n\t',...
+                            %    blk_name,i,j, ind{i}{j}) ;
                         end
                     end
                 end
@@ -343,7 +341,7 @@ classdef Assignment_To_Lustre < Block_To_Lustre
                     U_dimJump(i) = U_dimJump(i)*U_expanded_dims.dims(j);
                 end
             end
-            str_Y_index = {};
+            varId_Y_index = {};
             for i=1:numel(inputs{2})    % looping over U elements
                 curSub = ones(1,numel(U_expanded_dims.dims));
                 % ind2sub
@@ -356,25 +354,35 @@ classdef Assignment_To_Lustre < Block_To_Lustre
                 curSub(6) = d6;
                 curSub(7) = d7;                
                 for j=1:numel(in_matrix_dimension{1}.dims)
-                    str_Y_index{i}{j} = sprintf('%s_str_Y_index_%d_%d',...
-                        blk_name,i,j);
-                    addVarIndex = addVarIndex + 1;
-                    addVars{addVarIndex} = sprintf('%s_str_Y_index_%d_%d:%s;',...
-                        blk_name,i,j,indexDataType);
-                    codeIndex = codeIndex + 1;
-                    codes{codeIndex} = sprintf('%s = %s_ind_dim_%d_%d;\n\t',...
-                        str_Y_index{i}{j},blk_name,j,curSub(j)) ;
+                    varId_Y_index{i}{j} = VarIdExpr(...
+                        sprintf('%s_str_Y_index_%d_%d',...
+                        blk_name,i,j));
+                    addVars{end + 1} = LustreVar(varId_Y_index{i}{j}, indexDataType);
+                    codes{end + 1} = LustreEq(varId_Y_index{i}{j}, ...
+                        VarIdExpr(sprintf('%s_ind_dim_%d_%d',...
+                        blk_name,j,curSub(j))));
+                    %sprintf('%s = %s_ind_dim_%d_%d;\n\t',...
+                    %    str_Y_index{i}{j},blk_name,j,curSub(j)) ;
                 end                
-                value = '0';
+                value = IntExpr('0');
+                value_terms = cell(1, numel(in_matrix_dimension{1}.dims));
                 for j=1:numel(in_matrix_dimension{1}.dims)
                     if j==1
-                        value = sprintf('%s + %s*%d',value,str_Y_index{i}{j}, Y0_dimJump(j));
+                        value_terms{j} = BinaryExpr(BinaryExpr.MULTIPLY,...
+                            varId_Y_index{i}{j}, IntExpr(Y0_dimJump(j)));
+                        %value = sprintf('%s + %s*%d',value,str_Y_index{i}{j}, Y0_dimJump(j));
                     else
-                        value = sprintf('%s + (%s-1)*%d',value,str_Y_index{i}{j}, Y0_dimJump(j));
+                        value_terms{j} = BinaryExpr(...
+                            BinaryExpr.MULTIPLY,...
+                            BinaryExpr(BinaryExpr.MINUS,...
+                                        varId_Y_index{i}{j}, ...
+                                        IntExpr(1)), ...
+                            IntExpr(Y0_dimJump(j)));
+                        %value = sprintf('%s + (%s-1)*%d',value,str_Y_index{i}{j}, Y0_dimJump(j));
                     end
                 end
-                codeIndex = codeIndex + 1;
-                codes{codeIndex} = sprintf('%s = %s;\n\t', U_index{i}, value);
+                value = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS, value_terms);
+                codes{end + 1} = LustreEq( U_index{i}, value);
             end
             if numel(in_matrix_dimension{1}.dims) > 7
                 
@@ -383,16 +391,22 @@ classdef Assignment_To_Lustre < Block_To_Lustre
                     MsgType.ERROR, 'Assignment_To_Lustre', '');
             end
             for i=1:numel(outputs)
-                codeIndex = codeIndex + 1;
-                code = sprintf('%s = \n\t', outputs{i});
+                conds = {};
+                thens = {};
                 for j=numel(inputs{2}):-1:1
-                    if j==numel(inputs{2})
-                        code = sprintf('%s  if(%s = %d) then %s\n\t', code, U_index{j},i,inputs{2}{j});
-                    else
-                        code = sprintf('%s  else if(%s = %d) then %s\n\t', code, U_index{j},i,inputs{2}{j});
-                    end
+                    conds{end+1} = BinaryExpr(BinaryExpr.EQ,...
+                        U_index{j}, IntExpr(i));
+                    thens{end + 1} = inputs{2}{j};
+                    %if j==numel(inputs{2})
+                       %code = sprintf('%s  if(%s = %d) then %s\n\t', code, U_index{j},i,inputs{2}{j});
+                    %else
+                     %   code = sprintf('%s  else if(%s = %d) then %s\n\t', code, U_index{j},i,inputs{2}{j});
+                    %end
                 end
-                codes{codeIndex} = sprintf('%s  else %s ;\n\t', code,inputs{1}{i});               
+                %codes{end + 1} = sprintf('%s  else %s ;\n\t', code,inputs{1}{i});
+                thens{end + 1} = inputs{1}{i};
+                code = IteExpr.nestedIteExpr(conds, thens);
+                codes{end + 1} = LustreEq( outputs{i}, code);               
             end            
             obj.addVariable(addVars);
         end

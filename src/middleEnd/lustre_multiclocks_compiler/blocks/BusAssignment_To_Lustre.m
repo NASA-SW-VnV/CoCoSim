@@ -15,9 +15,8 @@ classdef BusAssignment_To_Lustre < Block_To_Lustre
             isInsideContract = SLX2LusUtils.isContractBlk(parent);
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             if ~isInsideContract, obj.addVariable(outputs_dt);end
-            
-            inputs = {};
             widths = blk.CompiledPortWidths.Inport;
+            inputs = cell(1, numel(widths));
             for i=1:numel(widths)
                 inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
             end
@@ -58,7 +57,6 @@ classdef BusAssignment_To_Lustre < Block_To_Lustre
                     MsgType.ERROR, 'BusSelector_To_Lustre', '');
                 return;
             end
-            out_idx = 1;
             modifiedInputs = inputs{1};
             for i=1:numel(AssignedSignals)
                 if isKey(SignalsInputsMap, AssignedSignals{i})
@@ -70,23 +68,30 @@ classdef BusAssignment_To_Lustre < Block_To_Lustre
                     continue;
                 end
                 for j=1:numel(inputs_i)
-                    modifiedInputs{strcmp(modifiedInputs, inputs_i{j})} = ...
+                    idx = BusAssignment_To_Lustre.findIdx(modifiedInputs, inputs_i{j});
+                    modifiedInputs{idx} = ...
                         inputs{i+1}{j};
                 end
             end
-            codes = {};
+            codes = cell(1, numel(outputs));
             for i=1:numel(outputs)
-                codes{end+1} = sprintf('%s = %s;\n\t', outputs{i}, modifiedInputs{i});
+                codes{i} = LustreEq(outputs{i}, modifiedInputs{i});
             end
-            obj.setCode( MatlabUtils.strjoin(codes, ''));
+            obj.setCode( codes );
         end
         
-        function options = getUnsupportedOptions(obj, parent, blk, varargin)
+        function options = getUnsupportedOptions(obj,  varargin)
             options = obj.unsupported_options;
         end
     end
   
-    
+    methods(Static)
+        function idx = findIdx(VarIds, var)
+           varNames = cellfun(@(x) x.getId(), VarIds, 'UniformOutput', 0); 
+           varName = var.getId();
+           idx = strcmp(varNames, varName);
+        end
+    end
     
 end
 

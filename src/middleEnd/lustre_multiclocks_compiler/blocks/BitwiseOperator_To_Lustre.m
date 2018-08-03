@@ -12,7 +12,7 @@ classdef BitwiseOperator_To_Lustre < Block_To_Lustre
     
     methods
         function obj = BitwiseOperator_To_Lustre()
-            obj.ContentNeedToBeTranslated = 0;
+            obj.ContentNeedToBeTranslated = false;
         end
         function  write_code(obj, parent, blk, xml_trace, varargin)
             %% Step 1: Get the block outputs names
@@ -24,7 +24,7 @@ classdef BitwiseOperator_To_Lustre < Block_To_Lustre
             
             %% Step 3: construct the inputs names
             % we initialize the inputs by empty cell.
-            inputs = {};
+            inputs = cell(1, numInputs);
             widths = blk.CompiledPortWidths.Inport;
             numInputs = numel(widths);
             max_width = max(widths);
@@ -42,7 +42,7 @@ classdef BitwiseOperator_To_Lustre < Block_To_Lustre
                 end
             end
             if strcmp(blk.UseBitMask, 'on')
-                inputs{end+1} = {sprintf('%d',eval(blk.BitMask))};
+                inputs{end+1} = {IntExpr(eval(blk.BitMask))};
                 if numel(inputs{end}) < max_width
                     inputs{end} = arrayfun(@(x) {inputs{end}{1}}, (1:max_width));
                 end
@@ -69,15 +69,12 @@ classdef BitwiseOperator_To_Lustre < Block_To_Lustre
                 fun = sprintf('_%s_Bitwise_%s_%d', op, signedStr, intSize);
             end
             
-            codes = {};
+            
             % Go over outputs
             if (strcmp(op, 'NAND') || strcmp(op, 'NOR'))...
                     && numInputs==1
                 new_op = op(2:end);%remove N from NAND and NOR
-                scalars = {};
-                for i=1:numel(inputs{1})
-                    scalars{i} = inputs{1}{i};
-                end
+                scalars = inputs{1};
                 new_fun = sprintf('_%s_Bitwise_%s_%d', new_op, signedStr, intSize);
                 if signed
                     not_fun = sprintf('_NOT_Bitwise_%s', signedStr);
@@ -86,11 +83,11 @@ classdef BitwiseOperator_To_Lustre < Block_To_Lustre
                 end
                 obj.addExternal_libraries(strcat('LustMathLib_', new_fun));
                 obj.addExternal_libraries(strcat('LustMathLib_', not_fun));
-                res =sprintf('%s(%s)', ...
-                    not_fun, MinMax_To_Lustre.recursiveMinMax(scalars, new_fun));
-                codes{1} = sprintf('%s = %s;\n\t', ...
-                        outputs{1}, res);
+                res = NodeCallExpr(not_fun, ...
+                    MinMax_To_Lustre.recursiveMinMax(new_fun, scalars));
+                codes{1} = LustreEq(outputs{1}, res);
             else
+                codes = cell(1, numel(outputs));
                 for j=1:numel(outputs)
                     scalars = {};
                     if numInputs==1
@@ -106,14 +103,13 @@ classdef BitwiseOperator_To_Lustre < Block_To_Lustre
                             scalars{i} = inputs{i}{j};
                         end
                     end
-                    res = MinMax_To_Lustre.recursiveMinMax(scalars, fun);
-                    codes{j} = sprintf('%s = %s;\n\t', ...
-                        outputs{j}, res);
+                    res = MinMax_To_Lustre.recursiveMinMax(fun, scalars);
+                    codes{j} =  LustreEq(outputs{j}, res);
                 end
                 obj.addExternal_libraries(strcat('LustMathLib_', fun));
             end
             % join the lines and set the block code.
-            obj.setCode(MatlabUtils.strjoin(codes, ''));
+            obj.setCode( codes );
             
         end
         
