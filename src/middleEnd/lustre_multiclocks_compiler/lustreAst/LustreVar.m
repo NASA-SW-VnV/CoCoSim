@@ -33,7 +33,7 @@ classdef LustreVar < LustreAst
         
         function code = print_lustrec(obj, backend)
             if BackendType.isKIND2(backend) ...
-                    && isequa(obj.type, 'bool clock')
+                    && isequal(obj.type, 'bool clock')
                 dt = 'bool';
             else
                 dt = obj.type;

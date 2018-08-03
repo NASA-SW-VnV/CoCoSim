@@ -6,13 +6,13 @@ classdef BlocksLib
     
     methods(Static)
         
-        function [node, external_nodes_i, opens] = template()
+        function [node, external_nodes_i, opens] = template(varargin)
             opens = {};
             external_nodes_i = {};
             node = '';
         end
         
-        function [node, external_nodes_i, opens] = get__DigitalClock()
+        function [node, external_nodes_i, opens] = get__DigitalClock(varargin)
             opens = {};
             external_nodes_i = {'LustDTLib__round', 'LustMathLib__fabs'};
             format = 'node _DigitalClock (simulationTime, SampleTime:real)\nreturns(q:real);\n';

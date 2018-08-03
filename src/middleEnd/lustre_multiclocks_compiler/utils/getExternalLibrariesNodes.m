@@ -1,11 +1,11 @@
-function [ lustre_code , open_list] = getExternalLibrariesNodes( external_libraries )
-[ lustre_code, open_list ] = recursive_call( external_libraries, {} );
+function [ lustre_nodes , open_list] = getExternalLibrariesNodes( external_libraries , backend )
+[ lustre_nodes, open_list ] = recursive_call( external_libraries, {} ,backend);
 if ~isempty(open_list)
     open_list = unique(open_list);
 end
 end
 
-function [ lustre_nodes, open_list ] = recursive_call( external_libraries, already_handled )
+function [ lustre_nodes, open_list ] = recursive_call( external_libraries, already_handled, backend )
 %GETEXTERNALLIBRARIESNODES returns the lustre nodes and libraries to be add
 %to the head of lustre code.
 lustre_nodes = {};
@@ -35,7 +35,7 @@ for i=1:numel(external_libraries)
     end
     try
         fun_handle = str2func(fun_name);
-        [node, external_nodes_i, opens] = fun_handle();
+        [node, external_nodes_i, opens] = fun_handle(backend);
     catch
         display_msg(sprintf('Library %s not supported', lib),...
             MsgType.ERROR, 'getExternalLibrariesNodes','');
@@ -53,7 +53,7 @@ end
 already_handled = unique([already_handled, external_libraries]);
 additional_nodes = unique(additional_nodes);
 additional_nodes = additional_nodes(~ismember(additional_nodes, already_handled));
-[ additional_code, additional_open_list ] = recursive_call( additional_nodes, already_handled );
+[ additional_code, additional_open_list ] = recursive_call( additional_nodes, already_handled,backend );
 lustre_nodes = [additional_code, lustre_nodes];
 open_list = [open_list, additional_open_list];
 

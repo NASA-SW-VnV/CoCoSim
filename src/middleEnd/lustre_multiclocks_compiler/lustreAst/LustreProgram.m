@@ -28,7 +28,12 @@ classdef LustreProgram < LustreAst
         function code = print_lustrec(obj, backend)
             lines = {};
             %opens
-            if ~(BackendType.isKIND2(backend) || BackendType.isJKIND(backend))
+            if (BackendType.isKIND2(backend) || BackendType.isJKIND(backend))
+                for i=1:numel(obj.opens)
+                    lines{end+1} = sprintf('include "%s.lus"\n', ...
+                        obj.opens{i});
+                end
+            else
                 for i=1:numel(obj.opens)
                     lines{end+1} = sprintf('#open <%s>\n', ...
                         obj.opens{i});

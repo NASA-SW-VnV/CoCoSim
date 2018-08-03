@@ -15,14 +15,14 @@ classdef KIND2MathLib
     
     methods(Static)
         
-        function [node, external_nodes_i, opens] = template()
+        function [node, external_nodes_i, opens] = template(varargin)
             opens = {};
             external_nodes_i = {};
             node = '';
         end
         
         %% sqrt
-        function [node, external_nodes_i] = get_sqrt()
+        function [node, external_nodes_i] = get_sqrt(varargin)
             opens = {};
             external_nodes_i = {};
             % assume x >= 0.0
@@ -52,7 +52,7 @@ classdef KIND2MathLib
                 false);
         end
         %% mod_real
-        function [node, external_nodes_i, opens] = get_mod_real()
+        function [node, external_nodes_i, opens] = get_mod_real(varargin)
             opens = {};
             external_nodes_i = {};
             
@@ -149,7 +149,7 @@ classdef KIND2MathLib
                 false);
         end
         %% rem_real
-        function [node, external_nodes_i, opens] = get_rem_real()
+        function [node, external_nodes_i, opens] = get_rem_real(varargin)
             opens = {};
             external_nodes_i = {'LustMathLib_abs_real'};
             %guarantee x=0.0 => z = 0.0

@@ -110,11 +110,20 @@ main_sampleTime = model_struct.CompiledSampleTime;
 is_main_node = 1;
 [nodes_ast, contracts_ast, external_libraries] = recursiveGeneration(...
     model_struct, model_struct, main_sampleTime, is_main_node, backend, xml_trace);
-[external_lib_code, open_list] = getExternalLibrariesNodes(external_libraries);
+[external_lib_code, open_list] = getExternalLibrariesNodes(external_libraries, backend);
 %TODO: change it to AST
 nodes_ast = [external_lib_code, nodes_ast];
 %% create LustreProgram
 program =  LustreProgram(open_list, nodes_ast, contracts_ast);
+
+% copy Kind2 libraries
+if BackendType.isKIND2(backend) 
+    if ismember('lustrec_math', open_list)
+        lib_path = fullfile(fileparts(mfilename('fullpath')),...
+            'lib', 'lustrec_math.lus');
+        copyfile(lib_path, output_dir);
+    end
+end
 %% writing code
 fid = fopen(nom_lustre_file, 'a');
 if fid==-1

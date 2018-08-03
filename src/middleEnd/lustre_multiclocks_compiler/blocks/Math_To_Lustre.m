@@ -138,11 +138,7 @@ classdef Math_To_Lustre < Block_To_Lustre
                     fun = strcat(operator, '_int_int');
                 else
                     fun = strcat(operator, '_real');
-                    if BackendType.isKIND2(backend)
-                        obj.addExternal_libraries(strcat('KIND2MathLib_', fun));
-                    else
-                        obj.addExternal_libraries('LustMathLib_simulink_math_fcn');
-                    end
+                    obj.addExternal_libraries('LustMathLib_simulink_math_fcn');
                 end
                 for i=1:numel(outputs)
                     codes{i} = LustreEq(outputs{i}, ...

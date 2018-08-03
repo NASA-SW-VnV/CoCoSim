@@ -6,7 +6,7 @@ classdef LustMathLib
     
     methods(Static)
         
-        function [node, external_nodes_i, opens] = template()
+        function [node, external_nodes_i, opens] = template(varargin)
             opens = {};
             external_nodes_i = {};
             node = '';
@@ -38,37 +38,37 @@ classdef LustMathLib
             node.setBodyEqs(bodyElts);           
             node.setIsMain(false);
         end
-        function [node, external_nodes_i, opens] = get__min_int()
+        function [node, external_nodes_i, opens] = get__min_int(varargin)
             [node, external_nodes_i, opens] = LustMathLib.getMinMax('min', 'int');
         end
         
-        function [node, external_nodes_i, opens] = get__min_real()
+        function [node, external_nodes_i, opens] = get__min_real(varargin)
             [node, external_nodes_i, opens] = LustMathLib.getMinMax('min', 'real');
         end
         
-        function [node, external_nodes_i, opens] = get__max_int()
+        function [node, external_nodes_i, opens] = get__max_int(varargin)
             [node, external_nodes_i, opens] = LustMathLib.getMinMax('max', 'int');
         end
         
-        function [node, external_nodes_i, opens] = get__max_real()
+        function [node, external_nodes_i, opens] = get__max_real(varargin)
             [node, external_nodes_i, opens] = LustMathLib.getMinMax('max', 'real');
         end
         
         %%
-        function [node, external_nodes_i, opens] = get_lustrec_math()
+        function [node, external_nodes_i, opens] = get_lustrec_math(varargin)
             opens = {'lustrec_math'};
             external_nodes_i = {};
             node = '';
         end
         
-        function [node, external_nodes_i, opens] = get_simulink_math_fcn()
+        function [node, external_nodes_i, opens] = get_simulink_math_fcn(varargin)
             opens = {'simulink_math_fcn'};
             external_nodes_i = {};
             node = '';
         end
         
         %% fabs, abs
-        function [node, external_nodes_i, opens] = get__fabs()
+        function [node, external_nodes_i, opens] = get__fabs(varargin)
             opens = {};
             external_nodes_i = {};
             %             format = 'node _fabs (x:real)\nreturns(z:real);\nlet\n\t';
@@ -90,7 +90,7 @@ classdef LustMathLib
             node.setIsMain(false);
         end
         
-        function [node, external_nodes_i, opens] = get_abs_int()
+        function [node, external_nodes_i, opens] = get_abs_int(varargin)
             opens = {};
             external_nodes_i = {};
             %             format = 'node abs_int (x: int)\nreturns(y:int);\nlet\n\t';
@@ -111,7 +111,7 @@ classdef LustMathLib
             node.setIsMain(false);
         end
         
-        function [node, external_nodes_i, opens] = get_abs_real()
+        function [node, external_nodes_i, opens] = get_abs_real(varargin)
             opens = {};
             external_nodes_i = {};
 %             format = 'node abs_real (x: real)\nreturns(y:real);\nlet\n\t';
@@ -418,114 +418,114 @@ classdef LustMathLib
         end
         
         %AND
-        function [node, external_nodes_i, opens] = get__AND_Bitwise_Unsigned_8()
+        function [node, external_nodes_i, opens] = get__AND_Bitwise_Unsigned_8(varargin)
             [node, external_nodes_i, opens] = LustMathLib.getANDBitwiseUnsigned(8);
         end
-        function [node, external_nodes_i, opens] = get__AND_Bitwise_Unsigned_16()
+        function [node, external_nodes_i, opens] = get__AND_Bitwise_Unsigned_16(varargin)
             [node, external_nodes_i, opens] = LustMathLib.getANDBitwiseUnsigned(16);
         end
-        function [node, external_nodes_i, opens] = get__AND_Bitwise_Unsigned_32()
+        function [node, external_nodes_i, opens] = get__AND_Bitwise_Unsigned_32(varargin)
             [node, external_nodes_i, opens] = LustMathLib.getANDBitwiseUnsigned(32);
         end
-        function [node, external_nodes_i, opens] = get__AND_Bitwise_Signed_8()
+        function [node, external_nodes_i, opens] = get__AND_Bitwise_Signed_8(varargin)
             [node, external_nodes_i, opens] = LustMathLib.getBitwiseSigned('AND', 8);
         end
-        function [node, external_nodes_i, opens] = get__AND_Bitwise_Signed_16()
+        function [node, external_nodes_i, opens] = get__AND_Bitwise_Signed_16(varargin)
             [node, external_nodes_i, opens] = LustMathLib.getBitwiseSigned('AND', 16);
         end
-        function [node, external_nodes_i, opens] = get__AND_Bitwise_Signed_32()
+        function [node, external_nodes_i, opens] = get__AND_Bitwise_Signed_32(varargin)
             [node, external_nodes_i, opens] = LustMathLib.getBitwiseSigned('AND', 32);
         end
         %NAND
-        function [node, external_nodes_i, opens] = get__NAND_Bitwise_Unsigned_8()
+        function [node, external_nodes_i, opens] = get__NAND_Bitwise_Unsigned_8(varargin)
             [node, external_nodes_i, opens] = LustMathLib.getNANDBitwiseUnsigned(8);
         end
-        function [node, external_nodes_i, opens] = get__NAND_Bitwise_Unsigned_16()
+        function [node, external_nodes_i, opens] = get__NAND_Bitwise_Unsigned_16(varargin)
             [node, external_nodes_i, opens] = LustMathLib.getNANDBitwiseUnsigned(16);
         end
-        function [node, external_nodes_i, opens] = get__NAND_Bitwise_Unsigned_32()
+        function [node, external_nodes_i, opens] = get__NAND_Bitwise_Unsigned_32(varargin)
             [node, external_nodes_i, opens] = LustMathLib.getNANDBitwiseUnsigned(32);
         end
-        function [node, external_nodes_i, opens] = get__NAND_Bitwise_Signed_8()
+        function [node, external_nodes_i, opens] = get__NAND_Bitwise_Signed_8(varargin)
             [node, external_nodes_i, opens] = LustMathLib.getBitwiseSigned('NAND', 8);
         end
-        function [node, external_nodes_i, opens] = get__NAND_Bitwise_Signed_16()
+        function [node, external_nodes_i, opens] = get__NAND_Bitwise_Signed_16(varargin)
             [node, external_nodes_i, opens] = LustMathLib.getBitwiseSigned('NAND', 16);
         end
-        function [node, external_nodes_i, opens] = get__NAND_Bitwise_Signed_32()
+        function [node, external_nodes_i, opens] = get__NAND_Bitwise_Signed_32(varargin)
             [node, external_nodes_i, opens] = LustMathLib.getBitwiseSigned('NAND', 32);
         end
        
         %OR
-        function [node, external_nodes_i, opens] = get__OR_Bitwise_Unsigned_8()
+        function [node, external_nodes_i, opens] = get__OR_Bitwise_Unsigned_8(varargin)
             [node, external_nodes_i, opens] = LustMathLib.getORBitwiseUnsigned(8);
         end
-        function [node, external_nodes_i, opens] = get__OR_Bitwise_Unsigned_16()
+        function [node, external_nodes_i, opens] = get__OR_Bitwise_Unsigned_16(varargin)
             [node, external_nodes_i, opens] = LustMathLib.getORBitwiseUnsigned(16);
         end
-        function [node, external_nodes_i, opens] = get__OR_Bitwise_Unsigned_32()
+        function [node, external_nodes_i, opens] = get__OR_Bitwise_Unsigned_32(varargin)
             [node, external_nodes_i, opens] = LustMathLib.getORBitwiseUnsigned(32);
         end
-        function [node, external_nodes_i, opens] = get__OR_Bitwise_Signed_8()
+        function [node, external_nodes_i, opens] = get__OR_Bitwise_Signed_8(varargin)
             [node, external_nodes_i, opens] = LustMathLib.getBitwiseSigned('OR', 8);
         end
-        function [node, external_nodes_i, opens] = get__OR_Bitwise_Signed_16()
+        function [node, external_nodes_i, opens] = get__OR_Bitwise_Signed_16(varargin)
             [node, external_nodes_i, opens] = LustMathLib.getBitwiseSigned('OR', 16);
         end
-        function [node, external_nodes_i, opens] = get__OR_Bitwise_Signed_32()
+        function [node, external_nodes_i, opens] = get__OR_Bitwise_Signed_32(varargin)
             [node, external_nodes_i, opens] = LustMathLib.getBitwiseSigned('OR', 32);
         end
         %NOR
-        function [node, external_nodes_i, opens] = get__NOR_Bitwise_Unsigned_8()
+        function [node, external_nodes_i, opens] = get__NOR_Bitwise_Unsigned_8(varargin)
             [node, external_nodes_i, opens] = LustMathLib.getNORBitwiseUnsigned(8);
         end
-        function [node, external_nodes_i, opens] = get__NOR_Bitwise_Unsigned_16()
+        function [node, external_nodes_i, opens] = get__NOR_Bitwise_Unsigned_16(varargin)
             [node, external_nodes_i, opens] = LustMathLib.getNORBitwiseUnsigned(16);
         end
-        function [node, external_nodes_i, opens] = get__NOR_Bitwise_Unsigned_32()
+        function [node, external_nodes_i, opens] = get__NOR_Bitwise_Unsigned_32(varargin)
             [node, external_nodes_i, opens] = LustMathLib.getNORBitwiseUnsigned(32);
         end
-        function [node, external_nodes_i, opens] = get__NOR_Bitwise_Signed_8()
+        function [node, external_nodes_i, opens] = get__NOR_Bitwise_Signed_8(varargin)
             [node, external_nodes_i, opens] = LustMathLib.getBitwiseSigned('NOR', 8);
         end
-        function [node, external_nodes_i, opens] = get__NOR_Bitwise_Signed_16()
+        function [node, external_nodes_i, opens] = get__NOR_Bitwise_Signed_16(varargin)
             [node, external_nodes_i, opens] = LustMathLib.getBitwiseSigned('NOR', 16);
         end
-        function [node, external_nodes_i, opens] = get__NOR_Bitwise_Signed_32()
+        function [node, external_nodes_i, opens] = get__NOR_Bitwise_Signed_32(varargin)
             [node, external_nodes_i, opens] = LustMathLib.getBitwiseSigned('NOR', 32);
         end
        
         %XOR
-        function [node, external_nodes_i, opens] = get__XOR_Bitwise_Unsigned_8()
+        function [node, external_nodes_i, opens] = get__XOR_Bitwise_Unsigned_8(varargin)
             [node, external_nodes_i, opens] = LustMathLib.getXORBitwiseUnsigned(8);
         end
-        function [node, external_nodes_i, opens] = get__XOR_Bitwise_Unsigned_16()
+        function [node, external_nodes_i, opens] = get__XOR_Bitwise_Unsigned_16(varargin)
             [node, external_nodes_i, opens] = LustMathLib.getXORBitwiseUnsigned(16);
         end
-        function [node, external_nodes_i, opens] = get__XOR_Bitwise_Unsigned_32()
+        function [node, external_nodes_i, opens] = get__XOR_Bitwise_Unsigned_32(varargin)
             [node, external_nodes_i, opens] = LustMathLib.getXORBitwiseUnsigned(32);
         end
-        function [node, external_nodes_i, opens] = get__XOR_Bitwise_Signed_8()
+        function [node, external_nodes_i, opens] = get__XOR_Bitwise_Signed_8(varargin)
             [node, external_nodes_i, opens] = LustMathLib.getBitwiseSigned('XOR', 8);
         end
-        function [node, external_nodes_i, opens] = get__XOR_Bitwise_Signed_16()
+        function [node, external_nodes_i, opens] = get__XOR_Bitwise_Signed_16(varargin)
             [node, external_nodes_i, opens] = LustMathLib.getBitwiseSigned('XOR', 16);
         end
-        function [node, external_nodes_i, opens] = get__XOR_Bitwise_Signed_32()
+        function [node, external_nodes_i, opens] = get__XOR_Bitwise_Signed_32(varargin)
             [node, external_nodes_i, opens] = LustMathLib.getBitwiseSigned('XOR', 32);
         end
         
         %NOT
-        function [node, external_nodes_i, opens] = get__NOT_Bitwise_Signed()
-            [node, external_nodes_i, opens] = LustMathLib.getNOTBitwiseSigned();
+        function [node, external_nodes_i, opens] = get__NOT_Bitwise_Signed(varargin)
+            [node, external_nodes_i, opens] = LustMathLib.getNOTBitwiseSigned(varargin);
         end
-        function [node, external_nodes_i, opens] = get__NOT_Bitwise_Unsigned_8()
+        function [node, external_nodes_i, opens] = get__NOT_Bitwise_Unsigned_8(varargin)
             [node, external_nodes_i, opens] = LustMathLib.getNOTBitwiseUnsigned(8);
         end
-        function [node, external_nodes_i, opens] = get__NOT_Bitwise_Unsigned_16()
+        function [node, external_nodes_i, opens] = get__NOT_Bitwise_Unsigned_16(varargin)
             [node, external_nodes_i, opens] = LustMathLib.getNOTBitwiseUnsigned(16);
         end
-        function [node, external_nodes_i, opens] = get__NOT_Bitwise_Unsigned_32()
+        function [node, external_nodes_i, opens] = get__NOT_Bitwise_Unsigned_32(varargin)
             [node, external_nodes_i, opens] = LustMathLib.getNOTBitwiseUnsigned(32);
         end
         %% Integer division
@@ -533,7 +533,7 @@ classdef LustMathLib
         % The following functions assume "/" and "mod" in Lustre as in
         % euclidean division for integers.
         
-        function [node, external_nodes_i, opens] = get_int_div_Ceiling()
+        function [node, external_nodes_i, opens] = get_int_div_Ceiling(varargin)
             opens = {};
             external_nodes_i = {strcat('LustMathLib_', 'abs_int')};
             %             format = '--Rounds positive and negative numbers toward positive infinity\n ';
@@ -648,7 +648,7 @@ classdef LustMathLib
             node.setIsMain(false);
         end
         %Floor: Rounds positive and negative numbers toward negative infinity.
-        function [node, external_nodes_i, opens] = get_int_div_Floor()
+        function [node, external_nodes_i, opens] = get_int_div_Floor(varargin)
             opens = {};
             external_nodes_i = {strcat('LustMathLib_', 'abs_int')};
             % format = '--Rounds positive and negative numbers toward negative infinity\n ';
@@ -763,7 +763,7 @@ classdef LustMathLib
             node.setBodyEqs(bodyElts);           
             node.setIsMain(false);
         end
-        function [node, external_nodes_i, opens] = get_int_div_Nearest()
+        function [node, external_nodes_i, opens] = get_int_div_Nearest(varargin)
             opens = {};
             external_nodes_i = {};
             % format = '--Rounds number to the nearest representable value. If a tie occurs, rounds toward positive infinity\n ';
@@ -842,7 +842,7 @@ classdef LustMathLib
             node.setIsMain(false);
         end
         
-        function [node, external_nodes_i, opens] = get_int_div_Zero()
+        function [node, external_nodes_i, opens] = get_int_div_Zero(varargin)
             opens = {};
             external_nodes_i = {strcat('LustMathLib_', 'abs_int')};
             % format = '--Rounds positive and negative numbers toward positive infinity\n ';
@@ -898,12 +898,12 @@ classdef LustMathLib
         end
         
         %% fmod, rem, mod
-        function [node, external_nodes_i, opens] = get_fmod()
+        function [node, external_nodes_i, opens] = get_fmod(varargin)
             opens = {'lustrec_math'};
             external_nodes_i = {};
             node = '';
         end
-        function [node, external_nodes_i, opens] = get_rem_int_int()
+        function [node, external_nodes_i, opens] = get_rem_int_int(varargin)
             opens = {};
             external_nodes_i = {strcat('LustMathLib_', 'abs_int')};
             % format = 'node rem_int_int (x, y: int)\nreturns(z:int);\nlet\n\t';
@@ -939,7 +939,7 @@ classdef LustMathLib
             node.setBodyEqs(bodyElts);           
             node.setIsMain(false);
         end
-        function [node, external_nodes_i, opens] = get_mod_int_int()
+        function [node, external_nodes_i, opens] = get_mod_int_int(varargin)
             opens = {};
             external_nodes_i = {};
             % format = 'node mod_int_int (x, y: int)\nreturns(z:int);\nlet\n\t';

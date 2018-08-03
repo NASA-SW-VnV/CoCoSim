@@ -15,6 +15,7 @@ classdef LustreNode < LustreAst
         localVars;
         bodyEqs;
         isMain;
+        isImported;
     end
     
     methods
@@ -39,6 +40,7 @@ classdef LustreNode < LustreAst
                 obj.bodyEqs = bodyEqs;
                 obj.isMain = isMain;
             end
+            obj.isImported = false;
         end
         function setMetaInfo(obj, metaInfo)
             obj.metaInfo = metaInfo;
@@ -64,7 +66,9 @@ classdef LustreNode < LustreAst
         function setIsMain(obj, isMain)
             obj.isMain = isMain;
         end
-        
+        function setIsImported(obj, isImported)
+            obj.isImported = isImported;
+        end
         
         function code = print(obj, backend)
             %TODO: check if LUSTREC syntax is OK for the other backends.
@@ -80,13 +84,25 @@ classdef LustreNode < LustreAst
                     lines{end + 1} = obj.metaInfo.print(backend);
                 end
             end
-            lines{end + 1} = sprintf('node %s(%s)\nreturns(%s);\n', ...
+            if obj.isImported
+                isImported_str = 'imported';
+            else
+                isImported_str = '';
+            end
+            lines{end + 1} = sprintf('node %s %s(%s)\nreturns(%s);\n', ...
+                isImported_str, ...
                 obj.name, ...
                 LustreAst.listVarsWithDT(obj.inputs, backend), ...
                 LustreAst.listVarsWithDT(obj.outputs, backend));
             if ~isempty(obj.localContract)
                 lines{end + 1} = obj.localContract.print(backend);
             end
+            
+            if obj.isImported
+                code = MatlabUtils.strjoin(lines, '');
+                return;
+            end
+            
             if ~isempty(obj.localVars)
                 lines{end + 1} = sprintf('var %s\n', ...
                     LustreAst.listVarsWithDT(obj.localVars, backend));

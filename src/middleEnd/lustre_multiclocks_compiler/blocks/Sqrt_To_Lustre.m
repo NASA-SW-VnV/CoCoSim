@@ -11,23 +11,27 @@ classdef Sqrt_To_Lustre < Block_To_Lustre
     end
     
     methods
-        function  write_code(obj, parent, blk, xml_trace, ~, backend, varargin)
+        function  write_code(obj, parent, blk, xml_trace, varargin)
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
-            inputs = {};
+            
             if ~strcmp(blk.OutMax, '[]') || ~strcmp(blk.OutMin, '[]')
                 display_msg(sprintf('The minimum/maximum value is not support in block %s',...
                     blk.Origin_path), MsgType.WARNING, 'Sqrt_To_Lustre', '');
             end
-            if BackendType.isKIND2(backend)
-                obj.addExternal_libraries('KIND2MathLib_sqrt');
-            else
-                obj.addExternal_libraries('LustMathLib_lustrec_math');
+            if strcmp(blk.AlgorithmType, 'Newton-Raphson')
+                msg = sprintf('Option Newton-Raphson is not supported in block %s', ...
+                    blk.Origin_path);
+                display_msg(msg, MsgType.WARNING, 'Sqrt_To_Lustre', '');
             end
+
+            obj.addExternal_libraries('LustMathLib_lustrec_math');
+            
             widths = blk.CompiledPortWidths.Inport;
             max_width = max(widths);
             outputDataType = blk.CompiledPortDataTypes.Outport{1};
             RndMeth = blk.RndMeth;
             SaturateOnIntegerOverflow = blk.SaturateOnIntegerOverflow;
+            inputs = cell(1, numel(widths));
             for i=1:numel(widths)
                 inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
                 if numel(inputs{i}) < max_width
@@ -48,15 +52,25 @@ classdef Sqrt_To_Lustre < Block_To_Lustre
             end
             [outLusDT, zero, one] = SLX2LusUtils.get_lustre_dt(outputDataType);
             
-            codes = {};
+            codes = cell(1, numel(inputs{1}));
             for j=1:numel(inputs{1})
                 if strcmp(blk.Operator, 'sqrt')
-                    code = sprintf('sqrt(%s) ',  inputs{1}{j});
-
+                    %code = sprintf('sqrt(%s) ',  inputs{1}{j});
+                    code = NodeCallExpr('sqrt', inputs{1}{j});
                 elseif strcmp(blk.Operator, 'signedSqrt')
-                    code = sprintf('if %s >= %s then sqrt(%s) else -sqrt(-%s)', inputs{1}{j}, zero, inputs{1}{j}, inputs{1}{j});
+                    %code = sprintf('if %s >= %s then sqrt(%s) else -sqrt(-%s)', inputs{1}{j}, zero, inputs{1}{j}, inputs{1}{j});
+                    code = IteExpr(...
+                        BinaryExpr(BinaryExpr.GTE, inputs{1}{j}, zero),...
+                        NodeCallExpr('sqrt', inputs{1}{j}), ...
+                        UnaryExpr(UnaryExpr.NEG, ...
+                                   NodeCallExpr('sqrt', ...
+                                                UnaryExpr(UnaryExpr.NEG,...
+                                                        inputs{1}{j}))));
                 elseif strcmp(blk.Operator, 'rSqrt')
-                    code = sprintf('%s/sqrt(%s) ', one, inputs{1}{j});
+                    %code = sprintf('%s/sqrt(%s) ', one, inputs{1}{j});
+                    code =  BinaryExpr(BinaryExpr.DIVIDE, ...
+                        one, ...
+                        NodeCallExpr('sqrt', inputs{1}{j}));
                 end
                
                  if ~strcmp(outLusDT, 'real')
@@ -66,18 +80,14 @@ classdef Sqrt_To_Lustre < Block_To_Lustre
                         code = SLX2LusUtils.setArgInConvFormat(conv_format, code);
                     end
                 end
-                codes{j} = sprintf('%s = %s;\n\t', outputs{j}, code);
+                codes{j} = LustreEq( outputs{j}, code);
             end
-            if strcmp(blk.AlgorithmType, 'Newton-Raphson')
-                msg = sprintf('Option Newton-Raphson is not supported in block %s', ...
-                    blk.Origin_path);
-                display_msg(msg, MsgType.WARNING, 'Sqrt_To_Lustre', '');
-            end
-            obj.setCode(MatlabUtils.strjoin(codes, ''));
+            
+            obj.setCode( codes );
             obj.addVariable(outputs_dt);
         end
         
-        function options = getUnsupportedOptions(obj, parent, blk, varargin)
+        function options = getUnsupportedOptions(obj, ~, blk, varargin)
             
             if ~strcmp(blk.OutMax, '[]') || ~strcmp(blk.OutMin, '[]')
                 obj.addUnsupported_options(...
