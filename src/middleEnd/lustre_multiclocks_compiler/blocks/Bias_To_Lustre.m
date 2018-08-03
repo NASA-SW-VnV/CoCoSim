@@ -13,17 +13,27 @@ classdef Bias_To_Lustre < Block_To_Lustre
     methods
         
         function  write_code(obj, parent, blk, xml_trace, varargin)
-            bias = blk.Bias;
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
-            [inputs,widths] = getBlockInputsNames_convInType2AccType(obj, parent, blk)
-            bias = blk.Bias;
+            [inputs] = getBlockInputsNames_convInType2AccType(obj, parent, blk);
+            
 
-            [outLusDT, zero, one] = SLX2LusUtils.get_lustre_dt(outputDataType);
-            codes = {};            
-            for j=1:numel(inputs{1})
-                codes{j} = sprintf('%s = %s + %s;', outputs{j}, inputs{1}{j},bias);
+            [outLusDT] = SLX2LusUtils.get_lustre_dt(outputDataType);
+            if isequal(outLusDT, 'int')
+                bias = IntExpr(blk.Bias);
+            else
+                bias = RealExpr(blk.Bias);
             end
-            obj.setCode(MatlabUtils.strjoin(codes, ''));
+            n = numel(inputs{1});
+            codes = cell(1, n);            
+            for j=1:n
+                %codes{j} = sprintf('%s = %s + %s;', outputs{j}, inputs{1}{j},bias);
+                codes{j} = LustreEq(...
+                    outputs{j}, ...
+                    BinaryExpr(BinaryExpr.PLUS, ...
+                                inputs{1}{j}, ...
+                                bias));
+            end
+            obj.setCode(codes);
             obj.addVariable(outputs_dt);
         end
         
