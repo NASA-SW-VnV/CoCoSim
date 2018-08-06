@@ -74,29 +74,51 @@ classdef DiscretePulseGenerator_To_Lustre < Block_To_Lustre
                PulseWidth = PulseWidth*Period/100.0;
            end
             
-           displayString = sprintf('period: %f, width: %f, phase: %f ',Period, PulseWidth, PhaseDelay);
-           disp(displayString);
+           %displayString = sprintf('period: %f, width: %f, phase: %f ',...
+           %Period, PulseWidth, PhaseDelay);
+           %disp(displayString);
             
-            codes = {};
+            
             ts = IRUtils.get_BlockDiagram_SampleTime(parent.Name);
-            zero = 0.000000000000000;
+            zero = RealExpr('0.0');
             blk_name = SLX2LusUtils.node_name_format(blk);
             dtc = sprintf('dtc_%s', blk_name);
-            obj.addVariable(sprintf('%s:real;', dtc));
+            obj.addVariable(LustreVar( dtc, 'real'));
             epsilon = 0.0001*ts;
+            codes = cell(1, numel(outputs_dt) + 1);
             for i=1:numel(outputs_dt)
-                codes{i} = sprintf('%s = if(__time_step < %.15f) then %.15f\n\t', outputs{i},PhaseDelay,zero);
-                codes{i} = sprintf('%s   else if(%s <= %.15f) then %.15f\n\t', codes{i},dtc,PulseWidth, Amplitude);
-                codes{i} = sprintf('%s   else %.15f;\n\t', codes{i},zero);
+                conds = cell(1, 2);
+                thens = cell(1, 3);
+                conds{1} = BinaryExpr(BinaryExpr.LT, ...
+                                      VarIdExpr(SLX2LusUtils.timeStepStr()),...
+                                      RealExpr(PhaseDelay));
+                thens{1} = zero;                 
+                conds{2} = BinaryExpr(BinaryExpr.LTE, ...
+                                      VarIdExpr(dtc),...
+                                      RealExpr(PulseWidth));
+                thens{2} = RealExpr(Amplitude);
+                thens{3} = zero;  
+                codes{i} = LustreEq(outputs{i}, ...
+                    IteExpr.nestedIteExpr(conds, thens));
+                %codes{i} = sprintf('%s = if(__time_step < %.15f) then %.15f\n\t', outputs{i},PhaseDelay,zero);
+                %codes{i} = sprintf('%s   else if(%s <= %.15f) then %.15f\n\t', codes{i},dtc,PulseWidth, Amplitude);
+                %codes{i} = sprintf('%s   else %.15f;\n\t', codes{i},zero);
             end
-            codes{end+1} = sprintf('%s = fmod((__time_step - %.15f + %f),%.15f);\n\t',dtc,PhaseDelay,epsilon, Period);
+            codes{end} = LustreEq(VarIdExpr(dtc), ...
+                NodeCallExpr('fmod', ...
+                            BinaryExpr.BinaryMultiArgs(BinaryExpr.MINUS, ...
+                                       {VarIdExpr(SLX2LusUtils.timeStepStr()), ...
+                                       RealExpr(PhaseDelay), ...
+                                       RealExpr(epsilon)}), ...
+                            RealExpr(Period)));
+            %sprintf('%s = fmod((__time_step - %.15f + %f),%.15f);\n\t',dtc,PhaseDelay,epsilon, Period);
             
             obj.addExternal_libraries('LustMathLib_lustrec_math');
             obj.setCode(MatlabUtils.strjoin(codes, ''));
             
         end
         
-        function options = getUnsupportedOptions(obj, parent, blk, varargin)
+        function options = getUnsupportedOptions(obj, ~, blk, varargin)
             obj.unsupported_options = {}; 
             if strcmp(blk.TimeSource, 'Use external signal')
                  obj.addUnsupported_options(sprintf('Option "Use external signal" is not supported for block %s',...

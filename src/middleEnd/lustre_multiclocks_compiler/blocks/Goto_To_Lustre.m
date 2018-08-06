@@ -14,9 +14,8 @@ classdef Goto_To_Lustre < Block_To_Lustre
         
         function  write_code(obj, parent, blk, xml_trace, varargin)
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
-            widths = blk.CompiledPortWidths.Inport;
             inputs{1} = SLX2LusUtils.getBlockInputsNames(parent, blk, 1);
-            codes = {};
+            codes = cell(1, numel(outputs));
             for i=1:numel(outputs)
                     codes{i} = sprintf('%s = %s;',outputs{i}, inputs{1}{i});
             end

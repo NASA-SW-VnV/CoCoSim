@@ -46,6 +46,7 @@ classdef SubSystem_To_Lustre < Block_To_Lustre
             
             %% add time input and clocks
             inputs{end + 1} = VarIdExpr(SLX2LusUtils.timeStepStr());
+            inputs{end + 1} = VarIdExpr(SLX2LusUtils.nbStepStr());
             clocks_list = SLX2LusUtils.getRTClocksSTR(blk, main_sampleTime);
             if ~isempty(clocks_list)
                 clocks_var = cell(1, numel(clocks_list));

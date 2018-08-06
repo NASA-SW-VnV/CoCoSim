@@ -17,22 +17,23 @@ classdef Ground_To_Lustre < Block_To_Lustre
             lus_outputDataType = SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Outport{1});
             
             if strcmp(lus_outputDataType, 'bool')
-                v = 'false';
+                v = BooleanExpr('false');
             elseif strcmp(lus_outputDataType, 'int')
-                v = '0';
+                v = IntExpr('0');
             else
-                v = '0.0';
+                v = RealExpr('0.0');
             end
             
+            codes = cell(1, numel(outputs));
             for j=1:numel(outputs)
-                codes{j} = sprintf('%s = %s;\n\t', outputs{j}, v);
+                codes{j} = LustreEq(outputs{j}, v);
             end
             
-            obj.setCode(MatlabUtils.strjoin(codes, ''));
+            obj.setCode( codes );
             
         end
         
-        function options = getUnsupportedOptions(obj,parent, blk, varargin)
+        function options = getUnsupportedOptions(obj, varargin)
             options = obj.unsupported_options;
         end
     end

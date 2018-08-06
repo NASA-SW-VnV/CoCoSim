@@ -38,15 +38,16 @@ classdef DataTypeConversion_To_Lustre < Block_To_Lustre
             end
             
             % Just pass inputs to outputs.
+            codes = cell(1, numel(outputs));
             for i=1:numel(outputs)
-                codes{i} = sprintf('%s = %s;\n\t', outputs{i}, inputs{1}{i});
+                codes{i} = LustreEq(outputs{i}, inputs{1}{i});
             end
             
-            obj.setCode(MatlabUtils.strjoin(codes, ''));
+            obj.setCode(codes);
             obj.addVariable(outputs_dt);
         end
         
-        function options = getUnsupportedOptions(obj, parent, blk, varargin)
+        function options = getUnsupportedOptions(obj, varargin)
             obj.unsupported_options = {};
             options = obj.unsupported_options;
         end

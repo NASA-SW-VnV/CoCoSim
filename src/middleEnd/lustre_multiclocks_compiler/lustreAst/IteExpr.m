@@ -13,7 +13,7 @@ classdef IteExpr < LustreExpr
         OneLine;% to print it in one line
     end
     
-    methods 
+    methods
         function obj = IteExpr(condition, thenExpr, ElseExpr, OneLine)
             obj.condition = condition;
             obj.thenExpr = thenExpr;
@@ -32,6 +32,15 @@ classdef IteExpr < LustreExpr
         
         
         function code = print_lustrec(obj, backend)
+            if iscell(obj.thenExpr) && numel(obj.thenExpr) == 1
+                obj.thenExpr = obj.thenExpr{1};
+            end
+            if iscell(obj.ElseExpr) && numel(obj.ElseExpr) == 1
+                obj.ElseExpr = obj.ElseExpr{1};
+            end
+            if iscell(obj.condition) && numel(obj.condition) == 1
+                obj.condition = obj.condition{1};
+            end
             if obj.OneLine
                 code = sprintf('(if %s then %s else %s)', ...
                     obj.condition.print(backend),...
@@ -58,7 +67,7 @@ classdef IteExpr < LustreExpr
             code = obj.print_lustrec(BackendType.PRELUDE);
         end
     end
-     methods(Static)
+    methods(Static)
         % This function return the IteExpr object
         % representing nested if-else.
         function exp = nestedIteExpr(conds, thens)

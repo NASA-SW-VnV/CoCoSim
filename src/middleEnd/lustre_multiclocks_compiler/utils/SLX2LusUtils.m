@@ -21,6 +21,9 @@ classdef SLX2LusUtils < handle
         function time_step = timeStepStr()
             time_step = '__time_step';
         end
+        function time_step = nbStepStr()
+            time_step = '__nb_step';
+        end
         function res = isContractBlk(ss_ir)
             res = isfield(ss_ir, 'MaskType') ...
                 && strcmp(ss_ir.MaskType, 'ContractBlock');
@@ -223,6 +226,10 @@ classdef SLX2LusUtils < handle
                 SLX2LusUtils.timeStepStr(), 'real');
             node_inputs_withoutDT_cell{end+1} = ...
                 VarIdExpr(SLX2LusUtils.timeStepStr());
+            node_inputs_cell{end + 1} = LustreVar(...
+                SLX2LusUtils.nbStepStr(), 'int');
+            node_inputs_withoutDT_cell{end+1} = ...
+                VarIdExpr(SLX2LusUtils.nbStepStr());
             % add clocks
             clocks_list = SLX2LusUtils.getRTClocksSTR(blk, main_sampleTime);
             if ~isempty(clocks_list)

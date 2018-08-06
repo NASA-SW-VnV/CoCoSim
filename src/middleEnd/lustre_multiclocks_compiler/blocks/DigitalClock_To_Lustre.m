@@ -24,12 +24,16 @@ classdef DigitalClock_To_Lustre < Block_To_Lustre
                 return;
             end
             obj.addExternal_libraries('BlocksLib__DigitalClock');
-            code = sprintf('%s = _DigitalClock(%s, %.15f);\n\t', outputs{1},...
-                SLX2LusUtils.timeStepStr(), digitalsampleTime);
+            code = LustreEq(outputs{1}, ...
+                NodeCallExpr('_DigitalClock', ...
+                VarIdExpr(SLX2LusUtils.timeStepStr()), ...
+                RealExpr(digitalsampleTime)));
+            %sprintf('%s = _DigitalClock(%s, %.15f);\n\t', outputs{1},...
+            %    SLX2LusUtils.timeStepStr(), digitalsampleTime);
             obj.setCode( code);
         end
         
-        function options = getUnsupportedOptions(obj, parent, blk, varargin)
+        function options = getUnsupportedOptions(obj, varargin)
             options = obj.unsupported_options;
         end
     end
