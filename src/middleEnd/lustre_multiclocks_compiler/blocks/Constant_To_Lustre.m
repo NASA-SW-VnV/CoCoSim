@@ -13,10 +13,7 @@ classdef Constant_To_Lustre < Block_To_Lustre
     methods
         function  write_code(obj, parent, blk, xml_trace, varargin)
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
-            isInsideContract = SLX2LusUtils.isContractBlk(parent);
-            if ~isInsideContract
-                obj.addVariable(outputs_dt);
-            end
+            obj.addVariable(outputs_dt);
             lus_outputDataType = SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Outport{1});
             [Value, valueDataType, status] = ...
                 Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Value);
@@ -27,49 +24,24 @@ classdef Constant_To_Lustre < Block_To_Lustre
                 return;
             end
             
-            values_str = {};
+            
             width = numel(Value);
+            values_AST = cell(1, width);
             for i=1:width
-                if strcmp(lus_outputDataType, 'real')
-                    values_str{i} = sprintf('%.15f', Value(i));
-                elseif strcmp(lus_outputDataType, 'int')
-                    values_str{i} = sprintf('%d', int32(Value(i)));
-                elseif strcmp(lus_outputDataType, 'bool')
-                    if Value(i)
-                        values_str{i} = 'true';
-                    else
-                        values_str{i} = 'false';
-                    end
-                elseif strncmp(valueDataType, 'int', 3) ...
-                        || strncmp(valueDataType, 'uint', 4)
-                    values_str{i} = num2str(Value(i));
-                elseif strcmp(valueDataType, 'boolean') || strcmp(valueDataType, 'logical')
-                    if Value(i)
-                        values_str{i} = 'true';
-                    else
-                        values_str{i} = 'false';
-                    end
-                else
-                    values_str{i} = sprintf('%.15f', Value(i));
-                end
+                values_AST{i} = SLX2LusUtils.num2LusExp(Value(i),...
+                    lus_outputDataType, valueDataType);
             end
             
-            
+            codes = cell(1, numel(outputs));
             for j=1:numel(outputs)
-                if isInsideContract
-                    codes{j} = sprintf('var %s = %s;\n\t', ...
-                        strrep(outputs_dt{j}, ';', ''), values_str{j});
-                else
-                    codes{j} = sprintf('%s = %s;\n\t',...
-                        outputs{j}, values_str{j});
-                end
+                codes{j} = LustreEq(outputs{j}, values_AST{j});
             end
             
-            obj.setCode(MatlabUtils.strjoin(codes, ''));
+            obj.setCode( codes );
             
         end
         
-        function options = getUnsupportedOptions(obj,parent, blk, varargin)
+        function options = getUnsupportedOptions(obj,~, blk, varargin)
             % search the variable in Model workspace, if not raise
             % unsupported option
             if isvarname(blk.Value)

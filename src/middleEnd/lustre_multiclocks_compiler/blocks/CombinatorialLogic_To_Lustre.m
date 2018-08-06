@@ -43,51 +43,61 @@ classdef CombinatorialLogic_To_Lustre < Block_To_Lustre
                     % cast the input to the conversion format. In our
                     % example conv_format = 'int_to_real(%s)'.
                     inputs{1} = cellfun(@(x) ...
-                        SLX2LusUtils.setArgInConvFormat(conv_format,x), inputs{1}, 'un', 0);
+                        SLX2LusUtils.setArgInConvFormat(conv_format,x), ...
+                        inputs{1}, 'un', 0);
                 end
             end
             
             
             %% Step 4: start filling the definition of each output
-            codes = {};
+            codes = cell(1, numel(outputs) + 1 );
             % define row index
             %row index = 1 + u(m)*2^0 + u(m-1)*2^1 + ... + u(1)*2^(m-1)
             blk_name = SLX2LusUtils.node_name_format(blk);
             row_index_varName = sprintf('row_index_%s', blk_name);
-            obj.addVariable( sprintf('%s:int;', row_index_varName));
-            row_term = {};
+            obj.addVariable( LustreVar(row_index_varName, 'int'));
+            
             m = numel(inputs{1});
+            row_term = cell(1, m + 1);
             for i=0:m-1
                 v = 2^i;
-                row_term{i+1} = sprintf('%s * %d', inputs{1}{m-i}, v);
+                row_term{i+1} = BinaryExpr(BinaryExpr.MULTIPLY, ...
+                    inputs{1}{m-i}, IntExpr(v));
+                %sprintf('%s * %d', inputs{1}{m-i}, v);
             end
-            codes{1} = sprintf('%s = 1 + %s;\n\t', ...
-                    row_index_varName, MatlabUtils.strjoin(row_term, ' + '));
+            row_term{m + 1} = IntExpr(1); 
+            codes{1} = LustreEq(VarIdExpr(row_index_varName), ...
+                BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS, row_term));
+            %sprintf('%s = 1 + %s;\n\t', ...
+            %        row_index_varName, MatlabUtils.strjoin(row_term, ' + '));
                 
             [truthTable, ~, ~] = ...
                 Constant_To_Lustre.getValueFromParameter(parent, blk, blk.TruthTable);
             [nbRow, ~] = size(truthTable);
             % Go over outputs
             for j=1:numel(outputs)
-                rightCode = {};
+                conds = cell(1, nbRow - 1);
+                thens = cell(1, nbRow );
                 for i=1:nbRow-1
-                    v_str = CombinatorialLogic_To_Lustre.getStrValue(truthTable(i,j), outputLusDT);
-                    rightCode{i} = sprintf('if %s = %d then %s\n\t\telse ', row_index_varName, i, v_str);
+                    v_lus = CombinatorialLogic_To_Lustre.getAstValue(truthTable(i,j), outputLusDT);
+                    conds{i} = BinaryExpr(BinaryExpr.EQ, ...
+                        VarIdExpr(row_index_varName), IntExpr(i));
+                    thens{i} = v_lus;
+                    %sprintf('if %s = %d then %s\n\t\telse ', row_index_varName, i, v_str);
                 end
                 % last row
-                v_str = CombinatorialLogic_To_Lustre.getStrValue(truthTable(nbRow,j), outputLusDT);
-                rightCode{nbRow} = sprintf('%s', v_str);
-                rightCode = MatlabUtils.strjoin(rightCode, '');
+                v_lus = CombinatorialLogic_To_Lustre.getAstValue(truthTable(nbRow,j), outputLusDT);
+                thens{nbRow} = v_lus;
+                rightCode = IteExpr.nestedIteExpr(conds, thens);
                 % example of lement wise product block.
-                codes{end+1} = sprintf('%s = %s;\n\t', ...
-                    outputs{j}, rightCode);
+                codes{j+1} = LustreEq(outputs{j}, rightCode);
             end
             % join the lines and set the block code.
-            obj.setCode(MatlabUtils.strjoin(codes, ''));
+            obj.setCode( codes );
             
         end
         
-        function options = getUnsupportedOptions(obj,parent, blk, varargin)
+        function options = getUnsupportedOptions(obj, varargin)
             % add your unsuported options list here
             options = obj.unsupported_options;
             
@@ -95,16 +105,12 @@ classdef CombinatorialLogic_To_Lustre < Block_To_Lustre
     end
     methods(Static)
         
-        function v_str = getStrValue(v, dt)
+        function v_lus = getAstValue(v, dt)
             % in this block, the output dataType is Boolean or double
             if strcmp(dt, 'bool')
-                if v
-                    v_str = 'true';
-                else
-                    v_str = 'false';
-                end
+                v_lus = BooleanExpr(v);
             else
-                v_str = sprintf('%.15f', v);
+                v_lus = RealExpr(v);
             end
             
         end

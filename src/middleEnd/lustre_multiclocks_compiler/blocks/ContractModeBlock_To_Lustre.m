@@ -27,10 +27,11 @@ classdef ContractModeBlock_To_Lustre < Block_To_Lustre
                     MsgType.ERROR, 'ContractModeBlock_To_Lustre', '');
                 return;
             end
-            
-            inputs = {};
-            widths = blk.CompiledPortWidths.Inport;           
-            for i=1:numel(widths)
+            widths = blk.CompiledPortWidths.Inport;
+            nb_inputs = numel(widths);
+            inputs = cell(1, nb_inputs);
+                       
+            for i=1:nb_inputs
                 inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
 
                 % Get the input datatype
@@ -55,27 +56,13 @@ classdef ContractModeBlock_To_Lustre < Block_To_Lustre
                 end
             end
             
-            require = {};
-            % Go over first input to get require expression
-            for j=1:numel(inputs{1})
-                require{j} = sprintf('require %s;\n\t\t', inputs{1}{j});
-            end
-            require = MatlabUtils.strjoin(require, '');
-            
-            ensure = {};
-            % Go over first input to get require expression
-            for j=1:numel(inputs{2})
-                ensure{j} = sprintf('ensure %s;\n\t\t', inputs{2}{j});
-            end
-            ensure = MatlabUtils.strjoin(ensure, '');
             blk_name = SLX2LusUtils.node_name_format(blk);
-            code = sprintf('mode %s(\n\t%s%s);\n\t', blk_name, require, ensure);
-            % join the lines and set the block code.
-            obj.setCode(code);
+            code = ContractModeExpr(blk_name, inputs{1}, inputs{2});
+            obj.setCode( code );
             
         end
         
-        function options = getUnsupportedOptions(obj,parent, blk, varargin)
+        function options = getUnsupportedOptions(obj, varargin)
             % add your unsuported options list here
            options = obj.unsupported_options;
            

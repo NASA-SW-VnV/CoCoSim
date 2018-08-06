@@ -21,13 +21,9 @@ classdef Chart_To_Lustre < Block_To_Lustre
             % This current version is using old lustre compiler for Stateflow
             node_name = get_full_name( blk, true );
             
-            x = MatlabUtils.strjoin(inputs, ',\n\t\t');
-            y = MatlabUtils.strjoin(outputs, ',\n\t');
-            
-            code = sprintf('(%s) = %s(%s);\n\t', ...
-                y, node_name, x);
+            code = LustreEq(outputs, NodeCallExpr(node_name, inputs));
 
-            obj.setCode( code);
+            obj.setCode( code );
             obj.addVariable(outputs_dt); 
         end
         

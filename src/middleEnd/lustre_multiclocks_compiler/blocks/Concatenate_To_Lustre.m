@@ -18,9 +18,9 @@ classdef Concatenate_To_Lustre < Block_To_Lustre
             [inputs,widths] = ...
                 Concatenate_To_Lustre.getBlockInputsNames_convInType2AccType(obj, parent, blk);
             [blkParams,in_matrix_dimension] = Concatenate_To_Lustre.readBlkParams(blk);
-            
+            nb_inputs = numel(widths);
             if blkParams.isVector
-                [codes] = Concatenate_To_Lustre.concatenateVector(widths, inputs, outputs);
+                [codes] = Concatenate_To_Lustre.concatenateVector(nb_inputs, inputs, outputs);
             else
                 [ConcatenateDimension, ~, status] = ...
                 Constant_To_Lustre.getValueFromParameter(parent, blk, blk.ConcatenateDimension);
@@ -48,8 +48,20 @@ classdef Concatenate_To_Lustre < Block_To_Lustre
                 end
             end
             
-            obj.setCode(MatlabUtils.strjoin(codes, ''));
+            obj.setCode( codes );
             obj.addVariable(outputs_dt);
+        end
+        
+         function options = getUnsupportedOptions(obj, ~, blk, varargin)
+            obj.unsupported_options = {};
+            in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(blk.CompiledPortDimensions.Inport);
+            if numel(in_matrix_dimension) > 7
+                obj.addUnsupported_options(...
+                    sprintf('More than 7 dimensions is not supported in block %s',...
+                    blk.Origin_path), ...
+                    MsgType.ERROR, 'Concatenate_To_Lustre', '');
+            end
+            options = obj.unsupported_options;
         end
     end
     
@@ -70,7 +82,7 @@ classdef Concatenate_To_Lustre < Block_To_Lustre
         end
         
         function [codes] = concatenateDimension1(inputs, outputs,in_matrix_dimension)
-            codes = {};
+            
             sizeD1 = 0;
             for i=1:numel(in_matrix_dimension)
                 sizeD1 = sizeD1 + in_matrix_dimension{i}.dims(1);
@@ -83,6 +95,7 @@ classdef Concatenate_To_Lustre < Block_To_Lustre
                 cumuRow(i) = cumu + in_matrix_dimension{i}.dims(1);
                 cumu = cumu + in_matrix_dimension{i}.dims(1);
             end
+            codes = cell(1, numel(outputs));
             for i=1:numel(outputs)
                 [d1, d2,~,~,~,~,~ ] = ind2sub(outMatSize,i);   % 7 dims max
                 rowCounted = 0;
@@ -99,14 +112,16 @@ classdef Concatenate_To_Lustre < Block_To_Lustre
                 curD1 = d1-rowCounted;
                 curMatSize = in_matrix_dimension{inputPortIndex}.dims;
                 inputIndex = sub2ind(curMatSize,curD1,d2);
-                codes{i} = sprintf('%s = %s;\n\t', outputs{i}, inputs{inputPortIndex}{inputIndex});
+                codes{i} = LustreEq(outputs{i},...
+                    inputs{inputPortIndex}{inputIndex});
             end
         end
         
         function [inputs,widths] = getBlockInputsNames_convInType2AccType(obj, parent, blk)
-            inputs = {};
+            
             widths = blk.CompiledPortWidths.Inport;
             outputDataType = blk.CompiledPortDataTypes.Outport{1};
+            inputs = cell(1, numel(widths));
             for i=1:numel(widths)
                 inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
                 inport_dt = blk.CompiledPortDataTypes.Inport(i);
@@ -129,34 +144,21 @@ classdef Concatenate_To_Lustre < Block_To_Lustre
             index = 0;
             for i=1:numel(in_matrix_dimension)       %loop over number of inports
                 for j=1:numel(inputs{i})     % loop over each element of inport
-                    index = index + 1;
-                    codes{index} = sprintf('%s = %s;\n\t', outputs{index}, inputs{i}{j});
+                    codes{end + 1} = LustreEq(outputs{index}, inputs{i}{j});
                 end
             end
         end
         
-        function [codes] = concatenateVector(widths, inputs, outputs)
+        function [codes] = concatenateVector(nb_inputs, inputs, outputs)
             codes = {};
-            outputIndex = 0;
-            for i=1:numel(widths)
+            for i=1:nb_inputs
                 for j=1:numel(inputs{i})
-                    outputIndex = outputIndex + 1;
-                    codes{outputIndex} = sprintf('%s = %s;\n\t', outputs{outputIndex}, inputs{i}{j});
+                    codes{end + 1} = LustreEq(outputs{outputIndex}, inputs{i}{j});
                 end
             end
         end
         
-        function options = getUnsupportedOptions(obj, parent, blk, varargin)
-            obj.unsupported_options = {};
-            in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(blk.CompiledPortDimensions.Inport);
-            if numel(in_matrix_dimension) > 7
-                obj.addUnsupported_options(...
-                    sprintf('More than 7 dimensions is not supported in block %s',...
-                    blk.Origin_path), ...
-                    MsgType.ERROR, 'Concatenate_To_Lustre', '');
-            end
-            options = obj.unsupported_options;
-        end
+       
     end
     
 end

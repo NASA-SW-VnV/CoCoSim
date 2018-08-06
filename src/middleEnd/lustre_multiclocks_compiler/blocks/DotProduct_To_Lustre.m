@@ -14,12 +14,12 @@ classdef DotProduct_To_Lustre < Block_To_Lustre
         
         function  write_code(obj, parent, blk, xml_trace, varargin)
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
-            inputs = {};
+            
             
             widths = blk.CompiledPortWidths.Inport;
             max_width = max(widths);
             outputDataType = blk.CompiledPortDataTypes.Outport{1};
-
+            inputs = cell(1, numel(widths));
             for i=1:numel(widths)
                 inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
                 if numel(inputs{i}) < max_width
@@ -39,20 +39,19 @@ classdef DotProduct_To_Lustre < Block_To_Lustre
                 end
             end
             
-            [~, zero] = SLX2LusUtils.get_lustre_dt(outputDataType);
                        
-            codes{1} = sprintf('%s = %s ',outputs{1},zero);
-            
+            right = cell(1, numel(inputs{1}));
             for j=1:numel(inputs{1})
-                codes{1} = sprintf('%s + %s*%s', codes{1}, inputs{1}{j}, inputs{2}{j});
+                right{j} = BinaryExpr(BinaryExpr.MULTIPLY, ...
+                    inputs{1}{j}, inputs{2}{j});
             end
-            codes{1} = sprintf('%s;\n\t', codes{1});
-            
-            obj.setCode(MatlabUtils.strjoin(codes, ''));
+            code = LustreEq(outputs{1}, ...
+                BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS, right));
+            obj.setCode( code );
             obj.addVariable(outputs_dt);
         end
         
-        function options = getUnsupportedOptions(obj, parent, blk, varargin)
+        function options = getUnsupportedOptions(obj, varargin)
             obj.unsupported_options = {};
            
             options = obj.unsupported_options;
