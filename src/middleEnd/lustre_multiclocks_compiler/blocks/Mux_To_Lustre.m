@@ -14,12 +14,11 @@ classdef Mux_To_Lustre < Block_To_Lustre
         
         function  write_code(obj, parent, blk, xml_trace, varargin)
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
-            inputs = {};
+            
             
             widths = blk.CompiledPortWidths.Inport;
-            max_width = max(widths);
             outputDataType = blk.CompiledPortDataTypes.Outport{1};
-
+            inputs = cell(1, numel(widths));
             for i=1:numel(widths)
                 inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
                 inport_dt = blk.CompiledPortDataTypes.Inport(i);
@@ -35,26 +34,25 @@ classdef Mux_To_Lustre < Block_To_Lustre
                     end
                 end
             end
-                       
-            codes = {};
-            if 1
-                outputIndex = 0;
-                for i=1:numel(widths)
-                    for j=1:numel(inputs{i})
-                        outputIndex = outputIndex + 1;
-                        codes{outputIndex} = sprintf('%s = %s;\n\t', outputs{outputIndex}, inputs{i}{j});
-                    end
-                end
-
-            end        
             
-            obj.setCode(MatlabUtils.strjoin(codes, ''));
+            codes = cell(1, numel(outputs));
+            outputIndex = 0;
+            for i=1:numel(widths)
+                for j=1:numel(inputs{i})
+                    outputIndex = outputIndex + 1;
+                    codes{outputIndex} = LustreEq( outputs{outputIndex}, inputs{i}{j});
+                end
+            end
+            
+            
+            
+            obj.setCode( codes );
             obj.addVariable(outputs_dt);
         end
         
-        function options = getUnsupportedOptions(obj, parent, blk, varargin)
+        function options = getUnsupportedOptions(obj, varargin)
             obj.unsupported_options = {};
-           
+            
             options = obj.unsupported_options;
         end
     end

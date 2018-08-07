@@ -24,11 +24,11 @@ classdef From_To_Lustre < Block_To_Lustre
             end
             gotoBlk = get_struct(parent, GotoHandle);
             [goto_outputs, ~] = SLX2LusUtils.getBlockOutputsNames(parent, gotoBlk);
-            codes = {};
+            codes = cell(1, numel(outputs));
             for j=1:numel(outputs)
-                codes{j} = sprintf('%s = %s;\n\t', outputs{j}, goto_outputs{j});
+                codes{j} = LustreEq( outputs{j}, goto_outputs{j});
             end
-            obj.setCode(MatlabUtils.strjoin(codes, ''));
+            obj.setCode( codes );
             obj.addVariable(outputs_dt);
             
             

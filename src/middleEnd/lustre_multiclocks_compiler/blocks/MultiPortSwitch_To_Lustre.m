@@ -15,20 +15,16 @@ classdef MultiPortSwitch_To_Lustre < Block_To_Lustre
         function  write_code(obj, parent, blk, xml_trace, varargin)
             
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+            obj.addVariable(outputs_dt);
             [inputs] = getBlockInputsNames_convInType2AccType(obj, parent, blk);
-            outputDataType = blk.CompiledPortDataTypes.Outport{1};
-            [outLusDT, ~, one] = SLX2LusUtils.get_lustre_dt(outputDataType);
             
             [numInputs, ~, ~] = ...
                 Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Inputs);
             blk_name = SLX2LusUtils.node_name_format(blk);
             
-            addVarIndex = 0;
-            addVarIndex = addVarIndex + 1;
-            portIndex = sprintf('%s_portIndex',blk_name);
-            addVars{addVarIndex} = sprintf('%s:int;',portIndex);
-            codes = {}; 
-            codeIndex = 0;
+            portIndex = VarIdExpr(sprintf('%s_portIndex',blk_name));
+            obj.addVariable(LustreVar(portIndex, 'int'));
+            
             indexShift = 0;    % portIndex = readin index + indexShift.  
             %                    indexShift = 0 for 1-based contiguous (1st port is control port)
             %                    indexShift = 2 for 0-based contigous        
@@ -40,36 +36,41 @@ classdef MultiPortSwitch_To_Lustre < Block_To_Lustre
                     blk.Origin_path), MsgType.ERROR, 'MultiportSwitch_To_Lustre', '');
             end
             
-            codeIndex = codeIndex + 1;
-            codes{codeIndex} = sprintf('%s = %s + %d; \n\t', portIndex, inputs{1}{1},indexShift);
+            codes = cell(1, numel(outputs) + 1); 
+            codes{1} = LustreEq(portIndex, ...
+                BinaryExpr(BinaryExpr.PLUS, ...
+                            inputs{1}{1},...
+                            IntExpr(indexShift)));
+            %sprintf('%s = %s + %d; \n\t', portIndex, inputs{1}{1},indexShift);
                         
             for i=1:numel(outputs)
-                code = sprintf('%s = \n\t', outputs{i});
+                %code = sprintf('%s = \n\t', outputs{i});
+                conds = cell(1, numInputs);
+                thens = cell(1, numInputs + 1);
                 for j=1:numInputs
-                    if j==1
-                        code = sprintf('%s  if(%s = %d) then %s\n\t', code, portIndex,j,inputs{j+1}{i});   % 1st port is control port
-                    else
-                        code = sprintf('%s else if(%s = %d) then %s\n\t', code, portIndex,j,inputs{j+1}{i});
-                    end
+                    conds{j} = BinaryExpr(BinaryExpr.EQ, portIndex, IntExpr(j));
+                    thens{j} = inputs{j+1}{i};
+                    %code = sprintf('%s  if(%s = %d) then %s\n\t', code, portIndex,j,inputs{j+1}{i});   % 1st port is control port
                 end
-                codeIndex = codeIndex + 1;
-                codes{codeIndex} = sprintf('%s  else %s ;\n\t', code,inputs{numel(inputs)}{i});   % default port is always last port whether there is additional port or not
+                thens{numInputs + 1} = inputs{numel(inputs)}{i};
+                %codes{i + 1} = sprintf('%s  else %s ;\n\t', code,inputs{numel(inputs)}{i});   % default port is always last port whether there is additional port or not
+                codes{i + 1} = LustreEq(outputs{i}, ...
+                    IteExpr.nestedIteExpr(conds, thens));
             end
             
-            obj.setCode(MatlabUtils.strjoin(codes, ''));
-            obj.addVariable(outputs_dt);
-            obj.addVariable(addVars);
+            obj.setCode( codes );
+            
+            
         end
         
-        function [inputs] = getBlockInputsNames_convInType2AccType(obj, parent, blk)
-            inputs = {};
-            
+        function [inputs] = getBlockInputsNames_convInType2AccType(obj, parent, blk)            
             widths = blk.CompiledPortWidths.Inport;
             nbInputs = numel(widths);
             max_width = max(widths);
             outputDataType = blk.CompiledPortDataTypes.Outport{1};
             RndMeth = blk.RndMeth;
             SaturateOnIntegerOverflow = blk.SaturateOnIntegerOverflow;
+            inputs = cell(1, nbInputs);
             for i=1:nbInputs
                 inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
                 if numel(inputs{i}) < max_width
@@ -99,7 +100,7 @@ classdef MultiPortSwitch_To_Lustre < Block_To_Lustre
             end
         end
         
-        function options = getUnsupportedOptions(obj, parent, blk, varargin)
+        function options = getUnsupportedOptions(obj, ~, blk, varargin)
             obj.unsupported_options = {};
             if strcmp(blk.DataPortOrder, 'Specify indices')
                 obj.addUnsupported_options(...

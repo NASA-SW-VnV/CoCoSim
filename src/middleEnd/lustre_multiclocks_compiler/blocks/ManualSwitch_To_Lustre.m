@@ -17,13 +17,14 @@ classdef ManualSwitch_To_Lustre < Block_To_Lustre
             isInsideContract = SLX2LusUtils.isContractBlk(parent);
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             if ~isInsideContract, obj.addVariable(outputs_dt);end
-
             
-            inputs = {};
+            
+            
             % take the list of the inputs width
             widths = blk.CompiledPortWidths.Inport;
             max_width = max(widths);
             % save the information of the outport dataType
+            inputs = cell(1, numel(widths));
             for i=1:numel(widths)
                 % fill the names of the ith input.
                 % inputs{1} = {'In1_1', 'In1_2', 'In1_3'}
@@ -34,11 +35,15 @@ classdef ManualSwitch_To_Lustre < Block_To_Lustre
                 end
             end
             
-            codes = {};
+            
             try
                 % check to what input is linked to
                 %sw does not exist in IR
-                sw = get_param(blk.Origin_path, 'sw');
+                if isfield(blk, 'sw')
+                    sw = blk.sw;
+                else
+                    sw = '1';
+                end
                 if strcmp(sw, '1')
                     port = 1;
                 else
@@ -48,24 +53,16 @@ classdef ManualSwitch_To_Lustre < Block_To_Lustre
                 port = 1;
             end
             % Go over outputs
+            codes = cell(1, numel(outputs));
             for j=1:numel(outputs)
-                % example of lement wise product block.
-                if isInsideContract
-                    codes{j} = sprintf('var %s = %s;\n\t', ...
-                        strrep(outputs_dt{j}, ';', ''), ...
-                        inputs{port}{j});
-                else
-                    codes{j} = sprintf('%s = %s;\n\t', ...
-                        outputs{j}, inputs{port}{j});
-                end
-                
+                codes{j} = LustreEq(outputs{j}, inputs{port}{j});
             end
             % join the lines and set the block code.
-            obj.setCode(MatlabUtils.strjoin(codes, ''));
+            obj.setCode( codes );
             
         end
         
-        function options = getUnsupportedOptions(obj,parent, blk, varargin)
+        function options = getUnsupportedOptions(obj, varargin)
             %             if isequal(blk.varsize, 'on')
             %                 obj.addUnsupported_options(...
             %                     sprintf('Option input signals with different sizes in Block "%s" is not supported.',...

@@ -12,7 +12,7 @@ classdef Math_To_Lustre < Block_To_Lustre
     
     methods
         
-        function  write_code(obj, parent, blk, xml_trace, ~, backend, varargin)
+        function  write_code(obj, parent, blk, xml_trace, varargin)
             
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             inputs = {};

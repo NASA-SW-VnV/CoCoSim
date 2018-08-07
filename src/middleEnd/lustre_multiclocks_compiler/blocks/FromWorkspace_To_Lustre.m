@@ -27,14 +27,10 @@ classdef FromWorkspace_To_Lustre < Block_To_Lustre
             end
             
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
-            inputs = {};
-            
-            widths = blk.CompiledPortWidths.Inport;
-            nbInputs = numel(widths);
-            max_width = max(widths);
+
             outputDataType = blk.CompiledPortDataTypes.Outport{1};
             
-            % there is no inputs
+
             
             VariableName = blk.VariableName;
             [variable, ~, status] = ...
@@ -54,7 +50,7 @@ classdef FromWorkspace_To_Lustre < Block_To_Lustre
             %             ZeroCross = blk.ZeroCross;
             %             OutputAfterFinalValue = blk.OutputAfterFinalValue;
             
-            codes = {};
+            
             
             if isnumeric(variable)
                 % for matrix
@@ -83,8 +79,8 @@ classdef FromWorkspace_To_Lustre < Block_To_Lustre
             if strcmp(blk.OutputAfterFinalValue, 'Setting to zero')
                 initcode = zero;
             end
+            codes = cell(1, dims);
             for i=1:dims
-                
                 for j=nrow:-1:1
                     a = values(j,i);
                     if j== nrow
@@ -92,16 +88,11 @@ classdef FromWorkspace_To_Lustre < Block_To_Lustre
                             code = FromWorkspace_To_Lustre.addValue(a, initcode, outLusDT);   
                         else
                             if strcmp(outLusDT, 'int')
-                                code = sprintf('%d',int32(a));
+                                code = IntExpr(a);
                             elseif strcmp(outLusDT, 'bool')
-                                if a
-                                    v = 'true';
-                                else
-                                    v = 'false';
-                                end
-                                code = sprintf('%s',v);
+                                code = BooleanExpr(a);
                             else
-                                code = sprintf('%f',a);
+                                code = RealExpr(a);
                             end
                         end
                     else
@@ -109,15 +100,15 @@ classdef FromWorkspace_To_Lustre < Block_To_Lustre
                     end
                 end
                 
-                codes{i} = sprintf('%s = %s; \n\t',outputs{i},code);
-                code = initcode;
+                codes{i} = LustreEq(outputs{i}, code);
+                %code = initcode;
             end
             
-            obj.setCode(MatlabUtils.strjoin(codes, ''));
+            obj.setCode( codes );
             obj.addVariable(outputs_dt);
         end
         
-        function options = getUnsupportedOptions(obj, parent, blk, varargin)
+        function options = getUnsupportedOptions(obj, ~, blk, varargin)
             obj.unsupported_options = {};
             VariableName = blk.VariableName;
             variable = evalin('base',VariableName);
@@ -155,17 +146,15 @@ classdef FromWorkspace_To_Lustre < Block_To_Lustre
     methods (Static)
         function code = addValue(a, code, outLusDT)
             if strcmp(outLusDT, 'int')
-                code = sprintf('%d -> pre (%s)',int32(a), code);
+                v = IntExpr(int32(a));
             elseif strcmp(outLusDT, 'bool')
-                if a
-                    v = 'true';
-                else
-                    v = 'false';
-                end
-                code = sprintf('%s -> pre (%s)',v,code);
+                v = BooleanExpr(a);
             else
-                code = sprintf('%f -> pre (%s)',a,code);
+                v = RealExpr(a);
             end
+            code = BinaryExpr(BinaryExpr.ARROW, ...
+                    v, ...
+                    UnaryExpr(UnaryExpr.PRE, code));
         end
         
     end

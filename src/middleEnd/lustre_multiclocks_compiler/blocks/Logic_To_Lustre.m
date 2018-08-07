@@ -16,13 +16,13 @@ classdef Logic_To_Lustre < Block_To_Lustre
         function  write_code(obj, parent, blk, xml_trace, varargin)
             
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
-            inputs = {};
+            
             
             widths = blk.CompiledPortWidths.Inport;
             nbInputs = numel(widths);
             max_width = max(widths);
             outputDataType = blk.CompiledPortDataTypes.Outport{1};
-            
+            inputs = cell(1, numel(widths));
             for i=1:numel(widths)
                 inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
                 if numel(inputs{i}) < max_width
@@ -42,42 +42,54 @@ classdef Logic_To_Lustre < Block_To_Lustre
                 end
             end
             
-            codes = {};
+            codes = cell(1, numel(outputs));
             for i=1:numel(outputs)
-                scalars = {};
+                
                 if nbInputs==1
+                    scalars = cell(1, numel(inputs{1}));
                     for j=1:numel(inputs{1})
                         scalars{j} = inputs{1}{j};
                     end
                 else
+                    scalars = cell(1, nbInputs);
                     for j=1:nbInputs
                         scalars{j} = inputs{j}{i};
                     end
                 end
                 if strcmp(blk.Operator, 'AND')
-                    codes{i} = sprintf('%s = %s; \n\t', outputs{i}, MatlabUtils.strjoin(scalars, ' and '));
+                    codes{i} = LustreEq(outputs{i}, ...
+                        BinaryExpr.BinaryMultiArgs(BinaryExpr.AND, scalars));
                 elseif strcmp(blk.Operator, 'OR')
-                    codes{i} = sprintf('%s = %s; \n\t', outputs{i}, MatlabUtils.strjoin(scalars, ' or '));
+                    codes{i} = LustreEq(outputs{i}, ...
+                        BinaryExpr.BinaryMultiArgs(BinaryExpr.OR, scalars));
                 elseif strcmp(blk.Operator, 'XOR')
-                    codes{i} = sprintf('%s = %s; \n\t', outputs{i}, MatlabUtils.strjoin(scalars, ' xor '));
+                    codes{i} = LustreEq(outputs{i}, ...
+                        BinaryExpr.BinaryMultiArgs(BinaryExpr.XOR, scalars));
                 elseif strcmp(blk.Operator, 'NOT')
-                    codes{i} = sprintf('%s = not %s; \n\t', outputs{i}, inputs{1}{i});
+                    codes{i} = LustreEq(outputs{i}, ...
+                        UnaryExpr(UnaryExpr.NOT, inputs{1}{i}));
                 elseif strcmp(blk.Operator, 'NAND')
-                    codes{i} = sprintf('%s = not(%s); \n\t', outputs{i}, MatlabUtils.strjoin(scalars, ' and '));
+                    codes{i} = LustreEq(outputs{i}, ...
+                        UnaryExpr(UnaryExpr.NOT, ...
+                        BinaryExpr.BinaryMultiArgs(BinaryExpr.AND, scalars)));
                 elseif strcmp(blk.Operator, 'NOR')
-                    codes{i} = sprintf('%s = not(%s); \n\t', outputs{i}, MatlabUtils.strjoin(scalars, ' or '));
+                    codes{i} = LustreEq(outputs{i}, ...
+                        UnaryExpr(UnaryExpr.NOT, ...
+                        BinaryExpr.BinaryMultiArgs(BinaryExpr.OR, scalars)));
                 elseif strcmp(blk.Operator, 'NXOR')
-                    codes{i} = sprintf('%s = not(%s); \n\t', outputs{i}, MatlabUtils.strjoin(scalars, ' xor '));
+                    codes{i} = LustreEq(outputs{i}, ...
+                        UnaryExpr(UnaryExpr.NOT, ...
+                        BinaryExpr.BinaryMultiArgs(BinaryExpr.XOR, scalars)));
                 end
             end
             
-            obj.setCode(MatlabUtils.strjoin(codes, ''));
+            obj.setCode( codes );
             obj.addVariable(outputs_dt);
         end
         
         
-        %%
-        function options = getUnsupportedOptions(obj, parent, blk, varargin)
+        
+        function options = getUnsupportedOptions(obj, varargin)
             % add your unsuported options list here
             
             options = obj.unsupported_options;
