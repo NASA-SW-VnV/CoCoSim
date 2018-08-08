@@ -32,7 +32,8 @@ classdef DigitalClock_To_Lustre < Block_To_Lustre
             
             % ctc: clockTickCounter
             % ctc = 0 -> if (pre ctc >= digitalsampleTime-1) then 0 else pre ctc +1;
-            ctc = VarIdExpr(sprintf('counter_%s', blk_name));   
+            ctc = VarIdExpr(sprintf('counter_%s', blk_name));  
+            obj.addVariable(LustreVar( ctc, 'int'));
             pre_ctc = UnaryExpr(UnaryExpr.PRE, ctc);
             cond1 = BinaryExpr(...
                 BinaryExpr.GTE, ...
@@ -54,7 +55,8 @@ classdef DigitalClock_To_Lustre < Block_To_Lustre
                                    IntExpr(0),...
                                    else1)));
                  
-            realTime =  VarIdExpr(sprintf('real_time_%s', blk_name));                                
+            realTime =  VarIdExpr(sprintf('real_time_%s', blk_name));   
+            obj.addVariable(LustreVar( realTime, 'real'));
             codes{end + 1} = LustreEq(...
                 realTime, ...
                 BinaryExpr(BinaryExpr.ARROW, ...
