@@ -26,14 +26,14 @@ classdef Product_To_Lustre < Block_To_Lustre
                 Sum_To_Lustre.getSumProductCodes(obj, parent, blk, ...
                 OutputDataTypeStr,isSumBlock, OutputDataTypeStr, xml_trace);
             
-            obj.setCode(MatlabUtils.strjoin(codes, ''));
+            obj.setCode( codes );
             obj.addVariable(outputs_dt);
             obj.addVariable(additionalVars);
         end
         
         
         %%
-        function options = getUnsupportedOptions(obj, parent, blk, varargin)
+        function options = getUnsupportedOptions(obj, ~, blk, varargin)
             % add your unsuported options list here
             if strcmp(blk.Multiplication, 'Matrix(*)')...
                     && contains(blk.Inputs, '/')
@@ -53,7 +53,7 @@ classdef Product_To_Lustre < Block_To_Lustre
     end
     
     methods(Static)
-        function [codes, AdditionalVars] = matrix_multiply(blk, inputs, outputs, zero, LusOutputDataTypeStr )
+        function [codes, AdditionalVars] = matrix_multiply(blk, inputs, outputs, zero, LusOutputDataTypeStr, conv_format )
             % check that the number of columns of 1st input matrix is equalled
             % to the number of rows of the 2nd matrix
             % matrix C(mxl) = A(mxn)*B(nxl)
@@ -83,18 +83,20 @@ classdef Product_To_Lustre < Block_To_Lustre
                 
                 [code, productOutputs, addVar] = Product_To_Lustre.matrix_multiply_pair(m1_dimension, ...
                     m2_dimension, m1_inputs,...
-                    inputs{i+1}, output_m, zero, pair_number, LusOutputDataTypeStr, tmp_prefix);
+                    inputs{i+1}, output_m, zero, pair_number,...
+                    LusOutputDataTypeStr, tmp_prefix, conv_format);
                 codes = [codes, code];
                 %productOutputs = [productOutputs, tmp_outputs];
                 AdditionalVars = [AdditionalVars, addVar];
             end
         end
         function [codes, product_out, addVars] = matrix_multiply_pair(m1_dim, m2_dim, ...
-                input_m1, input_m2, output_m, zero, pair_number, OutputDT, tmp_prefix)
+                input_m1, input_m2, output_m, zero, pair_number,...
+                OutputDT, tmp_prefix, conv_format)
             % adding additional variables for inside matrices.  For
             % AxBxCxD, B and C are inside matrices and needs additional
             % variables
-            codeIndex = 0;
+            
             initCode = sprintf('%s ',zero);
             m=m1_dim.dims(1,1);
             if numel(m1_dim.dims) > 1
@@ -110,11 +112,15 @@ classdef Product_To_Lustre < Block_To_Lustre
             addVars = {};
             if numel(output_m) == 0
                 index = 0;
+                addVars = cell(1, m*l);
+                product_out = cell(1, m*l);
                 for i=1:m
                     for j=1:l
                         index = index+1;
-                        product_out{index} = sprintf('%s_matrix_mult_%d_%d',tmp_prefix, pair_number,index);
-                        addVars{index} = sprintf('%s:%s;',...
+                        product_out{index} = VarIdExpr(...
+                            sprintf('%s_matrix_mult_%d_%d',...
+                            tmp_prefix, pair_number,index));
+                        addVars{index} = LustreVar(...
                             product_out{index}, OutputDT);
                     end
                 end
@@ -122,6 +128,8 @@ classdef Product_To_Lustre < Block_To_Lustre
                 product_out = output_m;
             end
             % doing matrix multiplication, A = BxC
+            codes = cell(1, m*l);
+            codeIndex = 0;
             for i=1:m      %i is row of result matrix
                 for j=1:l      %j is column of result matrix
                     codeIndex = codeIndex + 1;
@@ -129,11 +137,20 @@ classdef Product_To_Lustre < Block_To_Lustre
                     for k=1:n
                         aIndex = sub2ind([m,n],i,k);
                         bIndex = sub2ind([n,l],k,j);
-                        code = sprintf('%s + (%s * %s)',code, input_m1{1,aIndex},input_m2{1,bIndex});
-                        %                         diag = sprintf('i %d, j %d, k %d, aIndex %d, bIndex %d',i,j,k,aIndex,bIndex);
+                        code = BinaryExpr(BinaryExpr.PLUS, ...
+                            code, ...
+                            BinaryExpr(BinaryExpr.MULTIPLY, ...
+                                        input_m1{1,aIndex},...
+                                        input_m2{1,bIndex}),...
+                            false);
+                        %sprintf('%s + (%s * %s)',code, input_m1{1,aIndex},input_m2{1,bIndex});
+                        %diag = sprintf('i %d, j %d, k %d, aIndex %d, bIndex %d',i,j,k,aIndex,bIndex);
                     end
                     productOutIndex = sub2ind([m,l],i,j);
-                    codes{codeIndex} = sprintf('%s = %s;\n\t', product_out{productOutIndex}, code) ;
+                    if ~isempty(conv_format) && ~isempty(output_m)
+                        code = SLX2LusUtils.setArgInConvFormat(conv_format, code);
+                    end
+                    codes{codeIndex} = LustreEq(product_out{productOutIndex}, code) ;
                 end
                 
             end

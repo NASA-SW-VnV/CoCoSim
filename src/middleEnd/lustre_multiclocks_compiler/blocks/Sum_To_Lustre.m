@@ -41,14 +41,14 @@ classdef Sum_To_Lustre < Block_To_Lustre
                 Sum_To_Lustre.getSumProductCodes(obj, parent, blk, ...
                 OutputDataTypeStr,isSumBlock,AccumDataTypeStr, xml_trace);
             
-            obj.setCode(MatlabUtils.strjoin(codes, ''));
+            obj.setCode( codes );
             obj.addVariable(outputs_dt);
             obj.addVariable(additionalVars);
         end
         
         
         %%
-        function options = getUnsupportedOptions(obj, parent,  blk, varargin)
+        function options = getUnsupportedOptions(obj, ~,  blk, varargin)
             % add your unsuported options list here
             % if there is one input and the output dimension is > 7
             if numel(blk.CompiledPortWidths.Inport) == 1 ...
@@ -87,8 +87,8 @@ classdef Sum_To_Lustre < Block_To_Lustre
             %    exp can be ++- or a number 3 .
             %    in the first case an operator is given for every input,
             %    in the second case the operator is + for all inputs
-            if ~isempty(str2num(exp))
-                nb = str2num(exp);
+            if ~isempty(str2double(exp))
+                nb = str2double(exp);
                 exp = arrayfun(@(x) operator_character, (1:nb));
             else
                 % delete spacer character
@@ -120,7 +120,7 @@ classdef Sum_To_Lustre < Block_To_Lustre
                             MsgType.ERROR, 'Sum_To_Lustre', '');
                         return;
                     end
-                    [codes, AdditionalVars] = Product_To_Lustre.matrix_multiply(blk, inputs, outputs, zero, LusOutputDataTypeStr );
+                    [codes, AdditionalVars] = Product_To_Lustre.matrix_multiply(blk, inputs, outputs, zero, LusOutputDataTypeStr, conv_format );
                 else
                     % element wise operations / Sum
                     % If it is integer division, we need to call the
@@ -153,9 +153,10 @@ classdef Sum_To_Lustre < Block_To_Lustre
         %%
         function inputs = createBlkInputs(obj, parent, blk, widths, AccumDataTypeStr, isSumBlock)
             max_width = max(widths);
-            inputs = {};
+            
             RndMeth = blk.RndMeth;
             SaturateOnIntegerOverflow = blk.SaturateOnIntegerOverflow;
+            inputs = cell(1, numel(widths));
             for i=1:numel(widths)
                 inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
                 if numel(inputs{i}) < max_width
@@ -180,20 +181,22 @@ classdef Sum_To_Lustre < Block_To_Lustre
         end
         %%
         function [codes] = elementWiseSumProduct(exp, inputs, outputs, widths, initCode, conv_format, int_divFun)
-            codes = {};
+            codes = cell(1, numel(outputs));
             for i=1:numel(outputs)
                 code = initCode;
                 for j=1:numel(widths)
                     if ~isempty(int_divFun) && strcmp(exp(j), '/')
-                        code = sprintf('%s(%s, %s)',int_divFun, code, inputs{j}{i});
+                        code = NodeCallExpr(int_divFun,...
+                            {code, inputs{j}{i}});
                     else
-                        code = sprintf('%s %s %s',code, exp(j), inputs{j}{i});
+                        code = BinaryExpr(exp(j), ...
+                            code, inputs{j}{i}, false);
                     end
                 end
                 if ~isempty(conv_format)
-                    code = sprintf(conv_format, code);
+                    code = SLX2LusUtils.setArgInConvFormat(conv_format, code);
                 end
-                codes{i} = sprintf('%s = %s;\n\t', outputs{i}, code);
+                codes{i} = LustreEq(outputs{i}, code);
             end
         end
         %%
@@ -201,8 +204,15 @@ classdef Sum_To_Lustre < Block_To_Lustre
         function [codes] = oneInputSumProduct(blk, outputs, inputs, CollapseDim, ...
                 widths, exp, initCode,isSumBlock, conv_format)
             if ~isSumBlock && strcmp(blk.Multiplication, 'Matrix(*)')    % product, 1 input, 1 exp, Matrix(x), matrix remains unchanged.
+                codes = cell(1, numel(outputs));
                 for i=1:numel(outputs)
-                    codes{i} = sprintf('%s = %s;\n\t', outputs{i}, inputs{1}{i});
+                    if ~isempty(conv_format)
+                        code = SLX2LusUtils.setArgInConvFormat(conv_format,...
+                            inputs{1}{i});
+                    else
+                        code = inputs{1}{i};
+                    end
+                    codes{i} = LustreEq(outputs{i}, code);
                 end
                 return;
             end
@@ -211,17 +221,21 @@ classdef Sum_To_Lustre < Block_To_Lustre
                 % if output is a scalar,
                 % operate over the elements of same input.
                 for j=1:widths
-                    code = sprintf('%s %s %s',code, exp(1), inputs{1}{j});
+                    code = BinaryExpr(exp(1), ...
+                        code, inputs{1}{j}, false);
                 end
                 if ~isempty(conv_format)
-                    code = sprintf(conv_format, code);
+                    code = SLX2LusUtils.setArgInConvFormat(conv_format,code);
                 end
-                codes{1} = sprintf('%s = %s;\n\t', outputs{1}, code);
+                codes{1} = LustreEq(outputs{1}, code);
                 
             elseif numel(outputs)>1        % needed for collapsing of matrix
                 in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(blk.CompiledPortDimensions.Inport);
                 [numelCollapseDim, delta, collapseDims] = Sum_To_Lustre.collapseMatrix(in_matrix_dimension, CollapseDim);
+                % the variable matSize is used in eval function, do not
+                % remove it.
                 matSize = in_matrix_dimension{1}.dims;
+                codes = cell(1, numel(outputs));
                 for i=1:numel(outputs)
                     code = initCode;
                     
@@ -248,16 +262,18 @@ classdef Sum_To_Lustre < Block_To_Lustre
                     sub2ind_string = sprintf('%s);',sub2ind_string);
                     eval(sub2ind_string);
                     
-                    code = sprintf('%s %s %s',code, exp(1), inputs{1}{inpIndex});
+                    code = BinaryExpr(exp(1), ...
+                        code, inputs{1}{inpIndex}, false);
                     
                     for j=2:numelCollapseDim
-                        code = sprintf('%s %s %s',code, exp(1), inputs{1}{inpIndex+(j-1)*delta});
+                        code = BinaryExpr(exp(1), ...
+                            code, inputs{1}{inpIndex+(j-1)*delta}, false);
                     end
                     
                     if ~isempty(conv_format)
-                        code = sprintf(conv_format, code);
+                        code = SLX2LusUtils.setArgInConvFormat(conv_format,code);
                     end
-                    codes{i} = sprintf('%s = %s;\n\t', outputs{i}, code);
+                    codes{i} = LustreEq(outputs{i}, code);
                 end
             end
         end
