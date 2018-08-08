@@ -33,13 +33,15 @@ classdef SwitchCase_To_Lustre < Block_To_Lustre
             % and inputs{2} = {'In2_1'}
             
             % we initialize the inputs by empty cell.
-            inputs = {};
+            
             % take the list of the inputs width, in the previous example,
             % "In1" has a width of 3 and "In2" has a width of 1.
             % So width = [3, 1].
             widths = blk.CompiledPortWidths.Inport;
             % Go over inputs, numel(widths) is the number of inputs. In
             % this example is 2 ("In1", "In2").
+            inputs = cell(1, numel(widths));
+            inports_dt = cell(1, numel(widths));
             for i=1:numel(widths)
                 % fill the names of the ith input.
                 % inputs{1} = {'In1_1', 'In1_2', 'In1_3'}
@@ -57,17 +59,17 @@ classdef SwitchCase_To_Lustre < Block_To_Lustre
                 end
             end
             % get all conditions expressions
-            IfExp = {};
             CaseConditions = eval(blk.CaseConditions);
+            IfExp = cell(1, numel(CaseConditions));
             for i=1:numel(CaseConditions)
                 if numel(CaseConditions{i}) == 1
-                    IfExp{end+1} = sprintf('u1 == %d', CaseConditions{i});
+                    IfExp{i} = sprintf('u1 == %d', CaseConditions{i});
                 else
-                    exp = {};
+                    exp = cell(1, numel(CaseConditions{i}));
                     for j=1:numel(CaseConditions{i})
                         exp{j} = sprintf('u1 == %d', CaseConditions{i}(j));
                     end
-                    IfExp{end+1} = MatlabUtils.strjoin(exp, ' | ');
+                    IfExp{i} = MatlabUtils.strjoin(exp, ' | ');
                 end
                 
             end
@@ -77,11 +79,11 @@ classdef SwitchCase_To_Lustre < Block_To_Lustre
             %% Step 4: start filling the definition of each output
             code = If_To_Lustre.ifElseCode(obj, parent, blk, outputs, ...
                 inputs, inports_dt, IfExp);
-            obj.setCode(code);
+            obj.setCode( code );
             
         end
         
-        function options = getUnsupportedOptions(obj,parent, blk, varargin)
+        function options = getUnsupportedOptions(obj, varargin)
             % add your unsuported options list here
             options = obj.unsupported_options;
             

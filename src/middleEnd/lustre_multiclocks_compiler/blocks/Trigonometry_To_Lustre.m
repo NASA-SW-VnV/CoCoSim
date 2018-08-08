@@ -14,11 +14,12 @@ classdef Trigonometry_To_Lustre < Block_To_Lustre
         
         function  write_code(obj, parent, blk,xml_trace,  varargin)
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
-            inputs = {};
+            
             obj.addExternal_libraries('LustMathLib_lustrec_math');
             widths = blk.CompiledPortWidths.Inport;
             nbInputs = numel(widths);
             max_width = max(widths);
+            inputs = cell(1, nbInputs);
             for i=1:nbInputs
                 inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
                 if numel(inputs{i}) < max_width
@@ -38,38 +39,47 @@ classdef Trigonometry_To_Lustre < Block_To_Lustre
             end
             
             operator = blk.Operator;
-            codes = {};
+            
             unsupportedOp = {'cos + jsin'};
             if ismember(operator, unsupportedOp)
                 display_msg(sprintf('The "%s" operator is not supported in block %s',...
                     operator, blk.Origin_path), MsgType.ERROR, 'Trigonometry_To_Lustre', '');
+                return;
             elseif strcmp(operator, 'sincos')
                 index = 0;
+                codes = cell(1, 2*widths);
                 for i=1:widths
                     index = index + 1;
                     operator = 'sin';
-                    codes{index} = sprintf('%s = %s(%s);\n\t', outputs{index}, operator,inputs{1}{i});
+                    codes{index} = LustreEq(outputs{index}, ...
+                        NodeCallExpr(operator, inputs{1}{i}));
                 end
                 for i=1:widths
                     index = index + 1;
                     operator = 'cos';
-                    codes{index} = sprintf('%s = %s(%s);\n\t', outputs{index}, operator,inputs{1}{i});
+                    codes{index} = LustreEq(outputs{index}, ...
+                        NodeCallExpr(operator, inputs{1}{i}));
                 end
             elseif strcmp(operator, 'atan2')
+                codes = cell(1, numel(outputs));
                 for i=1:numel(outputs)
-                    codes{i} = sprintf('%s = %s(%s, %s);\n\t', outputs{i}, operator,inputs{1}{i}, inputs{2}{i});
+                    codes{i} = LustreEq(outputs{i}, ...
+                        NodeCallExpr(operator, ...
+                        {inputs{1}{i}, inputs{2}{i}}));
                 end
             else
+                codes = cell(1, numel(outputs));
                 for i=1:numel(outputs)
-                    codes{i} = sprintf('%s = %s(%s);\n\t', outputs{i}, operator,inputs{1}{i});
+                    codes{i} = LustreEq(outputs{i}, ...
+                        NodeCallExpr(operator, inputs{1}{i}));
                 end
             end
             
-            obj.setCode(MatlabUtils.strjoin(codes, ''));
+            obj.setCode( codes );
             obj.addVariable(outputs_dt);
         end
         
-        function options = getUnsupportedOptions(obj, parent, blk, varargin)
+        function options = getUnsupportedOptions(obj, ~, blk, varargin)
             obj.unsupported_options = {};
             unsupportedOp = {'cos + jsin', 'tanh'};
             if ismember(blk.Operator, unsupportedOp)

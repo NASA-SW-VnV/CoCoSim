@@ -12,7 +12,7 @@ classdef RandomNumber_To_Lustre < Block_To_Lustre
     
     methods
         
-        function  write_code(obj, parent, blk, xml_trace, varargin)
+        function  write_code(obj, parent, blk, xml_trace, ~, backend, varargin)
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             obj.addVariable(outputs_dt);
             [mean, ~, status] = ...
@@ -33,46 +33,67 @@ classdef RandomNumber_To_Lustre < Block_To_Lustre
             end
             a = mean - 2.57*sqrt(variance);
             b = mean + 2.57*sqrt(variance);
-            nbSteps = 100/blk.CompiledSampleTime(1);
+            nbSteps = 100;
             r = a + (b-a).*rand(nbSteps,1);
             blk_name = SLX2LusUtils.node_name_format(blk);
-            obj.addExtenal_node(RandomNumber_To_Lustre.randomNode(blk_name, r));
+            obj.addExtenal_node(RandomNumber_To_Lustre.randomNode(blk_name, r, backend));
             
-            clk_name = sprintf('%s_clock', blk_name);
-            obj.addVariable(sprintf('%s:bool clock;', clk_name));
-            obj.addExternal_libraries('_make_clock');
             codes = {};
-            codes{1} = sprintf('%s = _make_clock(%.0f, %.0f);\n\t', ...
-                clk_name, 100, 0);
-            % generating 100 random random that will be repeated each 100
-            % steps
-            codes{2} = sprintf('%s = %s(true) every %s;\n\t', outputs{1},...
-                blk_name, clk_name);
+            if BackendType.isKIND2(backend)
+                codes{1} = LustreEq(outputs{1}, ...
+                    NodeCallExpr(blk_name, BooleanExpr('true')));
+            else
+                clk_var = VarIdExpr(sprintf('%s_clock', blk_name));
+                obj.addVariable(LustreVar(clk_var, 'bool clock'));
+                obj.addExternal_libraries('_make_clock');
+                codes{1} = LustreEq(clk_var, ...
+                    NodeCallExpr('_make_clock',...
+                    {IntExpr(nbSteps), IntExpr(0)}));
+                % generating 100 random random that will be repeated each 100
+                % steps
+                codes{2} = LustreEq(outputs{1}, ...
+                    EveryExpr(blk_name, BooleanExpr('true'), clk_var));
+            end
             
-            obj.setCode( MatlabUtils.strjoin(codes, ''));
+            obj.setCode( codes );
         end
         
-        function options = getUnsupportedOptions(obj, parent, blk, varargin)
+        function options = getUnsupportedOptions(obj, varargin)
             options = obj.unsupported_options;
         end
     end
     methods(Static)
-        function node = randomNode(blk_name, r)
+        function node = randomNode(blk_name, r, backend)
+            node = LustreNode();
+            node.setName(blk_name);
+            node.setInputs(LustreVar('b', 'bool'));
+            node.setOutputs(LustreVar('r', 'real'));
+            if BackendType.isKIND2(backend)
+                contractElts{1} = ContractGuaranteeExpr('', ...
+                    BinaryExpr(BinaryExpr.AND, ...
+                    BinaryExpr(BinaryExpr.LTE, RealExpr(min(r)), VarIdExpr('r')), ...
+                    BinaryExpr(BinaryExpr.LTE, VarIdExpr('r'), RealExpr(max(r)))));
+                contract = LustreContract();
+                contract.setBody(contractElts);
+                node.setLocalContract(contract);
+                node.setIsImported(true);
+            else
+                node.setBodyEqs(LustreEq(VarIdExpr('r'), ...
+                    RandomNumber_To_Lustre.getRandomValues(r, 1)));
+            end
             
-            format = 'node %s (b:bool)\nreturns(r:real);\n';
-            format = [format, '-- add contract here for Kind2 telling it''s a random block generator\n'];
-            format = [format, 'let\n\t'];
-            format = [format, 'r = %s; \n'];
-            format = [format, 'tel\n\n'];
-            node = sprintf(format, blk_name,...
-                RandomNumber_To_Lustre.getRandomValues(r, 1));
+            
+            
         end
         function r_str = getRandomValues(r, i)
             if i == numel(r)
-                r_str = sprintf('%.4f', r(i));
+                r_str = RealExpr(r(i));
             else
-                r_str = sprintf('%.4f -> pre (\n\t\t%s)',...
-                    r(i), RandomNumber_To_Lustre.getRandomValues(r, i+1));
+                r_str =BinaryExpr(BinaryExpr.ARROW, ...
+                    RealExpr(r(i)), ...
+                    UnaryExpr(UnaryExpr.PRE,...
+                    RandomNumber_To_Lustre.getRandomValues(r, i+1)));
+                
             end
         end
     end

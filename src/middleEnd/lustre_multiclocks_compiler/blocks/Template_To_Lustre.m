@@ -17,7 +17,7 @@ classdef Template_To_Lustre < Block_To_Lustre
             % get if the block is inside contract or not.
             isInsideContract = SLX2LusUtils.isContractBlk(parent);
             %% Step 1: Get the block outputs names, If a block is called X
-            % and has one outport with width 3 and datatype double, 
+            % and has one outport with width 3 and datatype double,
             % then outputs = {'X_1', 'X_2', 'X_3'}
             % and outputs_dt = {'X_1:real;', 'X_2:real;', 'X_3:real;'}
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
@@ -34,9 +34,9 @@ classdef Template_To_Lustre < Block_To_Lustre
             % and inputs{2} = {'In2_1'}
             
             % we initialize the inputs by empty cell.
-            inputs = {};
+            
             % take the list of the inputs width, in the previous example,
-            % "In1" has a width of 3 and "In2" has a width of 1. 
+            % "In1" has a width of 3 and "In2" has a width of 1.
             % So width = [3, 1].
             widths = blk.CompiledPortWidths.Inport;
             % Max width in our example is 3.
@@ -49,6 +49,7 @@ classdef Template_To_Lustre < Block_To_Lustre
             SaturateOnIntegerOverflow = blk.SaturateOnIntegerOverflow;
             % Go over inputs, numel(widths) is the number of inputs. In
             % this example is 2 ("In1", "In2").
+            inputs = cell(1, numel(widths));
             for i=1:numel(widths)
                 % fill the names of the ith input.
                 % inputs{1} = {'In1_1', 'In1_2', 'In1_3'}
@@ -85,7 +86,7 @@ classdef Template_To_Lustre < Block_To_Lustre
                         % overall lustre code).
                         obj.addExternal_libraries(external_lib);
                         % cast the input to the conversion format. In our
-                        % example conv_format = 'int_to_real(%s)'. 
+                        % example conv_format = 'int_to_real(%s)'.
                         inputs{i} = cellfun(@(x) ...
                             SLX2LusUtils.setArgInConvFormat(conv_format,x), inputs{i}, 'un', 0);
                     end
@@ -93,30 +94,23 @@ classdef Template_To_Lustre < Block_To_Lustre
             end
             
             %% Step 4: start filling the definition of each output
-            codes = {};
+            codes = cell (1, numel ( outputs ) );
             
             % Go over outputs
             for j=1:numel(outputs)
-                % example of lement wise product block.
-                if isInsideContract
-                    codes{j} = sprintf('var %s = %s * %s;\n\t', ...
-                        strrep(outputs_dt{j}, ';', ''), ...
-                        inputs{1}{j}, inputs{2}{j});
-                else
-                    codes{j} = sprintf('%s = %s * %s;\n\t', ...
-                        outputs{j}, inputs{1}{j}, inputs{2}{j});
-                end
-                    
+                codes{j} = LustreEq(outputs{j},...
+                    BinaryExpr(BinaryExpr.MULTIPLY,...
+                    inputs{1}{j}, inputs{2}{j}));
             end
             % join the lines and set the block code.
-            obj.setCode(MatlabUtils.strjoin(codes, ''));
+            obj.setCode( codes );
             
         end
         
-        function options = getUnsupportedOptions(obj,parent, blk, varargin)
+        function options = getUnsupportedOptions(obj, varargin)
             % add your unsuported options list here
-           options = obj.unsupported_options;
-           
+            options = obj.unsupported_options;
+            
         end
     end
     

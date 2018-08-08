@@ -31,7 +31,7 @@ classdef Outport_To_Lustre < Block_To_Lustre
                 inputs = arrayfun(@(x) {zero}, (1:numel(outputs)));
             end
             %% 
-            codes = {};
+            codes = cell(1, numel(outputs));
             for i=1:numel(outputs)
                 %codes{i} = sprintf('%s = %s;\n\t', outputs{i}, inputs{i});
                 codes{i} = LustreEq(outputs{i}, inputs{i});
@@ -40,7 +40,7 @@ classdef Outport_To_Lustre < Block_To_Lustre
             obj.setCode( codes);
         end
         
-        function options = getUnsupportedOptions(obj, parent, blk, varargin)
+        function options = getUnsupportedOptions(obj, varargin)
             options = obj.unsupported_options;
         end
     end

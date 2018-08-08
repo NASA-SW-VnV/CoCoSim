@@ -15,26 +15,24 @@ classdef ZeroOrderHold_To_Lustre < Block_To_Lustre
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             obj.addVariable(outputs_dt);
             [inputs] = SLX2LusUtils.getBlockInputsNames(parent, blk);
-            %% calculated by rateTransition_ir_pp
+            % calculated by rateTransition_ir_pp
             OutportCompiledSampleTime = blk.OutportCompiledSampleTime;
             outTs = OutportCompiledSampleTime(1);
             outTsOffset = OutportCompiledSampleTime(2);
-            
-            
-            
-            %%
-            codes = {};
-            
+                        
             clockName = SLX2LusUtils.clockName(outTs/main_sampleTime(1), outTsOffset/main_sampleTime(1));
+            codes = cell(1, numel(outputs));
             for i=1:numel(outputs)
-                codes{i} = sprintf('%s = %s when %s;\n\t', outputs{i}, inputs{i}, clockName);
+                codes{i} = LustreEq(outputs{i}, ...
+                    BinaryExpr(BinaryExpr.WHEN, ...
+                                inputs{i}, ...
+                                VarIdExpr(clockName)));
             end
             
-            
-            obj.setCode( MatlabUtils.strjoin(codes, ''));
+            obj.setCode( codes );
         end
         %%
-        function options = getUnsupportedOptions(obj, parent, blk, varargin)
+        function options = getUnsupportedOptions(obj, varargin)
             options = obj.unsupported_options;
         end
     end

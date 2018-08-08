@@ -16,36 +16,40 @@ classdef Signum_To_Lustre < Block_To_Lustre
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             obj.addVariable(outputs_dt);
             inputs = {};
-%             outputDataType = blk.CompiledPortDataTypes.Outport{1};
-%             [LusOutputDT,     ~] = SLX2LusUtils.get_lustre_dt(outputDataType);
-            [lusInport_dt, zero] = SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Inport(1));
+            %             outputDataType = blk.CompiledPortDataTypes.Outport{1};
+            %             [LusOutputDT,     ~] = SLX2LusUtils.get_lustre_dt(outputDataType);
+            [lusInport_dt, zero, one] = SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Inport(1));
             inputs{1} = SLX2LusUtils.getBlockInputsNames(parent, blk, 1);
             
             
             
-            codes = {};
+            codes = cell(1, numel(inputs{1}));
             if strcmp(lusInport_dt, 'bool')
                 for j=1:numel(inputs{1})
-                    codes{j} = sprintf('%s = if %s then 1 else 0;\n\t', outputs{j}, inputs{1}{j});
+                    codes{j} = LustreEq(outputs{j}, ...
+                        IteExpr(inputs{1}{j}, IntExpr(1), IntExpr(0)));
                 end
             else
-                if strcmp(lusInport_dt, 'int')
-                    postfix = '';
-                else
-                    postfix = '.0';
-                end
                 for j=1:numel(inputs{1})
-                    code = sprintf('if %s > %s then 1%s else if %s < %s then -1%s else 0%s', ...
-                        inputs{1}{j}, zero, postfix, inputs{1}{j}, zero, postfix, postfix);
-                    codes{j} = sprintf('%s = %s;\n\t', outputs{j}, code);
+                    code = IteExpr.nestedIteExpr(...
+                        {...
+                        BinaryExpr(BinaryExpr.GT, inputs{1}{j}, zero), ...
+                        BinaryExpr(BinaryExpr.LT, inputs{1}{j}, zero)
+                        }, ...
+                        {...
+                        one,...
+                        UnaryExpr(UnaryExpr.NEG, one), ...
+                        zero
+                        }) ;
+                    codes{j} = LustreEq(outputs{j}, code);
                 end
             end
             
-            obj.setCode(MatlabUtils.strjoin(codes, ''));
+            obj.setCode( codes );
             
         end
         
-        function options = getUnsupportedOptions(obj, parent, blk, varargin)
+        function options = getUnsupportedOptions(obj, varargin)
             options = obj.unsupported_options;
         end
     end

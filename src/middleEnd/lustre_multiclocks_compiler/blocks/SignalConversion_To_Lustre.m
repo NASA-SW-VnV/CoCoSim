@@ -16,17 +16,17 @@ classdef SignalConversion_To_Lustre < Block_To_Lustre
             obj.addVariable(outputs_dt);
             [inputs] = SLX2LusUtils.getBlockInputsNames(parent, blk);
             
-            codes = {};
+            codes = cell(1, numel(outputs));
             % Thanks to inlining signals as well as BusCreator and BusSelector, 
             % Signal Conversion is passing the inputs
             for i=1:numel(outputs)
-                codes{i} = sprintf('%s = %s;\n\t', outputs{i}, inputs{i});
+                codes{i} = LustreEq(outputs{i}, inputs{i});
             end
             
-            obj.setCode( MatlabUtils.strjoin(codes, ''));
+            obj.setCode( codes );
         end
         
-        function options = getUnsupportedOptions(obj, parent, blk, varargin)
+        function options = getUnsupportedOptions(obj, varargin)
             options = obj.unsupported_options;
         end
     end

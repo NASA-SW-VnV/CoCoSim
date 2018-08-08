@@ -14,17 +14,18 @@ classdef Rounding_To_Lustre < Block_To_Lustre
         
         function  write_code(obj, parent, blk, xml_trace, varargin)
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
-            inputs = {};
+            
             
             widths = blk.CompiledPortWidths.Inport;
             outputDataType = blk.CompiledPortDataTypes.Outport{1};
             RndMeth = blk.Operator;
+            inputs = cell(1, numel(widths));
             for i=1:numel(widths)
                 inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
                 inport_dt = blk.CompiledPortDataTypes.Inport(i);
                 %converts the input data type(s) to
                 %its outputDataType
-                [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, 'int', RndMeth);
+                [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, outputDataType, RndMeth);
                 if ~isempty(external_lib)
                     obj.addExternal_libraries(external_lib);
                     inputs{i} = cellfun(@(x) ...
@@ -34,15 +35,16 @@ classdef Rounding_To_Lustre < Block_To_Lustre
             end
             
             % Just pass inputs to outputs.
+            codes = cell(1, numel(outputs));
             for i=1:numel(outputs)
-                codes{i} = sprintf('%s = %s;\n\t', outputs{i}, inputs{1}{i});
+                codes{i} = LustreEq(outputs{i}, inputs{1}{i});
             end
             
-            obj.setCode(MatlabUtils.strjoin(codes, ''));
+            obj.setCode( codes );
             obj.addVariable(outputs_dt);
         end
         
-        function options = getUnsupportedOptions(obj, parent, blk, varargin)
+        function options = getUnsupportedOptions(obj, varargin)
             obj.unsupported_options = {};
             options = obj.unsupported_options;
         end

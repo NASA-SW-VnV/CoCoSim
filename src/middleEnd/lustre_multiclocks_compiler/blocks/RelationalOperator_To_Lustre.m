@@ -14,11 +14,11 @@ classdef RelationalOperator_To_Lustre < Block_To_Lustre
         
         function  write_code(obj, parent, blk, xml_trace, varargin)
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
-            inputs = {};
+            
             
             widths = blk.CompiledPortWidths.Inport;
             max_width = max(widths);
-            outputDataType = blk.CompiledPortDataTypes.Outport{1};
+            %outputDataType = blk.CompiledPortDataTypes.Outport{1};
             lus_in1_dt = SLX2LusUtils.get_lustre_dt(...
                 blk.CompiledPortDataTypes.Inport(1));
             lus_in2_dt = SLX2LusUtils.get_lustre_dt(...
@@ -27,6 +27,7 @@ classdef RelationalOperator_To_Lustre < Block_To_Lustre
             if strcmp(lus_in1_dt, 'real') || strcmp(lus_in2_dt, 'real')
                 thewantedDataType = 'real';
             end
+            inputs = cell(1, numel(widths));
             for i=1:numel(widths)
                 inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
                 if numel(inputs{i}) < max_width
@@ -45,12 +46,12 @@ classdef RelationalOperator_To_Lustre < Block_To_Lustre
                     end
                 end
             end
-            codes = {};
+            
             op = blk.Operator;
             if strcmp(op, '==')
-                op = '=';
+                op = BinaryExpr.EQ;
             elseif strcmp(op, '~=')
-                op = '<>';
+                op = BinaryExpr.NEQ;
             elseif strcmp(op, 'isInf') || strcmp(op, 'isNaN') ...
                     ||strcmp(op, 'isFinite')
                 display_msg(sprintf('Operator %s in blk %s is not supported',...
@@ -58,16 +59,16 @@ classdef RelationalOperator_To_Lustre < Block_To_Lustre
                     MsgType.ERROR, 'RelationalOperator_To_Lustre', '');
                 return;
             end
-            
+            codes = cell(1, numel(outputs));
             for j=1:numel(outputs)
-                code = sprintf('%s %s %s', inputs{1}{j}, op, inputs{2}{j});
-                codes{j} = sprintf('%s = %s;\n\t', outputs{j}, code);
+                code = BinaryExpr(op, inputs{1}{j}, inputs{2}{j});
+                codes{j} = LustreEq(outputs{j}, code);
             end
             obj.setCode(MatlabUtils.strjoin(codes, ''));
             obj.addVariable(outputs_dt);
         end
         
-        function options = getUnsupportedOptions(obj,parent, blk,  varargin)
+        function options = getUnsupportedOptions(obj, ~, blk,  varargin)
             % add your unsuported options list here
             op = blk.Operator;
            if strcmp(op, 'isInf') || strcmp(op, 'isNaN') ...

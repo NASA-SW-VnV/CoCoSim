@@ -56,17 +56,17 @@ classdef UnaryMinus_To_Lustre < Block_To_Lustre
             
             
             %% Step 4: start filling the definition of each output
-            codes = {};
+            codes = cell(1, numel(outputs));
             isSignedInt = true;
             if strcmp(inport_dt, 'int8')
-                vmin = -128;
-                vmax = 127;
+                vmin = IntExpr(-128);
+                vmax = IntExpr(127);
             elseif strcmp(inport_dt, 'int16')
-                vmin = -32768;
-                vmax = 32767;
+                vmin = IntExpr(-32768);
+                vmax = IntExpr(32767);
             elseif strcmp(inport_dt, 'int32')
-                vmin = -2147483648;
-                vmax = 2147483647;
+                vmin = IntExpr(-2147483648);
+                vmax = IntExpr(2147483647);
             else
                 isSignedInt = false;
             end
@@ -77,24 +77,29 @@ classdef UnaryMinus_To_Lustre < Block_To_Lustre
                 % Go over outputs
                 for j=1:numel(outputs)
                     % example of lement wise product block.
-                    codes{j} = sprintf('%s = if %s = %d then %d else -%s;\n\t', ...
-                        outputs{j}, inputs{1}{j}, vmin, vmax, inputs{1}{j});
+                    codes{j} = LustreEq(outputs{j}, ...
+                        IteExpr(...
+                                BinaryExpr(BinaryExpr.EQ, ...
+                                           inputs{1}{j}, ...
+                                           vmin), ...
+                                 vmax, ...
+                                 UnaryExpr(UnaryExpr.NEG, inputs{1}{j})));
+                    
                 end
             else
                 % Go over outputs
                 for j=1:numel(outputs)
                     % example of lement wise product block.
-                    codes{j} = sprintf('%s = -%s;\n\t', ...
-                        outputs{j}, inputs{1}{j});
+                    codes{j} = LustreEq(outputs{j}, ...
+                         UnaryExpr(UnaryExpr.NEG, inputs{1}{j}));
                 end
             end
             
-            % join the lines and set the block code.
-            obj.setCode(MatlabUtils.strjoin(codes, ''));
+            obj.setCode( codes );
             
         end
         
-        function options = getUnsupportedOptions(obj,parent, blk, varargin)
+        function options = getUnsupportedOptions(obj, varargin)
             % add your unsuported options list here
             options = obj.unsupported_options;
             
