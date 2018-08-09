@@ -135,7 +135,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
             % writing external node code
             %node header
             node_header = Lookup_nD_To_Lustre.getNodeCodeHeader(isLookupTableDynamic,...
-                inputs,blk_name,outputs,ext_node_name);
+                inputs,outputs,ext_node_name);
             
             % declaring and defining table values
             [body, vars,table_elem] = Lookup_nD_To_Lustre.addTableCode(blkParams.Table,blk_name,...
@@ -172,13 +172,25 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                 zero,shapeNodeSign,u_node,index_node,dimJump,table_elem);
                        
             if BackendType.isKIND2(backend) && ~isLookupTableDynamic
-                contractBody = Lookup_nD_To_Lustre.getContractBody(blkParams,inputs,outputs);
-                contract = sprintf('(*@contract\n%s\n*)\n',contractBody);
-                nodeCodes = sprintf('%s%s%slet\n\t%s\ntel',...
-                    node_header, contract,vars, body);
+                contract = Lookup_nD_To_Lustre.getContractBody(blkParams,inputs,outputs);
+                %nodeCodes = sprintf('%s%s%slet\n\t%s\ntel',...
+                %    node_header, contract,vars, body);
+                nodeCodes = LustreNode();
+                nodeCodes.setName(node_header.NodeName)
+                nodeCodes.setInputs(node_header.Inputs);
+                nodeCodes.setOutputs( node_header.Outputs);
+                nodeCodes.setLocalContrac(contract);
+                nodeCodes.setLocalVars(vars);
+                nodeCodes.setBodyEqs(body);
             else
                 nodeCodes = sprintf('%s%slet\n\t%s\ntel',...
                     node_header,vars, body);
+                nodeCodes = LustreNode();
+                nodeCodes.setName(node_header.NodeName)
+                nodeCodes.setInputs(node_header.Inputs);
+                nodeCodes.setOutputs( node_header.Outputs);
+                nodeCodes.setLocalVars(vars);
+                nodeCodes.setBodyEqs(body);
             end
             main_vars = outputs_dt;
             mainCodes = Lookup_nD_To_Lustre.getMainCode(outputs,inputs,ext_node_name,isLookupTableDynamic);
@@ -477,16 +489,17 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
         function [body,vars,table_elem] = ...
                 addTableCode(Table,blk_name,lusInport_dt,isLookupTableDynamic,inputs)
             % This function defines the table values defined by users.
-            table_elem = {};
-            body = '';
-            vars = 'var';
+            table_elem = cell(1, numel(Table));
+            body = cell(1, numel(Table));
+            vars = cell(1, numel(Table));
             for i=1:numel(Table)
-                table_elem{i} = sprintf('%s_table_elem_%d',blk_name,i);
-                vars = sprintf('%s\t%s:%s;\n',vars,table_elem{i},lusInport_dt);
+                table_elem{i} = VarIdExpr(...
+                    sprintf('%s_table_elem_%d',blk_name,i));
+                vars{i} = LustreVar(table_elem{i},lusInport_dt);
                 if ~isLookupTableDynamic
-                    body = sprintf('%s%s = %.15f ;\n\t',body, table_elem{i}, Table(i));
+                    body{i} = LustreEq(table_elem{i}, RealExpr(Table(i)));
                 else
-                    body = sprintf('%s%s = %s;\n\t',body, table_elem{i}, inputs{3}{i});
+                    body{i} = LustreEq(table_elem{i}, inputs{3}{i});
                 end
                 
                 
@@ -513,30 +526,28 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
             end
         end
         
-        function node_header = getNodeCodeHeader(isLookupTableDynamic,inputs,blk_name,outputs,ext_node_name)
-            node_inputs = '';
+        function node_header = getNodeCodeHeader(isLookupTableDynamic,inputs,outputs,ext_node_name)
+            
             if ~isLookupTableDynamic
+                node_inputs = cell(1, numel(inputs));
                 for i=1:numel(inputs)
-                    node_inputs = sprintf('%s%s:real;\n', node_inputs,inputs{i}{1});
+                    node_inputs{i} = LustreVar(inputs{i}{1}, 'real');
                 end
             else
-                node_inputs = {};
-                node_inputs{1} = sprintf('%s:real', inputs{1}{1});
+                node_inputs{1} = LustreVar(inputs{1}{1}, 'real');
                 for i=2:3
                     for j=1:numel(inputs{i})
-                        node_inputs{end+1} = sprintf('%s:real', inputs{i}{j});
+                        node_inputs{end+1} = LustreVar(inputs{i}{j}, 'real');
                     end
                 end
-                node_inputs = MatlabUtils.strjoin(node_inputs, '; ');
             end
-            node_returns = '';
-            node_returns = sprintf('%s%s:real;\n', node_returns, outputs{1});
-            node_header = sprintf('node %s(%s)\nreturns(%s);\n',...
-                ext_node_name, node_inputs, node_returns);
+            node_header.NodeName = ext_node_name;
+            node_header.Inputs = node_inputs;
+            node_header.Outputs = LustreVar(outputs{1}, 'real');
         end
         
         function codes = getMainCode(outputs,inputs,ext_node_name,isLookupTableDynamic)
-            codes = {};
+            codes = cell(1, numel(outputs));
             for outIdx=1:numel(outputs)
                 nodeCall_inputs = {};
                 if isLookupTableDynamic
@@ -545,15 +556,15 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                         nodeCall_inputs = [nodeCall_inputs, inputs{i}];
                     end
                 else
+                    nodeCall_inputs = cell(1, numel(inputs));
                     for i=1:numel(inputs)
-                        nodeCall_inputs{end+1} = inputs{i}{outIdx};
+                        nodeCall_inputs{i} = inputs{i}{outIdx};
                     end
                 end
-                nodeCall_inputs = MatlabUtils.strjoin(nodeCall_inputs, ', ');
                 
-                codes{outIdx} = sprintf('%s =  %s(%s) ;\n\t', outputs{outIdx}, ext_node_name, nodeCall_inputs);
+                codes{outIdx} = LustreEq(outputs{outIdx}, ...
+                    NodeCallExpr(ext_node_name, nodeCall_inputs));
             end
-            codes = MatlabUtils.strjoin(codes, '');
         end
         
         function inputs = useOneInputPortForAllInputData(blk,isLookupTableDynamic,inputs,NumberOfTableDimensions)
