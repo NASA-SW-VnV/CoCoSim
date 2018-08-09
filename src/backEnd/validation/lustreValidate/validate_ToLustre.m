@@ -15,11 +15,7 @@ lus_file_path = '';
 %close all simulink models
 bdclose('all')
 %% define parameters if not given by the user
-if nargin < 3
-    show_model = 0;
-elseif show_model
-    open(model_full_path);
-end
+
 if ~exist('min_max_constraints', 'var') || isempty(min_max_constraints)
     min_max_constraints = [];
 end
@@ -34,9 +30,15 @@ if ~exist('model_checker', 'var') || isempty(model_checker)
     model_checker = 'KIND2'; 
 end
 if ~exist('options', 'var') || isempty(options)
-    options = '';
+    options = {};
 end
-
+if nargin < 3
+    show_model = 0;
+elseif show_model
+    open(model_full_path);
+else
+    options{end+1} = 'nodisplay';
+end
 
 [model_path, file_name, ext] = fileparts(char(model_full_path));
 addpath(model_path);

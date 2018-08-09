@@ -7,7 +7,7 @@ classdef ParenthesesExpr < LustreExpr
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     properties
-        expr;%String
+        expr;
     end
 
     methods 
@@ -17,6 +17,17 @@ classdef ParenthesesExpr < LustreExpr
         function expr = getExp(obj)
             expr = obj.expr;
         end
+        
+        function new_obj = deepCopy(obj)
+            if iscell(obj.expr)
+                new_expr = cellfun(@(x) x.deepCopy(), obj.expr, 'UniformOutput', 0);
+            else
+                new_expr = obj.expr.deepCopy();
+            end
+            new_obj = ParenthesesExpr(obj.nodeName, new_expr);
+        end
+         
+        
         function code = print(obj, backend)
             %TODO: check if LUSTREC syntax is OK for the other backends.
             code = obj.print_lustrec(backend);

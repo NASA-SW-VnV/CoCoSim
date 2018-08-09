@@ -21,6 +21,19 @@ classdef LustreEq < LustreAst
             obj.lhs = lhs;
         end
         
+        function new_obj = deepCopy(obj)
+            if iscell(obj.lhs)
+                new_lhs = cellfun(@(x) x.deepCopy(), obj.lhs, 'UniformOutput', 0);
+            else
+                new_lhs = obj.lhs.deepCopy();
+            end
+            if iscell(obj.rhs)
+                new_rhs = cellfun(@(x) x.deepCopy(), obj.rhs, 'UniformOutput', 0);
+            else
+                new_rhs = obj.rhs.deepCopy();
+            end
+            new_obj = LustreEq(new_lhs, new_rhs);
+        end
         function code = print(obj, backend)
             %TODO: check if LUSTREC syntax is OK for the other backends.
             code = obj.print_lustrec(backend);
@@ -28,7 +41,7 @@ classdef LustreEq < LustreAst
         
         
         function code = print_lustrec(obj, backend)
-            if numel(obj.lhs) > 1 || iscell(obj.lhs)
+            if iscell(obj.lhs)
                 lhs_cell = cellfun(@(x) x.print(backend), obj.lhs, 'UniformOutput', 0);
                 lhs_str = sprintf('(%s)', ...
                     MatlabUtils.strjoin(lhs_cell, ', '));

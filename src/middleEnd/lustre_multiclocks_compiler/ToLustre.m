@@ -172,9 +172,9 @@ if isfield(blk, 'Content') && ~isempty(blk.Content)
     [main_node, is_contract, external_nodes, external_libraries_i] = SS_To_LustreNode.subsystem2node(parent, blk, main_sampleTime, is_main_node, backend, xml_trace);
     external_libraries = [external_libraries, external_libraries_i];
     nodes_ast = [ nodes_ast, external_nodes];
-    if is_contract
+    if is_contract && ~isempty(main_node)
         contracts_ast{end + 1} = main_node;
-    else
+    elseif ~isempty(main_node)
         nodes_ast{end + 1} = main_node;
     end    
 elseif isfield(blk, 'SFBlockType') && isequal(blk.SFBlockType, 'Chart')

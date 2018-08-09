@@ -25,6 +25,17 @@ classdef AutomatonTransExpr < LustreExpr
                 obj.resume_state = state_name;
             end
         end
+        
+        function new_obj = deepCopy(obj)
+            if obj.is_restart
+                state_name = obj.restart_state;
+            else
+                state_name = obj.resume_state;
+            end
+            new_obj = AutomatonTransExpr(...
+                obj.condition.deepCopy(), ...
+                obj.is_restart, state_name);
+        end
         function code = print(obj, backend)
             %TODO: check if lustrec syntax is OK for jkind and prelude.
             code = obj.print_lustrec(backend);

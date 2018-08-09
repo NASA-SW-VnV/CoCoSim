@@ -24,6 +24,14 @@ classdef NodeCallExpr < LustreExpr
             obj.args = arg;
         end
         
+         function new_obj = deepCopy(obj)
+            if iscell(obj.args)
+                new_args = cellfun(@(x) x.deepCopy(), obj.args, 'UniformOutput', 0);
+            else
+                new_args = obj.args.deepCopy();
+            end
+            new_obj = NodeCallExpr(obj.nodeName, new_args);
+         end
         
         function code = print(obj, backend)
             %TODO: check if LUSTREC syntax is OK for the other backends.
@@ -61,6 +69,9 @@ classdef NodeCallExpr < LustreExpr
             else
                 args_str = '';
             end
+        end
+        function new_callObj = NodeCallExpr.deepCopy(callObj)
+            
         end
     end
 end

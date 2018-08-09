@@ -17,6 +17,13 @@ classdef VarIdExpr < LustreExpr
         function id = getId(obj)
             id = obj.id;
         end
+        
+        function new_obj = deepCopy(obj)
+            new_obj = VarIdExpr(obj.id);
+        end
+        
+        
+        
         function code = print(obj, ~)
             %TODO: check if LUSTREC syntax is OK for the other backends.
             code = obj.print_lustrec();

@@ -38,6 +38,37 @@ classdef LustreContract < LustreAst
             end
         end
         
+        function new_obj = deepCopy(obj)
+             if iscell(obj.inputs)
+                new_inputs = cellfun(@(x) x.deepCopy(), obj.inputs, ...
+                    'UniformOutput', 0);
+            else
+                new_inputs = obj.inputs.deepCopy();
+            end
+            if iscell(obj.outputs)
+                new_outputs = cellfun(@(x) x.deepCopy(), obj.outputs,...
+                    'UniformOutput', 0);
+            else
+                new_outputs = obj.outputs.deepCopy();
+            end
+            if iscell(obj.localVars)
+                new_localVars = cellfun(@(x) x.deepCopy(), obj.localVars, ...
+                    'UniformOutput', 0);
+            else
+                new_localVars = obj.localVars.deepCopy();
+            end
+            if iscell(obj.localEqs)
+                new_localEqs = cellfun(@(x) x.deepCopy(), obj.localEqs, ...
+                    'UniformOutput', 0);
+            else
+                new_localEqs = obj.localEqs.deepCopy();
+            end
+            new_obj = LustreContract(obj.metaInfo, obj.name,...
+                new_inputs, ...
+                new_outputs, new_localVars, new_localEqs, ...
+                obj.islocalContract);
+        end
+        
         function setBody(obj, localEqs)
             obj.localEqs = localEqs;
         end

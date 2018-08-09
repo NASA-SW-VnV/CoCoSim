@@ -18,6 +18,11 @@ classdef ContractImportExpr < LustreExpr
             obj.inputs = inputs;
             obj.outputs = outputs;
         end
+        function new_obj = deepCopy(obj)
+            %TODO: deepCopy inputs and outputs
+            new_obj = ContractImportExpr(obj.name, ...
+                obj.inputs, obj.outputs);
+        end
         
         function code = print(obj, backend)
             %TODO: check if KIND2 syntax is OK for the other backends.

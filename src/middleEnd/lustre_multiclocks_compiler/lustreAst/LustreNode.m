@@ -42,6 +42,40 @@ classdef LustreNode < LustreAst
             end
             obj.isImported = false;
         end
+
+        function new_obj = deepCopy(obj)
+            if iscell(obj.inputs)
+                new_inputs = cellfun(@(x) x.deepCopy(), obj.inputs, 'UniformOutput', 0);
+            else
+                new_inputs = obj.inputs.deepCopy();
+            end
+            if iscell(obj.outputs)
+                new_outputs = cellfun(@(x) x.deepCopy(), obj.outputs, 'UniformOutput', 0);
+            else
+                new_outputs = obj.outputs.deepCopy();
+            end
+            if iscell(obj.localContract)
+                new_localContract = cellfun(@(x) x.deepCopy(), obj.localContract, 'UniformOutput', 0);
+            else
+                new_localContract = obj.localContract.deepCopy();
+            end
+            if iscell(obj.localVars)
+                new_localVars = cellfun(@(x) x.deepCopy(), obj.localVars, 'UniformOutput', 0);
+            else
+                new_localVars = obj.localVars.deepCopy();
+            end
+            if iscell(obj.bodyEqs)
+                new_bodyEqs = cellfun(@(x) x.deepCopy(), obj.bodyEqs, 'UniformOutput', 0);
+            else
+                new_bodyEqs = obj.bodyEqs.deepCopy();
+            end
+            
+            new_obj = LustreNode(obj.metaInfo, obj.name,...
+                new_inputs, ...
+                new_outputs, new_localContract, new_localVars, new_bodyEqs, ...
+                obj.isMain);
+        end
+        
         function setMetaInfo(obj, metaInfo)
             obj.metaInfo = metaInfo;
         end

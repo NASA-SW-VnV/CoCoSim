@@ -87,8 +87,9 @@ classdef Sum_To_Lustre < Block_To_Lustre
             %    exp can be ++- or a number 3 .
             %    in the first case an operator is given for every input,
             %    in the second case the operator is + for all inputs
-            if ~isempty(str2double(exp))
-                nb = str2double(exp);
+            % DO NOt USE str2double instead of str2num
+            if ~isempty(str2num(exp))
+                nb = str2num(exp);
                 exp = arrayfun(@(x) operator_character, (1:nb));
             else
                 % delete spacer character

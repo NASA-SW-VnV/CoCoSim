@@ -22,7 +22,15 @@ classdef TupleExpr < LustreExpr
             obj.args = arg;
         end
         
-        
+        function new_obj = deepCopy(obj)
+            if iscell(obj.args)
+                new_args = cellfun(@(x) x.deepCopy(), obj.args, 'UniformOutput', 0);
+            else
+                new_args = obj.args.deepCopy();
+            end
+            new_obj = TupleExpr(new_args);
+        end
+         
         function code = print(obj, backend)
             %TODO: check if LUSTREC syntax is OK for the other backends.
             code = obj.print_lustrec(backend);

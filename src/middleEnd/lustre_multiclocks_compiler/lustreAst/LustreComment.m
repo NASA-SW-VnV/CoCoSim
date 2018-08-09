@@ -16,6 +16,12 @@ classdef LustreComment < LustreExpr
             obj.text = text;
             obj.isMultiLine = isMultiLine;
         end
+        
+        function new_obj = deepCopy(obj)
+            new_obj = LustreComment(obj.text,...
+                obj.isMultiLine);
+        end
+        
         function code = print(obj, backend)
             code = obj.print_lustrec(backend);
         end

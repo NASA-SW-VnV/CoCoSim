@@ -43,6 +43,12 @@ classdef BinaryExpr < LustreExpr
                 obj.withPar = true;
             end
         end
+        function new_obj = deepCopy(obj)
+            new_obj = BinaryExpr(obj.op,...
+                obj.left.deepCopy(),...
+                obj.right.deepCopy(), ...
+                obj.withPar);
+        end
         function code = print(obj, backend)
             code = obj.print_lustrec(backend);
         end

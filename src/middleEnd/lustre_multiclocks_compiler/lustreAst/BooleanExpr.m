@@ -14,15 +14,17 @@ classdef BooleanExpr < LustreExpr
         function obj = BooleanExpr(v)
             obj.value = v;
         end
-        
+        function new_obj = deepCopy(obj)
+            new_obj = BooleanExpr(obj.value);
+        end
         function code = print(obj, ~)
             %TODO: check if LUSTREC syntax is OK for the other backends.
             code = obj.print_lustrec();
         end
         
         function code = print_lustrec(obj)
-            if isnumeric(obj.value)
-                if obj.value ~= 0
+            if isnumeric(obj.value) || islogical(obj.value)
+                if obj.value 
                     code = 'true';
                 else
                     code = 'false';

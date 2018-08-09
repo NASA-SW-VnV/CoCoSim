@@ -18,7 +18,11 @@ classdef EveryExpr < LustreExpr
             obj.nodeArgs = nodeArgs;
             obj.cond = cond;
         end
-        
+        function new_obj = deepCopy(obj)
+            %TODO: deepCopy nodeArgs
+            new_obj = ContractModeExpr(obj.nodeName, ...
+                obj.nodeArgs, obj.cond.deepCopy());
+        end
         
         function code = print(obj, backend)
             if BackendType.isKIND2(backend)

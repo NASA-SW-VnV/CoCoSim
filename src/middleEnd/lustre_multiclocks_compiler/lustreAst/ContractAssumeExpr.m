@@ -16,7 +16,10 @@ classdef ContractAssumeExpr < LustreExpr
             obj.id = id;
             obj.exp = exp;
         end
-        
+        function new_obj = deepCopy(obj)
+            new_obj = ContractAssumeExpr(obj.id, ...
+                obj.exp.deepCopy());
+        end
         function code = print(obj, backend)
             %TODO: check if KIND2 syntax is OK for the other backends.
             code = obj.print_kind2(backend);

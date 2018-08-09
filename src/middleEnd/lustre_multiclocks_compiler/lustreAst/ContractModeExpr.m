@@ -18,7 +18,11 @@ classdef ContractModeExpr < LustreExpr
             obj.requires = requires;
             obj.ensures = ensures;
         end
-        
+        function new_obj = deepCopy(obj)
+            %TODO: deepCopy requires and ensures
+            new_obj = ContractModeExpr(obj.name, ...
+                obj.requires, obj.ensures);
+        end
         function code = print(obj, backend)
             %TODO: check if KIND2 syntax is OK for the other backends.
             code = obj.print_kind2(backend);

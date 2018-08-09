@@ -14,8 +14,8 @@ classdef Bias_To_Lustre < Block_To_Lustre
         
         function  write_code(obj, parent, blk, xml_trace, varargin)
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
-            [inputs] = getBlockInputsNames_convInType2AccType(obj, parent, blk);
-            
+            [inputs] = Bias_To_Lustre.getBlockInputsNames_convInType2AccType(obj, parent, blk);
+            outputDataType = blk.CompiledPortDataTypes.Outport{1};
 
             [outLusDT] = SLX2LusUtils.get_lustre_dt(outputDataType);
             if isequal(outLusDT, 'int')

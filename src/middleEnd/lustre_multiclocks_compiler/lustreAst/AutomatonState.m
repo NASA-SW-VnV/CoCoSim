@@ -23,6 +23,33 @@ classdef AutomatonState < LustreExpr
             obj.body = body;
         end
         
+        function new_obj = deepCopy(obj)
+            if iscell(obj.local_vars)
+                new_local_vars = cellfun(@(x) x.deepCopy(), obj.local_vars, 'UniformOutput', 0);
+            else
+                new_local_vars = obj.local_vars.deepCopy();
+            end
+            if iscell(obj.strongTrans)
+                new_strongTrans = cellfun(@(x) x.deepCopy(), obj.strongTrans, 'UniformOutput', 0);
+            else
+                new_strongTrans = obj.strongTrans.deepCopy();
+            end
+            if iscell(obj.weakTrans)
+                new_weakTrans = cellfun(@(x) x.deepCopy(), obj.weakTrans, 'UniformOutput', 0);
+            else
+                new_weakTrans = obj.weakTrans.deepCopy();
+            end
+            if iscell(obj.body)
+                new_body = cellfun(@(x) x.deepCopy(), obj.body, 'UniformOutput', 0);
+            else
+                new_body = obj.body.deepCopy();
+            end
+            new_obj = AutomatonState(obj.name, new_local_vars, ...
+                new_strongTrans, new_weakTrans, new_body);
+        end
+         
+        
+        
         function code = print(obj, backend)
             %TODO: check if lustrec syntax is OK for jkind and prelude.
             code = obj.print_lustrec(backend);

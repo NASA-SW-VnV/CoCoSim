@@ -17,6 +17,14 @@ classdef MergeExpr < LustreExpr
             obj.exprs = exprs;
         end
         
+        function new_obj = deepCopy(obj)
+            if iscell(obj.exprs)
+                new_exprs = cellfun(@(x) x.deepCopy(), obj.exprs, 'UniformOutput', 0);
+            else
+                new_exprs = obj.exprs.deepCopy();
+            end
+            new_obj = MergeExpr(obj.clock, new_exprs);
+        end
         
         function code = print(obj, backend)
             %TODO: check if LUSTREC syntax is OK for the other backends.

@@ -795,18 +795,19 @@ classdef SLX2LusUtils < handle
             end
         end
         %% Data type conversion node name
-        function callObj = setArgInConvFormat(callObj, arg)
+        function new_callObj = setArgInConvFormat(callObj, arg)
             % this function goes with dataType_conversion funciton to set 
             % the missing argument in conv_format.
-            if isempty(callObj)
-                callObj = arg;
+            new_callObj = callObj.deepCopy();
+            if isempty(new_callObj)
+                new_callObj = arg;
                 return;
             end
-            args = callObj.getArgs();
+            args = new_callObj.getArgs();
             if isempty(args)
-                callObj.setArgs(arg);
+                new_callObj.setArgs(arg);
             elseif isa(args, 'NodeCallExpr')
-                callObj.setArgs(...
+                new_callObj.setArgs(...
                     SLX2LusUtils.setArgInConvFormat(args, arg));
             end
         end

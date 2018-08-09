@@ -19,6 +19,19 @@ classdef LustreProgram < LustreAst
             obj.contracts = contracts;
         end
         
+        function new_obj = deepCopy(obj)
+            if iscell(obj.nodes)
+                new_nodes = cellfun(@(x) x.deepCopy(), obj.nodes, 'UniformOutput', 0);
+            else
+                new_nodes = obj.nodes.deepCopy();
+            end
+            if iscell(obj.contracts)
+                new_contracts = cellfun(@(x) x.deepCopy(), obj.contracts, 'UniformOutput', 0);
+            else
+                new_contracts = obj.contracts.deepCopy();
+            end
+            new_obj = LustreProgram(obj.opens, new_nodes, new_contracts);
+        end
         
         function code = print(obj, backend)
             %TODO: check if LUSTREC syntax is OK for the other backends.
@@ -42,12 +55,18 @@ classdef LustreProgram < LustreAst
             % contracts
             if BackendType.isKIND2(backend)
                 for i=1:numel(obj.contracts)
+                    if isempty(obj.contracts{i})
+                        continue;
+                    end
                     lines{end+1} = sprintf('%s\n', ...
                         obj.contracts{i}.print(backend));
                 end
             end
             % modes
             for i=1:numel(obj.nodes)
+                if isempty(obj.nodes{i})
+                    continue;
+                end
                 lines{end+1} = sprintf('%s\n', ...
                     obj.nodes{i}.print(backend));
             end
