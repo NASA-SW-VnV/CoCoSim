@@ -81,10 +81,32 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
             if ~isempty(external_lib)
                 obj.addExternal_libraries(external_lib);
             end
+            
+            blk_name = SLX2LusUtils.node_name_format(blk);
+            
+            % external node
+            node_name = sprintf('_Lookup_ext_node_%s',blk_name);
+            node = LustreNode();
+            node.setMetaInfo('external node code for doing Lookup_nD');
+            node.setName(node_name);
+            node.setInputs(LustreVar('x', 'real'));
+            node.setOutputs(LustreVar('y', 'real'));
+            node.setBodyEqs(bodyElts);           
+            node.setIsMain(false);      
+            obj.addExtenal_node(node);
+            
+            % main node
+            node_name = sprintf('_Lookup_main_node_%s',blk_name);
+            node = LustreNode();
+            node.setMetaInfo('main node code for doing Lookup_nD');
+            node.setName(node_name);
+            node.setInputs(LustreVar('x', 'real'));
+            node.setOutputs(LustreVar('y', 'real'));
+            node.setBodyEqs(bodyElts);           
+            node.setIsMain(true);             
             obj.setCode(mainCodes);
             obj.addVariable(main_vars);
-            obj.addExtenal_node(nodeCodes);
-            
+
         end
         
         function options = getUnsupportedOptions(obj, blk, varargin)
@@ -201,11 +223,13 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
             % supported
             if skipInterpolation
                 returnTableIndex{1} =  sprintf('%s_retTableInd_%d',blk_name,1);
-                vars = sprintf('%s\t%s:%s;\n',vars,returnTableIndex{1},indexDataType);
+                %vars = sprintf('%s\t%s:%s;\n',vars,returnTableIndex{1},indexDataType);
+                vars{end+1} = LustreVar(returnTableIndex{1}, indexDataType);
                 
                 if strcmp(InterpMethod,'Flat')
                     % defining returnTableIndex{1}
                     value = '0';
+                    value_n = IntExpr(0);
                     for j=1:NumberOfTableDimensions
                         
                         curIndex =  index_node{j,1};
