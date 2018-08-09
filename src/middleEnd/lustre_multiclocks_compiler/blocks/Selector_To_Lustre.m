@@ -109,9 +109,9 @@ classdef Selector_To_Lustre < Block_To_Lustre
                         indexBlock.Origin_path), ...
                         MsgType.ERROR, 'Selector_To_Lustre', '');
                 end
-                
+                codes = {};
                 indexDataType = 'int';
-                U_index = {};
+                U_index = cell(1, numel(outputs));
                 addVars = {};
                 blk_name = SLX2LusUtils.node_name_format(blk);
                 for i=1:numel(outputs)
@@ -127,7 +127,7 @@ classdef Selector_To_Lustre < Block_To_Lustre
                             v_name = sprintf('%s_ind_dim_%d_%d',...
                                blk_name,i,j);
                             addVars{end + 1} = LustreVar(v_name, indexDataType);
-                            codes{end + 1} = LustreEq(v_name, ind{i}(j)) ;
+                            codes{end + 1} = LustreEq(v_name, IntExpr(ind{i}(j))) ;
                         end
                     else
                         % port
@@ -175,7 +175,7 @@ classdef Selector_To_Lustre < Block_To_Lustre
                         U_dimJump(i) = U_dimJump(i)*in_matrix_dimension{1}.dims(j);
                     end
                 end
-                str_Y_index = {};
+                ast_Y_index = cell(1, numel(outputs));
                 for i=1:numel(outputs)  % looping over Y elements
                     curSub = ones(1,numel(outputDimsArray));
                     % ind2sub
@@ -189,24 +189,36 @@ classdef Selector_To_Lustre < Block_To_Lustre
                     curSub(7) = d7;
 
                     for j=1:numel(outputDimsArray)
-                        str_Y_index{i}{j} = sprintf('%s_str_Y_index_%d_%d',...
-                           blk_name,i,j);
-                        addVars{end + 1} = sprintf('%s_str_Y_index_%d_%d:%s;',...
-                           blk_name,i,j,indexDataType);
-                        codes{end + 1} = sprintf('%s = %s_ind_dim_%d_%d;\n\t',...
-                            str_Y_index{i}{j},blk_name,j,curSub(j)) ;
+                        ast_Y_index{i}{j} = VarIdExpr(...
+                            sprintf('%s_str_Y_index_%d_%d',...
+                           blk_name,i,j));
+                        addVars{end + 1} = LustreVar(...
+                            ast_Y_index{i}{j}, indexDataType);
+                        codes{end + 1} = LustreEq(ast_Y_index{i}{j},...
+                            VarIdExpr(...
+                            sprintf('%s_ind_dim_%d_%d', blk_name,j,curSub(j)))) ;
                     end
                     
                     % calculating sub2ind in Lustre
-                    value = '0';
+                    value_args = cell(1, umel(outputDimsArray));
                     for j=1:numel(outputDimsArray)
                         if j==1
-                            value = sprintf('%s + %s*%d',value,str_Y_index{i}{j}, U_dimJump(j));
+                            value_args{j} = BinaryExpr(BinaryExpr.MULTIPLY, ...
+                                ast_Y_index{i}{j}, ...
+                                IntExpr(U_dimJump(j)));
+                            %value = sprintf('%s + %s*%d',value,ast_Y_index{i}{j}, U_dimJump(j));
                         else
-                            value = sprintf('%s + (%s-1)*%d',value,str_Y_index{i}{j}, U_dimJump(j));
+                            value_args{j} = BinaryExpr(BinaryExpr.MULTIPLY, ...
+                                BinaryExpr(BinaryExpr.MINUS, ...
+                                            ast_Y_index{i}{j}, ...
+                                            IntExpr(1)), ...
+                                IntExpr(U_dimJump(j)));
+                            %value = sprintf('%s + (%s-1)*%d',value,ast_Y_index{i}{j}, U_dimJump(j));
                         end
                     end
-                    codes{end + 1} = sprintf('%s = %s;\n\t', U_index{i}, value);
+                    value = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS, ...
+                        value_args);
+                    codes{end + 1} = LustreEq( U_index{i}, value);
                 end
                 if numel(in_matrix_dimension{1}.dims) > 7                    
                     display_msg(sprintf('More than 7 dimensions is not supported in block %s',...
@@ -216,16 +228,17 @@ classdef Selector_To_Lustre < Block_To_Lustre
                 
                 % writing outputs code
                 for i=1:numel(outputs)
-                    code = sprintf('%s = \n\t', outputs{i});
-                    for j=numel(inputs{1}):-1:2
-                        if j==numel(inputs{1})
-                            code = sprintf('%s  if(%s = %d) then %s\n\t', code, U_index{i},j,inputs{1}{j});
-                        else
-                            code = sprintf('%s  else if(%s = %d) then %s\n\t', code, U_index{i},j,inputs{1}{j});
-                        end
+                    n = numel(inputs{1});
+                    conds = cell(1, n -1);
+                    thens = cell(1, n);
+                    for j=n:-1:2
+                        conds{n - j + 1} = BinaryExpr(BinaryExpr.EQ, ...
+                            U_index{i}, IntExpr(j));
+                        thens{n - j + 1} = inputs{1}{j};
                     end
-                    codes{end + 1} = sprintf('%s  else %s ;\n\t', code,inputs{1}{1});
-                    
+                    thens{n} = inputs{1}{1};
+                    codes{end + 1} = LustreEq(outputs{i}, ...
+                        IteExpr.nestedIteExpr(conds, thens));
                 end
                 
                 obj.addVariable(addVars);            
