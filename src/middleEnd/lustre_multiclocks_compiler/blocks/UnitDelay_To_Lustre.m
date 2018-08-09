@@ -30,7 +30,7 @@ classdef UnitDelay_To_Lustre < Block_To_Lustre
            
         end
         
-        function options = getUnsupportedOptions(obj, parent, blk, varargin)
+        function options = getUnsupportedOptions(obj, varargin)
             % add your unsuported options list here
             options = obj.unsupported_options;
         end

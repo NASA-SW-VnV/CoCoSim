@@ -14,7 +14,7 @@ classdef Switch_To_Lustre < Block_To_Lustre
         
         function  write_code(obj, parent, blk, xml_trace, varargin)
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
-            inputs = {};
+            
             
             if strcmp(blk.AllowDiffInputSizes, 'on')
                 display_msg(sprintf('The Allow different data input sizes option is not support in block %s',...
@@ -28,8 +28,15 @@ classdef Switch_To_Lustre < Block_To_Lustre
             SaturateOnIntegerOverflow = blk.SaturateOnIntegerOverflow;
             [threshold, ~, status] = ...
                 Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Threshold);
+            if status
+                display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
+                    blk.Threshold, blk.Origin_path), ...
+                    MsgType.ERROR, 'Constant_To_Lustre', '');
+                return;
+            end
             secondInputIsBoolean = 0;
-            threshold_str = {};
+            threshold_ast = {};
+            inputs = cell(1, numel(widths));
             for i=1:numel(widths)
                 inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
                 if numel(inputs{i}) < max_width
@@ -51,30 +58,33 @@ classdef Switch_To_Lustre < Block_To_Lustre
                     [lus_inportDataType, ~] = SLX2LusUtils.get_lustre_dt(inport_dt);
                     if strcmp(blk.Criteria, 'u2 ~= 0')
                         if strcmp(lus_inportDataType, 'real')
-                            threshold_str_temp = '0.0';
+                            threshold_str_temp = RealExpr('0.0');
                         elseif strcmp(lus_inportDataType, 'int')
-                            threshold_str_temp = '0';
+                            threshold_str_temp = IntExpr(0);
                         else
-                            threshold_str_temp = 'false';
+                            threshold_str_temp = BooleanExpr('false');
                             secondInputIsBoolean = 1;
                         end
+                        threshold_ast = cell(1, max_width);
                         for j=1:max_width
-                            threshold_str{j} = threshold_str_temp;
+                            threshold_ast{j} = threshold_str_temp;
                         end
                             
                     else
+                        threshold_ast = cell(1, numel(threshold));
                         for j=1:numel(threshold)
                             if strcmp(lus_inportDataType, 'real')
-                                threshold_str{j} = sprintf('%.15f', threshold(j));
+                                threshold_ast{j} = RealExpr(threshold(j));
                             elseif strcmp(lus_inportDataType, 'int')
-                                threshold_str{j} = sprintf('%d', int32(threshold(j)));
+                                threshold_ast{j} = IntExpr(int32(threshold(j)));
                             else
                                 secondInputIsBoolean = 1;
                             end
                         end
                         if numel(threshold) < max_width && ~secondInputIsBoolean
+                            threshold_ast = cell(1, max_width);
                             for j=1:max_width
-                                threshold_str{j} = threshold_str{1};
+                                threshold_ast{j} = threshold_ast{1};
                             end
                         end
                         if numel(inputs{i}) < max_width
@@ -83,32 +93,29 @@ classdef Switch_To_Lustre < Block_To_Lustre
                     end
                 end
             end
-%             [~, zero] = SLX2LusUtils.get_lustre_dt(outputDataType);
             
-            if status
-                display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
-                    blk.Threshold, blk.Origin_path), ...
-                    MsgType.ERROR, 'Constant_To_Lustre', '');
-                return;
-            end
-            codes = {};
             
+            codes = cell(1, numel(outputs));
             for i=1:numel(outputs)
                 if secondInputIsBoolean
-                    cond = sprintf(' %s ', inputs{2}{i});
+                    cond = inputs{2}{i};
                 else
                     if strcmp(blk.Criteria, 'u2 > Threshold')
-                        cond = sprintf(' %s > %s ',inputs{2}{i}, threshold_str{i});
+                        cond = BinaryExpr(BinaryExpr.GT, ...
+                            inputs{2}{i}, threshold_ast{i});
                     elseif strcmp(blk.Criteria, 'u2 >= Threshold')
-                        cond = sprintf(' %s >= %s ',inputs{2}{i}, threshold_str{i});
+                        cond = BinaryExpr(BinaryExpr.GTE, ...
+                            inputs{2}{i}, threshold_ast{i});
                     elseif strcmp(blk.Criteria, 'u2 ~= 0')
-                        cond = sprintf(' not(%s = %s) ',inputs{2}{i}, threshold_str{i});
+                        cond = BinaryExpr(BinaryExpr.NEQ, ...
+                            inputs{2}{i}, threshold_ast{i});
                     end
                 end
-                codes{i} = sprintf('%s = if %s then %s else %s; \n\t', outputs{i}, cond, inputs{1}{i},inputs{3}{i});
+                codes{i} = LustreEq(outputs{i}, ...
+                    IteExpr(cond, inputs{1}{i}, inputs{3}{i}));
             end
             
-            obj.setCode(MatlabUtils.strjoin(codes, ''));
+            obj.setCode( codes );
             obj.addVariable(outputs_dt);
         end
         

@@ -64,7 +64,7 @@ classdef RelationalOperator_To_Lustre < Block_To_Lustre
                 code = BinaryExpr(op, inputs{1}{j}, inputs{2}{j});
                 codes{j} = LustreEq(outputs{j}, code);
             end
-            obj.setCode(MatlabUtils.strjoin(codes, ''));
+            obj.setCode( codes );
             obj.addVariable(outputs_dt);
         end
         

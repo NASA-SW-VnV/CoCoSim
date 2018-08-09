@@ -305,8 +305,9 @@ classdef Assignment_To_Lustre < Block_To_Lustre
                             v_name = sprintf('%s_ind_dim_%d_%d',...
                                 blk_name,i,j);
                             addVars{end + 1} = LustreVar(v_name, indexDataType);
+
                             if j==1
-                                codes{end + 1} = LustreEq(v_name, IntExpr(ind{i}{1})) ;
+                                codes{end + 1} = LustreEq(v_name, ind{i}{1}) ;
                             else
                                 codes{end + 1} = LustreEq(v_name,...
                                     BinaryExpr(BinaryExpr.PLUS,...
@@ -530,7 +531,10 @@ classdef Assignment_To_Lustre < Block_To_Lustre
                     selectorOutputDimsArray(i) = numel(inputs{portNumber});
                     for j=1:numel(inputs{portNumber})
                         if strcmp(IndexMode, 'Zero-based')
-                            ind{i}{j} = sprintf('%s + 1',inputs{portNumber}{j});
+                            ind{i}{j} = BinaryExpr(BinaryExpr.PLUS,...
+                                inputs{portNumber}{j},...
+                                IntExpr(1));
+                                %sprintf('%s + 1',inputs{portNumber}{j});
                         else
                             ind{i}{j} = inputs{portNumber}{j};
                         end
@@ -566,9 +570,19 @@ classdef Assignment_To_Lustre < Block_To_Lustre
                         for j=1:selectorOutputDimsArray(i)
                             
                             if strcmp(IndexMode, 'Zero-based')
-                                ind{i}{j} = sprintf('%s + 1 + %d',inputs{portNumber}{1},(j-1));
+                                ind{i}{j} = BinaryExpr.BinaryMultiArgs(...
+                                    BinaryExpr.PLUS, ...
+                                    {...
+                                        inputs{portNumber}{1}, ...
+                                        IntExpr(1), ...
+                                        IntExpr(j-1)...
+                                    });
+                                %sprintf('%s + 1 + %d',inputs{portNumber}{1},(j-1));
                             else
-                                ind{i}{j} = sprintf('%s + %d',inputs{portNumber}{1},(j-1));
+                                ind{i}{j} = BinaryExpr(BinaryExpr.PLUS,...
+                                    inputs{portNumber}{1},...
+                                    IntExpr(j-1));
+                                    %sprintf('%s + %d',inputs{portNumber}{1},(j-1));
                             end
                         end
                     else
@@ -580,15 +594,28 @@ classdef Assignment_To_Lustre < Block_To_Lustre
                         for j=1:jend
                             if j==1
                                 if strcmp(IndexMode, 'Zero-based')
-                                    ind{i}{j} = sprintf('%s + 1',inputs{portNumber}{1});
+                                    ind{i}{j} = BinaryExpr(BinaryExpr.PLUS,...
+                                        inputs{portNumber}{1},...
+                                        IntExpr(1));
+                                    %sprintf('%s + 1',inputs{portNumber}{1});
                                 else
                                     ind{i}{j} = inputs{portNumber}{j};
                                 end
                             else
                                 if strcmp(IndexMode, 'Zero-based')
-                                    ind{i}{j} = sprintf('%s + 1 + d',inputs{portNumber}{1},(j-1));
+                                    ind{i}{j} = BinaryExpr.BinaryMultiArgs(...
+                                        BinaryExpr.PLUS, ...
+                                        {...
+                                            inputs{portNumber}{1}, ...
+                                            IntExpr(1), ...
+                                            IntExpr(j-1)...
+                                        });
+                                    %sprintf('%s + 1 + d',inputs{portNumber}{1},(j-1));
                                 else
-                                    ind{i}{j} = sprintf('%s + d',inputs{portNumber}{1},(j-1));
+                                    ind{i}{j} = BinaryExpr(BinaryExpr.PLUS,...
+                                        inputs{portNumber}{1},...
+                                        IntExpr(j-1));
+                                    %sprintf('%s + d',inputs{portNumber}{1},(j-1));
                                 end
                             end
                         end
