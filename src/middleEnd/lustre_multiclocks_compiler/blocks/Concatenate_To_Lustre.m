@@ -140,20 +140,23 @@ classdef Concatenate_To_Lustre < Block_To_Lustre
         end        
         
         function [codes] = concatenateDimension2(inputs, outputs,in_matrix_dimension)
-            codes = {};
+            codes = cell(1, numel(outputs));
             index = 0;
             for i=1:numel(in_matrix_dimension)       %loop over number of inports
                 for j=1:numel(inputs{i})     % loop over each element of inport
-                    codes{end + 1} = LustreEq(outputs{index}, inputs{i}{j});
+                    index = index + 1;
+                    codes{index} = LustreEq(outputs{index}, inputs{i}{j});
                 end
             end
         end
         
         function [codes] = concatenateVector(nb_inputs, inputs, outputs)
-            codes = {};
+            codes = cell(1, numel(outputs));
+            outputIndex = 0;
             for i=1:nb_inputs
                 for j=1:numel(inputs{i})
-                    codes{end + 1} = LustreEq(outputs{outputIndex}, inputs{i}{j});
+                    outputIndex = outputIndex + 1;
+                    codes{outputIndex} = LustreEq(outputs{outputIndex}, inputs{i}{j});
                 end
             end
         end

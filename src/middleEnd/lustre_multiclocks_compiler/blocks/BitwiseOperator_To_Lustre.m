@@ -24,13 +24,13 @@ classdef BitwiseOperator_To_Lustre < Block_To_Lustre
             
             %% Step 3: construct the inputs names
             % we initialize the inputs by empty cell.
-            inputs = cell(1, numInputs);
+            
             widths = blk.CompiledPortWidths.Inport;
             numInputs = numel(widths);
             max_width = max(widths);
             % save the information of the outport dataType,
             inputDT = blk.CompiledPortDataTypes.Inport{1};
-            
+            inputs = cell(1, numInputs);
             % Go over inputs, numel(widths) is the number of inputs.
             for i=1:numInputs
                 % fill the names of the ith input.
@@ -81,8 +81,9 @@ classdef BitwiseOperator_To_Lustre < Block_To_Lustre
                 else
                     not_fun = sprintf('_NOT_Bitwise_%s_%d', signedStr, intSize);
                 end
-                obj.addExternal_libraries(strcat('LustMathLib_', new_fun));
-                obj.addExternal_libraries(strcat('LustMathLib_', not_fun));
+                obj.addExternal_libraries(...
+                    {strcat('LustMathLib_', new_fun), ...
+                    strcat('LustMathLib_', not_fun)});
                 res = NodeCallExpr(not_fun, ...
                     MinMax_To_Lustre.recursiveMinMax(new_fun, scalars));
                 codes{1} = LustreEq(outputs{1}, res);
@@ -103,7 +104,12 @@ classdef BitwiseOperator_To_Lustre < Block_To_Lustre
                             scalars{i} = inputs{i}{j};
                         end
                     end
-                    res = MinMax_To_Lustre.recursiveMinMax(fun, scalars);
+                    if strcmp(op, 'NOT')
+                        res = NodeCallExpr(fun, scalars);
+                    else
+                        res = MinMax_To_Lustre.recursiveMinMax(fun, scalars);
+                    end
+                    
                     codes{j} =  LustreEq(outputs{j}, res);
                 end
                 obj.addExternal_libraries(strcat('LustMathLib_', fun));

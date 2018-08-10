@@ -187,7 +187,11 @@ classdef SS_To_LustreNode
                     continue;
                 end
                 b.write_code(subsys, blk, xml_trace, main_sampleTime, backend);
-                body = [body, b.getCode()];
+                if iscell(b.getCode())
+                    body = [body, b.getCode()];
+                else
+                    body{end+1} = b.getCode();
+                end
                 variables = [variables, b.getVariables()];
                 external_nodes = [external_nodes, b.getExternalNodes()];
                 external_libraries = [external_libraries, b.getExternalLibraries()];

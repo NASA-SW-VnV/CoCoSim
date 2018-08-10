@@ -517,7 +517,7 @@ classdef LustMathLib
         
         %NOT
         function [node, external_nodes_i, opens] = get__NOT_Bitwise_Signed(varargin)
-            [node, external_nodes_i, opens] = LustMathLib.getNOTBitwiseSigned(varargin);
+            [node, external_nodes_i, opens] = LustMathLib.getNOTBitwiseSigned();
         end
         function [node, external_nodes_i, opens] = get__NOT_Bitwise_Unsigned_8(varargin)
             [node, external_nodes_i, opens] = LustMathLib.getNOTBitwiseUnsigned(8);
@@ -941,7 +941,7 @@ classdef LustMathLib
         end
         function [node, external_nodes_i, opens] = get_mod_int_int(varargin)
             opens = {};
-            external_nodes_i = {};
+            external_nodes_i = {strcat('LustMathLib_', 'abs_int')};
             % format = 'node mod_int_int (x, y: int)\nreturns(z:int);\nlet\n\t';
             % format = [format, 'z = if (y = 0 or x = 0) then x\n\t\telse\n\t\t (x mod y) - (if (x mod y <> 0 and y <= 0) then (if y > 0 then y else -y) else 0);\ntel\n\n'];
             % node = sprintf(format);
