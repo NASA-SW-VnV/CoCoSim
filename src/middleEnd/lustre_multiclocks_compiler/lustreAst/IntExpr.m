@@ -25,7 +25,7 @@ classdef IntExpr < LustreExpr
         end
         
         function code = print_lustrec(obj)
-            if isnumeric(obj.value)
+            if isnumeric(obj.value) || islogical(obj.value)
                 code = sprintf('%.0f', obj.value);
             elseif ischar(obj.value)
                 if contains(obj.value, '.') 

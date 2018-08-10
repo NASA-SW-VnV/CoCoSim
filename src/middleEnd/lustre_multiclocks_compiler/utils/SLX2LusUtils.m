@@ -798,11 +798,12 @@ classdef SLX2LusUtils < handle
         function new_callObj = setArgInConvFormat(callObj, arg)
             % this function goes with dataType_conversion funciton to set 
             % the missing argument in conv_format.
-            new_callObj = callObj.deepCopy();
-            if isempty(new_callObj)
+            
+            if isempty(callObj)
                 new_callObj = arg;
                 return;
             end
+            new_callObj = callObj.deepCopy();
             args = new_callObj.getArgs();
             if isempty(args)
                 new_callObj.setArgs(arg);

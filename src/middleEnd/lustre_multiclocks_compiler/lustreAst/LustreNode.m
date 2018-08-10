@@ -146,8 +146,12 @@ classdef LustreNode < LustreAst
             if iscell(obj.bodyEqs)
                 for i=1:numel(obj.bodyEqs)
                     eq = obj.bodyEqs{i};
+                    if isempty(eq)
+                        continue;
+                    end
                     lines{end+1} = sprintf('\t%s\n', ...
                         eq.print(backend));
+
                 end
             elseif ~isempty(obj.bodyEqs)
                 lines{end+1} = sprintf('\t%s\n', ...

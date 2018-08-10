@@ -101,7 +101,7 @@ classdef Delay_To_Lustre < Block_To_Lustre
                 I = [1, nb_inports];
                 x0DataType = blk.CompiledPortDataTypes.Inport{end};
             else
-                [ICValue, x0DataType, status] = ...
+                [ICValue, ~, status] = ...
                     Constant_To_Lustre.getValueFromParameter(parent, blk, blk.InitialCondition);
                 if status
                     display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
@@ -128,16 +128,10 @@ classdef Delay_To_Lustre < Block_To_Lustre
                 if numel(lus_inportDataType_cell) == 1 && numel(ICValue) > 1
                     lus_inportDataType_cell = arrayfun(@(x) {lus_inportDataType_cell{1}}, (1:numel(ICValue)));
                 end
-                if strcmp(lus_inportDataType_cell{1}, 'real')
-                    x0DataType = 'double';
-                elseif strcmp(lus_inportDataType_cell{1}, 'int')
-                    x0DataType = 'int';
-                elseif strcmp(lus_inportDataType_cell{1}, 'bool')
-                    x0DataType = 'boolean';
-                end
+                x0DataType =  inportDataType;
                 for i=1:numel(ICValue)
                     inputs{x0Port}{i} = SLX2LusUtils.num2LusExp(...
-                        ICValue(i), lus_inportDataType_cell{i}, x0DataType);
+                        ICValue(i), lus_inportDataType_cell{i});
                 end
                 
                 I = [1, (nb_inports+1)];

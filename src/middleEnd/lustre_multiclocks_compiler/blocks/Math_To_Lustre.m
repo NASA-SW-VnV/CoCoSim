@@ -15,7 +15,7 @@ classdef Math_To_Lustre < Block_To_Lustre
         function  write_code(obj, parent, blk, xml_trace, varargin)
             
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
-            inputs = {};
+            
             
             widths = blk.CompiledPortWidths.Inport;
             nbInputs = numel(widths);
@@ -29,6 +29,7 @@ classdef Math_To_Lustre < Block_To_Lustre
                 outputDataType = blk.CompiledPortDataTypes.Outport{1};
             end
             SaturateOnIntegerOverflow = blk.SaturateOnIntegerOverflow;
+            inputs = cell(1, nbInputs);
             for i=1:nbInputs
                 inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
                 if numel(inputs{i}) < max_width
@@ -78,7 +79,7 @@ classdef Math_To_Lustre < Block_To_Lustre
                 for i=1:numel(outputs)
                     rhs = SLX2LusUtils.setArgInConvFormat(...
                         conv_format,...
-                        NodeCallExpr('pow', inputs{1}{i}));
+                        NodeCallExpr('pow', {RealExpr('10.0'), inputs{1}{i}}));
                     codes{i} = LustreEq(outputs{i}, rhs);
                 end
                 
@@ -159,7 +160,7 @@ classdef Math_To_Lustre < Block_To_Lustre
                     for i=1:in_matrix_dimension{1}.dims(2)
                         outIndex = outIndex + 1;
                         inIndex = sub2ind(in_matrix_dimension{1}.dims,j,i);
-                        codes{i} = LustreEq(outputs{outIndex},...
+                        codes{outIndex} = LustreEq(outputs{outIndex},...
                             inputs{1}{inIndex}) ;
                     end
                 end

@@ -66,6 +66,7 @@ classdef Constant_To_Lustre < Block_To_Lustre
                 getValueFromParameter(parent, blk, param)
             status = 0;
             valueDataType = 'double';
+            Value = 0;
             if isempty(regexp(param, '[a-zA-Z]', 'match'))
                 Value = str2num(param);
                 if contains(param, '.')
@@ -89,13 +90,27 @@ classdef Constant_To_Lustre < Block_To_Lustre
                 else
                     try
                         Value = evalin('base', param);
-                        valueDataType =  evalin('base',...
-                            sprintf('class(%s)', param));
-                    catch
+                        valueDataType =  class(Value);
+                    catch me
+                        if isequal(me.identifier, 'MATLAB:UndefinedFunction')
+                            % check if it's a mask parameter
+                            tokens = ...
+                                regexp(me.message, '''(\w+)''', 'tokens', 'once');
+                            if ~isempty(tokens)
+                                f = tokens{1};
+                                if isfield(parent, f)
+                                    %it is a mask parameter
+                                    assignin('base', f, parent.(f));
+                                    [Value, valueDataType, status] = ...
+                                        Constant_To_Lustre.getValueFromParameter(parent, blk, param);
+                                    return;
+                                end
+                            end
+                        end
                         try
                             Value = get_param(parent.Origin_path, param);
                             Value = evalin('base', Value);
-                        catch
+                        catch me
                             status = 1;
                         end
                     end

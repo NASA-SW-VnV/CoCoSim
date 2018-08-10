@@ -26,9 +26,9 @@ classdef RealExpr < LustreExpr
         end
         
         function code = print_lustrec(obj)
-            if isnumeric(obj.value)
+            if isnumeric(obj.value) || islogical(obj.value)
                 code = sprintf('%.15f', obj.value);
-            elseif ischar(obj.value)
+            elseif ischar(obj.value) 
                 code = obj.value;
             else
                 display_msg(sprintf('%s is not a lustre boolean Expression', obj.value), ...
