@@ -293,8 +293,9 @@ classdef Assignment_To_Lustre < Block_To_Lustre
             for i=1:numel(ind)
                 if ~contains(blk.IndexOptionArray{i}, '(port)')
                     for j=1:numel(ind{i})
-                        v_name =  sprintf('%s_ind_dim_%d_%d',...
-                            blk_name,i,j);
+                        v_name =  VarIdExpr(...
+                            sprintf('%s_ind_dim_%d_%d',...
+                            blk_name,i,j));
                         addVars{end + 1} = LustreVar(v_name, indexDataType);
                         codes{end + 1} = LustreEq(v_name, IntExpr(ind{i}(j))) ;
                     end
@@ -302,8 +303,9 @@ classdef Assignment_To_Lustre < Block_To_Lustre
                     % port
                     if strcmp(blk.IndexOptionArray{i}, 'Starting index (port)')
                         for j=1:numel(ind{i})
-                            v_name = sprintf('%s_ind_dim_%d_%d',...
-                                blk_name,i,j);
+                            v_name = VarIdExpr(...
+                                sprintf('%s_ind_dim_%d_%d',...
+                                blk_name,i,j));
                             addVars{end + 1} = LustreVar(v_name, indexDataType);
 
                             if j==1
@@ -319,8 +321,9 @@ classdef Assignment_To_Lustre < Block_To_Lustre
                         end
                     else   % 'Index vector (port)'
                         for j=1:numel(ind{i})
-                            v_name = sprintf('%s_ind_dim_%d_%d',...
-                                blk_name,i,j);
+                            v_name = VarIdExpr(...
+                                sprintf('%s_ind_dim_%d_%d',...
+                                blk_name,i,j));
                             addVars{end + 1} = LustreVar(v_name, indexDataType);
                             codes{end + 1} =  LustreEq(v_name, ind{i}{j});
                             %sprintf('%s_ind_dim_%d_%d = %s;\n\t',...

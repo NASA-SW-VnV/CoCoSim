@@ -46,9 +46,7 @@ classdef LustreEq < LustreAst
                 lhs_str = sprintf('(%s)', ...
                     MatlabUtils.strjoin(lhs_cell, ', '));
             else
-                
                 lhs_str = obj.lhs.print(backend);
-                
             end
             if iscell(obj.rhs)
                 rhs_str = obj.rhs{1}.print(backend);
