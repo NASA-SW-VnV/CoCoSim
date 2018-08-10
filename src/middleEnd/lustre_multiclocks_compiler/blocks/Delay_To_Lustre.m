@@ -91,6 +91,12 @@ classdef Delay_To_Lustre < Block_To_Lustre
             % gives the number of inports therefore the port number of X0.
             inportDataType = blk.CompiledPortDataTypes.Inport{1};
             [lus_inportDataType, ~] = SLX2LusUtils.get_lustre_dt(inportDataType);
+            if ischar(lus_inportDataType)
+                %change it to cell array
+                lus_inportDataType_cell{1} = lus_inportDataType;
+            else
+                lus_inportDataType_cell = lus_inportDataType;
+            end
             if strcmp(InitialConditionSource, 'Input port')
                 I = [1, nb_inports];
                 x0DataType = blk.CompiledPortDataTypes.Inport{end};
@@ -113,12 +119,7 @@ classdef Delay_To_Lustre < Block_To_Lustre
                     end
                 end
                 x0Port = numel(inputs) + 1;
-                if ischar(lus_inportDataType)
-                    %change it to cell array
-                    lus_inportDataType_cell{1} = lus_inportDataType;
-                else
-                    lus_inportDataType_cell = lus_inportDataType;
-                end
+                
                 %inline ICValue
                 if numel(ICValue) == 1 && numel(lus_inportDataType_cell) > 1
                     ICValue = arrayfun(@(x) ICValue, (1:numel(lus_inportDataType_cell)));
@@ -208,7 +209,7 @@ classdef Delay_To_Lustre < Block_To_Lustre
                 resetValue = inputs{resetPort};
                 
                 [resetCode, status] = SLX2LusUtils.getResetCode( ...
-                    ExternalReset,resetDT, char(resetValue) , zero);
+                    ExternalReset,resetDT, resetValue , zero);
                 if status
                     display_msg(sprintf('This External reset type [%s] is not supported in block %s.', ...
                     ExternalReset, blk.Origin_path), ...
@@ -247,7 +248,9 @@ classdef Delay_To_Lustre < Block_To_Lustre
                     codes{end + 1} = LustreEq(lhs, ...
                         IteExpr(enableCondition, ...
                         VarIdExpr(u{i}), ...
-                        BinaryExpr(BinaryExpr.ARROW, x0{i}, VarIdExpr(varName))));
+                        BinaryExpr(BinaryExpr.ARROW, ...
+                                    x0{i}, ...
+                                    UnaryExpr(UnaryExpr.PRE, VarIdExpr(varName)))));
                     %codes{end + 1} = sprintf(...
                     %    '%s = if  %s then %s\n\t\t\t', ...
                     %    lhs, enableCondition, u{i} );
@@ -300,7 +303,7 @@ classdef Delay_To_Lustre < Block_To_Lustre
                     if isEnabe
                         args{end + 1} = enableCondition;
                     end
-                    pre_u{i} = NodeCallExp(delay_node_name, args);
+                    pre_u{i} = NodeCallExpr(delay_node_name, args);
                     %sprintf('%s)',node_call_format);
                 end
             else

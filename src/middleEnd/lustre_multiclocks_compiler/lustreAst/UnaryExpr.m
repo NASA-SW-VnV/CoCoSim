@@ -47,6 +47,10 @@ classdef UnaryExpr < LustreExpr
         end
         
         function code = print_lustrec(obj, backend)
+            if iscell(obj.expr) && numel(obj.expr) == 1
+                obj.expr = obj.expr{1};
+            end
+            
             if obj.withPar
                 code = sprintf('(%s %s)', ...
                     obj.op, ...
@@ -56,7 +60,6 @@ classdef UnaryExpr < LustreExpr
                     obj.op, ...
                     obj.expr.print(backend));
             end
-            
         end
         
         function code = print_kind2(obj)

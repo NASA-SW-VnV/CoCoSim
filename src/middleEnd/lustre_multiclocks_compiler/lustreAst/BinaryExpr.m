@@ -53,6 +53,13 @@ classdef BinaryExpr < LustreExpr
             code = obj.print_lustrec(backend);
         end
         function code = print_lustrec(obj, backend)
+            if iscell(obj.left) && numel(obj.left) == 1
+                obj.left = obj.left{1};
+            end
+            if iscell(obj.right) && numel(obj.right) == 1
+                obj.right = obj.right{1};
+            end
+            
             if obj.withPar
                 code = sprintf('(%s %s %s)', ...
                     obj.left.print(backend),...

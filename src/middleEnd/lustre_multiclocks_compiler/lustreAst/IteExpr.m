@@ -48,6 +48,7 @@ classdef IteExpr < LustreExpr
             if iscell(obj.condition) && numel(obj.condition) == 1
                 obj.condition = obj.condition{1};
             end
+            
             if obj.OneLine
                 code = sprintf('(if %s then %s else %s)', ...
                     obj.condition.print(backend),...

@@ -52,10 +52,37 @@ if ~isempty(match)
     [sym, expr] = parseEN(expr);
     tree = {'Not',sym};
 else
+    [tree, expr] = parseUnaryMinus(expr);
+end
+end
+
+function [tree, expr] = parseUnaryMinus(expr)
+[match, expr] = parseMinus(expr);
+if ~isempty(match)
+    [sym, expr] = parseSE(expr);
+    sym1 = {'UnaryMinus',sym};
+    [tree, expr] = parseEM2(expr, sym1);
+    
+else
     [tree, expr] = parseEM(expr);
 end
 end
 %% *, /, ^
+function [tree, expr] = parseEM2(expr, sym1)
+[match, expr] = parseMult(expr);
+if ~isempty(match)
+    [sym2, expr] = parseEA(expr);
+    tree = {'Mult',sym1,sym2};
+else
+    [match, expr] = parseDiv(expr);
+    if ~isempty(match)
+        [sym2, expr] = parseEA(expr);
+        tree = {'Div',sym1,sym2};
+    else
+        tree = sym1;
+    end
+end
+end
 function [tree, expr] = parseEM(expr)
 [sym1, expr] = parseEP(expr);
 [match, expr] = parseMult(expr);

@@ -24,26 +24,30 @@ classdef VarIdExpr < LustreExpr
         
         
         
-        function code = print(obj, ~)
+        function code = print(obj, backend)
             %TODO: check if LUSTREC syntax is OK for the other backends.
-            code = obj.print_lustrec();
+            code = obj.print_lustrec(backend);
         end
         
-        function code = print_lustrec(obj)
-            code = obj.id;
+        function code = print_lustrec(obj, backend)
+            if ischar(obj.id)
+                code = obj.id;
+            elseif isa(obj.id, 'LustreExpr')
+                code = obj.id.print(backend);
+            end
         end
         
         function code = print_kind2(obj)
-            code = obj.print_lustrec();
+            code = obj.print_lustrec(BackendType.KIND2);
         end
         function code = print_zustre(obj)
-            code = obj.print_lustrec();
+            code = obj.print_lustrec(BackendType.ZUSTRE);
         end
         function code = print_jkind(obj)
-            code = obj.print_lustrec();
+            code = obj.print_lustrec(BackendType.JKIND);
         end
         function code = print_prelude(obj)
-            code = obj.print_lustrec();
+            code = obj.print_lustrec(BackendType.PRELUDE);
         end
     end
 

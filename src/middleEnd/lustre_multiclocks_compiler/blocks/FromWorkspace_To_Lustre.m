@@ -67,6 +67,7 @@ classdef FromWorkspace_To_Lustre < Block_To_Lustre
             else
                 display_msg(sprintf('Workspace variable must be numeric arrays or struct in block %s',...
                     blk.Origin_path), MsgType.ERROR, 'FromWorkspace_To_Lustre', '');
+                return;
             end
             dt = t(2) - t(1);
             if dt ~= SampleTime
