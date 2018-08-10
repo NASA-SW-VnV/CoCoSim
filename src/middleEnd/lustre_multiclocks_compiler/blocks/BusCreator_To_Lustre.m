@@ -25,7 +25,7 @@ classdef BusCreator_To_Lustre < Block_To_Lustre
                 codes{i} = LustreEq(outputs{i}, inputs{i});
             end
             
-            obj.setCode( MatlabUtils.strjoin(codes, ''));
+            obj.setCode( codes );
         end
         
         function options = getUnsupportedOptions(obj, ~, blk, varargin)

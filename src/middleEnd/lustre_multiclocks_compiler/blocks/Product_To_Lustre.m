@@ -97,7 +97,7 @@ classdef Product_To_Lustre < Block_To_Lustre
             % AxBxCxD, B and C are inside matrices and needs additional
             % variables
             
-            initCode = sprintf('%s ',zero);
+            initCode = zero;
             m=m1_dim.dims(1,1);
             if numel(m1_dim.dims) > 1
                 n=m1_dim.dims(1,2);

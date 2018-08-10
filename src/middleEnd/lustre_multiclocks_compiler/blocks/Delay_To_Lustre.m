@@ -131,6 +131,8 @@ classdef Delay_To_Lustre < Block_To_Lustre
                     x0DataType = 'double';
                 elseif strcmp(lus_inportDataType_cell{1}, 'int')
                     x0DataType = 'int';
+                elseif strcmp(lus_inportDataType_cell{1}, 'bool')
+                    x0DataType = 'boolean';
                 end
                 for i=1:numel(ICValue)
                     inputs{x0Port}{i} = SLX2LusUtils.num2LusExp(...
