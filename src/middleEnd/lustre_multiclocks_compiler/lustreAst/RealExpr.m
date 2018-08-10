@@ -29,7 +29,11 @@ classdef RealExpr < LustreExpr
             if isnumeric(obj.value) || islogical(obj.value)
                 code = sprintf('%.15f', obj.value);
             elseif ischar(obj.value) 
-                code = obj.value;
+                if contains(obj.value, '.')
+                    code = obj.value;
+                else
+                    code = sprintf('%.15f', str2num(obj.value));
+                end
             else
                 display_msg(sprintf('%s is not a lustre boolean Expression', obj.value), ...
                     MsgType.ERROR, 'BooleanExpr', '');
