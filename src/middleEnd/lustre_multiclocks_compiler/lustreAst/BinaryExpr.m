@@ -59,7 +59,7 @@ classdef BinaryExpr < LustreExpr
             if iscell(obj.right) && numel(obj.right) == 1
                 obj.right = obj.right{1};
             end
-            
+            try
             if obj.withPar
                 code = sprintf('(%s %s %s)', ...
                     obj.left.print(backend),...
@@ -70,6 +70,9 @@ classdef BinaryExpr < LustreExpr
                     obj.left.print(backend),...
                     obj.op, ...
                     obj.right.print(backend));
+            end
+            catch me
+                me
             end
         end
         

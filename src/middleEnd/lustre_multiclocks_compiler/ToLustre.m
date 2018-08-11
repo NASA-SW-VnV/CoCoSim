@@ -36,7 +36,7 @@ end
 
 %% initialize outputs
 nom_lustre_file = '';
-
+xml_trace = [];
 %% Get start time
 t_start = tic;
 
@@ -45,6 +45,10 @@ if (exist(model_path, 'file') == 2 || exist(model_path, 'file') == 4)
     model_full_path = model_path;
 else
     model_full_path = which(model_path);
+end
+if ~exist(model_full_path, 'file')
+    error('Model "%s" Does not exist', model_path);
+    
 end
 %% Save current path
 PWD = pwd;

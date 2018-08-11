@@ -82,10 +82,8 @@ classdef Switch_To_Lustre < Block_To_Lustre
                             end
                         end
                         if numel(threshold) < max_width && ~secondInputIsBoolean
-                            threshold_ast = cell(1, max_width);
-                            for j=1:max_width
-                                threshold_ast{j} = threshold_ast{1};
-                            end
+                            threshold_ast = arrayfun(@(x) threshold_ast{1},...
+                                (1:max_width), 'UniformOutput', 0);
                         end
                         if numel(inputs{i}) < max_width
                             inputs{i} = arrayfun(@(x) {inputs{i}{1}}, (1:max_width));
