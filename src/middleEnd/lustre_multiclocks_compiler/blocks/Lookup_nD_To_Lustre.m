@@ -232,10 +232,10 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                         curIndex =  index_node{j,1};
                         if j==1
                             %value = sprintf('%s + %s*%d',value,curIndex, dimJump(j));
-                            terms{j} = BinaryExpr(BinaryExpr.MULTIPLY,IntExpr(curIndex), dimJump(j));
+                            terms{j} = BinaryExpr(BinaryExpr.MULTIPLY,curIndex, dimJump(j));
                         else
                             %value = sprintf('%s + (%s-1)*%d',value,curIndex, dimJump(j));
-                            terms{j} = BinaryExpr(BinaryExpr.MULTIPLY,BinaryExpr(BinaryExpr.MINUS,IntExpr(curIndex),IntExpr(1)), dimJump(j));
+                            terms{j} = BinaryExpr(BinaryExpr.MULTIPLY,BinaryExpr(BinaryExpr.MINUS,curIndex,IntExpr(1)), dimJump(j));
                         end
                     end
                 else   % 'Nearest' case
@@ -393,10 +393,14 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                     end
                     if j==1
                         %value = sprintf('%s + %s*%d',value,curIndex, dimJump(j));
-                        terms{j} = BinaryExpr(BinaryExpr.MULTIPLY,IntExpr(curIndex),IntExpr(dimJump(j)));
+                        terms{j} = BinaryExpr(BinaryExpr.MULTIPLY,curIndex,IntExpr(dimJump(j)));
                     else
                         %value = sprintf('%s + (%s-1)*%d',value,curIndex, dimJump(j));
-                        terms{j} = BinaryExpr(BinaryExpr.MULTIPLY,IntExpr(curIndex-1),IntExpr(dimJump(j)));
+                        terms{j} = BinaryExpr(BinaryExpr.MULTIPLY,...
+                            BinaryExpr(BinaryExpr.MINUS,...
+                                        curIndex, ...
+                                        IntExpr(1)),...
+                            IntExpr(dimJump(j)));
                     end
                 end
                 %body = sprintf('%s%s = %s;\n\t', body,boundingNodeIndex{nodeIndex}, value);
