@@ -15,14 +15,15 @@ classdef LookupTableDynamic_To_Lustre < Block_To_Lustre
         function  write_code(obj, parent, blk, xml_trace, ~, backend, varargin)
 
             isLookupTableDynamic = 1;
-            [mainCodes, main_vars, nodeCodes, external_lib] =  ...
+            [mainCode, main_vars, extNode, external_lib] =  ...
                 Lookup_nD_To_Lustre.get_code_to_write(parent, blk, xml_trace, isLookupTableDynamic,backend);
             if ~isempty(external_lib)
                 obj.addExternal_libraries(external_lib);
             end
-            obj.setCode(mainCodes);
+             
+            obj.addExtenal_node(extNode);            
+            obj.setCode(mainCode);
             obj.addVariable(main_vars);
-            obj.addExtenal_node(nodeCodes);
         end
         
         function options = getUnsupportedOptions(obj, blk, varargin)
