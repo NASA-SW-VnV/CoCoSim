@@ -37,6 +37,13 @@ classdef BusSelector_To_Lustre < Block_To_Lustre
                 if isBus
                     % case of bus object
                     inport_cell_dimension = SLX2LusUtils.getDimensionsFromBusObject(InportDT);
+                elseif isequal(InportDT, 'double') ...
+                        || isequal(InportDT, 'single')...
+                        || MatlabUtils.startsWith(InportDT, 'int')...
+                        || MatlabUtils.startsWith(InportDT, 'uint')...
+                        || isequal(InportDT, 'boolean')
+                    inport_cell_dimension =...
+                        Assignment_To_Lustre.getInputMatrixDimensions(InportDimensions);
                 else
                     display_msg(sprintf('Block %s with type %s is not supported.', ...
                         blk.Origin_path,InportDT ),...
@@ -71,7 +78,7 @@ classdef BusSelector_To_Lustre < Block_To_Lustre
             obj.setCode( codes );
         end
         
-        function options = getUnsupportedOptions(obj, parent, blk, varargin)
+        function options = getUnsupportedOptions(obj, varargin)
             options = obj.unsupported_options;
         end
     end
@@ -80,11 +87,12 @@ classdef BusSelector_To_Lustre < Block_To_Lustre
         function [SignalsInputsMap, status] = signalInputsUsingDimensions(...
                 inport_cell_dimension, inputSignalsInlined, inputs)
             status = 0;
-            if numel(inport_cell_dimension) ~= numel(inputSignalsInlined)
-                status = 1;
-                return;
-            end
             SignalsInputsMap = containers.Map('KeyType', 'char', 'ValueType', 'any');
+            if numel(inport_cell_dimension) ~= numel(inputSignalsInlined) ...
+                   && numel(inport_cell_dimension) ~= 1 
+               status = 1;
+               return;
+            end
             
             inputIdx = 1;
             for i=1:numel(inport_cell_dimension)
