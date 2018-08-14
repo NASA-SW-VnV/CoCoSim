@@ -17,27 +17,20 @@ classdef Rounding_To_Lustre < Block_To_Lustre
             
             
             widths = blk.CompiledPortWidths.Inport;
-            outputDataType = blk.CompiledPortDataTypes.Outport{1};
             RndMeth = blk.Operator;
             inputs = cell(1, numel(widths));
             for i=1:numel(widths)
                 inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
-                inport_dt = blk.CompiledPortDataTypes.Inport(i);
-                %converts the input data type(s) to
-                %its outputDataType
-                [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, outputDataType, RndMeth);
-                if ~isempty(external_lib)
-                    obj.addExternal_libraries(external_lib);
-                    inputs{i} = cellfun(@(x) ...
-                        SLX2LusUtils.setArgInConvFormat(conv_format,x),...
-                        inputs{i}, 'un', 0);
-                end
             end
+            % we use _ before the node name. round => _round
+            RndMeth = sprintf('_%s', RndMeth);
             
+            obj.addExternal_libraries(strcat('LustDTLib_',RndMeth))
             % Just pass inputs to outputs.
             codes = cell(1, numel(outputs));
             for i=1:numel(outputs)
-                codes{i} = LustreEq(outputs{i}, inputs{1}{i});
+                codes{i} = LustreEq(outputs{i}, ...
+                    NodeCallExpr(RndMeth, inputs{1}{i}));
             end
             
             obj.setCode( codes );
