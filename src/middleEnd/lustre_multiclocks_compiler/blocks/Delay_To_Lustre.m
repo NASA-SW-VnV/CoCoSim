@@ -90,12 +90,9 @@ classdef Delay_To_Lustre < Block_To_Lustre
             % convention From Simulink, is the last one.  numel(widths)
             % gives the number of inports therefore the port number of X0.
             inportDataType = blk.CompiledPortDataTypes.Inport{1};
-            [lus_inportDataType, ~] = SLX2LusUtils.get_lustre_dt(inportDataType);
-            if ischar(lus_inportDataType)
-                %change it to cell array
-                lus_inportDataType_cell{1} = lus_inportDataType;
-            else
-                lus_inportDataType_cell = lus_inportDataType;
+            lus_inportDataType_cell = cell(1, numel(outputs_dt));
+            for i=1:numel(outputs_dt)
+                lus_inportDataType_cell{i} = outputs_dt{i}.getDT();
             end
             if strcmp(InitialConditionSource, 'Input port')
                 I = [1, nb_inports];
@@ -144,17 +141,7 @@ classdef Delay_To_Lustre < Block_To_Lustre
                 end
             end
             
-            %converts the x0 data type(s) to the first inport data type
-            %(Simulink documentation)
-            if ~strcmp(x0DataType, inportDataType)
-                [external_lib, conv_format] = ...
-                    SLX2LusUtils.dataType_conversion(x0DataType, inportDataType);
-                if ~isempty(external_lib)
-                    external_libraries = [external_libraries, external_lib];
-                    inputs{end} = cellfun(@(x) ...
-                        SLX2LusUtils.setArgInConvFormat(conv_format,x), inputs{end}, 'un', 0);
-                end
-            end
+
             if strcmp(DelayLengthSource, 'Dialog')
                 delayLength = str2double(DelayLength);
                 isDelayVariable = 0;

@@ -439,8 +439,25 @@ classdef SLX2LusUtils < handle
                     if strcmp(type, 'Inports')
                         % this is the case of virtual bus, we need to do back
                         % propagation to find the real datatypes
-                        lus_dt = SLX2LusUtils.getpreBlockLusDT(parent, blk, portNumber);
-                        isBus = false;
+                        if isfield(blk, 'BusObject') && ~isempty(blk.BusObject)
+                            try
+                                isBus = evalin('base',...
+                                    sprintf('isa(%s, ''Simulink.Bus'')',...
+                                    blk.BusObject));
+                            catch
+                                isBus = false;
+                            end
+                            if isBus
+                                lus_dt =...
+                                    SLX2LusUtils.getLustreTypesFromBusObject(blk.BusObject);
+                                isBus = false;
+                            else
+                                lus_dt = SLX2LusUtils.getpreBlockLusDT(parent, blk, portNumber);
+                            end
+                        else
+                            lus_dt = SLX2LusUtils.getpreBlockLusDT(parent, blk, portNumber);
+                            isBus = false;
+                        end
                     else
                         try
                             pH = get_param(blk.Origin_path, 'PortHandles');
@@ -508,20 +525,27 @@ classdef SLX2LusUtils < handle
                 end
             end
         end
+        %%
         function [lus_dt] = SignalHierarchyLusDT(blk, SignalHierarchy)
             %isBus = false;
             lus_dt = {};
             try
                 if ~isfield(SignalHierarchy, 'SignalName')
+                    display_msg(sprintf('Bock %s has an auto dataType and is not supported',...
+                    blk.Origin_path), MsgType.ERROR, '', '');
                     lus_dt = 'real';
-                    isBus = false;
                     return;
                 end
+                SignalName = SignalHierarchy.SignalName;
                 if isempty(SignalHierarchy.SignalName)
+                    SignalName = SignalHierarchy.BusObject;
+                end
+                if isempty(SignalName)
                     if  ~isfield(SignalHierarchy, 'Children') ...
                             || isempty(SignalHierarchy.Children)
                         lus_dt = 'real';
-                        isBus = false;
+                        display_msg(sprintf('Bock %s has an auto dataType and is not supported',...
+                            blk.Origin_path), MsgType.ERROR, '', '');
                         return;
                     else
                         for i=1:numel(SignalHierarchy.Children)
@@ -539,19 +563,19 @@ classdef SLX2LusUtils < handle
                 try
                     isBus = evalin('base',...
                         sprintf('isa(%s, ''Simulink.Bus'')',...
-                        SignalHierarchy.SignalName));
+                        SignalName));
                 catch
                     isBus = false;
                 end
                 if isBus
                     lus_dt =...
-                        SLX2LusUtils.getLustreTypesFromBusObject(SignalHierarchy.SignalName);
+                        SLX2LusUtils.getLustreTypesFromBusObject(SignalName);
                 else
                     p = find_system(bdroot(blk.Origin_path),...
                         'FindAll', 'on', ...
                         'Type', 'port',...
                         'PortType', 'outport', ...
-                        'SignalNameFromLabel', SignalHierarchy.SignalName );
+                        'SignalNameFromLabel', SignalName );
                     BusCreatorFound = false;
                     for i=1:numel(p)
                         p_parent=  get_param(p(i), 'Parent');
@@ -563,10 +587,12 @@ classdef SLX2LusUtils < handle
                     end
                     if BusCreatorFound
                         lus_dt = SLX2LusUtils.getBusCreatorLusDT(...
-                            get_param(p_parentObj.Parent, 'Object'), p_parentObj);
+                            get_param(p_parentObj.Parent, 'Object'), ...
+                            p_parentObj, ...
+                            get_param(p(i), 'PortNumber'));
                     elseif numel(p) >= 1
                         compiledDT = SLXUtils.getCompiledParam(p(1), 'CompiledPortDataType');
-                        [lus_dt, ~, ~, isBus] = ...
+                        [lus_dt, ~, ~, ~] = ...
                             SLX2LusUtils.get_lustre_dt(compiledDT);
                         CompiledPortWidth = SLXUtils.getCompiledParam(p(1), 'CompiledPortWidth');
                         if iscell(lus_dt) && numel(lus_dt) < CompiledPortWidth
@@ -583,7 +609,6 @@ classdef SLX2LusUtils < handle
             catch me
                 display_msg(me.getReport(), MsgType.DEBUG, 'getBlockOutputsNames', '');
                 lus_dt = 'real';
-                isBus = false;
             end
         end
         %% get block inputs names. E.g subsystem taking input signals from differents blocks.
@@ -680,7 +705,7 @@ classdef SLX2LusUtils < handle
                 return;
             end
             if strcmp(srcBlk.CompiledPortDataTypes.Outport{blkOutportPort}, 'auto')
-                lus_dt = SLX2LusUtils.getBusCreatorLusDT(parent, srcBlk);
+                lus_dt = SLX2LusUtils.getBusCreatorLusDT(parent, srcBlk, blkOutportPort);
             else
                 width = srcBlk.CompiledPortWidths.Outport;
                 slx_dt = srcBlk.CompiledPortDataTypes.Outport{blkOutportPort};
@@ -693,7 +718,7 @@ classdef SLX2LusUtils < handle
                 end
             end
         end
-        function lus_dt = getBusCreatorLusDT(parent, srcBlk)
+        function lus_dt = getBusCreatorLusDT(parent, srcBlk, portNumber)
             lus_dt = {};
             if strcmp(srcBlk.BlockType, 'BusCreator')
                 width = srcBlk.CompiledPortWidths.Inport;
@@ -713,10 +738,11 @@ classdef SLX2LusUtils < handle
                     end
                 end
             else
-                lus_dt = {'real'};
-                display_msg(sprintf('Bock %s has an auto dataType and is not supported',...
-                    srcBlk.Origin_path), MsgType.ERROR, '', '');
-                return;
+                pH = get_param(srcBlk.Origin_path, 'PortHandles');
+                SignalHierarchy = get_param(pH.Outport(portNumber), ...
+                    'SignalHierarchy');
+                [lus_dt] = SLX2LusUtils.SignalHierarchyLusDT(...
+                    srcBlk,  SignalHierarchy);
             end
         end
         %% Change Simulink DataTypes to Lustre DataTypes. Initial default
