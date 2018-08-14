@@ -436,10 +436,26 @@ classdef SLX2LusUtils < handle
                     slx_dt = blk.CompiledPortDataTypes.Outport{portNumber};
                 end
                 if strcmp(slx_dt, 'auto')
-                    % this is the case of virtual bus, we need to do back
-                    % propagation to find the real datatypes
-                    lus_dt = SLX2LusUtils.getpreBlockLusDT(parent, blk, portNumber);
-                    isBus = false;
+                    if strcmp(type, 'Inports')
+                        % this is the case of virtual bus, we need to do back
+                        % propagation to find the real datatypes
+                        lus_dt = SLX2LusUtils.getpreBlockLusDT(parent, blk, portNumber);
+                        isBus = false;
+                    else
+                        try
+                            pH = get_param(blk.Origin_path, 'PortHandles');
+                            SignalHierarchy = get_param(pH.Outport(portNumber), ...
+                                'SignalHierarchy');
+                            [lus_dt] = SLX2LusUtils.SignalHierarchyLusDT(...
+                                blk, SignalHierarchy); 
+                            isBus = false;
+                        catch me
+                            display_msg(me.getReport(), MsgType.DEBUG, 'getBlockOutputsNames', '');
+                            lus_dt = 'real';
+                            isBus = false;
+                        end
+                        
+                    end
                 else
                     [lus_dt, ~, ~, isBus] = SLX2LusUtils.get_lustre_dt(slx_dt);
                 end
@@ -492,7 +508,84 @@ classdef SLX2LusUtils < handle
                 end
             end
         end
-        
+        function [lus_dt] = SignalHierarchyLusDT(blk, SignalHierarchy)
+            %isBus = false;
+            lus_dt = {};
+            try
+                if ~isfield(SignalHierarchy, 'SignalName')
+                    lus_dt = 'real';
+                    isBus = false;
+                    return;
+                end
+                if isempty(SignalHierarchy.SignalName)
+                    if  ~isfield(SignalHierarchy, 'Children') ...
+                            || isempty(SignalHierarchy.Children)
+                        lus_dt = 'real';
+                        isBus = false;
+                        return;
+                    else
+                        for i=1:numel(SignalHierarchy.Children)
+                            [lus_dt_i] = ...
+                                SLX2LusUtils.SignalHierarchyLusDT(blk, SignalHierarchy.Children(i));
+                            if iscell(lus_dt_i)
+                                lus_dt = [lus_dt, lus_dt_i];
+                            else
+                                lus_dt{end+1} = lus_dt_i;
+                            end
+                        end
+                        return;
+                    end
+                end
+                try
+                    isBus = evalin('base',...
+                        sprintf('isa(%s, ''Simulink.Bus'')',...
+                        SignalHierarchy.SignalName));
+                catch
+                    isBus = false;
+                end
+                if isBus
+                    lus_dt =...
+                        SLX2LusUtils.getLustreTypesFromBusObject(SignalHierarchy.SignalName);
+                else
+                    p = find_system(bdroot(blk.Origin_path),...
+                        'FindAll', 'on', ...
+                        'Type', 'port',...
+                        'PortType', 'outport', ...
+                        'SignalNameFromLabel', SignalHierarchy.SignalName );
+                    BusCreatorFound = false;
+                    for i=1:numel(p)
+                        p_parent=  get_param(p(i), 'Parent');
+                        p_parentObj = get_param(p_parent, 'Object');
+                        if isequal(p_parentObj.BlockType, 'BusCreator')
+                            BusCreatorFound = true;
+                            break;
+                        end
+                    end
+                    if BusCreatorFound
+                        lus_dt = SLX2LusUtils.getBusCreatorLusDT(...
+                            get_param(p_parentObj.Parent, 'Object'), p_parentObj);
+                    elseif numel(p) >= 1
+                        compiledDT = SLXUtils.getCompiledParam(p(1), 'CompiledPortDataType');
+                        [lus_dt, ~, ~, isBus] = ...
+                            SLX2LusUtils.get_lustre_dt(compiledDT);
+                        CompiledPortWidth = SLXUtils.getCompiledParam(p(1), 'CompiledPortWidth');
+                        if iscell(lus_dt) && numel(lus_dt) < CompiledPortWidth
+                            lus_dt = arrayfun(@(x) lus_dt{1}, (1:CompiledPortWidth), ...
+                                'UniformOutput', 0);
+                        else
+                            lus_dt = arrayfun(@(x) lus_dt, (1:CompiledPortWidth), ...
+                                'UniformOutput', 0);
+                        end
+                    else
+                        lus_dt = 'real';
+                    end
+                end
+            catch me
+                display_msg(me.getReport(), MsgType.DEBUG, 'getBlockOutputsNames', '');
+                lus_dt = 'real';
+                isBus = false;
+            end
+        end
         %% get block inputs names. E.g subsystem taking input signals from differents blocks.
         % We need to go over all linked blocks and get their output names
         % in the corresponding port number.
@@ -567,6 +660,7 @@ classdef SLX2LusUtils < handle
         %% get pre block DataType for specific port,
         %it is used in the case of 'auto' type.
         function lus_dt = getpreBlockLusDT(parent, blk, portNumber)
+           
             global model_struct
             lus_dt = {};
             if strcmp(blk.BlockType, 'Inport')
@@ -586,29 +680,7 @@ classdef SLX2LusUtils < handle
                 return;
             end
             if strcmp(srcBlk.CompiledPortDataTypes.Outport{blkOutportPort}, 'auto')
-                if strcmp(srcBlk.BlockType, 'BusCreator')
-                    width = srcBlk.CompiledPortWidths.Inport;
-                    for port=1:numel(width)
-                        slx_dt = srcBlk.CompiledPortDataTypes.Inport{port};
-                        if strcmp(slx_dt, 'auto')
-                            lus_dt = [lus_dt, ...
-                                SLX2LusUtils.getpreBlockLusDT(parent, srcBlk, port)];
-                        else
-                            lus_dt_tmp = SLX2LusUtils.get_lustre_dt(slx_dt);
-                            if iscell(lus_dt_tmp)
-                                lus_dt = [lus_dt, lus_dt_tmp];
-                            else
-                                lus_dt_tmp = arrayfun(@(x) {lus_dt_tmp}, (1:width(port)), 'UniformOutput',false);
-                                lus_dt = [lus_dt, lus_dt_tmp];
-                            end
-                        end
-                    end
-                else
-                    lus_dt = {'real'};
-                    display_msg(sprintf('Bock %s has an auto dataType and is not supported',...
-                        srcBlk.Origin_path), MsgType.ERROR, '', '');
-                    return;
-                end
+                lus_dt = SLX2LusUtils.getBusCreatorLusDT(parent, srcBlk);
             else
                 width = srcBlk.CompiledPortWidths.Outport;
                 slx_dt = srcBlk.CompiledPortDataTypes.Outport{blkOutportPort};
@@ -619,6 +691,32 @@ classdef SLX2LusUtils < handle
                     lus_dt_tmp = cellfun(@(x) {lus_dt_tmp}, (1:width(blkOutportPort)), 'UniformOutput',false);
                     lus_dt = [lus_dt, lus_dt_tmp];
                 end
+            end
+        end
+        function lus_dt = getBusCreatorLusDT(parent, srcBlk)
+            lus_dt = {};
+            if strcmp(srcBlk.BlockType, 'BusCreator')
+                width = srcBlk.CompiledPortWidths.Inport;
+                for port=1:numel(width)
+                    slx_dt = srcBlk.CompiledPortDataTypes.Inport{port};
+                    if strcmp(slx_dt, 'auto')
+                        lus_dt = [lus_dt, ...
+                            SLX2LusUtils.getpreBlockLusDT(parent, srcBlk, port)];
+                    else
+                        lus_dt_tmp = SLX2LusUtils.get_lustre_dt(slx_dt);
+                        if iscell(lus_dt_tmp)
+                            lus_dt = [lus_dt, lus_dt_tmp];
+                        else
+                            lus_dt_tmp = arrayfun(@(x) {lus_dt_tmp}, (1:width(port)), 'UniformOutput',false);
+                            lus_dt = [lus_dt, lus_dt_tmp];
+                        end
+                    end
+                end
+            else
+                lus_dt = {'real'};
+                display_msg(sprintf('Bock %s has an auto dataType and is not supported',...
+                    srcBlk.Origin_path), MsgType.ERROR, '', '');
+                return;
             end
         end
         %% Change Simulink DataTypes to Lustre DataTypes. Initial default
@@ -775,20 +873,29 @@ classdef SLX2LusUtils < handle
         end
         
         %% change numerical value to Lustre Expr string based on DataType dt.
-        function lustreExp = num2LusExp(v, dt, InitialOutputType)
+        function lustreExp = num2LusExp(v, lus_dt, slx_dt)
             if nargin < 3
-                InitialOutputType = dt;
+                slx_dt = lus_dt;
             end
-            if strcmp(dt, 'real')
+            if strcmp(lus_dt, 'real')
                 lustreExp = RealExpr(v);
-            elseif strcmp(dt, 'int')
-                lustreExp = IntExpr(v);
-            elseif strcmp(dt, 'bool')
+            elseif strcmp(lus_dt, 'int')
+                if numel(slx_dt) > 3 ...
+                        && strncmp(slx_dt, 'int', 3) ...
+                        || strncmp(slx_dt, 'uint', 4)
+                    % e.g. cast double value to int32
+                    f = eval(strcat('@', slx_dt));
+                    lustreExp = IntExpr(...
+                        f(v));
+                else
+                    lustreExp = IntExpr(v);
+                end
+            elseif strcmp(lus_dt, 'bool')
                 lustreExp = BooleanExpr(v);
-            elseif strncmp(InitialOutputType, 'int', 3) ...
-                    || strncmp(InitialOutputType, 'uint', 4)
+            elseif strncmp(slx_dt, 'int', 3) ...
+                    || strncmp(slx_dt, 'uint', 4)
                 lustreExp = IntExpr(v);
-            elseif strcmp(InitialOutputType, 'boolean') || strcmp(InitialOutputType, 'logical')
+            elseif strcmp(slx_dt, 'boolean') || strcmp(slx_dt, 'logical')
                lustreExp = BooleanExpr(v);
             else
                 lustreExp = RealExpr(v);
