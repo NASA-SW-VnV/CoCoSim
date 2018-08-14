@@ -27,11 +27,7 @@ classdef FromWorkspace_To_Lustre < Block_To_Lustre
             end
             
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
-
-            outputDataType = blk.CompiledPortDataTypes.Outport{1};
-            
-
-            
+            outputDataType = blk.CompiledPortDataTypes.Outport{1};                        
             VariableName = blk.VariableName;
             [variable, ~, status] = ...
                 Constant_To_Lustre.getValueFromParameter(parent, blk, VariableName);
@@ -42,16 +38,13 @@ classdef FromWorkspace_To_Lustre < Block_To_Lustre
                 return;
             end
             [outLusDT, zero, ~] = SLX2LusUtils.get_lustre_dt(outputDataType);
-            
-            
+                        
             % blk parameters
             %             SampleTime = blk.SampleTime;
             %             Interpolate = blk.Interpolate;
             %             ZeroCross = blk.ZeroCross;
             %             OutputAfterFinalValue = blk.OutputAfterFinalValue;
-            
-            
-            
+                        
             if isnumeric(variable)
                 % for matrix
                 [nrow, ncol] = size(variable);
