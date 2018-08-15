@@ -221,12 +221,12 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                 returnTableIndex{1} =  VarIdExpr(sprintf('%s_retTableInd_%d',blk_name,1));
                 %vars = sprintf('%s\t%s:%s;\n',vars,returnTableIndex{1},indexDataType);
                 vars{end+1} = LustreVar(returnTableIndex{1}, indexDataType);
-                
+                terms = cell(1,NumberOfTableDimensions);
                 if strcmp(InterpMethod,'Flat')
                     % defining returnTableIndex{1}
                     %value = '0';
                     %value_n = IntExpr(0);
-                    terms = cell(1,NumberOfTableDimensions);
+                    
                     for j=1:NumberOfTableDimensions
                         
                         curIndex =  index_node{j,1};
@@ -264,7 +264,6 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                     end
                     
                     %value = '0';
-                    terms = cell(1,NumberOfTableDimensions);
                     for j=1:NumberOfTableDimensions
                         if j==1
                             %value = sprintf('%s + %s*%d',value,nearestIndex{j}, dimJump(j));
@@ -276,7 +275,11 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                     end
                 end
                 %body = sprintf('%s%s = %s;\n\t', body,returnTableIndex{1}, value);
-                rhs = BinaryExpr(BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,terms));
+                if NumberOfTableDimensions == 1
+                    rhs = terms{1};
+                else
+                    rhs = BinaryExpr(BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,terms));
+                end
                 body{end+1} = LustreEq(returnTableIndex{1},rhs);
                 
                 % defining outputs{1}
@@ -293,8 +296,12 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
 %                     end
                 end
                 %body = sprintf('%s%s  else %s ;\n\t', body,code,table_elem{numel(table_elem)});
-                thens{end+1} = table_elem{numel(table_elem)};
-                rhs = IteExpr.nestedIteExpr(conds, thens);
+                thens{numel(table_elem)} = table_elem{numel(table_elem)};
+                if NumberOfTableDimensions == 1
+                    rhs = IteExpr(conds{1},thens{1},thens{2});
+                else
+                    rhs = IteExpr.nestedIteExpr(conds, thens);
+                end
                 body{end+1} = LustreEq(outputs{1},rhs);
             else
                 % clipping
@@ -338,11 +345,11 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                                 numerator_terms{j} = BinaryExpr(BinaryExpr.MINUS,coords_node{j,2},clipped_inputs{j});
                             else
                                 %code = sprintf('%s*(%s-%s)',code,clipped_inputs{j},coords_node{j,1});
-                                numerator_terms{j} = BinaryExpr(BinaryExpr.MINUS,coords_node{j,2},clipped_inputs{j});
+                                numerator_terms{j} = BinaryExpr(BinaryExpr.MINUS,clipped_inputs{j},coords_node{j,1});
                             end
                         end
                         %body = sprintf('%s%s = (%s)/%s ;\n\t', body,N_shape_node{i}, code,denom);
-                        numerator = BinaryExpr.BinaryMultiArgs(BinaryExpr.MULTIPLY,denom_terms);
+                        numerator = BinaryExpr.BinaryMultiArgs(BinaryExpr.MULTIPLY,numerator_terms);
                         body{end+1} = LustreEq(N_shape_node{i},BinaryExpr(BinaryExpr.DIVIDE,numerator,denom));
                     end
                 else  % Cubic spline  % not yet
@@ -402,7 +409,11 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                     end
                 end
                 %body = sprintf('%s%s = %s;\n\t', body,boundingi{i}, value);
-                value = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,terms);
+                if NumberOfTableDimensions == 1
+                    value = terms{1};
+                else
+                    value = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,terms);
+                end
                 body{end+1} = LustreEq(boundingi{i},value);
                 
                 if ~skipInterpolation
@@ -519,9 +530,9 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                             %index_code = sprintf('%s  if(%s >= %s) then %d\n\t', index_code, inputs{i}{1},Breakpoints{i}{j},(j-1));
                             
                             numberOfBreakPoint_cond = numberOfBreakPoint_cond + 1;
-                            cond_index{end+1} =  BinaryExpr(BinaryExpr.EQ, inputs{i}{1},Breakpoints{i}{j});
+                            cond_index{end+1} =  BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j});
                             then_index{end+1} = IntExpr(j-1);
-                            cond_coords{end+1} = BinaryExpr(BinaryExpr.EQ, inputs{i}{1},Breakpoints{i}{j});
+                            cond_coords{end+1} = BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j});
                             then_coords{end+1} = Breakpoints{i}{j-1};
                         else
                             % for "flat" we want lower node to be last node
@@ -529,9 +540,9 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                             %index_code = sprintf('%s  if(%s >= %s) then %d\n\t', index_code, inputs{i}{1},Breakpoints{i}{j},(j));
                             
                             numberOfBreakPoint_cond = numberOfBreakPoint_cond + 1;
-                            cond_index{end+1} = BinaryExpr(BinaryExpr.EQ, inputs{i}{1},Breakpoints{i}{j});
+                            cond_index{end+1} = BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j});
                             then_index{end+1} = IntExpr(j);
-                            cond_coords{end+1} = BinaryExpr(BinaryExpr.EQ, inputs{i}{1},Breakpoints{i}{j});
+                            cond_coords{end+1} = BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j});
                             then_coords{end+1} = Breakpoints{i}{j-1};                            
                             
                         end
@@ -541,9 +552,9 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                         %index_code = sprintf('%s  else if(%s >= %s) then %d\n\t', index_code, inputs{i}{1},Breakpoints{i}{j},j);
                         
                         numberOfBreakPoint_cond = numberOfBreakPoint_cond + 1;
-                        cond_index{end+1} = BinaryExpr(BinaryExpr.EQ, inputs{i}{1},Breakpoints{i}{j});
+                        cond_index{end+1} = BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j});
                         then_index{end+1} = IntExpr(j);
-                        cond_coords{end+1} = BinaryExpr(BinaryExpr.EQ, inputs{i}{1},Breakpoints{i}{j});
+                        cond_coords{end+1} = BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j});
                         then_coords{end+1} = Breakpoints{i}{j};
                         
                     end                    
@@ -571,18 +582,18 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                         %code = sprintf('%s  if(%s >= %s) then %s\n\t', code, inputs{i}{1},Breakpoints{i}{j},Breakpoints{i}{j});
                         %index_code = sprintf('%s  if(%s >= %s) then %d\n\t', index_code, inputs{i}{1},Breakpoints{i}{j},j);
 
-                        cond_index{end+1} = BinaryExpr(BinaryExpr.EQ, inputs{i}{1},Breakpoints{i}{j});
+                        cond_index{end+1} = BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j});
                         then_index{end+1} = IntExpr((j));
-                        cond_coords{end+1} = BinaryExpr(BinaryExpr.EQ, inputs{i}{1},Breakpoints{i}{j});
+                        cond_coords{end+1} = BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j});
                         then_coords{end+1} = Breakpoints{i}{j};
                     
                     else
                         %code = sprintf('%s  else if(%s >= %s) then %s\n\t', code, inputs{i}{1},Breakpoints{i}{j},Breakpoints{i}{j+1});
                         %index_code = sprintf('%s  else if(%s >= %s) then %d\n\t', index_code, inputs{i}{1},Breakpoints{i}{j},(j+1));
                        
-                        cond_index{end+1} = BinaryExpr(BinaryExpr.EQ, inputs{i}{1},Breakpoints{i}{j});
+                        cond_index{end+1} = BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j});
                         then_index{end+1} = IntExpr(j+1);
-                        cond_coords{end+1} = BinaryExpr(BinaryExpr.EQ, inputs{i}{1},Breakpoints{i}{j});
+                        cond_coords{end+1} = BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j});
                         then_coords{end+1} = Breakpoints{i}{j+1};
                                             
                     end
