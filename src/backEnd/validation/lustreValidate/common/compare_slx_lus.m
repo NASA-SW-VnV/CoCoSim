@@ -93,8 +93,8 @@ if exist('min_max_constraints','var') && numel(min_max_constraints) > 0
     IMIN = min_max_constraints{:,2};
     IMAX = min_max_constraints{:,3};
 else
-    IMIN = -500;
-    IMAX = 500;
+    IMIN = -300;
+    IMAX = 300;
 end
 eps = SLXUtils.getLustrescSlxEps(model_full_path);
 T = [];

@@ -24,7 +24,11 @@ classdef Constant_To_Lustre < Block_To_Lustre
                     MsgType.ERROR, 'Constant_To_Lustr', '');
                 return;
             end
-            
+            %inline value
+            max_width = blk.CompiledPortWidths.Outport;
+            if numel(Value) < max_width
+                Value = arrayfun(@(x) Value(1), (1:max_width));
+            end
             
             width = numel(Value);
             values_AST = cell(1, width);
@@ -37,7 +41,8 @@ classdef Constant_To_Lustre < Block_To_Lustre
             for j=1:numel(outputs)
                 codes{j} = LustreEq(outputs{j}, values_AST{j});
             end
-            
+
+                
             obj.setCode( codes );
             
         end
@@ -90,6 +95,15 @@ classdef Constant_To_Lustre < Block_To_Lustre
                     Value = getVariable(hws, param);
                 else
                     try
+                        if isfield(parent, param)
+                            % mask parameter
+                            [Value, valueDataType, status] = ...
+                                Constant_To_Lustre.getValueFromParameter(...
+                                parent, ...
+                                parent,...
+                                parent.(param));
+                            return;
+                        end    
                         Value = evalin('base', param);
                         if ischar(Value)
                             [Value, valueDataType, status] = ...
