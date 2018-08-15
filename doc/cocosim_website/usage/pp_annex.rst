@@ -197,5 +197,5 @@ for example), and in this case, the model generated won’t support this
 input of information. The block should be replaced by a lookup table
 with a clock in input for example if we want this data to go threw the
 compilation. Or the user can make assumptions about its input (see
-section `[sec:obs_vv] <#sec:obs_vv>`__) to give an abstraction on the
+section :any:`ref <sec:obs_vv>`) to give an abstraction on the
 inport and use an inport instead.

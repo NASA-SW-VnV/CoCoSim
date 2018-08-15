@@ -6,14 +6,14 @@ perform analyzes or compilation of that Lustre models and provide back
 information at Simulink level.
 
 For the moment CoCoSim is offering the following features: verification
-enfines (cf. Sect. \ `0.1 <#sec:bk-end:verif>`__), code generation (cf.
-Sect. \ `0.2 <#sec:bk-end:codegen>`__), invariant generation (cf.
-Sect. \ `0.3 <#sec:bk-end:invariant_gen>`__), test-case generation and
-coverage evaluation (cf. Sect. \ `0.4 <#sec:bk-end:tests>`__), Support
+enfines (cf. Sect. \ :ref:`ref <sec:bk-end:verif>`), code generation (cf.
+Sect. \ :ref:`ref <sec:bk-end:codegen>`), invariant generation (cf.
+Sect. \ :ref:`ref <sec:bk-end:invariant_gen>`), test-case generation and
+coverage evaluation (cf. Sect. \ :ref:`ref <sec:bk-end:tests>`), Support
 of specification, including Lustre to Simulink translation (cf.
-Sect. \ `0.5 <#sec:bk-end:spec>`__), compilation validation (cf.
-Sect. \ `0.6 <#sec:bk-end:validation>`__), and code analysis (cf.
-Sect. \ `0.7 <#sec:bk-end:codeverif>`__).
+Sect. \ :ref:`ref <sec:bk-end:spec>`), compilation validation (cf.
+Sect. \ :ref:`ref <sec:bk-end:validation>`), and code analysis (cf.
+Sect. \ :ref:`ref <sec:bk-end:codeverif>`).
 
 As mentioned in the introduction, the goal of the framework is to ease
 the application of formal methods for Simulink-based systems. The
@@ -45,7 +45,7 @@ Code Generation
 
 CoCoSim generates C, Rust or Lustre code from Simulink model. This
 compilation process is validated by equivalence testing and equivalence
-checking. See section `[sec:validation] <#sec:validation>`__.
+checking. See section :ref:`ref <sec:validation>`.
 
 .. _sec:bk-end:invariant_gen:
 
@@ -80,7 +80,7 @@ so-called counter-example is a test case that activates the property,
 eventually. This unrolling process is called BMC: bounded
 model-checking.
 
-Figure \ `[fig:test_gen] <#fig:test_gen>`__ presents the set of
+Figure \ :ref:`ref <fig:test_gen>` presents the set of
 approaches that can be run at Lustre level and then propagated back as
 test case at the Simulink level.
 
@@ -196,16 +196,18 @@ Note that the process may not succeed for each condition since the
 property can be (1) unreachable or (2) undecidable to the SMT solver
 behind the BMC analyzer.
 
+
 .. raw:: latex
 
    \centering
+.. _fig:test_gen:
 
 .. figure:: /graphics/arch_test.*
    :alt: Combinaison of approaches to support test generation.
 
    Combinaison of approaches to support test generation.
 
-[fig:test_gen]
+
 
 .. _sec:bk-end:spec:
 
@@ -214,7 +216,7 @@ Lustre to Simulink
 
 This back-end is interested in translating any Lustre code to pure
 Simulink. It has many uses. We use this compilation process for our
-compiler validation. See section `[sec:validation] <#sec:validation>`__.
+compiler validation. See section :ref:`ref <sec:validation>`.
 It can also be used to annotate Simulink models with specification
 written as Lustre models.
 
@@ -224,7 +226,7 @@ Compiler Validation
 -------------------
 
 This back-end is interested in validating the compiler from Simulink to
-Lustre. See section `[sec:validation] <#sec:validation>`__.
+Lustre. See section :ref:`ref <sec:validation>`.
 
 .. _sec:bk-end:codeverif:
 

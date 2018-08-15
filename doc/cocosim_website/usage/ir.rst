@@ -4,9 +4,9 @@ The internal representation (IR) allows to export the simplified model
 into a hierarchical tree-based structure. We present here the structure
 and the syntax of its fields. The structure is specific to the input
 model. We handle a restricted subset of Simulink components, cf
-Sec. \ `0.0.1 <#sec:simulink_ir>`__, a subset of Stateflow automata, cf
-Sec. \ `0.0.2 <#sec:stateflow_ir>`__ and some basic Matlab expressions,
-cf Sec. \ `0.0.3 <sec:matlab_ir>`__.
+Sec. \ :ref:`ref <sec:simulink_ir>`, a subset of Stateflow automata, cf
+Sec. \ :ref:`ref <sec:stateflow_ir>` and some basic Matlab expressions,
+cf Sec. \ :ref:`ref <sec:matlab_ir>`.
 
 .. _sec:simulink_ir:
 
@@ -203,6 +203,7 @@ attributes:
    int16 ...) and its initial value when defined.
 
 .. _sec:matlab_ir:
+
 Matlab IR
 ---------
 
@@ -211,20 +212,21 @@ ANTLR4 format and java source code handling this grammar can be found in
 ``cocosim2/src/IR/matlab_IR/EM``. The user can define a new
 transformation from Matlab AST to another language or format. Following
 the existing example of transforming Matlab to Json format may help.
-Fig. \ `[fig:matlab_ir_ex] <#fig:matlab_ir_ex>`__ shows an example of a
+Fig. \ :ref:`ref <fig:matlab_ir_ex>` shows an example of a
 simple Matlab function and its equivalent in Json format.
 
 .. raw:: latex
 
    \centering
+.. _fig:matlab_ir_ex:
 
-| |Internal representation of a simple Matlab code in Json format.|
-| |Internal representation of a simple Matlab code in Json format.|
+.. figure:: /graphics/matlab_code_ex.*
+    :alt: Internal representation of a simple Matlab code in Json format.
 
-[fig:matlab_ir_ex]
+.. figure:: /graphics/matlab_ir_ex.*
+
+    Internal representation of a simple Matlab code in Json format. 
 
 Note that the subset of Matlab expressions accepted of extremelly
 limited and cannot involve sophisticated Matlab functions.
 
-.. |Internal representation of a simple Matlab code in Json format.| image:: matlab_code_ex
-.. |Internal representation of a simple Matlab code in Json format.| image:: matlab_ir_ex

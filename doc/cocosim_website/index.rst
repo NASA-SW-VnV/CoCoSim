@@ -13,6 +13,7 @@ Welcome to CoCoSim Documentation's documentation!
    usage/introduction
    usage/installation
    usage/quickstart
+   usage/specification.rst
    usage/frontEnd
    usage/backendFeatures
 

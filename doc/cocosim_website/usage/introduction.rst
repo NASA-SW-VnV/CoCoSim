@@ -9,19 +9,19 @@ call to a verification tool. By design, each phase is highly
 parametrizable through an API and could then be used for different
 purposes depending on the customization.
 
-The Figure \ `[fig:cocosim_arch] <#fig:cocosim_arch>`__ outlines the
+The Figure \ :ref:`ref <fig:cocosim_arch>` outlines the
 different steps.
 
 .. raw:: latex
 
    \centering
+.. _fig:cocosim_arch:
 
 .. figure:: /graphics/cocosim2_framework.*
    :alt: CoCoSim framework
 
    CoCoSim framework
 
-[fig:cocosim_arch]
 
 Front-End.
 ----------

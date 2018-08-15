@@ -1,3 +1,5 @@
+Formalize requirements as Simulink components
+=============================================
 .. role:: raw-latex(raw)
    :format: latex
 ..
@@ -20,10 +22,10 @@ their definition and their use to support verification and validation
 activities.
 
 Synchronous language and Synchronous observers
-==============================================
+----------------------------------------------
 
 A glance at synchronous dataflow languages
-------------------------------------------
+""""""""""""""""""""""""""""""""""""""""""
 
 Let us first outline the specificities of synchronous languages and draw
 some parallel between constructs.
@@ -191,7 +193,7 @@ transition.
 .. _sec:spec_means:
 
 Means of expressing the axiomatics semantics: varieties of synchronous observers
---------------------------------------------------------------------------------
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 In :raw-latex:`\cite{DBLP:journals/cacm/Hoare69}`, “An Axiomatic Basis
 for Computer Programming”, Hoare defines a deductive reasoning to
@@ -371,7 +373,7 @@ creation of a spurious algebraic loop.
 .. _sec:obs_vv:
 
 Synchronous observers to support V&V activities
-===============================================
+-----------------------------------------------
 
 Once the specification is formalized, as regular Simulink components,
 one can rely on them to support numerous verification and validation
@@ -412,7 +414,7 @@ requirement.
 [fig:example_spec_run]
 
 Synthesis of test oracles
--------------------------
+"""""""""""""""""""""""""
 
 Each formalized requirement acts as a test oracle. The synchronous
 observer defines a predicate. Therefore its boolean output corresponds
@@ -431,7 +433,7 @@ This opens the opportunity to produce C level or binaries implementing
 test oracles.
 
 Computation of metrics regarding test suites
---------------------------------------------
+""""""""""""""""""""""""""""""""""""""""""""
 
 When considering a large test suite, it is important to evaluate the
 validity of each requirement for each test case but also to measure the
@@ -451,7 +453,7 @@ Metrics and coverage of requirements can then be automatized, either at
 model level, or at code level.
 
 Supporting the generation of test cases
----------------------------------------
+"""""""""""""""""""""""""""""""""""""""
 
 Since the property is expressed in the same language as the model it can
 be easily expressed in the intermediate language and, eventually in C.
@@ -462,7 +464,7 @@ condition. Synthesis of traces, ie. test case, containing real/floats
 values is much more challenging and requires other techniques.
 
 Consistency of specification
-----------------------------
+""""""""""""""""""""""""""""
 
 Among the possibilities, let us mention also the evaluation or
 verification of the consistency of the specification. At the contract
