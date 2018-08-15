@@ -7,11 +7,14 @@ Welcome to CoCoSim Documentation's documentation!
 =================================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Contents:
-
+   
+   usage/introduction
    usage/installation
    usage/quickstart
+   usage/frontEnd
+   usage/backendFeatures
 
 
 

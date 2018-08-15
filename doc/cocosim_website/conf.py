@@ -41,6 +41,7 @@ release = u''
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.githubpages',
+    'sphinx.ext.mathjax',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -158,3 +159,9 @@ texinfo_documents = [
 
 
 # -- Extension configuration -------------------------------------------------
+mathjax_path='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js'
+mathjax_options = {}
+mathjax_config = {
+    'extensions': ['tex2jax.js'],
+    'jax': ['input/TeX', 'output/HTML-CSS'],
+}
