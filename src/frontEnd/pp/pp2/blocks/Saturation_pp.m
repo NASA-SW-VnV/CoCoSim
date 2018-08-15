@@ -15,8 +15,9 @@ if ~ ( isempty( saturation_list ) )
         try
             l = evalin('base', lower_limit);
             u = evalin('base', upper_limit);
-            UpperIsInf = isinf(u);
-            LowerIsInf = isinf(l);
+            %calling all twise in the case of l or u are N-D arrays
+            UpperIsInf = all(all(isinf(u)));
+            LowerIsInf = all(all(isinf(l)));
         catch
             UpperIsInf= false;
             LowerIsInf = false;
