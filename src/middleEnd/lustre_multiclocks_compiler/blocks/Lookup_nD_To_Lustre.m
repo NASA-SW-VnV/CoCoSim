@@ -299,7 +299,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                 end
                 %body = sprintf('%s%s  else %s ;\n\t', body,code,table_elem{numel(table_elem)});
                 thens{numel(table_elem)} = table_elem{numel(table_elem)};
-                if NumberOfTableDimensions == 1
+                if numel(table_elem) == 1
                     rhs = IteExpr(conds{1},thens{1},thens{2});
                 else
                     rhs = IteExpr.nestedIteExpr(conds, thens);
