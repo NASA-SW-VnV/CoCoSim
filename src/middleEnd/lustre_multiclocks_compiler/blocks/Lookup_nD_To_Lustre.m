@@ -162,7 +162,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
             % doing subscripts to index in Lustre.  Need subscripts, and
             % dimension jump.
             shapeNodeSign = Lookup_nD_To_Lustre.getShapeBoundingNodeSign(blkParams.NumberOfTableDimensions);
-            [body, vars,dimJump] = ...
+            [body, vars,Ast_dimJump] = ...
                 Lookup_nD_To_Lustre.addDimJumpCode(blkParams.NumberOfTableDimensions,...
                 blk_name,indexDataType,blkParams.BreakpointsForDimension);
             body_all = [body_all  body];
@@ -170,19 +170,19 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
             
             [body, vars] = Lookup_nD_To_Lustre.addShapeFunctionCode(...
                 numBoundNodes,shapeNodeSign,blk_name,indexDataType,table_elem,...
-                blkParams.NumberOfTableDimensions,index_node,dimJump,blkParams.skipInterpolation,u_node);
+                blkParams.NumberOfTableDimensions,index_node,Ast_dimJump,blkParams.skipInterpolation,u_node);
             body_all = [body_all  body];
             vars_all = [vars_all  vars];
             
             % now that we have all needed variables, write final interp
             % code
-            [body, vars] = Lookup_nD_To_Lustre.addFinalInterpCode( ...
+            [bodyf, varsf] = Lookup_nD_To_Lustre.addFinalInterpCode( ...
                 outputs,inputs,blkParams.skipInterpolation,indexDataType,blk_name,...
                 blkParams.InterpMethod,blkParams.NumberOfTableDimensions,numBoundNodes,blk,...
                 N_shape_node,coords_node,lusInport_dt,blkParams.ExtrapMethod,one,...
-                zero,shapeNodeSign,u_node,index_node,dimJump,table_elem);
-            body_all = [body_all  body];
-            vars_all = [vars_all  vars];
+                zero,shapeNodeSign,u_node,index_node,Ast_dimJump,table_elem);
+            body_all = [body_all  bodyf];
+            vars_all = [vars_all  varsf];
             
             extNode = LustreNode();
             extNode.setName(node_header.NodeName)
@@ -205,7 +205,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                 skipInterpolation,indexDataType,blk_name,InterpMethod,...
                 NumberOfTableDimensions,numBoundNodes,blk,N_shape_node,...
                 coords_node,lusInport_dt,ExtrapMethod,one,zero,shapeNodeSign,...
-                u_node,index_node,dimJump,table_elem)
+                u_node,index_node,Ast_dimJump,table_elem)
             % This function carries out the interpolation depending on algorithm
             % option.  For the flat option, the value at the lower bounding
             % breakpoint is used. For the nearest option, the closest
@@ -232,10 +232,10 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                         curIndex =  index_node{j,1};
                         if j==1
                             %value = sprintf('%s + %s*%d',value,curIndex, dimJump(j));
-                            terms{j} = BinaryExpr(BinaryExpr.MULTIPLY,curIndex, dimJump(j));
+                            terms{j} = BinaryExpr(BinaryExpr.MULTIPLY,curIndex, Ast_dimJump{j});
                         else
                             %value = sprintf('%s + (%s-1)*%d',value,curIndex, dimJump(j));
-                            terms{j} = BinaryExpr(BinaryExpr.MULTIPLY,BinaryExpr(BinaryExpr.MINUS,curIndex,IntExpr(1)), dimJump(j));
+                            terms{j} = BinaryExpr(BinaryExpr.MULTIPLY,BinaryExpr(BinaryExpr.MINUS,curIndex,IntExpr(1)), Ast_dimJump{j});
                         end
                     end
                 else   % 'Nearest' case
@@ -267,18 +267,20 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                     for j=1:NumberOfTableDimensions
                         if j==1
                             %value = sprintf('%s + %s*%d',value,nearestIndex{j}, dimJump(j));
-                            terms{j} = BinaryExpr(BinaryExpr.MULTIPLY,nearestIndex{j}, dimJump(j));
+                            terms{j} = BinaryExpr(BinaryExpr.MULTIPLY,nearestIndex{j}, Ast_dimJump{j});
                         else
                             %value = sprintf('%s + (%s-1)*%d',value,nearestIndex{j}, dimJump(j));
-                            terms{j} = BinaryExpr(BinaryExpr.MULTIPLY,BinaryExpr(BinaryExpr.MINUS,nearestIndex{j},IntExpr(1)), dimJump(j));
+                            terms{j} = BinaryExpr(BinaryExpr.MULTIPLY,BinaryExpr(BinaryExpr.MINUS,nearestIndex{j},IntExpr(1)), Ast_dimJump{j});
                         end
                     end
                 end
                 %body = sprintf('%s%s = %s;\n\t', body,returnTableIndex{1}, value);
                 if NumberOfTableDimensions == 1
                     rhs = terms{1};
+                elseif NumberOfTableDimensions == 2
+                    rhs = BinaryExpr(BinaryExpr.PLUS,terms{1},terms{2});
                 else
-                    rhs = BinaryExpr(BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,terms));
+                    rhs = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,terms);
                 end
                 body{end+1} = LustreEq(returnTableIndex{1},rhs);
                 
@@ -287,7 +289,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                 conds = cell(1,numel(table_elem)-1);
                 thens = cell(1,numel(table_elem));
                 for j=1:numel(table_elem)-1
-                    conds{j} = BinaryExpr(BinaryExpr.EQ,returnTableIndex{1},j);
+                    conds{j} = BinaryExpr(BinaryExpr.EQ,returnTableIndex{1},IntExpr(j));
                     thens{j} = table_elem{j};
 %                     if j==1
 %                         code = sprintf('%s  if(%s = %d) then %s\n\t', code, returnTableIndex{1},j,table_elem{j});
@@ -372,7 +374,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
         
         function [body, vars] = addShapeFunctionCode(numBoundNodes,...
                 shapeNodeSign,blk_name,indexDataType,table_elem,...
-                NumberOfTableDimensions,index_node,dimJump,skipInterpolation,u_node)
+                NumberOfTableDimensions,index_node,Ast_dimJump,skipInterpolation,u_node)
             % This function defines and calculating shape function values for the
             % interpolation point
             body = {};   % body may grow if ~skipInterpolation
@@ -398,14 +400,14 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                     end
                     if j==1
                         %value = sprintf('%s + %s*%d',value,curIndex, dimJump(j));
-                        terms{j} = BinaryExpr(BinaryExpr.MULTIPLY,curIndex,IntExpr(dimJump(j)));
+                        terms{j} = BinaryExpr(BinaryExpr.MULTIPLY,curIndex,Ast_dimJump{j});
                     else
                         %value = sprintf('%s + (%s-1)*%d',value,curIndex, dimJump(j));
                         terms{j} = BinaryExpr(BinaryExpr.MULTIPLY,...
                             BinaryExpr(BinaryExpr.MINUS,...
                                         curIndex, ...
                                         IntExpr(1)),...
-                            IntExpr(dimJump(j)));
+                            Ast_dimJump{j});
                     end
                 end
                 %body = sprintf('%s%s = %s;\n\t', body,boundingi{i}, value);
@@ -441,7 +443,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
             end
         end
         
-        function [body, vars,dimJump] = ...
+        function [body, vars,Ast_dimJump] = ...
                 addDimJumpCode(NumberOfTableDimensions,blk_name,...
                 indexDataType,BreakpointsForDimension)
             %  This function defines dimJump.  table breakpoints and values are inline in Lustre, the
@@ -456,6 +458,8 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
             dimJump = ones(1,NumberOfTableDimensions);
             L_dimjump = cell(1,NumberOfTableDimensions);
             L_dimjump{1} =  VarIdExpr(sprintf('%s_dimJump_%d',blk_name,1));
+            Ast_dimJump = cell(1,NumberOfTableDimensions);
+            Ast_dimJump{1} = IntExpr(1);
             %vars = sprintf('%s\t%s:%s;\n',vars,L_dimjump{1},indexDataType);
             vars{1} = LustreVar(L_dimjump{1},indexDataType);
             %body = sprintf('%s%s = %d;\n\t', body,L_dimjump{1}, dimJump(1));
@@ -469,6 +473,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                 end
                 %body = sprintf('%s%s = %d;\n\t', body,L_dimjump{i}, dimJump(i));
                 body{i} = LustreEq(L_dimjump{i},IntExpr(dimJump(i)));
+                Ast_dimJump{i} = IntExpr(dimJump(i));
             end
         end
         
