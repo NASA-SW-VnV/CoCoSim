@@ -193,7 +193,9 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
             extNode.setMetaInfo('external node code for doing Lookup_nD');
             
             if BackendType.isKIND2(backend) && ~isLookupTableDynamic
-                contract = Lookup_nD_To_Lustre.getContractBody(blkParams,inputs,outputs);
+                contractBody = Lookup_nD_To_Lustre.getContractBody(blkParams,inputs,outputs);
+                contract = LustreContract();
+                contract.setBody(contractBody);
                 extNode.setLocalContrac(contract);
             end
             main_vars = outputs_dt;
