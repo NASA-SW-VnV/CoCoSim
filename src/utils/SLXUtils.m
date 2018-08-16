@@ -139,7 +139,7 @@ classdef SLXUtils
             already_pp = hasVariable(hws,'already_pp') && getVariable(hws,'already_pp') == 1;
         end
         
-        %% Get epsilon of tolerance from floiting values between lustrec and SLX
+        %% Get percentage of tolerance from floiting values between lustrec and SLX
         function eps = getLustrescSlxEps(model_path)
             [~, model, ~ ] = fileparts(model_path);
             if ~bdIsLoaded(model); load_system(model_path); end
@@ -147,7 +147,7 @@ classdef SLXUtils
             if hasVariable(hws,'lustrec_slx_eps') 
                 eps = getVariable(hws,'lustrec_slx_eps');
             else
-                eps = 1e-4;
+                eps = 1e-2;
             end
         end
         

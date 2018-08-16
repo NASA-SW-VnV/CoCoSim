@@ -1374,7 +1374,13 @@ classdef LustrecUtils < handle
                             if yout_values(j)==inf
                                 diff=0;
                             else
-                                diff = abs(yout_values(j)-output_val);
+                                if yout_values(j) ~= 0
+                                    % percentage of difference
+                                    diff = 100*abs(...
+                                        (yout_values(j)-output_val)/yout_values(j))
+                                else
+                                    diff = abs(output_val);
+                                end
                             end
                             valid = valid && (diff<eps);
                             if  ~valid
@@ -1607,7 +1613,7 @@ classdef LustrecUtils < handle
                     display_msg(f_msg, MsgType.RESULT, 'validation', '');
                     LustrecUtils.show_CEX(...
                         error_index, input_struct, yout_signals, outputs_array );
-                    f_msg = sprintf('difference between outputs %s is :%2.10f\n',diff_name, diff);
+                    f_msg = sprintf('difference between outputs %s is :%2.10f\%\n',diff_name, diff);
                     display_msg(f_msg, MsgType.RESULT, 'CEX', '');
                 else
                     GUIUtils.update_status('Translation is valid');
