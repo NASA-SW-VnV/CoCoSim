@@ -60,31 +60,33 @@ The first component of the IR is the meta data. It contains informations
 such as date of creation of the IR or model path. The model
 representation is rather straightforward, each block is defined as its
 set of properties and values. The
-Figure \ `[fig:IR_SL_1] <#fig:IR_SL_1>`__ presents a simple Simulink
+Figure \ :ref:`ref <fig:IR_SL_1>` presents a simple Simulink
 model computing the absolute value of an input flow and
-Figure \ `[fig:IR_SL_2] <#fig:IR_SL_2>`__ its IR.
+Figure \ :ref:`ref <fig:IR_SL_2>` its IR.
 
 .. raw:: latex
 
    \centering
+.. _fig:IR_SL_1:
 
 .. figure:: /graphics/simple.*
    :alt: Absolute value subsystem.
 
    Absolute value subsystem.
 
-[fig:IR_SL_1]
+
 
 .. raw:: latex
 
    \centering
+.. _fig:IR_SL_2:
 
 .. figure:: /graphics/ir_simple.*
    :alt: Absolute value subsystem intermediate representation.
 
    Absolute value subsystem intermediate representation.
 
-[fig:IR_SL_2]
+
 
 .. _sec:stateflow_ir:
 

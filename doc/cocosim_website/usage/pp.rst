@@ -1,24 +1,25 @@
 Preprocessing blocks
 ====================
 The idea behind the pre-processing (as described in
-Fig. \ `[fig:pp_blocks] <#fig:pp_blocks>`__) is to transform a Simulink
+Fig. \ :ref:`ref <fig:pp_blocks>`) is to transform a Simulink
 model with complex blocks to one that uses basic Simulink blocks.
 
 .. raw:: latex
 
    \centering
+.. _fig:pp_blocks:
 
 .. figure:: /graphics/pp_blocks.*
    :alt: Some of pre-processing libraries.
 
    Some of pre-processing libraries.
 
-[fig:pp_blocks]
 
-For example Fig `[fig:pp_ex1] <#fig:pp_ex1>`__ illustrates the
+
+For example Fig :ref:`ref <fig:pp_ex1>` illustrates the
 pre-processing of a Saturation block: such a block can, without loss of
 precision, be transformed into a combination of min and max operators.
-Fig. \ `[fig:pp_ex23] <#fig:pp_ex23>`__ proposes the expression of a
+Fig. \ :ref:`ref <fig:pp_ex23>` proposes the expression of a
 ``TransferFcn`` block as a sub-system describing its linear system
 realization. This process can be applied on a discrete transfer function
 without loss of precision, while its application to continuous transfer
@@ -27,21 +28,24 @@ function can be appropriate or not depending on the context.
 .. raw:: latex
 
    \centering
+.. _fig:pp_ex1:
 
 .. figure:: /graphics/pp_ex1.*
    :alt: Example of simplifying the Saturation block.
 
    Example of simplifying the Saturation block.
 
-[fig:pp_ex1]
+
 
 .. raw:: latex
 
    \centering
+.. _fig:pp_ex23:
 
-| 
+.. figure:: /graphics/pp_ex2.*
+.. figure:: /graphics/pp_ex3.*
 
-[fig:pp_ex23]
+    Example of pre-processing the TransferFcn block.
 
 We present here the Matlab function performing the pre-processing. Then
 we present how the pre-processing can be tuned and extended.
@@ -109,34 +113,24 @@ Configure pre-processing order programmatically
 
 The function call order is specified in ``main/pp_order.m``. The
 pre-processing tree is presented in
-Fig. \ `[fig:pp_tree] <#fig:pp_tree>`__.
+Fig. \ :ref:`ref <fig:pp_tree>`.
 
 .. raw:: latex
 
    \centering
 
 .. raw:: latex
+.. _fig:pp_tree_order:
 
-   \subfloat[Pre-Processing tree]{
-         \includegraphics[scale=0.5]{pp_tree}
-         \label{fig:pp_tree}
-   %      \caption{Pre-Processing tree}
-       }
+.. figure:: /graphics/pp_tree.*
+.. figure:: /graphics/pp_order.*
 
-.. raw:: latex
 
-   \subfloat[Pre-Processing configuration file]{
-         \includegraphics[scale=0.45]{pp_order}
-         \label{fig:pp_order}
-   %      \caption{Pre-Processing configuration file.}
-       }
-
-[fig:pp_tree_order]
 
 The ``std_pp`` and ``pp2`` folders are two libraries that offer some
 pre-processing functions. ``std_pp`` refers to the standard library from
 CMU while ``pp2`` is from NASA. The file ``main/pp_order.m`` (Fig.
-`[fig:pp_order] <#fig:pp_order>`__) defines which functions have to be
+:ref:`ref <fig:pp_tree_order>`) defines which functions have to be
 executed and their order. ``pp_handled_blocks`` and
 ``pp_unhandled_blocks`` are variables defining accepted and rejected
 blocks. Functions are defined thanks to their relative path to the
@@ -157,20 +151,21 @@ GUI-order configuration
 """""""""""""""""""""""
 
 An configuration GUI (Fig.
-`[fig:pp_user_config] <#fig:pp_user_config>`__) helps the user to define
+:ref:`ref <fig:pp_user_config>`) helps the user to define
 the order of functions and adding new functions. It can be called using
 the function ``pp_user_config`` in Matlab command line.
 
 .. raw:: latex
 
    \centering
+.. _fig:pp_user_config:
 
 .. figure:: /graphics/pp_user_config.*
    :alt: Pre-Processing user configuration interface
 
    Pre-Processing user configuration interface
 
-[fig:pp_user_config]
+
 
 Extending Pre-Processing Libraries
 ----------------------------------
@@ -180,10 +175,12 @@ to add the new functions in one of the folders ``pp/pp2`` or
 ``pp/str_pp``. Any function added to the previous folders will be
 executed unless given priority -1. The user can also define his personal
 folder. In that case, the user should follow the configuration steps in
-section `0.0.2 <#sec:pp_config>`__.
+section :any:`ref <sec:pp_config>`.
 
 Existing libraries.
 """""""""""""""""""
 
-Please refer to section `[sec:pp_annex] <#sec:pp_annex>`__ for more
+Please refer to section :any:`ref <sec:pp_annex>` for more
 details.
+
+

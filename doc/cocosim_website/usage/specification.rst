@@ -38,7 +38,7 @@ program itself but more like a meta information required for further
 developments such as the scheduling of multiple processes. Synchronous
 models assume that the processing time of functions is immediate and
 communication is assumed
-instantaneous :raw-latex:`\cite{DBLP:journals/pieee/BenvenisteCEHGS03}`.
+instantaneous :cite:`DBLP:journals/pieee/BenvenisteCEHGS03`.
 These unreasonable hypotheses allow to separate the concerns: on the one
 hand, a functional description of the computation – the model –, and, on
 the other hand, physical constraints: the evaluation of the function
@@ -82,7 +82,7 @@ some elements about its syntax and semantics.
 
 .. _sec:lustre:
 
-Lustre :raw-latex:`\cite{DBLP:conf/popl/CaspiPHP87,lustre2}` and relationship to Simulink
+Lustre :cite:`DBLP:conf/popl/CaspiPHP87` :cite:`lustre2` and relationship to Simulink
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **Lustre** is a synchronous language for modeling systems of synchronous
@@ -159,13 +159,13 @@ Extensions to model automata
 All of these frameworks provide extensions to express automata. In the
 Matlab context, Stateflow can support the definition of such automata.
 Stateflow is a toolbox developed by TheMathWorks that extends
-Simulink :raw-latex:`\cite{simulink}` with an environment for modeling
+Simulink :cite:`simulink` with an environment for modeling
 and simulating state machines as reactive systems. A Stateflow diagram
 can be included in a Simulink model as one of the blocks interacting
 with other Simulink components using input and output signals. Stateflow
 is a highly complex language with no formal semantics [1]_: its
 semantics is only described through examples on TheMathWorks
-website :raw-latex:`\cite{stateflow}` without any formal definition. A
+website :cite:`stateflow` without any formal definition. A
 Stateflow diagram has a hierarchical structure, which can be either
 arranged in *parallel* in which all states are eventually executed,
 following a specific order; or *sequentially*, in which states are
@@ -195,7 +195,7 @@ transition.
 Means of expressing the axiomatics semantics: varieties of synchronous observers
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-In :raw-latex:`\cite{DBLP:journals/cacm/Hoare69}`, “An Axiomatic Basis
+In :cite:`DBLP:journals/cacm/Hoare69`, “An Axiomatic Basis
 for Computer Programming”, Hoare defines a deductive reasoning to
 validate code level annotations. This paper introduces the concept of
 Hoare triple :math:`\{ Pre \} code \{ Post \}` as a way to express the
@@ -216,7 +216,7 @@ not fully specified and its behavior is not defined.
 
 This idea has been naturally extended to synchronous dataflow languages
 with the concept of synchronous
-observer :raw-latex:`\cite{DBLP:conf/amast/HalbwachsLR93,Westhead96verificationof,Rushby:SAS14}`.
+observer :cite:`DBLP:conf/amast/HalbwachsLR93` :cite:`Westhead96verificationof` :cite:`Rushby:SAS14`.
 A synchronous observer encodes a predicate corresponding to the
 postcondition of the Hoare triple. However since the semantics is not
 expressed over values but flows of values, the principle of Hoare triple
@@ -245,24 +245,24 @@ precondition. It is valid if then the postcondition always applies.
 
 Graphically speaking a synchronous observer is a subsystem that accesses
 to some internal flows and computes a boolean output.
-Figure \ `[fig:sl-simple-obs] <#fig:sl-simple-obs>`__ performs such a
+Figure \ :ref:`ref <fig:sl-simple-obs>` performs such a
 computation and verifies that a specific relationship between its two
 inputs is always valid.
 
 .. raw:: latex
 
    \centering
+.. _fig:sl-simple-obs:
 
 .. figure:: /graphics/sl_synchronous_obs.jpg
    :alt: Simple synchronous observer as Simulink subsystem
-   :name: fig:sl-simple-obs
 
    Simple synchronous observer as Simulink subsystem
 
 In control theory we speak about an open-loop property: the property can
 be expressed over the controller inputs, outputs or memories without
 knowledge of the plant semantics.
-Figure \ `[fig:cocospec-open] <#fig:cocospec-open>`__ presents the
+Figure \ :ref:`ref <fig:cocospec-open>` presents the
 association of such a synchronous observer, an open-loop property,
 attached to a component element.
 
@@ -284,9 +284,9 @@ specification by expressing hypotheses, ie. the precondition of the
 Hoare triples, or modes, conditional behavior depending on some
 conditions.
 
-In Lustre, recent works :raw-latex:`\cite{Champion2016}` proposed a
+In Lustre, recent works :cite:`Champion2016` proposed a
 dedicated language to annotate Lustre model with a rich specification.
-Figure \ `[fig:cocospec] <#fig:cocospec>`__ gives an example. The node
+Figure \ :ref:`ref <fig:cocospec>` gives an example. The node
 represents the mode logic of an aircraft controller, deciding whether
 the autopilot is active or not. Its specification is described in a .
 This contract can bind new variables but, more importantly, can specify
@@ -295,44 +295,72 @@ expressed as well as four different modes. Each of these modes is
 guarded by some conditions in the expressions, while a conditional
 postcondition is specified. Last, in the actual Lustre node, the
 contract is declared.
+::
 
-contract ml ( altRequest, fpaRequest, deactivate : bool ; altitude,
-targetAlt : real ) returns ( altEngaged, fpaEngaged : bool ) ; let var
-altRequested = switch(altRequest, deactivate) ; var fpaRequested =
-switch(fpaRequest, deactivate) ; var smallGap = abs(altitude -
-targetAlt) < 200.0 ; assume altitude >= 0.0 ; guarantee targetAlt >= 0.0
-; guarantee not altEngaged or not fpaEngaged ; mode guide210Alt (
-require smallGap ; require altRequested; ensure altEngaged ; ) ; mode
-guide210FPA ( require smallGap ; require fpaRequested ; require not
-altRequested; ensure fpaEngaged; ) ; mode guide180 ( require not
-smallGap ; require fpaRequested; ensure fpaEngaged; ) ; mode guide170 (
-require not smallGap ; require altRequested ; require not fpaRequested;
-ensure altEngaged ; ) ; tel
+  contract ml ( altRequest, fpaRequest, deactivate : bool ; altitude,
+              targetAlt : real ) 
+  returns ( altEngaged, fpaEngaged : bool ) ; 
+  let 
+    var altRequested = switch(altRequest, deactivate) ; 
+    var fpaRequested = switch(fpaRequest, deactivate) ; 
+    var smallGap = abs(altitude - targetAlt) < 200.0 ; 
+    assume altitude >= 0.0 ; guarantee targetAlt >= 0.0;
+    guarantee not altEngaged or not fpaEngaged ; 
+    mode guide210Alt (
+        require smallGap ; 
+        require altRequested; 
+        ensure altEngaged ;
+    ) ; 
+    mode guide210FPA ( 
+      require smallGap ; 
+      require fpaRequested ; 
+      require not altRequested; 
+      ensure fpaEngaged; 
+    ) ;
+    mode guide180 ( 
+      require not smallGap ; 
+      require fpaRequested; 
+      ensure fpaEngaged; 
+    ) ; 
+    mode guide170 (
+      require not smallGap ; 
+      require altRequested ; 
+      require not fpaRequested;
+      ensure altEngaged ; 
+    ) ; 
+  tel
 
-node ml ( altRequest, fpaRequest, deactivate : bool ; altitude,
-targetAlt : real ) returns ( altEngaged, fpaEngaged : bool );
-(*@contract import mlSpec ( altRequest, fpaRequest, deactivate : bool ;
-altitude, targetAlt : real ) returns ( altEngaged, fpaEngaged : bool );
-\*) let ... tel
+:: 
+
+  node ml ( altRequest, fpaRequest, deactivate : bool ; altitude,
+  targetAlt : real ) 
+  returns ( altEngaged, fpaEngaged : bool );
+  (*@contract 
+    import mlSpec ( altRequest, fpaRequest, deactivate : bool ;
+                    altitude, targetAlt : real ) 
+    returns ( altEngaged, fpaEngaged : bool );
+  \*) 
+  let ... tel
 
 At Simulink level dedicated constructs, such as shown in
-Fig. \ `[fig:sl-contracts_with_modes] <#fig:sl-contracts_with_modes>`__,
+Fig. \ :ref:`ref <fig:sl-contracts_with_modes>`,
 ease the definition of such model-based contracts.
 
 .. raw:: latex
 
    \centering
+.. _fig:sl-contracts_with_modes:
 
 .. figure:: /graphics/kind_contract.jpg
    :alt: Modes as Simulink contracts
 
    Modes as Simulink contracts
 
-[fig:sl-contracts_with_modes]
+
 
 Regarding the complexity of the synchronous observer node, it can
 contain any legal Simulink or Scade/Lustre content. As an example,
-Figure. \ `[fig:cocospec-closed] <#fig:cocospec-closed>`__ presents a
+Figure. \ :ref:`ref <fig:cocospec-closed>` presents a
 template to support the expression of closed loop properties. This
 observer contains both the plant model and a set of closed and open-loop
 properties. Within that specification subsystem, observers can have
@@ -352,7 +380,7 @@ However, the insertion of the closed-loop specification node within a
 model is not as convenient that it is for an open-loop property. The
 open one could be defined only with probes, while the closed one needs,
 maybe artificially, to reconstruct a feedback loop. This is presented in
-Figure. \ `[fig:cocospec-closed-injection] <#fig:cocospec-closed-injection>`__.
+Figure. \ :ref:`ref <fig:cocospec-closed-injection>`.
 Note the occurrence of a *specification-based unit delay* to prevent the
 creation of a spurious algebraic loop.
 
@@ -378,26 +406,27 @@ Synchronous observers to support V&V activities
 Once the specification is formalized, as regular Simulink components,
 one can rely on them to support numerous verification and validation
 activities. Let us look at the example in
-Figure \ `[fig:example_spec] <#fig:example_spec>`__ to illustrate these
+Figure \ :ref:`ref <fig:example_spec>` to illustrate these
 various uses.
 
 .. raw:: latex
 
    \centering
+.. _fig:example_spec:
 
 .. figure:: /graphics/example_spec.jpg
    :alt: Example of a specification
 
    Example of a specification
 
-[fig:example_spec]
+
 
 This observer only focuses on a very local property: depending on some
 conditions the controller switches between different control laws. This
 property ensures that the switch is continuous. However simulations
 performed on the whole controller leave no opportunity to evaluate the
 validity of this specific property.
-Figure \ `[fig:example_spec_run] <#fig:example_spec_run>`__ provides one
+Figure \ :ref:`ref <fig:example_spec_run>` provides one
 of such run. While one can consider that the global behavior is
 acceptable, it is important to provide strong arguments for each
 requirement.
@@ -405,13 +434,14 @@ requirement.
 .. raw:: latex
 
    \centering
+.. _fig:example_spec_run:
 
 .. figure:: /graphics/run_simple_ex.jpg
    :alt: One run of the example
 
    One run of the example
 
-[fig:example_spec_run]
+
 
 Synthesis of test oracles
 """""""""""""""""""""""""
@@ -421,7 +451,7 @@ observer defines a predicate. Therefore its boolean output corresponds
 to the validity of the expressed requirement.
 
 This block is runable and can be used at various levels. As visible in
-Figure \ `[fig:example_spec] <#fig:example_spec>`__ additional elements
+Figure \ :ref:`ref <fig:example_spec>` additional elements
 could be added to the model to visualize the status of the property. In
 this specific simulation run, the positive value of the output shows
 that the property was valid during all the execution of that single
@@ -442,7 +472,7 @@ case does not activate a specification. The notion of modes in CoCoSpec
 is appropriate: one need to provide figures regarding the evaluation of
 each mode by a test suite.
 
-The Figure \ `[fig:example_spec] <#fig:example_spec>`__ also provides
+The Figure \ :ref:`ref <fig:example_spec>` also provides
 these elements as internal flows. Each simulation will produce some
 numerical values denoting the activation of the property or some
 meaningful values. In this specific case we compute the number of mode
@@ -486,3 +516,6 @@ predicates expressed over sub-components.
 
 .. [1]
    At least not provided as a reference by the tool provider.
+
+
+.. bibliography:: /references.bib
