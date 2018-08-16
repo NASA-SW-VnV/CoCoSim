@@ -40,8 +40,10 @@ release = u''
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
+    'sphinx.ext.todo',
     'sphinx.ext.githubpages',
     'sphinx.ext.mathjax',
+    'sphinxcontrib.bibtex',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -83,7 +85,7 @@ html_theme = 'alabaster'
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
-html_theme_options = {}
+#html_theme_options = {}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -159,6 +161,12 @@ texinfo_documents = [
 
 
 # -- Extension configuration -------------------------------------------------
+
+# -- Options for todo extension ----------------------------------------------
+
+# If true, `todo` and `todoList` produce output, else they produce nothing.
+todo_include_todos = True
+
 mathjax_path='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js'
 mathjax_options = {}
 mathjax_config = {

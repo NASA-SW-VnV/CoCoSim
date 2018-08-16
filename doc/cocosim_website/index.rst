@@ -13,9 +13,11 @@ Welcome to CoCoSim Documentation's documentation!
    usage/introduction
    usage/installation
    usage/quickstart
-   usage/specification.rst
    usage/frontEnd
    usage/backendFeatures
+   usage/specification
+   usage/use_cases
+   usage/annex
 
 
 
@@ -25,3 +27,5 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
+

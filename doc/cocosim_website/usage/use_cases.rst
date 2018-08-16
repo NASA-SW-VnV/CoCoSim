@@ -24,19 +24,4 @@ Use case : TCM
 The Simulink model can be found in
 https://github.com/coco-team/benchmarks/tree/master/Simulink/tcm.
 
-Use case : DEMETER MNO
-----------------------
 
-Specification
-~~~~~~~~~~~~~
-
-- Presenter quelques propriétés, leur formalisation et le resultat de
-l’evaluation des tests
-
-CoCoSim
-~~~~~~~
-
-\*\* Use case : DEMETER MNO
-
-model du debut: librariry et bloc bidule model2 derouler les
-modifications requises

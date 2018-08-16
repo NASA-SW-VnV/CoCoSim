@@ -1,5 +1,10 @@
-Supported blocks
-================
+.. _sec:pp_annex:
+
+Appendix A
+==========
+
+Supported Pre-processing blocks
+-------------------------------
 
 | The blocks registered in this section are converted into a
   CoCoSim-friendly equivalent, but certain option may not be handled by
@@ -187,7 +192,7 @@ Supported blocks
      and zeros of the function.  
 
 Remarks
--------
+"""""""
 
 The blocks ``FromWorkspace`` are replaced by inports in the top level
 layer of the model, and blocks ``ToWorkspace`` are replaced by outports
