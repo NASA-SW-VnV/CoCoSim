@@ -1130,7 +1130,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
             end
         end
         
-        function y_interp = interp2points(x1, y1, x2, y2, x_interp)
+        function y_interp = interp2points_2D(x1, y1, x2, y2, x_interp)
             b1 = BinaryExpr(BinaryExpr.MINUS,x2,x_interp); 
             b2 = BinaryExpr(BinaryExpr.MINUS,x_interp,x1); 
             n1 = BinaryExpr(BinaryExpr.MULTIPLY,y1,b1);
