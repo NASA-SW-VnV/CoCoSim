@@ -40,26 +40,38 @@ classdef Sigbuilderblock_To_Lustre < Block_To_Lustre
         
         function [codeAst, vars] = getSigBuilderCode(obj,outputs,time,data,blk_name)
             curTime = VarIdExpr(SLX2LusUtils.timeStepStr());
+            % time is nx1 cell if there is more than 1 signal, time is
+            % array of 1xm where m is the number of time index in the time
+            % series
             astTime = {};
             astData = {};
             codeAst = {};
             vars = {};
+            time_array = [];
+            data_array = [];
             for signal_index=1:numel(outputs)
-                for i=1:numel(time{signal_index})
+                if iscell(time)
+                    time_array = time{signal_index};
+                    data_array = data{signal_index};
+                else
+                    time_array = time;
+                    data_array = data;
+                end
+                for i=1:numel(time_array)
                     astTime{signal_index, i} = ...
                         VarIdExpr(sprintf('%s_time_%d_%d',blk_name,signal_index,i));
                     astData{signal_index, i} = ...
                         VarIdExpr(sprintf('%s_data_%d_%d',blk_name,signal_index,i));
-                    codeAst{end+1} = LustreEq(astTime{signal_index, i}, RealExpr(time{signal_index}(i)));
-                    codeAst{end+1} = LustreEq(astData{signal_index, i}, RealExpr(data{signal_index}(i)));
+                    codeAst{end+1} = LustreEq(astTime{signal_index, i}, RealExpr(time_array(i)));
+                    codeAst{end+1} = LustreEq(astData{signal_index, i}, RealExpr(data_array(i)));
                     vars{end+1} = LustreVar(astTime{signal_index, i},'real');
                     vars{end+1} = LustreVar(astData{signal_index, i},'real');
                 end
                 conds = {};
                 thens = {};
                 
-                for i=1:numel(time{signal_index})-1
-                    if time{signal_index}(i) == time{signal_index}(i+1)
+                for i=1:numel(time_array)-1
+                    if time_array(i) == time_array(i+1)
                         continue;
                     else
                         lowerCond = BinaryExpr(BinaryExpr.GTE, ...
@@ -82,7 +94,7 @@ classdef Sigbuilderblock_To_Lustre < Block_To_Lustre
                 if numel(thens) <= 2
                     value = IteExpr(conds{1},thens{1}, thens{2});
                 else
-                    thens{end+1} = astData{signal_index, numel(data{signal_index})};
+                    thens{end+1} = astData{signal_index, numel(data_array)};
                     value = IteExpr.nestedIteExpr(conds, thens);
                 end
                 codeAst{end+1} = LustreEq(outputs{signal_index},value);
