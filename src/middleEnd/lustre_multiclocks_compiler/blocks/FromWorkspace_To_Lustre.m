@@ -17,13 +17,12 @@ classdef FromWorkspace_To_Lustre < Block_To_Lustre
             model_name = model_name{1};
             SampleTime = SLXUtils.getModelCompiledSampleTime(model_name);
             
-%             if strcmp(blk.OutputAfterFinalValue, 'Cyclic repetition')...
-%                     ||  strcmp(blk.OutputAfterFinalValue, 'Extrapolation')
-%                 display_msg(sprintf('Option %s is not supported in block %s',...
-%                     blk.OutputAfterFinalValue, blk.Origin_path), ...
-%                     MsgType.ERROR, 'FromWorkspace_To_Lustre', '');
-%                 return;       
-%             end
+            if strcmp(blk.OutputAfterFinalValue, 'Cyclic repetition')
+                display_msg(sprintf('Option %s is not supported in block %s',...
+                    blk.OutputAfterFinalValue, blk.Origin_path), ...
+                    MsgType.ERROR, 'FromWorkspace_To_Lustre', '');
+                return;       
+            end
             
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             outputDataType = blk.CompiledPortDataTypes.Outport{1};                        
@@ -123,6 +122,9 @@ classdef FromWorkspace_To_Lustre < Block_To_Lustre
                     time_array = [time_array, t_final];
                     data_array = [data_array, df];
                 elseif strcmp(blk.OutputAfterFinalValue, 'Setting to zero')
+                    t_next = time_array(end)+1.e-5*time_array(end);
+                    time_array = [time_array, t_next];
+                    data_array = [data_array, 0.0];                    
                     time_array = [time_array, t_final];
                     data_array = [data_array, 0.0];
                 elseif strcmp(blk.OutputAfterFinalValue, 'Holding final value')
@@ -167,8 +169,7 @@ classdef FromWorkspace_To_Lustre < Block_To_Lustre
                     blk.Origin_path));
             end
             %unsupported options
-            if strcmp(blk.OutputAfterFinalValue, 'Cyclic repetition')...
-                    ||  strcmp(blk.OutputAfterFinalValue, 'Extrapolation')
+            if strcmp(blk.OutputAfterFinalValue, 'Cyclic repetition')
                 obj.addUnsupported_options(...
                     sprintf('Option %s is not supported in block %s',...
                     blk.OutputAfterFinalValue, blk.Origin_path));
