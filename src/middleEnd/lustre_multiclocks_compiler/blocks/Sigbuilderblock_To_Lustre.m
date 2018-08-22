@@ -43,6 +43,8 @@ classdef Sigbuilderblock_To_Lustre < Block_To_Lustre
             % series
             codeAst_all = {};
             vars_all = {};
+            curTime = VarIdExpr(SLX2LusUtils.timeStepStr());
+            interpolation = 1;
             for signal_index=1:numel(outputs)
                 if iscell(time)
                     time_array = time{signal_index};
@@ -54,7 +56,7 @@ classdef Sigbuilderblock_To_Lustre < Block_To_Lustre
                 [codeAst, vars] = ...
                     Sigbuilderblock_To_Lustre.interpTimeSeries(...
                         outputs{signal_index},time_array, data_array, ...
-                        blk_name,signal_index);
+                        blk_name,signal_index,interpolation, curTime);
                 codeAst_all = [codeAst_all codeAst];
                 vars_all = [vars_all vars];
             end
@@ -62,11 +64,10 @@ classdef Sigbuilderblock_To_Lustre < Block_To_Lustre
     end
     methods (Static)
         function [codeAst, vars] = interpTimeSeries(output,time_array, ...
-                data_array, blk_name,signal_index)
+                data_array, blk_name,signal_index,interpolate,curTime)
             % This function write code to interpolate a piecewise linear
             % time data series.  Time and data must be 1xm array where m is
             % number of data points in the time series.
-            curTime = VarIdExpr(SLX2LusUtils.timeStepStr());
             astTime = cell(1,numel(time_array));
             astData = cell(1,numel(time_array));
             codeAst = cell(1,2*numel(time_array)+1);
@@ -96,12 +97,16 @@ classdef Sigbuilderblock_To_Lustre < Block_To_Lustre
                         astTime{i+1});
                     
                     conds{end+1} = BinaryExpr(BinaryExpr.AND, lowerCond, upperCond);
-                    thens{end+1} = ...
-                        Lookup_nD_To_Lustre.interp2points_2D(astTime{i}, ...
-                        astData{i}, ...
-                        astTime{i+1}, ...
-                        astData{i+1}, ...
-                        curTime);
+                    if interpolate
+                        thens{end+1} = ...
+                            Lookup_nD_To_Lustre.interp2points_2D(astTime{i}, ...
+                            astData{i}, ...
+                            astTime{i+1}, ...
+                            astData{i+1}, ...
+                            curTime);
+                    else
+                        thens{end+1} = astData{i};
+                    end
                 end
             end
             
