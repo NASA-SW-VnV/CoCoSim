@@ -17,14 +17,13 @@ classdef FromWorkspace_To_Lustre < Block_To_Lustre
             model_name = model_name{1};
             SampleTime = SLXUtils.getModelCompiledSampleTime(model_name);
             
-            if strcmp(blk.OutputAfterFinalValue, 'Cyclic repetition')...
-                    ||  strcmp(blk.OutputAfterFinalValue, 'Extrapolation')
-                display_msg(sprintf('Option %s is not supported in block %s',...
-                    blk.OutputAfterFinalValue, blk.Origin_path), ...
-                    MsgType.ERROR, 'FromWorkspace_To_Lustre', '');
-                return;
-                
-            end
+%             if strcmp(blk.OutputAfterFinalValue, 'Cyclic repetition')...
+%                     ||  strcmp(blk.OutputAfterFinalValue, 'Extrapolation')
+%                 display_msg(sprintf('Option %s is not supported in block %s',...
+%                     blk.OutputAfterFinalValue, blk.Origin_path), ...
+%                     MsgType.ERROR, 'FromWorkspace_To_Lustre', '');
+%                 return;       
+%             end
             
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             outputDataType = blk.CompiledPortDataTypes.Outport{1};                        
@@ -62,44 +61,95 @@ classdef FromWorkspace_To_Lustre < Block_To_Lustre
                     blk.Origin_path), MsgType.ERROR, 'FromWorkspace_To_Lustre', '');
                 return;
             end
-            dt = t(2) - t(1);
-            if dt ~= SampleTime
-                display_msg(sprintf('SampleTime %s in block %s is different from model SampleTime.',...
-                    num2str(dt), blk.Origin_path), ...
-                    MsgType.ERROR, 'FromWorkspace_To_Lustre', '');
-                return;
-            end
-            initcode = '';
-            if strcmp(blk.OutputAfterFinalValue, 'Setting to zero')
-                initcode = zero;
-            end
-            codes = cell(1, dims);
+
+%             initcode = '';
+%             if strcmp(blk.OutputAfterFinalValue, 'Setting to zero')
+%                 initcode = zero;
+%             end
+            %codes = cell(1, dims);
+            blk_name = SLX2LusUtils.node_name_format(blk);
+            codeAst_all = {};
+            vars_all = {};            
             for i=1:dims
-                for j=nrow:-1:1
-                    a = values(j,i);
-                    if j== nrow
-                        if strcmp(blk.OutputAfterFinalValue, 'Setting to zero')
-                            code = FromWorkspace_To_Lustre.addValue(a, initcode, outLusDT);   
-                        else
-                            if strcmp(outLusDT, 'int')
-                                code = IntExpr(a);
-                            elseif strcmp(outLusDT, 'bool')
-                                code = BooleanExpr(a);
-                            else
-                                code = RealExpr(a);
-                            end
-                        end
-                    else
-                        code = FromWorkspace_To_Lustre.addValue(a, code, outLusDT);                        
-                    end
+                
+                
+                %%%%%%%% old $$$$
+%                 for j=nrow:-1:1
+%                     a = values(j,i);
+%                     if j== nrow
+%                         if strcmp(blk.OutputAfterFinalValue, 'Setting to zero')
+%                             code = FromWorkspace_To_Lustre.addValue(a, initcode, outLusDT);   
+%                         else
+%                             if strcmp(outLusDT, 'int')
+%                                 code = IntExpr(a);
+%                             elseif strcmp(outLusDT, 'bool')
+%                                 code = BooleanExpr(a);
+%                             else
+%                                 code = RealExpr(a);
+%                             end
+%                         end
+%                     else
+%                         code = FromWorkspace_To_Lustre.addValue(a, code, outLusDT);                        
+%                     end
+%                 end
+                %%%%%%%% old $$$$
+                
+                %%%%%%%%%% new code %%%%%%%%%%%
+                time_array = t';
+                data_array = values(:,i)';
+                
+                if numel(t) == 1      % constant case, add another point
+                    t1000 = t(1) + 1000.;
+                    time_array = [time_array, t1000];
+                    data_array = [data_array(1), data_array(1)];                    
                 end
                 
-                codes{i} = LustreEq(outputs{i}, code);
-                %code = initcode;
+                % Add data for t = 0. if none using linear extrapolation of
+                % first 2 data points
+                if time_array(1) > 0.
+                    x = [time_array(1), time_array(2)];
+                    y = [data_array(1), data_array(2)];
+                    d0 = interp1(x, y, 0.,'linear','extrap');
+                    time_array = [0., time_array];
+                    data_array = [d0, data_array];
+                end
+                
+                % handling blk.OutputAfterFinalValue
+                t_final = time_array(end)*1.e3;
+                if strcmp(blk.OutputAfterFinalValue, 'Extrapolation')
+                    x = [time_array(end-1), time_array(end)];
+                    y = [data_array(end-1), data_array(end)];
+                    df = interp1(x, y, t_final,'linear','extrap');
+                    time_array = [time_array, t_final];
+                    data_array = [data_array, df];
+                elseif strcmp(blk.OutputAfterFinalValue, 'Setting to zero')
+                    time_array = [time_array, t_final];
+                    data_array = [data_array, 0.0];
+                elseif strcmp(blk.OutputAfterFinalValue, 'Holding final value')
+                    time_array = [time_array, t_final];
+                    data_array = [data_array, data_array(end)];
+                else   % Cyclic repetition
+                    
+                end
+                
+                if numel(outputs) >= i    % TBD check with Hamza, Khanh doesn't understand this logic
+                    [codeAst, vars] = ...
+                        Sigbuilderblock_To_Lustre.interpTimeSeries(...
+                        outputs{i},time_array, data_array, ...
+                        blk_name,i);
+                    
+                    %codes{i} = LustreEq(outputs{i}, code);
+                    %code = initcode;
+                    
+                    codeAst_all = [codeAst_all codeAst];
+                    vars_all = [vars_all vars];
+                    %%%%%%%%%% new code %%%%%%%%%%%
+                end
             end
             
-            obj.setCode( codes );
+            obj.setCode( codeAst_all );      %%%%%%%%%% new code %%%%%%%%%%%
             obj.addVariable(outputs_dt);
+            obj.addVariable(vars_all);       %%%%%%%%%% new code %%%%%%%%%%%
         end
         
         function options = getUnsupportedOptions(obj, ~, blk, varargin)
