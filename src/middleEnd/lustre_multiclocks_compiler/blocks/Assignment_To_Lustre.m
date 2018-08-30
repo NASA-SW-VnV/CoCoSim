@@ -458,7 +458,7 @@ classdef Assignment_To_Lustre < Block_To_Lustre
             end
         end
         
-        %% get block inputs names and also convert input data type to accumulated datatype
+        %% get block inputs names and also convert input signal data type to accumulated datatype but keep index assignment/selection as int
         function [inputs] = ...
                 getBlockInputsNames_convInType2AccType(obj, parent, blk,isSelector)
             if isSelector
@@ -477,7 +477,7 @@ classdef Assignment_To_Lustre < Block_To_Lustre
                 
                 %converts the input data type(s) to
                 %its accumulator data type
-                if ~strcmp(inport_dt, outputDataType) && i <= 2
+                if ~strcmp(inport_dt, outputDataType) && i <= inputIdToConvertToInt
                     [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, outputDataType);
                     if ~isempty(external_lib)
                         obj.addExternal_libraries(external_lib);
