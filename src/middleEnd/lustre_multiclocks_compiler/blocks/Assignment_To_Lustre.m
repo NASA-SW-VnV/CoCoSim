@@ -157,7 +157,7 @@ classdef Assignment_To_Lustre < Block_To_Lustre
             if isPortIndex
                 [codes] = getWriteCodeForPortInput(obj, in_matrix_dimension,inputs,outputs,numOutDims,U_expanded_dims,ind,blk);                
             else  % no port input
-                [codes] = getWriteCodeForNonPortInput(obj,in_matrix_dimension,inputs,outputs,U_expanded_dims,ind);                
+                [codes] = getWriteCodeForNonPortInput(obj,in_matrix_dimension,inputs,outputs,numOutDims,U_expanded_dims,ind);                
             end
             
             obj.setCode( codes );
@@ -224,12 +224,11 @@ classdef Assignment_To_Lustre < Block_To_Lustre
             end             
         end        
         
-        function [codes] = getWriteCodeForNonPortInput(~, in_matrix_dimension,inputs,outputs,U_expanded_dims,ind)
+        function [codes] = getWriteCodeForNonPortInput(~, in_matrix_dimension,inputs,outputs,numOutDims,U_expanded_dims,ind)
             %% function get code for noPortInput
             
             % initialization
-                     
-            if in_matrix_dimension{1}.numDs == 1   % for 1D
+            if numOutDims == 1              % for 1D
                 U_to_Y0 = ind{1};
             else
                 % support max dimensions = 7
