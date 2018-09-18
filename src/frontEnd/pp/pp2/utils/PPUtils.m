@@ -30,11 +30,26 @@ classdef PPUtils
             
             % Computing state space representation
             [A,B,C,D]=tf2ss(num,denum);
-            
-            A = mat2str(A);
-            B = mat2str(B);
-            C = mat2str(C);
-            D = mat2str(D);
+            if isempty(A)
+                A = '0';
+            else
+                A = mat2str(A);
+            end
+            if isempty(B)
+                B = '0';
+            else
+                B = mat2str(B);
+            end
+            if isempty(C)
+                C = '0';
+            else
+                C = mat2str(C);
+            end
+            if isempty(D)
+                D = '0';
+            else
+                D = mat2str(D);
+            end
             
             [n,~] = size(num);
             mutliNumerator = 0;

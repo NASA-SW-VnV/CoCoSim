@@ -595,18 +595,28 @@ classdef SLXUtils
             code_on=sprintf('%s([], [], [], ''compile'')', model);
             eval(code_on);
             try
-                U_dims = {};
+                U_dims = cell(1, length(blkList));
                 for i=1:length(blkList)
-                    CompiledPortDimensions = get_param(blkList{i}, 'CompiledPortDimensions');
-                    in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(CompiledPortDimensions.Inport);
-                    if numel(in_matrix_dimension) > 1
+                    NumeratorSource = get_param(blkList{i}, 'NumeratorSource');
+                    DenominatorSource = get_param(blkList{i}, 'DenominatorSource');
+                    if isequal(NumeratorSource, 'Input port') ...
+                            || isequal(DenominatorSource, 'Input port')
                         display_msg(sprintf('block %s has external numerator/denominator not supported',...
                             blkList{i}), ...
                             MsgType.ERROR, pp_name, '');
-                        U_dims{end+1} = [];
+                        U_dims{i} = [];
+                        continue;
+                    end
+                    CompiledPortDimensions = get_param(blkList{i}, 'CompiledPortDimensions');
+                    in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(CompiledPortDimensions.Inport);
+                    if numel(in_matrix_dimension) > 1
+                        display_msg(sprintf('block %s has external reset signal not supported',...
+                            blkList{i}), ...
+                            MsgType.ERROR, pp_name, '');
+                        U_dims{i} = [];
                         continue;
                     else
-                        U_dims{end+1} = in_matrix_dimension{1}.dims;
+                        U_dims{i} = in_matrix_dimension{1}.dims;
                     end
                 end
             catch me

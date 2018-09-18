@@ -13,7 +13,7 @@ classdef DiscreteTransferFcn_To_Lustre < Block_To_Lustre
     methods
         
         function  write_code(varargin)
-           
+           %% Block supported by Pre-Processing
         end
         
         function options = getUnsupportedOptions(obj, ~, blk, varargin)
@@ -23,13 +23,5 @@ classdef DiscreteTransferFcn_To_Lustre < Block_To_Lustre
             options = obj.unsupported_options;
         end
     end
-    
-    
-    methods(Static)
-      
-        
-        
-    end
-    
 end
 

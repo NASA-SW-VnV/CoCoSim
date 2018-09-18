@@ -113,7 +113,9 @@ for i=1:numel(ordered_pp_functions)
             try
                 warning off;
                 evalin('base',code_on);
-            catch
+            catch me
+                display_msg(['can not run ' func2str(fh)], MsgType.WARNING, 'PP', '');
+                display_msg(me.getReport(), MsgType.DEBUG, 'PP', '');
                 display_msg(['Skipping ' func2str(fh)], MsgType.WARNING, 'PP', '');
                 restore_ppmodel(new_model_base, new_file_path);
                 continue;
