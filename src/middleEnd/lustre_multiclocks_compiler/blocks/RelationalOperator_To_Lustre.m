@@ -18,7 +18,9 @@ classdef RelationalOperator_To_Lustre < Block_To_Lustre
             
             widths = blk.CompiledPortWidths.Inport;
             max_width = max(widths);
-            %outputDataType = blk.CompiledPortDataTypes.Outport{1};
+            outputDataType = blk.CompiledPortDataTypes.Outport{1};
+            [lus_outputDT, zero, one] = SLX2LusUtils.get_lustre_dt(...
+                outputDataType);
             lus_in1_dt = SLX2LusUtils.get_lustre_dt(...
                 blk.CompiledPortDataTypes.Inport(1));
             lus_in2_dt = SLX2LusUtils.get_lustre_dt(...
@@ -62,7 +64,12 @@ classdef RelationalOperator_To_Lustre < Block_To_Lustre
             codes = cell(1, numel(outputs));
             for j=1:numel(outputs)
                 code = BinaryExpr(op, inputs{1}{j}, inputs{2}{j});
-                codes{j} = LustreEq(outputs{j}, code);
+                if isequal(lus_outputDT, 'bool')
+                    codes{j} = LustreEq(outputs{j}, code);
+                else
+                    codes{j} = LustreEq(outputs{j}, ...
+                        IteExpr(code, one, zero));
+                end
             end
             obj.setCode( codes );
             obj.addVariable(outputs_dt);
