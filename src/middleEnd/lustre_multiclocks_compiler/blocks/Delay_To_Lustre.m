@@ -13,10 +13,26 @@ classdef Delay_To_Lustre < Block_To_Lustre
     methods
         
         function  write_code(obj, parent, blk, xml_trace, varargin)
+            [DelayLength, ~, status] = ...
+                Constant_To_Lustre.getValueFromParameter(parent, blk, blk.DelayLength);
+            if status
+                display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
+                    blk.DelayLength, blk.Origin_path), ...
+                    MsgType.ERROR, 'Constant_To_Lustr', '');
+                return;
+            end
+            [DelayLengthUpperLimit, ~, status] = ...
+                Constant_To_Lustre.getValueFromParameter(parent, blk, blk.DelayLengthUpperLimit);
+            if status
+                display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
+                    blk.DelayLengthUpperLimit, blk.Origin_path), ...
+                    MsgType.ERROR, 'Constant_To_Lustr', '');
+                return;
+            end
             [lustre_code, delay_node_code, variables, external_libraries] = ...
                 Delay_To_Lustre.get_code( parent, blk, ...
                 blk.InitialConditionSource, blk.DelayLengthSource,...
-                blk.DelayLength, blk.DelayLengthUpperLimit, blk.ExternalReset, blk.ShowEnablePort, xml_trace );
+                DelayLength, DelayLengthUpperLimit, blk.ExternalReset, blk.ShowEnablePort, xml_trace );
             obj.addVariable(variables);
             obj.addExternal_libraries(external_libraries);
             obj.addExtenal_node(delay_node_code);
@@ -108,7 +124,7 @@ classdef Delay_To_Lustre < Block_To_Lustre
                 end
                 if numel(ICValue) > 1
                     if ~(strcmp(DelayLengthSource, 'Dialog') ...
-                            && strcmp(DelayLength, '1'))
+                            && DelayLength == 1)
                         display_msg(sprintf('InitialCondition %s in block %s is not supported for delay > 1',...
                             blk.InitialCondition, blk.Origin_path), ...
                             MsgType.ERROR, 'Constant_To_Lustr', '');
@@ -143,11 +159,11 @@ classdef Delay_To_Lustre < Block_To_Lustre
             
 
             if strcmp(DelayLengthSource, 'Dialog')
-                delayLength = str2double(DelayLength);
+                delayLength = DelayLength;
                 isDelayVariable = 0;
             else
                 
-                delayLength = str2double(DelayLengthUpperLimit);
+                delayLength = DelayLengthUpperLimit;
                 isDelayVariable = 1;
                 delayDataType = blk.CompiledPortDataTypes.Inport{2};
                 if delayLength <= 255

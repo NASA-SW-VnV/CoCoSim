@@ -15,8 +15,8 @@ classdef UnitDelay_To_Lustre < Block_To_Lustre
         function  write_code(obj, parent, blk, xml_trace, varargin)
             InitialConditionSource = 'Dialog';
             DelayLengthSource = 'Dialog';
-            DelayLength = '1';
-            DelayLengthUpperLimit = '1';
+            DelayLength = 1;
+            DelayLengthUpperLimit = 1;
             ExternalReset = 'None';
             ShowEnablePort = 'off';
             [lustre_code, delay_node_code, variables, external_libraries] = ...
