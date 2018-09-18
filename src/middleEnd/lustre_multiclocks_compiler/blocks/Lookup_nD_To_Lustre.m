@@ -88,7 +88,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
 
         end
         
-        function options = getUnsupportedOptions(obj, blk, varargin)
+        function options = getUnsupportedOptions(obj, parent, blk, varargin)
             obj.unsupported_options = {};
             [blkParams.NumberOfTableDimensions, ~, ~] = ...
                 Constant_To_Lustre.getValueFromParameter(parent, blk, blk.NumberOfTableDimensions);

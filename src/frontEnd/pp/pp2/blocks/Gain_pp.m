@@ -18,7 +18,8 @@ if not(isempty(Gain_list))
         display_msg(Gain_list{i}, MsgType.INFO, ...
             'Gain_process', '');
         gain = get_param(Gain_list{i},'Gain');
-        outputDataType = get_param(Gain_list{i}, 'OutDataTypeStr');
+        CompiledPortDataTypes = SLXUtils.getCompiledParam(Gain_list{i}, 'CompiledPortDataTypes');
+        outputDataType = CompiledPortDataTypes.Outport{1}; %get_param(Gain_list{i}, 'OutDataTypeStr');
         Multiplication = get_param(Gain_list{i}, 'Multiplication');
         SaturateOnIntegerOverflow = get_param(Gain_list{i},'SaturateOnIntegerOverflow');
         if strcmp(Multiplication, 'Element-wise(K.*u)')
@@ -35,9 +36,9 @@ if not(isempty(Gain_list))
         set_param(strcat(Gain_list{i},'/K'),...
             'OutDataTypeStr','Inherit: Inherit via back propagation');
         
-        if strcmp(outputDataType, 'Inherit: Same as input')
-            outputDataType = 'Inherit: Same as first input';
-        end
+%         if strcmp(outputDataType, 'Inherit: Same as input')
+%             outputDataType = 'Inherit: Same as first input';
+%         end
         set_param(strcat(Gain_list{i},'/Product'),...
             'OutDataTypeStr',outputDataType);
         set_param(strcat(Gain_list{i},'/Product'),...
