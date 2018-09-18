@@ -9,10 +9,13 @@ if ~exist('const_files', 'var') || isempty(const_files)
     const_files = {};
 end
 
-[nom_lustre_file, xml_trace]= ToLustre(model_full_path, const_files,...
+[nom_lustre_file, xml_trace, status, unsupportedOptions] = ...
+    ToLustre(model_full_path, const_files,...
     BackendType.KIND2, varargin);
 
-
+if status || ~isempty(unsupportedOptions)
+    return;
+end
 % Get start time
 t_start = now;
 

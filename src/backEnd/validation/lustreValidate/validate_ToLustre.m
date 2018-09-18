@@ -1,5 +1,5 @@
 function [valid, validation_compute,lustrec_failed, ...
-    lustrec_binary_failed, sim_failed, lus_file_path] = ...
+    lustrec_binary_failed, sim_failed, is_unsupported, lus_file_path] = ...
     validate_ToLustre(model_full_path, tests_method, model_checker, ...
     show_model, deep_CEX, min_max_constraints, options)
 
@@ -11,6 +11,7 @@ lustrec_failed = -1;
 lustrec_binary_failed= -1;
 sim_failed = -1;
 validation_compute = -1;
+is_unsupported = 0;
 lus_file_path = '';
 %close all simulink models
 bdclose('all')
@@ -47,8 +48,12 @@ try
     f_msg = sprintf('Compiling model "%s" to Lustre\n',file_name);
     display_msg(f_msg, MsgType.RESULT, 'validation', '');
     GUIUtils.update_status('Runing CocoSim');
-    [lus_file_path, ~] = ToLustre(model_full_path, [], BackendType.LUSTREC, options);
-%     lus_file_path = lustre_compiler(model_full_path);
+    [lus_file_path, ~, status, unsupportedOptions] = ToLustre(model_full_path, [], BackendType.LUSTREC, options);
+    is_unsupported = status || ~isempty(unsupportedOptions);
+    if is_unsupported
+        display_msg('Model is not supported', MsgType.ERROR, 'validation', '');
+        return;
+    end
     [output_dir, lus_file_name, ~] = fileparts(lus_file_path);
     file_name = lus_file_name;
     main_node = lus_file_name;

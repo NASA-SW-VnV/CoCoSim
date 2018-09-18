@@ -1,4 +1,4 @@
-function [nom_lustre_file, xml_trace, unsupportedOptions]= ToLustre(model_path, const_files, backend, varargin)
+function [nom_lustre_file, xml_trace, status, unsupportedOptions]= ToLustre(model_path, const_files, backend, varargin)
 %lustre_multiclocks_compiler translate Simulink models to Lustre. It is based on
 %article :
 %INPUTS:
