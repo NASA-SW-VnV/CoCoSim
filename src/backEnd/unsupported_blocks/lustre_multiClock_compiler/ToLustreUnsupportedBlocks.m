@@ -1,4 +1,9 @@
-function [unsupportedOptions]= ToLustreUnsupportedBlocks(model_path, const_files, varargin)
+function [unsupportedOptions, ...
+    status,...
+    model_full_path, ...
+    ir_struct, ...
+    output_dir] =...
+    ToLustreUnsupportedBlocks(model_path, const_files, backend, varargin)
 %ToLustreUnsupportedBlocks detects unsupported options/blocks in Simulink model.
 %INPUTS:
 %   MODEL_PATH: The full path of the Simulink model.
@@ -14,12 +19,20 @@ function [unsupportedOptions]= ToLustreUnsupportedBlocks(model_path, const_files
 
 %% inputs treatment
 
-narginchk(1, 2);
-
+narginchk(1, inf);
+status = 0;
 if ~exist('const_files', 'var') || isempty(const_files)
     const_files = {};
 end
-
+mode_display = 1;
+for i=1:numel(varargin)
+    if strcmp(varargin{i}, 'nodisplay')
+        mode_display = 0;
+    end
+end
+if ~exist('backend', 'var') || isempty(backend)
+    backend = BackendType.LUSTREC; 
+end
 
 
 %% initialize result
@@ -34,6 +47,10 @@ if (exist(model_path, 'file') == 2 || exist(model_path, 'file') == 4)
 else
     model_full_path = which(model_path);
 end
+if ~exist(model_full_path, 'file')
+    status = 1;
+    error('Model "%s" Does not exist', model_path);
+end
 %% Save current path
 PWD = pwd;
 
@@ -43,7 +60,8 @@ SLXUtils.run_constants_files(const_files);
 
 %% Pre-process model
 display_msg('Pre-processing', MsgType.INFO, 'ToLustreUnsupportedBlocks', '');
-[new_file_name, status] = cocosim_pp(model_full_path ,'nodisplay',  varargin{:});
+varargin{end+1} = 'use_backup';
+[new_file_name, status] = cocosim_pp(model_full_path , varargin{:});
 if status
     return;
 end
@@ -51,19 +69,24 @@ end
 if ~strcmp(new_file_name, '')
     model_full_path = new_file_name;
     [model_dir, file_name, ~] = fileparts(model_full_path);
+    if mode_display == 1
+        open(model_full_path);
+    end
 else
+    status = 1;
     display_msg('Pre-processing has failed', MsgType.ERROR, 'ToLustreUnsupportedBlocks', '');
     return;
 end
 
 
 
-
+output_dir = fullfile(model_dir, 'cocosim_output', file_name);
+if ~exist(output_dir, 'dir'); mkdir(output_dir); end
 %% Internal representation building %%%%%%
 display_msg('Building internal format', MsgType.INFO, 'ToLustreUnsupportedBlocks', '');
-[ir_struct, ~, ~, ~] = cocosim_IR(model_full_path);
+[ir_struct, ~, ~, ~] = cocosim_IR(model_full_path,  0, output_dir);
 % Pre-process IR
-[ir_struct] = internalRep_pp(ir_struct);
+[ir_struct] = internalRep_pp(ir_struct, 1, output_dir);
 
 
 %% Unsupported blocks detection
@@ -80,13 +103,18 @@ else
 end
 %% display report files
 if isempty(unsupportedOptions)
-    if exist('success.png', 'file')
-        [icondata,iconcmap] = imread('success.png');
-        msgbox('Your model is compatible with CoCoSim!','Success','custom',icondata,iconcmap);
+    if mode_display == 1
+        if exist('success.png', 'file')
+            [icondata,iconcmap] = imread('success.png');
+            msgbox('Your model is compatible with CoCoSim!','Success','custom',icondata,iconcmap);
+        else
+            msgbox('Your model is compatible with CoCoSim!');
+        end
     else
-        msgbox('Your model is compatible with CoCoSim!');
+        display_msg('Your model is compatible with CoCoSim!', ...
+                MsgType.RESULT, 'ToLustreUnsupportedBlocks', '');
     end
-else
+elseif mode_display == 1
     try
         output_dir = fullfile(model_dir, 'cocosim_output', file_name);
         html_path = fullfile(output_dir, strcat(file_name, '_unsupportedOptions.html'));
@@ -100,10 +128,12 @@ else
             MatlabUtils.strjoin(unsupportedOptions, '\n\n'));
         msgbox(msg, 'Error','error');
     end
+else
+    display_msg(MatlabUtils.strjoin(unsupportedOptions, '\n'), ...
+        MsgType.ERROR, 'ToLustreUnsupportedBlocks', '');
 end
 
 t_finish = toc(t_start);
-display_msg(MatlabUtils.strjoin(unsupportedOptions, '\n'), MsgType.DEBUG, 'ToLustreUnsupportedBlocks', '');
 msg = sprintf('ToLustreUnsupportedBlocks finished in %f seconds', t_finish);
 display_msg(msg, MsgType.RESULT, 'ToLustreUnsupportedBlocks', '');
 cd(PWD)

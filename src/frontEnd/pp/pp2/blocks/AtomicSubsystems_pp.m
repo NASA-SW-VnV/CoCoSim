@@ -15,14 +15,15 @@ if not(isempty(ssys_list))
         %disp(ssys_list{i})
         try
             set_param(ssys_list{i},'TreatAsAtomicUnit','on');
-            set_param(ssys_list{i},'MinAlgLoopOccurrences','on');
+            set_param(ssys_list{i},'MinAlgLoopOccurrences','off');
             
         catch
         end
     end
     display_msg('Done\n\n', MsgType.INFO, 'PP', '');
 end
-
+configSet = getActiveConfigSet(new_model_base);
+set_param(configSet, 'AlgebraicLoopMsg', 'error');
 solveAlgebraicLoops(new_model_base);
 end
 
@@ -41,6 +42,21 @@ catch ME
     for c=causes'
         switch c{1}.identifier
             case 'Simulink:Engine:BlkInAlgLoopErr'
+                display_msg('Algebraic Loop detected', MsgType.INFO, 'PP', '');
+                msg = c{1}.message;
+                tokens = regexp(msg, 'matlab:open\w+\s*\(''([^''])+''', 'tokens', 'once');
+                if isempty(tokens)
+                    continue;
+                end
+                subsys = tokens{1};
+                try
+                    display_msg(['Turn off atomic in block' subsys], MsgType.INFO, 'PP', '');
+                    set_param(subsys,'TreatAsAtomicUnit','off');
+                    solveAlgebraicLoops(new_model_base);
+                catch
+                end
+                break;
+            case 'Simulink:Engine:BlkInAlgLoopErrWithInfo'
                 display_msg('Algebraic Loop detected', MsgType.INFO, 'PP', '');
                 msg = c{1}.message;
                 tokens = regexp(msg, 'matlab:open\w+\s*\(''([^''])+''', 'tokens', 'once');

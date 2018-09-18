@@ -1,4 +1,4 @@
-function [nom_lustre_file, xml_trace]= ToLustre(model_path, const_files, backend, varargin)
+function [nom_lustre_file, xml_trace, unsupportedOptions]= ToLustre(model_path, const_files, backend, varargin)
 %lustre_multiclocks_compiler translate Simulink models to Lustre. It is based on
 %article :
 %INPUTS:
@@ -23,13 +23,6 @@ end
 if ~exist('const_files', 'var') || isempty(const_files)
     const_files = {};
 end
-
-mode_display = 1;
-for i=1:numel(varargin)
-    if strcmp(varargin{i}, 'nodisplay')
-        mode_display = 0;
-    end
-end
 if ~exist('backend', 'var') || isempty(backend)
     backend = BackendType.LUSTREC; 
 end
@@ -40,51 +33,17 @@ xml_trace = [];
 %% Get start time
 t_start = tic;
 
-%% Get Simulink model full path
-if (exist(model_path, 'file') == 2 || exist(model_path, 'file') == 4)
-    model_full_path = model_path;
-else
-    model_full_path = which(model_path);
-end
-if ~exist(model_full_path, 'file')
-    error('Model "%s" Does not exist', model_path);
-    
-end
-%% Save current path
-PWD = pwd;
+[unsupportedOptions, status, model_full_path, ir_struct, output_dir]= ...
+    ToLustreUnsupportedBlocks(model_path, const_files, backend, varargin);
 
-%% Run constants
-SLXUtils.run_constants_files(const_files);
-
-
-%% Pre-process model
-display_msg('Pre-processing', MsgType.INFO, 'lustre_multiclocks_compiler', '');
-% if nargin > 3
-%     varargin = [varargin; {'nodisplay'}];
-% else
-%     varargin = 'nodisplay';
-% end
-varargin{end+1} = 'use_backup';
-[new_file_name, status] = cocosim_pp(model_full_path , varargin{:});
-if status
-    return;
-end
-%% Update model path with the pre-processed model
-if ~strcmp(new_file_name, '')
-    model_full_path = new_file_name;
-    [model_dir, file_name, ~] = fileparts(model_full_path);
-    if mode_display == 1
-        open(model_full_path);
-    end
-else
-    display_msg('Pre-processing has failed', MsgType.ERROR, 'lustre_multiclocks_compiler', '');
+if status || ~isempty(unsupportedOptions)
     return;
 end
 
+[~, file_name, ~] = fileparts(model_full_path);
 %% Definition of the generated output files names
-output_dir = fullfile(model_dir, 'cocosim_output', file_name);
 nom_lustre_file = fullfile(output_dir, strcat(file_name, '.lus'));
-if ~exist(output_dir, 'dir'); mkdir(output_dir); end
+
 
 %% Create Meta informations
 create_file_meta_info(nom_lustre_file);
@@ -96,13 +55,6 @@ json_trace_file_name = fullfile(output_dir, strcat(file_name, '_mapping.json'));
 xml_trace = SLX2Lus_Trace(model_full_path,...
     xml_trace_file_name, json_trace_file_name);
 
-
-%% Internal representation building %%%%%%
-
-display_msg('Building internal format', MsgType.INFO, 'lustre_multiclocks_compiler', '');
-[ir_struct, ~, ~, ~] = cocosim_IR(model_full_path, 0, output_dir);
-% Pre-process IR
-[ir_struct] = internalRep_pp(ir_struct, 1, output_dir);
 
 
 %% Lustre generation
@@ -148,7 +100,7 @@ msg = sprintf('Lustre File generated:%s', nom_lustre_file);
 display_msg(msg, MsgType.RESULT, 'lustre_multiclocks_compiler', '');
 msg = sprintf('Lustre generation finished in %f seconds', t_finish);
 display_msg(msg, MsgType.RESULT, 'lustre_multiclocks_compiler', '');
-cd(PWD)
+
 end
 
 %%

@@ -147,7 +147,7 @@ classdef SLXUtils
             if hasVariable(hws,'lustrec_slx_eps') 
                 eps = getVariable(hws,'lustrec_slx_eps');
             else
-                eps = 1e-2;
+                eps = 1e-4;
             end
         end
         
