@@ -166,19 +166,18 @@ classdef Delay_To_Lustre < Block_To_Lustre
                 delayLength = DelayLengthUpperLimit;
                 isDelayVariable = 1;
                 delayDataType = blk.CompiledPortDataTypes.Inport{2};
-                if delayLength <= 255
-                    delayLengthDT = 'uint8';
-                else
-                    delayLengthDT = 'uint16';
+                if ~contains(delayDataType, 'int')
+                    delayLengthDT = 'uint32';
+                    [external_lib, conv_format] = ...
+                        SLX2LusUtils.dataType_conversion(delayDataType, delayLengthDT);
+                    if ~isempty(external_lib)
+                        external_libraries = [external_libraries, external_lib];
+                        inputs{2} = cellfun(@(x) ...
+                            SLX2LusUtils.setArgInConvFormat(conv_format,x),...
+                            inputs{2}, 'un', 0);
+                    end
                 end
-                [external_lib, conv_format] = ...
-                    SLX2LusUtils.dataType_conversion(delayDataType, delayLengthDT);
-                if ~isempty(external_lib)
-                    external_libraries = [external_libraries, external_lib];
-                    inputs{2} = cellfun(@(x) ...
-                        SLX2LusUtils.setArgInConvFormat(conv_format,x),...
-                        inputs{2}, 'un', 0);
-                end
+                
             end
             x0 =  inputs{end};
             u = inputs{1};
