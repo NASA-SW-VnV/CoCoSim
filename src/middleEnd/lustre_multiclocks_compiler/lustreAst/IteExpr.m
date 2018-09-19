@@ -48,7 +48,7 @@ classdef IteExpr < LustreExpr
             if iscell(obj.condition) && numel(obj.condition) == 1
                 obj.condition = obj.condition{1};
             end
-            try
+            
             if obj.OneLine
                 code = sprintf('(if %s then %s else %s)', ...
                     obj.condition.print(backend),...
@@ -60,9 +60,7 @@ classdef IteExpr < LustreExpr
                     obj.thenExpr.print(backend), ...
                     obj.ElseExpr.print(backend));
             end
-             catch me
-                me
-            end
+            
         end
         
         function code = print_kind2(obj)

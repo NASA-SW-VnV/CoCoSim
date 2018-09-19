@@ -39,7 +39,7 @@ classdef Abs_To_Lustre < Block_To_Lustre
             [~, zero] = SLX2LusUtils.get_lustre_dt(outputDataType);
             
             
-            if contains(inport_dt, 'int')
+            if MatlabUtils.startsWith(inport_dt, 'int')
                 n = 2;
             else
                 n =1;
