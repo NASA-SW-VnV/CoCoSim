@@ -19,7 +19,7 @@ classdef Sqrt_To_Lustre < Block_To_Lustre
                     blk.Origin_path), MsgType.WARNING, 'Sqrt_To_Lustre', '');
             end
             if strcmp(blk.AlgorithmType, 'Newton-Raphson')
-                msg = sprintf('Option Newton-Raphson is not supported in block %s', ...
+                msg = sprintf('Option Newton-Raphson is not supported in block %s. Exact method will be used.', ...
                     blk.Origin_path);
                 display_msg(msg, MsgType.WARNING, 'Sqrt_To_Lustre', '');
             end
@@ -92,11 +92,6 @@ classdef Sqrt_To_Lustre < Block_To_Lustre
             if ~strcmp(blk.OutMax, '[]') || ~strcmp(blk.OutMin, '[]')
                 obj.addUnsupported_options(...
                     sprintf('The minimum/maximum value is not support in block %s', blk.Origin_path));
-            end
-            if strcmp(blk.AlgorithmType, 'Newton-Raphson')
-                obj.addUnsupported_options(...
-                sprintf('Option Newton-Raphson is not supported in block %s', ...
-                    blk.Origin_path));
             end
             options = obj.unsupported_options;
         end

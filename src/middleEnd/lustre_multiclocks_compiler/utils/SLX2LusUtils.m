@@ -1052,8 +1052,8 @@ classdef SLX2LusUtils < handle
             if strcmp(resetDT, 'bool')
                 b = resetInput;
             else
-                %b = sprintf('(%s >= %s)',resetInput , zero);
-                b = BinaryExpr(BinaryExpr.GTE, resetInput, zero);
+                %b = sprintf('(%s > %s)',resetInput , zero);
+                b = BinaryExpr(BinaryExpr.GT, resetInput, zero);
             end
             if strcmp(resetType, 'Rising') || strcmp(resetType, 'rising')
                 resetCode = ...

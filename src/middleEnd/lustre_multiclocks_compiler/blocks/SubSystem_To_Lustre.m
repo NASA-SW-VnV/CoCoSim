@@ -81,15 +81,6 @@ classdef SubSystem_To_Lustre < Block_To_Lustre
         end
         
         function options = getUnsupportedOptions(obj, parent, blk, varargin)
-            [isEnabledSubsystem, ~, StatesWhenEnabling] = ...
-                SubSystem_To_Lustre.hasEnablePort(blk);
-            [isTriggered, ~, ~] = ...
-                SubSystem_To_Lustre.hasTriggerPort(blk);
-            if isEnabledSubsystem && isTriggered && strcmp(StatesWhenEnabling, 'reset')
-                obj.addUnsupported_options(...
-                    sprintf('Subsystem %s has an EnablePort and TriggerPort, in this scenario we do not support "reset" option in the EnablePort. Please use held', ...
-                    blk.Origin_path));
-            end
             isInsideContract = SLX2LusUtils.isContractBlk(parent);
             [outputs, ~] = SLX2LusUtils.getBlockOutputsNames(parent, blk);
             if isInsideContract && numel(outputs) > 1
