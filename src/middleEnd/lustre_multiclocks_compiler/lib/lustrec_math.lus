@@ -7,6 +7,9 @@ node imported atan2(x:real; n: real) returns (y: real) ;
 node imported atanh (x: real) returns (y: real) ;
 node imported cbrt (x: real) returns (y: real) ;
 node imported cos (x: real) returns (y: real) ;
+(*@contract
+     	guarantee (y >= -1.0 and y <= 1.0);
+*)
 node imported cosh (x: real) returns (y: real) ;
 node imported ceil (x: real) returns (y: real) ;
 node imported erf (x: real) returns (y: real) ;
@@ -19,6 +22,9 @@ node imported log10 (x: real) returns (y: real) ;
 node imported pow (x:real; n: real) returns (y: real) ;
 node imported round (x: real) returns (y: real) ;
 node imported sin (x: real) returns (y: real) ;
+(*@contract
+     	guarantee (y >= -1.0 and y <= 1.0);
+*)
 node imported sinh (x: real) returns (y: real) ;
 node imported sqrt (x: real) returns (y: real) ;
 (*@contract

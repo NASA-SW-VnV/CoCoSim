@@ -186,7 +186,15 @@ classdef SS_To_LustreNode
                 if status
                     continue;
                 end
-                b.write_code(subsys, blk, xml_trace, main_sampleTime, backend);
+                try
+                    b.write_code(subsys, blk, xml_trace, main_sampleTime, backend);
+                catch me
+                    display_msg(sprintf('Translation to Lustre of block %s has failed.', blk.Origin_path),...
+                        MsgType.ERROR, 'write_body', '');
+                    display_msg(me.getReport(), MsgType.DEBUG, 'write_body', '');
+                end
+                    
+                    
                 if iscell(b.getCode())
                     body = [body, b.getCode()];
                 else
