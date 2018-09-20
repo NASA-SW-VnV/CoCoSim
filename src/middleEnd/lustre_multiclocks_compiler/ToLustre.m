@@ -86,6 +86,11 @@ if BackendType.isKIND2(backend)
             'lib', 'lustrec_math.lus');
         copyfile(lib_path, output_dir);
     end
+    if ismember('simulink_math_fcn', open_list)
+        lib_path = fullfile(fileparts(mfilename('fullpath')),...
+            'lib', 'simulink_math_fcn.lus');
+        copyfile(lib_path, output_dir);
+    end
 end
 %% writing code
 fid = fopen(nom_lustre_file, 'a');

@@ -1,3 +1,10 @@
+node  abs_real(x : real;)
+returns(y : real;);
+let
+y = if (x >= 0.0) then
+    x
+    else (- x);
+tel
 node imported rem_real(x : real;
      	y : real;)
 returns(z : real;);
