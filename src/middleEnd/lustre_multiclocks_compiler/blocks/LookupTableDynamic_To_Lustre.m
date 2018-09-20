@@ -11,7 +11,9 @@ classdef LookupTableDynamic_To_Lustre < Block_To_Lustre
     end
     
     methods
-        
+        function obj = LookupTableDynamic_To_Lustre()
+            obj.ContentNeedToBeTranslated = 0;
+        end
         function  write_code(obj, parent, blk, xml_trace, ~, backend, varargin)
 
             isLookupTableDynamic = 1;
