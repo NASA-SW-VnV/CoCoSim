@@ -160,10 +160,15 @@ classdef FromWorkspace_To_Lustre < Block_To_Lustre
             obj.addVariable(vars_all);       %%%%%%%%%% new code %%%%%%%%%%%
         end
         %%
-        function options = getUnsupportedOptions(obj, ~, blk, varargin)
+        function options = getUnsupportedOptions(obj, parent, blk, varargin)
             obj.unsupported_options = {};
             VariableName = blk.VariableName;
-            variable = evalin('base',VariableName);
+            [variable, ~, status] = ...
+                Constant_To_Lustre.getValueFromParameter(parent, blk, VariableName);
+            if status
+                obj.addUnsupported_options(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
+                    VariableName, blk.Origin_path));
+            end
             t = [0, 0];
             if isnumeric(variable)
                 t = variable(:,1);

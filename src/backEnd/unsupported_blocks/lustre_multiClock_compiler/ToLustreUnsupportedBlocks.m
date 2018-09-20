@@ -178,7 +178,7 @@ if status
     end
     return;
 end
-unsupportedOptions_i = b.getUnsupportedOptions(parent, blk,  main_sampleTime);
+unsupportedOptions_i = b.getUnsupportedOptions(parent, blk,  main_sampleTime, backend);
 is_abstracted = b.isAbstracted(backend, parent, blk, main_sampleTime);
 if is_abstracted
     if isempty(masktype)

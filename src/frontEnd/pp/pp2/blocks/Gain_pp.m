@@ -23,7 +23,12 @@ if not(isempty(Gain_list))
                 'Gain_process', '');
             gain = get_param(Gain_list{i},'Gain');
             CompiledPortDataTypes = SLXUtils.getCompiledParam(Gain_list{i}, 'CompiledPortDataTypes');
-            outputDataType = CompiledPortDataTypes.Outport{1}; %get_param(Gain_list{i}, 'OutDataTypeStr');
+            if isequal(CompiledPortDataTypes.Inport{1}, 'boolean') ...
+                    && ~contains(CompiledPortDataTypes.Outport{1}, 'fix')
+                outputDataType = CompiledPortDataTypes.Outport{1};
+            else
+                outputDataType = get_param(Gain_list{i}, 'OutDataTypeStr');
+            end
             Multiplication = get_param(Gain_list{i}, 'Multiplication');
             SaturateOnIntegerOverflow = get_param(Gain_list{i},'SaturateOnIntegerOverflow');
             if strcmp(Multiplication, 'Element-wise(K.*u)')
