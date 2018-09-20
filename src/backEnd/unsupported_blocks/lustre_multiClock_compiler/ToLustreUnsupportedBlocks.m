@@ -123,7 +123,7 @@ elseif mode_display == 1
         if ~exist(output_dir, 'dir'); MatlabUtils.mkdir(output_dir); end
         MenuUtils.createHtmlList('Unsupported options/blocks', unsupportedOptions, html_path);
         msg = sprintf('HTML report is in : %s', html_path);
-        display_msg(msg, MsgType.RESULT, 'ToLustreUnsupportedBlocks', '');
+        display_msg(msg, MsgType.ERROR, 'ToLustreUnsupportedBlocks', '');
     catch me
         display_msg(me.getReport(), MsgType.DEBUG, 'unsupportedBlocksMenu', '');
         msg = sprintf('Your model is incompatible with CoCoSim for the following reasons:\n%s', ...

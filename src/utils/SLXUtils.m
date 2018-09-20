@@ -597,8 +597,14 @@ classdef SLXUtils
             try
                 U_dims = cell(1, length(blkList));
                 for i=1:length(blkList)
-                    NumeratorSource = get_param(blkList{i}, 'NumeratorSource');
-                    DenominatorSource = get_param(blkList{i}, 'DenominatorSource');
+                    try
+                        NumeratorSource = get_param(blkList{i}, 'NumeratorSource');
+                        DenominatorSource = get_param(blkList{i}, 'DenominatorSource');
+                    catch
+                        NumeratorSource = '';
+                        DenominatorSource = '';
+                    end
+                    
                     if isequal(NumeratorSource, 'Input port') ...
                             || isequal(DenominatorSource, 'Input port')
                         display_msg(sprintf('block %s has external numerator/denominator not supported',...
