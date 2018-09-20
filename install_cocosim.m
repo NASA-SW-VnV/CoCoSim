@@ -109,7 +109,12 @@ for i=1:numel(sources)
         fprintf('copyfile failed:\n%s \n', MESSAGE);
     end
 end
-
+%add path the new folder
+addpath(genpath(cocosim_path));
+rmpath(genpath(fullfile(cocosim_path, 'tools')));
+%add only tools not its sub-folders
+addpath(fullfile(cocosim_path, 'tools'));
+%delete old cocosim_pp
 delete(fullfile(cocosim_path, 'src', 'frontEnd', 'pp', 'std_pp', 'cocosim_pp.m'));
 
 end

@@ -1,5 +1,5 @@
-function [status, stdout, stderr] = cmd(varargin)
-    % cmd - Execute a command on the host operating system
+function [status, stdout, stderr] = system_timeout(varargin)
+    % system_timeout - Execute a command on the host operating system
     %
     %   This function is very similar to Matlab's builtin SYSTEM function
     %   with the exception that it provides a way for the user to specify a

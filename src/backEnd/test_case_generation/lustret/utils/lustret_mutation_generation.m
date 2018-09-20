@@ -38,7 +38,7 @@ msg = sprintf('LUSTRET_COMMAND : %s\n',command);
 display_msg(msg, MsgType.INFO, 'lustret_mutation_generation', '');
 display_msg('Please Kill me (Ctrl+C) if I am taking long time',...
     MsgType.INFO, 'lustret_mutation_generation', '');
-[status, lustret_out, ~] = cmd(command,7);
+[status, lustret_out, ~] = system_timeout(command,7);
 if status
     msg = sprintf('lustret failed for model "%s"',file_name);
     display_msg(msg, MsgType.INFO, 'lustret_mutation_generation', '');

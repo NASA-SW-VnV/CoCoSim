@@ -16,6 +16,13 @@ end
 if status || ~isempty(unsupportedOptions)
     return;
 end
+tools_config;
+[status, output] = Kind2Utils2.checkSyntaxError(nom_lustre_file, KIND2, Z3);
+if status
+    display_msg('Simulink To Lustre has failed.', MsgType.ERROR, 'toLustreVerify', '');
+    display_msg(output, MsgType.DEBUG, 'toLustreVerify', '');
+    return;
+end
 % Get start time
 t_start = now;
 
