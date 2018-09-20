@@ -41,6 +41,10 @@ classdef BusCreator_To_Lustre < Block_To_Lustre
                 obj.addUnsupported_options(msg);
             end             
         end
+        %%
+        function is_Abstracted = isAbstracted(varargin)
+            is_Abstracted = false;
+        end
     end
     
 end

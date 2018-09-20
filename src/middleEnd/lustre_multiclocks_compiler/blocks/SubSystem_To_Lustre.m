@@ -79,7 +79,7 @@ classdef SubSystem_To_Lustre < Block_To_Lustre
             obj.setCode( codes );
             obj.addVariable(outputs_dt); 
         end
-        
+        %%
         function options = getUnsupportedOptions(obj, parent, blk, varargin)
             isInsideContract = SLX2LusUtils.isContractBlk(parent);
             [outputs, ~] = SLX2LusUtils.getBlockOutputsNames(parent, blk);
@@ -90,6 +90,10 @@ classdef SubSystem_To_Lustre < Block_To_Lustre
             end
             % add your unsuported options list here
             options = obj.unsupported_options;
+        end
+        %%
+        function is_Abstracted = isAbstracted(varargin)
+            is_Abstracted = false;
         end
     end
     methods (Static = true)

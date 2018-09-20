@@ -112,6 +112,9 @@ classdef Template_To_Lustre < Block_To_Lustre
             options = obj.unsupported_options;
             
         end
+        function is_Abstracted = isAbstracted(varargin)
+            is_Abstracted = false;
+        end
     end
     
 end

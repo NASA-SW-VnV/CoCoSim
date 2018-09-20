@@ -15,15 +15,17 @@ classdef ExtLib
     
     methods(Static)
         
-        function [node, external_nodes_i, opens] = template(varargin)
+        function [node, external_nodes_i, opens, abstractedNodes] = template(varargin)
             opens = {};
+            abstractedNodes = {};
             external_nodes_i = {};
             node = '';
         end
         
         %% Clocks
-        function [node, external_nodes_i, opens] = get__make_clock(varargin)
+        function [node, external_nodes_i, opens, abstractedNodes] = get__make_clock(varargin)
             opens = {};
+            abstractedNodes = {};
             external_nodes_i = {};
             % format = 'node _make_clock(period: int; phase: int)\nreturns( clk: bool );\nvar count: int;\n';
             % format = [format, 'let\n\t'];

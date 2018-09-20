@@ -50,11 +50,13 @@ classdef DotProduct_To_Lustre < Block_To_Lustre
             obj.setCode( code );
             obj.addVariable(outputs_dt);
         end
-        
+        %%
         function options = getUnsupportedOptions(obj, varargin)
-            obj.unsupported_options = {};
-           
             options = obj.unsupported_options;
+        end
+        %%
+        function is_Abstracted = isAbstracted(varargin)
+            is_Abstracted = false;
         end
     end
     

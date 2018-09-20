@@ -169,12 +169,22 @@ classdef Math_To_Lustre < Block_To_Lustre
             obj.setCode(codes);
             obj.addVariable(outputs_dt);
         end
-        
+        %%
         function options = getUnsupportedOptions(obj,  varargin)
-            obj.unsupported_options = {};
-            
-            
+            obj.unsupported_options = {};            
             options = obj.unsupported_options;
+        end
+        
+        %%
+        function is_Abstracted = isAbstracted(~, ~, ~, blk, varargin)
+            operator = blk.Operator;
+            is_Abstracted = ~ (...
+                strcmp(operator, 'transpose') ...
+                || strcmp(operator, 'hermitian') ...
+                || strcmp(operator, 'reciprocal') ...
+                || strcmp(operator, 'conj') ...
+                || strcmp(operator, 'square') ...
+                || strcmp(operator, 'magnitude^2'));
         end
     end
     

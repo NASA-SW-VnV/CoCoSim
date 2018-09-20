@@ -3,14 +3,14 @@ classdef Sigbuilderblock_To_Lustre < Block_To_Lustre
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
-    % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+    % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     properties
     end
     
     methods
-        function  write_code(obj, parent, blk, xml_trace,  ~, ~,varargin)
+        function  write_code(obj, parent, blk, xml_trace, varargin)
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             obj.addVariable(outputs_dt);
             [time,data,~] = signalbuilder(blk.Origin_path);
@@ -36,7 +36,11 @@ classdef Sigbuilderblock_To_Lustre < Block_To_Lustre
             options = obj.unsupported_options;
             
         end
-        
+        %%
+        function is_Abstracted = isAbstracted(varargin)
+            is_Abstracted = false;
+        end
+        %%
         function [codeAst_all, vars_all] = getSigBuilderCode(obj,outputs,time,data,blk_name)
             % time is nx1 cell if there is more than 1 signal, time is
             % array of 1xm where m is the number of time index in the time

@@ -28,6 +28,10 @@ classdef ModelReference_To_Lustre < Block_To_Lustre
             obj.addUnsupported_options(ssObj.getUnsupportedOptions(parent, blk, varargin));
             options = obj.unsupported_options;
         end
+        %%
+        function is_Abstracted = isAbstracted(varargin)
+            is_Abstracted = false;
+        end
     end
     
 end

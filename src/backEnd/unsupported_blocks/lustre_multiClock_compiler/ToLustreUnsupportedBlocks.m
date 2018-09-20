@@ -2,7 +2,8 @@ function [unsupportedOptions, ...
     status,...
     model_full_path, ...
     ir_struct, ...
-    output_dir] =...
+    output_dir, ...
+    abstractedBlocks] =...
     ToLustreUnsupportedBlocks(model_path, const_files, backend, varargin)
 %ToLustreUnsupportedBlocks detects unsupported options/blocks in Simulink model.
 %INPUTS:
@@ -21,6 +22,7 @@ function [unsupportedOptions, ...
 
 narginchk(1, inf);
 status = 0;
+abstractedBlocks = {};
 if ~exist('const_files', 'var') || isempty(const_files)
     const_files = {};
 end
@@ -31,7 +33,7 @@ for i=1:numel(varargin)
     end
 end
 if ~exist('backend', 'var') || isempty(backend)
-    backend = BackendType.LUSTREC; 
+    backend = BackendType.LUSTREC;
 end
 
 
@@ -99,7 +101,7 @@ if numel(main_sampleTime) >= 2 && main_sampleTime(2) ~= 0
     unsupportedOptions{end+1} = sprintf('Your model is running with a CompiledSampleTime [%d, %d], offset time not null is not supported in the root level.',...
         main_sampleTime(1), main_sampleTime(2));
 else
-    unsupportedOptions = recursiveGeneration(main_block, main_block, main_sampleTime);
+    [unsupportedOptions, abstractedBlocks] = recursiveGeneration(main_block, main_block, main_sampleTime, backend);
 end
 %% display report files
 if isempty(unsupportedOptions)
@@ -112,7 +114,7 @@ if isempty(unsupportedOptions)
         end
     else
         display_msg('Your model is compatible with CoCoSim!', ...
-                MsgType.RESULT, 'ToLustreUnsupportedBlocks', '');
+            MsgType.RESULT, 'ToLustreUnsupportedBlocks', '');
     end
 elseif mode_display == 1
     try
@@ -140,9 +142,9 @@ cd(PWD)
 end
 
 %%
-function unsupportedOptions= recursiveGeneration(parent, blk, main_sampleTime)
+function [unsupportedOptions, abstractedBlocks]= recursiveGeneration(parent, blk, main_sampleTime, backend)
 unsupportedOptions = {};
-unsupportedOptions_i = blockUnsupportedOptions(parent, blk, main_sampleTime);
+[unsupportedOptions_i, abstractedBlocks] = blockUnsupportedOptions(parent, blk, main_sampleTime, backend);
 unsupportedOptions = [unsupportedOptions, unsupportedOptions_i];
 if isfield(blk, 'Content')
     field_names = fieldnames(blk.Content);
@@ -150,19 +152,21 @@ if isfield(blk, 'Content')
         field_names(...
         cellfun(@(x) isfield(blk.Content.(x),'BlockType'), field_names));
     for i=1:numel(field_names)
-        unsupportedOptions_i = recursiveGeneration(blk, blk.Content.(field_names{i}), main_sampleTime);
+        [unsupportedOptions_i, abstractedBlocks_i] = recursiveGeneration(blk, blk.Content.(field_names{i}), main_sampleTime, backend);
         unsupportedOptions = [unsupportedOptions, unsupportedOptions_i];
+        abstractedBlocks = [abstractedBlocks , abstractedBlocks_i];
     end
 end
 end
 
-function  unsupportedOptions_i  = blockUnsupportedOptions( parent, blk,  main_sampleTime)
+function  [unsupportedOptions_i, abstractedBlocks]  = blockUnsupportedOptions( parent, blk,  main_sampleTime, backend)
 %blockUnsupportedOptions get unsupported options of a bock.
 %INPUTS:
 %   blk: The internal representation of the subsystem.
 %   main_clock   : The model sample time.
 [b, status, type, masktype, isIgnored] = getWriteType(blk);
 unsupportedOptions_i = {};
+abstractedBlocks = {};
 if status
     if ~isIgnored
         if isempty(masktype)
@@ -175,6 +179,14 @@ if status
     return;
 end
 unsupportedOptions_i = b.getUnsupportedOptions(parent, blk,  main_sampleTime);
-
+is_abstracted = b.isAbstracted(backend, parent, blk, main_sampleTime);
+if is_abstracted
+    if isempty(masktype)
+        msg = sprintf('Block "%s" with BlockType "%s".', blk.Origin_path, type);
+    else
+        msg = sprintf('Block "%s" with BlockType "%s" and MaskType "%s".', blk.Origin_path, type, masktype);
+    end
+    abstractedBlocks = {msg};
+end
 end
 

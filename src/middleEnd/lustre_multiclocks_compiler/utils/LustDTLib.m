@@ -5,15 +5,17 @@ classdef LustDTLib
     
     methods(Static)
         
-        function [node, external_nodes_i, opens] = template(varargin)
+        function [node, external_nodes_i, opens, abstractedNodes] = template(varargin)
             opens = {};
+            abstractedNodes = {};
             external_nodes_i = {};
             node = '';
         end
                               
         %%
-        function [node, external_nodes_i, opens] = getToBool(dt)
+        function [node, external_nodes_i, opens, abstractedNodes] = getToBool(dt)
             opens = {};
+            abstractedNodes = {};
             external_nodes_i = {};
             node_name = strcat(dt, '_to_bool');
             if strcmp(dt, 'int')
@@ -38,8 +40,9 @@ classdef LustDTLib
                         
         end
             
-        function [node, external_nodes_i, opens] = getBoolTo(dt)
+        function [node, external_nodes_i, opens, abstractedNodes] = getBoolTo(dt)
             opens = {};
+            abstractedNodes = {};
             external_nodes_i = {};
             
             node_name = strcat('bool_to_', dt);
@@ -68,26 +71,26 @@ classdef LustDTLib
             node.setIsMain(false);             
         end
        
-        function [node, external_nodes_i, opens] = get_real_to_bool(varargin)
-            [node, external_nodes_i, opens] = LustDTLib.getToBool('real');   
+        function [node, external_nodes_i, opens, abstractedNodes] = get_real_to_bool(varargin)
+            [node, external_nodes_i, opens, abstractedNodes] = LustDTLib.getToBool('real');   
         end
         
-        function [node, external_nodes_i, opens] = get_int_to_bool(varargin)
-            [node, external_nodes_i, opens] = LustDTLib.getToBool('int');
+        function [node, external_nodes_i, opens, abstractedNodes] = get_int_to_bool(varargin)
+            [node, external_nodes_i, opens, abstractedNodes] = LustDTLib.getToBool('int');
         end
         
-        function [node, external_nodes_i, opens] = get_bool_to_int(varargin)
-            [node, external_nodes_i, opens] = LustDTLib.getBoolTo('int');
+        function [node, external_nodes_i, opens, abstractedNodes] = get_bool_to_int(varargin)
+            [node, external_nodes_i, opens, abstractedNodes] = LustDTLib.getBoolTo('int');
         end
         
-        function [node, external_nodes_i, opens] = get_bool_to_real(varargin)
-            [node, external_nodes_i, opens] = LustDTLib.getBoolTo('real');
+        function [node, external_nodes_i, opens, abstractedNodes] = get_bool_to_real(varargin)
+            [node, external_nodes_i, opens, abstractedNodes] = LustDTLib.getBoolTo('real');
         end
         
         %%
-        function [node, external_nodes, opens] = getIntToInt(dt)
+        function [node, external_nodes, opens, abstractedNodes] = getIntToInt(dt)
             opens = {};
-            
+            abstractedNodes = {};
             v_max = double(intmax(dt));% we need v_max as double variable
             v_min = double(intmin(dt));% we need v_min as double variable
             nb_int = (v_max - v_min + 1);
@@ -140,8 +143,9 @@ classdef LustDTLib
             external_nodes = {strcat('LustMathLib_', 'rem_int_int')};
             
         end
-        function [node, external_nodes, opens] = getIntToIntSaturate(dt)
+        function [node, external_nodes, opens, abstractedNodes] = getIntToIntSaturate(dt)
             opens = {};
+            abstractedNodes = {};
             external_nodes = {};
             node_name = sprintf('int_to_%s_saturate', dt);
             % format = 'node %s (x: int)\nreturns(y:int);\nlet\n\t';
@@ -171,47 +175,48 @@ classdef LustDTLib
         end
         
                 
-        function [node, external_nodes_i, opens] = get_int_to_int8(varargin)
-            [node, external_nodes_i, opens] = LustDTLib.getIntToInt('int8');
+        function [node, external_nodes_i, opens, abstractedNodes] = get_int_to_int8(varargin)
+            [node, external_nodes_i, opens, abstractedNodes] = LustDTLib.getIntToInt('int8');
         end
-        function [node, external_nodes_i, opens] = get_int_to_uint8(varargin)
-            [node, external_nodes_i, opens] = LustDTLib.getIntToInt('uint8');
+        function [node, external_nodes_i, opens, abstractedNodes] = get_int_to_uint8(varargin)
+            [node, external_nodes_i, opens, abstractedNodes] = LustDTLib.getIntToInt('uint8');
         end
-        function [node, external_nodes_i, opens] = get_int_to_int16(varargin)
-            [node, external_nodes_i, opens] = LustDTLib.getIntToInt('int16');
+        function [node, external_nodes_i, opens, abstractedNodes] = get_int_to_int16(varargin)
+            [node, external_nodes_i, opens, abstractedNodes] = LustDTLib.getIntToInt('int16');
         end
-        function [node, external_nodes_i, opens] = get_int_to_uint16(varargin)
-            [node, external_nodes_i, opens] = LustDTLib.getIntToInt('uint16');
+        function [node, external_nodes_i, opens, abstractedNodes] = get_int_to_uint16(varargin)
+            [node, external_nodes_i, opens, abstractedNodes] = LustDTLib.getIntToInt('uint16');
         end
-        function [node, external_nodes_i, opens] = get_int_to_int32(varargin)
-            [node, external_nodes_i, opens] = LustDTLib.getIntToInt('int32');
+        function [node, external_nodes_i, opens, abstractedNodes] = get_int_to_int32(varargin)
+            [node, external_nodes_i, opens, abstractedNodes] = LustDTLib.getIntToInt('int32');
         end
-        function [node, external_nodes_i, opens] = get_int_to_uint32(varargin)
-            [node, external_nodes_i, opens] = LustDTLib.getIntToInt('uint32');
+        function [node, external_nodes_i, opens, abstractedNodes] = get_int_to_uint32(varargin)
+            [node, external_nodes_i, opens, abstractedNodes] = LustDTLib.getIntToInt('uint32');
         end
-        function [node, external_nodes_i, opens] = get_int_to_int8_saturate(varargin)
-            [node, external_nodes_i, opens] = LustDTLib.getIntToIntSaturate('int8');
+        function [node, external_nodes_i, opens, abstractedNodes] = get_int_to_int8_saturate(varargin)
+            [node, external_nodes_i, opens, abstractedNodes] = LustDTLib.getIntToIntSaturate('int8');
         end
-        function [node, external_nodes_i, opens] = get_int_to_uint8_saturate(varargin)
-            [node, external_nodes_i, opens] = LustDTLib.getIntToIntSaturate('uint8');
+        function [node, external_nodes_i, opens, abstractedNodes] = get_int_to_uint8_saturate(varargin)
+            [node, external_nodes_i, opens, abstractedNodes] = LustDTLib.getIntToIntSaturate('uint8');
         end
-        function [node, external_nodes_i, opens] = get_int_to_int16_saturate(varargin)
-            [node, external_nodes_i, opens] = LustDTLib.getIntToIntSaturate('int16');
+        function [node, external_nodes_i, opens, abstractedNodes] = get_int_to_int16_saturate(varargin)
+            [node, external_nodes_i, opens, abstractedNodes] = LustDTLib.getIntToIntSaturate('int16');
         end
-        function [node, external_nodes_i, opens] = get_int_to_uint16_saturate(varargin)
-            [node, external_nodes_i, opens] = LustDTLib.getIntToIntSaturate('uint16');
+        function [node, external_nodes_i, opens, abstractedNodes] = get_int_to_uint16_saturate(varargin)
+            [node, external_nodes_i, opens, abstractedNodes] = LustDTLib.getIntToIntSaturate('uint16');
         end
-        function [node, external_nodes_i, opens] = get_int_to_int32_saturate(varargin)
-            [node, external_nodes_i, opens] = LustDTLib.getIntToIntSaturate('int32');
+        function [node, external_nodes_i, opens, abstractedNodes] = get_int_to_int32_saturate(varargin)
+            [node, external_nodes_i, opens, abstractedNodes] = LustDTLib.getIntToIntSaturate('int32');
         end
-        function [node, external_nodes_i, opens] = get_int_to_uint32_saturate(varargin)
-            [node, external_nodes_i, opens] = LustDTLib.getIntToIntSaturate('uint32');
+        function [node, external_nodes_i, opens, abstractedNodes] = get_int_to_uint32_saturate(varargin)
+            [node, external_nodes_i, opens, abstractedNodes] = LustDTLib.getIntToIntSaturate('uint32');
         end
        
         %%
-        function [node, external_nodes, opens] = get_int_to_real(backend, varargin)
+        function [node, external_nodes, opens, abstractedNodes] = get_int_to_real(backend, varargin)
             if BackendType.isKIND2(backend)
                 opens = {};
+                abstractedNodes = {'int_to_real'};
                 external_nodes = {};
                 node = LustreNode();
                 node.setName('int_to_real');
@@ -221,14 +226,16 @@ classdef LustDTLib
                 node.setIsImported(true);
             else
                 opens = {'conv'};
+                abstractedNodes = {};
                 external_nodes = {};
                 node = {};
             end
         end
         
-        function [node, external_nodes, opens] = get_real_to_int(backend, varargin)
+        function [node, external_nodes, opens, abstractedNodes] = get_real_to_int(backend, varargin)
             if BackendType.isKIND2(backend)
                 opens = {};
+                abstractedNodes = {'real_to_int'};
                 external_nodes = {};
                 node = LustreNode();
                 node.setName('real_to_int');
@@ -238,13 +245,15 @@ classdef LustDTLib
                 node.setIsImported(true);
             else
                 opens = {'conv'};
+                abstractedNodes = {};
                 external_nodes = {};
                 node = {};
             end
         end
         
-        function [node, external_nodes, opens] = get__Floor(backend, varargin)
+        function [node, external_nodes, opens, abstractedNodes] = get__Floor(backend, varargin)
             if BackendType.isKIND2(backend)
+                abstractedNodes = {'Floor'};
                 opens = {};
                 external_nodes = {};
                 node = LustreNode();
@@ -255,6 +264,7 @@ classdef LustDTLib
                 node.setIsImported(true);
             else
                 opens = {'conv'};
+                abstractedNodes = {};
                 external_nodes = {};
                 node = {};
             end
@@ -262,8 +272,9 @@ classdef LustDTLib
         end
         % this one for "Rounding" Simulink block, it is different from Floor by
         % returning a real instead of int.
-        function [node, external_nodes, opens] = get__floor(backend, varargin)
+        function [node, external_nodes, opens, abstractedNodes] = get__floor(backend, varargin)
             if BackendType.isKIND2(backend)
+                abstractedNodes = {'floor'};
                 opens = {};
                 external_nodes = {};
                 % y - 1.0 < x <= y
@@ -290,15 +301,17 @@ classdef LustDTLib
                 node.setIsImported(true);
             else
                 opens = {'conv'};
+                abstractedNodes = {};
                 external_nodes = {};
                 node = {};
             end
         end
         
 
-        function [node, external_nodes, opens] = get__Ceiling(backend, varargin)
+        function [node, external_nodes, opens, abstractedNodes] = get__Ceiling(backend, varargin)
             if BackendType.isKIND2(backend)
                 opens = {};
+                abstractedNodes = {'Ceiling'};
                 external_nodes = {};
                 node = LustreNode();
                 node.setName('_Ceiling');
@@ -308,6 +321,7 @@ classdef LustDTLib
                 node.setIsImported(true);
             else
                 opens = {'conv'};
+                abstractedNodes = {};
                 external_nodes = {};
                 node = {};
             end
@@ -315,9 +329,10 @@ classdef LustDTLib
         end
         % this one for "Rounding" block, it is different from Ceiling by
         % returning a real instead of int.
-        function [node, external_nodes, opens] = get__ceil(backend, varargin)
+        function [node, external_nodes, opens, abstractedNodes] = get__ceil(backend, varargin)
             if BackendType.isKIND2(backend)
                 opens = {};
+                abstractedNodes = {'ceil'};
                 external_nodes = {};
                 % y  <= x < y + 1.0
                 contractElts{1} = ContractGuaranteeExpr('', ...
@@ -344,6 +359,7 @@ classdef LustDTLib
                 node.setIsImported(true);
             else
                 opens = {'conv'};
+                abstractedNodes = {};
                 external_nodes = {};
                 node = {};
             end
@@ -353,7 +369,7 @@ classdef LustDTLib
                 
         % Round Rounds number to the nearest representable value.
         %If a tie occurs, rounds positive numbers toward positive infinity and rounds negative numbers toward negative infinity. Equivalent to the Fixed-Point Designer round function.
-        function [node, external_nodes, opens] = get__Round(backend, varargin)
+        function [node, external_nodes, opens, abstractedNodes] = get__Round(backend, varargin)
             % format = '--Rounds number to the nearest representable value.\n';
             % format = [format , '--If a tie occurs,rounds positive numbers toward positive infinity and rounds negative numbers toward negative infinity\n '];
             % format = [ format ,'node _Round (x: real)\nreturns(y:int);\nlet\n\t'];
@@ -364,6 +380,7 @@ classdef LustDTLib
             % node = sprintf(format);
             if BackendType.isKIND2(backend)
                 opens = {};
+                abstractedNodes = {'Round'};
                 external_nodes = {};
                 node = LustreNode();
                 node.setName('_Round');
@@ -373,15 +390,17 @@ classdef LustDTLib
                 node.setIsImported(true);
             else
                 opens = {'conv'};
+                abstractedNodes = {};
                 external_nodes = {};
                 node = {};
             end
         end
         % this one for "Rounding" block, it is different from Ceiling by
         % returning a real instead of int.
-        function [node, external_nodes, opens] = get__round(backend, varargin)
+        function [node, external_nodes, opens, abstractedNodes] = get__round(backend, varargin)
             if BackendType.isKIND2(backend)
                 opens = {};
+                abstractedNodes = {'round'};
                 external_nodes = {'LustMathLib_abs_real'};
                 % abs(x - y) < 1.0
                 contractElts{1} = ContractGuaranteeExpr('', ...
@@ -404,6 +423,7 @@ classdef LustDTLib
                 node.setIsImported(true);
             else
                 opens = {'conv'};
+                abstractedNodes = {};
                 external_nodes = {};
                 node = {};
             end
@@ -411,11 +431,12 @@ classdef LustDTLib
         end
         
         
-        function [node, external_nodes, opens] = get__Convergent(varargin)
+        function [node, external_nodes, opens, abstractedNodes] = get__Convergent(varargin)
             %Rounds number to the nearest representable value.
             %If a tie occurs, rounds to the nearest even integer.
             %Equivalent to the Fixed-Point Designer? convergent function.
             opens = {};
+            abstractedNodes = {};
             % format = '--Rounds number to the nearest representable value.\n ';
             % format = [ format ,'node _Convergent (x: real)\nreturns(y:int);\nlet\n\t'];
             % format = [ format , 'y = if (x > 0.5) then\n\t\t\t'];
@@ -486,8 +507,9 @@ classdef LustDTLib
         
         % Nearest Rounds number to the nearest representable value.
         %If a tie occurs, rounds toward positive infinity. Equivalent to the Fixed-Point Designer nearest function.
-        function [node, external_nodes, opens] = get__Nearest(varargin)
+        function [node, external_nodes, opens, abstractedNodes] = get__Nearest(varargin)
             opens = {};
+            abstractedNodes = {};
             % format = '--Rounds number to the nearest representable value.\n--If a tie occurs, rounds toward positive infinity\n ';
             % format = [ format ,'node _Nearest (x: real)\nreturns(y:int);\nlet\n\t'];
             % format = [ format , 'y = if (_fabs(x) >= 0.5) then _Floor(x + 0.5)\n\t'];
@@ -524,8 +546,9 @@ classdef LustDTLib
 
         
         % Rounds each element of the input signal to the nearest integer towards zero.
-        function [node, external_nodes, opens] = get__Fix(varargin)
+        function [node, external_nodes, opens, abstractedNodes] = get__Fix(varargin)
             opens = {};
+            abstractedNodes = {};
             % format = '--Rounds number to the nearest integer towards zero.\n';
             % format = [ format ,'node _Fix (x: real)\nreturns(y:int);\nlet\n\t'];
             % format = [ format , 'y = if (x >= 0.5) then _Floor(x)\n\t\t'];
@@ -561,8 +584,9 @@ classdef LustDTLib
         end
         % this one for "Rounding" block, it is different from Fix by
         % returning a real instead of int.
-        function [node, external_nodes, opens] = get__fix(varargin)
+        function [node, external_nodes, opens, abstractedNodes] = get__fix(varargin)
             opens = {};
+            abstractedNodes = {};
             % format = '--Rounds number to the nearest integer towards zero.\n';
             % format = [ format ,'node _fix (x: real)\nreturns(y:real);\nlet\n\t'];
             % format = [ format , 'y = if (x >= 0.5) then _floor(x)\n\t\t'];

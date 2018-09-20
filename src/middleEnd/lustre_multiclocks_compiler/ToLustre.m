@@ -1,4 +1,4 @@
-function [nom_lustre_file, xml_trace, status, unsupportedOptions]= ToLustre(model_path, const_files, backend, varargin)
+function [nom_lustre_file, xml_trace, status, unsupportedOptions, abstractedBlocks]= ToLustre(model_path, const_files, backend, varargin)
 %lustre_multiclocks_compiler translate Simulink models to Lustre. It is based on
 %article :
 %INPUTS:
@@ -33,7 +33,7 @@ xml_trace = [];
 %% Get start time
 t_start = tic;
 
-[unsupportedOptions, status, model_full_path, ir_struct, output_dir]= ...
+[unsupportedOptions, status, model_full_path, ir_struct, output_dir, abstractedBlocks]= ...
     ToLustreUnsupportedBlocks(model_path, const_files, backend, varargin);
 
 if status || ~isempty(unsupportedOptions)
@@ -66,7 +66,14 @@ main_sampleTime = model_struct.CompiledSampleTime;
 is_main_node = 1;
 [nodes_ast, contracts_ast, external_libraries] = recursiveGeneration(...
     model_struct, model_struct, main_sampleTime, is_main_node, backend, xml_trace);
-[external_lib_code, open_list] = getExternalLibrariesNodes(external_libraries, backend);
+[external_lib_code, open_list, abstractedNodes] = getExternalLibrariesNodes(external_libraries, backend);
+abstractedBlocks = [abstractedBlocks, abstractedNodes];
+if ~isempty(abstractedBlocks)
+    display_msg('The following Blocks/Nodes are abstracted:', ...
+        MsgType.WARNING, 'ToLustreUnsupportedBlocks', '');
+    display_msg(MatlabUtils.strjoin(abstractedBlocks, '\n'), ...
+        MsgType.WARNING, 'ToLustreUnsupportedBlocks', '');
+end
 %TODO: change it to AST
 nodes_ast = [external_lib_code, nodes_ast];
 %% create LustreProgram

@@ -163,7 +163,7 @@ classdef Assignment_To_Lustre < Block_To_Lustre
             obj.setCode( codes );
             obj.addVariable(outputs_dt);
         end
-        
+        %%
         function options = getUnsupportedOptions(obj, ~, blk, varargin)
             obj.unsupported_options = {};
             in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(blk.CompiledPortDimensions.Inport);
@@ -187,6 +187,11 @@ classdef Assignment_To_Lustre < Block_To_Lustre
             end
             options = obj.unsupported_options;
         end   
+        %%
+        function is_Abstracted = isAbstracted(varargin)
+            is_Abstracted = false;
+        end
+        %%
         
         function [in_matrix_dimension, U_expanded_dims,inputs] = ...
                 expand_U(~, parent,blk,inputs,numOutDims)

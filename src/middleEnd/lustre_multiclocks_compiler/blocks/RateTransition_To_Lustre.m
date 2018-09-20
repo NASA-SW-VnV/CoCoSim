@@ -110,30 +110,38 @@ classdef RateTransition_To_Lustre < Block_To_Lustre
             obj.setCode( codes );
         end
         %%
-        function options = getUnsupportedOptions(obj, ~, blk, varargin)
-            if strcmp(blk.Integrity, 'on') && strcmp(blk.Deterministic, 'on')
-                if inTs == outTs
-                    if inTsOffset ~= outTsOffset
-                        obj.addUnsupported_options(sprintf('RateTransition block "%s" is not supported. inTsOffset should be equal to outTsOffset.', ...
-                            blk.Origin_path));
-                    end
-                elseif inTs < outTs % fast to slow
-                    if ~(mod(int32(outTs/inTs),1)==0 &&  inTsOffset == outTsOffset && inTsOffset == 0)
-                        obj.addUnsupported_options(sprintf('RateTransition block "%s" is not supported.\n The following conditionin should be met: Ts = outTs / N and inTsOffset = outTsOffset =0.', ...
-                            blk.Origin_path));
-                    end
-                else %inTs > outTs : slow to fast
-                    if ~(mod(int32(inTs/outTs),1)==0 &&  inTsOffset == outTsOffset && inTsOffset == 0)
-                        obj.addUnsupported_options(sprintf('RateTransition block "%s" is not supported.\n The following conditionin should be met: Ts = outTs * N and inTsOffset = outTsOffset =0.', ...
-                            blk.Origin_path));
-                    end
-                end
+        function options = getUnsupportedOptions(obj, ~, blk, ~, backend, varargin)
+            if BackendType.isKIND2(backend)
+                obj.addUnsupported_options(...
+                    sprintf('multi-clocks in block "%s" is currently not supported by KIND2.', blk.Origin_path));
             else
-                obj.addUnsupported_options(sprintf('RateTransition block "%s" is not supported. Data Integrity and Determinism should be checked', ...
-                    blk.Origin_path));
+                if strcmp(blk.Integrity, 'on') && strcmp(blk.Deterministic, 'on')
+                    if inTs == outTs
+                        if inTsOffset ~= outTsOffset
+                            obj.addUnsupported_options(sprintf('RateTransition block "%s" is not supported. inTsOffset should be equal to outTsOffset.', ...
+                                blk.Origin_path));
+                        end
+                    elseif inTs < outTs % fast to slow
+                        if ~(mod(int32(outTs/inTs),1)==0 &&  inTsOffset == outTsOffset && inTsOffset == 0)
+                            obj.addUnsupported_options(sprintf('RateTransition block "%s" is not supported.\n The following conditionin should be met: Ts = outTs / N and inTsOffset = outTsOffset =0.', ...
+                                blk.Origin_path));
+                        end
+                    else %inTs > outTs : slow to fast
+                        if ~(mod(int32(inTs/outTs),1)==0 &&  inTsOffset == outTsOffset && inTsOffset == 0)
+                            obj.addUnsupported_options(sprintf('RateTransition block "%s" is not supported.\n The following conditionin should be met: Ts = outTs * N and inTsOffset = outTsOffset =0.', ...
+                                blk.Origin_path));
+                        end
+                    end
+                else
+                    obj.addUnsupported_options(sprintf('RateTransition block "%s" is not supported. Data Integrity and Determinism should be checked', ...
+                        blk.Origin_path));
+                end
             end
-            
             options = obj.unsupported_options;
+        end
+        %%
+        function is_Abstracted = isAbstracted(varargin)
+            is_Abstracted = false;
         end
     end
     

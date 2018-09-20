@@ -25,7 +25,7 @@ classdef LookupTableDynamic_To_Lustre < Block_To_Lustre
             obj.setCode(mainCode);
             obj.addVariable(main_vars);
         end
-        
+        %%
         function options = getUnsupportedOptions(obj, blk, varargin)
             obj.unsupported_options = {};
             [NumberOfTableDimensions, ~, ~] = ...
@@ -39,6 +39,10 @@ classdef LookupTableDynamic_To_Lustre < Block_To_Lustre
                     sprintf('Cubic spline interpolation is not support in block %s', blk.Origin_path);
             end            
             options = obj.unsupported_options;
+        end
+        %%
+        function is_Abstracted = isAbstracted(varargin)
+            is_Abstracted = false;
         end
     end        
 end

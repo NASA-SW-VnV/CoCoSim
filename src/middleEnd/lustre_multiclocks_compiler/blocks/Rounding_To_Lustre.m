@@ -41,6 +41,11 @@ classdef Rounding_To_Lustre < Block_To_Lustre
             obj.unsupported_options = {};
             options = obj.unsupported_options;
         end
+        
+        %%
+        function is_Abstracted = isAbstracted(~, backend, varargin)
+            is_Abstracted = BackendType.isKIND2(backend);
+        end
     end
     
 

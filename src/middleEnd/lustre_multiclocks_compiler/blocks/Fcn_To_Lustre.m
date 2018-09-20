@@ -37,10 +37,14 @@ classdef Fcn_To_Lustre < Block_To_Lustre
                 Fcn_To_Lustre.expToLustre(obj, blk.Expr, parent, blk, inputs)));
             obj.addVariable(outputs_dt);
         end
-        
+        %%
         function options = getUnsupportedOptions(obj, varargin)
             obj.unsupported_options = {};
             options = obj.unsupported_options;
+        end
+        %%
+        function is_Abstracted = isAbstracted(obj, varargin)
+            is_Abstracted = ~isempty(obj.getExternalLibraries);
         end
     end
     

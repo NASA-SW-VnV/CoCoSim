@@ -132,7 +132,7 @@ classdef DiscretePulseGenerator_To_Lustre < Block_To_Lustre
             obj.setCode( codes );
             
         end
-        
+        %%
         function options = getUnsupportedOptions(obj, ~, blk, varargin)
             obj.unsupported_options = {};
             if strcmp(blk.TimeSource, 'Use external signal')
@@ -140,6 +140,10 @@ classdef DiscretePulseGenerator_To_Lustre < Block_To_Lustre
                     blk.Origin_path));
             end
             options = obj.unsupported_options;
+        end
+        %%
+        function is_Abstracted = isAbstracted(varargin)
+            is_Abstracted = false;
         end
     end
     

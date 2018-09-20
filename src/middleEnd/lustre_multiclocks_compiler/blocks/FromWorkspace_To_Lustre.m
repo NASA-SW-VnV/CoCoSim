@@ -159,7 +159,7 @@ classdef FromWorkspace_To_Lustre < Block_To_Lustre
             obj.addVariable(outputs_dt);
             obj.addVariable(vars_all);       %%%%%%%%%% new code %%%%%%%%%%%
         end
-        
+        %%
         function options = getUnsupportedOptions(obj, ~, blk, varargin)
             obj.unsupported_options = {};
             VariableName = blk.VariableName;
@@ -192,6 +192,10 @@ classdef FromWorkspace_To_Lustre < Block_To_Lustre
                 return;
             end
             options = obj.unsupported_options;
+        end
+        %%
+        function is_Abstracted = isAbstracted(varargin)
+            is_Abstracted = false;
         end
     end
     methods (Static)

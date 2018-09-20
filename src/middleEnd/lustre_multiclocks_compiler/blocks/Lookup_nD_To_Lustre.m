@@ -87,7 +87,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
             obj.addVariable(main_vars);
 
         end
-        
+        %%
         function options = getUnsupportedOptions(obj, parent, blk, varargin)
             obj.unsupported_options = {};
             [blkParams.NumberOfTableDimensions, ~, ~] = ...
@@ -105,6 +105,10 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                     sprintf('Lookup table object option for DataSpecification is not support in block %s', blk.Origin_path);
             end                
             options = obj.unsupported_options;
+        end
+        %%
+        function is_Abstracted = isAbstracted(varargin)
+            is_Abstracted = false;
         end
         
     end

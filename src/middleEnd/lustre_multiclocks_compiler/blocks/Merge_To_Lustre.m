@@ -108,7 +108,7 @@ classdef Merge_To_Lustre < Block_To_Lustre
             obj.setCode( codes );
             
         end
-        
+        %%
         function options = getUnsupportedOptions(obj,parent, blk, varargin)
             if strcmp(blk.AllowUnequalInputPortWidths, 'on')
                 display_msg(sprintf('Merge block "%s" is not supported. CoCoSim supports only Merge blocks with equal Input Port widths', ...
@@ -134,6 +134,10 @@ classdef Merge_To_Lustre < Block_To_Lustre
             end
            options = obj.unsupported_options;
            
+        end
+        %%
+        function is_Abstracted = isAbstracted(varargin)
+            is_Abstracted = false;
         end
     end
     

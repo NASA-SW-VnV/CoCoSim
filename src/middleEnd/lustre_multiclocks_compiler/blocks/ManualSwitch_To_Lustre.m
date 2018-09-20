@@ -61,15 +61,13 @@ classdef ManualSwitch_To_Lustre < Block_To_Lustre
             obj.setCode( codes );
             
         end
-        
+        %%
         function options = getUnsupportedOptions(obj, varargin)
-            %             if isequal(blk.varsize, 'on')
-            %                 obj.addUnsupported_options(...
-            %                     sprintf('Option input signals with different sizes in Block "%s" is not supported.',...
-            %                     blk.Origin_path));
-            %             end
             options = obj.unsupported_options;
-            
+        end
+        %%
+        function is_Abstracted = isAbstracted(varargin)
+            is_Abstracted = false;
         end
     end
     

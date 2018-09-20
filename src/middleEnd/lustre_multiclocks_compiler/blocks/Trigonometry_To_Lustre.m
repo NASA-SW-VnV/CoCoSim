@@ -89,6 +89,9 @@ classdef Trigonometry_To_Lustre < Block_To_Lustre
            
             options = obj.unsupported_options;
         end
+        function is_Abstracted = isAbstracted(~, backend, varargin)
+            is_Abstracted = BackendType.isKIND2(backend);
+        end
     end
     
 end

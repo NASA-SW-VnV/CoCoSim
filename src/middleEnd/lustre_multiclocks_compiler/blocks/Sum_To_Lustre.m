@@ -59,6 +59,11 @@ classdef Sum_To_Lustre < Block_To_Lustre
             end
             options = obj.unsupported_options;
         end
+        
+        %%
+        function is_Abstracted = isAbstracted(varargin)
+            is_Abstracted = false;
+        end
     end
     
     methods(Static)

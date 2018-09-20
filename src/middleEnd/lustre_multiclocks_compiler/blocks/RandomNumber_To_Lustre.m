@@ -61,6 +61,10 @@ classdef RandomNumber_To_Lustre < Block_To_Lustre
         function options = getUnsupportedOptions(obj, varargin)
             options = obj.unsupported_options;
         end
+        %%
+        function is_Abstracted = isAbstracted(~, backend, varargin)
+            is_Abstracted = BackendType.isKIND2(backend);
+        end
     end
     methods(Static)
         function node = randomNode(blk_name, r, backend)

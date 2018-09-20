@@ -50,6 +50,11 @@ classdef Product_To_Lustre < Block_To_Lustre
             end
             options = obj.unsupported_options;
         end
+        %%
+        function is_Abstracted = isAbstracted(varargin)
+            %TODO: abstract inverse of matrix
+            is_Abstracted = false;
+        end
     end
     
     methods(Static)

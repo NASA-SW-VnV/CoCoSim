@@ -37,13 +37,17 @@ classdef Block_To_Lustre < handle
         %behavior set this attribute to False. So you can define the
         %definition of the Masked SS in MaskType_To_Lustre.
         ContentNeedToBeTranslated = 1;
+        
+        
+        
     end
     
     methods (Abstract)
         %these functions should be implemented by all classes inherit from
         %this class
         write_code(obj, parent, blk, xml_trace, main_sampleTime, backend, varargin)
-        getUnsupportedOptions(obj, parent, blk, main_sampleTime, xml_trace, varargin)
+        getUnsupportedOptions(obj, parent, blk, main_sampleTime, backend, varargin)
+        isAbstracted(obj, backend, parent, blk, main_sampleTime, varargin)
     end
     methods
         function addVariable(obj, varname, ...

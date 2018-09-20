@@ -50,6 +50,10 @@ classdef Reshape_To_Lustre < Block_To_Lustre
             obj.unsupported_options = {};
             options = obj.unsupported_options;
         end
+        %%
+        function is_Abstracted = isAbstracted(varargin)
+            is_Abstracted = false;
+        end
     end
     
 

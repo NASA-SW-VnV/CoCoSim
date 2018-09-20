@@ -39,13 +39,16 @@ classdef If_To_Lustre < Block_To_Lustre
             obj.setCode(code);
             
         end
-        
+        %%
         function options = getUnsupportedOptions(obj, varargin)
             % add your unsuported options list here
             options = obj.unsupported_options;
             
         end
-        
+        %%
+        function is_Abstracted = isAbstracted(varargin)
+            is_Abstracted = false;
+        end
     end
     methods(Static)
         function code = ifElseCode(obj, parent, blk, outputs, inputs, inports_dt, IfExp)
