@@ -26,18 +26,9 @@ classdef LookupTableDynamic_To_Lustre < Block_To_Lustre
             obj.addVariable(main_vars);
         end
         
-        function options = getUnsupportedOptions(obj, blk, varargin)
+        function options = getUnsupportedOptions(obj, parent, blk, varargin)
             obj.unsupported_options = {};
-            [NumberOfTableDimensions, ~, ~] = ...
-                Constant_To_Lustre.getValueFromParameter(parent, blk, blk.NumberOfTableDimensions);
-            if NumberOfTableDimensions >= 7
-                obj.unsupported_options{numel(obj.unsupported_options) + 1} = ...
-                    sprintf('More than 7 dimensions is not support in block %s', blk.Origin_path);
-            end 
-            if ~strcmp(blk.InterpMethod, 'Cubic spline')
-                obj.unsupported_options{numel(obj.unsupported_options) + 1} = ...
-                    sprintf('Cubic spline interpolation is not support in block %s', blk.Origin_path);
-            end            
+          
             options = obj.unsupported_options;
         end
     end        
