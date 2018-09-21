@@ -1161,10 +1161,65 @@ classdef LustMathLib
           
         end
         
-%         function [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_4x4(varargin)
-%             
-%         end
-%         
+        function [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_4x4(varargin)
+            % support 4x4 matrix inversion
+            n = 4;
+            opens = {};
+            abstractedNodes = {};
+            external_nodes_i ={};
+            node_name = '_inv_M_4x4';
+            node = LustreNode();
+            node.setName(node_name);
+            node.setIsMain(false);            
+            body = {};
+            vars = cell(1,n+1); 
+            
+            det = VarIdExpr('det');
+            vars{1} = LustreVar(det,'real');
+            % a: inputs, ai: outputs, adj: adjugate            
+            a = cell(n,n);
+            ai = cell(n,n);
+            adj = cell(n,n);
+            for i=1:n
+                for j=1:n
+                    a{i,j} = VarIdExpr(sprintf('a%d%d',i,j));
+                    ai{i,j} = VarIdExpr(sprintf('ai%d%d',i,j));
+                    adj{i,j} = VarIdExpr(sprintf('adj%d%d',i,j));
+                    vars{(i-1)*n+j+1} = LustreVar(adj{i,j},'real');
+                end
+            end            
+            
+            % define adjugate
+            
+            
+            % define det
+            
+            % define inverse
+            for i=1:n
+                for j=1:n
+                    body{end+1} = LustreEq(ai{i,j},BinaryExpr(BinaryExpr.DIVIDE,adj{i,j},det));
+                end
+            end
+
+            % set node
+            inputs = cell(1,9);
+            outputs = cell(1,9);
+            counter = 0;
+            for j=1:n
+                for i=1:n
+                    counter = counter + 1;
+                    inputs{counter} = LustreVar(a{i,j},'real');
+                    outputs{counter} = LustreVar(ai{i,j},'real');
+                end
+            end
+            node.setInputs(inputs);
+            node.setOutputs(outputs);
+            node.setBodyEqs(body);   
+            node.setLocalVars(vars);            
+            
+            
+        end
+        
         function [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_5x5(varargin)
             % 5x5 inversion is not supported
             if strcmp(varargin{1}, 'LUSTREC')
