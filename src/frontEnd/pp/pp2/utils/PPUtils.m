@@ -21,12 +21,12 @@ classdef PPUtils
         end
         
         function [] = replace_DTF_block(blk, U_dims_blk,num,denum )
-                       
+            
             if numel(denum) < numel(num)
                 tempDenum = zeros(1,length(num));
                 tempDenum(1:numel(denum)) = denum;
                 denum = tempDenum;
-            end            
+            end
             
             % Computing state space representation
             [A,B,C,D]=tf2ss(num,denum);
@@ -110,7 +110,11 @@ classdef PPUtils
         
         function [num, status] = getTfNumerator(model,blk,numStr,ppName)
             num_str = get_param(blk,numStr);
-            [num, status] = SLXUtils.evalParam(model, num_str);
+            [num, status] = SLXUtils.evalParam(...
+                model, ...
+                get_param(blk, 'Parent'), ...
+                blk, ...
+                num_str);
             if status
                 display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
                     num_str, blk), ...
@@ -120,13 +124,17 @@ classdef PPUtils
         
         function [denum, status] = getTfDenum(model,blk, ppName)
             denum_str = get_param(blk, 'Denominator');
-            [denum, status] = SLXUtils.evalParam(model, denum_str);
+            [denum, status] = SLXUtils.evalParam(...
+                model, ...
+                get_param(blk, 'Parent'), ...
+                blk, ...
+                denum_str);
             if status
                 display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
                     denum_str, blk), ...
                     MsgType.ERROR, ppName, '');
             end
-        end        
+        end
         
     end
     

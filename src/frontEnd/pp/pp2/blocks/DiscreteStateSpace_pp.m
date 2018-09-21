@@ -28,19 +28,27 @@ if not(isempty(dss_list))
         catch
             Init = get_param(dss_list{i},'X0');
         end
-       
+        
         blocktype= get_param(dss_list{i}, 'BlockType');
         if strcmp(blocktype, 'StateSpace')
             try
                 ST = SLXUtils.getModelCompiledSampleTime(model);
-                [a, status] = SLXUtils.evalParam(model, A);
+                [a, status] = SLXUtils.evalParam(...
+                    model, ...
+                    get_param(dss_list{i},'Parent'), ...
+                    dss_list{i}, ...
+                    A);
                 if status
                     display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
                         A, dss_list{i}), ...
                         MsgType.ERROR, 'DiscreteTransferFcn_pp', '');
                     continue;
                 end
-                [b, status] = SLXUtilsgit .evalParam(model, B);
+                [b, status] = SLXUtils.evalParam(...
+                    model, ...
+                    get_param(dss_list{i},'Parent'), ...
+                    dss_list{i}, ...
+                    B);
                 if status
                     display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
                         A, dss_list{i}), ...
@@ -52,13 +60,13 @@ if not(isempty(dss_list))
                 B = mat2str(Gamma);
             catch
                 display_msg(sprintf('block %s is not supported. Please change it to DiscreteTransferFcn',...
-                     dss_list{i}), ...
+                    dss_list{i}), ...
                     MsgType.ERROR, 'DiscreteTransferFcn_pp', '');
                 continue
             end
             ST = num2str(ST);
         else
-             ST = get_param(dss_list{i},'SampleTime');
+            ST = get_param(dss_list{i},'SampleTime');
         end
         % replacing
         replace_one_block(dss_list{i},'pp_lib/DSS');
@@ -80,7 +88,7 @@ if not(isempty(dss_list))
                 'X0',Init);
         end
         set_param(strcat(dss_list{i},'/X0'),...
-                'SampleTime',ST);
+            'SampleTime',ST);
     end
     display_msg('Done\n\n', MsgType.INFO, 'DiscreteStateSpace_pp', '');
 end

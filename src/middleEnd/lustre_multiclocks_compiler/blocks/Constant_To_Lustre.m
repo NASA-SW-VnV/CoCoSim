@@ -41,8 +41,8 @@ classdef Constant_To_Lustre < Block_To_Lustre
             for j=1:numel(outputs)
                 codes{j} = LustreEq(outputs{j}, values_AST{j});
             end
-
-                
+            
+            
             obj.setCode( codes );
             
         end
@@ -66,74 +66,10 @@ classdef Constant_To_Lustre < Block_To_Lustre
     methods(Static = true)
         function [Value, valueDataType, status] = ...
                 getValueFromParameter(parent, blk, param)
-            status = 0;
-            valueDataType = 'double';
-            Value = 0;
-            if isempty(regexp(param, '[a-zA-Z]', 'match'))
-                Value = str2num(param);% do not use str2double
-                if contains(param, '.')
-                    valueDataType = 'double';
-                else
-                    valueDataType = 'int';
-                end
-            elseif strcmp(param, 'true') ...
-                    ||strcmp(param, 'false')
-                Value = evalin('base', param);
-                valueDataType = 'boolean';
-            else
-                
-                % search the variable in Model workspace, if not raise
-                % unsupported option
-                model_name = regexp(blk.Origin_path, filesep, 'split');
-                model_name = model_name{1};
-                hws = get_param(model_name, 'modelworkspace') ;
-                if isvarname(param) && hasVariable(hws, param)
-                    Value = getVariable(hws, param);
-                else
-                    try
-                        if isfield(parent, param)
-                            % mask parameter
-                            [Value, valueDataType, status] = ...
-                                Constant_To_Lustre.getValueFromParameter(...
-                                parent, ...
-                                parent,...
-                                parent.(param));
-                            return;
-                        end    
-                        Value = evalin('base', param);
-                        if ischar(Value)
-                            [Value, valueDataType, status] = ...
-                                        Constant_To_Lustre.getValueFromParameter(parent, blk, Value);
-                            return;
-                        end
-                        valueDataType =  class(Value);
-                    catch me
-                        if isequal(me.identifier, 'MATLAB:UndefinedFunction')
-                            % check if it's a mask parameter
-                            tokens = ...
-                                regexp(me.message, '''(\w+)''', 'tokens', 'once');
-                            if ~isempty(tokens)
-                                f = tokens{1};
-                                if isfield(parent, f)
-                                    %it is a mask parameter
-                                    [f_v, ~, ~] = ...
-                                        Constant_To_Lustre.getValueFromParameter(parent, parent, parent.(f));
-                                    assignin('base', f, f_v);
-                                    [Value, valueDataType, status] = ...
-                                        Constant_To_Lustre.getValueFromParameter(parent, blk, param);
-                                    return;
-                                end
-                            end
-                        end
-                        try
-                            Value = get_param(parent.Origin_path, param);
-                            Value = evalin('base', Value);
-                        catch me
-                            status = 1;
-                        end
-                    end
-                end
-            end
+            model_name = regexp(blk.Origin_path, filesep, 'split');
+            model_name = model_name{1};
+            [Value, valueDataType, status] = ...
+                SLXUtils.evalParam(model_name, parent, blk, param);
         end
     end
     
