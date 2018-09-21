@@ -71,7 +71,7 @@ classdef SubSystem_To_Lustre < Block_To_Lustre
                         parent, blk, node_name, inputs, outputs, maskType, xml_trace);
                 else
                     codes{end + 1} = LustreEq(outputs,...
-                        NodeCallExpr(node_name, inputs));
+                        NodeCallExpr(node_name, inputs{1}));
                 end
             end
             

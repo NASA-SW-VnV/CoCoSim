@@ -1011,7 +1011,190 @@ classdef LustMathLib
             node.setBodyEqs(bodyElts);           
             node.setIsMain(false);
         end
+        
+        
+        
+        %% Matrix inversion
+        function [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_2x2(varargin)
+            opens = {};
+            abstractedNodes = {};
+            external_nodes_i ={};
+            node_name = '_inv_M_2x2';
+            body = {};
+            vars = {}; 
+            
+            a = VarIdExpr('a');
+            b = VarIdExpr('b');
+            c = VarIdExpr('c');
+            d = VarIdExpr('d');    
+            ainv = VarIdExpr('a_inv');
+            binv = VarIdExpr('b_inv');
+            cinv = VarIdExpr('c_inv');
+            dinv = VarIdExpr('d_inv'); 
+            det = VarIdExpr('det');
+            vars{1} = LustreVar(det,'real');
+            
+            term1 = BinaryExpr(BinaryExpr.MULTIPLY,a,d);
+            term2 = BinaryExpr(BinaryExpr.MULTIPLY,b,c);
+            body{1} = LustreEq(det,BinaryExpr(BinaryExpr.MINUS,term1,term2));
+            body{end+1} = LustreEq(ainv,BinaryExpr(BinaryExpr.DIVIDE,d,det));
+            body{end+1} = LustreEq(binv,BinaryExpr(BinaryExpr.DIVIDE,...
+                UnaryExpr(UnaryExpr.NEG, b),det));
+            body{end+1} = LustreEq(cinv,BinaryExpr(BinaryExpr.DIVIDE,...
+                UnaryExpr(UnaryExpr.NEG, c),det));
+            body{end+1} = LustreEq(dinv,BinaryExpr(BinaryExpr.DIVIDE,a,det));            
+            node = LustreNode();
+            node.setName(node_name);
+            node.setInputs({LustreVar(a, 'real'), LustreVar(b, 'real'),...
+                LustreVar(c, 'real'), LustreVar(d, 'real')});
+            node.setOutputs({LustreVar(ainv, 'real'), LustreVar(binv, 'real'),...
+                LustreVar(cinv, 'real'), LustreVar(dinv, 'real')});
+            node.setBodyEqs(body);   
+            node.setLocalVars(vars);
+            node.setIsMain(false);
+        end
+        
+        function [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_3x3(varargin)
+            % define i: row, j: column to follow 
+            opens = {};
+            abstractedNodes = {};
+            external_nodes_i ={};
+            node_name = '_inv_M_3x3';
+            body = {};
+            vars = {}; 
+            
+            % inputs
+            a11 = VarIdExpr('a11');
+            a21 = VarIdExpr('a21');
+            a31 = VarIdExpr('a31');
+            a12 = VarIdExpr('a12');   
+            a22 = VarIdExpr('a22');
+            a32 = VarIdExpr('a32');
+            a13 = VarIdExpr('a13');
+            a23 = VarIdExpr('a23'); 
+            a33 = VarIdExpr('a33'); 
+            % outputs
+            a11i = VarIdExpr('a11i');
+            a21i = VarIdExpr('a21i');
+            a31i = VarIdExpr('a31i');
+            a12i = VarIdExpr('a12i');   
+            a22i = VarIdExpr('a22i');
+            a32i = VarIdExpr('a32i');
+            a13i = VarIdExpr('a13i');
+            a23i = VarIdExpr('a23i'); 
+            a33i = VarIdExpr('a33i'); 
+            % det
+            det = VarIdExpr('det');
+            % adjugate
+            a11adj = VarIdExpr('a11adj');
+            a21adj = VarIdExpr('a21adj');
+            a31adj = VarIdExpr('a31adj');
+            a12adj = VarIdExpr('a12adj');   
+            a22adj = VarIdExpr('a22adj');
+            a32adj = VarIdExpr('a32adj');
+            a13adj = VarIdExpr('a13adj');
+            a23adj = VarIdExpr('a23adj'); 
+            a33adj = VarIdExpr('a33adj');             
+            
+            % define local variables
+            vars{1} = LustreVar(det,'real');
+            vars{end+1} = LustreVar(a11adj,'real');
+            vars{end+1} = LustreVar(a21adj,'real');
+            vars{end+1} = LustreVar(a31adj,'real');
+            vars{end+1} = LustreVar(a12adj,'real');
+            vars{end+1} = LustreVar(a22adj,'real');
+            vars{end+1} = LustreVar(a32adj,'real');
+            vars{end+1} = LustreVar(a13adj,'real');
+            vars{end+1} = LustreVar(a23adj,'real');
+            vars{end+1} = LustreVar(a33adj,'real');
+            
+            % define det
+            term1 =  BinaryExpr(BinaryExpr.MULTIPLY,a11,a11adj);
+            term2 =  BinaryExpr(BinaryExpr.MULTIPLY,a12,a21adj);
+            term4 = BinaryExpr(BinaryExpr.PLUS,term1,term2);
+            term3 =  BinaryExpr(BinaryExpr.MULTIPLY,a13,a31adj);
+            body{1} = LustreEq(det,BinaryExpr(BinaryExpr.PLUS,term4,term3));
+            
+            % define adjugate
+            term1 = BinaryExpr(BinaryExpr.MULTIPLY,a22,a33);
+            term2 = BinaryExpr(BinaryExpr.MULTIPLY,a23,a32);            
+            body{end+1} = LustreEq(a11adj,BinaryExpr(BinaryExpr.MINUS,term1,term2));
 
+            term1 = BinaryExpr(BinaryExpr.MULTIPLY,a23,a31);
+            term2 = BinaryExpr(BinaryExpr.MULTIPLY,a21,a33);            
+            body{end+1} = LustreEq(a21adj,BinaryExpr(BinaryExpr.MINUS,term1,term2));            
+            
+            term1 = BinaryExpr(BinaryExpr.MULTIPLY,a21,a32);
+            term2 = BinaryExpr(BinaryExpr.MULTIPLY,a31,a22);            
+            body{end+1} = LustreEq(a31adj,BinaryExpr(BinaryExpr.MINUS,term1,term2));   
+            
+            term1 = BinaryExpr(BinaryExpr.MULTIPLY,a13,a32);
+            term2 = BinaryExpr(BinaryExpr.MULTIPLY,a33,a12);            
+            body{end+1} = LustreEq(a12adj,BinaryExpr(BinaryExpr.MINUS,term1,term2));  
+            
+            term1 = BinaryExpr(BinaryExpr.MULTIPLY,a11,a33);
+            term2 = BinaryExpr(BinaryExpr.MULTIPLY,a13,a31);            
+            body{end+1} = LustreEq(a22adj,BinaryExpr(BinaryExpr.MINUS,term1,term2));    
+            
+            term1 = BinaryExpr(BinaryExpr.MULTIPLY,a12,a31);
+            term2 = BinaryExpr(BinaryExpr.MULTIPLY,a32,a11);            
+            body{end+1} = LustreEq(a32adj,BinaryExpr(BinaryExpr.MINUS,term1,term2));   
+            
+            term1 = BinaryExpr(BinaryExpr.MULTIPLY,a12,a23);
+            term2 = BinaryExpr(BinaryExpr.MULTIPLY,a22,a13);            
+            body{end+1} = LustreEq(a13adj,BinaryExpr(BinaryExpr.MINUS,term1,term2));  
+            
+            term1 = BinaryExpr(BinaryExpr.MULTIPLY,a13,a21);
+            term2 = BinaryExpr(BinaryExpr.MULTIPLY,a23,a11);            
+            body{end+1} = LustreEq(a23adj,BinaryExpr(BinaryExpr.MINUS,term1,term2));  
+            
+            term1 = BinaryExpr(BinaryExpr.MULTIPLY,a11,a22);
+            term2 = BinaryExpr(BinaryExpr.MULTIPLY,a21,a12);            
+            body{end+1} = LustreEq(a33adj,BinaryExpr(BinaryExpr.MINUS,term1,term2));            
+                     
+            % define inverse
+            body{end+1} = LustreEq(a11i,BinaryExpr(BinaryExpr.DIVIDE,a11adj,det));
+            body{end+1} = LustreEq(a21i,BinaryExpr(BinaryExpr.DIVIDE,a21adj,det));
+            body{end+1} = LustreEq(a31i,BinaryExpr(BinaryExpr.DIVIDE,a31adj,det));
+            body{end+1} = LustreEq(a12i,BinaryExpr(BinaryExpr.DIVIDE,a12adj,det));
+            body{end+1} = LustreEq(a22i,BinaryExpr(BinaryExpr.DIVIDE,a22adj,det));
+            body{end+1} = LustreEq(a32i,BinaryExpr(BinaryExpr.DIVIDE,a32adj,det));
+            body{end+1} = LustreEq(a13i,BinaryExpr(BinaryExpr.DIVIDE,a13adj,det));
+            body{end+1} = LustreEq(a23i,BinaryExpr(BinaryExpr.DIVIDE,a23adj,det));
+            body{end+1} = LustreEq(a33i,BinaryExpr(BinaryExpr.DIVIDE,a33adj,det));
+
+          
+            node = LustreNode();
+            node.setName(node_name);
+            node.setInputs({LustreVar(a11, 'real'), LustreVar(a21, 'real'),...
+                LustreVar(a31, 'real'), LustreVar(a12, 'real'),...
+                LustreVar(a22, 'real'), LustreVar(a32, 'real'),...
+                LustreVar(a13, 'real'), LustreVar(a23, 'real'),LustreVar(a33, 'real')});
+            node.setOutputs({LustreVar(a11i, 'real'), LustreVar(a21i, 'real'),...
+                LustreVar(a31i, 'real'), LustreVar(a12i, 'real'),...
+                LustreVar(a22i, 'real'), LustreVar(a32i, 'real'),...
+                LustreVar(a13i, 'real'), LustreVar(a23i, 'real'),LustreVar(a33i, 'real')});
+            node.setBodyEqs(body);   
+            node.setLocalVars(vars);
+            node.setIsMain(false);            
+        end
+        
+%         function [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_4x4(varargin)
+%             
+%         end
+%         
+%         function [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_5x5(varargin)
+%             
+%         end        
+%         
+%         function [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_6x6(varargin)
+%             
+%         end      
+%         
+%         function [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_7x7(varargin)
+%             
+%         end        
+        
     end
     
 end

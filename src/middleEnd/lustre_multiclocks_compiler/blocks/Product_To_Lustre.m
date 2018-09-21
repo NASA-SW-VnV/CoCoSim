@@ -35,10 +35,17 @@ classdef Product_To_Lustre < Block_To_Lustre
         %%
         function options = getUnsupportedOptions(obj, ~, blk, varargin)
             % add your unsuported options list here
-            if strcmp(blk.Multiplication, 'Matrix(*)')...
-                    && contains(blk.Inputs, '/')
+            if (strcmp(blk.Multiplication, 'Matrix(*)')...
+                    && strcmp(blk.Inputs, '/') ...
+                    && blk.CompiledPortWidths.Inport > 49)
                 obj.addUnsupported_options(...
-                    sprintf('Option Matrix(*) with division is not supported in block %s', ...
+                    sprintf('Option Matrix(*) with division is not supported in block %s. Only less than 7x7 Matrix inversion is supported.', ...
+                    blk.Origin_path));
+            end
+            if ( contains(blk.Inputs, '/') ...
+                && numel(blk.CompiledPortWidths.Inport) > 1)
+                obj.addUnsupported_options(...
+                    sprintf('Option Matrix(*) with division in block %s should be handled by pre-processing. See pp errors above.', ...
                     blk.Origin_path));
             end
             % if there is one input and the output dimension is > 7
@@ -160,7 +167,7 @@ classdef Product_To_Lustre < Block_To_Lustre
                 
             end
         end
-        
+       
     end
     
 end

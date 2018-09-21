@@ -71,6 +71,7 @@ classdef Sum_To_Lustre < Block_To_Lustre
                 obj, parent, blk, OutputDataTypeStr,isSumBlock, ...
                 AccumDataTypeStr, xml_trace)
             AdditionalVars = {};
+            codes = {};
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             widths = blk.CompiledPortWidths.Inport;
             inputs = Sum_To_Lustre.createBlkInputs(obj, parent, blk, widths, AccumDataTypeStr, isSumBlock);
@@ -88,6 +89,26 @@ classdef Sum_To_Lustre < Block_To_Lustre
                 obj.addExternal_libraries(external_lib);
             end
             exp = blk.Inputs;
+            if strcmp(exp, '/') && strcmp(blk.Multiplication, 'Matrix(*)')
+                if numel(outputs) > 1
+                    % inverse of Matrix
+                    n = sqrt(numel(outputs));
+                    if n > 7
+                        display_msg(...
+                            sprintf('Option Matrix(*) with divid is not supported in block %s', ...
+                            blk.Origin_path), ...
+                            MsgType.ERROR, 'Sum_To_Lustre', '');
+                        return;
+                    else
+                        lib_name = sprintf('_inv_M_%dx%d', n, n);
+                        obj.addExternal_libraries(strcat('LustMathLib_', lib_name));
+                        codes{1} =LustreEq(outputs,...
+                            NodeCallExpr(lib_name, inputs{1}));
+                        return;
+                    end
+                    
+                end
+            end
             % for sum:
             %    exp can be ++- or a number 3 .
             %    in the first case an operator is given for every input,
@@ -101,7 +122,7 @@ classdef Sum_To_Lustre < Block_To_Lustre
                 exp = strrep(exp, '|', '');
             end
             
-            codes = {};
+            
             
             if numel(exp) == 1 && numel(inputs) == 1
                 % one input and 1 expression
