@@ -1015,7 +1015,7 @@ classdef LustMathLib
         
         
         %% Matrix inversion
-        function [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_2x2(varargin)
+        function [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_2x2(backend, varargin)
             % support 2x2 matrix inversion
             opens = {};
             abstractedNodes = {};
@@ -1023,45 +1023,49 @@ classdef LustMathLib
             node_name = '_inv_M_2x2';
             node = LustreNode();
             node.setName(node_name);
-            node.setIsMain(false);              
+            node.setIsMain(false);
             body = {};
-            vars = {}; 
-            
-            % inputs
-            a = VarIdExpr('a');
-            b = VarIdExpr('b');
-            c = VarIdExpr('c');
-            d = VarIdExpr('d');  
-            
-            % outputs
-            ainv = VarIdExpr('a_inv');
-            binv = VarIdExpr('b_inv');
-            cinv = VarIdExpr('c_inv');
-            dinv = VarIdExpr('d_inv'); 
-            
-            % det
-            det = VarIdExpr('det');
-            vars{1} = LustreVar(det,'real');            
-            term1 = BinaryExpr(BinaryExpr.MULTIPLY,a,d);
-            term2 = BinaryExpr(BinaryExpr.MULTIPLY,b,c);
-            body{1} = LustreEq(det,BinaryExpr(BinaryExpr.MINUS,term1,term2));
-            
-            % adjugate & inverse
-            body{end+1} = LustreEq(ainv,BinaryExpr(BinaryExpr.DIVIDE,d,det));
-            body{end+1} = LustreEq(binv,BinaryExpr(BinaryExpr.DIVIDE,...
-                UnaryExpr(UnaryExpr.NEG, b),det));
-            body{end+1} = LustreEq(cinv,BinaryExpr(BinaryExpr.DIVIDE,...
-                UnaryExpr(UnaryExpr.NEG, c),det));
-            body{end+1} = LustreEq(dinv,BinaryExpr(BinaryExpr.DIVIDE,a,det));  
-            
-            % set node
-            node.setInputs({LustreVar(a, 'real'), LustreVar(b, 'real'),...
-                LustreVar(c, 'real'), LustreVar(d, 'real')});
-            node.setOutputs({LustreVar(ainv, 'real'), LustreVar(binv, 'real'),...
-                LustreVar(cinv, 'real'), LustreVar(dinv, 'real')});
-            node.setBodyEqs(body);   
-            node.setLocalVars(vars);
-
+            vars = {};
+            if BackendType.isKIND2(backend)
+                
+                node.setIsImported(true);
+            else
+                
+                % inputs
+                a = VarIdExpr('a11');
+                b = VarIdExpr('a21');
+                c = VarIdExpr('a12');
+                d = VarIdExpr('a22');
+                
+                % outputs
+                ainv = VarIdExpr('ai11');
+                binv = VarIdExpr('ai21');
+                cinv = VarIdExpr('ai12');
+                dinv = VarIdExpr('ai22');
+                
+                % det
+                det = VarIdExpr('det');
+                vars{1} = LustreVar(det,'real');
+                term1 = BinaryExpr(BinaryExpr.MULTIPLY,a,d);
+                term2 = BinaryExpr(BinaryExpr.MULTIPLY,b,c);
+                body{1} = LustreEq(det,BinaryExpr(BinaryExpr.MINUS,term1,term2));
+                
+                % adjugate & inverse
+                body{end+1} = LustreEq(ainv,BinaryExpr(BinaryExpr.DIVIDE,d,det));
+                body{end+1} = LustreEq(binv,BinaryExpr(BinaryExpr.DIVIDE,...
+                    UnaryExpr(UnaryExpr.NEG, b),det));
+                body{end+1} = LustreEq(cinv,BinaryExpr(BinaryExpr.DIVIDE,...
+                    UnaryExpr(UnaryExpr.NEG, c),det));
+                body{end+1} = LustreEq(dinv,BinaryExpr(BinaryExpr.DIVIDE,a,det));
+                
+                % set node
+                node.setInputs({LustreVar(a, 'real'), LustreVar(b, 'real'),...
+                    LustreVar(c, 'real'), LustreVar(d, 'real')});
+                node.setOutputs({LustreVar(ainv, 'real'), LustreVar(binv, 'real'),...
+                    LustreVar(cinv, 'real'), LustreVar(dinv, 'real')});
+                node.setBodyEqs(body);
+                node.setLocalVars(vars);
+            end
         end
         
         function [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_3x3(varargin)
