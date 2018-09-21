@@ -1005,16 +1005,6 @@ classdef SLX2LusUtils < handle
                             NodeCallExpr(RndMeth, {}));
                     end
                     
-                case {'fixdt(1,16,0)', 'fixdt(1,16,2^0,0)'}
-                    % DataType conversion not supported yet
-                    % temporal solution is to consider those types as int
-                    if strcmp(lus_in_dt, 'bool')
-                        external_lib = { 'LustDTLib_bool_to_int'};
-                        conv_format = NodeCallExpr('bool_to_int', {});
-                    elseif strcmp(lus_in_dt, 'real')
-                        external_lib = {strcat('LustDTLib_', RndMeth)};
-                        conv_format = NodeCallExpr(bool_to_int, {});
-                    end
                     
                     
                     %lustre conversion
@@ -1041,6 +1031,16 @@ classdef SLX2LusUtils < handle
                     elseif strcmp(lus_in_dt, 'real')
                         external_lib = {'LustDTLib_real_to_bool'};
                         conv_format = NodeCallExpr('real_to_bool', {});
+                    end
+                    
+                otherwise
+                    %fixdt 
+                    if strcmp(lus_in_dt, 'int')
+                        external_lib = {strcat('LustDTLib_', RndMeth)};
+                        conv_format = NodeCallExpr(RndMeth, {});
+                    elseif strcmp(lus_in_dt, 'bool')
+                        external_lib = {'LustDTLib_bool_to_real'};
+                        conv_format = NodeCallExpr('bool_to_real', {});
                     end
             end
         end
