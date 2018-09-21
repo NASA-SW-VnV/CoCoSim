@@ -86,7 +86,7 @@ classdef Gain_To_Lustre < Block_To_Lustre
                     blk.Gain, blk.Origin_path));
             end
             if numel(gain) > 1
-                obj.addUnsupported_options(sprintf('Matrix/Vector Gain "%s" in Gain block "%s" is supported in pre-processing. See pre-processing errors.',...
+                obj.addUnsupported_options(sprintf('Matrix/Vector Gain "%s" in Gain block "%s" should be supported in pre-processing (Gain_pp). See pre-processing errors above.',...
                     blk.Gain, blk.Origin_path));
             end
             options = obj.unsupported_options;
