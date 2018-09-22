@@ -13,10 +13,6 @@ classdef Abs_To_Lustre < Block_To_Lustre
     methods
         
         function  write_code(obj, parent, blk, xml_trace, varargin)
-            if ~strcmp(blk.OutMax, '[]') || ~strcmp(blk.OutMin, '[]')
-                display_msg(sprintf('The minimum/maximum value is not supported in block %s',...
-                    blk.Origin_path), MsgType.WARNING, 'Abs_To_Lustre', '');
-            end
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             obj.addVariable(outputs_dt);
             outputDataType = blk.CompiledPortDataTypes.Outport{1};
@@ -73,12 +69,11 @@ classdef Abs_To_Lustre < Block_To_Lustre
         end
         
         function options = getUnsupportedOptions(obj, ~, blk, varargin)
-            obj.unsupported_options = {};
             if ~strcmp(blk.OutMax, '[]') || ~strcmp(blk.OutMin, '[]')
                 obj.addUnsupported_options(...
                     sprintf('The minimum/maximum value is not supported in block %s', blk.Origin_path));
             end
-            options = obj.unsupported_options;
+            options = obj.getUnsupportedOptions();
         end
         %%
         function is_Abstracted = isAbstracted(varargin)

@@ -40,42 +40,47 @@ classdef Delay_To_Lustre < Block_To_Lustre
             
             
         end
-        
+        %%
         function options = getUnsupportedOptions(obj, ~, blk, varargin)
-            
-            if isempty(regexp(blk.InitialCondition, '[a-zA-Z]', 'match'))
-                InitialCondition = str2num(blk.InitialCondition);
-            elseif strcmp(blk.InitialCondition, 'true') ...
-                    ||strcmp(blk.InitialCondition, 'false')
-                InitialCondition = evalin('base', blk.InitialCondition);
-            else
-                try
-                    InitialCondition = evalin('base', blk.InitialCondition);
-                catch
-                    % search the variable in Model workspace, if not raise
-                    % unsupported option
-                    model_name = regexp(blk.Origin_path, filesep, 'split');
-                    model_name = model_name{1};
-                    hws = get_param(model_name, 'modelworkspace') ;
-                    if hasVariable(hws, blk.InitialCondition)
-                        InitialCondition = getVariable(hws, blk.InitialCondition);
-                    else
-                        obj.addUnsupported_options(...
-                            sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
-                            blk.InitialCondition, blk.Origin_path));
-                        return;
-                    end
-                end
+            [DelayLength, ~, status] = ...
+                Constant_To_Lustre.getValueFromParameter(parent, blk, blk.DelayLength);
+            if status
+                obj.addUnsupported_options(...
+                    sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
+                    blk.DelayLength, blk.Origin_path));
             end
+            [~, ~, status] = ...
+                Constant_To_Lustre.getValueFromParameter(parent, blk, blk.DelayLengthUpperLimit);
+            if status
+                obj.addUnsupported_options(...
+                    sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
+                    blk.DelayLengthUpperLimit, blk.Origin_path));
+            end
+            [InitialCondition, ~, status] = ...
+                Constant_To_Lustre.getValueFromParameter(parent, blk, blk.InitialCondition);
+            if status
+                obj.addUnsupported_options(...
+                    sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
+                    blk.InitialCondition, blk.Origin_path));
+            end
+            
             if numel(InitialCondition) > 1 ...
-                    && ~(strcmp(DelayLengthSource, 'Dialog') ...
-                    && strcmp(DelayLength, '1'))
+                    && ~( ...
+                    strcmp(blk.DelayLengthSource, 'Dialog') && DelayLength == 1 )
                 obj.addUnsupported_options(...
                     sprintf('InitialCondition %s in block %s is not supported for delay > 1',...
                     blk.InitialCondition, blk.Origin_path));
             end
             
-            options = obj.unsupported_options;
+            ExternalReset = blk.ExternalReset;
+            isReset = ~strcmp(ExternalReset, 'None');
+            if isReset
+                if ~SLX2LusUtils.resetTypeIsSupported(ExternalReset)
+                    obj.addUnsupported_options(sprintf('This External reset type [%s] is not supported in block %s.', ...
+                    ExternalReset, blk.Origin_path));
+                end
+            end
+            options = obj.getUnsupportedOptions();
         end
         %%
         function is_Abstracted = isAbstracted(varargin)

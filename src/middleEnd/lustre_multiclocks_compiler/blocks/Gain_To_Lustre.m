@@ -89,7 +89,7 @@ classdef Gain_To_Lustre < Block_To_Lustre
                 obj.addUnsupported_options(sprintf('Matrix/Vector Gain "%s" in Gain block "%s" should be supported in pre-processing (Gain_pp). See pre-processing errors above.',...
                     blk.Gain, blk.Origin_path));
             end
-            options = obj.unsupported_options;
+            options = obj.getUnsupportedOptions();
         end
         %%
         function is_Abstracted = isAbstracted(varargin)

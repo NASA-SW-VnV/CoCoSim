@@ -38,10 +38,10 @@ classdef From_To_Lustre < Block_To_Lustre
             goToPath = find_system(parent.Origin_path,'SearchDepth',1,...
                 'LookUnderMasks', 'all', 'BlockType','Goto','GotoTag',blk.GotoTag);
             if isempty(goToPath)
-                obj.addUnsupported_options...
-                    (sprintf('From block %s has no GoTo', blk.Origin_path));
+                obj.addUnsupported_options(...
+                    sprintf('From block %s has no GoTo', blk.Origin_path));
             end
-            options = obj.unsupported_options;
+            options = obj.getUnsupportedOptions();
             
         end
         %%

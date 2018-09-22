@@ -34,7 +34,65 @@ classdef SwitchCase_To_Lustre < Block_To_Lustre
             
             % we initialize the inputs by empty cell.
             
-            % take the list of the inputs width, in the previous example,
+           [inputs, inports_dt] = obj.getInputs( parent, blk);
+            % get all conditions expressions
+            IfExp = obj.getIfExp(blk);
+            %% Step 4: start filling the definition of each output
+            code = If_To_Lustre.ifElseCode(obj, parent, blk, outputs, ...
+                inputs, inports_dt, IfExp);
+            obj.setCode( code );
+            
+        end
+        %%
+        function options = getUnsupportedOptions(obj, parent, blk, varargin)
+            [inputs, inports_dt] = obj.getInputs( parent, blk);
+            IfExp = obj.getIfExp(blk);
+            nbOutputs = numel(blk.CompiledPortWidths.Outport);
+            for j=1:nbOutputs
+                [tree, status, unsupportedExp] = Fcn_Exp_Parser(IfExp{j});
+                if status
+                    obj.addUnsupported_options(sprintf('ParseError  character unsupported  %s in block %s', ...
+                        unsupportedExp, blk.Origin_path));
+                end
+                try
+                    Fcn_To_Lustre.tree2code(obj, tree, parent, blk, inputs, inports_dt{1});
+                catch me
+                    if strcmp(me.identifier, 'COCOSIM:TREE2CODE')
+                        obj.addUnsupported_options(me.message);
+                    end
+                end
+            end
+            options = obj.getUnsupportedOptions();
+        end
+        
+        %%
+        function is_Abstracted = isAbstracted(varargin)
+            is_Abstracted = false;
+        end
+        
+        %%
+        function IfExp = getIfExp(obj, blk)
+            CaseConditions = eval(blk.CaseConditions);
+            IfExp = cell(1, numel(CaseConditions));
+            for i=1:numel(CaseConditions)
+                if numel(CaseConditions{i}) == 1
+                    IfExp{i} = sprintf('u1 == %d', CaseConditions{i});
+                else
+                    exp = cell(1, numel(CaseConditions{i}));
+                    for j=1:numel(CaseConditions{i})
+                        exp{j} = sprintf('u1 == %d', CaseConditions{i}(j));
+                    end
+                    IfExp{i} = MatlabUtils.strjoin(exp, ' | ');
+                end
+                
+            end
+            if strcmp(blk.ShowDefaultCase, 'on')
+                IfExp{end+1} = '';
+            end
+        end
+        %%
+        function [inputs, inports_dt] = getInputs(obj, parent, blk)
+             % take the list of the inputs width, in the previous example,
             % "In1" has a width of 3 and "In2" has a width of 1.
             % So width = [3, 1].
             widths = blk.CompiledPortWidths.Inport;
@@ -58,41 +116,10 @@ classdef SwitchCase_To_Lustre < Block_To_Lustre
                     inports_dt{i} = 'int';
                 end
             end
-            % get all conditions expressions
-            CaseConditions = eval(blk.CaseConditions);
-            IfExp = cell(1, numel(CaseConditions));
-            for i=1:numel(CaseConditions)
-                if numel(CaseConditions{i}) == 1
-                    IfExp{i} = sprintf('u1 == %d', CaseConditions{i});
-                else
-                    exp = cell(1, numel(CaseConditions{i}));
-                    for j=1:numel(CaseConditions{i})
-                        exp{j} = sprintf('u1 == %d', CaseConditions{i}(j));
-                    end
-                    IfExp{i} = MatlabUtils.strjoin(exp, ' | ');
-                end
-                
-            end
-            if strcmp(blk.ShowDefaultCase, 'on')
-                IfExp{end+1} = '';
-            end
-            %% Step 4: start filling the definition of each output
-            code = If_To_Lustre.ifElseCode(obj, parent, blk, outputs, ...
-                inputs, inports_dt, IfExp);
-            obj.setCode( code );
-            
-        end
-        
-        function options = getUnsupportedOptions(obj, varargin)
-            % add your unsuported options list here
-            options = obj.unsupported_options;
-            
-        end
-        function is_Abstracted = isAbstracted(varargin)
-            is_Abstracted = false;
         end
     end
-   
+    
+    
     
 end
 

@@ -255,18 +255,16 @@ classdef Selector_To_Lustre < Block_To_Lustre
                 if strcmp(blk.IndexOptionArray{i}, 'Starting and ending indices (port)')
                     obj.addUnsupported_options(...
                         sprintf('Starting and ending indices (port) is not supported in block %s',...
-                        indexBlock.Origin_path), ...
-                        MsgType.ERROR, 'Selector_To_Lustre', '');
+                        indexBlock.Origin_path));
                 end
             end
             if numOutDims>7
                 obj.addUnsupported_options(...
                     sprintf('More than 7 dimensions is not supported in block %s',...
-                    indexBlock.Origin_path), ...
-                    MsgType.ERROR, 'Selector_To_Lustre', '');
+                    indexBlock.Origin_path));
             end
             
-            options = obj.unsupported_options;
+            options = obj.getUnsupportedOptions();
         end
         
         %%

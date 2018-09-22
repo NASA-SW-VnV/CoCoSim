@@ -137,7 +137,7 @@ classdef RateTransition_To_Lustre < Block_To_Lustre
                         blk.Origin_path));
                 end
             end
-            options = obj.unsupported_options;
+            options = obj.getUnsupportedOptions();
         end
         %%
         function is_Abstracted = isAbstracted(varargin)

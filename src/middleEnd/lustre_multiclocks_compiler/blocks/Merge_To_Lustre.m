@@ -112,7 +112,7 @@ classdef Merge_To_Lustre < Block_To_Lustre
         function options = getUnsupportedOptions(obj,parent, blk, varargin)
             if strcmp(blk.AllowUnequalInputPortWidths, 'on')
                 display_msg(sprintf('Merge block "%s" is not supported. CoCoSim supports only Merge blocks with equal Input Port widths', ...
-                    blk.Origin_path), MsgType.ERROR, 'Merge_To_Lustre', '');
+                    blk.Origin_path));
             end
             widths = blk.CompiledPortWidths.Inport;
             is_supported = true;
@@ -132,7 +132,7 @@ classdef Merge_To_Lustre < Block_To_Lustre
                 obj.addUnsupported_options(sprintf('Merge block "%s" is not supported. CoCoSim supports only Merge blocks that are connected to conditionally-executed subsystem', ...
                     blk.Origin_path));
             end
-           options = obj.unsupported_options;
+           options = obj.getUnsupportedOptions();
            
         end
         %%

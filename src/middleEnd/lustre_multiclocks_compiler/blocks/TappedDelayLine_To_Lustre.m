@@ -88,13 +88,13 @@ classdef TappedDelayLine_To_Lustre < Block_To_Lustre
             obj.setCode( codes );
             
         end
-        
+        %%
         function options = getUnsupportedOptions(obj, varargin)
             % add your unsuported options list here
-            options = obj.unsupported_options;
+            options = obj.getUnsupportedOptions();
             
         end
-        
+        %%
         function is_Abstracted = isAbstracted(varargin)
             is_Abstracted = false;
         end

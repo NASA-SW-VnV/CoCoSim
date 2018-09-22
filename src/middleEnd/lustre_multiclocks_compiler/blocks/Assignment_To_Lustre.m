@@ -165,7 +165,6 @@ classdef Assignment_To_Lustre < Block_To_Lustre
         end
         %%
         function options = getUnsupportedOptions(obj, ~, blk, varargin)
-            obj.unsupported_options = {};
             in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(blk.CompiledPortDimensions.Inport);
             if in_matrix_dimension{1}.numDs>7
                 msg = sprintf('More than 7 dimensions is not supported in block %s',...
@@ -185,7 +184,7 @@ classdef Assignment_To_Lustre < Block_To_Lustre
                     obj.addUnsupported_options(msg);
                 end
             end
-            options = obj.unsupported_options;
+            options = obj.getUnsupportedOptions();
         end   
         %%
         function is_Abstracted = isAbstracted(varargin)

@@ -62,9 +62,13 @@ classdef ContractModeBlock_To_Lustre < Block_To_Lustre
             
         end
         
-        function options = getUnsupportedOptions(obj, varargin)
+        function options = getUnsupportedOptions(obj, parent, blk, varargin)
             % add your unsuported options list here
-           options = obj.unsupported_options;
+            if ~SLX2LusUtils.isContractBlk(parent)
+                obj.addUnsupported_options(...
+                    sprintf('Mode block "%s" should not be outside a Contract Subsystem', blk.Origin_path));
+            end
+           options = obj.getUnsupportedOptions();
            
         end
         %%

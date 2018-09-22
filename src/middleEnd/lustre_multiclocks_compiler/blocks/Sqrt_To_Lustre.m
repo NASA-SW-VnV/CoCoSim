@@ -93,7 +93,7 @@ classdef Sqrt_To_Lustre < Block_To_Lustre
                 obj.addUnsupported_options(...
                     sprintf('The minimum/maximum value is not support in block %s', blk.Origin_path));
             end
-            options = obj.unsupported_options;
+            options = obj.getUnsupportedOptions();
         end
         %%
         function is_Abstracted = isAbstracted(varargin)

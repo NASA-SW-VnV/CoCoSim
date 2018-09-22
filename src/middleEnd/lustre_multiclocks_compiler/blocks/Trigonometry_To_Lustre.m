@@ -78,17 +78,17 @@ classdef Trigonometry_To_Lustre < Block_To_Lustre
             obj.setCode( codes );
             obj.addVariable(outputs_dt);
         end
-        
+        %%
         function options = getUnsupportedOptions(obj, ~, blk, varargin)
-            obj.unsupported_options = {};
-            unsupportedOp = {'cos + jsin', 'tanh'};
+            unsupportedOp = {'cos + jsin'};
             if ismember(blk.Operator, unsupportedOp)
                 obj.addUnsupported_options(...
                     sprintf('The "%s" option is not supported in block %s', blk.Operator, blk.Origin_path));
             end
            
-            options = obj.unsupported_options;
+            options = obj.getUnsupportedOptions();
         end
+        %%
         function is_Abstracted = isAbstracted(~, backend, varargin)
             is_Abstracted = BackendType.isKIND2(backend);
         end

@@ -56,7 +56,7 @@ classdef Constant_To_Lustre < Block_To_Lustre
                 obj.addUnsupported_options(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
                     blk.Value, blk.Origin_path));
             end
-            options = obj.unsupported_options;
+            options = obj.getUnsupportedOptions();
         end
         %%
         function is_Abstracted = isAbstracted(varargin)

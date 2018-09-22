@@ -37,21 +37,8 @@ classdef Bias_To_Lustre < Block_To_Lustre
             obj.addVariable(outputs_dt);
         end
         
-        function options = getUnsupportedOptions(obj, parent, blk, varargin)
-            obj.unsupported_options = {};
-            if strcmp(blk.Operator, 'cos + jsin')
-                obj.addUnsupported_options(...
-                    sprintf('The cos + jsin option is not support in block %s', blk.Origin_path));
-            end 
-            if strcmp(blk.Operator, 'atanh')
-                obj.addUnsupported_options(...
-                    sprintf('The atanh option is not support in block %s', blk.Origin_path));
-            end   
-            if strcmp(blk.Operator, 'tanh')
-                obj.addUnsupported_options(...
-                    sprintf('The tanh option is not support in block %s', blk.Origin_path));
-            end             
-            options = obj.unsupported_options;
+        function options = getUnsupportedOptions(obj, ~, blk, varargin)
+            options = obj.getUnsupportedOptions();
         end
         %%
         function is_Abstracted = isAbstracted(varargin)

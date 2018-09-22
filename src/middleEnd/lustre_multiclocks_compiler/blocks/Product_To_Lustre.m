@@ -48,14 +48,9 @@ classdef Product_To_Lustre < Block_To_Lustre
                     sprintf('Option Matrix(*) with division in block %s should be handled by pre-processing. See pp errors above.', ...
                     blk.Origin_path));
             end
-            % if there is one input and the output dimension is > 7
-            if numel(blk.CompiledPortWidths.Inport) == 1 ...
-                    &&  numel(blk.CompiledPortDimensions.Outport) > 7
-                obj.addUnsupported_options(...
-                    sprintf('Dimension %s in block %s is not supported.',...
-                    mat2str(blk.CompiledPortDimensions.Inport), blk.Origin_path));
-            end
-            options = obj.unsupported_options;
+            b = Sum_To_Lustre();
+            obj.addUnsupported_options(b.getUnsupportedOptions);
+            options = obj.getUnsupportedOptions();
         end
         %%
         function is_Abstracted = isAbstracted(varargin)

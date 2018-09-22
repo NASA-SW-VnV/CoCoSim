@@ -89,22 +89,18 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
         end
         %%
         function options = getUnsupportedOptions(obj, parent, blk, varargin)
-            obj.unsupported_options = {};
-            [blkParams.NumberOfTableDimensions, ~, ~] = ...
+            [NumberOfTableDimensions, ~, ~] = ...
                 Constant_To_Lustre.getValueFromParameter(parent, blk, blk.NumberOfTableDimensions);
-            if blkParams.NumberOfTableDimensions >= 7
-                obj.unsupported_options{numel(obj.unsupported_options) + 1} = ...
-                    sprintf('More than 7 dimensions is not support in block %s', blk.Origin_path);
+            if NumberOfTableDimensions >= 7
+                obj.addUnsupported_options(sprintf('More than 7 dimensions is not supported in block %s', blk.Origin_path));
             end
             if strcmp(blk.InterpMethod, 'Cubic spline')
-                obj.unsupported_options{numel(obj.unsupported_options) + 1} = ...
-                    sprintf('Cubic spline interpolation is not support in block %s', blk.Origin_path);
+                obj.addUnsupported_options(sprintf('Cubic spline interpolation is not support in block %s', blk.Origin_path));
             end            	
             if strcmp(blk.DataSpecification, 'Lookup table object')
-                obj.unsupported_options{numel(obj.unsupported_options) + 1} = ...
-                    sprintf('Lookup table object option for DataSpecification is not support in block %s', blk.Origin_path);
+                obj.addUnsupported_options(sprintf('Lookup table object option for DataSpecification is not support in block %s', blk.Origin_path));
             end                
-            options = obj.unsupported_options;
+            options = obj.getUnsupportedOptions();
         end
         %%
         function is_Abstracted = isAbstracted(varargin)

@@ -30,9 +30,9 @@ classdef UnitDelay_To_Lustre < Block_To_Lustre
            
         end
         
-        function options = getUnsupportedOptions(obj, varargin)
-            % add your unsuported options list here
-            options = obj.unsupported_options;
+        function options = getUnsupportedOptions(obj, parent, blk, varargin)
+            b = Delay_To_Lustre();
+            options = b.getUnsupportedOptions(obj, parent, blk, varargin);
         end
         function is_Abstracted = isAbstracted(varargin)
             is_Abstracted = false;

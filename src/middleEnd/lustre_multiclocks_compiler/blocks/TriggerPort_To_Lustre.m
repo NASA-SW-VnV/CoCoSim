@@ -14,7 +14,7 @@ classdef TriggerPort_To_Lustre < Block_To_Lustre
         
         function  write_code(varargin)
         end
-        
+        %%
         function options = getUnsupportedOptions(obj, ~, blk, varargin)
             if strcmp(blk.TriggerType, 'function-call')
                 obj.addUnsupported_options(...
@@ -23,6 +23,7 @@ classdef TriggerPort_To_Lustre < Block_To_Lustre
             end
             options = obj.unsupported_options;
         end
+        %%
         function is_Abstracted = isAbstracted(varargin)
             is_Abstracted = false;
         end

@@ -194,7 +194,6 @@ classdef FromWorkspace_To_Lustre < Block_To_Lustre
                 obj.addUnsupported_options(...
                     sprintf('SampleTime %s in block %s is different from model SampleTime.',...
                     num2str(dt), blk.Origin_path));
-                return;
             end
             options = obj.unsupported_options;
         end

@@ -88,8 +88,23 @@ classdef SubSystem_To_Lustre < Block_To_Lustre
                     sprintf('Subsystem %s has more than one outputs. All Subsystems inside Contract should have one output.', ...
                     blk.Origin_path))
             end
+            [isTriggered, ~, TriggerType, ~] = ...
+                SubSystem_To_Lustre.hasTriggerPort(blk);
+            if isTriggered
+                if ~SLX2LusUtils.resetTypeIsSupported(TriggerType)
+                    obj.addUnsupported_options(sprintf('This External Trigger type [%s] is not supported in block %s.', ...
+                        TriggerType, blk.Origin_path));
+                end
+            end
+            [isResetSubsystem, ResetType] =SubSystem_To_Lustre.hasResetPort(blk);
+            if isResetSubsystem
+                if ~SLX2LusUtils.resetTypeIsSupported(ResetType)
+                    obj.addUnsupported_options(sprintf('This External reset type [%s] is not supported in block %s.', ...
+                        ResetType, blk.Origin_path));
+                end
+            end
             % add your unsuported options list here
-            options = obj.unsupported_options;
+            options = obj.getUnsupportedOptions();
         end
         %%
         function is_Abstracted = isAbstracted(varargin)

@@ -133,13 +133,39 @@ classdef DiscretePulseGenerator_To_Lustre < Block_To_Lustre
             
         end
         %%
-        function options = getUnsupportedOptions(obj, ~, blk, varargin)
-            obj.unsupported_options = {};
+        function options = getUnsupportedOptions(obj, parent, blk, varargin)
+            [~, ~, status] = ...
+                Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Amplitude);
+            if status
+                obj.addUnsupported_options(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
+                    blk.Amplitude, blk.Origin_path));
+            end
+            
+            [~, ~, status] = ...
+                Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Period);
+            if status
+                obj.addUnsupported_options(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
+                    blk.Period, blk.Origin_path));
+            end
+            
+            [~, ~, status] = ...              
+                Constant_To_Lustre.getValueFromParameter(parent, blk, blk.PulseWidth);
+            if status
+                obj.addUnsupported_options(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
+                    blk.PulseWidth, blk.Origin_path));
+            end
+            
+            [~, ~, status] = ...
+                Constant_To_Lustre.getValueFromParameter(parent, blk, blk.PhaseDelay);
+            if status
+                obj.addUnsupported_options(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
+                    blk.PhaseDelay, blk.Origin_path));
+            end
             if strcmp(blk.TimeSource, 'Use external signal')
                 obj.addUnsupported_options(sprintf('Option "Use external signal" is not supported for block %s',...
                     blk.Origin_path));
             end
-            options = obj.unsupported_options;
+            options = obj.getUnsupportedOptions();
         end
         %%
         function is_Abstracted = isAbstracted(varargin)

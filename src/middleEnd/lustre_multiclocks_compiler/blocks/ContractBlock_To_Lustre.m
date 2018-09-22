@@ -34,7 +34,7 @@ classdef ContractBlock_To_Lustre < Block_To_Lustre
                 obj.addUnsupported_options(...
                     sprintf(format, blk.Origin_path, associatedBlk.Origin_path));
             end
-            options = obj.unsupported_options;
+            options = obj.getUnsupportedOptions();
             
         end
         %%

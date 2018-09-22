@@ -14,7 +14,7 @@ classdef block_diagram_To_Lustre < Block_To_Lustre
         function  write_code( varargin)
         end
         
-        function options = getUnsupportedOptions(obj, parent, blk, varargin)
+        function options = getUnsupportedOptions(obj, ~, blk, varargin)
             if SubSystem_To_Lustre.hasEnablePort(blk) ...
                     || SubSystem_To_Lustre.hasTriggerPort(blk) ...
                     || SubSystem_To_Lustre.hasResetPort(blk)
@@ -22,7 +22,7 @@ classdef block_diagram_To_Lustre < Block_To_Lustre
                     sprintf('Block diagram "%s" with Enable/Trigger/Reset port in root level is not supported.', ...
                     blk.Origin_path));
             end
-            options = obj.unsupported_options;
+            options = obj.getUnsupportedOptions();
         end
         %%
         function is_Abstracted = isAbstracted(varargin)

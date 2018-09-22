@@ -49,7 +49,6 @@ classdef Sum_To_Lustre < Block_To_Lustre
         
         %%
         function options = getUnsupportedOptions(obj, ~,  blk, varargin)
-            % add your unsuported options list here
             % if there is one input and the output dimension is > 7
             if numel(blk.CompiledPortWidths.Inport) == 1 ...
                     &&  numel(blk.CompiledPortDimensions.Outport) > 7
@@ -57,7 +56,7 @@ classdef Sum_To_Lustre < Block_To_Lustre
                     sprintf('Dimension %s in block %s is not supported.',...
                     mat2str(blk.CompiledPortDimensions.Inport), blk.Origin_path));
             end
-            options = obj.unsupported_options;
+            options = obj.getUnsupportedOptions();
         end
         
         %%
@@ -126,16 +125,9 @@ classdef Sum_To_Lustre < Block_To_Lustre
             
             if numel(exp) == 1 && numel(inputs) == 1
                 % one input and 1 expression
-                [CollapseDim, ~, status] = ...
-                    Constant_To_Lustre.getValueFromParameter(parent, blk, blk.CollapseDim);
-                if status
-                    display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
-                        blk.CollapseDim, blk.Origin_path), ...
-                        MsgType.ERROR, 'Sum_To_Lustre', '');
-                    return;
-                end
-                [codes] = Sum_To_Lustre.oneInputSumProduct(blk, outputs, ...
-                    inputs, CollapseDim, widths, exp, initCode,isSumBlock, conv_format);
+                
+                [codes] = Sum_To_Lustre.oneInputSumProduct(parent, blk, outputs, ...
+                    inputs, widths, exp, initCode,isSumBlock, conv_format);
             else
                 if ~isSumBlock && strcmp(blk.Multiplication, 'Matrix(*)')
                     %This is a matrix multiplication, only applies to
@@ -228,7 +220,7 @@ classdef Sum_To_Lustre < Block_To_Lustre
         end
         %%
         
-        function [codes] = oneInputSumProduct(blk, outputs, inputs, CollapseDim, ...
+        function [codes] = oneInputSumProduct(parent, blk, outputs, inputs, ...
                 widths, exp, initCode,isSumBlock, conv_format)
             if ~isSumBlock && strcmp(blk.Multiplication, 'Matrix(*)')    % product, 1 input, 1 exp, Matrix(x), matrix remains unchanged.
                 codes = cell(1, numel(outputs));
@@ -257,6 +249,14 @@ classdef Sum_To_Lustre < Block_To_Lustre
                 codes{1} = LustreEq(outputs{1}, code);
                 
             elseif numel(outputs)>1        % needed for collapsing of matrix
+                [CollapseDim, ~, status] = ...
+                    Constant_To_Lustre.getValueFromParameter(parent, blk, blk.CollapseDim);
+                if status
+                    display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
+                        blk.CollapseDim, blk.Origin_path), ...
+                        MsgType.ERROR, 'Sum_To_Lustre', '');
+                    return;
+                end
                 in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(blk.CompiledPortDimensions.Inport);
                 [numelCollapseDim, delta, collapseDims] = Sum_To_Lustre.collapseMatrix(in_matrix_dimension, CollapseDim);
                 % the variable matSize is used in eval function, do not

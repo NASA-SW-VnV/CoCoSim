@@ -69,7 +69,7 @@ classdef BusSelector_To_Lustre < Block_To_Lustre
                 if isKey(SignalsInputsMap, OutputSignals{i})
                     inputs_i = SignalsInputsMap(OutputSignals{i});
                 else
-                    display_msg(sprintf('Block %s with type %s is not supported.',...
+                    display_msg(sprintf('Block %s with output signal %s is not supported.',...
                         blk.Origin_path, OutputSignals{i}),...
                         MsgType.ERROR, 'BusSelector_To_Lustre', '');
                     continue;
@@ -84,7 +84,7 @@ classdef BusSelector_To_Lustre < Block_To_Lustre
         end
         
         function options = getUnsupportedOptions(obj, varargin)
-            options = obj.unsupported_options;
+            options = obj.getUnsupportedOptions();
         end
         %%
         function is_Abstracted = isAbstracted(varargin)

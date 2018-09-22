@@ -23,7 +23,7 @@ classdef Concatenate_To_Lustre < Block_To_Lustre
                 [codes] = Concatenate_To_Lustre.concatenateVector(nb_inputs, inputs, outputs);
             else
                 [ConcatenateDimension, ~, status] = ...
-                Constant_To_Lustre.getValueFromParameter(parent, blk, blk.ConcatenateDimension);
+                    Constant_To_Lustre.getValueFromParameter(parent, blk, blk.ConcatenateDimension);
                 if status
                     display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
                         blk.ConcatenateDimension, blk.Origin_path), ...
@@ -35,11 +35,11 @@ classdef Concatenate_To_Lustre < Block_To_Lustre
                         blk.Origin_path), ...
                         MsgType.ERROR, 'Concatenate_To_Lustre', '');
                     return;
-                end                
+                end
                 if ConcatenateDimension == 2    %concat matrix in row direction
                     [codes] = Concatenate_To_Lustre.concatenateDimension2(inputs, outputs,in_matrix_dimension);
                 elseif ConcatenateDimension == 1    %concat matrix in column direction
-                    [codes] = Concatenate_To_Lustre.concatenateDimension1(inputs, outputs,in_matrix_dimension);                    
+                    [codes] = Concatenate_To_Lustre.concatenateDimension1(inputs, outputs,in_matrix_dimension);
                 else
                     display_msg(sprintf('ConcatenateDimension > 2 in block %s',...
                         blk.Origin_path), ...
@@ -52,17 +52,24 @@ classdef Concatenate_To_Lustre < Block_To_Lustre
             obj.addVariable(outputs_dt);
         end
         
-         function options = getUnsupportedOptions(obj, ~, blk, varargin)
-            obj.unsupported_options = {};
-            in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(blk.CompiledPortDimensions.Inport);
-            if numel(in_matrix_dimension) > 7
+        function options = getUnsupportedOptions(obj, parent, blk, varargin)
+            [ConcatenateDimension, ~, status] = ...
+                Constant_To_Lustre.getValueFromParameter(parent, blk, blk.ConcatenateDimension);
+            if status
+                obj.addUnsupported_options(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
+                    blk.ConcatenateDimension, blk.Origin_path));
+            end
+            if numel(blk.CompiledPortDimensions.Inport) > 7
                 obj.addUnsupported_options(...
                     sprintf('More than 7 dimensions is not supported in block %s',...
-                    blk.Origin_path), ...
-                    MsgType.ERROR, 'Concatenate_To_Lustre', '');
+                    blk.Origin_path));
             end
-            options = obj.unsupported_options;
-         end
+            if ConcatenateDimension > 2
+                obj.addUnsupported_options(sprintf('ConcatenateDimension > 2 in block %s',...
+                        blk.Origin_path));
+            end
+            options = obj.getUnsupportedOptions();
+        end
         %%
         function is_Abstracted = isAbstracted(varargin)
             is_Abstracted = false;
@@ -82,7 +89,7 @@ classdef Concatenate_To_Lustre < Block_To_Lustre
                 if in_matrix_dimension{1}.numDs == 1
                     blkParams.isVector = 1;
                 end
-            end   
+            end
         end
         
         function [codes] = concatenateDimension1(inputs, outputs,in_matrix_dimension)
@@ -140,8 +147,8 @@ classdef Concatenate_To_Lustre < Block_To_Lustre
                             inputs{i}, 'un', 0);
                     end
                 end
-            end            
-        end        
+            end
+        end
         
         function [codes] = concatenateDimension2(inputs, outputs,in_matrix_dimension)
             codes = cell(1, numel(outputs));
@@ -165,7 +172,7 @@ classdef Concatenate_To_Lustre < Block_To_Lustre
             end
         end
         
-       
+        
     end
     
 end
