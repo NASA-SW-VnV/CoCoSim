@@ -1217,9 +1217,9 @@ classdef LustMathLib
                 
                 % define det
                 term1 =  BinaryExpr(BinaryExpr.MULTIPLY,a{1,1},adj{1,1});
-                term2 =  BinaryExpr(BinaryExpr.MULTIPLY,a{2,1},adj{2,1});
-                term3 =  BinaryExpr(BinaryExpr.MULTIPLY,a{3,1},adj{3,1});
-                term4 =  BinaryExpr(BinaryExpr.MULTIPLY,a{4,1},adj{4,1});
+                term2 =  BinaryExpr(BinaryExpr.MULTIPLY,a{2,1},adj{1,2});
+                term3 =  BinaryExpr(BinaryExpr.MULTIPLY,a{3,1},adj{1,3});
+                term4 =  BinaryExpr(BinaryExpr.MULTIPLY,a{4,1},adj{1,4});
                 term5 =  BinaryExpr(BinaryExpr.PLUS,term1,term2);
                 term6 =  BinaryExpr(BinaryExpr.PLUS,term3,term4);
                 body{1} = LustreEq(det,BinaryExpr(BinaryExpr.PLUS,term5,term6));             
@@ -1233,13 +1233,13 @@ classdef LustMathLib
                 list{5} = {a{2,3},a{3,2},a{4,4}};
                 list{6} = {a{2,2},a{3,4},a{4,3}};
                 
-                term = cell(1,n);
-                for i=1:n
-                    term{i} = BinaryExpr.BinaryMultiArgs(BinaryExpr.MULTIPLY,list{i});
+                terms = cell(1,6);
+                for i=1:6
+                    terms{i} = BinaryExpr.BinaryMultiArgs(BinaryExpr.MULTIPLY,list{i});
                 end
                 
-                termPos = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{list{1},list{2},list{3}});
-                termNeg = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{list{4},list{5},list{6}});
+                termPos = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{1},terms{2},terms{3}});
+                termNeg = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{4},terms{5},terms{6}});
                 body{end+1} = LustreEq(adj{1,1},BinaryExpr(BinaryExpr.MINUS,termPos,termNeg));
                 
                 %   adj12
@@ -1250,13 +1250,13 @@ classdef LustMathLib
                 list{5} = {a{1,3},a{3,4},a{4,2}};
                 list{6} = {a{1,4},a{3,2},a{4,3}};
                 
-                term = cell(1,n);
-                for i=1:n
-                    term{i} = BinaryExpr.BinaryMultiArgs(BinaryExpr.MULTIPLY,list{i});
+                terms = cell(1,6);
+                for i=1:6
+                    terms{i} = BinaryExpr.BinaryMultiArgs(BinaryExpr.MULTIPLY,list{i});
                 end
                 
-                termPos = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{list{1},list{2},list{3}});
-                termNeg = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{list{4},list{5},list{6}});
+                termPos = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{1},terms{2},terms{3}});
+                termNeg = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{4},terms{5},terms{6}});
                 body{end+1} = LustreEq(adj{1,2},BinaryExpr(BinaryExpr.MINUS,termPos,termNeg));
                 
                 %   adj13
@@ -1267,13 +1267,13 @@ classdef LustMathLib
                 list{5} = {a{1,3},a{2,2},a{4,4}};
                 list{6} = {a{1,2},a{2,4},a{4,3}};
                 
-                term = cell(1,n);
-                for i=1:n
-                    term{i} = BinaryExpr.BinaryMultiArgs(BinaryExpr.MULTIPLY,list{i});
+                terms = cell(1,6);
+                for i=1:6
+                    terms{i} = BinaryExpr.BinaryMultiArgs(BinaryExpr.MULTIPLY,list{i});
                 end
                 
-                termPos = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{list{1},list{2},list{3}});
-                termNeg = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{list{4},list{5},list{6}});
+                termPos = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{1},terms{2},terms{3}});
+                termNeg = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{4},terms{5},terms{6}});
                 body{end+1} = LustreEq(adj{1,3},BinaryExpr(BinaryExpr.MINUS,termPos,termNeg));
                 
                 %     adj14
@@ -1284,13 +1284,13 @@ classdef LustMathLib
                 list{5} = {a{1,3},a{2,4},a{3,2}};
                 list{6} = {a{1,4},a{2,2},a{3,3}};
                 
-                term = cell(1,n);
-                for i=1:n
-                    term{i} = BinaryExpr.BinaryMultiArgs(BinaryExpr.MULTIPLY,list{i});
+                terms = cell(1,6);
+                for i=1:6
+                    terms{i} = BinaryExpr.BinaryMultiArgs(BinaryExpr.MULTIPLY,list{i});
                 end
                 
-                termPos = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{list{1},list{2},list{3}});
-                termNeg = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{list{4},list{5},list{6}});
+                termPos = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{1},terms{2},terms{3}});
+                termNeg = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{4},terms{5},terms{6}});
                 body{end+1} = LustreEq(adj{1,4},BinaryExpr(BinaryExpr.MINUS,termPos,termNeg));
                 
                 %    adj21
@@ -1301,13 +1301,13 @@ classdef LustMathLib
                 list{5} = {a{2,3},a{3,4},a{4,1}};
                 list{6} = {a{2,4},a{3,1},a{4,3}};
                 
-                term = cell(1,n);
-                for i=1:n
-                    term{i} = BinaryExpr.BinaryMultiArgs(BinaryExpr.MULTIPLY,list{i});
+                terms = cell(1,6);
+                for i=1:6
+                    terms{i} = BinaryExpr.BinaryMultiArgs(BinaryExpr.MULTIPLY,list{i});
                 end
                 
-                termPos = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{list{1},list{2},list{3}});
-                termNeg = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{list{4},list{5},list{6}});
+                termPos = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{1},terms{2},terms{3}});
+                termNeg = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{4},terms{5},terms{6}});
                 body{end+1} = LustreEq(adj{2,1},BinaryExpr(BinaryExpr.MINUS,termPos,termNeg));
                 
                 %    adj22
@@ -1318,13 +1318,13 @@ classdef LustMathLib
                 list{5} = {a{1,3},a{3,1},a{4,4}};
                 list{6} = {a{1,1},a{3,4},a{4,3}};
                 
-                term = cell(1,n);
-                for i=1:n
-                    term{i} = BinaryExpr.BinaryMultiArgs(BinaryExpr.MULTIPLY,list{i});
+                terms = cell(1,6);
+                for i=1:6
+                    terms{i} = BinaryExpr.BinaryMultiArgs(BinaryExpr.MULTIPLY,list{i});
                 end
                 
-                termPos = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{list{1},list{2},list{3}});
-                termNeg = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{list{4},list{5},list{6}});
+                termPos = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{1},terms{2},terms{3}});
+                termNeg = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{4},terms{5},terms{6}});
                 body{end+1} = LustreEq(adj{2,2},BinaryExpr(BinaryExpr.MINUS,termPos,termNeg));
                 
                 %    adj23
@@ -1335,13 +1335,13 @@ classdef LustMathLib
                 list{5} = {a{1,3},a{2,4},a{4,1}};
                 list{6} = {a{1,4},a{2,1},a{4,3}};
                 
-                term = cell(1,n);
-                for i=1:n
-                    term{i} = BinaryExpr.BinaryMultiArgs(BinaryExpr.MULTIPLY,list{i});
+                terms = cell(1,6);
+                for i=1:6
+                    terms{i} = BinaryExpr.BinaryMultiArgs(BinaryExpr.MULTIPLY,list{i});
                 end
                 
-                termPos = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{list{1},list{2},list{3}});
-                termNeg = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{list{4},list{5},list{6}});
+                termPos = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{1},terms{2},terms{3}});
+                termNeg = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{4},terms{5},terms{6}});
                 body{end+1} = LustreEq(adj{2,3},BinaryExpr(BinaryExpr.MINUS,termPos,termNeg));
                 
                 %    adj24
@@ -1352,13 +1352,13 @@ classdef LustMathLib
                 list{5} = {a{1,3},a{2,1},a{3,4}};
                 list{6} = {a{1,1},a{2,4},a{3,3}};
                 
-                term = cell(1,n);
-                for i=1:n
-                    term{i} = BinaryExpr.BinaryMultiArgs(BinaryExpr.MULTIPLY,list{i});
+                terms = cell(1,6);
+                for i=1:6
+                    terms{i} = BinaryExpr.BinaryMultiArgs(BinaryExpr.MULTIPLY,list{i});
                 end
                 
-                termPos = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{list{1},list{2},list{3}});
-                termNeg = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{list{4},list{5},list{6}});
+                termPos = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{1},terms{2},terms{3}});
+                termNeg = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{4},terms{5},terms{6}});
                 body{end+1} = LustreEq(adj{2,4},BinaryExpr(BinaryExpr.MINUS,termPos,termNeg));
                 
                 %    adj31
@@ -1369,13 +1369,13 @@ classdef LustMathLib
                 list{5} = {a{2,2},a{3,1},a{4,4}};
                 list{6} = {a{2,1},a{3,4},a{4,2}};
                 
-                term = cell(1,n);
-                for i=1:n
-                    term{i} = BinaryExpr.BinaryMultiArgs(BinaryExpr.MULTIPLY,list{i});
+                terms = cell(1,6);
+                for i=1:6
+                    terms{i} = BinaryExpr.BinaryMultiArgs(BinaryExpr.MULTIPLY,list{i});
                 end
                 
-                termPos = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{list{1},list{2},list{3}});
-                termNeg = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{list{4},list{5},list{6}});
+                termPos = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{1},terms{2},terms{3}});
+                termNeg = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{4},terms{5},terms{6}});
                 body{end+1} = LustreEq(adj{3,1},BinaryExpr(BinaryExpr.MINUS,termPos,termNeg));
                 
                 %    adj32
@@ -1386,13 +1386,13 @@ classdef LustMathLib
                 list{5} = {a{1,2},a{3,4},a{4,1}};
                 list{6} = {a{1,4},a{3,1},a{4,2}};
                 
-                term = cell(1,n);
-                for i=1:n
-                    term{i} = BinaryExpr.BinaryMultiArgs(BinaryExpr.MULTIPLY,list{i});
+                terms = cell(1,6);
+                for i=1:6
+                    terms{i} = BinaryExpr.BinaryMultiArgs(BinaryExpr.MULTIPLY,list{i});
                 end
                 
-                termPos = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{list{1},list{2},list{3}});
-                termNeg = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{list{4},list{5},list{6}});
+                termPos = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{1},terms{2},terms{3}});
+                termNeg = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{4},terms{5},terms{6}});
                 body{end+1} = LustreEq(adj{3,2},BinaryExpr(BinaryExpr.MINUS,termPos,termNeg));
                 
                 %    adj33
@@ -1403,13 +1403,13 @@ classdef LustMathLib
                 list{5} = {a{1,2},a{2,1},a{4,4}};
                 list{6} = {a{1,1},a{2,4},a{4,2}};
                 
-                term = cell(1,n);
-                for i=1:n
-                    term{i} = BinaryExpr.BinaryMultiArgs(BinaryExpr.MULTIPLY,list{i});
+                terms = cell(1,6);
+                for i=1:6
+                    terms{i} = BinaryExpr.BinaryMultiArgs(BinaryExpr.MULTIPLY,list{i});
                 end
                 
-                termPos = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{list{1},list{2},list{3}});
-                termNeg = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{list{4},list{5},list{6}});
+                termPos = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{1},terms{2},terms{3}});
+                termNeg = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{4},terms{5},terms{6}});
                 body{end+1} = LustreEq(adj{3,3},BinaryExpr(BinaryExpr.MINUS,termPos,termNeg));
                 
                 %     adj34
@@ -1420,13 +1420,13 @@ classdef LustMathLib
                 list{5} = {a{1,2},a{2,4},a{3,1}};
                 list{6} = {a{1,4},a{2,1},a{3,2}};
                 
-                term = cell(1,n);
-                for i=1:n
-                    term{i} = BinaryExpr.BinaryMultiArgs(BinaryExpr.MULTIPLY,list{i});
+                terms = cell(1,6);
+                for i=1:6
+                    terms{i} = BinaryExpr.BinaryMultiArgs(BinaryExpr.MULTIPLY,list{i});
                 end
                 
-                termPos = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{list{1},list{2},list{3}});
-                termNeg = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{list{4},list{5},list{6}});
+                termPos = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{1},terms{2},terms{3}});
+                termNeg = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{4},terms{5},terms{6}});
                 body{end+1} = LustreEq(adj{3,4},BinaryExpr(BinaryExpr.MINUS,termPos,termNeg));
                 
                 %   adj41
@@ -1437,13 +1437,13 @@ classdef LustMathLib
                 list{5} = {a{2,2},a{3,3},a{4,1}};
                 list{6} = {a{2,3},a{3,1},a{4,2}};
                 
-                term = cell(1,n);
-                for i=1:n
-                    term{i} = BinaryExpr.BinaryMultiArgs(BinaryExpr.MULTIPLY,list{i});
+                terms = cell(1,6);
+                for i=1:6
+                    terms{i} = BinaryExpr.BinaryMultiArgs(BinaryExpr.MULTIPLY,list{i});
                 end
                 
-                termPos = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{list{1},list{2},list{3}});
-                termNeg = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{list{4},list{5},list{6}});
+                termPos = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{1},terms{2},terms{3}});
+                termNeg = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{4},terms{5},terms{6}});
                 body{end+1} = LustreEq(adj{4,1},BinaryExpr(BinaryExpr.MINUS,termPos,termNeg));
                 
                 %    adj42
@@ -1454,13 +1454,13 @@ classdef LustMathLib
                 list{5} = {a{1,2},a{3,1},a{4,3}};
                 list{6} = {a{1,1},a{3,3},a{4,2}};
                 
-                term = cell(1,n);
-                for i=1:n
-                    term{i} = BinaryExpr.BinaryMultiArgs(BinaryExpr.MULTIPLY,list{i});
+                terms = cell(1,6);
+                for i=1:6
+                    terms{i} = BinaryExpr.BinaryMultiArgs(BinaryExpr.MULTIPLY,list{i});
                 end
                 
-                termPos = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{list{1},list{2},list{3}});
-                termNeg = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{list{4},list{5},list{6}});
+                termPos = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{1},terms{2},terms{3}});
+                termNeg = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{4},terms{5},terms{6}});
                 body{end+1} = LustreEq(adj{4,2},BinaryExpr(BinaryExpr.MINUS,termPos,termNeg));
                 
                 %    adj43
@@ -1471,13 +1471,13 @@ classdef LustMathLib
                 list{5} = {a{1,2},a{2,3},a{4,1}};
                 list{6} = {a{1,3},a{2,1},a{4,2}};
                 
-                term = cell(1,n);
-                for i=1:n
-                    term{i} = BinaryExpr.BinaryMultiArgs(BinaryExpr.MULTIPLY,list{i});
+                terms = cell(1,6);
+                for i=1:6
+                    terms{i} = BinaryExpr.BinaryMultiArgs(BinaryExpr.MULTIPLY,list{i});
                 end
                 
-                termPos = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{list{1},list{2},list{3}});
-                termNeg = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{list{4},list{5},list{6}});
+                termPos = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{1},terms{2},terms{3}});
+                termNeg = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{4},terms{5},terms{6}});
                 body{end+1} = LustreEq(adj{4,3},BinaryExpr(BinaryExpr.MINUS,termPos,termNeg));
                 
                 % adj44
@@ -1488,13 +1488,13 @@ classdef LustMathLib
                 list{5} = {a{1,2},a{2,1},a{3,3}};
                 list{6} = {a{1,1},a{2,3},a{3,2}};
                 
-                term = cell(1,n);
-                for i=1:n
-                    term{i} = BinaryExpr.BinaryMultiArgs(BinaryExpr.MULTIPLY,list{i});
+                terms = cell(1,6);
+                for i=1:6
+                    terms{i} = BinaryExpr.BinaryMultiArgs(BinaryExpr.MULTIPLY,list{i});
                 end
                 
-                termPos = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{list{1},list{2},list{3}});
-                termNeg = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{list{4},list{5},list{6}});
+                termPos = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{1},terms{2},terms{3}});
+                termNeg = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{4},terms{5},terms{6}});
                 body{end+1} = LustreEq(adj{4,4},BinaryExpr(BinaryExpr.MINUS,termPos,termNeg));
                 
                 % define inverse
