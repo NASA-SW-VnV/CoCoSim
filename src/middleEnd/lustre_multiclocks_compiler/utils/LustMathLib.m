@@ -1017,6 +1017,7 @@ classdef LustMathLib
         %% Matrix inversion
         function [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_2x2(backend, varargin)
             % support 2x2 matrix inversion
+            n = 2;
             opens = {};
             abstractedNodes = {};
             external_nodes_i ={};
@@ -1026,22 +1027,26 @@ classdef LustMathLib
             node.setIsMain(false);
             body = {};
             vars = {};
+            
+            % inputs
+            a = VarIdExpr('a11');
+            b = VarIdExpr('a21');
+            c = VarIdExpr('a12');
+            d = VarIdExpr('a22');
+            
+            % outputs
+            ainv = VarIdExpr('ai11');
+            binv = VarIdExpr('ai21');
+            cinv = VarIdExpr('ai12');
+            dinv = VarIdExpr('ai22');
+            
             if BackendType.isKIND2(backend)
-                
+                contractBody = LustMathLib.getContractBody_nxn_inverstion(n);
+                contract = LustreContract();
+                contract.setBody(contractBody);
+                node.setLocalContract(contract);
                 node.setIsImported(true);
             else
-                
-                % inputs
-                a = VarIdExpr('a11');
-                b = VarIdExpr('a21');
-                c = VarIdExpr('a12');
-                d = VarIdExpr('a22');
-                
-                % outputs
-                ainv = VarIdExpr('ai11');
-                binv = VarIdExpr('ai21');
-                cinv = VarIdExpr('ai12');
-                dinv = VarIdExpr('ai22');
                 
                 % det
                 det = VarIdExpr('det');
@@ -1057,19 +1062,22 @@ classdef LustMathLib
                 body{end+1} = LustreEq(cinv,BinaryExpr(BinaryExpr.DIVIDE,...
                     UnaryExpr(UnaryExpr.NEG, c),det));
                 body{end+1} = LustreEq(dinv,BinaryExpr(BinaryExpr.DIVIDE,a,det));
-                
-                % set node
-                node.setInputs({LustreVar(a, 'real'), LustreVar(b, 'real'),...
-                    LustreVar(c, 'real'), LustreVar(d, 'real')});
-                node.setOutputs({LustreVar(ainv, 'real'), LustreVar(binv, 'real'),...
-                    LustreVar(cinv, 'real'), LustreVar(dinv, 'real')});
-                node.setBodyEqs(body);
-                node.setLocalVars(vars);
             end
+            
+            % set node
+            node.setInputs({LustreVar(a, 'real'), LustreVar(b, 'real'),...
+                LustreVar(c, 'real'), LustreVar(d, 'real')});
+            node.setOutputs({LustreVar(ainv, 'real'), LustreVar(binv, 'real'),...
+                LustreVar(cinv, 'real'), LustreVar(dinv, 'real')});
+            node.setBodyEqs(body);
+            node.setLocalVars(vars);
+            
         end
         
-        function [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_3x3(varargin)
+        function [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_3x3(backend,varargin)
             % support 3x3 matrix inversion
+            % 3x3 matrix inverse formulations:
+            % http://mathworld.wolfram.com/MatrixInverse.html
             n = 3;
             opens = {};
             abstractedNodes = {};
@@ -1077,79 +1085,86 @@ classdef LustMathLib
             node_name = '_inv_M_3x3';
             node = LustreNode();
             node.setName(node_name);
-            node.setIsMain(false);            
+            node.setIsMain(false);
             body = {};
-            vars = cell(1,n+1); 
+            vars = {};
             
-            det = VarIdExpr('det');
-            vars{1} = LustreVar(det,'real');
-            % a: inputs, ai: outputs, adj: adjugate            
-            a = cell(n,n);
-            ai = cell(n,n);
-            adj = cell(n,n);
-            for i=1:n
-                for j=1:n
-                    a{i,j} = VarIdExpr(sprintf('a%d%d',i,j));
-                    ai{i,j} = VarIdExpr(sprintf('ai%d%d',i,j));
-                    adj{i,j} = VarIdExpr(sprintf('adj%d%d',i,j));
-                    vars{(i-1)*n+j+1} = LustreVar(adj{i,j},'real');
+            if BackendType.isKIND2(backend)
+                
+                node.setIsImported(true);
+            else
+                
+                vars = cell(1,n*n+1);                
+                det = VarIdExpr('det');
+                vars{1} = LustreVar(det,'real');
+                % a: inputs, ai: outputs, adj: adjugate
+                a = cell(n,n);
+                ai = cell(n,n);
+                adj = cell(n,n);
+                for i=1:n
+                    for j=1:n
+                        a{i,j} = VarIdExpr(sprintf('a%d%d',i,j));
+                        ai{i,j} = VarIdExpr(sprintf('ai%d%d',i,j));
+                        adj{i,j} = VarIdExpr(sprintf('adj%d%d',i,j));
+                        vars{(i-1)*n+j+1} = LustreVar(adj{i,j},'real');
+                    end
+                end
+                
+                % define det
+                term1 =  BinaryExpr(BinaryExpr.MULTIPLY,a{1,1},adj{1,1});
+                term2 =  BinaryExpr(BinaryExpr.MULTIPLY,a{1,2},adj{2,1});
+                term4 = BinaryExpr(BinaryExpr.PLUS,term1,term2);
+                term3 =  BinaryExpr(BinaryExpr.MULTIPLY,a{1,3},adj{3,1});
+                body{1} = LustreEq(det,BinaryExpr(BinaryExpr.PLUS,term4,term3));
+                
+                % define adjugate
+                term1 = BinaryExpr(BinaryExpr.MULTIPLY,a{2,2},a{3,3});
+                term2 = BinaryExpr(BinaryExpr.MULTIPLY,a{2,3},a{3,2});
+                body{end+1} = LustreEq(adj{1,1},BinaryExpr(BinaryExpr.MINUS,term1,term2));
+                
+                term1 = BinaryExpr(BinaryExpr.MULTIPLY,a{2,3},a{3,1});
+                term2 = BinaryExpr(BinaryExpr.MULTIPLY,a{2,1},a{3,3});
+                body{end+1} = LustreEq(adj{2,1},BinaryExpr(BinaryExpr.MINUS,term1,term2));
+                
+                term1 = BinaryExpr(BinaryExpr.MULTIPLY,a{2,1},a{3,2});
+                term2 = BinaryExpr(BinaryExpr.MULTIPLY,a{3,1},a{2,2});
+                body{end+1} = LustreEq(adj{3,1},BinaryExpr(BinaryExpr.MINUS,term1,term2));
+                
+                term1 = BinaryExpr(BinaryExpr.MULTIPLY,a{1,3},a{3,2});
+                term2 = BinaryExpr(BinaryExpr.MULTIPLY,a{3,3},a{1,2});
+                body{end+1} = LustreEq(adj{1,2},BinaryExpr(BinaryExpr.MINUS,term1,term2));
+                
+                term1 = BinaryExpr(BinaryExpr.MULTIPLY,a{1,1},a{3,3});
+                term2 = BinaryExpr(BinaryExpr.MULTIPLY,a{1,3},a{3,1});
+                body{end+1} = LustreEq(adj{2,2},BinaryExpr(BinaryExpr.MINUS,term1,term2));
+                
+                term1 = BinaryExpr(BinaryExpr.MULTIPLY,a{1,2},a{3,1});
+                term2 = BinaryExpr(BinaryExpr.MULTIPLY,a{3,2},a{1,1});
+                body{end+1} = LustreEq(adj{3,2},BinaryExpr(BinaryExpr.MINUS,term1,term2));
+                
+                term1 = BinaryExpr(BinaryExpr.MULTIPLY,a{1,2},a{2,3});
+                term2 = BinaryExpr(BinaryExpr.MULTIPLY,a{2,2},a{1,3});
+                body{end+1} = LustreEq(adj{1,3},BinaryExpr(BinaryExpr.MINUS,term1,term2));
+                
+                term1 = BinaryExpr(BinaryExpr.MULTIPLY,a{1,3},a{2,1});
+                term2 = BinaryExpr(BinaryExpr.MULTIPLY,a{2,3},a{1,1});
+                body{end+1} = LustreEq(adj{2,3},BinaryExpr(BinaryExpr.MINUS,term1,term2));
+                
+                term1 = BinaryExpr(BinaryExpr.MULTIPLY,a{1,1},a{2,2});
+                term2 = BinaryExpr(BinaryExpr.MULTIPLY,a{2,1},a{1,2});
+                body{end+1} = LustreEq(adj{3,3},BinaryExpr(BinaryExpr.MINUS,term1,term2));
+                
+                % define inverse
+                for i=1:n
+                    for j=1:n
+                        body{end+1} = LustreEq(ai{i,j},BinaryExpr(BinaryExpr.DIVIDE,adj{i,j},det));
+                    end
                 end
             end
             
-            % define det
-            term1 =  BinaryExpr(BinaryExpr.MULTIPLY,a{1,1},adj{1,1});
-            term2 =  BinaryExpr(BinaryExpr.MULTIPLY,a{1,2},adj{2,1});
-            term4 = BinaryExpr(BinaryExpr.PLUS,term1,term2);
-            term3 =  BinaryExpr(BinaryExpr.MULTIPLY,a{1,3},adj{3,1});            
-            body{1} = LustreEq(det,BinaryExpr(BinaryExpr.PLUS,term4,term3));
-            
-            % define adjugate
-            term1 = BinaryExpr(BinaryExpr.MULTIPLY,a{2,2},a{3,3});
-            term2 = BinaryExpr(BinaryExpr.MULTIPLY,a{2,3},a{3,2});                        
-            body{end+1} = LustreEq(adj{1,1},BinaryExpr(BinaryExpr.MINUS,term1,term2));
-
-            term1 = BinaryExpr(BinaryExpr.MULTIPLY,a{2,3},a{3,1});
-            term2 = BinaryExpr(BinaryExpr.MULTIPLY,a{2,1},a{3,3});                    
-            body{end+1} = LustreEq(adj{2,1},BinaryExpr(BinaryExpr.MINUS,term1,term2));       
-            
-            term1 = BinaryExpr(BinaryExpr.MULTIPLY,a{2,1},a{3,2});
-            term2 = BinaryExpr(BinaryExpr.MULTIPLY,a{3,1},a{2,2});                       
-            body{end+1} = LustreEq(adj{3,1},BinaryExpr(BinaryExpr.MINUS,term1,term2));   
-            
-            term1 = BinaryExpr(BinaryExpr.MULTIPLY,a{1,3},a{3,2});
-            term2 = BinaryExpr(BinaryExpr.MULTIPLY,a{3,3},a{1,2});                      
-            body{end+1} = LustreEq(adj{1,2},BinaryExpr(BinaryExpr.MINUS,term1,term2));  
-            
-            term1 = BinaryExpr(BinaryExpr.MULTIPLY,a{1,1},a{3,3});
-            term2 = BinaryExpr(BinaryExpr.MULTIPLY,a{1,3},a{3,1});                       
-            body{end+1} = LustreEq(adj{2,2},BinaryExpr(BinaryExpr.MINUS,term1,term2));    
-            
-            term1 = BinaryExpr(BinaryExpr.MULTIPLY,a{1,2},a{3,1});
-            term2 = BinaryExpr(BinaryExpr.MULTIPLY,a{3,2},a{1,1});                       
-            body{end+1} = LustreEq(adj{3,2},BinaryExpr(BinaryExpr.MINUS,term1,term2));   
-            
-            term1 = BinaryExpr(BinaryExpr.MULTIPLY,a{1,2},a{2,3});
-            term2 = BinaryExpr(BinaryExpr.MULTIPLY,a{2,2},a{1,3});                      
-            body{end+1} = LustreEq(adj{1,3},BinaryExpr(BinaryExpr.MINUS,term1,term2));  
-            
-            term1 = BinaryExpr(BinaryExpr.MULTIPLY,a{1,3},a{2,1});
-            term2 = BinaryExpr(BinaryExpr.MULTIPLY,a{2,3},a{1,1});                     
-            body{end+1} = LustreEq(adj{2,3},BinaryExpr(BinaryExpr.MINUS,term1,term2));  
-
-            term1 = BinaryExpr(BinaryExpr.MULTIPLY,a{1,1},a{2,2});
-            term2 = BinaryExpr(BinaryExpr.MULTIPLY,a{2,1},a{1,2});                       
-            body{end+1} = LustreEq(adj{3,3},BinaryExpr(BinaryExpr.MINUS,term1,term2));            
-                     
-            % define inverse
-            for i=1:n
-                for j=1:n
-                    body{end+1} = LustreEq(ai{i,j},BinaryExpr(BinaryExpr.DIVIDE,adj{i,j},det));
-                end
-            end
-
             % set node
-            inputs = cell(1,9);
-            outputs = cell(1,9);
+            inputs = cell(1,n*n);
+            outputs = cell(1,n*n);
             counter = 0;
             for j=1:n
                 for i=1:n
@@ -1160,13 +1175,14 @@ classdef LustMathLib
             end
             node.setInputs(inputs);
             node.setOutputs(outputs);
-            node.setBodyEqs(body);   
+            node.setBodyEqs(body);
             node.setLocalVars(vars);
-          
+            
         end
         
-        function [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_4x4(varargin)
+        function [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_4x4(backend,varargin)
             % support 4x4 matrix inversion
+            % http://semath.info/src/inverse-cofactor-ex4.html
             n = 4;
             opens = {};
             abstractedNodes = {};
@@ -1174,40 +1190,325 @@ classdef LustMathLib
             node_name = '_inv_M_4x4';
             node = LustreNode();
             node.setName(node_name);
-            node.setIsMain(false);            
+            node.setIsMain(false);
             body = {};
-            vars = cell(1,n+1); 
+            vars = {};
             
-            det = VarIdExpr('det');
-            vars{1} = LustreVar(det,'real');
-            % a: inputs, ai: outputs, adj: adjugate            
-            a = cell(n,n);
-            ai = cell(n,n);
-            adj = cell(n,n);
-            for i=1:n
-                for j=1:n
-                    a{i,j} = VarIdExpr(sprintf('a%d%d',i,j));
-                    ai{i,j} = VarIdExpr(sprintf('ai%d%d',i,j));
-                    adj{i,j} = VarIdExpr(sprintf('adj%d%d',i,j));
-                    vars{(i-1)*n+j+1} = LustreVar(adj{i,j},'real');
+            if BackendType.isKIND2(backend)
+                
+                node.setIsImported(true);
+            else              
+                
+                vars = cell(1,n*n+1);                
+                det = VarIdExpr('det');
+                vars{1} = LustreVar(det,'real');
+                % a: inputs, ai: outputs, adj: adjugate
+                a = cell(n,n);
+                ai = cell(n,n);
+                adj = cell(n,n);
+                for i=1:n
+                    for j=1:n
+                        a{i,j} = VarIdExpr(sprintf('a%d%d',i,j));
+                        ai{i,j} = VarIdExpr(sprintf('ai%d%d',i,j));
+                        adj{i,j} = VarIdExpr(sprintf('adj%d%d',i,j));
+                        vars{(i-1)*n+j+1} = LustreVar(adj{i,j},'real');
+                    end
                 end
-            end            
-            
-            % define adjugate
-            
-            
-            % define det
-            
-            % define inverse
-            for i=1:n
-                for j=1:n
-                    body{end+1} = LustreEq(ai{i,j},BinaryExpr(BinaryExpr.DIVIDE,adj{i,j},det));
+                
+                % define det
+                term1 =  BinaryExpr(BinaryExpr.MULTIPLY,a{1,1},adj{1,1});
+                term2 =  BinaryExpr(BinaryExpr.MULTIPLY,a{2,1},adj{1,2});
+                term3 =  BinaryExpr(BinaryExpr.MULTIPLY,a{3,1},adj{1,3});
+                term4 =  BinaryExpr(BinaryExpr.MULTIPLY,a{4,1},adj{1,4});
+                term5 =  BinaryExpr(BinaryExpr.PLUS,term1,term2);
+                term6 =  BinaryExpr(BinaryExpr.PLUS,term3,term4);
+                body{1} = LustreEq(det,BinaryExpr(BinaryExpr.PLUS,term5,term6));             
+                
+                % define adjugate
+                %   adj11
+                list{1} = {a{2,2},a{3,3},a{4,4}};
+                list{2} = {a{2,3},a{3,4},a{4,2}};
+                list{3} = {a{2,4},a{3,2},a{4,3}};
+                list{4} = {a{2,4},a{3,3},a{4,2}};
+                list{5} = {a{2,3},a{3,2},a{4,4}};
+                list{6} = {a{2,2},a{3,4},a{4,3}};
+                
+                terms = cell(1,6);
+                for i=1:6
+                    terms{i} = BinaryExpr.BinaryMultiArgs(BinaryExpr.MULTIPLY,list{i});
                 end
+                
+                termPos = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{1},terms{2},terms{3}});
+                termNeg = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{4},terms{5},terms{6}});
+                body{end+1} = LustreEq(adj{1,1},BinaryExpr(BinaryExpr.MINUS,termPos,termNeg));
+                
+                %   adj12
+                list{1} = {a{1,4},a{3,3},a{4,2}};
+                list{2} = {a{1,3},a{3,2},a{4,4}};
+                list{3} = {a{1,2},a{3,4},a{4,3}};
+                list{4} = {a{1,2},a{3,3},a{4,4}};
+                list{5} = {a{1,3},a{3,4},a{4,2}};
+                list{6} = {a{1,4},a{3,2},a{4,3}};
+                
+                terms = cell(1,6);
+                for i=1:6
+                    terms{i} = BinaryExpr.BinaryMultiArgs(BinaryExpr.MULTIPLY,list{i});
+                end
+                
+                termPos = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{1},terms{2},terms{3}});
+                termNeg = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{4},terms{5},terms{6}});
+                body{end+1} = LustreEq(adj{1,2},BinaryExpr(BinaryExpr.MINUS,termPos,termNeg));
+                
+                %   adj13
+                list{1} = {a{1,2},a{2,3},a{4,4}};
+                list{2} = {a{1,3},a{2,4},a{4,2}};
+                list{3} = {a{1,4},a{2,2},a{4,3}};
+                list{4} = {a{1,4},a{2,3},a{4,2}};
+                list{5} = {a{1,3},a{2,2},a{4,4}};
+                list{6} = {a{1,2},a{2,4},a{4,3}};
+                
+                terms = cell(1,6);
+                for i=1:6
+                    terms{i} = BinaryExpr.BinaryMultiArgs(BinaryExpr.MULTIPLY,list{i});
+                end
+                
+                termPos = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{1},terms{2},terms{3}});
+                termNeg = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{4},terms{5},terms{6}});
+                body{end+1} = LustreEq(adj{1,3},BinaryExpr(BinaryExpr.MINUS,termPos,termNeg));
+                
+                %     adj14
+                list{1} = {a{1,4},a{2,3},a{3,2}};
+                list{2} = {a{1,3},a{2,2},a{3,4}};
+                list{3} = {a{1,2},a{2,4},a{3,3}};
+                list{4} = {a{1,2},a{2,3},a{3,4}};
+                list{5} = {a{1,3},a{2,4},a{3,2}};
+                list{6} = {a{1,4},a{2,2},a{3,3}};
+                
+                terms = cell(1,6);
+                for i=1:6
+                    terms{i} = BinaryExpr.BinaryMultiArgs(BinaryExpr.MULTIPLY,list{i});
+                end
+                
+                termPos = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{1},terms{2},terms{3}});
+                termNeg = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{4},terms{5},terms{6}});
+                body{end+1} = LustreEq(adj{1,4},BinaryExpr(BinaryExpr.MINUS,termPos,termNeg));
+                
+                %    adj21
+                list{1} = {a{2,4},a{3,3},a{4,1}};
+                list{2} = {a{2,3},a{3,1},a{4,4}};
+                list{3} = {a{2,1},a{3,4},a{4,3}};
+                list{4} = {a{2,1},a{3,3},a{4,4}};
+                list{5} = {a{2,3},a{3,4},a{4,1}};
+                list{6} = {a{2,4},a{3,1},a{4,3}};
+                
+                terms = cell(1,6);
+                for i=1:6
+                    terms{i} = BinaryExpr.BinaryMultiArgs(BinaryExpr.MULTIPLY,list{i});
+                end
+                
+                termPos = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{1},terms{2},terms{3}});
+                termNeg = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{4},terms{5},terms{6}});
+                body{end+1} = LustreEq(adj{2,1},BinaryExpr(BinaryExpr.MINUS,termPos,termNeg));
+                
+                %    adj22
+                list{1} = {a{1,1},a{3,3},a{4,4}};
+                list{2} = {a{1,3},a{3,4},a{4,1}};
+                list{3} = {a{1,4},a{3,1},a{4,3}};
+                list{4} = {a{1,4},a{3,3},a{4,1}};
+                list{5} = {a{1,3},a{3,1},a{4,4}};
+                list{6} = {a{1,1},a{3,4},a{4,3}};
+                
+                terms = cell(1,6);
+                for i=1:6
+                    terms{i} = BinaryExpr.BinaryMultiArgs(BinaryExpr.MULTIPLY,list{i});
+                end
+                
+                termPos = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{1},terms{2},terms{3}});
+                termNeg = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{4},terms{5},terms{6}});
+                body{end+1} = LustreEq(adj{2,2},BinaryExpr(BinaryExpr.MINUS,termPos,termNeg));
+                
+                %    adj23
+                list{1} = {a{1,4},a{2,3},a{4,1}};
+                list{2} = {a{1,3},a{2,1},a{4,4}};
+                list{3} = {a{1,1},a{2,4},a{4,3}};
+                list{4} = {a{1,1},a{2,3},a{4,4}};
+                list{5} = {a{1,3},a{2,4},a{4,1}};
+                list{6} = {a{1,4},a{2,1},a{4,3}};
+                
+                terms = cell(1,6);
+                for i=1:6
+                    terms{i} = BinaryExpr.BinaryMultiArgs(BinaryExpr.MULTIPLY,list{i});
+                end
+                
+                termPos = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{1},terms{2},terms{3}});
+                termNeg = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{4},terms{5},terms{6}});
+                body{end+1} = LustreEq(adj{2,3},BinaryExpr(BinaryExpr.MINUS,termPos,termNeg));
+                
+                %    adj24
+                list{1} = {a{1,1},a{2,3},a{3,4}};
+                list{2} = {a{1,3},a{2,4},a{3,1}};
+                list{3} = {a{1,4},a{2,1},a{3,3}};
+                list{4} = {a{1,4},a{2,3},a{3,1}};
+                list{5} = {a{1,3},a{2,1},a{3,4}};
+                list{6} = {a{1,1},a{2,4},a{3,3}};
+                
+                terms = cell(1,6);
+                for i=1:6
+                    terms{i} = BinaryExpr.BinaryMultiArgs(BinaryExpr.MULTIPLY,list{i});
+                end
+                
+                termPos = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{1},terms{2},terms{3}});
+                termNeg = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{4},terms{5},terms{6}});
+                body{end+1} = LustreEq(adj{2,4},BinaryExpr(BinaryExpr.MINUS,termPos,termNeg));
+                
+                %    adj31
+                list{1} = {a{2,1},a{3,2},a{4,4}};
+                list{2} = {a{2,2},a{3,4},a{4,1}};
+                list{3} = {a{2,4},a{3,1},a{4,2}};
+                list{4} = {a{2,4},a{3,2},a{4,1}};
+                list{5} = {a{2,2},a{3,1},a{4,4}};
+                list{6} = {a{2,1},a{3,4},a{4,2}};
+                
+                terms = cell(1,6);
+                for i=1:6
+                    terms{i} = BinaryExpr.BinaryMultiArgs(BinaryExpr.MULTIPLY,list{i});
+                end
+                
+                termPos = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{1},terms{2},terms{3}});
+                termNeg = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{4},terms{5},terms{6}});
+                body{end+1} = LustreEq(adj{3,1},BinaryExpr(BinaryExpr.MINUS,termPos,termNeg));
+                
+                %    adj32
+                list{1} = {a{1,4},a{3,2},a{4,1}};
+                list{2} = {a{1,2},a{3,1},a{4,4}};
+                list{3} = {a{1,1},a{3,4},a{4,2}};
+                list{4} = {a{1,1},a{3,2},a{4,4}};
+                list{5} = {a{1,2},a{3,4},a{4,1}};
+                list{6} = {a{1,4},a{3,1},a{4,2}};
+                
+                terms = cell(1,6);
+                for i=1:6
+                    terms{i} = BinaryExpr.BinaryMultiArgs(BinaryExpr.MULTIPLY,list{i});
+                end
+                
+                termPos = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{1},terms{2},terms{3}});
+                termNeg = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{4},terms{5},terms{6}});
+                body{end+1} = LustreEq(adj{3,2},BinaryExpr(BinaryExpr.MINUS,termPos,termNeg));
+                
+                %    adj33
+                list{1} = {a{1,1},a{2,2},a{4,4}};
+                list{2} = {a{1,2},a{2,4},a{4,1}};
+                list{3} = {a{1,4},a{2,1},a{4,2}};
+                list{4} = {a{1,4},a{2,2},a{4,1}};
+                list{5} = {a{1,2},a{2,1},a{4,4}};
+                list{6} = {a{1,1},a{2,4},a{4,2}};
+                
+                terms = cell(1,6);
+                for i=1:6
+                    terms{i} = BinaryExpr.BinaryMultiArgs(BinaryExpr.MULTIPLY,list{i});
+                end
+                
+                termPos = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{1},terms{2},terms{3}});
+                termNeg = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{4},terms{5},terms{6}});
+                body{end+1} = LustreEq(adj{3,3},BinaryExpr(BinaryExpr.MINUS,termPos,termNeg));
+                
+                %     adj34
+                list{1} = {a{1,4},a{2,2},a{3,1}};
+                list{2} = {a{1,2},a{2,1},a{3,4}};
+                list{3} = {a{1,1},a{2,4},a{3,2}};
+                list{4} = {a{1,1},a{2,2},a{3,4}};
+                list{5} = {a{1,2},a{2,4},a{3,1}};
+                list{6} = {a{1,4},a{2,1},a{3,2}};
+                
+                terms = cell(1,6);
+                for i=1:6
+                    terms{i} = BinaryExpr.BinaryMultiArgs(BinaryExpr.MULTIPLY,list{i});
+                end
+                
+                termPos = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{1},terms{2},terms{3}});
+                termNeg = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{4},terms{5},terms{6}});
+                body{end+1} = LustreEq(adj{3,4},BinaryExpr(BinaryExpr.MINUS,termPos,termNeg));
+                
+                %   adj41
+                list{1} = {a{2,3},a{3,2},a{4,1}};
+                list{2} = {a{2,2},a{3,1},a{4,3}};
+                list{3} = {a{2,1},a{3,3},a{4,2}};
+                list{4} = {a{2,1},a{3,2},a{4,3}};
+                list{5} = {a{2,2},a{3,3},a{4,1}};
+                list{6} = {a{2,3},a{3,1},a{4,2}};
+                
+                terms = cell(1,6);
+                for i=1:6
+                    terms{i} = BinaryExpr.BinaryMultiArgs(BinaryExpr.MULTIPLY,list{i});
+                end
+                
+                termPos = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{1},terms{2},terms{3}});
+                termNeg = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{4},terms{5},terms{6}});
+                body{end+1} = LustreEq(adj{4,1},BinaryExpr(BinaryExpr.MINUS,termPos,termNeg));
+                
+                %    adj42
+                list{1} = {a{1,1},a{3,2},a{4,3}};
+                list{2} = {a{1,2},a{3,3},a{4,1}};
+                list{3} = {a{1,3},a{3,1},a{4,2}};
+                list{4} = {a{1,3},a{3,2},a{4,1}};
+                list{5} = {a{1,2},a{3,1},a{4,3}};
+                list{6} = {a{1,1},a{3,3},a{4,2}};
+                
+                terms = cell(1,6);
+                for i=1:6
+                    terms{i} = BinaryExpr.BinaryMultiArgs(BinaryExpr.MULTIPLY,list{i});
+                end
+                
+                termPos = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{1},terms{2},terms{3}});
+                termNeg = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{4},terms{5},terms{6}});
+                body{end+1} = LustreEq(adj{4,2},BinaryExpr(BinaryExpr.MINUS,termPos,termNeg));
+                
+                %    adj43
+                list{1} = {a{1,3},a{2,2},a{4,1}};
+                list{2} = {a{1,2},a{2,1},a{4,3}};
+                list{3} = {a{1,1},a{2,3},a{4,2}};
+                list{4} = {a{1,1},a{2,2},a{4,3}};
+                list{5} = {a{1,2},a{2,3},a{4,1}};
+                list{6} = {a{1,3},a{2,1},a{4,2}};
+                
+                terms = cell(1,6);
+                for i=1:6
+                    terms{i} = BinaryExpr.BinaryMultiArgs(BinaryExpr.MULTIPLY,list{i});
+                end
+                
+                termPos = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{1},terms{2},terms{3}});
+                termNeg = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{4},terms{5},terms{6}});
+                body{end+1} = LustreEq(adj{4,3},BinaryExpr(BinaryExpr.MINUS,termPos,termNeg));
+                
+                % adj44
+                list{1} = {a{1,1},a{2,2},a{3,3}};
+                list{2} = {a{1,2},a{2,3},a{3,1}};
+                list{3} = {a{1,3},a{2,1},a{3,2}};
+                list{4} = {a{1,3},a{2,2},a{3,1}};
+                list{5} = {a{1,2},a{2,1},a{3,3}};
+                list{6} = {a{1,1},a{2,3},a{3,2}};
+                
+                terms = cell(1,6);
+                for i=1:6
+                    terms{i} = BinaryExpr.BinaryMultiArgs(BinaryExpr.MULTIPLY,list{i});
+                end
+                
+                termPos = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{1},terms{2},terms{3}});
+                termNeg = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{4},terms{5},terms{6}});
+                body{end+1} = LustreEq(adj{4,4},BinaryExpr(BinaryExpr.MINUS,termPos,termNeg));
+                
+                % define inverse
+                for i=1:n
+                    for j=1:n
+                        body{end+1} = LustreEq(ai{i,j},BinaryExpr(BinaryExpr.DIVIDE,adj{i,j},det));
+                    end
+                end
+                
             end
-
+            
             % set node
-            inputs = cell(1,9);
-            outputs = cell(1,9);
+            inputs = cell(1,n*n);
+            outputs = cell(1,n*n);
             counter = 0;
             for j=1:n
                 for i=1:n
@@ -1218,8 +1519,8 @@ classdef LustMathLib
             end
             node.setInputs(inputs);
             node.setOutputs(outputs);
-            node.setBodyEqs(body);   
-            node.setLocalVars(vars);            
+            node.setBodyEqs(body);
+            node.setLocalVars(vars);
             
             
         end
@@ -1232,11 +1533,11 @@ classdef LustMathLib
                     blk.Origin_path), ...
                     MsgType.ERROR, 'Product_To_Lustre', '');
                 return;
-            end   
+            end
             
             % KIND2:   guarantee code     A_inv*A = I
             if strcmp(varargin{1}, 'KIND2')
-
+                
                 opens = {};
                 abstractedNodes = {};
                 external_nodes_i ={};
@@ -1307,10 +1608,10 @@ classdef LustMathLib
                 a45i = VarIdExpr('a45i');
                 a55i = VarIdExpr('a55i');
                 
-    
+                
             end
-        end        
-         
+        end
+        
         function [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_6x6(varargin)
             if strcmp(varargin{1}, 'LUSTREC')
                 display_msg(...
@@ -1321,9 +1622,9 @@ classdef LustMathLib
             
             if strcmp(varargin{1}, 'KIND2')
                 % guarantee code     A_inv*A = I
-            end            
-        end      
-
+            end
+        end
+        
         function [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_7x7(varargin)
             if strcmp(varargin{1}, 'LUSTREC')
                 display_msg(...
@@ -1334,8 +1635,12 @@ classdef LustMathLib
             
             if strcmp(varargin{1}, 'KIND2')
                 % guarantee code     A_inv*A = I
-            end            
-        end         
+            end
+        end
+        
+        function contractBody = getContractBody_nxn_inverstion(n)
+            contractBody = {};
+        end
         
     end
     
