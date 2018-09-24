@@ -53,7 +53,7 @@ classdef Fcn_To_Lustre < Block_To_Lustre
                     obj.addUnsupported_options(me.message);
                 end
             end
-            options = obj.getUnsupportedOptions();
+            options = obj.unsupported_options;
         end
         %%
         function is_Abstracted = isAbstracted(obj, varargin)

@@ -50,7 +50,7 @@ classdef Product_To_Lustre < Block_To_Lustre
             end
             b = Sum_To_Lustre();
             obj.addUnsupported_options(b.getUnsupportedOptions);
-            options = obj.getUnsupportedOptions();
+            options = obj.unsupported_options;
         end
         %%
         function is_Abstracted = isAbstracted(varargin)

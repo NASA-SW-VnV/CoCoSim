@@ -264,7 +264,7 @@ classdef Selector_To_Lustre < Block_To_Lustre
                     indexBlock.Origin_path));
             end
             
-            options = obj.getUnsupportedOptions();
+            options = obj.unsupported_options;
         end
         
         %%

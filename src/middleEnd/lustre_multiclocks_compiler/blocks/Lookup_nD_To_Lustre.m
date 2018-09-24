@@ -100,7 +100,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
             if strcmp(blk.DataSpecification, 'Lookup table object')
                 obj.addUnsupported_options(sprintf('Lookup table object option for DataSpecification is not support in block %s', blk.Origin_path));
             end                
-            options = obj.getUnsupportedOptions();
+            options = obj.unsupported_options;
         end
         %%
         function is_Abstracted = isAbstracted(varargin)

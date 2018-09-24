@@ -132,7 +132,7 @@ classdef Merge_To_Lustre < Block_To_Lustre
                 obj.addUnsupported_options(sprintf('Merge block "%s" is not supported. CoCoSim supports only Merge blocks that are connected to conditionally-executed subsystem', ...
                     blk.Origin_path));
             end
-           options = obj.getUnsupportedOptions();
+           options = obj.unsupported_options;
            
         end
         %%

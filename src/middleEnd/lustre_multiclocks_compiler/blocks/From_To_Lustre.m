@@ -41,7 +41,7 @@ classdef From_To_Lustre < Block_To_Lustre
                 obj.addUnsupported_options(...
                     sprintf('From block %s has no GoTo', blk.Origin_path));
             end
-            options = obj.getUnsupportedOptions();
+            options = obj.unsupported_options;
             
         end
         %%

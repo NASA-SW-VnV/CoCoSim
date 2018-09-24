@@ -48,7 +48,7 @@ classdef If_To_Lustre < Block_To_Lustre
                     end
                 end
             end
-            options = obj.getUnsupportedOptions();
+            options = obj.unsupported_options;
             
         end
         %%

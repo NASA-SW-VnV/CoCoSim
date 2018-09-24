@@ -33,7 +33,7 @@ classdef Step_To_Lustre < Block_To_Lustre
         end
         %%
         function options = getUnsupportedOptions(obj, varargin)
-            options = obj.getUnsupportedOptions();
+            options = obj.unsupported_options;
         end
         
         %%

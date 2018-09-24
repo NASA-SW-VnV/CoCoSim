@@ -62,7 +62,7 @@ classdef DigitalClock_To_Lustre < Block_To_Lustre
                     blk.SampleTime, blk.Origin_path));
             end
             
-            options = obj.getUnsupportedOptions();
+            options = obj.unsupported_options;
         end
         %%
         function is_Abstracted = isAbstracted(varargin)

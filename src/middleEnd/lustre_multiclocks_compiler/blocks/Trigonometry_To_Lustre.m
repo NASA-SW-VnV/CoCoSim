@@ -86,7 +86,7 @@ classdef Trigonometry_To_Lustre < Block_To_Lustre
                     sprintf('The "%s" option is not supported in block %s', blk.Operator, blk.Origin_path));
             end
            
-            options = obj.getUnsupportedOptions();
+            options = obj.unsupported_options;
         end
         %%
         function is_Abstracted = isAbstracted(~, backend, varargin)

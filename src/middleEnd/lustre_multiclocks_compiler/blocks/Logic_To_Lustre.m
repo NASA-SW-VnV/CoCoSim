@@ -90,7 +90,7 @@ classdef Logic_To_Lustre < Block_To_Lustre
         
         %%
         function options = getUnsupportedOptions(obj, varargin)
-            options = obj.getUnsupportedOptions();
+            options = obj.unsupported_options;
         end
         %%
         function is_Abstracted = isAbstracted(varargin)

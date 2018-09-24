@@ -20,7 +20,7 @@ classdef DiscreteTransferFcn_To_Lustre < Block_To_Lustre
             obj.unsupported_options = {...
                 sprintf('Block %s is supported by Pre-processing check the pre-processing errors.',...
                 blk.Origin_path)};
-            options = obj.getUnsupportedOptions();
+            options = obj.unsupported_options;
         end
         %%
         function is_Abstracted = isAbstracted(varargin)

@@ -184,7 +184,7 @@ classdef Assignment_To_Lustre < Block_To_Lustre
                     obj.addUnsupported_options(msg);
                 end
             end
-            options = obj.getUnsupportedOptions();
+            options = obj.unsupported_options;
         end   
         %%
         function is_Abstracted = isAbstracted(varargin)

@@ -22,7 +22,7 @@ classdef block_diagram_To_Lustre < Block_To_Lustre
                     sprintf('Block diagram "%s" with Enable/Trigger/Reset port in root level is not supported.', ...
                     blk.Origin_path));
             end
-            options = obj.getUnsupportedOptions();
+            options = obj.unsupported_options;
         end
         %%
         function is_Abstracted = isAbstracted(varargin)

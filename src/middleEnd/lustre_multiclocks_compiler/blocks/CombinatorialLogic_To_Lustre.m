@@ -99,7 +99,7 @@ classdef CombinatorialLogic_To_Lustre < Block_To_Lustre
         
         function options = getUnsupportedOptions(obj, varargin)
             % add your unsuported options list here
-            options = obj.getUnsupportedOptions();
+            options = obj.unsupported_options;
             
         end
         %%

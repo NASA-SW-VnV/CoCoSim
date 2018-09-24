@@ -56,7 +56,7 @@ classdef Sum_To_Lustre < Block_To_Lustre
                     sprintf('Dimension %s in block %s is not supported.',...
                     mat2str(blk.CompiledPortDimensions.Inport), blk.Origin_path));
             end
-            options = obj.getUnsupportedOptions();
+            options = obj.unsupported_options;
         end
         
         %%
