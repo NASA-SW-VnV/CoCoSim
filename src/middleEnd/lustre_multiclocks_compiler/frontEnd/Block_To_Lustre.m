@@ -96,10 +96,21 @@ classdef Block_To_Lustre < handle
                 obj.external_nodes{end +1} = nodeAst;
             end
         end
+        
         function setCode(obj, code)
             obj.lustre_code = code;
         end
-        
+        function addCode(obj, code)
+            if iscell(code)
+                obj.lustre_code = [obj.lustre_code, code];
+            elseif ~ischar(code) && numel(code) > 1
+                for i=1:numel(code)
+                    obj.lustre_code{end +1} = code(i);
+                end
+            else
+                obj.lustre_code{end +1} = code;
+            end
+        end
         % Getters
         function code = getCode(obj)
             code = obj.lustre_code;
@@ -130,20 +141,31 @@ classdef Block_To_Lustre < handle
         % e.g Inport block is trivial and does not need a code, its name is given
         % in the node signature.
         function b = ignored(blk)
-            % add blocks that will be ignored because they are supported somehow implicitly or not important for Code generation adn Verification.
-            blksNames = {'Inport', 'Terminator', 'Scope', 'Display', ...
-                'EnablePort','ActionPort', 'ResetPort', 'TriggerPort', 'ToWorkspace', ...
-                'DataTypeDuplicate', 'Data Type Propagation'};
+            % add blocks that will be ignored because they are supported 
+            % somehow implicitly or not important for Code generation and Verification.
+            blksIgnored = {'Inport', 'Terminator', 'Scope', 'Display', ...
+                'EnablePort','ActionPort', 'ResetPort', 'TriggerPort', ...
+                'ToWorkspace', 'DataTypeDuplicate', ...
+                'Data Type Propagation'};
+            % the list of block without outputs but should be translated to
+            % Lustre.
+            blksWithNoOutputsButNotIgnored = {...
+                'Outport',...
+                'Design Verifier Assumption'};
             type = blk.BlockType;
             try
-                masktype = sub_blk.MaskType;
+                masktype = blk.MaskType;
             catch
                 masktype = '';
             end
-            
-            b = ismember(type, blksNames) || ismember(masktype, blksNames)...
-                || (~strcmp(type, 'Outport') ...
-                && isfield(blk, 'CompiledPortWidths') && isempty(blk.CompiledPortWidths.Outport));
+            hasNoOutpot = ...
+                isfield(blk, 'CompiledPortWidths') && isempty(blk.CompiledPortWidths.Outport);
+            b = ismember(type, blksIgnored) ...
+                || ismember(masktype, blksIgnored)...
+                || ...
+                (~ismember(type, blksWithNoOutputsButNotIgnored) ...
+                && ~ismember(masktype, blksWithNoOutputsButNotIgnored) ...
+                && hasNoOutpot);
         end
     end
     
