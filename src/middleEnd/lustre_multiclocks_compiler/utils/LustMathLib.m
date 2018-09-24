@@ -1075,7 +1075,7 @@ classdef LustMathLib
         end
         
         function [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_3x3(backend,varargin)
-            % support 3x3 matrix inversion
+            % support 3x3 matrix inversion 
             % 3x3 matrix inverse formulations:
             % http://mathworld.wolfram.com/MatrixInverse.html
             n = 3;
@@ -1089,22 +1089,43 @@ classdef LustMathLib
             body = {};
             vars = {};
             
+            % inputs & outputs
+            % a: inputs, ai: outputs
+            a = cell(n,n);
+            ai = cell(n,n);
+            for i=1:n
+                for j=1:n
+                    a{i,j} = VarIdExpr(sprintf('a%d%d',i,j));
+                    ai{i,j} = VarIdExpr(sprintf('ai%d%d',i,j));
+                end
+            end
+            inputs = cell(1,n*n);
+            outputs = cell(1,n*n);
+            counter = 0;
+            for j=1:n
+                for i=1:n
+                    counter = counter + 1;
+                    inputs{counter} = LustreVar(a{i,j},'real');
+                    outputs{counter} = LustreVar(ai{i,j},'real');
+                end
+            end      
+            
+            % inversion and contract
             if BackendType.isKIND2(backend)
-                
+                contractBody = getContractBody_nxn_inverstion(n,inputs,outputs);
+                contract = LustreContract();
+                contract.setBody(contractBody);
+                node.setLocalContract(contract);                
                 node.setIsImported(true);
             else
                 
                 vars = cell(1,n*n+1);                
                 det = VarIdExpr('det');
                 vars{1} = LustreVar(det,'real');
-                % a: inputs, ai: outputs, adj: adjugate
-                a = cell(n,n);
-                ai = cell(n,n);
+                % adj: adjugate
                 adj = cell(n,n);
                 for i=1:n
                     for j=1:n
-                        a{i,j} = VarIdExpr(sprintf('a%d%d',i,j));
-                        ai{i,j} = VarIdExpr(sprintf('ai%d%d',i,j));
                         adj{i,j} = VarIdExpr(sprintf('adj%d%d',i,j));
                         vars{(i-1)*n+j+1} = LustreVar(adj{i,j},'real');
                     end
@@ -1163,16 +1184,6 @@ classdef LustMathLib
             end
             
             % set node
-            inputs = cell(1,n*n);
-            outputs = cell(1,n*n);
-            counter = 0;
-            for j=1:n
-                for i=1:n
-                    counter = counter + 1;
-                    inputs{counter} = LustreVar(a{i,j},'real');
-                    outputs{counter} = LustreVar(ai{i,j},'real');
-                end
-            end
             node.setInputs(inputs);
             node.setOutputs(outputs);
             node.setBodyEqs(body);
@@ -1193,6 +1204,17 @@ classdef LustMathLib
             node.setIsMain(false);
             body = {};
             vars = {};
+            
+            inputs = cell(1,n*n);
+            outputs = cell(1,n*n);
+            counter = 0;
+            for j=1:n
+                for i=1:n
+                    counter = counter + 1;
+                    inputs{counter} = LustreVar(a{i,j},'real');
+                    outputs{counter} = LustreVar(ai{i,j},'real');
+                end
+            end            
             
             if BackendType.isKIND2(backend)
                 
@@ -1507,139 +1529,96 @@ classdef LustMathLib
             end
             
             % set node
-            inputs = cell(1,n*n);
-            outputs = cell(1,n*n);
-            counter = 0;
-            for j=1:n
-                for i=1:n
-                    counter = counter + 1;
-                    inputs{counter} = LustreVar(a{i,j},'real');
-                    outputs{counter} = LustreVar(ai{i,j},'real');
-                end
-            end
             node.setInputs(inputs);
             node.setOutputs(outputs);
             node.setBodyEqs(body);
             node.setLocalVars(vars);
             
-            
         end
         
-        function [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_5x5(varargin)
-            % 5x5 inversion is not supported
-            if strcmp(varargin{1}, 'LUSTREC')
-                display_msg(...
-                    sprintf('Option Matrix(*) with divid is not supported in block %s', ...
-                    blk.Origin_path), ...
-                    MsgType.ERROR, 'Product_To_Lustre', '');
-                return;
-            end
-            
-            % KIND2:   guarantee code     A_inv*A = I
-            if strcmp(varargin{1}, 'KIND2')
-                
-                opens = {};
-                abstractedNodes = {};
-                external_nodes_i ={};
-                node_name = '_inv_M_5x5';
-                node = LustreNode();
-                node.setName(node_name);
-                node.setIsMain(false);
-                
-                % inputs
-                a11 = VarIdExpr('a11');
-                a21 = VarIdExpr('a21');
-                a31 = VarIdExpr('a31');
-                a41 = VarIdExpr('a41');
-                a51 = VarIdExpr('a51');
-                
-                a12 = VarIdExpr('a12');
-                a22 = VarIdExpr('a22');
-                a32 = VarIdExpr('a32');
-                a42 = VarIdExpr('a42');
-                a52 = VarIdExpr('a52');
-                
-                a13 = VarIdExpr('a13');
-                a23 = VarIdExpr('a23');
-                a33 = VarIdExpr('a33');
-                a43 = VarIdExpr('a43');
-                a53 = VarIdExpr('a53');
-                
-                a14 = VarIdExpr('a14');
-                a24 = VarIdExpr('a24');
-                a34 = VarIdExpr('a34');
-                a44 = VarIdExpr('a44');
-                a54 = VarIdExpr('a54');
-                
-                a15 = VarIdExpr('a15');
-                a25 = VarIdExpr('a25');
-                a35 = VarIdExpr('a35');
-                a45 = VarIdExpr('a45');
-                a55 = VarIdExpr('a55');
-                
-                % outputs
-                a11i = VarIdExpr('a11i');
-                a21i = VarIdExpr('a21i');
-                a31i = VarIdExpr('a31i');
-                a41i = VarIdExpr('a41i');
-                a51i = VarIdExpr('a51i');
-                
-                a12i = VarIdExpr('a12i');
-                a22i = VarIdExpr('a22i');
-                a32i = VarIdExpr('a32i');
-                a42i = VarIdExpr('a42i');
-                a52i = VarIdExpr('a52i');
-                
-                a13i = VarIdExpr('a13i');
-                a23i = VarIdExpr('a23i');
-                a33i = VarIdExpr('a33i');
-                a43i = VarIdExpr('a43i');
-                a53i = VarIdExpr('a53i');
-                
-                a14i = VarIdExpr('a14i');
-                a24i = VarIdExpr('a24i');
-                a34i = VarIdExpr('a34i');
-                a44i = VarIdExpr('a44i');
-                a54i = VarIdExpr('a54i');
-                
-                a15i = VarIdExpr('a15i');
-                a25i = VarIdExpr('a25i');
-                a35i = VarIdExpr('a35i');
-                a45i = VarIdExpr('a45i');
-                a55i = VarIdExpr('a55i');
-                
-                
-            end
-        end
+%         function [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_5x5(backend, varargin)
+%             % 5x5 inversion is not supported, only guarantee code when
+%             % backend is KIND2
+%             if strcmp(varargin{1}, 'LUSTREC')
+%                 display_msg(...
+%                     sprintf('Option Matrix(*) with divid is not supported in block %s', ...
+%                     blk.Origin_path), ...
+%                     MsgType.ERROR, 'Product_To_Lustre', '');
+%                 return;
+%             end
+%             
+%             % KIND2:   guarantee code     A_inv*A = I
+%             if strcmp(varargin{1}, 'KIND2')
+%                 
+%                 opens = {};
+%                 abstractedNodes = {};
+%                 external_nodes_i ={};
+%                 node_name = '_inv_M_5x5';
+%                 node = LustreNode();
+%                 node.setName(node_name);
+%                 node.setIsMain(false);
+%                 
+% 
+%             end
+%         end
+%         
+%         function [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_6x6(backend, varargin)
+%             if strcmp(varargin{1}, 'LUSTREC')
+%                 display_msg(...
+%                     sprintf('Option Matrix(*) with divid is not supported in block %s', ...
+%                     blk.Origin_path), ...
+%                     MsgType.ERROR, 'Product_To_Lustre', '');
+%             end
+%             
+%             if strcmp(varargin{1}, 'KIND2')
+%                 
+%             end
+%         end
+%         
+%         function [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_7x7(backend, varargin)
+%             if strcmp(varargin{1}, 'LUSTREC')
+%                 display_msg(...
+%                     sprintf('Option Matrix(*) with divid is not supported in block %s', ...
+%                     blk.Origin_path), ...
+%                     MsgType.ERROR, 'Product_To_Lustre', '');
+%             end
+%             
+%             if strcmp(varargin{1}, 'KIND2')
+%                 % guarantee code     A_inv*A = I
+%             end
+%         end
         
-        function [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_6x6(varargin)
-            if strcmp(varargin{1}, 'LUSTREC')
-                display_msg(...
-                    sprintf('Option Matrix(*) with divid is not supported in block %s', ...
-                    blk.Origin_path), ...
-                    MsgType.ERROR, 'Product_To_Lustre', '');
-            end
+        function contractBody = getContractBody_nxn_inverstion(n,inputs,outputs)
+            % guarantee code     A*A_inv = I
+            % A*A_inv(ij) = 1.0 if i==j, = 0.0 if i!=j
+            contractBody = cell(1, n*n);
+            codeIndex = 0;
+            zero = RealExpr(0.0);
+            one = RealExpr(1.0);
             
-            if strcmp(varargin{1}, 'KIND2')
-                % guarantee code     A_inv*A = I
-            end
-        end
-        
-        function [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_7x7(varargin)
-            if strcmp(varargin{1}, 'LUSTREC')
-                display_msg(...
-                    sprintf('Option Matrix(*) with divid is not supported in block %s', ...
-                    blk.Origin_path), ...
-                    MsgType.ERROR, 'Product_To_Lustre', '');
-            end
-            
-            if strcmp(varargin{1}, 'KIND2')
-                % guarantee code     A_inv*A = I
-            end
-        end
-        
-        function contractBody = getContractBody_nxn_inverstion(n)
-            contractBody = {};
+            for i=1:n      %i is row of result matrix
+                for j=1:n      %j is column of result matrix
+                    lhs = zero;
+                    if i==j
+                        rhs = one;
+                    else
+                        rhs = zero;
+                    end
+                    for k=1:n
+                        A_index = sub2ind([n,n],i,k);
+                        A_inv_index = sub2ind([n,n],k,j);
+
+                        lhs = BinaryExpr(BinaryExpr.PLUS, ...
+                            lhs, ...
+                            BinaryExpr(BinaryExpr.MULTIPLY, ...
+                                        inputs{1,A_index},...
+                                        outputs{1,A_inv_index}));
+                    end
+                    codeIndex = codeIndex + 1;
+                    contractBody{codeIndex+1} = ContractGuaranteeExpr(LustreEq,lhs, rhs);
+                end
+                
+            end            
         end
         
     end
