@@ -1092,14 +1092,17 @@ classdef LustMathLib
                     inputs{counter} = LustreVar(a{i,j},'real');
                     outputs{counter} = LustreVar(ai{i,j},'real');
                 end
-            end      
-            
-            % inversion and contract
+            end
             if BackendType.isKIND2(backend)
                 contractBody = LustMathLib.getContractBody_nxn_inverstion(n,inline_a,inline_ai);
                 contract = LustreContract();
                 contract.setBody(contractBody);
-                node.setLocalContract(contract);                
+                node.setLocalContract(contract);
+            end
+            % inversion and contract
+            if  n > 4
+                node.setIsImported(true);
+            elseif n==4 && BackendType.isKIND2(backend)
                 node.setIsImported(true);
             else
                 Lustre_inversion = 0;
@@ -1144,12 +1147,13 @@ classdef LustMathLib
         
         function body = get_Det_Adjugate_Code(n,det,a,adj)
             body = {};
+            body{1} = AssertExpr(BinaryExpr(BinaryExpr.NEQ, ...
+                det, RealExpr('0.0')));
             if n == 2
                 % det
-                det = VarIdExpr('det');
                 term1 = BinaryExpr(BinaryExpr.MULTIPLY,a{1,1},a{2,2});
                 term2 = BinaryExpr(BinaryExpr.MULTIPLY,a{1,2},a{2,1});
-                body{1} = LustreEq(det,BinaryExpr(BinaryExpr.MINUS,term1,term2));
+                body{end + 1} = LustreEq(det,BinaryExpr(BinaryExpr.MINUS,term1,term2));
                 
                 % adjugate & inverse
                 body{end+1} = LustreEq(adj{1,1},a{2,2});
@@ -1162,7 +1166,7 @@ classdef LustMathLib
                 term2 =  BinaryExpr(BinaryExpr.MULTIPLY,a{1,2},adj{2,1});
                 term4 = BinaryExpr(BinaryExpr.PLUS,term1,term2);
                 term3 =  BinaryExpr(BinaryExpr.MULTIPLY,a{1,3},adj{3,1});
-                body{1} = LustreEq(det,BinaryExpr(BinaryExpr.PLUS,term4,term3));
+                body{end + 1} = LustreEq(det,BinaryExpr(BinaryExpr.PLUS,term4,term3));
                 
                 % define adjugate
                 term1 = BinaryExpr(BinaryExpr.MULTIPLY,a{2,2},a{3,3});
@@ -1212,7 +1216,7 @@ classdef LustMathLib
                 term4 =  BinaryExpr(BinaryExpr.MULTIPLY,a{4,1},adj{1,4});
                 term5 =  BinaryExpr(BinaryExpr.PLUS,term1,term2);
                 term6 =  BinaryExpr(BinaryExpr.PLUS,term3,term4);
-                body{1} = LustreEq(det,BinaryExpr(BinaryExpr.PLUS,term5,term6));             
+                body{end + 1} = LustreEq(det,BinaryExpr(BinaryExpr.PLUS,term5,term6));             
                 
                 % define adjugate
                 %   adj11
@@ -1521,7 +1525,7 @@ classdef LustMathLib
                         rhs = zero;
                     end                    
                     codeIndex = codeIndex + 1;
-                    contractBody{codeIndex} = ContractGuaranteeExpr('',LustreEq(lhs, rhs));
+                    contractBody{codeIndex} = ContractGuaranteeExpr('',BinaryExpr(BinaryExpr.EQ,lhs, rhs));
                 end
                 
             end            

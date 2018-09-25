@@ -33,7 +33,7 @@ classdef Product_To_Lustre < Block_To_Lustre
         
         
         %%
-        function options = getUnsupportedOptions(obj, ~, blk, varargin)
+        function options = getUnsupportedOptions(obj, parent, blk, varargin)
             % add your unsuported options list here
             if (strcmp(blk.Multiplication, 'Matrix(*)')...
                     && strcmp(blk.Inputs, '/') ...
@@ -49,7 +49,7 @@ classdef Product_To_Lustre < Block_To_Lustre
                     blk.Origin_path));
             end
             b = Sum_To_Lustre();
-            obj.addUnsupported_options(b.getUnsupportedOptions);
+            obj.addUnsupported_options(b.getUnsupportedOptions( parent, blk, varargin));
             options = obj.unsupported_options;
         end
         %%
