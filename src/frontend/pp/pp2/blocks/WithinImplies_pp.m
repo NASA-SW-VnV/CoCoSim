@@ -30,7 +30,7 @@ if not(isempty(wimplies_list))
             replace_one_block(wimplies_list{i},fullfile('pp_lib',pp_name));
         catch
             status = 1;
-            errors_msg{end + 1} = sprintf('Gain pre-process has failed for block %s', wimplies_list{i});
+            errors_msg{end + 1} = sprintf('WithinImplies pre-process has failed for block %s', wimplies_list{i});
             continue;
         end
     end
