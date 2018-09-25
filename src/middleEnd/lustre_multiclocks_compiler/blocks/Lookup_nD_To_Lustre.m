@@ -773,14 +773,17 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                     blkParams.yIsBounded = 1;
                 elseif strcmp(blk.LookUpMeth, 'Use Input Nearest')
                     blkParams.InterpMethod = 'Nearest';
+                    blkParams.skipInterpolation = 1;
                     blkParams.ExtrapMethod  = 'Clip';
                     blkParams.yIsBounded = 1;
                 elseif strcmp(blk.LookUpMeth, 'Use Input Below')
                     blkParams.InterpMethod = 'Flat';
+                    blkParams.skipInterpolation = 1;
                     blkParams.ExtrapMethod  = 'Clip';
                     blkParams.yIsBounded = 1;
                 elseif strcmp(blk.LookUpMeth, 'Use Input Above')
                     blkParams.InterpMethod = 'Above';
+                    blkParams.skipInterpolation = 1;
                     blkParams.ExtrapMethod  = 'Clip';
                     blkParams.yIsBounded = 1;
                 elseif strcmp(blk.InterpMethod, 'Cubic spline')
