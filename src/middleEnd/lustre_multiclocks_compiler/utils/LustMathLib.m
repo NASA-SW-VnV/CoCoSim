@@ -1016,78 +1016,58 @@ classdef LustMathLib
         
         %% Matrix inversion
         function [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_2x2(backend, varargin)
-            % support 2x2 matrix inversion
-            n = 2;
-            opens = {};
-            abstractedNodes = {};
-            external_nodes_i ={};
-            node_name = '_inv_M_2x2';
-            node = LustreNode();
-            node.setName(node_name);
-            node.setIsMain(false);
-            body = {};
-            vars = {};
-            
-            % inputs
-            a = VarIdExpr('a11');
-            b = VarIdExpr('a21');
-            c = VarIdExpr('a12');
-            d = VarIdExpr('a22');
-            
-            % outputs
-            ainv = VarIdExpr('ai11');
-            binv = VarIdExpr('ai21');
-            cinv = VarIdExpr('ai12');
-            dinv = VarIdExpr('ai22');
-            
-            if BackendType.isKIND2(backend)
-                contractBody = LustMathLib.getContractBody_nxn_inverstion(n);
-                contract = LustreContract();
-                contract.setBody(contractBody);
-                node.setLocalContract(contract);
-                node.setIsImported(true);
-            else
-                
-                % det
-                det = VarIdExpr('det');
-                vars{1} = LustreVar(det,'real');
-                term1 = BinaryExpr(BinaryExpr.MULTIPLY,a,d);
-                term2 = BinaryExpr(BinaryExpr.MULTIPLY,b,c);
-                body{1} = LustreEq(det,BinaryExpr(BinaryExpr.MINUS,term1,term2));
-                
-                % adjugate & inverse
-                body{end+1} = LustreEq(ainv,BinaryExpr(BinaryExpr.DIVIDE,d,det));
-                body{end+1} = LustreEq(binv,BinaryExpr(BinaryExpr.DIVIDE,...
-                    UnaryExpr(UnaryExpr.NEG, b),det));
-                body{end+1} = LustreEq(cinv,BinaryExpr(BinaryExpr.DIVIDE,...
-                    UnaryExpr(UnaryExpr.NEG, c),det));
-                body{end+1} = LustreEq(dinv,BinaryExpr(BinaryExpr.DIVIDE,a,det));
-            end
-            
-            % set node
-            node.setInputs({LustreVar(a, 'real'), LustreVar(b, 'real'),...
-                LustreVar(c, 'real'), LustreVar(d, 'real')});
-            node.setOutputs({LustreVar(ainv, 'real'), LustreVar(binv, 'real'),...
-                LustreVar(cinv, 'real'), LustreVar(dinv, 'real')});
-            node.setBodyEqs(body);
-            node.setLocalVars(vars);
-            
+            % support 2x2 matrix inversion            
+            n = 2;            
+            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.get_inverse_code(backend,n);            
         end
         
         function [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_3x3(backend,varargin)
             % support 3x3 matrix inversion 
             % 3x3 matrix inverse formulations:
             % http://mathworld.wolfram.com/MatrixInverse.html
-            n = 3;
+            n = 3;            
+            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.get_inverse_code(backend,n);            
+        end
+        
+        function [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_4x4(backend,varargin)
+            % support 4x4 matrix inversion
+            % http://semath.info/src/inverse-cofactor-ex4.html
+            n = 4;
+            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.get_inverse_code(backend,n); 
+        end
+        
+        function [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_5x5(backend,varargin)
+            % only KIND2 contract for 5x5 matrix inversion
+            n = 5;
+            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.get_inverse_code(backend,n); 
+        end        
+
+        function [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_6x6(backend,varargin)
+            % only KIND2 contract for 6x6 matrix inversion
+            n = 6;
+            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.get_inverse_code(backend,n); 
+        end 
+        
+        function [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_7x7(backend,varargin)
+            % only KIND2 contract for 7x7 matrix inversion
+            n = 7;
+            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.get_inverse_code(backend,n); 
+        end 
+        
+        function [node, external_nodes_i, opens, abstractedNodes] = get_inverse_code(backend,n)
+            % support 2x2 matrix inversion
+            % support 3x3 matrix inversion
+            % support 4x4 matrix inversion
+            % contract for 2x2 to 7x7 matrix inversion
             opens = {};
             abstractedNodes = {};
             external_nodes_i ={};
-            node_name = '_inv_M_3x3';
+            node_name = sprintf('_inv_M_%dx%d',n,n);
             node = LustreNode();
             node.setName(node_name);
             node.setIsMain(false);
-            body = {};
             vars = {};
+            body = {};
             
             % inputs & outputs
             % a: inputs, ai: outputs
@@ -1101,10 +1081,14 @@ classdef LustMathLib
             end
             inputs = cell(1,n*n);
             outputs = cell(1,n*n);
+            inline_a = cell(1,n*n);
+            inline_ai = cell(1,n*n);            
             counter = 0;
             for j=1:n
                 for i=1:n
                     counter = counter + 1;
+                    inline_a{counter} = a{i,j};
+                    inline_ai{counter} = ai{i,j};                    
                     inputs{counter} = LustreVar(a{i,j},'real');
                     outputs{counter} = LustreVar(ai{i,j},'real');
                 end
@@ -1112,25 +1096,67 @@ classdef LustMathLib
             
             % inversion and contract
             if BackendType.isKIND2(backend)
-                contractBody = getContractBody_nxn_inverstion(n,inputs,outputs);
+                contractBody = LustMathLib.getContractBody_nxn_inverstion(n,inline_a,inline_ai);
                 contract = LustreContract();
                 contract.setBody(contractBody);
                 node.setLocalContract(contract);                
                 node.setIsImported(true);
             else
-                
-                vars = cell(1,n*n+1);                
-                det = VarIdExpr('det');
-                vars{1} = LustreVar(det,'real');
-                % adj: adjugate
-                adj = cell(n,n);
-                for i=1:n
-                    for j=1:n
-                        adj{i,j} = VarIdExpr(sprintf('adj%d%d',i,j));
-                        vars{(i-1)*n+j+1} = LustreVar(adj{i,j},'real');
-                    end
+                Lustre_inversion = 0;
+                if n == 2 || n == 3 || n ==4
+                    Lustre_inversion = 1;
                 end
+                if Lustre_inversion == 1
+                    vars = cell(1,n*n+1);
+                    det = VarIdExpr('det');
+                    vars{1} = LustreVar(det,'real');
+                    % adj: adjugate
+                    adj = cell(n,n);
+                    for i=1:n
+                        for j=1:n
+                            adj{i,j} = VarIdExpr(sprintf('adj%d%d',i,j));
+                            vars{(i-1)*n+j+1} = LustreVar(adj{i,j},'real');
+                        end
+                    end
+                    
+                    body = LustMathLib.get_Det_Adjugate_Code(n,det,a,adj);
+                    
+                    % define inverse
+                    for i=1:n
+                        for j=1:n
+                            body{end+1} = LustreEq(ai{i,j},BinaryExpr(BinaryExpr.DIVIDE,adj{i,j},det));
+                        end
+                    end
+                else
+                    display_msg(...
+                        sprintf('Matrix inversion for higher than 4x4 matrix is not supported in LustMathLib'), ...
+                        MsgType.ERROR, 'LustMathLib', '');
+                end
+            end
+            
+            % set node
+            node.setInputs(inputs);
+            node.setOutputs(outputs);
+            node.setBodyEqs(body);
+            node.setLocalVars(vars);            
+            
+        end
+        
+        function body = get_Det_Adjugate_Code(n,det,a,adj)
+            body = {};
+            if n == 2
+                % det
+                det = VarIdExpr('det');
+                term1 = BinaryExpr(BinaryExpr.MULTIPLY,a{1,1},a{2,2});
+                term2 = BinaryExpr(BinaryExpr.MULTIPLY,a{1,2},a{2,1});
+                body{1} = LustreEq(det,BinaryExpr(BinaryExpr.MINUS,term1,term2));
                 
+                % adjugate & inverse
+                body{end+1} = LustreEq(adj{1,1},a{2,2});
+                body{end+1} = LustreEq(adj{1,2},UnaryExpr(UnaryExpr.NEG,a{1,2}));
+                body{end+1} = LustreEq(adj{2,1},UnaryExpr(UnaryExpr.NEG,a{2,1}));
+                body{end+1} = LustreEq(adj{2,2},a{1,1});              
+            elseif n == 3
                 % define det
                 term1 =  BinaryExpr(BinaryExpr.MULTIPLY,a{1,1},adj{1,1});
                 term2 =  BinaryExpr(BinaryExpr.MULTIPLY,a{1,2},adj{2,1});
@@ -1175,67 +1201,9 @@ classdef LustMathLib
                 term2 = BinaryExpr(BinaryExpr.MULTIPLY,a{2,1},a{1,2});
                 body{end+1} = LustreEq(adj{3,3},BinaryExpr(BinaryExpr.MINUS,term1,term2));
                 
-                % define inverse
-                for i=1:n
-                    for j=1:n
-                        body{end+1} = LustreEq(ai{i,j},BinaryExpr(BinaryExpr.DIVIDE,adj{i,j},det));
-                    end
-                end
-            end
-            
-            % set node
-            node.setInputs(inputs);
-            node.setOutputs(outputs);
-            node.setBodyEqs(body);
-            node.setLocalVars(vars);
-            
-        end
-        
-        function [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_4x4(backend,varargin)
-            % support 4x4 matrix inversion
-            % http://semath.info/src/inverse-cofactor-ex4.html
-            n = 4;
-            opens = {};
-            abstractedNodes = {};
-            external_nodes_i ={};
-            node_name = '_inv_M_4x4';
-            node = LustreNode();
-            node.setName(node_name);
-            node.setIsMain(false);
-            body = {};
-            vars = {};
-            
-            inputs = cell(1,n*n);
-            outputs = cell(1,n*n);
-            counter = 0;
-            for j=1:n
-                for i=1:n
-                    counter = counter + 1;
-                    inputs{counter} = LustreVar(a{i,j},'real');
-                    outputs{counter} = LustreVar(ai{i,j},'real');
-                end
-            end            
-            
-            if BackendType.isKIND2(backend)
+            elseif n  == 4
+
                 
-                node.setIsImported(true);
-            else              
-                
-                vars = cell(1,n*n+1);                
-                det = VarIdExpr('det');
-                vars{1} = LustreVar(det,'real');
-                % a: inputs, ai: outputs, adj: adjugate
-                a = cell(n,n);
-                ai = cell(n,n);
-                adj = cell(n,n);
-                for i=1:n
-                    for j=1:n
-                        a{i,j} = VarIdExpr(sprintf('a%d%d',i,j));
-                        ai{i,j} = VarIdExpr(sprintf('ai%d%d',i,j));
-                        adj{i,j} = VarIdExpr(sprintf('adj%d%d',i,j));
-                        vars{(i-1)*n+j+1} = LustreVar(adj{i,j},'real');
-                    end
-                end
                 
                 % define det
                 term1 =  BinaryExpr(BinaryExpr.MULTIPLY,a{1,1},adj{1,1});
@@ -1518,75 +1486,14 @@ classdef LustMathLib
                 termPos = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{1},terms{2},terms{3}});
                 termNeg = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,{terms{4},terms{5},terms{6}});
                 body{end+1} = LustreEq(adj{4,4},BinaryExpr(BinaryExpr.MINUS,termPos,termNeg));
-                
-                % define inverse
-                for i=1:n
-                    for j=1:n
-                        body{end+1} = LustreEq(ai{i,j},BinaryExpr(BinaryExpr.DIVIDE,adj{i,j},det));
-                    end
-                end
-                
+                               
+            else
+                display_msg(...
+                    sprintf('Option Matrix(*) with divid is not supported in block LustMathLib'), ...
+                    MsgType.ERROR, 'LustMathLib', '');
+                return;
             end
-            
-            % set node
-            node.setInputs(inputs);
-            node.setOutputs(outputs);
-            node.setBodyEqs(body);
-            node.setLocalVars(vars);
-            
         end
-        
-%         function [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_5x5(backend, varargin)
-%             % 5x5 inversion is not supported, only guarantee code when
-%             % backend is KIND2
-%             if strcmp(varargin{1}, 'LUSTREC')
-%                 display_msg(...
-%                     sprintf('Option Matrix(*) with divid is not supported in block %s', ...
-%                     blk.Origin_path), ...
-%                     MsgType.ERROR, 'Product_To_Lustre', '');
-%                 return;
-%             end
-%             
-%             % KIND2:   guarantee code     A_inv*A = I
-%             if strcmp(varargin{1}, 'KIND2')
-%                 
-%                 opens = {};
-%                 abstractedNodes = {};
-%                 external_nodes_i ={};
-%                 node_name = '_inv_M_5x5';
-%                 node = LustreNode();
-%                 node.setName(node_name);
-%                 node.setIsMain(false);
-%                 
-% 
-%             end
-%         end
-%         
-%         function [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_6x6(backend, varargin)
-%             if strcmp(varargin{1}, 'LUSTREC')
-%                 display_msg(...
-%                     sprintf('Option Matrix(*) with divid is not supported in block %s', ...
-%                     blk.Origin_path), ...
-%                     MsgType.ERROR, 'Product_To_Lustre', '');
-%             end
-%             
-%             if strcmp(varargin{1}, 'KIND2')
-%                 
-%             end
-%         end
-%         
-%         function [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_7x7(backend, varargin)
-%             if strcmp(varargin{1}, 'LUSTREC')
-%                 display_msg(...
-%                     sprintf('Option Matrix(*) with divid is not supported in block %s', ...
-%                     blk.Origin_path), ...
-%                     MsgType.ERROR, 'Product_To_Lustre', '');
-%             end
-%             
-%             if strcmp(varargin{1}, 'KIND2')
-%                 % guarantee code     A_inv*A = I
-%             end
-%         end
         
         function contractBody = getContractBody_nxn_inverstion(n,inputs,outputs)
             % guarantee code     A*A_inv = I
@@ -1598,24 +1505,23 @@ classdef LustMathLib
             
             for i=1:n      %i is row of result matrix
                 for j=1:n      %j is column of result matrix
-                    lhs = zero;
-                    if i==j
-                        rhs = one;
-                    else
-                        rhs = zero;
-                    end
+                    terms = cell(1,n);
                     for k=1:n
                         A_index = sub2ind([n,n],i,k);
                         A_inv_index = sub2ind([n,n],k,j);
 
-                        lhs = BinaryExpr(BinaryExpr.PLUS, ...
-                            lhs, ...
-                            BinaryExpr(BinaryExpr.MULTIPLY, ...
+                        terms{k} = BinaryExpr(BinaryExpr.MULTIPLY, ...
                                         inputs{1,A_index},...
-                                        outputs{1,A_inv_index}));
+                                        outputs{1,A_inv_index});
                     end
+                    lhs = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,terms);
+                    if i==j
+                        rhs = one;
+                    else
+                        rhs = zero;
+                    end                    
                     codeIndex = codeIndex + 1;
-                    contractBody{codeIndex+1} = ContractGuaranteeExpr(LustreEq,lhs, rhs);
+                    contractBody{codeIndex} = ContractGuaranteeExpr('',LustreEq(lhs, rhs));
                 end
                 
             end            
