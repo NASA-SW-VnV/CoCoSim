@@ -41,7 +41,7 @@ classdef Delay_To_Lustre < Block_To_Lustre
             
         end
         %%
-        function options = getUnsupportedOptions(obj, ~, blk, varargin)
+        function options = getUnsupportedOptions(obj, parent, blk, varargin)
             [DelayLength, ~, status] = ...
                 Constant_To_Lustre.getValueFromParameter(parent, blk, blk.DelayLength);
             if status

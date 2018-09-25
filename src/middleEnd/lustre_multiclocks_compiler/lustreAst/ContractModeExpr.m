@@ -24,8 +24,11 @@ classdef ContractModeExpr < LustreExpr
                 obj.requires, obj.ensures);
         end
         function code = print(obj, backend)
-            %TODO: check if KIND2 syntax is OK for the other backends.
-            code = obj.print_kind2(backend);
+            if BackendType.isKIND2(backend)
+                code = obj.print_kind2(backend);
+            else
+                code = '';
+            end
         end
         
         function code = print_lustrec(obj)

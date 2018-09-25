@@ -18,13 +18,13 @@ classdef Product_To_Lustre < Block_To_Lustre
     
     methods
         
-        function  write_code(obj, parent, blk, xml_trace, varargin)
+        function  write_code(obj, parent, blk, xml_trace, ~, backend, varargin)
             
             OutputDataTypeStr = blk.CompiledPortDataTypes.Outport{1};
             isSumBlock = false;
             [codes, outputs_dt, additionalVars] = ...
                 Sum_To_Lustre.getSumProductCodes(obj, parent, blk, ...
-                OutputDataTypeStr,isSumBlock, OutputDataTypeStr, xml_trace);
+                OutputDataTypeStr,isSumBlock, OutputDataTypeStr, xml_trace, backend);
             
             obj.setCode( codes );
             obj.addVariable(outputs_dt);
@@ -33,17 +33,27 @@ classdef Product_To_Lustre < Block_To_Lustre
         
         
         %%
-        function options = getUnsupportedOptions(obj, parent, blk, varargin)
+        function options = getUnsupportedOptions(obj, parent, blk, ~, backend, varargin)
             % add your unsuported options list here
             if (strcmp(blk.Multiplication, 'Matrix(*)')...
                     && strcmp(blk.Inputs, '/') ...
-                    && blk.CompiledPortWidths.Inport > 49)
-                obj.addUnsupported_options(...
-                    sprintf('Option Matrix(*) with division is not supported in block %s. Only less than 7x7 Matrix inversion is supported.', ...
-                    blk.Origin_path));
+                    && numel(blk.CompiledPortWidths.Inport) == 1)
+                if BackendType.isKIND2(backend)
+                    if blk.CompiledPortWidths.Inport > 49
+                        obj.addUnsupported_options(...
+                            sprintf('Option Matrix(*) with division is not supported in block %s. Only less than 8x8 Matrix inversion is supported.', ...
+                            blk.Origin_path));
+                    end
+                else
+                    if blk.CompiledPortWidths.Inport > 16
+                        obj.addUnsupported_options(...
+                            sprintf('Option Matrix(*) with division is not supported in block %s. Only less than 5x5 Matrix inversion is supported.', ...
+                            blk.Origin_path));
+                    end
+                end
             end
             if ( contains(blk.Inputs, '/') ...
-                && numel(blk.CompiledPortWidths.Inport) > 1)
+                    && numel(blk.CompiledPortWidths.Inport) > 1)
                 obj.addUnsupported_options(...
                     sprintf('Option Matrix(*) with division in block %s should be handled by pre-processing. See pp errors above.', ...
                     blk.Origin_path));
@@ -147,8 +157,8 @@ classdef Product_To_Lustre < Block_To_Lustre
                         code = BinaryExpr(BinaryExpr.PLUS, ...
                             code, ...
                             BinaryExpr(BinaryExpr.MULTIPLY, ...
-                                        input_m1{1,aIndex},...
-                                        input_m2{1,bIndex}),...
+                            input_m1{1,aIndex},...
+                            input_m2{1,bIndex}),...
                             false);
                         %sprintf('%s + (%s * %s)',code, input_m1{1,aIndex},input_m2{1,bIndex});
                         %diag = sprintf('i %d, j %d, k %d, aIndex %d, bIndex %d',i,j,k,aIndex,bIndex);
@@ -162,7 +172,7 @@ classdef Product_To_Lustre < Block_To_Lustre
                 
             end
         end
-       
+        
     end
     
 end

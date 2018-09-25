@@ -18,7 +18,7 @@ classdef Sum_To_Lustre < Block_To_Lustre
     
     methods
         
-        function  write_code(obj, parent, blk, xml_trace, varargin)
+        function  write_code(obj, parent, blk, xml_trace, ~, backend, varargin)
             
             OutputDataTypeStr = blk.OutDataTypeStr;
             AccumDataTypeStr = blk.AccumDataTypeStr;
@@ -39,7 +39,7 @@ classdef Sum_To_Lustre < Block_To_Lustre
             isSumBlock = true;
             [codes, outputs_dt, additionalVars] = ...
                 Sum_To_Lustre.getSumProductCodes(obj, parent, blk, ...
-                OutputDataTypeStr,isSumBlock,AccumDataTypeStr, xml_trace);
+                OutputDataTypeStr,isSumBlock,AccumDataTypeStr, xml_trace, backend);
             
             obj.setCode( codes );
             obj.addVariable(outputs_dt);
@@ -68,7 +68,7 @@ classdef Sum_To_Lustre < Block_To_Lustre
     methods(Static)
         function [codes, outputs_dt, AdditionalVars] = getSumProductCodes(...
                 obj, parent, blk, OutputDataTypeStr,isSumBlock, ...
-                AccumDataTypeStr, xml_trace)
+                AccumDataTypeStr, xml_trace, backend)
             AdditionalVars = {};
             codes = {};
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
@@ -95,6 +95,12 @@ classdef Sum_To_Lustre < Block_To_Lustre
                     if n > 7
                         display_msg(...
                             sprintf('Option Matrix(*) with divid is not supported in block %s', ...
+                            blk.Origin_path), ...
+                            MsgType.ERROR, 'Product_To_Lustre', '');
+                        return;
+                    elseif n > 4 && ~BackendType.isKIND2(backend)
+                         display_msg(...
+                            sprintf('Option Matrix(*) with divid is not supported in block %s for Matrix dimension > 4', ...
                             blk.Origin_path), ...
                             MsgType.ERROR, 'Product_To_Lustre', '');
                         return;

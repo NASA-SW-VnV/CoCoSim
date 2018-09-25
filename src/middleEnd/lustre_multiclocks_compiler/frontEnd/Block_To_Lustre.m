@@ -151,7 +151,8 @@ classdef Block_To_Lustre < handle
             % Lustre.
             blksWithNoOutputsButNotIgnored = {...
                 'Outport',...
-                'Design Verifier Assumption'};
+                'Design Verifier Assumption', ...
+                'Design Verifier Proof Objective'};
             type = blk.BlockType;
             try
                 masktype = blk.MaskType;

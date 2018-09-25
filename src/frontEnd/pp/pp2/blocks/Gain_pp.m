@@ -1,5 +1,5 @@
 function [status, errors_msg] = Gain_pp(model)
-% substitute_gain_process Searches for gain blocks and replaces them by a
+% Gain_pp Searches for gain blocks and replaces them by a
 % PP-friendly equivalent.
 %   model is a string containing the name of the model to search in
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
