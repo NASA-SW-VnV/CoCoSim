@@ -211,7 +211,8 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
             % This function carries out the interpolation depending on algorithm
             % option.  For the flat option, the value at the lower bounding
             % breakpoint is used. For the nearest option, the closest
-            % bounding node for each dimension is used.  We are not
+            % bounding node for each dimension is used.  For the above option, the 
+            % value at the upper bounding breakpoint is used.  We are not
             % calculating the distance from the interpolated point to each
             % of the bounding node on the polytop containing the
             % interpolated point.  For the "clipped" extrapolation option, the nearest
@@ -227,10 +228,8 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                 if strcmp(InterpMethod,'Flat')
                     % defining returnTableIndex{1}
                     %value = '0';
-                    %value_n = IntExpr(0);
-                    
-                    for j=1:NumberOfTableDimensions
-                        
+                    %value_n = IntExpr(0);                    
+                    for j=1:NumberOfTableDimensions                        
                         curIndex =  index_node{j,1};
                         if j==1
                             %value = sprintf('%s + %s*%d',value,curIndex, dimJump(j));
@@ -240,6 +239,25 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                             terms{j} = BinaryExpr(BinaryExpr.MULTIPLY,BinaryExpr(BinaryExpr.MINUS,curIndex,IntExpr(1)), Ast_dimJump{j});
                         end
                     end
+                elseif strcmp(InterpMethod,'Above')
+                    % defining returnTableIndex{2} if input value is not at lower bounding breakpoint                 
+                    for j=1:NumberOfTableDimensions  
+                        % check to see if input is at lower bounding node,
+                        % if it is then curIndex equal lower bounding
+                        % breakpoint, otherwise it is at higher bounding
+                        % breakpoint
+                        curIndex1 =  index_node{j,1};
+                        curIndex2 =  index_node{j,2};
+                        cond = BinaryExpr(BinaryExpr.LTE,inputs{j}{1},coords_node{j,1});
+                        if j==1
+                            terms{j} = IteExpr(cond,BinaryExpr(BinaryExpr.MULTIPLY,curIndex1, Ast_dimJump{j}),...
+                                BinaryExpr(BinaryExpr.MULTIPLY,curIndex2, Ast_dimJump{j}));
+                        else
+                            terms{j} = IteExpr(cond,BinaryExpr(BinaryExpr.MULTIPLY,...
+                                BinaryExpr(BinaryExpr.MINUS,curIndex1,IntExpr(1)), Ast_dimJump{j}),...
+                                BinaryExpr(BinaryExpr.MULTIPLY,BinaryExpr(BinaryExpr.MINUS,curIndex2,IntExpr(1)), Ast_dimJump{j}));
+                        end
+                    end                    
                 else   % 'Nearest' case
                     % defining returnTableIndex{1}
                     disFromTableNode = cell(NumberOfTableDimensions,2);
@@ -307,7 +325,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                     rhs = IteExpr.nestedIteExpr(conds, thens);
                 end
                 body{end+1} = LustreEq(outputs{1},rhs);
-            else
+            else % perform interpolation
                 % clipping
                 clipped_inputs = cell(1,NumberOfTableDimensions);
                 
