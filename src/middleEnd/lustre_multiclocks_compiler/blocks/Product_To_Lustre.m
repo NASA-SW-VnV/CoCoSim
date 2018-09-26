@@ -36,30 +36,26 @@ classdef Product_To_Lustre < Block_To_Lustre
         function options = getUnsupportedOptions(obj, parent, blk, ~, backend, varargin)
             % add your unsuported options list here
             if (strcmp(blk.Multiplication, 'Matrix(*)')...
-                    && strcmp(blk.Inputs, '/') ...
-                    && numel(blk.CompiledPortWidths.Inport) == 1)
-                if BackendType.isKIND2(backend)
-                    if blk.CompiledPortWidths.Inport > 49
-                        obj.addUnsupported_options(...
-                            sprintf('Option Matrix(*) with division is not supported in block %s. Only less than 8x8 Matrix inversion is supported.', ...
-                            blk.Origin_path));
-                    end
-                else
-                    if blk.CompiledPortWidths.Inport > 16
-                        obj.addUnsupported_options(...
-                            sprintf('Option Matrix(*) with division is not supported in block %s. Only less than 5x5 Matrix inversion is supported.', ...
-                            blk.Origin_path));
+                    && contains(blk.Inputs, '/') )
+                for i=1:numel(blk.Inputs)
+                    if isequal(blk.Inputs(i), '/')
+                        if BackendType.isKIND2(backend)
+                            if blk.CompiledPortWidths.Inport(i) > 49
+                                obj.addUnsupported_options(...
+                                    sprintf('Option Matrix(*) with division is not supported in block %s in inport %d. Only less than 8x8 Matrix inversion is supported.', ...
+                                    blk.Origin_path, i));
+                            end
+                        else
+                            if blk.CompiledPortWidths.Inport(i) > 16
+                                obj.addUnsupported_options(...
+                                    sprintf('Option Matrix(*) with division is not supported in block %s in inport %d. Only less than 5x5 Matrix inversion is supported.', ...
+                                    blk.Origin_path, i));
+                            end
+                        end
                     end
                 end
             end
-            if ( strcmp(blk.Multiplication, 'Matrix(*)') ...
-                    && contains(blk.Inputs, '/') ...
-                    && numel(blk.CompiledPortWidths.Inport) > 1 ...
-                    && prod(blk.CompiledPortWidths.Inport) ~= 1)
-                obj.addUnsupported_options(...
-                    sprintf('Option Matrix(*) with division in block %s should be handled by pre-processing. See pp errors above.', ...
-                    blk.Origin_path));
-            end
+
             b = Sum_To_Lustre();
             obj.addUnsupported_options(b.getUnsupportedOptions( parent, blk, varargin));
             options = obj.unsupported_options;
@@ -72,7 +68,7 @@ classdef Product_To_Lustre < Block_To_Lustre
     end
     
     methods(Static)
-        function [codes, AdditionalVars] = matrix_multiply(blk, inputs, outputs, zero, LusOutputDataTypeStr, conv_format )
+        function [codes, AdditionalVars] = matrix_multiply(obj, exp, blk, inputs, outputs, zero, LusOutputDataTypeStr, conv_format )
             % check that the number of columns of 1st input matrix is equalled
             % to the number of rows of the 2nd matrix
             % matrix C(mxl) = A(mxn)*B(nxl)
@@ -80,15 +76,17 @@ classdef Product_To_Lustre < Block_To_Lustre
             % the index of the current matrix pair
             pair_number = 0;
             codes = {};
-            AdditionalVars = {};
+            %AdditionalVars = {};
             productOutputs = {};
             tmp_prefix = SLX2LusUtils.node_name_format(blk);
+            [new_inputs, invertCodes, AdditionalVars] = Product_To_Lustre.invertInputs(obj, exp, inputs, blk, LusOutputDataTypeStr);
+            codes = [codes, invertCodes];
             for i=1:numel(in_matrix_dimension)-1
                 pair_number = pair_number + 1;
                 output_m = {};
                 m2_dimension = in_matrix_dimension{i+1};
                 if i==1
-                    m1_inputs = inputs{1};
+                    m1_inputs = new_inputs{1};
                     m1_dimension = in_matrix_dimension{i};
                 else
                     m1_inputs = productOutputs;
@@ -102,7 +100,7 @@ classdef Product_To_Lustre < Block_To_Lustre
                 
                 [code, productOutputs, addVar] = Product_To_Lustre.matrix_multiply_pair(m1_dimension, ...
                     m2_dimension, m1_inputs,...
-                    inputs{i+1}, output_m, zero, pair_number,...
+                    new_inputs{i+1}, output_m, zero, pair_number,...
                     LusOutputDataTypeStr, tmp_prefix, conv_format);
                 codes = [codes, code];
                 %productOutputs = [productOutputs, tmp_outputs];
@@ -172,6 +170,39 @@ classdef Product_To_Lustre < Block_To_Lustre
                     codes{codeIndex} = LustreEq(product_out{productOutIndex}, code) ;
                 end
                 
+            end
+        end
+        
+        function [new_inputs, invertCodes, AdditionalVars] = invertInputs(obj, exp, inputs, blk, LusOutputDataTypeStr)
+            blk_id = sprintf('%.3f', blk.Handle);
+            blk_id = strrep(blk_id, '.', '_');
+            new_inputs = {};
+            invertCodes = {};
+            AdditionalVars = {};
+            for i=1:numel(exp)
+                if isequal(exp(i), '/')
+                    %create new variables
+                    for j=1:numel(inputs{i})
+                        if iscell(inputs{i}{j})
+                            v = inputs{i}{j}{1};
+                        else
+                            v = inputs{i}{j};
+                        end
+                        v = VarIdExpr(...
+                            strcat(v.getId(), '_inv_', blk_id));
+                        new_inputs{i}{j} = v;
+                        AdditionalVars{end+1} = LustreVar(v, LusOutputDataTypeStr);
+                    end
+                    n = sqrt(numel(inputs{i}));
+                    lib_name = sprintf('_inv_M_%dx%d', n, n);
+                    obj.addExternal_libraries(strcat('LustMathLib_', lib_name));
+                    invertCodes{end + 1} = LustreEq(new_inputs{i},...
+                            NodeCallExpr(lib_name, inputs{i}));
+                    %create the equation B_inv= inv_x(B)
+                    %add the new variables to new_inputs
+                else
+                    new_inputs{i} = inputs{i};
+                end
             end
         end
         
