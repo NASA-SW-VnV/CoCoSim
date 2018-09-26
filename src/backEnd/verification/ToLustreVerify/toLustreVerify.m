@@ -1,4 +1,4 @@
-function [ ] = toLustreVerify(model_full_path,  const_files, varargin)
+function [ ] = toLustreVerify(model_full_path,  const_files, backend, varargin)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Copyright (c) 2017 United States Government as represented by the
 % Administrator of the National Aeronautics and Space Administration.
@@ -8,37 +8,59 @@ function [ ] = toLustreVerify(model_full_path,  const_files, varargin)
 if ~exist('const_files', 'var') || isempty(const_files)
     const_files = {};
 end
+if ~exist('backend', 'var') || isempty(backend)
+    backend = BackendType.KIND2;
+end
 
-[nom_lustre_file, xml_trace, status, unsupportedOptions] = ...
+
+%% run ToLustre
+[nom_lustre_file, xml_trace, status, unsupportedOptions, ...
+    abstractedBlocks, pp_model_full_path] = ...
     ToLustre(model_full_path, const_files,...
-    BackendType.KIND2, varargin);
+    backend, varargin);
 
 if status || ~isempty(unsupportedOptions)
     return;
 end
-tools_config;
-[status, output] = Kind2Utils2.checkSyntaxError(nom_lustre_file, KIND2, Z3);
-if status
-    display_msg('Simulink To Lustre has failed.', MsgType.ERROR, 'toLustreVerify', '');
-    display_msg(output, MsgType.DEBUG, 'toLustreVerify', '');
-    return;
+if BackendType.isKIND2(backend)
+    tools_config;
+    [status, output] = Kind2Utils2.checkSyntaxError(nom_lustre_file, KIND2, Z3);
+    if status
+        display_msg('Simulink To Lustre has failed.', MsgType.ERROR, 'toLustreVerify', '');
+        display_msg(output, MsgType.DEBUG, 'toLustreVerify', '');
+        return;
+    end
 end
 % Get start time
 t_start = now;
 
-mapping_file = xml_trace.json_file_path;
 
-if (exist(mapping_file,'file') == 2)
-    display_msg('Running Kind2', Constants.INFO, 'toLustreVerify', '');
-    try
-        cocoSpecKind2(nom_lustre_file, mapping_file);
-    catch ME
-        display_msg(ME.message, MsgType.ERROR, 'toLustreVerify', '');
-        display_msg(ME.getReport(), MsgType.DEBUG, 'toLustreVerify', '');
-    end
+%% Get the list of verification blocks: Assertion, Proof Objective, Contracts, Observers.
+load_system(pp_model_full_path);
+[~, model, ~] = fileparts(pp_model_full_path);
+Assertions_list = find_system(model, ...
+    'LookUnderMasks', 'all', 'BlockType','Assertion');
+ProofObjective_list = find_system(model, ...
+    'LookUnderMasks', 'all', 'MaskType', 'Design Verifier Proof Objective');
+Assertions_list = [Assertions_list; ProofObjective_list];
+contractBlocks_list = find_system(model, ...
+    'LookUnderMasks', 'all',  'MaskType', 'ContractBlock');
+
+if BackendType.isKIND2(backend)
+    
+    
 else
-    display_msg(sprintf('Mapping file %s is missing', mapping_file), MsgType.ERROR, 'toLustreVerify', '');
+    if ~isempty(Assertions_list)
+        display_msg('Verification of Assertion blocks is only supported by KIND2 model checker.', MsgType.ERROR, 'toLustreVerify', '');
+    end
+    if ~isempty(contractBlocks_list)
+        display_msg('Verification of Assertion blocks is only supported by KIND2 model checker.', MsgType.ERROR, 'toLustreVerify', '');
+    end
 end
+
+
+
+%% Generate final report.
 
 t_end = now;
 t_compute = t_end - t_start;

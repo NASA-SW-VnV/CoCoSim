@@ -22,7 +22,10 @@ global cocosim_pp_gen_verif  cocosim_pp_gen_verif_dir;
 nodisplay = 0;
 cocosim_pp_gen_verif = 0;
 cocosim_pp_gen_verif_dir = '';
-
+persistent pp_datenum_map;
+if isempty(pp_datenum_map)
+    pp_datenum_map = containers.Map('KeyType', 'char', 'ValueType', 'double');
+end
 skip_pp = 0;
 use_backup = 0 ;
 for i=1:numel(varargin)
@@ -38,9 +41,9 @@ for i=1:numel(varargin)
         use_backup = 1;
     end
 end
+status = 0;
 if skip_pp
     new_file_path = model_path;
-    status = 0;
     return;
 end
 %% Creat the new model name
@@ -52,15 +55,33 @@ if SLXUtils.isAlreadyPP(model_path)
     already_pp = true;
     new_model_base = model;
     new_file_path = model_path;
+    save_system(model);
 else
     new_model_base = strcat(model,'_PP');
     new_file_path = fullfile(model_parent,strcat(new_model_base, ext));
+    %close it without saving it
+    close_system(new_model_base,0);
 end
 
-%close it without saving it
-close_system(new_model_base,0);
-if ~already_pp; delete(new_file_path); end
 
+if ~already_pp; delete(new_file_path); end
+%% check if there is no need for pre-processing if the model was not changed from the last pp.
+if already_pp
+    if isKey(pp_datenum_map, new_file_path)
+        FileInfo = dir(new_file_path);
+        pp_datenum = pp_datenum_map(new_file_path);
+        [Y, M, D, H, MN, S] = datevec(FileInfo.datenum);
+        [Y2, M2, D2, H2, MN2, S2] = datevec(pp_datenum);
+        % we ignore seconds
+        if Y <= Y2 && M <= M2 && D <= D2 && H <= H2 && MN <= MN2 && abs(S - S2) <= 15
+            display_msg('Skipping pre-processing step. No modifications have been made to the model.', MsgType.RESULT, 'PP', '');
+            if ~nodisplay
+                open(new_file_path);
+            end
+            return;
+        end
+    end
+end
 %% If generation of verification template for each block pre-processed was 
 % asked
 addpath(model_parent);
@@ -100,7 +121,8 @@ for i=1:numel(ordered_pp_functions)
     [dirname, func_name, ~] = fileparts(ordered_pp_functions{i});
     cd(dirname);
     if use_backup
-        save_ppmodel(new_model_base, new_file_path);
+        save_system(new_model_base)
+        %save_ppmodel(new_model_base, new_file_path);
     end
     fh = str2func(func_name);
     try
@@ -135,6 +157,11 @@ for i=1:numel(ordered_pp_functions)
 end
 % warning on
 cd(oldDir);
+save_system(new_model_base)
+% save_ppmodel(new_model_base, new_file_path)
+if ~nodisplay
+    open(new_file_path);
+end
 %% Make sure model compile
 status = CompileModelCheck_pp( new_model_base );
 if status
@@ -143,16 +170,14 @@ end
 % Exporting the model to the mdl CoCoSim compatible file format
 
 display_msg('Saving simplified model', MsgType.INFO, 'PP', '');
-display_msg(['Simplified model path: ' new_file_path], MsgType.INFO, 'PP', '');
 
 
-save_ppmodel(new_model_base, new_file_path)
-if ~nodisplay
-    open(new_file_path);
-end
+
+
     
-
+display_msg(['Simplified model path: ' new_file_path], MsgType.INFO, 'PP', '');
 display_msg('Done with the simplification', MsgType.INFO, 'PP', '');
+pp_datenum_map(new_file_path) = now;
 end
 
 %%

@@ -1,4 +1,5 @@
-function [nom_lustre_file, xml_trace, status, unsupportedOptions, abstractedBlocks]= ToLustre(model_path, const_files, backend, varargin)
+function [nom_lustre_file, xml_trace, status, unsupportedOptions, abstractedBlocks, pp_model_full_path]= ...
+    ToLustre(model_path, const_files, backend, varargin)
 %lustre_multiclocks_compiler translate Simulink models to Lustre. It is based on
 %article :
 %INPUTS:
@@ -33,14 +34,14 @@ xml_trace = [];
 %% Get start time
 t_start = tic;
 
-[unsupportedOptions, status, model_full_path, ir_struct, output_dir, abstractedBlocks]= ...
+[unsupportedOptions, status, pp_model_full_path, ir_struct, output_dir, abstractedBlocks]= ...
     ToLustreUnsupportedBlocks(model_path, const_files, backend, varargin);
 
 if status || ~isempty(unsupportedOptions)
     return;
 end
 
-[~, file_name, ~] = fileparts(model_full_path);
+[~, file_name, ~] = fileparts(pp_model_full_path);
 %% Definition of the generated output files names
 nom_lustre_file = fullfile(output_dir, strcat(file_name, '.lus'));
 
@@ -52,7 +53,7 @@ create_file_meta_info(nom_lustre_file);
 display_msg('Start tracebility', MsgType.INFO, 'lustre_multiclocks_compiler', '');
 xml_trace_file_name = fullfile(output_dir, strcat(file_name, '.toLustre.trace.xml'));
 json_trace_file_name = fullfile(output_dir, strcat(file_name, '_mapping.json'));
-xml_trace = SLX2Lus_Trace(model_full_path,...
+xml_trace = SLX2Lus_Trace(pp_model_full_path,...
     xml_trace_file_name, json_trace_file_name);
 
 

@@ -12,7 +12,7 @@ classdef Assertion_To_Lustre < Block_To_Lustre
     
     methods
         function  write_code(obj, parent, blk, varargin)
-            if isequal(blk.enabled, 'off')
+            if isequal(blk.Enabled, 'off')
                 return;
             end
             inputs{1} = SLX2LusUtils.getBlockInputsNames(parent, blk, 1);
