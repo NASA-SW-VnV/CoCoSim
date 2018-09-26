@@ -94,13 +94,13 @@ classdef Sum_To_Lustre < Block_To_Lustre
                     n = sqrt(numel(outputs));
                     if n > 7
                         display_msg(...
-                            sprintf('Option Matrix(*) with divid is not supported in block %s', ...
+                            sprintf('Option Matrix(*) with is not supported for more than 7 dimensions in block %s', ...
                             blk.Origin_path), ...
                             MsgType.ERROR, 'Product_To_Lustre', '');
                         return;
                     elseif n > 4 && ~BackendType.isKIND2(backend)
                          display_msg(...
-                            sprintf('Option Matrix(*) with divid is not supported in block %s for Matrix dimension > 4', ...
+                            sprintf('Option Matrix(*) with division (inverse) is not supported for Matrix dimension > 4 in block %s', ...
                             blk.Origin_path), ...
                             MsgType.ERROR, 'Product_To_Lustre', '');
                         return;
@@ -126,9 +126,7 @@ classdef Sum_To_Lustre < Block_To_Lustre
                 % delete spacer character
                 exp = strrep(exp, '|', '');
             end
-            
-            
-            
+                    
             if numel(exp) == 1 && numel(inputs) == 1
                 % one input and 1 expression
                 
@@ -138,14 +136,7 @@ classdef Sum_To_Lustre < Block_To_Lustre
                 if ~isSumBlock && strcmp(blk.Multiplication, 'Matrix(*)')
                     %This is a matrix multiplication, only applies to
                     %Product block
-                    if  contains(exp, '/')
-                        display_msg(...
-                            sprintf('Option Matrix(*) with divid is not supported in block %s', ...
-                            blk.Origin_path), ...
-                            MsgType.ERROR, 'Sum_To_Lustre', '');
-                        return;
-                    end
-                    [codes, AdditionalVars] = Product_To_Lustre.matrix_multiply(blk, inputs, outputs, zero, LusOutputDataTypeStr, conv_format );
+                    [codes, AdditionalVars] = Product_To_Lustre.matrix_multiply(obj, exp, blk, inputs, outputs, zero, LusOutputDataTypeStr, conv_format );
                 else
                     % element wise operations / Sum
                     % If it is integer division, we need to call the
