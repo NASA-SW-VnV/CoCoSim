@@ -111,15 +111,15 @@ classdef BUtils
             end
         end
         
-        function res = isLastModified(file1, file2)
+        function res = isLastModified(old_file1, new_file2)
             % This function return true if file2 is new comparing to file1
             % This means file2 has been modified or created after file1
-            if ~exist(file2, 'file') || ~exist(file1, 'file')
+            if ~exist(new_file2, 'file') || ~exist(old_file1, 'file')
                 res = false;
                 return;
             end
-            f1_info = dir(file1);
-            f2_info = dir(file2);
+            f1_info = dir(old_file1);
+            f2_info = dir(new_file2);
             if isempty(f1_info) || isempty(f2_info)
                 res = false;
                 return;

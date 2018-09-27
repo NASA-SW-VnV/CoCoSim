@@ -44,10 +44,10 @@ unsupportedOptions = {};
 t_start = tic;
 
 %% Get Simulink model full path
-if (exist(model_path, 'file') == 2 || exist(model_path, 'file') == 4)
-    model_full_path = model_path;
-else
+if exist(model_path, 'file') == 4
     model_full_path = which(model_path);
+else
+    model_full_path = model_path;
 end
 if ~exist(model_full_path, 'file')
     status = 1;

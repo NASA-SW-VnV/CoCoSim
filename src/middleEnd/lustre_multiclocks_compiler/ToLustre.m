@@ -27,10 +27,39 @@ end
 if ~exist('backend', 'var') || isempty(backend)
     backend = BackendType.LUSTREC; 
 end
-
 %% initialize outputs
 nom_lustre_file = '';
 xml_trace = [];
+%% Get Simulink model full path
+if exist(model_path, 'file') == 4
+    model_path = which(model_path);
+end
+if ~exist(model_path, 'file')
+    error('Model "%s" Does not exist', model_path);
+end
+%% skip translation if no modification has been made to the model.
+persistent ToLustre_datenum_map;
+if isempty(ToLustre_datenum_map)
+    ToLustre_datenum_map = containers.Map('KeyType', 'char', 'ValueType', 'char');
+end
+if isKey(ToLustre_datenum_map, model_path)
+    nom_lustre_file = ToLustre_datenum_map(model_path);
+    if BUtils.isLastModified(model_path, nom_lustre_file)
+        mat_file = regexprep(nom_lustre_file, '.lus$', '.mat');
+        if exist(mat_file, 'file')
+            M = load(mat_file);
+            xml_trace = M.xml_trace;
+            status = M.status;
+            unsupportedOptions = M.unsupportedOptions;
+            abstractedBlocks = M.abstractedBlocks;
+            pp_model_full_path = M.pp_model_full_path;
+            display_msg('Skipping Lustre generation step. Using previously generated code, no modifications have been made to the model.',...
+                MsgType.RESULT, 'ToLustre', '');
+            return;
+        end
+    end
+end
+
 %% Get start time
 t_start = tic;
 
@@ -43,8 +72,8 @@ end
 
 [~, file_name, ~] = fileparts(pp_model_full_path);
 %% Definition of the generated output files names
-nom_lustre_file = fullfile(output_dir, strcat(file_name, '.lus'));
-
+nom_lustre_file = fullfile(output_dir, strcat(file_name,'.', backend, '.lus'));
+mat_file = fullfile(output_dir, strcat(file_name,'.', backend, '.mat'));
 
 %% Create Meta informations
 create_file_meta_info(nom_lustre_file);
@@ -114,6 +143,9 @@ display_msg(msg, MsgType.RESULT, 'lustre_multiclocks_compiler', '');
 msg = sprintf('Lustre generation finished in %f seconds', t_finish);
 display_msg(msg, MsgType.RESULT, 'lustre_multiclocks_compiler', '');
 
+%% save results in mat file.
+save(mat_file, 'xml_trace', 'status', 'unsupportedOptions', 'abstractedBlocks', 'pp_model_full_path');
+ToLustre_datenum_map(model_path) = nom_lustre_file;
 end
 
 %%
