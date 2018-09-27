@@ -11,7 +11,7 @@ classdef Assertion_To_Lustre < Block_To_Lustre
     end
     
     methods
-        function  write_code(obj, parent, blk, varargin)
+        function  write_code(obj, parent, blk, xml_trace, varargin)
             if isequal(blk.Enabled, 'off')
                 return;
             end
@@ -31,6 +31,8 @@ classdef Assertion_To_Lustre < Block_To_Lustre
             blk_name = SLX2LusUtils.node_name_format(blk);
             obj.addCode(LocalPropertyExpr( blk_name, ...
                 BinaryExpr.BinaryMultiArgs(BinaryExpr.AND, inputs{1})));
+            xml_trace.add_Property(blk.Origin_path, '', blk_name, 1, ...
+                'localProperty')
         end
         %%
         function options = getUnsupportedOptions(obj, varargin)
