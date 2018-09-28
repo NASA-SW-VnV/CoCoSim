@@ -40,7 +40,10 @@ classdef DesignVerifierProofObjective_To_Lustre < Block_To_Lustre
                     blk, inputs, inport_lus_dt);
                 if ~isempty(code)
                     blk_name = SLX2LusUtils.node_name_format(blk);
+                    parent_name = SLX2LusUtils.node_name_format(parent);
                     obj.addCode(LocalPropertyExpr( blk_name, code ));
+                    xml_trace.add_Property(blk.Origin_path, parent_name, blk_name, 1, ...
+                        'localProperty')
                 end
             catch me
                 display_msg(me.getReport(),  MsgType.DEBUG, ...

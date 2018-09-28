@@ -29,9 +29,10 @@ classdef Assertion_To_Lustre < Block_To_Lustre
                 end
             end
             blk_name = SLX2LusUtils.node_name_format(blk);
+            parent_name = SLX2LusUtils.node_name_format(parent);
             obj.addCode(LocalPropertyExpr( blk_name, ...
                 BinaryExpr.BinaryMultiArgs(BinaryExpr.AND, inputs{1})));
-            xml_trace.add_Property(blk.Origin_path, '', blk_name, 1, ...
+            xml_trace.add_Property(blk.Origin_path, parent_name, blk_name, 1, ...
                 'localProperty')
         end
         %%
