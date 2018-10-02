@@ -18,7 +18,9 @@ classdef RawLustreCode < LustreAst
         function new_obj = deepCopy(obj)
             new_obj = RawLustreCode(obj.code);
         end
-        
+        function new_obj = changeArrowExp(obj, ~)
+            new_obj = obj;
+        end
         
         
         function code = print(obj, ~)

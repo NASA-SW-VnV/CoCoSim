@@ -20,6 +20,11 @@ classdef LocalPropertyExpr < LustreExpr
             new_obj = LocalPropertyExpr(obj.id, ...
                 obj.exp.deepCopy());
         end
+        
+        function new_obj = changeArrowExp(obj, ~)
+            new_obj = obj;
+        end
+        
         function code = print(obj, backend)
             if BackendType.isPRELUDE(backend)
                 code = obj.print_prelude();

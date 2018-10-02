@@ -23,6 +23,9 @@ classdef VarIdExpr < LustreExpr
         end
         
         
+        function new_obj = changeArrowExp(obj, ~)
+            new_obj = obj;
+        end
         
         function code = print(obj, backend)
             %TODO: check if LUSTREC syntax is OK for the other backends.

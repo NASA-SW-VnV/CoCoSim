@@ -19,6 +19,10 @@ classdef IntExpr < LustreExpr
             new_obj = IntExpr(obj.value);
         end
         
+        function new_obj = changeArrowExp(obj, ~)
+            new_obj = obj;
+        end
+        
         function code = print(obj, ~)
             %TODO: check if LUSTREC syntax is OK for the other backends.
             code = obj.print_lustrec();

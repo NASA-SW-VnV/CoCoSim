@@ -34,6 +34,7 @@ classdef SubSystem_To_Lustre < Block_To_Lustre
                 SubSystem_To_Lustre.hasTriggerPort(blk);
             blk_name = SLX2LusUtils.node_name_format(blk);
             [isActionSS, ~] = SubSystem_To_Lustre.hasActionPort(blk);
+            [isForIteraorSS, ~] = SubSystem_To_Lustre.hasForIterator(blk);
             if isEnabledSubsystem || isTriggered || isActionSS
                 [codes, node_name, inputs, EnableCondVar] = ...
                     SubSystem_To_Lustre.conditionallyExecutedSSCall(parent, blk, ...
@@ -42,6 +43,8 @@ classdef SubSystem_To_Lustre < Block_To_Lustre
                     isTriggered, TriggerShowOutputPortIsOn, TriggerType, TriggerDT, ...
                     isActionSS);
                     obj.addVariable(EnableCondVar);
+            elseif isForIteraorSS
+                node_name = strcat(node_name, '_iterator');
             end
             
             %% add time input and clocks
@@ -213,6 +216,21 @@ classdef SubSystem_To_Lustre < Block_To_Lustre
                 ShowOutputPortIsOn = 0;
                 TriggerType = '';
                 TriggerDT = '';
+            end
+        end
+        function [b, StatesWhenStarting] = hasForIterator(blk)
+            fields = fieldnames(blk.Content);
+            fields = ...
+                fields(...
+                cellfun(@(x) isfield(blk.Content.(x),'BlockType'), fields));
+            forIteratorFields = fields(...
+                cellfun(@(x) strcmp(blk.Content.(x).BlockType,'ForIterator'), fields));
+            b = ~isempty(forIteratorFields);
+            
+            if b
+                StatesWhenStarting = blk.Content.(forIteratorFields{1}).ResetStates;
+            else
+                StatesWhenStarting = '';
             end
         end
         %%

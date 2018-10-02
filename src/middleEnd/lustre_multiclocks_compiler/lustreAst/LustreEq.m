@@ -34,6 +34,16 @@ classdef LustreEq < LustreAst
             end
             new_obj = LustreEq(new_lhs, new_rhs);
         end
+        
+        function new_obj = changeArrowExp(obj, cond)
+            if iscell(obj.rhs)
+                new_rhs = cellfun(@(x) x.changeArrowExp(cond), obj.rhs, 'UniformOutput', 0);
+            else
+                new_rhs = obj.rhs.changeArrowExp(cond);
+            end
+            new_obj = LustreEq(obj.lhs, new_rhs);
+        end
+        
         function code = print(obj, backend)
             %TODO: check if LUSTREC syntax is OK for the other backends.
             code = obj.print_lustrec(backend);

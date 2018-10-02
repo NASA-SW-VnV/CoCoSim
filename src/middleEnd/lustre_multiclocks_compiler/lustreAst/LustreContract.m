@@ -69,6 +69,10 @@ classdef LustreContract < LustreAst
                 obj.islocalContract);
         end
         
+        function new_obj = changeArrowExp(obj, ~)
+            new_obj = obj;
+        end
+        
         function setBody(obj, localEqs)
             obj.localEqs = localEqs;
         end

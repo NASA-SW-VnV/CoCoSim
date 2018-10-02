@@ -75,7 +75,17 @@ classdef LustreNode < LustreAst
                 new_outputs, new_localContract, new_localVars, new_bodyEqs, ...
                 obj.isMain);
         end
-        
+        function new_obj = changeArrowExp(obj, cond)
+            if iscell(obj.bodyEqs)
+                new_bodyEqs = cellfun(@(x) x.changeArrowExp(cond), obj.bodyEqs, 'UniformOutput', 0);
+            else
+                new_bodyEqs = obj.bodyEqs.changeArrowExp(cond);
+            end
+            new_obj = LustreNode(obj.metaInfo, obj.name,...
+                obj.inputs, ...
+                obj.outputs, obj.localContract, obj.localVars, new_bodyEqs, ...
+                obj.isMain);
+        end
         function setMetaInfo(obj, metaInfo)
             obj.metaInfo = metaInfo;
         end

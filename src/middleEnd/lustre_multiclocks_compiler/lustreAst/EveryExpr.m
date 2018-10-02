@@ -18,10 +18,25 @@ classdef EveryExpr < LustreExpr
             obj.nodeArgs = nodeArgs;
             obj.cond = cond;
         end
+        
         function new_obj = deepCopy(obj)
-            %TODO: deepCopy nodeArgs
-            new_obj = ContractModeExpr(obj.nodeName, ...
-                obj.nodeArgs, obj.cond.deepCopy());
+            if iscell(obj.nodeArgs)
+                new_args = cellfun(@(x) x.deepCopy(), obj.nodeArgs, 'UniformOutput', 0);
+            else
+                new_args = obj.nodeArgs.deepCopy();
+            end
+            new_obj = EveryExpr(obj.nodeName, ...
+                new_args, obj.cond.deepCopy());
+        end
+        
+        function new_obj = changeArrowExp(obj, cond)
+            if iscell(obj.nodeArgs)
+                new_args = cellfun(@(x) x.changeArrowExp(cond), obj.nodeArgs, 'UniformOutput', 0);
+            else
+                new_args = obj.nodeArgs.changeArrowExp(cond);
+            end
+            new_obj = EveryExpr(obj.nodeName, ...
+                new_args, obj.cond.changeArrowExp(cond));
         end
         
         function code = print(obj, backend)

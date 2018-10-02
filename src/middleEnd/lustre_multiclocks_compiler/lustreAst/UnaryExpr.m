@@ -40,6 +40,14 @@ classdef UnaryExpr < LustreExpr
             new_obj = UnaryExpr(obj.op, new_expr, obj.withPar);
         end
         
+        function new_obj = changeArrowExp(obj, cond)
+            if iscell(obj.expr)
+                new_expr = cellfun(@(x) x.changeArrowExp(cond), obj.expr, 'UniformOutput', 0);
+            else
+                new_expr = obj.expr.changeArrowExp(cond);
+            end
+            new_obj = UnaryExpr(obj.op, new_expr, obj.withPar);
+        end
         
         function code = print(obj, backend)
             %TODO: check if LUSTREC syntax is OK for the other backends.

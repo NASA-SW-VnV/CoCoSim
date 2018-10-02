@@ -64,9 +64,10 @@ classdef SS_To_LustreNode
             
             
             %% Body code
+            isForIteraorSS = SubSystem_To_Lustre.hasForIterator(ss_ir);
             [body, variables, external_nodes, external_libraries] = ...
                 SS_To_LustreNode.write_body(ss_ir, main_sampleTime, ...
-                backend, xml_trace);
+                backend, xml_trace, isForIteraorSS);
             if is_main_node
                 if ~ismember(SLX2LusUtils.timeStepStr(), ...
                         cellfun(@(x) {x.getId()}, node_outputs_withoutDT_cell, 'UniformOutput', 1))
@@ -154,6 +155,16 @@ classdef SS_To_LustreNode
                     variables, ...
                     body, ...
                     is_main_node);
+                if isForIteraorSS
+                    % this node will be called many times using many
+                    % instances in the same time step. We need to not have
+                    % arrow in the node as each instance of the node has
+                    % its own memory, therefor different is_init values.
+                    main_node = main_node.changeArrowExp(...
+                        BinaryExpr(BinaryExpr.EQ, ...
+                                    VarIdExpr(SLX2LusUtils.timeStepStr()),...
+                                    RealExpr('0.0')));
+                end
             end
             
             if  isConditionalSS
@@ -167,7 +178,8 @@ classdef SS_To_LustreNode
         
         %% Go over SS Content
         function [body, variables, external_nodes, external_libraries] =...
-                write_body(subsys, main_sampleTime, backend, xml_trace)
+                write_body(subsys, main_sampleTime, backend, xml_trace,...
+                isForIteraorSS)
             variables = {};
             body = {};
             external_nodes = {};
@@ -193,19 +205,34 @@ classdef SS_To_LustreNode
                         MsgType.ERROR, 'write_body', '');
                     display_msg(me.getReport(), MsgType.DEBUG, 'write_body', '');
                 end
+                code = b.getCode();
+                if isForIteraorSS
+                    code = SS_To_LustreNode.forIteratorPP(code);
+                end
                     
-                    
-                if iscell(b.getCode())
-                    body = [body, b.getCode()];
+                if iscell(code)
+                    body = [body, code];
                 else
-                    body{end+1} = b.getCode();
+                    body{end+1} = code;
                 end
                 variables = [variables, b.getVariables()];
                 external_nodes = [external_nodes, b.getExternalNodes()];
                 external_libraries = [external_libraries, b.getExternalLibraries()];
             end
         end
-        
+        %%
+        function new_code = forIteratorPP(code)
+            if iscell(code)
+                new_code = code;
+            else
+                new_code{1} = code;
+            end
+            for i=1:numel(new_code)
+               if isa(new_code{i}, 'LustreEq')
+                   
+               end
+            end
+        end
         %% creat import contracts body
         function imported_contracts = getImportedContracts(...
                 parent_ir, ss_ir, main_sampleTime, node_inputs_withoutDT, node_outputs_withoutDT)

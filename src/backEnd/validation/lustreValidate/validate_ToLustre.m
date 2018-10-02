@@ -38,8 +38,10 @@ if nargin < 3
 end
 if show_model
     open(model_full_path);
-else
+elseif iscell(options)
     options{end+1} = 'nodisplay';
+else
+    options = {'nodisplay'};
 end
 
 [model_path, file_name, ext] = fileparts(char(model_full_path));

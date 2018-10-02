@@ -18,10 +18,26 @@ classdef ContractImportExpr < LustreExpr
             obj.inputs = inputs;
             obj.outputs = outputs;
         end
+        
         function new_obj = deepCopy(obj)
-            %TODO: deepCopy inputs and outputs
+            if iscell(obj.inputs)
+                new_inputs = cellfun(@(x) x.deepCopy(), obj.inputs, 'UniformOutput', 0);
+            else
+                new_inputs = obj.inputs.deepCopy();
+            end
+            
+            if iscell(obj.outputs)
+                new_outputs = cellfun(@(x) x.deepCopy(), obj.outputs, 'UniformOutput', 0);
+            else
+                new_outputs = obj.outputs.deepCopy();
+            end
+            
             new_obj = ContractImportExpr(obj.name, ...
-                obj.inputs, obj.outputs);
+                new_inputs, new_outputs);
+        end
+        
+        function new_obj = changeArrowExp(obj, ~)
+            new_obj = obj;
         end
         
         function code = print(obj, backend)

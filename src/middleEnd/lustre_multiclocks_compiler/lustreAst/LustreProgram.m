@@ -33,6 +33,10 @@ classdef LustreProgram < LustreAst
             new_obj = LustreProgram(obj.opens, new_nodes, new_contracts);
         end
         
+        function new_obj = changeArrowExp(obj, ~)
+            new_obj = obj;
+        end
+        
         function code = print(obj, backend)
             %TODO: check if LUSTREC syntax is OK for the other backends.
             code = obj.print_lustrec(backend);

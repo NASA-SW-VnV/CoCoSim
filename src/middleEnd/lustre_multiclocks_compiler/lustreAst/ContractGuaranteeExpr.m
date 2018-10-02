@@ -16,10 +16,16 @@ classdef ContractGuaranteeExpr < LustreExpr
             obj.id = id;
             obj.exp = exp;
         end
+        
         function new_obj = deepCopy(obj)
             new_obj = ContractGuaranteeExpr(obj.id, ...
                 obj.exp.deepCopy());
         end
+        
+        function new_obj = changeArrowExp(obj, ~)
+            new_obj = obj;
+        end
+        
         function code = print(obj, backend)
             if BackendType.isKIND2(backend)
                 code = obj.print_kind2(backend);

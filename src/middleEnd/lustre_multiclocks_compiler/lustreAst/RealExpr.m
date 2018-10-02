@@ -18,7 +18,9 @@ classdef RealExpr < LustreExpr
         function new_obj = deepCopy(obj)
             new_obj = RealExpr(obj.value);
         end
-        
+        function new_obj = changeArrowExp(obj, ~)
+            new_obj = obj;
+        end
         
         function code = print(obj, ~)
             %TODO: check if LUSTREC syntax is OK for the other backends.

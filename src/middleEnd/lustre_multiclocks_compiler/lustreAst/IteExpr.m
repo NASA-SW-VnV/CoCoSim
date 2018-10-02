@@ -32,6 +32,13 @@ classdef IteExpr < LustreExpr
                 obj.OneLine);
         end
         
+        function new_obj = changeArrowExp(obj, cond)
+            new_obj = IteExpr(obj.condition.changeArrowExp(cond),...
+                obj.thenExpr.changeArrowExp(cond),...
+                obj.ElseExpr.changeArrowExp(cond),...
+                obj.OneLine);
+        end
+        
         function code = print(obj, backend)
             %TODO: check if LUSTREC syntax is OK for the other backends.
             code = obj.print_lustrec(backend);

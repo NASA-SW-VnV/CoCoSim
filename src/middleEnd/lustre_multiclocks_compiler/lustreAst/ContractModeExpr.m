@@ -18,11 +18,27 @@ classdef ContractModeExpr < LustreExpr
             obj.requires = requires;
             obj.ensures = ensures;
         end
+        
         function new_obj = deepCopy(obj)
-            %TODO: deepCopy requires and ensures
-            new_obj = ContractModeExpr(obj.name, ...
-                obj.requires, obj.ensures);
+            if iscell(obj.requires)
+                new_requires = cellfun(@(x) x.deepCopy(), obj.requires, ...
+                    'UniformOutput', 0);
+            else
+                new_requires = obj.requires.deepCopy();
+            end
+            if iscell(obj.ensures)
+                new_ensures = cellfun(@(x) x.deepCopy(), obj.ensures, ...
+                    'UniformOutput', 0);
+            else
+                new_ensures = obj.ensures.deepCopy();
+            end
+            new_obj = ContractModeExpr(obj.name, new_requires, new_ensures);
         end
+        
+        function new_obj = changeArrowExp(obj, ~)
+            new_obj = obj;
+        end
+        
         function code = print(obj, backend)
             if BackendType.isKIND2(backend)
                 code = obj.print_kind2(backend);

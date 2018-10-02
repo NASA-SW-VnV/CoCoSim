@@ -25,7 +25,14 @@ classdef MergeExpr < LustreExpr
             end
             new_obj = MergeExpr(obj.clock, new_exprs);
         end
-        
+        function new_obj = changeArrowExp(obj, cond)
+            if iscell(obj.exprs)
+                new_exprs = cellfun(@(x) x.changeArrowExp(cond), obj.exprs, 'UniformOutput', 0);
+            else
+                new_exprs = obj.exprs.changeArrowExp(cond);
+            end
+            new_obj = MergeExpr(obj.clock, new_exprs);
+        end
         function code = print(obj, backend)
             %TODO: check if LUSTREC syntax is OK for the other backends.
             code = obj.print_lustrec(backend);

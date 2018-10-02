@@ -24,7 +24,9 @@ classdef LustreVar < LustreAst
         function new_obj = deepCopy(obj)
             new_obj = LustreVar(obj.name, obj.type);
         end
-        
+        function new_obj = changeArrowExp(obj, ~)
+            new_obj = obj;
+        end
         
         function id = getId(obj)
             id = obj.name;

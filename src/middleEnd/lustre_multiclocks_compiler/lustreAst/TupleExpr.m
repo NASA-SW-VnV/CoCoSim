@@ -31,6 +31,15 @@ classdef TupleExpr < LustreExpr
             new_obj = TupleExpr(new_args);
         end
          
+        function new_obj = changeArrowExp(obj, cond)
+            if iscell(obj.args)
+                new_args = cellfun(@(x) x.changeArrowExp(cond), obj.args, 'UniformOutput', 0);
+            else
+                new_args = obj.args.changeArrowExp(cond);
+            end
+            new_obj = TupleExpr(new_args);
+        end
+        
         function code = print(obj, backend)
             %TODO: check if LUSTREC syntax is OK for the other backends.
             code = obj.print_lustrec(backend);

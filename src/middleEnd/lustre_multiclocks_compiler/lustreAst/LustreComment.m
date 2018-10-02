@@ -21,6 +21,9 @@ classdef LustreComment < LustreExpr
             new_obj = LustreComment(obj.text,...
                 obj.isMultiLine);
         end
+        function new_obj = changeArrowExp(obj, ~)
+            new_obj = obj;
+        end
         
         function code = print(obj, backend)
             code = obj.print_lustrec(backend);

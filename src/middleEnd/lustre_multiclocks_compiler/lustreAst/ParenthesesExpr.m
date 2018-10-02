@@ -27,6 +27,14 @@ classdef ParenthesesExpr < LustreExpr
             new_obj = ParenthesesExpr(obj.nodeName, new_expr);
         end
          
+        function new_obj = changeArrowExp(obj, cond)
+            if iscell(obj.expr)
+                new_expr = cellfun(@(x) x.changeArrowExp(cond), obj.expr, 'UniformOutput', 0);
+            else
+                new_expr = obj.expr.changeArrowExp(cond);
+            end
+            new_obj = ParenthesesExpr(obj.nodeName, new_expr);
+        end
         
         function code = print(obj, backend)
             %TODO: check if LUSTREC syntax is OK for the other backends.
