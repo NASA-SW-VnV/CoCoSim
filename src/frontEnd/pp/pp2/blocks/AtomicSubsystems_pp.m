@@ -1,4 +1,4 @@
-function AtomicSubsystems_pp( new_model_base )
+function [status, errors_msg] = AtomicSubsystems_pp( new_model_base )
 %ATOMIC_PROCESS change all blocks to be atomic
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Copyright (c) 2017 United States Government as represented by the
@@ -7,6 +7,9 @@ function AtomicSubsystems_pp( new_model_base )
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Configure any subsystem to be treated as Atomic
+status = 0;
+errors_msg = {}; 
+
 ssys_list = find_system(new_model_base,'LookUnderMasks', 'all',...
     'BlockType','SubSystem');
 if not(isempty(ssys_list))
@@ -18,6 +21,9 @@ if not(isempty(ssys_list))
             set_param(ssys_list{i},'MinAlgLoopOccurrences','off');
             
         catch
+            status = 1;
+            errors_msg{end + 1} = sprintf('AtomicSubsystems pre-process has failed for block %s', ssys_list{i});
+            continue;            
         end
     end
     display_msg('Done\n\n', MsgType.INFO, 'PP', '');

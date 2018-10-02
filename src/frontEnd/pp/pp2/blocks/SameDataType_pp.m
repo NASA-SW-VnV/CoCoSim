@@ -1,4 +1,4 @@
-function SameDataType_pp( new_model_base )
+function [status, errors_msg] = SameDataType_pp( new_model_base )
 %sameDT_process requires all inputs and outputs to have the same data type.
 %Blocks: Logical operators
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -7,12 +7,21 @@ function SameDataType_pp( new_model_base )
 % All Rights Reserved.
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+status = 0;
+errors_msg = {};
+
 ssys_list = find_system(new_model_base,'LookUnderMasks','all', 'BlockType','Logic');
 if not(isempty(ssys_list))
     display_msg('Processing Logical Operators to ensure inputs have the same DatType'...
         , MsgType.INFO, 'PP', '');
     for i=1:length(ssys_list)
+        try
         set_param(ssys_list{i},'AllPortsSameDT','on');
+        catch
+            status = 1;
+            errors_msg{end + 1} = sprintf('SameDataType pre-process has failed for block %s', ssys_list{i});
+            continue;
+        end        
     end
 end
 
@@ -41,7 +50,13 @@ if not(isempty(ssys_list))
     display_msg('Processing Logical Operators to ensure inputs have the same DatType'...
         , MsgType.INFO, 'PP', '');
     for i=1:length(ssys_list)
+        try
         set_param(ssys_list{i},'InputSameDT','on');
+        catch
+            status = 1;
+            errors_msg{end + 1} = sprintf('SameDataType pre-process has failed for block %s', ssys_list{i});
+            continue;
+        end          
     end
 end
 

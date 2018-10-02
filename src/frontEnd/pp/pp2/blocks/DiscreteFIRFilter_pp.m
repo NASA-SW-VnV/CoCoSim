@@ -9,6 +9,9 @@ function [] = DiscreteFIRFilter_pp(model)
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>, Trinh, Khanh V <khanh.v.trinh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Processing Gain blocks
+status = 0;
+errors_msg = {};
+
 dFir_list = find_system(model, ...
     'LookUnderMasks', 'all', 'BlockType','DiscreteFir');
 if not(isempty(dFir_list))
@@ -19,56 +22,63 @@ if not(isempty(dFir_list))
     
     %% pre-processing blocks
     for i=1:length(dFir_list)
-        if isempty(U_dims{i}) 
+        try
+            if isempty(U_dims{i})
+                continue;
+            end
+            display_msg(dFir_list{i}, MsgType.INFO, ...
+                'DiscreteFIRFilter_pp', '');
+            
+            Filter_structure = get_param(dFir_list{i}, 'FilterStructure');
+            if strcmp(Filter_structure, 'Direct form symmetric')
+                display_msg(sprintf('Filter_structure %s in block %s is not supported',...
+                    Filter_structure, blk), ...
+                    MsgType.ERROR, 'DiscreteFIRFilter_pp', '');
+                continue;
+            end
+            
+            Filter_structure = get_param(dFir_list{i}, 'FilterStructure');
+            if strcmp(Filter_structure, 'Direct form antisymmetric')
+                display_msg(sprintf('Filter_structure %s in block %s is not supported',...
+                    Filter_structure, blk), ...
+                    MsgType.ERROR, 'DiscreteFIRFilter_pp', '');
+                continue;
+            end
+            
+            Filter_structure = get_param(dFir_list{i}, 'FilterStructure');
+            if strcmp(Filter_structure, 'Direct form transposed')
+                display_msg(sprintf('Filter_structure %s in block %s is not supported',...
+                    Filter_structure, blk), ...
+                    MsgType.ERROR, 'DiscreteFIRFilter_pp', '');
+                continue;
+            end
+            
+            Filter_structure = get_param(dFir_list{i}, 'FilterStructure');
+            if strcmp(Filter_structure, 'Lattice MA')
+                display_msg(sprintf('Filter_structure %s in block %s is not supported',...
+                    Filter_structure, blk), ...
+                    MsgType.ERROR, 'DiscreteFIRFilter_pp', '');
+                continue;
+            end
+            
+            % Obtaining z-expression parameters
+            % get numerator
+            [num, status] = PPUtils.getTfNumerator(model,dFir_list{i}, 'Coefficients','DiscreteFIRFilter_pp');
+            if status
+                continue;
+            end
+            
+            % Computing state space representation
+            denum = zeros(1,length(num));
+            denum(1) = 1;
+            
+            PPUtils.replace_DTF_block(dFir_list{i}, U_dims{i},num,denum);
+        catch
+            status = 1;
+            errors_msg{end + 1} = sprintf('DiscreteFIRFilter pre-process has failed for block %s', dFir_list{i});
             continue;
         end
-        display_msg(dFir_list{i}, MsgType.INFO, ...
-            'DiscreteFIRFilter_pp', '');
         
-        Filter_structure = get_param(dFir_list{i}, 'FilterStructure');
-        if strcmp(Filter_structure, 'Direct form symmetric')
-            display_msg(sprintf('Filter_structure %s in block %s is not supported',...
-                Filter_structure, blk), ...
-                MsgType.ERROR, 'DiscreteFIRFilter_pp', '');
-            continue;
-        end
-        
-        Filter_structure = get_param(dFir_list{i}, 'FilterStructure');
-        if strcmp(Filter_structure, 'Direct form antisymmetric')
-            display_msg(sprintf('Filter_structure %s in block %s is not supported',...
-                Filter_structure, blk), ...
-                MsgType.ERROR, 'DiscreteFIRFilter_pp', '');
-            continue;
-        end   
-        
-        Filter_structure = get_param(dFir_list{i}, 'FilterStructure');
-        if strcmp(Filter_structure, 'Direct form transposed')
-            display_msg(sprintf('Filter_structure %s in block %s is not supported',...
-                Filter_structure, blk), ...
-                MsgType.ERROR, 'DiscreteFIRFilter_pp', '');
-            continue;
-        end
-        
-        Filter_structure = get_param(dFir_list{i}, 'FilterStructure');
-        if strcmp(Filter_structure, 'Lattice MA')
-            display_msg(sprintf('Filter_structure %s in block %s is not supported',...
-                Filter_structure, blk), ...
-                MsgType.ERROR, 'DiscreteFIRFilter_pp', '');
-            continue;
-        end         
-
-        % Obtaining z-expression parameters
-        % get numerator
-        [num, status] = PPUtils.getTfNumerator(model,dFir_list{i}, 'Coefficients','DiscreteFIRFilter_pp');
-        if status
-            continue;
-        end
-
-        % Computing state space representation
-        denum = zeros(1,length(num));
-        denum(1) = 1;
-       
-        PPUtils.replace_DTF_block(dFir_list{i}, U_dims{i},num,denum);
     end
     display_msg('Done\n\n', MsgType.INFO, 'DiscreteFIRFilter_pp', '');
 end

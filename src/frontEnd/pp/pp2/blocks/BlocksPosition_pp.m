@@ -1,4 +1,4 @@
-function [  ] = BlocksPosition_pp( model, depth )
+function [status, errors_msg] = BlocksPosition_pp( model, depth )
 %BLOCKS_POSITION_PROCES try t change blocks position for graphical purpose.
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -7,6 +7,9 @@ function [  ] = BlocksPosition_pp( model, depth )
 % All Rights Reserved.
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+status = 0;
+errors_msg = {};
+
 clear organize
 limitedDepth = true;
 if ~exist('depth', 'var')
@@ -23,6 +26,8 @@ for i=2:length(allBlocks)
     try
         DstBlkH = get_param(allBlocks{i}, 'PortHandles');
     catch
+        status = 1;
+        errors_msg{end + 1} = sprintf('BlocksPosition pre-process has failed for block %s', allBlocks{i});        
         continue;
     end
     if isempty(DstBlkH.Outport)

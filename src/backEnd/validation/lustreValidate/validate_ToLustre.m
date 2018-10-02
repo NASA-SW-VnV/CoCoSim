@@ -49,16 +49,17 @@ try
     f_msg = sprintf('Compiling model "%s" to Lustre\n',file_name);
     display_msg(f_msg, MsgType.RESULT, 'validation', '');
     GUIUtils.update_status('Runing CocoSim');
-    [lus_file_path, ~, status, unsupportedOptions] = ToLustre(model_full_path, [], BackendType.LUSTREC, options{:});
+    [lus_file_path, ~, status, unsupportedOptions, ~, pp_model_full_path] = ToLustre(model_full_path, [], BackendType.LUSTREC, options{:});
     is_unsupported = status || ~isempty(unsupportedOptions);
     if is_unsupported
         display_msg('Model is not supported', MsgType.ERROR, 'validation', '');
         return;
     end
-    [output_dir, lus_file_name, ~] = fileparts(lus_file_path);
-    file_name = lus_file_name;
-    main_node = lus_file_name;
-    model_full_path = fullfile(model_path,strcat(file_name,ext));
+    [output_dir, ~, ~] = fileparts(lus_file_path);
+    [~, model_file_name, ~] = fileparts(pp_model_full_path);
+    file_name = model_file_name;
+    main_node = model_file_name;
+    model_full_path = pp_model_full_path;
     if show_model
         open(model_full_path);
     end

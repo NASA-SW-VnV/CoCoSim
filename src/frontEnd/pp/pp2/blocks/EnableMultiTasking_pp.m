@@ -1,4 +1,4 @@
-function EnableMultiTasking_pp( new_model_base )
+function [status, errors_msg] = EnableMultiTasking_pp( new_model_base )
 %EnableMultiTasking_pp detectes the implicite rateTransitions and adds them
 %explicitely
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -7,6 +7,9 @@ function EnableMultiTasking_pp( new_model_base )
 % All Rights Reserved.
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+status = 0;
+errors_msg = {};
+
 configSet = getActiveConfigSet(new_model_base);
 
 try
@@ -15,6 +18,9 @@ try
 catch
     param = get_param(configSet, 'SolverMode');
     set_param(configSet, 'SolverMode', 'MultiTasking');
+    status = 1;
+    errors_msg{end + 1} = sprintf('EnableMultiTasking pre-process has failed');
+    
 end
 set_param(configSet, 'AutoInsertRateTranBlk', 'off');
 solveRateTransitions(new_model_base);

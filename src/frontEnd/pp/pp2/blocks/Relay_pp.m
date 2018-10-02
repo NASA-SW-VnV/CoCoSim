@@ -1,4 +1,4 @@
-function [] = Relay_pp(model)
+function [status, errors_msg] = Relay_pp(model)
 % Relay_PROCESS Searches for Relay blocks and replaces them by a
 %  equivalent subsystem.
 %   model is a string containing the name of the model to search in
@@ -8,11 +8,15 @@ function [] = Relay_pp(model)
 % All Rights Reserved.
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+status = 0;
+errors_msg = {};
+
 Relay_list = find_system(model,...
     'LookUnderMasks','all', 'BlockType','Relay');
 if not(isempty(Relay_list))
     display_msg('Processing Relay blocks...', MsgType.INFO, 'Relay_process', ''); 
     for i=1:length(Relay_list)
+        try
         display_msg(Relay_list{i}, MsgType.INFO, 'Relay_process', ''); 
         OnSwitchValue = get_param(Relay_list{i},'OnSwitchValue' );
         OffSwitchValue = get_param(Relay_list{i},'OffSwitchValue' );
@@ -24,7 +28,11 @@ if not(isempty(Relay_list))
         set_param(strcat(Relay_list{i},'/OffSwitchValue'),'Value', OffSwitchValue);
         set_param(strcat(Relay_list{i},'/OnOutputValue'),'Value', OnOutputValue);
         set_param(strcat(Relay_list{i},'/OffOutputValue'),'Value', OffOutputValue);
-        
+        catch
+            status = 1;
+            errors_msg{end + 1} = sprintf('Relay pre-process has failed for block %s', Relay_list{i});
+            continue;
+        end        
     end
     display_msg('Done\n\n', MsgType.INFO, 'Relay_process', ''); 
 end

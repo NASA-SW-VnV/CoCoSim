@@ -1,4 +1,4 @@
-function [] = DotProduct_pp(model)
+function [status, errors_msg] = DotProduct_pp(model)
 % substitute_product_process Searches for DotProduct blocks and replaces them by a
 % PP-friendly equivalent.
 %   model is a string containing the name of the model to search in
@@ -9,6 +9,9 @@ function [] = DotProduct_pp(model)
 % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Processing DotProduct blocks
+status = 0;
+errors_msg = {};
+
 DotProduct_list = find_system(model, ...
     'LookUnderMasks', 'all', 'BlockType','DotProduct');
 if not(isempty(DotProduct_list))
@@ -17,6 +20,7 @@ if not(isempty(DotProduct_list))
     for i=1:length(DotProduct_list)
         display_msg(DotProduct_list{i}, MsgType.INFO, ...
             'DotProduct_process', '');
+        try
         %DotProduct = get_param(DotProduct_list{i},'DotProduct');
         pp_name = 'DotProduct';
         outputDataType = get_param(DotProduct_list{i}, 'OutDataTypeStr');
@@ -44,7 +48,11 @@ if not(isempty(DotProduct_list))
         set_param(strcat(DotProduct_list{i},'/Product'),...
             'LockScale',LockScale);       
         
-        
+        catch
+            status = 1;
+            errors_msg{end + 1} = sprintf('DotProduct pre-process has failed for block %s', DotProduct_list{i});
+            continue;
+        end        
     end
     display_msg('Done\n\n', MsgType.INFO, 'DotProduct_process', ''); 
 end

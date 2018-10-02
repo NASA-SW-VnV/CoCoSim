@@ -1,6 +1,9 @@
-function [] = Saturation_pp(model)
+function [status, errors_msg] = Saturation_pp(model)
 % SATURATION_PP changes Saturation block to Min/Max blocks.
 % if Upper limit or Lower limit are Infinite "Inf" they are ignored.
+status = 0;
+errors_msg = {};
+
 saturation_list = find_system(model,'BlockType','Saturate');
 if ~ ( isempty( saturation_list ) )
     display_msg('Processing Saturation blocks...', Constants.INFO,...
@@ -8,6 +11,7 @@ if ~ ( isempty( saturation_list ) )
     for i=1:length(saturation_list)
         display_msg(saturation_list{i}, Constants.INFO, ...
             'Saturation_pp', '');
+        try
         lower_limit = get_param(saturation_list{i},'LowerLimit');
         upper_limit = get_param(saturation_list{i},'UpperLimit');
         outputDataType = get_param(saturation_list{i}, 'OutDataTypeStr');
@@ -59,6 +63,11 @@ if ~ ( isempty( saturation_list ) )
                     'OutDataTypeStr','Inherit: Inherit via back propagation');
             end
         end
+        catch
+            status = 1;
+            errors_msg{end + 1} = sprintf('saturation pre-process has failed for block %s', saturation_list{i});
+            continue;
+        end        
     end
     display_msg('Done\n\n', Constants.INFO, 'Saturation_pp', '');
 end

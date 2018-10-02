@@ -1,4 +1,4 @@
-function [] = Memory_pp(model)
+function [status, errors_msg] = Memory_pp(model)
 % Memory_pp discretizing Memory block by UnitDelay
 %   model is a string containing the name of the model to search in
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -7,35 +7,44 @@ function [] = Memory_pp(model)
 % All Rights Reserved.
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+status = 0;
+errors_msg = {};
+
 memoryBlk_list = find_system(model, 'LookUnderMasks','all', ...
     'BlockType','Memory');
 if not(isempty(memoryBlk_list))
-    display_msg('Processing Memory blocks...', MsgType.INFO, 'Memory_pp', ''); 
+    display_msg('Processing Memory blocks...', MsgType.INFO, 'Memory_pp', '');
     for i=1:length(memoryBlk_list)
-        display_msg(memoryBlk_list{i}, MsgType.INFO, 'Memory_pp', ''); 
-        % get block informations
+        display_msg(memoryBlk_list{i}, MsgType.INFO, 'Memory_pp', '');
         try
-            InitialCondition = get_param(memoryBlk_list{i},'InitialCondition' );
+            % get block informations
+            try
+                InitialCondition = get_param(memoryBlk_list{i},'InitialCondition' );
+            catch
+                %InitialCondition does not exist in R2015b
+                InitialCondition = get_param(memoryBlk_list{i},'X0' );
+            end
+            %Statename does not exist in R2015b
+            %StateName = get_param(memoryBlk_list{i}, 'StateName');
+            StateMustResolveToSignalObject = get_param(memoryBlk_list{i}, 'StateMustResolveToSignalObject');
+            StateSignalObject = get_param(memoryBlk_list{i},'StateSignalObject');
+            StateStorageClass = get_param(memoryBlk_list{i}, 'StateStorageClass');
+            % replace it
+            replace_one_block(memoryBlk_list{i},'simulink/Discrete/Unit Delay');
+            %restore information
+            set_param(memoryBlk_list{i} ,'InitialCondition', InitialCondition);
+            %Statename does not exist in R2015b
+            %set_param(memoryBlk_list{i} ,'StateName', StateName);
+            set_param(memoryBlk_list{i} ,'StateMustResolveToSignalObject', StateMustResolveToSignalObject);
+            set_param(memoryBlk_list{i} ,'StateSignalObject', StateSignalObject);
+            set_param(memoryBlk_list{i} ,'StateStorageClass', StateStorageClass);
         catch
-            %InitialCondition does not exist in R2015b
-            InitialCondition = get_param(memoryBlk_list{i},'X0' );
+            status = 1;
+            errors_msg{end + 1} = sprintf('memoryBlk pre-process has failed for block %s', memoryBlk_list{i});
+            continue;
         end
-        %Statename does not exist in R2015b
-        %StateName = get_param(memoryBlk_list{i}, 'StateName');
-        StateMustResolveToSignalObject = get_param(memoryBlk_list{i}, 'StateMustResolveToSignalObject');
-        StateSignalObject = get_param(memoryBlk_list{i},'StateSignalObject');
-        StateStorageClass = get_param(memoryBlk_list{i}, 'StateStorageClass');
-        % replace it
-        replace_one_block(memoryBlk_list{i},'simulink/Discrete/Unit Delay');
-        %restore information
-        set_param(memoryBlk_list{i} ,'InitialCondition', InitialCondition);
-        %Statename does not exist in R2015b
-        %set_param(memoryBlk_list{i} ,'StateName', StateName);
-        set_param(memoryBlk_list{i} ,'StateMustResolveToSignalObject', StateMustResolveToSignalObject);
-        set_param(memoryBlk_list{i} ,'StateSignalObject', StateSignalObject);
-        set_param(memoryBlk_list{i} ,'StateStorageClass', StateStorageClass);
     end
-    display_msg('Done\n\n', MsgType.INFO, 'Memory_pp', ''); 
+    display_msg('Done\n\n', MsgType.INFO, 'Memory_pp', '');
 end
 end
 

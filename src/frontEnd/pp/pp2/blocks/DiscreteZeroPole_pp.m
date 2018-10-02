@@ -1,4 +1,4 @@
-function [] = DiscreteZeroPole_pp(model)
+function [status, errors_msg] = DiscreteZeroPole_pp(model)
 % DiscreteZeroPole_pp searches for DiscreteZeroPole blocks and replaces them by a
 % PP-friendly equivalent.
 %   model is a string containing the name of the model to search in
@@ -9,6 +9,9 @@ function [] = DiscreteZeroPole_pp(model)
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Processing Gain blocks
+status = 0;
+errors_msg = {};
+
 dzp_list = find_system(model,...
     'LookUnderMasks', 'all', 'BlockType','DiscreteZeroPole');
 dzp_list = [dzp_list; find_system(model,'BlockType','ZeroPole')];
@@ -23,7 +26,7 @@ if not(isempty(dzp_list))
         display_msg(dzp_list{i}, MsgType.INFO, ...
             'DiscreteZeroPole', '');
         
-        
+        try
         
         % Obtaining z-expression parameters
         Zeros_str = get_param(dzp_list{i}, 'Zeros');
@@ -101,6 +104,11 @@ if not(isempty(dzp_list))
             'Value',D);
         set_param(strcat(dzp_list{i},'/X0'),...
             'SampleTime',ST);
+        catch
+            status = 1;
+            errors_msg{end + 1} = sprintf('DiscreteZeroPole pre-process has failed for block %s', dzp_list{i});
+            continue;
+        end        
     end
     display_msg('Done\n\n', MsgType.INFO, 'DiscreteZeroPole', '');
 end

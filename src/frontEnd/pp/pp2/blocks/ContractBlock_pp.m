@@ -1,4 +1,4 @@
-function ContractBlock_pp( model )
+function [status, errors_msg] = ContractBlock_pp( model )
 %ContractBlock_pp if the contract is linked to non
 %Subsystem block, this funciton creates subsystem on top of it
 
@@ -8,6 +8,9 @@ function ContractBlock_pp( model )
 % All Rights Reserved.
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+status = 0;
+errors_msg = {};
+
 contractBlocks_list = find_system(model, ...
     'LookUnderMasks', 'all', 'BlockType','SubSystem', 'Mask', 'on', ...
     'MaskType', 'ContractBlock');
@@ -15,17 +18,20 @@ if not(isempty(contractBlocks_list))
     display_msg('Processing Contract blocks', MsgType.INFO, 'ContractBlock_pp', '');
     
     for i=1:length(contractBlocks_list)
-        
-        [blk, status] = getAssociatedBlk(contractBlocks_list{i});
-        if status
-            display_msg(sprintf('Could not find associated block of %s', contractBlocks_list{i}),...
-                MsgType.ERROR, 'ContractBlock_pp', '');
-            continue;
-        end
         try
+            [blk, status] = getAssociatedBlk(contractBlocks_list{i});
+            if status
+                display_msg(sprintf('Could not find associated block of %s', contractBlocks_list{i}),...
+                    MsgType.ERROR, 'ContractBlock_pp', '');
+                continue;
+            end
+            
             ceateSubsystemFromBlk(blk);
         catch me
             display_msg(me.getReport(), MsgType.DEBUG, 'ContractBlock_pp', '');
+            status = 1;
+            errors_msg{end + 1} = sprintf('ContractBlock pre-process has failed for block %s', contractBlocks_list{i});
+            continue;            
         end
     end
     display_msg('Done\n\n', MsgType.INFO, 'ContractBlock_pp', '');

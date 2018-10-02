@@ -1,4 +1,4 @@
-function [] = DiscreteStateSpace_pp(model)
+function [status, errors_msg] = DiscreteStateSpace_pp(model)
 % DiscreteStateSpace_pp Searches for DiscreteStateSpace blocks and replaces them by a
 % PP-friendly equivalent.
 %   model is a string containing the name of the model to search in
@@ -9,12 +9,16 @@ function [] = DiscreteStateSpace_pp(model)
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Processing Gain blocks
+status = 0;
+errors_msg = {};
+
 dss_list = find_system(model, ...
     'LookUnderMasks', 'all', 'BlockType','DiscreteStateSpace');
 dss_list = [dss_list; find_system(model,'BlockType','StateSpace')];
 if not(isempty(dss_list))
     display_msg('Replacing DiscreteStateSpace blocks...', MsgType.INFO,...
         'DiscreteStateSpace_pp', '');
+    try
     for i=1:length(dss_list)
         display_msg(dss_list{i}, MsgType.INFO, ...
             'DiscreteStateSpace_pp', '');
@@ -89,6 +93,10 @@ if not(isempty(dss_list))
         end
         set_param(strcat(dss_list{i},'/X0'),...
             'SampleTime',ST);
+        
+            status = 1;
+            errors_msg{end + 1} = sprintf('DiscreteStateSpace pre-process has failed for block %s', dss_list{i});
+            continue;        
     end
     display_msg('Done\n\n', MsgType.INFO, 'DiscreteStateSpace_pp', '');
 end

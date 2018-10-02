@@ -38,6 +38,7 @@ if not(isempty(detector_list))
             end
             
             replace_one_block(detector_list{i},fullfile('pp_lib',pp_name));
+            set_param(detector_list{i}, 'LinkStatus', 'inactive');
             set_param(detector_list{i},'in_hold', in_hold);
             if isequal(typ, 'Delayed Fixed Duration')
                 set_param(detector_list{i},'delay', delay);

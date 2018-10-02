@@ -1,9 +1,12 @@
-function ModelReference_pp(topLevelModel)
+function [status, errors_msg] = ModelReference_pp(topLevelModel)
 %ModelReference_pp will replace all model reference blocks at all levels
 % within the top level model with SubSystems having the same contents as
 % the referenced model.
 
 % Find Model Reference Blocks in the top level model:
+status = 0;
+errors_msg = {};
+
 topLevelModelHandle = get_param( topLevelModel , 'Handle' );
 mdlRefsHandles = find_system( topLevelModelHandle , 'LookUnderMasks','all', ...
     'findall' , 'on' , 'blocktype' , 'ModelReference' );
@@ -11,38 +14,43 @@ failed = 0;
 mdlRefIgnored = 0;
 if( ~isempty( mdlRefsHandles ) )
     for k = 1 : length( mdlRefsHandles )
-        
-        mdlRefName = get_param( mdlRefsHandles(k) , 'ModelName' );
-        mdlName =  get_param( mdlRefsHandles(k) , 'Name' );
-        [CompiledPortDataTypes] = SLXUtils.getCompiledParam(mdlRefsHandles(k), 'CompiledPortDataTypes');
-        if HasBusPort(CompiledPortDataTypes)
-            display_msg([mdlRefName ' will be handled directly in the compiler ToLustre as it has Bus Ports.'], MsgType.INFO, 'ModelReference_pp', '');
-            mdlRefIgnored = 1;
-            continue;
-        end
-        % Create a blank subsystem, fill it with the modelref's contents:
-        display_msg(mdlName, MsgType.INFO, 'ModelReference_pp', '');
         try
-            ref_block_path = getfullname(mdlRefsHandles(k));
-            ssName = [ ref_block_path '_SS_' num2str(k) ];
-            ssHandle = add_block( 'built-in/SubSystem' , ssName,...
-                'MakeNameUnique', 'on');  % Create empty SubSystem
-            display_msg(ref_block_path, MsgType.INFO, 'ModelReference_pp', '');
-            slcopy_mdl2subsys( mdlRefName , ssName );   % This function copies contents of the referenced model into the SubSystem
-            
-            Orient=get_param(ssHandle,'orientation');
-            blockPosition = get_param( mdlRefsHandles(k) , 'Position' );
-            delete_block( mdlRefsHandles(k) );
-            set_param( ssHandle , ...
-                'Name', mdlName, ...
-                'Orientation',Orient, ...
-                'Position' , blockPosition );
-            
-            % Assigning Model Reference Callbacks to the new subsystem:
-            Replace_Callbacks( mdlRefName , ssHandle );
-        catch me
-            failed = 1;
-            display_msg(me.getReport(), MsgType.DEBUG, 'ModelReference_pp', '');
+            mdlRefName = get_param( mdlRefsHandles(k) , 'ModelName' );
+            mdlName =  get_param( mdlRefsHandles(k) , 'Name' );
+            [CompiledPortDataTypes] = SLXUtils.getCompiledParam(mdlRefsHandles(k), 'CompiledPortDataTypes');
+            if HasBusPort(CompiledPortDataTypes)
+                display_msg([mdlRefName ' will be handled directly in the compiler ToLustre as it has Bus Ports.'], MsgType.INFO, 'ModelReference_pp', '');
+                mdlRefIgnored = 1;
+                continue;
+            end
+            % Create a blank subsystem, fill it with the modelref's contents:
+            display_msg(mdlName, MsgType.INFO, 'ModelReference_pp', '');
+            try
+                ref_block_path = getfullname(mdlRefsHandles(k));
+                ssName = [ ref_block_path '_SS_' num2str(k) ];
+                ssHandle = add_block( 'built-in/SubSystem' , ssName,...
+                    'MakeNameUnique', 'on');  % Create empty SubSystem
+                display_msg(ref_block_path, MsgType.INFO, 'ModelReference_pp', '');
+                slcopy_mdl2subsys( mdlRefName , ssName );   % This function copies contents of the referenced model into the SubSystem
+                
+                Orient=get_param(ssHandle,'orientation');
+                blockPosition = get_param( mdlRefsHandles(k) , 'Position' );
+                delete_block( mdlRefsHandles(k) );
+                set_param( ssHandle , ...
+                    'Name', mdlName, ...
+                    'Orientation',Orient, ...
+                    'Position' , blockPosition );
+                
+                % Assigning Model Reference Callbacks to the new subsystem:
+                Replace_Callbacks( mdlRefName , ssHandle );
+            catch me
+                failed = 1;
+                display_msg(me.getReport(), MsgType.DEBUG, 'ModelReference_pp', '');
+            end
+        catch
+            status = 1;
+            errors_msg{end + 1} = sprintf('ModelReference pre-process has failed for block %s', mdlRefsHandles{k});
+            continue;
         end
     end
     

@@ -1,4 +1,4 @@
-function KindContract_pp( model )
+function [status, errors_msg] = KindContract_pp( model )
 %KindContract_pp add MaskType to Kind contract blocks from old version.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -8,6 +8,9 @@ function KindContract_pp( model )
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Configure any subsystem to be treated as Atomic
+status = 0;
+errors_msg = {};
+
 masked_sys_list = find_system(model, ...
     'LookUnderMasks', 'all', 'BlockType','SubSystem', 'Mask', 'on');
 masked_sys_list = [masked_sys_list;...
@@ -20,6 +23,7 @@ if not(isempty(contractBlocks_list))
     display_msg('Processing Contract blocks', MsgType.INFO, 'PP', '');
     
     for i=1:length(contractBlocks_list)
+        try
         display_msg(contractBlocks_list{i}, MsgType.DEBUG, 'KindContract_pp', '');
         % setting the MaskType
         try
@@ -28,7 +32,11 @@ if not(isempty(contractBlocks_list))
         catch me
             display_msg(me.getReport(), MsgType.DEBUG, 'KindContract_pp', '');
         end
-        
+        catch
+            status = 1;
+            errors_msg{end + 1} = sprintf('contractBlocks pre-process has failed for block %s', contractBlocks_list{i});
+            continue;
+        end        
     end
     display_msg('Done\n\n', MsgType.INFO, 'PP', '');
 end
@@ -46,6 +54,9 @@ if not(isempty(LusOperator_list))
                 get_param(LusOperator_list{i}, 'LustreOperatorBlock'));
         catch me
             display_msg(me.getReport(), MsgType.DEBUG, 'KindContract_pp', '');
+            status = 1;
+            errors_msg{end + 1} = sprintf('LusOperator pre-process has failed for block %s', LusOperator_list{i});
+            continue;            
         end
         
     end

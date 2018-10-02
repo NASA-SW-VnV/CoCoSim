@@ -1,4 +1,4 @@
-function Outport_pp( new_model_base )
+function [status, errors_msg] = Outport_pp( new_model_base )
 %OUTPORT_PROCESS 
 % Check if there is an output in the main block
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -7,6 +7,9 @@ function Outport_pp( new_model_base )
 % All Rights Reserved.
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+status = 0;
+errors_msg = {};
+
 display_msg('Checking output blocks', MsgType.INFO, 'PP', '');
 
 outport_list = find_system(new_model_base,'SearchDepth','1','BlockType','Outport');
