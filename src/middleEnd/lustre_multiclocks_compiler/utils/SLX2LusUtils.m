@@ -24,6 +24,9 @@ classdef SLX2LusUtils < handle
         function time_step = nbStepStr()
             time_step = '__nb_step';
         end
+        function it = iterationVariable()
+            it = '_iterationVariable';
+        end
         function res = isContractBlk(ss_ir)
             res = isfield(ss_ir, 'MaskType') ...
                 && strcmp(ss_ir.MaskType, 'ContractBlock');

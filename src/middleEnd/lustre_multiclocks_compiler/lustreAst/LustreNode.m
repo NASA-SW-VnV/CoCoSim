@@ -112,6 +112,9 @@ classdef LustreNode < LustreAst
         function setName(obj, name)
             obj.name = name;
         end
+        function name = getName(obj)
+            name = obj.name;
+        end
         function setInputs(obj, inputs)
             obj.inputs = inputs;
         end
@@ -126,6 +129,9 @@ classdef LustreNode < LustreAst
         end
         function setBodyEqs(obj, bodyEqs)
             obj.bodyEqs = bodyEqs;
+        end
+        function addBodyEqs(obj, eq)
+            obj.bodyEqs{end+1} = eq;
         end
         function setIsMain(obj, isMain)
             obj.isMain = isMain;
