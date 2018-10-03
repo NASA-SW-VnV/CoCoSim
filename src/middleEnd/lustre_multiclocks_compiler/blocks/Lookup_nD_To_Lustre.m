@@ -117,14 +117,18 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
             % initialize
             indexDataType = 'int';
             blk_name = SLX2LusUtils.node_name_format(blk);
-            ext_node_name = sprintf('%s_ext_node',blk_name);            
+            ext_node_name = sprintf('%s_ext_node',blk_name);   
+            external_lib = {};
             
             % get block outputs
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             
             % get block inputs
-            [inputs,lusInport_dt,zero,one,  external_lib] = ...
+            [inputs,lusInport_dt,zero,one,  external_lib_i] = ...
                 Lookup_nD_To_Lustre.getBlockInputsNames_convInType2AccType(parent, blk,isLookupTableDynamic);
+            if ~isempty(external_lib_i)
+                external_lib{end+1} = external_lib_i;
+            end
             
             % read block parameters
             blkParams = Lookup_nD_To_Lustre.readBlkParams(parent,blk,isLookupTableDynamic,inputs);
@@ -199,7 +203,22 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                 extNode.setLocalContract(contract);
             end
             main_vars = outputs_dt;
-            mainCode = Lookup_nD_To_Lustre.getMainCode(outputs,inputs,ext_node_name,isLookupTableDynamic);
+            % if outputDataType is not real, we need to cast outputs
+            outputDataType = blk.CompiledPortDataTypes.Outport{1};
+            lus_out_type = SLX2LusUtils.get_lustre_dt(outputDataType);
+            if ~strcmp(lus_out_type,'real')
+                RndMeth = blk.RndMeth;
+                SaturateOnIntegerOverflow = blk.SaturateOnIntegerOverflow;
+                [external_lib_i, output_conv_format] = SLX2LusUtils.dataType_conversion('real', ...
+                    lus_out_type, RndMeth, SaturateOnIntegerOverflow);
+                if ~isempty(external_lib_i)
+                    external_lib(end+1) = external_lib_i;
+                end
+            else
+                output_conv_format = {};
+            end            
+            mainCode = Lookup_nD_To_Lustre.getMainCode(outputs,inputs,...
+                ext_node_name,isLookupTableDynamic,output_conv_format);
             
         end
         
@@ -726,7 +745,8 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
             node_header.Outputs = LustreVar(outputs{1}, 'real');
         end
         
-        function codes = getMainCode(outputs,inputs,ext_node_name,isLookupTableDynamic)
+        function codes = getMainCode(outputs,inputs,ext_node_name,...
+                isLookupTableDynamic,output_conv_format)
             codes = cell(1, numel(outputs));
             for outIdx=1:numel(outputs)
                 nodeCall_inputs = {};
@@ -742,8 +762,14 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                     end
                 end
                 
-                codes{outIdx} = LustreEq(outputs{outIdx}, ...
-                    NodeCallExpr(ext_node_name, nodeCall_inputs));
+                if isempty(output_conv_format)
+                    codes{outIdx} = LustreEq(outputs{outIdx}, ...
+                        NodeCallExpr(ext_node_name, nodeCall_inputs));
+                else
+                    code = SLX2LusUtils.setArgInConvFormat(output_conv_format, ...
+                        NodeCallExpr(ext_node_name, nodeCall_inputs));
+                    codes{outIdx} = LustreEq(outputs{outIdx}, code);                    
+                end
             end
         end
         

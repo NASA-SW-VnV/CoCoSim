@@ -51,7 +51,10 @@ classdef DotProduct_To_Lustre < Block_To_Lustre
             obj.addVariable(outputs_dt);
         end
         %%
-        function options = getUnsupportedOptions(obj, varargin)
+        function options = getUnsupportedOptions(obj, ~, blk, varargin)
+            obj.unsupported_options = {...
+                sprintf('Block %s is supported by Pre-processing check the pre-processing errors.',...
+                blk.Origin_path)};            
             options = obj.unsupported_options;
         end
         %%
