@@ -114,7 +114,7 @@ else
     pp_order_map(72) = {'pp2/blocks/ExpandNonAtomicSubsystems_pp.m'};
     
     pp_order_map(80) = {'pp2/blocks/Gain_pp.m'};
-    %pp_order_map(81) = {'pp2/blocks/FromWorkSpace_pp.m'};
+    pp_order_map(81) = {'pp2/blocks/FromWorkSpace_pp.m'};
     
     pp_order_map(90) = {'pp2/blocks/FixedStepDiscreteSolver_pp.m'};
     pp_order_map(91) = {'pp2/blocks/AlgebraicLoops_pp.m'};
