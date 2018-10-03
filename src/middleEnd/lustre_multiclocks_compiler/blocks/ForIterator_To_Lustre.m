@@ -12,7 +12,11 @@ classdef ForIterator_To_Lustre < Block_To_Lustre
     
     methods
         
-        function  write_code(varargin)
+        function  write_code(obj, parent, blk, xml_trace, varargin)
+            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+            obj.addVariable(outputs_dt);
+            % join the lines and set the block code.
+            obj.setCode( LustreEq(outputs{1}, SLX2LusUtils.iterationVariable()));
         end
         %%
         function options = getUnsupportedOptions(obj, parent, blk, varargin)
@@ -20,6 +24,18 @@ classdef ForIterator_To_Lustre < Block_To_Lustre
                 obj.addUnsupported_options(...
                     sprintf('Block "%s" has external iteration limit source. Only internal option is supported', ...
                     blk.Origin_path));
+            end
+            if isequal(blk.ExternalIncrement, 'on')
+                obj.addUnsupported_options(...
+                    sprintf('Block "%s" has external increment which is not supported.', ...
+                    blk.Origin_path));
+            end
+            [~, ~, status] = ...
+                Constant_To_Lustre.getValueFromParameter(parent, blk, blk.IterationLimit);
+            if status
+                obj.addUnsupported_options(...
+                    sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
+                    blk.IterationLimit, blk.Origin_path));
             end
             options = obj.unsupported_options;
         end

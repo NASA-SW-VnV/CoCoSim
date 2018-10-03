@@ -218,7 +218,7 @@ classdef SubSystem_To_Lustre < Block_To_Lustre
                 TriggerDT = '';
             end
         end
-        function [b, StatesWhenStarting] = hasForIterator(blk)
+        function [b, Iteratorblk] = hasForIterator(blk)
             fields = fieldnames(blk.Content);
             fields = ...
                 fields(...
@@ -228,9 +228,9 @@ classdef SubSystem_To_Lustre < Block_To_Lustre
             b = ~isempty(forIteratorFields);
             
             if b
-                StatesWhenStarting = blk.Content.(forIteratorFields{1}).ResetStates;
+                Iteratorblk = blk.Content.(forIteratorFields{1});
             else
-                StatesWhenStarting = '';
+                Iteratorblk = [];
             end
         end
         %%
