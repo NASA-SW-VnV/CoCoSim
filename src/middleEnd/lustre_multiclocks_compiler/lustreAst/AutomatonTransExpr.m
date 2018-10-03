@@ -36,12 +36,16 @@ classdef AutomatonTransExpr < LustreExpr
                 obj.condition.deepCopy(), ...
                 obj.is_restart, state_name);
         end
-        
+        %% This functions are used for ForIterator block
+        function [new_obj, varIds] = changePre2Var(obj)
+            new_obj = obj;
+            varIds = {};
+        end
         function new_obj = changeArrowExp(obj, ~)
             new_obj = obj;
         end
         
-        
+        %%
         function code = print(obj, backend)
             %TODO: check if lustrec syntax is OK for jkind and prelude.
             code = obj.print_lustrec(backend);

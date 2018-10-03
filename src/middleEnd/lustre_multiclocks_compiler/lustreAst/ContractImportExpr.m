@@ -35,11 +35,15 @@ classdef ContractImportExpr < LustreExpr
             new_obj = ContractImportExpr(obj.name, ...
                 new_inputs, new_outputs);
         end
-        
+        %% This functions are used for ForIterator block
+        function [new_obj, varIds] = changePre2Var(obj)
+            new_obj = obj;
+            varIds = {};
+        end
         function new_obj = changeArrowExp(obj, ~)
             new_obj = obj;
         end
-        
+        %%
         function code = print(obj, backend)
            if BackendType.isKIND2(backend)
                 code = obj.print_kind2(backend);

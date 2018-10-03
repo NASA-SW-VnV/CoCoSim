@@ -75,6 +75,24 @@ classdef LustreNode < LustreAst
                 new_outputs, new_localContract, new_localVars, new_bodyEqs, ...
                 obj.isMain);
         end
+        
+        %% This functions are used for ForIterator block
+        function [new_obj, varIds] = changePre2Var(obj)
+            varIds = {};
+            if iscell(obj.bodyEqs)
+                new_bodyEqs = {};
+                for i=1:numel(obj.bodyEqs)
+                    [new_bodyEqs{i}, vId] = obj.bodyEqs{i}.changePre2Var();
+                    varIds = [varIds, vId];
+                end
+            else
+                [new_bodyEqs, varIds] = obj.bodyEqs.changePre2Var();
+            end
+            new_obj = LustreNode(obj.metaInfo, obj.name, obj.inputs, ...
+                obj.outputs, obj.localContract, obj.localVars, new_bodyEqs, ...
+                obj.isMain);
+        end
+        
         function new_obj = changeArrowExp(obj, cond)
             if iscell(obj.bodyEqs)
                 new_bodyEqs = cellfun(@(x) x.changeArrowExp(cond), obj.bodyEqs, 'UniformOutput', 0);
@@ -86,6 +104,8 @@ classdef LustreNode < LustreAst
                 obj.outputs, obj.localContract, obj.localVars, new_bodyEqs, ...
                 obj.isMain);
         end
+        
+        %%
         function setMetaInfo(obj, metaInfo)
             obj.metaInfo = metaInfo;
         end

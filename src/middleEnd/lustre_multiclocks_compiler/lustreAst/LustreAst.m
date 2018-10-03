@@ -12,6 +12,7 @@ classdef LustreAst < handle
     methods (Abstract)
         deepCopy(obj)
         changeArrowExp(obj, cond)
+        changePre2Var(obj)
         print(obj, backend)
         print_lustrec(obj)
         print_kind2(obj)

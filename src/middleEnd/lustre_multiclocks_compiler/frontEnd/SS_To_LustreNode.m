@@ -67,7 +67,7 @@ classdef SS_To_LustreNode
             isForIteraorSS = SubSystem_To_Lustre.hasForIterator(ss_ir);
             [body, variables, external_nodes, external_libraries] = ...
                 SS_To_LustreNode.write_body(ss_ir, main_sampleTime, ...
-                backend, xml_trace, isForIteraorSS);
+                backend, xml_trace);
             if is_main_node
                 if ~ismember(SLX2LusUtils.timeStepStr(), ...
                         cellfun(@(x) {x.getId()}, node_outputs_withoutDT_cell, 'UniformOutput', 1))
@@ -78,14 +78,14 @@ classdef SS_To_LustreNode
                     BinaryExpr(BinaryExpr.ARROW, ...
                     RealExpr('0.0'), ...
                     BinaryExpr(BinaryExpr.PLUS, ...
-                        UnaryExpr(UnaryExpr.PRE, VarIdExpr(SLX2LusUtils.timeStepStr())), ...
-                        RealExpr(main_sampleTime(1)))));
+                    UnaryExpr(UnaryExpr.PRE, VarIdExpr(SLX2LusUtils.timeStepStr())), ...
+                    RealExpr(main_sampleTime(1)))));
                 body{end+1} = LustreEq(VarIdExpr(SLX2LusUtils.nbStepStr()), ...
                     BinaryExpr(BinaryExpr.ARROW, ...
                     IntExpr('0'), ...
                     BinaryExpr(BinaryExpr.PLUS, ...
-                        UnaryExpr(UnaryExpr.PRE, VarIdExpr(SLX2LusUtils.nbStepStr())), ...
-                        IntExpr('1'))));
+                    UnaryExpr(UnaryExpr.PRE, VarIdExpr(SLX2LusUtils.nbStepStr())), ...
+                    IntExpr('1'))));
                 %body = [sprintf('%s = 0.0 -> pre %s + %.15f;\n\t', ...
                 %   SLX2LusUtils.timeStepStr(), SLX2LusUtils.timeStepStr(), main_sampleTime(1)), body];
                 %define all clocks if needed
@@ -162,8 +162,19 @@ classdef SS_To_LustreNode
                     % its own memory, therefor different is_init values.
                     main_node = main_node.changeArrowExp(...
                         BinaryExpr(BinaryExpr.EQ, ...
-                                    VarIdExpr(SLX2LusUtils.timeStepStr()),...
-                                    RealExpr('0.0')));
+                        VarIdExpr(SLX2LusUtils.timeStepStr()),...
+                        RealExpr('0.0')));
+                    [main_node, memoryIds] = main_node.changePre2Var();
+                    [new_variables, additionalOutputs, additionalInputs] =...
+                        SS_To_LustreNode.getForIteratorMemoryVars(variables, ...
+                        node_inputs, memoryIds);
+                    if ~isempty(additionalInputs)
+                        main_node.setInputs([node_inputs, additionalInputs]);
+                    end
+                    if ~isempty(additionalOutputs)
+                        main_node.setOutputs([node_outputs, additionalOutputs]);
+                    end
+                    main_node.setLocalVars(new_variables);
                 end
             end
             
@@ -178,8 +189,7 @@ classdef SS_To_LustreNode
         
         %% Go over SS Content
         function [body, variables, external_nodes, external_libraries] =...
-                write_body(subsys, main_sampleTime, backend, xml_trace,...
-                isForIteraorSS)
+                write_body(subsys, main_sampleTime, backend, xml_trace)
             variables = {};
             body = {};
             external_nodes = {};
@@ -206,10 +216,6 @@ classdef SS_To_LustreNode
                     display_msg(me.getReport(), MsgType.DEBUG, 'write_body', '');
                 end
                 code = b.getCode();
-                if isForIteraorSS
-                    code = SS_To_LustreNode.forIteratorPP(code);
-                end
-                    
                 if iscell(code)
                     body = [body, code];
                 else
@@ -220,19 +226,7 @@ classdef SS_To_LustreNode
                 external_libraries = [external_libraries, b.getExternalLibraries()];
             end
         end
-        %%
-        function new_code = forIteratorPP(code)
-            if iscell(code)
-                new_code = code;
-            else
-                new_code{1} = code;
-            end
-            for i=1:numel(new_code)
-               if isa(new_code{i}, 'LustreEq')
-                   
-               end
-            end
-        end
+        
         %% creat import contracts body
         function imported_contracts = getImportedContracts(...
                 parent_ir, ss_ir, main_sampleTime, node_inputs_withoutDT, node_outputs_withoutDT)
@@ -304,6 +298,31 @@ classdef SS_To_LustreNode
                     SLX2LusUtils.getTimeClocksInputs(ss_ir, main_sampleTime, {}, contract_inputs);
                 imported_contracts{end+1} = ContractImportExpr(...
                     ss_ir.ContractNodeNames{i}, contract_inputs, contract_outputs);
+            end
+        end
+        %% ForIterator block
+        function [new_variables, additionalOutputs, additionalInputs] =...
+                getForIteratorMemoryVars(variables, node_inputs, memoryIds)
+            new_variables = {};
+            additionalOutputs = {};
+            additionalInputs = {};
+            variables_names = cellfun(@(x) x.getId(), variables, 'UniformOutput', false);
+            node_inputs_names = cellfun(@(x) x.getId(), node_inputs, 'UniformOutput', false);
+            memoryIds_names = cellfun(@(x) x.getId(), memoryIds, 'UniformOutput', false);
+            for i=1:numel(variables_names)
+                if ismember(variables_names{i}, memoryIds_names)
+                    additionalOutputs{end+1} = variables{i};
+                    additionalInputs{end+1} = LustreVar(strcat('_pre_',...
+                        variables_names{i}), variables{i}.getDT());
+                else
+                    new_variables{end + 1} = variables{i};
+                end
+            end
+            for i=1:numel(node_inputs_names)
+                if ismember(node_inputs_names{i}, memoryIds_names)
+                    additionalInputs{end+1} = LustreVar(strcat('_pre_',...
+                        node_inputs_names{i}), node_inputs{i}.getDT());
+                end
             end
         end
         

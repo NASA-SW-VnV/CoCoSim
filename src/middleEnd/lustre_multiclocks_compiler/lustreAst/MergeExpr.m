@@ -25,6 +25,21 @@ classdef MergeExpr < LustreExpr
             end
             new_obj = MergeExpr(obj.clock, new_exprs);
         end
+        
+        %% This functions are used for ForIterator block
+        function [new_obj, varIds] = changePre2Var(obj)
+            varIds = {};
+            if iscell(obj.exprs)
+                new_exprs = {};
+                for i=1:numel(obj.exprs)
+                    [new_exprs{i}, varIds_i] = obj.exprs{i}.changePre2Var();
+                    varIds = [varIds, varIds_i];
+                end
+            else
+                [new_exprs, varIds] = obj.exprs.changePre2Var();
+            end
+            new_obj = MergeExpr(obj.clock, new_exprs);
+        end
         function new_obj = changeArrowExp(obj, cond)
             if iscell(obj.exprs)
                 new_exprs = cellfun(@(x) x.changeArrowExp(cond), obj.exprs, 'UniformOutput', 0);
@@ -33,6 +48,8 @@ classdef MergeExpr < LustreExpr
             end
             new_obj = MergeExpr(obj.clock, new_exprs);
         end
+        
+        %%
         function code = print(obj, backend)
             %TODO: check if LUSTREC syntax is OK for the other backends.
             code = obj.print_lustrec(backend);

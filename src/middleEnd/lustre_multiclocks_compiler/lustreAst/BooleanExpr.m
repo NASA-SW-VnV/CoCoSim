@@ -17,11 +17,15 @@ classdef BooleanExpr < LustreExpr
         function new_obj = deepCopy(obj)
             new_obj = BooleanExpr(obj.value);
         end
-        
+        %% This functions are used for ForIterator block
+        function [new_obj, varIds] = changePre2Var(obj)
+            new_obj = obj;
+            varIds = {};
+        end
         function new_obj = changeArrowExp(obj, ~)
             new_obj = obj;
         end
-        
+        %%
         function code = print(obj, ~)
             %TODO: check if LUSTREC syntax is OK for the other backends.
             code = obj.print_lustrec();

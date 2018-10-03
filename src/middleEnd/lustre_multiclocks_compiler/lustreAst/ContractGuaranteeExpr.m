@@ -21,11 +21,15 @@ classdef ContractGuaranteeExpr < LustreExpr
             new_obj = ContractGuaranteeExpr(obj.id, ...
                 obj.exp.deepCopy());
         end
-        
+        %% This functions are used for ForIterator block
+        function [new_obj, varIds] = changePre2Var(obj)
+            new_obj = obj;
+            varIds = {};
+        end
         function new_obj = changeArrowExp(obj, ~)
             new_obj = obj;
         end
-        
+        %%
         function code = print(obj, backend)
             if BackendType.isKIND2(backend)
                 code = obj.print_kind2(backend);

@@ -33,6 +33,7 @@ classdef BinaryExpr < LustreExpr
         WHEN = 'when';
     end
     methods
+        %%
         function obj = BinaryExpr(op, left, right, withPar)
             obj.op = op;
             obj.left = left;
@@ -43,14 +44,25 @@ classdef BinaryExpr < LustreExpr
                 obj.withPar = true;
             end
         end
-        
+        %%
         function new_obj = deepCopy(obj)
             new_obj = BinaryExpr(obj.op,...
                 obj.left.deepCopy(),...
                 obj.right.deepCopy(), ...
                 obj.withPar);
         end
-        
+        %% This functions are used for ForIterator block
+        function [new_obj, varIds] = changePre2Var(obj)
+            varIds = {};
+            [leftExp, varIdLeft] = obj.left.changePre2Var();
+            varIds = [varIds, varIdLeft];
+            [rightExp, varIdright] = obj.right.changePre2Var();
+            varIds = [varIds, varIdright];
+            new_obj = BinaryExpr(obj.op,...
+                    leftExp,...
+                    rightExp, ...
+                    obj.withPar);
+        end
         function new_obj = changeArrowExp(obj, cond)
             if isequal(obj.op, BinaryExpr.ARROW)
                 new_obj = IteExpr(cond, ...
@@ -65,6 +77,7 @@ classdef BinaryExpr < LustreExpr
             end
         end
         
+        %%
         function code = print(obj, backend)
             code = obj.print_lustrec(backend);
         end
@@ -75,20 +88,16 @@ classdef BinaryExpr < LustreExpr
             if iscell(obj.right) && numel(obj.right) == 1
                 obj.right = obj.right{1};
             end
-            try
-                if obj.withPar
-                    code = sprintf('(%s %s %s)', ...
-                        obj.left.print(backend),...
-                        obj.op, ...
-                        obj.right.print(backend));
-                else
-                    code = sprintf('%s %s %s', ...
-                        obj.left.print(backend),...
-                        obj.op, ...
-                        obj.right.print(backend));
-                end
-            catch me
-                me
+            if obj.withPar
+                code = sprintf('(%s %s %s)', ...
+                    obj.left.print(backend),...
+                    obj.op, ...
+                    obj.right.print(backend));
+            else
+                code = sprintf('%s %s %s', ...
+                    obj.left.print(backend),...
+                    obj.op, ...
+                    obj.right.print(backend));
             end
         end
         

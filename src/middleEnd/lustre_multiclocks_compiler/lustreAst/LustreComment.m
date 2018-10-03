@@ -21,10 +21,19 @@ classdef LustreComment < LustreExpr
             new_obj = LustreComment(obj.text,...
                 obj.isMultiLine);
         end
+        
+        %% This functions are used for ForIterator block
+        function [new_obj, varIds] = changePre2Var(obj)
+            new_obj = obj;
+            varIds = {};
+        end
+        
         function new_obj = changeArrowExp(obj, ~)
             new_obj = obj;
         end
         
+        
+        %%
         function code = print(obj, backend)
             code = obj.print_lustrec(backend);
         end

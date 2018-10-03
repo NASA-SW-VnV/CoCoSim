@@ -30,7 +30,21 @@ classdef TupleExpr < LustreExpr
             end
             new_obj = TupleExpr(new_args);
         end
-         
+        %% This functions are used for ForIterator block
+        function [new_obj, varIds] = changePre2Var(obj)
+            varIds = {};
+            if iscell(obj.args)
+                new_args = {};
+                for i=1:numel(obj.args)
+                    [new_args{i}, varIds_i] = obj.args{i}.changePre2Var();
+                    varIds = [varIds, varIds_i];
+                end
+            else
+                [new_args, varIds] = obj.args.changePre2Var();
+            end
+            new_obj = TupleExpr(new_args);
+            
+        end
         function new_obj = changeArrowExp(obj, cond)
             if iscell(obj.args)
                 new_args = cellfun(@(x) x.changeArrowExp(cond), obj.args, 'UniformOutput', 0);
@@ -39,7 +53,7 @@ classdef TupleExpr < LustreExpr
             end
             new_obj = TupleExpr(new_args);
         end
-        
+        %%
         function code = print(obj, backend)
             %TODO: check if LUSTREC syntax is OK for the other backends.
             code = obj.print_lustrec(backend);

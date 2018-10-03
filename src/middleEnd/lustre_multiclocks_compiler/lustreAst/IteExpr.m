@@ -31,14 +31,21 @@ classdef IteExpr < LustreExpr
                 obj.ElseExpr.deepCopy(),...
                 obj.OneLine);
         end
-        
+        %% This functions are used for ForIterator block
+        function [new_obj, varIds] = changePre2Var(obj)
+            [cond, vcondId] = obj.condition.changePre2Var();
+            [then, thenCondId] = obj.thenExpr.changePre2Var();
+            [elseE, elseCondId] = obj.ElseExpr.changePre2Var();
+            varIds = [vcondId, thenCondId, elseCondId];
+            new_obj = IteExpr(cond, then, elseE, obj.OneLine);
+        end
         function new_obj = changeArrowExp(obj, cond)
             new_obj = IteExpr(obj.condition.changeArrowExp(cond),...
                 obj.thenExpr.changeArrowExp(cond),...
                 obj.ElseExpr.changeArrowExp(cond),...
                 obj.OneLine);
         end
-        
+        %%
         function code = print(obj, backend)
             %TODO: check if LUSTREC syntax is OK for the other backends.
             code = obj.print_lustrec(backend);

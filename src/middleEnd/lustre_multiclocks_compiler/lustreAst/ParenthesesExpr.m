@@ -24,18 +24,28 @@ classdef ParenthesesExpr < LustreExpr
             else
                 new_expr = obj.expr.deepCopy();
             end
-            new_obj = ParenthesesExpr(obj.nodeName, new_expr);
+            new_obj = ParenthesesExpr(new_expr);
         end
          
+        %% This functions are used for ForIterator block
+        function [new_obj, varIds] = changePre2Var(obj)
+            if iscell(obj.expr)
+                [new_expr, varIds] = obj.expr{1}.changePre2Var();
+            else
+                [new_expr, varIds] = obj.expr.changePre2Var();
+            end
+            new_obj = ParenthesesExpr(new_expr);
+        end
         function new_obj = changeArrowExp(obj, cond)
             if iscell(obj.expr)
                 new_expr = cellfun(@(x) x.changeArrowExp(cond), obj.expr, 'UniformOutput', 0);
             else
                 new_expr = obj.expr.changeArrowExp(cond);
             end
-            new_obj = ParenthesesExpr(obj.nodeName, new_expr);
+            new_obj = ParenthesesExpr(new_expr);
         end
         
+        %%
         function code = print(obj, backend)
             %TODO: check if LUSTREC syntax is OK for the other backends.
             code = obj.print_lustrec(backend);

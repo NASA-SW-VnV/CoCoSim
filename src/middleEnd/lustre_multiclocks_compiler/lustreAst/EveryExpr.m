@@ -28,7 +28,23 @@ classdef EveryExpr < LustreExpr
             new_obj = EveryExpr(obj.nodeName, ...
                 new_args, obj.cond.deepCopy());
         end
-        
+        %% This functions are used for ForIterator block
+        function [new_obj, varIds] = changePre2Var(obj)
+            varIds = {};
+            if iscell(obj.nodeArgs)
+                new_exprs = {};
+                for i=1:numel(obj.nodeArgs)
+                    [new_exprs{i}, varIds_i] = obj.nodeArgs{i}.changePre2Var();
+                    varIds = [varIds, varIds_i];
+                end
+            else
+                [new_exprs, varIds] = obj.nodeArgs.changePre2Var();
+            end
+            [condE, varId] = obj.cond.changePre2Var();
+            varIds = [varIds, varId];
+            new_obj = EveryExpr(obj.nodeName, ...
+                new_exprs, condE);
+        end
         function new_obj = changeArrowExp(obj, cond)
             if iscell(obj.nodeArgs)
                 new_args = cellfun(@(x) x.changeArrowExp(cond), obj.nodeArgs, 'UniformOutput', 0);
@@ -38,7 +54,7 @@ classdef EveryExpr < LustreExpr
             new_obj = EveryExpr(obj.nodeName, ...
                 new_args, obj.cond.changeArrowExp(cond));
         end
-        
+        %%
         function code = print(obj, backend)
             if BackendType.isKIND2(backend)
                 code = obj.print_kind2(backend);

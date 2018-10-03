@@ -34,6 +34,23 @@ classdef LustreEq < LustreAst
             end
             new_obj = LustreEq(new_lhs, new_rhs);
         end
+        %% This functions are used for ForIterator block
+        function [new_obj, varIds] = changePre2Var(obj)
+            varIds = {};
+            if iscell(obj.lhs)
+                [new_lhs, VarIdlhs] = obj.lhs{1}.changePre2Var();
+            else
+                [new_lhs, VarIdlhs] = obj.lhs.changePre2Var();
+            end
+            varIds = [varIds, VarIdlhs];
+            if iscell(obj.rhs)
+                [new_rhs, VarIdrhs] = obj.rhs{1}.changePre2Var();
+            else
+                [new_rhs, VarIdrhs] = obj.rhs.changePre2Var();
+            end
+            varIds = [varIds, VarIdrhs];
+            new_obj = LustreEq(new_lhs, new_rhs);
+        end
         
         function new_obj = changeArrowExp(obj, cond)
             if iscell(obj.rhs)
@@ -44,6 +61,7 @@ classdef LustreEq < LustreAst
             new_obj = LustreEq(obj.lhs, new_rhs);
         end
         
+        %%
         function code = print(obj, backend)
             %TODO: check if LUSTREC syntax is OK for the other backends.
             code = obj.print_lustrec(backend);

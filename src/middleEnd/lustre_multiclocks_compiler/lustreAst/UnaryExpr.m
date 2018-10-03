@@ -39,7 +39,21 @@ classdef UnaryExpr < LustreExpr
             end
             new_obj = UnaryExpr(obj.op, new_expr, obj.withPar);
         end
-        
+        %% This functions are used for ForIterator block
+        function [new_obj, varIds] = changePre2Var(obj)
+            if iscell(obj.expr)
+                v = obj.expr{1};
+            else
+                v = obj.expr;
+            end
+            if isequal(obj.op, UnaryExpr.PRE) && isa(v, 'VarIdExpr')
+                varIds{1} = v;
+                new_obj = VarIdExpr(strcat('_pre_', v.getId()));
+            else
+                [new_expr, varIds] = v.changePre2Var();
+                new_obj = UnaryExpr(obj.op, new_expr, obj.withPar);
+            end
+        end
         function new_obj = changeArrowExp(obj, cond)
             if iscell(obj.expr)
                 new_expr = cellfun(@(x) x.changeArrowExp(cond), obj.expr, 'UniformOutput', 0);
@@ -48,7 +62,7 @@ classdef UnaryExpr < LustreExpr
             end
             new_obj = UnaryExpr(obj.op, new_expr, obj.withPar);
         end
-        
+        %%
         function code = print(obj, backend)
             %TODO: check if LUSTREC syntax is OK for the other backends.
             code = obj.print_lustrec(backend);

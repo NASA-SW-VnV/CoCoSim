@@ -19,11 +19,15 @@ classdef AssertExpr < LustreExpr
         function new_obj = deepCopy(obj)
             new_obj = AssertExpr(obj.exp.deepCopy());
         end
-        
+        %% This functions are used for ForIterator block
+        function [new_obj, varIds] = changePre2Var(obj)
+            new_obj = obj;
+            varIds = {};
+        end
         function new_obj = changeArrowExp(obj, cond)
             new_obj = AssertExpr(obj.exp.changeArrowExp(cond));
         end
-        
+        %%
         function code = print(obj, backend)
             %TODO: check if KIND2 syntax is OK for the other backends.
             code = obj.print_kind2(backend);

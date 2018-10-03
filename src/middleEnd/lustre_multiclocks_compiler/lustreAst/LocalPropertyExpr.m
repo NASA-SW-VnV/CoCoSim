@@ -21,10 +21,16 @@ classdef LocalPropertyExpr < LustreExpr
                 obj.exp.deepCopy());
         end
         
+        %% This functions are used for ForIterator block
+        function [new_obj, varIds] = changePre2Var(obj)
+            new_obj = obj;
+            varIds = {};
+        end
         function new_obj = changeArrowExp(obj, ~)
             new_obj = obj;
         end
         
+        %%
         function code = print(obj, backend)
             if BackendType.isPRELUDE(backend)
                 code = obj.print_prelude();

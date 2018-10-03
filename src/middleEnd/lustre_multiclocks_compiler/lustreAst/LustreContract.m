@@ -68,11 +68,16 @@ classdef LustreContract < LustreAst
                 new_outputs, new_localVars, new_localEqs, ...
                 obj.islocalContract);
         end
-        
+        %% This functions are used for ForIterator block
+        function [new_obj, varIds] = changePre2Var(obj)
+            new_obj = obj;
+            varIds = {};
+        end
         function new_obj = changeArrowExp(obj, ~)
             new_obj = obj;
         end
         
+        %%
         function setBody(obj, localEqs)
             obj.localEqs = localEqs;
         end
