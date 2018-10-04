@@ -109,9 +109,9 @@ else
     pp_order_map(61) = {'pp2/blocks/ForEach_pp.m'};
     
     
-    
-    pp_order_map(70) = {'pp2/blocks/AtomicSubsystems_pp.m'};
-    pp_order_map(71) = {'pp2/blocks/ExpandNonAtomicSubsystems_pp.m'};
+    pp_order_map(70) = {'pp2/blocks/ForIterator_pp.m'};%It expands subsystems, it should be called before Atomic_pp
+    pp_order_map(71) = {'pp2/blocks/AtomicSubsystems_pp.m'};
+    pp_order_map(72) = {'pp2/blocks/ExpandNonAtomicSubsystems_pp.m'};
     
     pp_order_map(80) = {'pp2/blocks/Gain_pp.m'};
     pp_order_map(81) = {'pp2/blocks/FromWorkSpace_pp.m'};
