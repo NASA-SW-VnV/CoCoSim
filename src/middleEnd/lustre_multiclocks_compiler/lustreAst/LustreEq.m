@@ -38,11 +38,16 @@ classdef LustreEq < LustreAst
         function [new_obj, varIds] = changePre2Var(obj)
             varIds = {};
             if iscell(obj.lhs)
-                [new_lhs, VarIdlhs] = obj.lhs{1}.changePre2Var();
+                new_lhs = {};
+                for i=1:numel(obj.lhs)
+                    [new_lhs{i}, VarIdlhs_i] = obj.lhs{i}.changePre2Var();
+                    varIds = [varIds, VarIdlhs_i];
+                end
             else
                 [new_lhs, VarIdlhs] = obj.lhs.changePre2Var();
+                varIds = [varIds, VarIdlhs];
             end
-            varIds = [varIds, VarIdlhs];
+            
             if iscell(obj.rhs)
                 [new_rhs, VarIdrhs] = obj.rhs{1}.changePre2Var();
             else
