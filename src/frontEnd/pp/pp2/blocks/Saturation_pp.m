@@ -35,6 +35,7 @@ if ~ ( isempty( saturation_list ) )
             else
                 replace_one_block(saturation_list{i},'pp_lib/saturation');
             end
+            set_param(saturation_list{i}, 'LinkStatus', 'inactive');
             if ~LowerIsInf
                 set_param(strcat(saturation_list{i},'/lower_limit'),...
                     'Value',lower_limit);

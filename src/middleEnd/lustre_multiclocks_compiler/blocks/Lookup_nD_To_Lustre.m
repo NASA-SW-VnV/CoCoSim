@@ -100,6 +100,13 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
             if strcmp(blk.DataSpecification, 'Lookup table object')
                 obj.addUnsupported_options(sprintf('Lookup table object option for DataSpecification is not support in block %s', blk.Origin_path));
             end                
+            if NumberOfTableDimensions >= 3 ...
+                    && isequal(blk.TableDataTypeStr, 'Inherit: Same as output') ...
+                    && ~isequal(blk.CompiledPortDataTypes.Outport{1}, 'double') ...
+                    && ~isequal(blk.CompiledPortDataTypes.Outport{1}, 'single')
+                obj.addUnsupported_options(sprintf('Lookup table "%s" has a Table DataType set different from double/Single which is not supported for dimension greater than 2.', blk.Origin_path));
+            end
+                
             options = obj.unsupported_options;
         end
         %%
@@ -841,10 +848,24 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
             else
                 [blkParams.NumberOfTableDimensions, ~, ~] = ...
                     Constant_To_Lustre.getValueFromParameter(parent, blk, blk.NumberOfTableDimensions);
-                [blkParams.Table, ~, ~] = ...
-                    Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Table);
+                [T, ~, ~] = ...
+                    Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Table); 
+                validDT = {'double', 'single', 'int8', 'int16', ...
+                    'int32', 'uint8', 'uint16', 'uint32', 'boolean'};
+                if ismember(blk.CompiledPortDataTypes.Outport{1}, validDT)
+                    if isequal(blk.TableDataTypeStr, 'Inherit: Same as output')
+                        blkParams.Table = eval(sprintf('%s([%s])',blk.CompiledPortDataTypes.Outport{1}, mat2str(T)));
+                    elseif isequal(blk.TableDataTypeStr, 'double') ...
+                            || isequal(blk.TableDataTypeStr, 'single') ...
+                            || contains(blk.TableDataTypeStr, 'int') 
+                        blkParams.Table = eval(sprintf('%s([%s])',blk.TableDataTypeStr, mat2str(T)));
+                    else
+                        blkParams.Table = T;
+                    end
+                else
+                    blkParams.Table = T;
+                end
                 tableDims = size(blkParams.Table);
-                
                 if strcmp(blk.BreakpointsSpecification, 'Even spacing')
                     for i=1:blkParams.NumberOfTableDimensions
                         evalString = sprintf('[firstPoint, ~, ~] = Constant_To_Lustre.getValueFromParameter(parent, blk, blk.BreakpointsForDimension%dFirstPoint); ',i);
@@ -864,7 +885,20 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                         eval(evalString);
                     end
                 end
-                
+                %cast breakpoints
+                for i=1:blkParams.NumberOfTableDimensions
+                    T = blkParams.BreakpointsForDimension{i};
+                    dt = blk.(strcat('BreakpointsForDimension',num2str(i), 'DataTypeStr'));
+                    if ismember(blk.CompiledPortDataTypes.Inport{i}, validDT)
+                        if isequal(dt, 'Inherit: Same as corresponding input')
+                            blkParams.BreakpointsForDimension{i} = eval(sprintf('%s([%s])',blk.CompiledPortDataTypes.Inport{i}, mat2str(T)));
+                        elseif isequal(dt, 'double') ...
+                                || isequal(dt, 'single') ...
+                                || contains(dt, 'int') 
+                            blkParams.BreakpointsForDimension{i} = eval(sprintf('%s([%s])',dt, mat2str(T)));
+                        end
+                    end
+                end
                 blkParams.InterpMethod = blk.InterpMethod;
                 blkParams.ExtrapMethod = blk.ExtrapMethod;
                 blkParams.skipInterpolation = 0;

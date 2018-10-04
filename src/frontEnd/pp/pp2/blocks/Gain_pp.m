@@ -48,6 +48,7 @@ if not(isempty(Gain_list))
                 pp_name = 'gain_U_K';
             end
             replace_one_block(Gain_list{i},fullfile('pp_lib',pp_name));
+            set_param(Gain_list{i}, 'LinkStatus', 'inactive');
             set_param(strcat(Gain_list{i},'/K'),...
                 'Value',gain);
             set_param(strcat(Gain_list{i},'/K'),...

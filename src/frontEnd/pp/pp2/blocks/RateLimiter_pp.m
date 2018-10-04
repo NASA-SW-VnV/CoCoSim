@@ -28,6 +28,7 @@ if not(isempty(rateLimiter_list))
             Init = get_param(rateLimiter_list{i},'InitialCondition');
             % replace it
             replace_one_block(rateLimiter_list{i},'pp_lib/RateLimiter');
+            set_param(rateLimiter_list{i}, 'LinkStatus', 'inactive');
             %restore information
             set_param(strcat(...
                 rateLimiter_list{i} ,'/R'),...

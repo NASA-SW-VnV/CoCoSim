@@ -48,7 +48,9 @@ if not(isempty(SampleTimeMath_list))
             finalBlockName = 'Divide1';
         end
         pp_block_name = fullfile('pp_lib', strcat('SampleTimeMath', suffix));
+        
         replace_one_block(SampleTimeMath_list{i},pp_block_name);
+        set_param(SampleTimeMath_list{i}, 'LinkStatus', 'inactive');
         %set Value
         set_param(strcat(SampleTimeMath_list{i},'/weightValue'),'Value', weightValue);
         set_param(strcat(SampleTimeMath_list{i},'/Ts'),'Value', num2str(model_sample));

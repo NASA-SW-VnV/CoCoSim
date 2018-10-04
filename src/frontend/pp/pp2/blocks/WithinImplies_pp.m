@@ -28,6 +28,7 @@ if not(isempty(wimplies_list))
                 pp_name = 'WithinImpliesResetTrue';
             end
             replace_one_block(wimplies_list{i},fullfile('pp_lib',pp_name));
+            set_param(wimplies_list{i}, 'LinkStatus', 'inactive');
         catch
             status = 1;
             errors_msg{end + 1} = sprintf('WithinImplies pre-process has failed for block %s', wimplies_list{i});

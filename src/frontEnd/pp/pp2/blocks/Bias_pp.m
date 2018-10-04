@@ -26,6 +26,7 @@ if not(isempty(Bias_list))
             pp_name = 'bias';
             replace_one_block(Bias_list{i},fullfile('pp_lib',pp_name));
             set_param(Bias_list{i}, 'LinkStatus', 'inactive');
+            set_param(Bias_list{i}, 'LinkStatus', 'inactive');
             set_param(strcat(Bias_list{i},'/bias'),...
                 'Value',bias);
             set_param(strcat(Bias_list{i},'/Sum'),...

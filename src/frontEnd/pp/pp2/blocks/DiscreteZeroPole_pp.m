@@ -92,7 +92,7 @@ if not(isempty(dzp_list))
         
         % replacing
         replace_one_block(dzp_list{i},'pp_lib/DZP');
-        
+        set_param(dzp_list{i}, 'LinkStatus', 'inactive');
         %restoring info
         set_param(strcat(dzp_list{i},'/A'),...
             'Value',A);

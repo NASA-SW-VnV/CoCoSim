@@ -24,6 +24,7 @@ if not(isempty(Relay_list))
         OffOutputValue = get_param(Relay_list{i},'OffOutputValue' );
         
         replace_one_block(Relay_list{i},'pp_lib/relay');
+        set_param(Relay_list{i}, 'LinkStatus', 'inactive');
         set_param(strcat(Relay_list{i},'/OnSwitchValue'),'Value', OnSwitchValue);
         set_param(strcat(Relay_list{i},'/OffSwitchValue'),'Value', OffSwitchValue);
         set_param(strcat(Relay_list{i},'/OnOutputValue'),'Value', OnOutputValue);

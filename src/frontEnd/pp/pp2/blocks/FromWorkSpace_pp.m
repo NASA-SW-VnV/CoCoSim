@@ -24,11 +24,16 @@ if not(isempty(fromWorkSpace_list))
     %% pre-processing blocks
     for i=1:length(fromWorkSpace_list)
         try
-%            parent = get_param(fromWorkSpace_list{i}, 'Parent');
-%             parent_msktype = get_param(parent, 'MaskType');
-%             if isequal(parent_msktype, 'Sigbuilder block')
-%                 continue;
-%             end
+            
+            try
+                % checking if the parent is not signal Builder.
+                parent = get_param(fromWorkSpace_list{i}, 'Parent');
+                parent_msktype = get_param(parent, 'MaskType');
+                if isequal(parent_msktype, 'Sigbuilder block')
+                    continue;
+                end
+            catch
+            end
             display_msg(fromWorkSpace_list{i}, MsgType.INFO, ...
                 'FromWorkSpace_pp', '');
             
@@ -62,7 +67,7 @@ if not(isempty(fromWorkSpace_list))
             OutputAfterFinalValue = get_param(fromWorkSpace_list{i},'OutputAfterFinalValue');
             
             replace_one_block(fromWorkSpace_list{i},fullfile('pp_lib','FromWorkSpace'));
-            set_param(fromWorkSpace_list{i}, 'LinkStatus', 'inactive')
+            set_param(fromWorkSpace_list{i}, 'LinkStatus', 'inactive');
             % set digital clock sample time
             % The block 'FromWorkSpace_1_PP/From Workspace/D' does not permit continuous sample
             % time (0 or [0,0]) for the parameter 'SampleTime'.
@@ -86,24 +91,27 @@ if not(isempty(fromWorkSpace_list))
                 'InterpMethod',InterpMethod);
             OutDataTypeReplaceStr = outputDataType;
             if strcmp(outputDataType,'Inherit: auto')
-                OutDataTypeReplaceStr = 'Inherit: Inherit from table data'
+                OutDataTypeReplaceStr = 'Inherit: Inherit from table data';
             elseif strcmp(outputDataType,'boolean')
-                display_msg(me.getReport(), MsgType.DEBUG, 'FromWorkSpace', '');
+                msg = sprintf('FromWorkSpace pre-processing does not support Boolean output in block %s.', fromWorkSpace_list{i});
+                display_msg(msg, MsgType.DEBUG, 'FromWorkSpace', '');
                 status = 1;
-                errors_msg{end + 1} = sprintf('FromWorkspace pre-process has failed for block %s', fromWorkSpace_list{i});
+                errors_msg{end + 1} = msg;
                 continue;
             elseif strcmp(outputDataType,'Enum: <class name>')
-                display_msg(me.getReport(), MsgType.DEBUG, 'FromWorkSpace', '');
+                msg = sprintf('FromWorkspace pre-process has failed for block %s', fromWorkSpace_list{i});
+                display_msg(msg, MsgType.DEBUG, 'FromWorkSpace', '');
                 status = 1;
-                errors_msg{end + 1} = sprintf('FromWorkspace pre-process has failed for block %s', fromWorkSpace_list{i});
-                continue;                
+                errors_msg{end + 1} = msg;
+                continue;
             elseif strcmp(outputDataType,'Bus: <object name>')
-                display_msg(me.getReport(), MsgType.DEBUG, 'FromWorkSpace', '');
+                msg = sprintf('FromWorkspace pre-process has failed for block %s', fromWorkSpace_list{i});
+                display_msg(msg, MsgType.DEBUG, 'FromWorkSpace', '');
                 status = 1;
-                errors_msg{end + 1} = sprintf('FromWorkspace pre-process has failed for block %s', fromWorkSpace_list{i});
-                continue;                
+                errors_msg{end + 1} = msg;
+                continue;
             end
-                
+            
             set_param(strcat(fromWorkSpace_list{i},'/T'),...
                 'OutDataTypeStr',OutDataTypeReplaceStr);
             % ExtrapMethod
