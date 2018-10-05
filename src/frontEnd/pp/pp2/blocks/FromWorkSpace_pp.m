@@ -50,6 +50,22 @@ if not(isempty(fromWorkSpace_list))
                 continue;
             end
             
+            % assume VariableName_value is a 2D matrix
+            variableMatrix = VariableName_value;
+            % convert timeseries
+            if isa(VariableName_value,'timeseries')
+                [n,m] = size(VariableName_value.Data);
+                variableMatrix = zeros(n,m+1);
+                variableMatrix(:,1) = VariableName_value.Time;
+                variableMatrix(:,2:m+1) = VariableName_value.Data; 
+            elseif isstruct(VariableName_value)
+                [n,m] = size(VariableName_value.signals.values);
+                variableMatrix = zeros(n,m+1);
+                variableMatrix(:,1) = VariableName_value.time;
+                variableMatrix(:,2:m+1) = VariableName_value.signals.values;                 
+            end
+            % convert structure
+            
             SampleTime = get_param(fromWorkSpace_list{i},'SampleTime');
             [SampleTime_value, ~, status] = SLXUtils.evalParam(...
                 model, ...
@@ -71,7 +87,6 @@ if not(isempty(fromWorkSpace_list))
             % set digital clock sample time
             % The block 'FromWorkSpace_1_PP/From Workspace/D' does not permit continuous sample
             % time (0 or [0,0]) for the parameter 'SampleTime'.
-            %SampleTime = 0.2;
             if abs(SampleTime_value - 0.0) < 0.000001
                 SampleTime_value_str = '-1';
             else
@@ -81,7 +96,7 @@ if not(isempty(fromWorkSpace_list))
             set_param(strcat(fromWorkSpace_list{i},'/D'),...
                 'SampleTime',SampleTime_value_str);
             
-            [n,m] = size(VariableName_value);
+            [n,m] = size(variableMatrix);
             % set LookupTable interpolation method
             InterpMethod = 'Flat';
             if strcmp(Interpolate, 'on')
@@ -129,16 +144,16 @@ if not(isempty(fromWorkSpace_list))
                     % add last table data with y=0 if last break point is not
                     % at a simulation time
                     additionalData = zeros(1,m);
-                    additionalData(1,1) = VariableName_value(end,1);
-                    VariableName_value = [VariableName_value; additionalData];
-                    dt = VariableName_value(end,1) - VariableName_value(end-1,1);
-                    VariableName_value(end-1,1) = VariableName_value(end,1) - 0.00000001*dt;
+                    additionalData(1,1) = variableMatrix(end,1);
+                    variableMatrix = [variableMatrix; additionalData];
+                    dt = variableMatrix(2,1) - variableMatrix(1,1);
+                    variableMatrix(end-1,1) = variableMatrix(end,1) - 0.00000001*dt;
                 else
                     ExtrapMethod = 'Clip';
                     set_param(strcat(fromWorkSpace_list{i},'/T'),...
                         'UseLastTableValue','on');
                     
-                    VariableName_value(n,2:m) = 0.;
+                    variableMatrix(n,2:m) = 0.;
                 end
                 
             end
@@ -156,9 +171,9 @@ if not(isempty(fromWorkSpace_list))
                 'ExtrapMethod',ExtrapMethod);
             
             % set LookupTable breakpoints and data
-            table = mat2str(VariableName_value(:,2:m));
+            table = mat2str(variableMatrix(:,2:m));
             set_param(strcat(fromWorkSpace_list{i},'/T'),...
-                'BreakpointsForDimension1',mat2str(VariableName_value(:,1)));
+                'BreakpointsForDimension1',mat2str(variableMatrix(:,1)));
             set_param(strcat(fromWorkSpace_list{i},'/T'),...
                 'Table',table);
             

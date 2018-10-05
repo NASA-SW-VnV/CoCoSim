@@ -134,14 +134,16 @@ classdef FromWorkspace_To_Lustre < Block_To_Lustre
                 obj.addUnsupported_options(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
                     VariableName, blk.Origin_path));
             end
-            t = [0, 0];
-            if isnumeric(variable)
-                t = variable(:,1);
-            elseif isstruct(variable)
-                t = variable.time;
-            else
+%             t = [0, 0];
+%             if isnumeric(variable)
+%                 t = variable(:,1);
+%             elseif isstruct(variable)
+%                 t = variable.time;
+%             elseif isa(variable,'timeseries')
+%                 t = variable.Time;
+            if ~isnumeric(variable) & ~isstruct(variable) & ~isa(variable,'timeseries')
                 obj.addUnsupported_options(...
-                    sprintf('Workspace variable must be numeric arrays or struct in block %s',...
+                    sprintf('Workspace variable must be numeric arrays, time series or struct with time and data in block %s',...
                     blk.Origin_path));
             end
             %unsupported options
