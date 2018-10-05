@@ -27,6 +27,20 @@ end
 if ~exist('backend', 'var') || isempty(backend)
     backend = BackendType.LUSTREC; 
 end
+forceGeneration = 0;
+for i=1:numel(varargin)
+    if strcmp(varargin{i}, 'forceCodeGen')
+        forceGeneration = 1;
+    end
+end
+if ~forceGeneration
+    try
+        forceGeneration = evalin('base', 'cocosim_force');
+    catch
+        forceGeneration = 0;
+    end
+end
+    
 %% initialize outputs
 nom_lustre_file = '';
 xml_trace = [];
@@ -42,7 +56,7 @@ persistent ToLustre_datenum_map;
 if isempty(ToLustre_datenum_map)
     ToLustre_datenum_map = containers.Map('KeyType', 'char', 'ValueType', 'char');
 end
-if isKey(ToLustre_datenum_map, model_path)
+if ~forceGeneration && isKey(ToLustre_datenum_map, model_path)
     nom_lustre_file = ToLustre_datenum_map(model_path);
     if BUtils.isLastModified(model_path, nom_lustre_file)
         mat_file = regexprep(nom_lustre_file, '.lus$', '.mat');
