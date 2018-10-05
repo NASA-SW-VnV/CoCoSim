@@ -65,6 +65,14 @@ end
 
 
 if ~already_pp; delete(new_file_path); end
+if ~already_pp; copyfile(model_path, new_file_path); end
+display_msg(['Loading ' new_file_path ], MsgType.INFO, 'PP', '');
+load_system(new_file_path);
+%% Make sure model compile
+status = CompileModelCheck_pp( new_model_base );
+if status
+    return;
+end
 %% check if there is no need for pre-processing if the model was not changed from the last pp.
 if already_pp
     if isKey(pp_datenum_map, new_file_path)
@@ -95,9 +103,6 @@ end
 
 
 %% Creating a cache copy to process
-if ~already_pp; copyfile(model_path, new_file_path); end
-display_msg(['Loading ' new_file_path ], MsgType.INFO, 'PP', '');
-load_system(new_file_path);
 if ~already_pp
     hws = get_param(new_model_base, 'modelworkspace') ;
     hws.assignin('already_pp', 1);

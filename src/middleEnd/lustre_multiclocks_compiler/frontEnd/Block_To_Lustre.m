@@ -141,7 +141,7 @@ classdef Block_To_Lustre < handle
         % e.g Inport block is trivial and does not need a code, its name is given
         % in the node signature.
         function b = ignored(blk)
-            % add blocks that will be ignored because they are supported 
+            % add blocks that will be ignored because they are supported
             % somehow implicitly or not important for Code generation and Verification.
             blksIgnored = {'Inport', 'Terminator', 'Scope', 'Display', ...
                 'EnablePort','ActionPort', 'ResetPort', 'TriggerPort', ...
@@ -169,9 +169,32 @@ classdef Block_To_Lustre < handle
                 && ~ismember(masktype, blksWithNoOutputsButNotIgnored) ...
                 && hasNoOutpot);
         end
+        
+        %% find_system: look for blocks inside a struct using parameters such as BlcokType, MaskType.
+        % e.g blks = Block_To_Lustre.find_blocks(ss, 'BlockType', 'UnitDelay', 'StateName', 'X')
+        function blks = find_blocks(ss, varargin)
+            blks = {};
+            doesMatch = true;
+            for i=1:2:numel(varargin)
+                if ~(isfield(ss, varargin{i}) && isequal(ss.BlockType, varargin{i+1}))
+                    doesMatch = false;
+                    break;
+                end
+            end
+            if doesMatch
+                blks{1} = ss;
+            end
+            if isfield(ss, 'Content') && ~isempty(ss.Content)
+                field_names = fieldnames(ss.Content);
+                for i=1:numel(field_names)
+                    blks_i = Block_To_Lustre.find_blocks(ss.Content.(field_names{i}), varargin{:});
+                    blks = [blks, blks_i];
+                end
+            end
+            
+        end
+        
     end
-    
-    
     
 end
 

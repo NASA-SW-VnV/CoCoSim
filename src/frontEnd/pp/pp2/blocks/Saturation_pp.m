@@ -44,24 +44,32 @@ if ~ ( isempty( saturation_list ) )
                 set_param(strcat(saturation_list{i},'/upper_limit'),...
                     'Value',upper_limit);
             end
-            if ~contains(outputDataType, 'Same as input')
-                if ~UpperIsInf
-                    set_param(strcat(saturation_list{i},'/upper_limit'),...
-                        'OutDataTypeStr',outputDataType);
-                end
-                if ~LowerIsInf
-                    set_param(strcat(saturation_list{i},'/lower_limit'),...
-                        'OutDataTypeStr',outputDataType);
-                end
-            else
+            if isequal(outputDataType, 'Inherit: Same as input')
                 %Inherit: Inherit via back propagation
                 if ~UpperIsInf
+                    set_param(strcat(saturation_list{i},'/upper'),...
+                        'OutDataTypeStr','Inherit: Inherit via back propagation');
                     set_param(strcat(saturation_list{i},'/upper_limit'),...
                         'OutDataTypeStr','Inherit: Inherit via back propagation');
                 end
                 if ~LowerIsInf
+                    set_param(strcat(saturation_list{i},'/lower'),...
+                        'OutDataTypeStr','Inherit: Inherit via back propagation');
                     set_param(strcat(saturation_list{i},'/lower_limit'),...
                         'OutDataTypeStr','Inherit: Inherit via back propagation');
+                end
+            else
+                if ~UpperIsInf
+                    set_param(strcat(saturation_list{i},'/upper'),...
+                        'OutDataTypeStr',outputDataType);
+                    set_param(strcat(saturation_list{i},'/upper_limit'),...
+                        'OutDataTypeStr',outputDataType);
+                end
+                if ~LowerIsInf
+                    set_param(strcat(saturation_list{i},'/lower'),...
+                        'OutDataTypeStr',outputDataType);
+                    set_param(strcat(saturation_list{i},'/lower_limit'),...
+                        'OutDataTypeStr',outputDataType);
                 end
             end
         catch

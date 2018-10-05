@@ -17,15 +17,17 @@ try
     
     code_off=sprintf('%s([], [], [], ''term'')', new_model_base);
     evalin('base',code_off);
-%     warning on;
+    %     warning on;
 catch
-    code_off=sprintf('%s([], [], [], ''term'')', new_model_base);
-    evalin('base',code_off);
-    warning on;
+    try
+        code_off=sprintf('%s([], [], [], ''term'')', new_model_base);
+        evalin('base',code_off);
+    catch
+    end
     status = 1;
     msg = sprintf('Make sure model "%s" can be compiled', new_model_base);
     errordlg(msg, 'CoCoSim_PP') ;
-    errors_msg{end + 1} = sprintf('CompileModelCheck pre-process has failed ');
+    errors_msg{end + 1} = sprintf('The model can not be compiled. Make sure it compiles.');
 end
 end
 
