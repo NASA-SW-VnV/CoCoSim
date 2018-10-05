@@ -51,6 +51,7 @@ Hamza:  Abs,
         EnablePort,
         Fcn (full support to Lustre directly)
         ForEach (pp),
+        ForIterator (Limited support),
         From,
         Ground,
         If,
@@ -100,8 +101,8 @@ Not supported yet:
 
 
 Blocks difficult to support:
-    ForIterator, WhileIterator: executes a subsystem many times in the same 
-                time step. Impossible to support in Lustre.
+    WhileIterator: executes a subsystem many times in the same 
+                time step. Impossible to support in Lustre if the number of iterations is not known.
     S-Function: If it is C or Matlab code, it's hard to support.
                 many basic blocks in Simulink has S-Function BlockType, we 
                 support them using their MaskType (such as 'Bitwise Operator', 
