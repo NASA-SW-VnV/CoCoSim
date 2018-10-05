@@ -48,14 +48,17 @@ if isKey(ToLustre_datenum_map, model_path)
         mat_file = regexprep(nom_lustre_file, '.lus$', '.mat');
         if exist(mat_file, 'file')
             M = load(mat_file);
-            xml_trace = M.xml_trace;
-            status = M.status;
-            unsupportedOptions = M.unsupportedOptions;
-            abstractedBlocks = M.abstractedBlocks;
-            pp_model_full_path = M.pp_model_full_path;
-            display_msg('Skipping Lustre generation step. Using previously generated code, no modifications have been made to the model.',...
-                MsgType.RESULT, 'ToLustre', '');
-            return;
+            if exist(M.pp_model_full_path, 'file') ...
+                    && BUtils.isLastModified(M.pp_model_full_path, nom_lustre_file)
+                xml_trace = M.xml_trace;
+                status = M.status;
+                unsupportedOptions = M.unsupportedOptions;
+                abstractedBlocks = M.abstractedBlocks;
+                pp_model_full_path = M.pp_model_full_path;
+                display_msg('Skipping Lustre generation step. Using previously generated code, no modifications have been made to the model.',...
+                    MsgType.RESULT, 'ToLustre', '');
+                return;
+            end
         end
     end
 end
