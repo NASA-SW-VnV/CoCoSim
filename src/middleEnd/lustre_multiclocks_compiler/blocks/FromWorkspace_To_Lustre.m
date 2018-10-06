@@ -12,118 +12,123 @@ classdef FromWorkspace_To_Lustre < Block_To_Lustre
     
     methods
         
-        function  write_code(varargin)
+        function  write_code(obj, parent, blk, xml_trace, ~, backend, varargin)
+  
+            model_name = strsplit(blk.Origin_path, '/');
+            model_name = model_name{1};
+            SampleTime = SLXUtils.getModelCompiledSampleTime(model_name);
+            
+            interpolate = 1;
+            if strcmp(blk.Interpolate, 'off')
+                interpolate = 0;
+            end
+            
+            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+            outputDataType = blk.CompiledPortDataTypes.Outport{1};                        
+            VariableName = blk.VariableName;
+            [variable, ~, status] = ...
+                Constant_To_Lustre.getValueFromParameter(parent, blk, VariableName);
+            if status
+                display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
+                    VariableName, blk.Origin_path), ...
+                    MsgType.ERROR, 'Constant_To_Lustr', '');
+                return;
+            end
+            [outLusDT, zero, ~] = SLX2LusUtils.get_lustre_dt(outputDataType);
+                                                
+            if isnumeric(variable)
+                % for matrix
+                [nrow, ncol] = size(variable);
+                t = variable(:,1);
+                values = variable(:,2:ncol);
+                dims = ncol - 1;
+            elseif isa(variable,'timeseries')
+                [n,m] = size(variable.Data);
+                t = variable.Time;
+                values = variable.Data;   
+                dims = m;
+            elseif isstruct(variable)
+                % for struct
+                t = variable.time;
+                nrow = numel(t);
+                values = variable.signals.values;
+                dims = variable.signals.dimensions;
+            else
+                display_msg(sprintf('Workspace variable must be numeric arrays or struct in block %s',...
+                    blk.Origin_path), MsgType.ERROR, 'FromWorkspace_To_Lustre', '');
+                return;
+            end
+
+            blk_name = SLX2LusUtils.node_name_format(blk);
+            codeAst_all = {};
+            vars_all = {};   
+            simTime = VarIdExpr(SLX2LusUtils.timeStepStr());    % modify to do cyclic repetition?
+            for i=1:dims  
+
+                time_array = t';
+                data_array = values(:,i)';
+                
+                if numel(t) == 1      % constant case, add another point
+                    t1000 = t(1) + 1000.;
+                    time_array = [time_array, t1000];
+                    data_array = [data_array(1), data_array(1)];                    
+                end
+                
+                % Add data for t = 0. if none using linear extrapolation of
+                % first 2 data points
+                if time_array(1) > 0.
+
+                    if interpolate    % add 1 point at time 0
+                        x = [time_array(1), time_array(2)];
+                        y = [data_array(1), data_array(2)];
+                        d0 = interp1(x, y, 0.,'linear','extrap');                        
+                        time_array = [0., time_array];
+                        data_array = [d0, data_array];
+                    else  % add 2 data points
+                        time_array = [0., time_array(1), time_array];
+                        data_array = [0., 0.,  data_array];                        
+                    end
+                end
+                
+                % handling blk.OutputAfterFinalValue
+                t_final = time_array(end)*1.e3;
+                if strcmp(blk.OutputAfterFinalValue, 'Extrapolation')
+                    x = [time_array(end-1), time_array(end)];
+                    y = [data_array(end-1), data_array(end)];
+                    df = interp1(x, y, t_final,'linear','extrap');
+                    time_array = [time_array, t_final];
+                    data_array = [data_array, df];
+                elseif strcmp(blk.OutputAfterFinalValue, 'Setting to zero')
+                    t_next = time_array(end)+0.5*SampleTime;
+                    time_array = [time_array, t_next];
+                    data_array = [data_array, 0.0];                    
+                    time_array = [time_array, t_final];
+                    data_array = [data_array, 0.0];
+                elseif strcmp(blk.OutputAfterFinalValue, 'Holding final value')
+                    time_array = [time_array, t_final];
+                    data_array = [data_array, data_array(end)];
+                else   % Cyclic repetition not supported
+                    display_msg(sprintf('Option %s is not supported in block %s',...
+                        blk.OutputAfterFinalValue, blk.Origin_path), ...
+                        MsgType.ERROR, 'FromWorkspace_To_Lustre', '');
+                    return;
+                end
+                
+                if numel(outputs) >= i    
+                    [codeAst, vars] = ...
+                        Sigbuilderblock_To_Lustre.interpTimeSeries(...
+                        outputs{i},time_array, data_array, ...
+                        blk_name,i,interpolate, simTime);
+                 
+                    codeAst_all = [codeAst_all codeAst];
+                    vars_all = [vars_all vars];
+                end
+            end
+            
+            obj.setCode( codeAst_all );      
+            obj.addVariable(outputs_dt);
+            obj.addVariable(vars_all);       
         end
-%             model_name = strsplit(blk.Origin_path, '/');
-%             model_name = model_name{1};
-%             SampleTime = SLXUtils.getModelCompiledSampleTime(model_name);
-%             
-% %             interpolate = 1;
-% %             if strcmp(blk.Interpolate, 'off')
-% %                 interpolate = 0;
-% %             end
-% %             
-% %             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
-% %             outputDataType = blk.CompiledPortDataTypes.Outport{1};                        
-% %             VariableName = blk.VariableName;
-% %             [variable, ~, status] = ...
-% %                 Constant_To_Lustre.getValueFromParameter(parent, blk, VariableName);
-% %             if status
-% %                 display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
-% %                     VariableName, blk.Origin_path), ...
-% %                     MsgType.ERROR, 'Constant_To_Lustr', '');
-% %                 return;
-% %             end
-% %             [outLusDT, zero, ~] = SLX2LusUtils.get_lustre_dt(outputDataType);
-% %                                                 
-% %             if isnumeric(variable)
-% %                 % for matrix
-% %                 [nrow, ncol] = size(variable);
-% %                 t = variable(:,1);
-% %                 values = variable(:,2:ncol);
-% %                 dims = ncol - 1;
-% %             elseif isstruct(variable)
-% %                 % for struct
-% %                 t = variable.time;
-% %                 nrow = numel(t);
-% %                 values = variable.signals.values;
-% %                 dims = variable.signals.dimensions;
-% %             else
-% %                 display_msg(sprintf('Workspace variable must be numeric arrays or struct in block %s',...
-% %                     blk.Origin_path), MsgType.ERROR, 'FromWorkspace_To_Lustre', '');
-% %                 return;
-% %             end
-% % 
-% %             blk_name = SLX2LusUtils.node_name_format(blk);
-% %             codeAst_all = {};
-% %             vars_all = {};   
-% %             simTime = VarIdExpr(SLX2LusUtils.timeStepStr());    % modify to do cyclic repetition?
-% %             for i=1:dims  
-% % 
-% %                 time_array = t';
-% %                 data_array = values(:,i)';
-% %                 
-% %                 if numel(t) == 1      % constant case, add another point
-% %                     t1000 = t(1) + 1000.;
-% %                     time_array = [time_array, t1000];
-% %                     data_array = [data_array(1), data_array(1)];                    
-% %                 end
-% %                 
-% %                 % Add data for t = 0. if none using linear extrapolation of
-% %                 % first 2 data points
-% %                 if time_array(1) > 0.
-% % 
-% %                     if interpolate    % add 1 point at time 0
-% %                         x = [time_array(1), time_array(2)];
-% %                         y = [data_array(1), data_array(2)];
-% %                         d0 = interp1(x, y, 0.,'linear','extrap');                        
-% %                         time_array = [0., time_array];
-% %                         data_array = [d0, data_array];
-% %                     else  % add 2 data points
-% %                         time_array = [0., time_array(1), time_array];
-% %                         data_array = [0., 0.,  data_array];                        
-% %                     end
-% %                 end
-% %                 
-% %                 % handling blk.OutputAfterFinalValue
-% %                 t_final = time_array(end)*1.e3;
-% %                 if strcmp(blk.OutputAfterFinalValue, 'Extrapolation')
-% %                     x = [time_array(end-1), time_array(end)];
-% %                     y = [data_array(end-1), data_array(end)];
-% %                     df = interp1(x, y, t_final,'linear','extrap');
-% %                     time_array = [time_array, t_final];
-% %                     data_array = [data_array, df];
-% %                 elseif strcmp(blk.OutputAfterFinalValue, 'Setting to zero')
-% %                     t_next = time_array(end)+0.5*SampleTime;
-% %                     time_array = [time_array, t_next];
-% %                     data_array = [data_array, 0.0];                    
-% %                     time_array = [time_array, t_final];
-% %                     data_array = [data_array, 0.0];
-% %                 elseif strcmp(blk.OutputAfterFinalValue, 'Holding final value')
-% %                     time_array = [time_array, t_final];
-% %                     data_array = [data_array, data_array(end)];
-% %                 else   % Cyclic repetition not supported
-% %                     display_msg(sprintf('Option %s is not supported in block %s',...
-% %                         blk.OutputAfterFinalValue, blk.Origin_path), ...
-% %                         MsgType.ERROR, 'FromWorkspace_To_Lustre', '');
-% %                     return;
-% %                 end
-% %                 
-% %                 if numel(outputs) >= i    
-% %                     [codeAst, vars] = ...
-% %                         Sigbuilderblock_To_Lustre.interpTimeSeries(...
-% %                         outputs{i},time_array, data_array, ...
-% %                         blk_name,i,interpolate, simTime);
-% %                  
-% %                     codeAst_all = [codeAst_all codeAst];
-% %                     vars_all = [vars_all vars];
-% %                 end
-% %             end
-% %             
-% %             obj.setCode( codeAst_all );      
-% %             obj.addVariable(outputs_dt);
-% %             obj.addVariable(vars_all);       
-%         end
         %%
         function options = getUnsupportedOptions(obj, parent, blk, varargin)
             obj.unsupported_options = {};

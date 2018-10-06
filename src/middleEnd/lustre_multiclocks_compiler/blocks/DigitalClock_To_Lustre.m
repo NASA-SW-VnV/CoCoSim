@@ -15,17 +15,9 @@ classdef DigitalClock_To_Lustre < Block_To_Lustre
         function  write_code(obj, parent, blk, xml_trace, main_sampleTime, varargin)
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             obj.addVariable(outputs_dt);
-            [digitalsampleTime, ~, status] = ...
-                Constant_To_Lustre.getValueFromParameter(parent, blk, blk.SampleTime);
-            if status
-                display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
-                    blk.SampleTime, blk.Origin_path), ...
-                    MsgType.ERROR, 'Constant_To_Lustre', '');
-                return;
-            end
             
             % normalize digitalsampleTime to number of steps
-            digitalsampleTime = digitalsampleTime / main_sampleTime(1);
+            digitalsampleTime = blk.CompiledSampleTime(1) / main_sampleTime(1);
             realTime =  VarIdExpr(SLX2LusUtils.timeStepStr());
             
             

@@ -31,7 +31,7 @@ classdef Sigbuilderblock_To_Lustre < Block_To_Lustre
             obj.setCode(codeAst);
         end
         
-        function options = getUnsupportedOptions(obj, varargin)
+        function options = getUnsupportedOptions(obj, parent, blk, varargin)
             % add your unsuported options list here
             options = obj.unsupported_options;
             
