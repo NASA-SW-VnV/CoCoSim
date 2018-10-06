@@ -19,7 +19,6 @@ classdef SLX2Lus_Trace < handle
         current_inputs;
         current_outputs;
         current_variables;
-        current_properties;
     end
     
     methods
@@ -118,12 +117,6 @@ classdef SLX2Lus_Trace < handle
             obj.current_variables = element;
         end
         
-        % local properties management
-        function element = create_Properties_Element(obj)
-            element = obj.traceDOM.createElement('PropList');
-            obj.current_node.appendChild(element);
-            obj.current_properties = element;
-        end
         
         function element = add_InputOutputVar(obj, type, var_name, originPath, port, width, index, isInsideContract, IsNotInSimulink)
             if ~exist('IsNotInSimulink', 'var')
@@ -181,11 +174,11 @@ classdef SLX2Lus_Trace < handle
                 origin_path, ContractName, PropertyName, PropertyIndex, propertyType)
             element = obj.traceDOM.createElement('Property');
             element.setAttribute('PropertyType', propertyType);
-            element.appendChild(obj.create_Text_Node('OriginPath', origin_path));
-            element.appendChild(obj.create_Text_Node('ContractName', ContractName));
-            element.appendChild(obj.create_Text_Node('PropertyName', PropertyName));
-            element.appendChild(obj.create_Text_Node('Index', num2str(PropertyIndex)));
-             obj.current_properties.appendChild(element);
+            element.setAttribute('OriginPath', origin_path);
+            element.setAttribute('ParentName', ContractName);
+            element.setAttribute('PropertyName', PropertyName);
+            %element.appendChild(obj.create_Text_Node('Index', num2str(PropertyIndex)));
+            obj.traceRootNode.appendChild(element);
             %JSON
             s = struct();
             s.OriginPath = origin_path;

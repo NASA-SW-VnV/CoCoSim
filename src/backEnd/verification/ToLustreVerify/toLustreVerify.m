@@ -40,8 +40,16 @@ load_system(pp_model_full_path);
 [~, model, ~] = fileparts(pp_model_full_path);
 Assertions_list = find_system(model, ...
     'LookUnderMasks', 'all', 'BlockType','Assertion');
+if ~isempty(Assertions_list)
+    enableParams = get_param(Assertions_list, 'Enabled');
+    Assertions_list = Assertions_list(strcmp(enableParams, 'on'));
+end
 ProofObjective_list = find_system(model, ...
     'LookUnderMasks', 'all', 'MaskType', 'Design Verifier Proof Objective');
+if ~isempty(ProofObjective_list)
+    enableParams = get_param(ProofObjective_list, 'enabled');
+    ProofObjective_list = ProofObjective_list(strcmp(enableParams, 'on'));
+end
 Assertions_list = [Assertions_list; ProofObjective_list];
 contractBlocks_list = find_system(model, ...
     'LookUnderMasks', 'all',  'MaskType', 'ContractBlock');
