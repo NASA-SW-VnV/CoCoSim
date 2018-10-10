@@ -51,7 +51,7 @@ classdef BinaryExpr < LustreExpr
                 obj.addEpsilon = addEpsilon;
             end
             if ~exist('epsilon', 'var') || isempty(epsilon)
-                obj.epsilon = 1e-15;
+                obj.epsilon = [];
             else
                 obj.epsilon = epsilon;
             end
@@ -107,6 +107,15 @@ classdef BinaryExpr < LustreExpr
                     epsilonOp = BinaryExpr.LTE;
                 else
                     epsilonOp = BinaryExpr.GT;
+                end
+                if isempty(obj.epsilon)
+                    if isa(obj.left, 'RealExpr')
+                        obj.epsilon = eps(obj.left.getValue());
+                    elseif isa(obj.right, 'RealExpr')
+                        obj.epsilon = eps(obj.right.getValue());
+                    else
+                        obj.epsilon = 1e-15;
+                    end
                 end
                 code = sprintf('((%s %s %s) and abs_real(%s - %s) %s %.30f)', ...
                     obj.left.print(backend),...

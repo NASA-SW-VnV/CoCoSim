@@ -14,7 +14,11 @@ classdef RealExpr < LustreExpr
         function obj = RealExpr(v)
             obj.value = v;
         end
-        
+        %%
+        function v = getValue(obj)
+            v = obj.value;
+        end
+        %%
         function new_obj = deepCopy(obj)
             new_obj = RealExpr(obj.value);
         end
