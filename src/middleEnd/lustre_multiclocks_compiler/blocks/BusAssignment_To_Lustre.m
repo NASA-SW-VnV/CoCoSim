@@ -12,15 +12,73 @@ classdef BusAssignment_To_Lustre < Block_To_Lustre
     methods
         
         function  write_code(obj, parent, blk, xml_trace, varargin)
-            isInsideContract = SLX2LusUtils.isContractBlk(parent);
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
-            if ~isInsideContract, obj.addVariable(outputs_dt);end
+            obj.addVariable(outputs_dt);
             widths = blk.CompiledPortWidths.Inport;
             inputs = cell(1, numel(widths));
             for i=1:numel(widths)
                 inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
             end
-            
+            try
+                [SignalsInputsMap, AssignedSignals] = obj.getSignalMap(blk, inputs);
+            catch me
+                if strcmp(me.identifier, 'COCOSIM:BusSelector_To_Lustre') ...
+                        || strcmp(me.identifier, 'COCOSIM:BusAssignment_To_Lustre')
+                    display_msg(me.message, MsgType.ERROR, 'BusAssignment_To_Lustre', '');
+                    return;
+                end
+            end
+            modifiedInputs = inputs{1};
+            for i=1:numel(AssignedSignals)
+                if isKey(SignalsInputsMap, AssignedSignals{i})
+                    inputs_i = SignalsInputsMap(AssignedSignals{i});
+                else
+                    display_msg(sprintf('Block %s with type %s is not supported.',...
+                        blk.Origin_path, AssignedSignals{i}),...
+                        MsgType.ERROR, 'BusAssignment_To_Lustre', '');
+                    continue;
+                end
+                for j=1:numel(inputs_i)
+                    idx = BusAssignment_To_Lustre.findIdx(modifiedInputs, inputs_i{j});
+                    modifiedInputs{idx} = ...
+                        inputs{i+1}{j};
+                end
+            end
+            codes = cell(1, numel(outputs));
+            for i=1:numel(outputs)
+                codes{i} = LustreEq(outputs{i}, modifiedInputs{i});
+            end
+            obj.setCode( codes );
+        end
+        %%
+        function options = getUnsupportedOptions(obj, parent, blk, varargin)
+            widths = blk.CompiledPortWidths.Inport;
+            inputs = cell(1, numel(widths));
+            for i=1:numel(widths)
+                inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
+            end
+            try
+                [SignalsInputsMap, AssignedSignals] = obj.getSignalMap(blk, inputs);
+                for i=1:numel(AssignedSignals)
+                    if ~isKey(SignalsInputsMap, AssignedSignals{i})
+                        obj.addUnsupported_options(sprintf('Block %s with type %s is not supported.',...
+                            blk.Origin_path, AssignedSignals{i}));
+                    end
+                end
+            catch me
+                if strcmp(me.identifier, 'COCOSIM:BusSelector_To_Lustre') ...
+                        || strcmp(me.identifier, 'COCOSIM:BusAssignment_To_Lustre')
+                    obj.addUnsupported_options(me.message);
+                end
+            end
+            options = obj.unsupported_options;
+        end
+        %%
+        function is_Abstracted = isAbstracted(varargin)
+            is_Abstracted = false;
+        end
+        %%
+        function [SignalsInputsMap, AssignedSignals] = getSignalMap(obj, blk, inputs)
             % everything is inlined
             InportDimensions = blk.CompiledPortDimensions.Inport;
             InputSignals = blk.InputSignals;
@@ -44,56 +102,22 @@ classdef BusAssignment_To_Lustre < Block_To_Lustre
                     % case of bus object
                     inport_cell_dimension = SLX2LusUtils.getDimensionsFromBusObject(InportDT);
                 else
-                    display_msg(sprintf('Block %s with type %s is not supported.', ...
-                        blk.Origin_path,InportDT ),...
-                        MsgType.ERROR, 'BusSelector_To_Lustre', '');
-                    return;
+                    ME = MException('COCOSIM:BusAssignment_To_Lustre', ...
+                        'Block %s with type %s is not supported.', ...
+                        blk.Origin_path, InportDT);
+                    throw(ME);
                 end
             end
-            [SignalsInputsMap, status] = BusSelector_To_Lustre.signalInputsUsingDimensions(...
-                inport_cell_dimension, inputSignalsInlined, inputs{1});
-            if status
-                display_msg(sprintf('Block %s is not supported.', blk.Origin_path),...
-                    MsgType.ERROR, 'BusSelector_To_Lustre', '');
-                return;
-            end
-            modifiedInputs = inputs{1};
-            for i=1:numel(AssignedSignals)
-                if isKey(SignalsInputsMap, AssignedSignals{i})
-                    inputs_i = SignalsInputsMap(AssignedSignals{i});
-                else
-                    display_msg(sprintf('Block %s with type %s is not supported.',...
-                        blk.Origin_path, AssignedSignals{i}),...
-                        MsgType.ERROR, 'BusSelector_To_Lustre', '');
-                    continue;
-                end
-                for j=1:numel(inputs_i)
-                    idx = BusAssignment_To_Lustre.findIdx(modifiedInputs, inputs_i{j});
-                    modifiedInputs{idx} = ...
-                        inputs{i+1}{j};
-                end
-            end
-            codes = cell(1, numel(outputs));
-            for i=1:numel(outputs)
-                codes{i} = LustreEq(outputs{i}, modifiedInputs{i});
-            end
-            obj.setCode( codes );
-        end
-        
-        function options = getUnsupportedOptions(obj,  varargin)
-            options = obj.unsupported_options;
-        end
-        %%
-        function is_Abstracted = isAbstracted(varargin)
-            is_Abstracted = false;
+            SignalsInputsMap = BusSelector_To_Lustre.signalInputsUsingDimensions(...
+                blk, inport_cell_dimension, inputSignalsInlined, inputs{1});
         end
     end
-  
+    
     methods(Static)
         function idx = findIdx(VarIds, var)
-           varNames = cellfun(@(x) x.getId(), VarIds, 'UniformOutput', 0); 
-           varName = var.getId();
-           idx = strcmp(varNames, varName);
+            varNames = cellfun(@(x) x.getId(), VarIds, 'UniformOutput', 0);
+            varName = var.getId();
+            idx = strcmp(varNames, varName);
         end
     end
     

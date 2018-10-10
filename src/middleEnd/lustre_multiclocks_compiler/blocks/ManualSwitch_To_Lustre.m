@@ -14,9 +14,8 @@ classdef ManualSwitch_To_Lustre < Block_To_Lustre
     methods
         
         function  write_code(obj, parent, blk, xml_trace, varargin)
-            isInsideContract = SLX2LusUtils.isContractBlk(parent);
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
-            if ~isInsideContract, obj.addVariable(outputs_dt);end
+            obj.addVariable(outputs_dt);
             
             
             

@@ -107,25 +107,21 @@ classdef BusSelector_To_Lustre < Block_To_Lustre
                     throw(ME);
                 end
             end
-            [SignalsInputsMap, status] = BusSelector_To_Lustre.signalInputsUsingDimensions(...
-                inport_cell_dimension, inputSignalsInlined, inputs, OutputSignals_Width_Map);
-            if status
-                ME = MException('COCOSIM:BusSelector_To_Lustre', ...
-                    'Block %s is not supported.', blk.Origin_path);
-                throw(ME);
-            end
+            SignalsInputsMap = BusSelector_To_Lustre.signalInputsUsingDimensions(...
+                blk, inport_cell_dimension, inputSignalsInlined, inputs, OutputSignals_Width_Map);
+            
         end
     end
     
     methods(Static)
-        function [SignalsInputsMap, status] = signalInputsUsingDimensions(...
-                inport_cell_dimension, inputSignalsInlined, inputs, OutputSignals_Width_Map)
-            status = 0;
+        function SignalsInputsMap = signalInputsUsingDimensions(...
+                blk, inport_cell_dimension, inputSignalsInlined, inputs, OutputSignals_Width_Map)
             SignalsInputsMap = containers.Map('KeyType', 'char', 'ValueType', 'any');
             if numel(inport_cell_dimension) ~= numel(inputSignalsInlined) ...
                     && numel(inport_cell_dimension) ~= 1
-                status = 1;
-                return;
+                ME = MException('COCOSIM:BusSelector_To_Lustre', ...
+                    'Block %s is not supported. Inport and Outport Dimensions are not compatible.', blk.Origin_path);
+                throw(ME);
             end
             if numel(inport_cell_dimension) == 1
                 % the case of Busselector with a vector input instead of
@@ -134,8 +130,9 @@ classdef BusSelector_To_Lustre < Block_To_Lustre
                         sum( cellfun(@(x) x, OutputSignals_Width_Map.values))
                    % we can not do mapping between inputs and outpus if all
                    % of the inputs are used.
-                    status = 1;
-                    return;
+                    ME = MException('COCOSIM:BusSelector_To_Lustre', ...
+                        'Block %s is not supported. All inputs are selected.', blk.Origin_path);
+                    throw(ME);
                 end
                 inputIdx = 1;
                 for i=1:numel(inputSignalsInlined)
@@ -153,8 +150,9 @@ classdef BusSelector_To_Lustre < Block_To_Lustre
                         end
                         inputIdx = inputIdx + width;
                     else
-                        status = 1;
-                        return;
+                        ME = MException('COCOSIM:BusSelector_To_Lustre', ...
+                            'Block %s is not supported. Input Signal "%s" was not found.', blk.Origin_path, inputSignal);
+                        throw(ME);
                     end
                 end
                 
