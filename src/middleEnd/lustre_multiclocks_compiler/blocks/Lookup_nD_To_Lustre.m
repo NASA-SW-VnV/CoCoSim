@@ -131,7 +131,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             
             % get block inputs
-            [inputs,lusInport_dt,zero,one,  external_lib_i] = ...
+            [inputs,lusInport_dt,~,~,  external_lib_i] = ...
                 Lookup_nD_To_Lustre.getBlockInputsNames_convInType2AccType(parent, blk,isLookupTableDynamic);
             if ~isempty(external_lib_i)
                 external_lib{end+1} = external_lib_i;
@@ -545,6 +545,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
             %  mesh, then the polytop is a rectangle containing the
             %  interpolation point.
             %  For the 'Flat' case, only lower index is needed.  
+            %  For the 'Above" case, coords _2 is not needed
             body = {};
             vars = {};     
             skipInterpolation = blkParams.skipInterpolation;
@@ -580,7 +581,9 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                 
                 if ~strcmp(InterpMethod,'Flat')
                     vars{end+1} = LustreVar(coords_node{i,1},lusInport_dt);
-                    vars{end+1} = LustreVar(coords_node{i,2},lusInport_dt);
+                    if ~strcmp(InterpMethod,'Above')
+                        vars{end+1} = LustreVar(coords_node{i,2},lusInport_dt);
+                    end
                 end
                 % looking for low node
                 cond_index = {};
@@ -658,10 +661,11 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                 
                 if ~strcmp(InterpMethod,'Flat')
                     body{end+1} = LustreEq(index_node{i,2}, index_2_rhs);
-                    body{end+1} = LustreEq(coords_node{i,2}, coords_2_rhs);   
+                    if ~strcmp(InterpMethod,'Above')
+                        body{end+1} = LustreEq(coords_node{i,2}, coords_2_rhs);   
+                    end
                 end
-                
-                
+                                
             end
             
             % if flat, make inputs the lowest bounding node
