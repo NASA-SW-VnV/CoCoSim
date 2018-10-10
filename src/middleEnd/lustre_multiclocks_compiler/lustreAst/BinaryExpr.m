@@ -11,6 +11,8 @@ classdef BinaryExpr < LustreExpr
         left;
         right;
         withPar; %with parentheses
+        addEpsilon;
+        epsilon;
     end
     properties(Constant)
         OR = 'or';
@@ -34,14 +36,24 @@ classdef BinaryExpr < LustreExpr
     end
     methods
         %%
-        function obj = BinaryExpr(op, left, right, withPar)
+        function obj = BinaryExpr(op, left, right, withPar, addEpsilon, epsilon)
             obj.op = op;
             obj.left = left;
             obj.right = right;
-            if exist('withPar', 'var')
-                obj.withPar = withPar;
-            else
+            if ~exist('withPar', 'var') || isempty(withPar)
                 obj.withPar = true;
+            else
+                obj.withPar = withPar;
+            end
+            if ~exist('addEpsilon', 'var') || isempty(addEpsilon)
+                obj.addEpsilon = false;
+            else
+                obj.addEpsilon = addEpsilon;
+            end
+            if ~exist('epsilon', 'var') || isempty(epsilon)
+                obj.epsilon = [];
+            else
+                obj.epsilon = epsilon;
             end
         end
         %%
@@ -59,9 +71,9 @@ classdef BinaryExpr < LustreExpr
             [rightExp, varIdright] = obj.right.changePre2Var();
             varIds = [varIds, varIdright];
             new_obj = BinaryExpr(obj.op,...
-                    leftExp,...
-                    rightExp, ...
-                    obj.withPar);
+                leftExp,...
+                rightExp, ...
+                obj.withPar);
         end
         function new_obj = changeArrowExp(obj, cond)
             if isequal(obj.op, BinaryExpr.ARROW)
@@ -88,16 +100,39 @@ classdef BinaryExpr < LustreExpr
             if iscell(obj.right) && numel(obj.right) == 1
                 obj.right = obj.right{1};
             end
-            if obj.withPar
-                code = sprintf('(%s %s %s)', ...
+            if obj.addEpsilon ...
+                    && (isequal(obj.op, '>=') || isequal(obj.op, '>') ...
+                    || isequal(obj.op, '<=') || isequal(obj.op, '<'))
+                if isequal(obj.op, '>=') || isequal(obj.op, '<=')
+                    epsilonOp = BinaryExpr.LTE;
+                else
+                    epsilonOp = BinaryExpr.GT;
+                end
+                if isempty(obj.epsilon)
+                    if isa(obj.left, 'RealExpr')
+                        obj.epsilon = eps(obj.left.getValue());
+                    elseif isa(obj.right, 'RealExpr')
+                        obj.epsilon = eps(obj.right.getValue());
+                    else
+                        obj.epsilon = 1e-15;
+                    end
+                end
+                code = sprintf('((%s %s %s) and abs_real(%s - %s) %s %.30f)', ...
                     obj.left.print(backend),...
                     obj.op, ...
-                    obj.right.print(backend));
+                    obj.right.print(backend), ...
+                    obj.left.print(backend),...
+                    obj.right.print(backend), ...
+                    epsilonOp, ...
+                    obj.epsilon);
             else
                 code = sprintf('%s %s %s', ...
                     obj.left.print(backend),...
                     obj.op, ...
                     obj.right.print(backend));
+                if obj.withPar
+                    code = sprintf('(%s)', code);
+                end
             end
         end
         

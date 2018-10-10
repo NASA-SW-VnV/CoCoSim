@@ -19,26 +19,28 @@ classdef Kind2Utils2
                 MsgType.DEBUG, 'Kind2Utils2.checkSyntaxError', '');
             [status, output] = system(command);
         end
-        %% run compositional modular verification usin Kind2
-        function [valid, IN_struct] = run_Kind2(...
+        %% run kind2 with arguments
+        function [status, solver_output] = runKIND2(...
                 verif_lus_path,...
-                output_dir,...
                 node, ...
-                OPTS, KIND2, Z3)
+                OPTS, KIND2, Z3, timeout)
             
-            IN_struct = [];
-            valid = -1;
+            status = 0;
+            
             if nargin < 1
-                error('Missing arguments to function call: Kind2Utils2.run_Kind2')
+                error('Missing arguments to function call: Kind2Utils2.runKIND2')
             end
+            %
+
+            %
             if ~exist('OPTS', 'var')
                 OPTS = '';
             end
-            if nargin >= 3 && ~isempty(node)
-                
+            if nargin >= 2 && ~isempty(node)
                 OPTS = sprintf('%s --lus_main %s', OPTS, node);
             end
-            if nargin < 5
+            %
+            if nargin < 4
                 tools_config;
                 status = BUtils.check_files_exist(KIND2, Z3);
                 if status
@@ -47,27 +49,71 @@ classdef Kind2Utils2
                     return;
                 end
             end
-            [file_dir, file_name, ~] = fileparts(verif_lus_path);
-            if nargin < 2 || isempty(output_dir)
-                output_dir = file_dir;
+            %
+            if ~exist('timeout', 'var')
+                CoCoSimPreferences = load_coco_preferences();
+                if isfield(CoCoSimPreferences, 'verificationTimeout')
+                    timeout = num2str(CoCoSimPreferences.verificationTimeout);
+                else
+                    timeout = '120';
+                end
+            elseif isnumeric(timeout)
+                timeout = num2str(timeout);
             end
-            
-            timeout = '600';
-            PWD = pwd;
-            cd(output_dir);
-            
+                        
             command = sprintf('%s -xml  --z3_bin %s --timeout %s %s "%s"',...
                 KIND2, Z3, timeout, OPTS,  verif_lus_path);
             display_msg(['KIND2_COMMAND ' command],...
                 MsgType.DEBUG, 'Kind2Utils2.run_verif', '');
             
-            [~, solver_output] = system(command );
+            [~, solver_output] = system(command, '-echo' );
             display_msg(...
                 solver_output,...
                 MsgType.DEBUG,...
                 'Kind2Utils2.run_verif',...
                 '');
             
+            
+        end
+        %% run compositional modular verification usin Kind2
+        function [valid, IN_struct] = extractKind2CEX(...
+                verif_lus_path,...
+                output_dir,...
+                node, ...
+                OPTS, KIND2, Z3)
+            
+            IN_struct = [];
+            valid = -1;
+            if nargin < 1
+                error('Missing arguments to function call: Kind2Utils2.extractKind2CEX')
+            end
+            if ~exist('OPTS', 'var')
+                OPTS = '';
+            end
+            if ~exist('KIND2', 'var') || ~exist('Z3', 'var')
+                tools_config;
+                status = BUtils.check_files_exist(KIND2, Z3);
+                if status
+                    display_msg(['KIND2 or Z3 not found :' KIND2 ', ' Z3],...
+                        MsgType.DEBUG, 'LustrecUtils.run_verif', '');
+                    return;
+                end
+            end
+            
+            [file_dir, file_name, ~] = fileparts(verif_lus_path);
+            if nargin < 2 || isempty(output_dir)
+                output_dir = file_dir;
+            end
+      
+            PWD = pwd;
+            cd(output_dir);
+            [status, solver_output] = Kind2Utils2.runKIND2(...
+                verif_lus_path,...
+                node, ...
+                OPTS, KIND2, Z3);
+            if status
+                return;
+            end
             [valid, IN_struct] = ...
                 Kind2Utils2.extract_Kind2_Comp_Verif_answer(...
                 verif_lus_path, ...

@@ -17,7 +17,58 @@ classdef BusSelector_To_Lustre < Block_To_Lustre
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             obj.addVariable(outputs_dt);
             [inputs] = SLX2LusUtils.getBlockInputsNames(parent, blk);
+            try
+                [SignalsInputsMap, OutputSignals] = obj.getSignalMap( blk, inputs);
+            catch me
+                if strcmp(me.identifier, 'COCOSIM:BusSelector_To_Lustre')
+                    display_msg(me.message, MsgType.ERROR, 'BusSelector_To_Lustre', '');
+                    return;
+                end
+            end
+            out_idx = 1;
+            codes = cell(1, numel(outputs));
+            for i=1:numel(OutputSignals)
+                if isKey(SignalsInputsMap, OutputSignals{i})
+                    inputs_i = SignalsInputsMap(OutputSignals{i});
+                else
+                    display_msg(sprintf('Block %s with output signal %s is not supported.',...
+                        blk.Origin_path, OutputSignals{i}),...
+                        MsgType.ERROR, 'BusSelector_To_Lustre', '');
+                    continue;
+                end
+                for j=1:numel(inputs_i)
+                    codes{out_idx} = LustreEq(outputs{out_idx}, inputs_i{j});
+                    out_idx = out_idx + 1;
+                end
+            end
             
+            obj.setCode( codes );
+        end
+        
+        function options = getUnsupportedOptions(obj, parent, blk, varargin)
+            [inputs] = SLX2LusUtils.getBlockInputsNames(parent, blk);
+            try
+                [SignalsInputsMap, OutputSignals] = obj.getSignalMap( blk, inputs);
+                for i=1:numel(OutputSignals)
+                    if ~isKey(SignalsInputsMap, OutputSignals{i})
+                        obj.addUnsupported_options(sprintf('Block %s with output signal %s is not supported.',...
+                            blk.Origin_path, OutputSignals{i}));
+                    end
+                end
+            catch me
+                if strcmp(me.identifier, 'COCOSIM:BusSelector_To_Lustre')
+                    obj.addUnsupported_options(me.message);
+                end
+            end
+            
+            options = obj.unsupported_options;
+        end
+        %%
+        function is_Abstracted = isAbstracted(varargin)
+            is_Abstracted = false;
+        end
+        %%
+        function [SignalsInputsMap, OutputSignals] = getSignalMap(obj, blk, inputs)
             % everything is inlined
             InportDimensions = blk.CompiledPortDimensions.Inport;
             OutportWidths = blk.CompiledPortWidths.Outport;
@@ -50,57 +101,27 @@ classdef BusSelector_To_Lustre < Block_To_Lustre
                     inport_cell_dimension =...
                         Assignment_To_Lustre.getInputMatrixDimensions(InportDimensions);
                 else
-                    display_msg(sprintf('Block %s with type %s is not supported.', ...
-                        blk.Origin_path,InportDT ),...
-                        MsgType.ERROR, 'BusSelector_To_Lustre', '');
-                    return;
+                    ME = MException('COCOSIM:BusSelector_To_Lustre', ...
+                        'Block %s with type %s is not supported.', ...
+                        blk.Origin_path, InportDT);
+                    throw(ME);
                 end
             end
-            [SignalsInputsMap, status] = BusSelector_To_Lustre.signalInputsUsingDimensions(...
-                inport_cell_dimension, inputSignalsInlined, inputs, OutputSignals_Width_Map);
-            if status
-                display_msg(sprintf('Block %s is not supported.', blk.Origin_path),...
-                    MsgType.ERROR, 'BusSelector_To_Lustre', '');
-                return;
-            end
-            out_idx = 1;
-            codes = cell(1, numel(outputs));
-            for i=1:numel(OutputSignals)
-                if isKey(SignalsInputsMap, OutputSignals{i})
-                    inputs_i = SignalsInputsMap(OutputSignals{i});
-                else
-                    display_msg(sprintf('Block %s with output signal %s is not supported.',...
-                        blk.Origin_path, OutputSignals{i}),...
-                        MsgType.ERROR, 'BusSelector_To_Lustre', '');
-                    continue;
-                end
-                for j=1:numel(inputs_i)
-                    codes{out_idx} = LustreEq(outputs{out_idx}, inputs_i{j});
-                    out_idx = out_idx + 1;
-                end
-            end
+            SignalsInputsMap = BusSelector_To_Lustre.signalInputsUsingDimensions(...
+                blk, inport_cell_dimension, inputSignalsInlined, inputs, OutputSignals_Width_Map);
             
-            obj.setCode( codes );
-        end
-        
-        function options = getUnsupportedOptions(obj, varargin)
-            options = obj.unsupported_options;
-        end
-        %%
-        function is_Abstracted = isAbstracted(varargin)
-            is_Abstracted = false;
         end
     end
     
     methods(Static)
-        function [SignalsInputsMap, status] = signalInputsUsingDimensions(...
-                inport_cell_dimension, inputSignalsInlined, inputs, OutputSignals_Width_Map)
-            status = 0;
+        function SignalsInputsMap = signalInputsUsingDimensions(...
+                blk, inport_cell_dimension, inputSignalsInlined, inputs, OutputSignals_Width_Map)
             SignalsInputsMap = containers.Map('KeyType', 'char', 'ValueType', 'any');
             if numel(inport_cell_dimension) ~= numel(inputSignalsInlined) ...
                     && numel(inport_cell_dimension) ~= 1
-                status = 1;
-                return;
+                ME = MException('COCOSIM:BusSelector_To_Lustre', ...
+                    'Block %s is not supported. Inport and Outport Dimensions are not compatible.', blk.Origin_path);
+                throw(ME);
             end
             if numel(inport_cell_dimension) == 1
                 % the case of Busselector with a vector input instead of
@@ -109,8 +130,9 @@ classdef BusSelector_To_Lustre < Block_To_Lustre
                         sum( cellfun(@(x) x, OutputSignals_Width_Map.values))
                    % we can not do mapping between inputs and outpus if all
                    % of the inputs are used.
-                    status = 1;
-                    return;
+                    ME = MException('COCOSIM:BusSelector_To_Lustre', ...
+                        'Block %s is not supported. All inputs are selected.', blk.Origin_path);
+                    throw(ME);
                 end
                 inputIdx = 1;
                 for i=1:numel(inputSignalsInlined)
@@ -128,8 +150,9 @@ classdef BusSelector_To_Lustre < Block_To_Lustre
                         end
                         inputIdx = inputIdx + width;
                     else
-                        status = 1;
-                        return;
+                        ME = MException('COCOSIM:BusSelector_To_Lustre', ...
+                            'Block %s is not supported. Input Signal "%s" was not found.', blk.Origin_path, inputSignal);
+                        throw(ME);
                     end
                 end
                 

@@ -38,6 +38,7 @@ t_start = now;
 %% Get the list of verification blocks: Assertion, Proof Objective, Contracts, Observers.
 load_system(pp_model_full_path);
 [~, model, ~] = fileparts(pp_model_full_path);
+top_node_name = model;
 Assertions_list = find_system(model, ...
     'LookUnderMasks', 'all', 'BlockType','Assertion');
 if ~isempty(Assertions_list)
@@ -55,8 +56,27 @@ contractBlocks_list = find_system(model, ...
     'LookUnderMasks', 'all',  'MaskType', 'ContractBlock');
 
 if BackendType.isKIND2(backend)
-    
-    
+    if ~isempty(Assertions_list) && ~isempty(contractBlocks_list)
+        display_msg('Having both Assertion/Proof blocks and contracts are not supported in KIND2.', MsgType.ERROR, 'toLustreVerify', '');
+        return;
+    end
+    if ~isempty(Assertions_list)
+        OPTS = ' --slice_nodes false --check_subproperties true ';
+        [status, kind2_out] = Kind2Utils2.runKIND2(...
+            nom_lustre_file,...
+            top_node_name, ...
+            OPTS, KIND2, Z3);
+        if status
+            return;
+        end
+        mapping_file = xml_trace.json_file_path;
+        try
+            cocoSpecKind2(nom_lustre_file, mapping_file, kind2_out);
+        catch me
+            display_msg(me.getReport(), MsgType.DEBUG, 'toLustreVerify', '');
+            display_msg('Something went wrong in Verification.', MsgType.ERROR, 'toLustreVerify', '');
+        end
+    end
 else
     if ~isempty(Assertions_list)
         display_msg('Verification of Assertion blocks is only supported by KIND2 model checker.', MsgType.ERROR, 'toLustreVerify', '');

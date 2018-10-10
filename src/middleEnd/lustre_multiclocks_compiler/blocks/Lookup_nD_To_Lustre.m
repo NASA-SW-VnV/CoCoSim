@@ -125,7 +125,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
             indexDataType = 'int';
             blk_name = SLX2LusUtils.node_name_format(blk);
             ext_node_name = sprintf('%s_ext_node',blk_name);   
-            external_lib = {};
+            external_lib = {'LustMathLib_abs_real'};
             
             % get block outputs
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
@@ -190,7 +190,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                     outputs,inputs,blk_name,...
                     blkParams.InterpMethod,blkParams.NumberOfTableDimensions,numBoundNodes,blk,...
                     N_shape_node,coords_node,lusInport_dt,blkParams.ExtrapMethod,...
-                    shapeNodeSign,u_node);
+                    shapeNodeSign,u_node, backend);
                 body_all = [body_all  bodyf];
                 vars_all = [vars_all  varsf];
             else                
@@ -211,11 +211,17 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
             extNode.setBodyEqs(body_all);
             extNode.setMetaInfo('external node code for doing Lookup_nD');
             
-            if BackendType.isKIND2(backend) && ~isLookupTableDynamic
+            if BackendType.isKIND2(backend) ...
+                    && ~isLookupTableDynamic ...
+                    && blkParams.NumberOfTableDimensions <= 3
                 contractBody = Lookup_nD_To_Lustre.getContractBody(blkParams,inputs,outputs);
                 contract = LustreContract();
                 contract.setBody(contractBody);
                 extNode.setLocalContract(contract);
+                if blkParams.NumberOfTableDimensions == 3
+                    %complicated to prove
+                    extNode.setIsImported(true);
+                end
             end
             main_vars = outputs_dt;
             % if outputDataType is not real, we need to cast outputs
@@ -241,7 +247,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                 blk_name,InterpMethod,...
                 NumberOfTableDimensions,numBoundNodes,blk,N_shape_node,...
                 coords_node,lusInport_dt,ExtrapMethod,shapeNodeSign,...
-                u_node)
+                u_node, backend)
             % This function carries out the interpolation depending on algorithm
             % option.  For the flat option, the value at the lower bounding
             % breakpoint is used. For the nearest option, the closest
@@ -266,7 +272,8 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                     %code = sprintf('%s = if(%s<%s) then %s \n\t', clipped_inputs{i}, inputs{i}{1}, coords_node{i,1}, coords_node{i,1});
                     %code = sprintf('%s  else if(%s > %s) then %s\n\t', code, inputs{i}{1}, coords_node{i,2}, coords_node{i,2});
                     %body = sprintf('%s%s  else %s ;\n\t', body,code,inputs{i}{1});
-                    conds{1} = BinaryExpr(BinaryExpr.LT,inputs{i}{1}, coords_node{i,1});
+                    epsilon = 1e-15;%TODO: put a relative epsilon.
+                    conds{1} = BinaryExpr(BinaryExpr.LT,inputs{i}{1}, coords_node{i,1}, [], BackendType.isLUSTREC(backend), epsilon);
                     conds{2} = BinaryExpr(BinaryExpr.GT,inputs{i}{1}, coords_node{i,2});
                     thens{1} = coords_node{i,1};
                     thens{2} = coords_node{i,2};

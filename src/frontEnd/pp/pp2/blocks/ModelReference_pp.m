@@ -11,18 +11,18 @@ topLevelModelHandle = get_param( topLevelModel , 'Handle' );
 mdlRefsHandles = find_system( topLevelModelHandle , 'LookUnderMasks','all', ...
     'findall' , 'on' , 'blocktype' , 'ModelReference' );
 failed = 0;
-mdlRefIgnored = 0;
+%mdlRefIgnored = 0;
 if( ~isempty( mdlRefsHandles ) )
     for k = 1 : length( mdlRefsHandles )
         try
             mdlRefName = get_param( mdlRefsHandles(k) , 'ModelName' );
             mdlName =  get_param( mdlRefsHandles(k) , 'Name' );
-            [CompiledPortDataTypes] = SLXUtils.getCompiledParam(mdlRefsHandles(k), 'CompiledPortDataTypes');
-            if HasBusPort(CompiledPortDataTypes)
-                display_msg([mdlRefName ' will be handled directly in the compiler ToLustre as it has Bus Ports.'], MsgType.INFO, 'ModelReference_pp', '');
-                mdlRefIgnored = 1;
-                continue;
-            end
+            %[CompiledPortDataTypes] = SLXUtils.getCompiledParam(mdlRefsHandles(k), 'CompiledPortDataTypes');
+            % if HasBusPort(CompiledPortDataTypes)
+            %     display_msg([mdlRefName ' will be handled directly in the compiler ToLustre as it has Bus Ports.'], MsgType.INFO, 'ModelReference_pp', '');
+            %     mdlRefIgnored = 1;
+            %     continue;
+            % end
             % Create a blank subsystem, fill it with the modelref's contents:
             display_msg(mdlName, MsgType.INFO, 'ModelReference_pp', '');
             try
@@ -52,14 +52,15 @@ if( ~isempty( mdlRefsHandles ) )
             errors_msg{end + 1} = sprintf('ModelReference pre-process has failed for block %s', mdlRefsHandles{k});
             continue;
         end
+        %check for libraries too if they were inside referenced Models
+        if ~failed, LinkStatus_pp(ref_block_path); end
+        if ~failed %&& ~mdlRefIgnored
+            % Recursive searching of nested model references:
+            ModelReference_pp(ref_block_path);
+        end
     end
     
-    %check for libraries too if they were inside referenced Models 
-    if ~failed, LinkStatus_pp(topLevelModel); end
-    if ~failed && ~mdlRefIgnored
-        % Recursive searching of nested model references:
-        ModelReference_pp(topLevelModel)
-    end
+    
 end
 end
 
