@@ -67,7 +67,7 @@ end
 try
     % generate test cases that covers the MC-DC conditions
     new_mcdc_file = LustrecUtils.adapt_lustre_file(mcdc_file, 'Kind2');
-    [~, T] = Kind2Utils2.run_Kind2(new_mcdc_file, output_dir, main_node, ...
+    [~, T] = Kind2Utils2.extractKind2CEX(new_mcdc_file, output_dir, main_node, ...
         ' --slice_nodes false --check_subproperties true ');
     
     if isempty(T)

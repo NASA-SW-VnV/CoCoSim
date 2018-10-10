@@ -203,11 +203,17 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
             extNode.setBodyEqs(body_all);
             extNode.setMetaInfo('external node code for doing Lookup_nD');
             
-            if BackendType.isKIND2(backend) && ~isLookupTableDynamic
+            if BackendType.isKIND2(backend) ...
+                    && ~isLookupTableDynamic ...
+                    && blkParams.NumberOfTableDimensions <= 3
                 contractBody = Lookup_nD_To_Lustre.getContractBody(blkParams,inputs,outputs);
                 contract = LustreContract();
                 contract.setBody(contractBody);
                 extNode.setLocalContract(contract);
+                if blkParams.NumberOfTableDimensions == 3
+                    %complicated to prove
+                    extNode.setIsImported(true);
+                end
             end
             main_vars = outputs_dt;
             % if outputDataType is not real, we need to cast outputs

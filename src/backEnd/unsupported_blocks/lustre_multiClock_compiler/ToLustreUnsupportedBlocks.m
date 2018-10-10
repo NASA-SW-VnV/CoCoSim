@@ -21,8 +21,8 @@ function [unsupportedOptions, ...
 %% inputs treatment
 
 narginchk(1, inf);
-status = 0;
-abstractedBlocks = {};
+
+
 if ~exist('const_files', 'var') || isempty(const_files)
     const_files = {};
 end
@@ -39,7 +39,10 @@ end
 
 %% initialize result
 unsupportedOptions = {};
-
+status = 0;
+ir_struct = {};
+output_dir = '';
+abstractedBlocks = {};
 %% Get start time
 t_start = tic;
 
