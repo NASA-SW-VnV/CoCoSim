@@ -26,7 +26,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
     %         the shape functions.  For each dimension, there will be 2
     %         breakpoints that surround the coordinate of the interpolation
     %         point in that dimension.  For 2 dimensions, if the table is a
-    %         mesh, then the polytop is a rectangle containing the
+    %         mesh, then the polytop is a quadrilateral containing the
     %         interpolation point.  Defining the bounding nodes is done in
     %         the function addBoundNodeCode.
     %         3. defining dimJump.  table breakpoints and values are inline in Lustre, the
@@ -154,46 +154,54 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                 lusInport_dt,isLookupTableDynamic,inputs);
             body_all = body;
             vars_all = vars;
+            
             % declaring and defining break points
             [body, vars,Breakpoints] = Lookup_nD_To_Lustre.addBreakpointCode(...
                 blkParams.BreakpointsForDimension,blk_name,lusInport_dt,isLookupTableDynamic,...
                 inputs,blkParams.NumberOfTableDimensions);
             body_all = [body_all  body];
             vars_all = [vars_all  vars];
-            
-            % get bounding nodes (corners of polygon surrounding input point)
-            [body, vars,numBoundNodes,u_node,N_shape_node,coords_node,index_node] = ...
-                Lookup_nD_To_Lustre.addBoundNodeCode(blkParams.NumberOfTableDimensions,...
-                blk_name,Breakpoints,blkParams.skipInterpolation,lusInport_dt,indexDataType,...
-                blkParams.BreakpointsForDimension,inputs);
-            body_all = [body_all  body];
-            vars_all = [vars_all  vars];            
-            
+                     
             % defining u
             % doing subscripts to index in Lustre.  Need subscripts, and
-            % dimension jump.
-            shapeNodeSign = Lookup_nD_To_Lustre.getShapeBoundingNodeSign(blkParams.NumberOfTableDimensions);
+            % dimension jump.            
             [body, vars,Ast_dimJump] = ...
                 Lookup_nD_To_Lustre.addDimJumpCode(blkParams.NumberOfTableDimensions,...
                 blk_name,indexDataType,blkParams.BreakpointsForDimension);
             body_all = [body_all  body];
-            vars_all = [vars_all  vars];            
+            vars_all = [vars_all  vars];
             
-            [body, vars] = Lookup_nD_To_Lustre.addShapeFunctionCode(...
-                numBoundNodes,shapeNodeSign,blk_name,indexDataType,table_elem,...
-                blkParams.NumberOfTableDimensions,index_node,Ast_dimJump,blkParams.skipInterpolation,u_node);
+            % get bounding nodes (corners of polygon surrounding input point)
+            [body, vars,numBoundNodes,u_node,N_shape_node,coords_node,index_node] = ...
+                Lookup_nD_To_Lustre.addBoundNodeCode(blkParams,...
+                blk_name,Breakpoints,lusInport_dt,indexDataType,inputs);
             body_all = [body_all  body];
             vars_all = [vars_all  vars];
             
-            % now that we have all needed variables, write final interp
-            % code
-            [bodyf, varsf] = Lookup_nD_To_Lustre.addFinalInterpCode( ...
-                outputs,inputs,blkParams.skipInterpolation,indexDataType,blk_name,...
-                blkParams.InterpMethod,blkParams.NumberOfTableDimensions,numBoundNodes,blk,...
-                N_shape_node,coords_node,lusInport_dt,blkParams.ExtrapMethod,one,...
-                zero,shapeNodeSign,u_node,index_node,Ast_dimJump,table_elem);
-            body_all = [body_all  bodyf];
-            vars_all = [vars_all  varsf];
+            % Need shape functions if interpolation
+            if ~blkParams.skipInterpolation
+                shapeNodeSign = Lookup_nD_To_Lustre.getShapeBoundingNodeSign(blkParams.NumberOfTableDimensions);
+                [body, vars] = Lookup_nD_To_Lustre.addShapeFunctionCode(...
+                    numBoundNodes,shapeNodeSign,blk_name,indexDataType,table_elem,...
+                    blkParams.NumberOfTableDimensions,index_node,Ast_dimJump,blkParams.skipInterpolation,u_node);
+                body_all = [body_all  body];
+                vars_all = [vars_all  vars];
+                [bodyf, varsf] = Lookup_nD_To_Lustre.addFinalCode_with_interpolation( ...
+                    outputs,inputs,blk_name,...
+                    blkParams.InterpMethod,blkParams.NumberOfTableDimensions,numBoundNodes,blk,...
+                    N_shape_node,coords_node,lusInport_dt,blkParams.ExtrapMethod,...
+                    shapeNodeSign,u_node);
+                body_all = [body_all  bodyf];
+                vars_all = [vars_all  varsf];
+            else                
+                [bodyf, varsf] = Lookup_nD_To_Lustre.addFinalCode_without_interpolation( ...
+                    outputs,inputs,indexDataType,blk_name,...
+                    blkParams.InterpMethod,blkParams.NumberOfTableDimensions,...
+                    coords_node,lusInport_dt,...
+                    index_node,Ast_dimJump,table_elem);
+                body_all = [body_all  bodyf];
+                vars_all = [vars_all  varsf];                
+            end
             
             extNode = LustreNode();
             extNode.setName(node_header.NodeName)
@@ -228,12 +236,12 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                 ext_node_name,isLookupTableDynamic,output_conv_format);
             
         end
-        
-        function [body, vars] = addFinalInterpCode(outputs,inputs,...
-                skipInterpolation,indexDataType,blk_name,InterpMethod,...
+
+        function [body, vars] = addFinalCode_with_interpolation(outputs,inputs,...
+                blk_name,InterpMethod,...
                 NumberOfTableDimensions,numBoundNodes,blk,N_shape_node,...
-                coords_node,lusInport_dt,ExtrapMethod,~,~,shapeNodeSign,...
-                u_node,index_node,Ast_dimJump,table_elem)
+                coords_node,lusInport_dt,ExtrapMethod,shapeNodeSign,...
+                u_node)
             % This function carries out the interpolation depending on algorithm
             % option.  For the flat option, the value at the lower bounding
             % breakpoint is used. For the nearest option, the closest
@@ -246,178 +254,182 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
             % supported
             body = {};
             vars = {};
-            if skipInterpolation
-                returnTableIndex{1} =  VarIdExpr(sprintf('%s_retTableInd_%d',blk_name,1));
-                %vars = sprintf('%s\t%s:%s;\n',vars,returnTableIndex{1},indexDataType);
-                vars{end+1} = LustreVar(returnTableIndex{1}, indexDataType);
-                terms = cell(1,NumberOfTableDimensions);
-                if strcmp(InterpMethod,'Flat')
-                    % defining returnTableIndex{1}
-                    %value = '0';
-                    %value_n = IntExpr(0);                    
-                    for j=1:NumberOfTableDimensions                        
-                        curIndex =  index_node{j,1};
-                        if j==1
-                            %value = sprintf('%s + %s*%d',value,curIndex, dimJump(j));
-                            terms{j} = BinaryExpr(BinaryExpr.MULTIPLY,curIndex, Ast_dimJump{j});
-                        else
-                            %value = sprintf('%s + (%s-1)*%d',value,curIndex, dimJump(j));
-                            terms{j} = BinaryExpr(BinaryExpr.MULTIPLY,BinaryExpr(BinaryExpr.MINUS,curIndex,IntExpr(1)), Ast_dimJump{j});
-                        end
-                    end
-                elseif strcmp(InterpMethod,'Above')
-                    % defining returnTableIndex{2} if input value is not at lower bounding breakpoint                 
-                    for j=1:NumberOfTableDimensions  
-                        % check to see if input is at lower bounding node,
-                        % if it is then curIndex equal lower bounding
-                        % breakpoint, otherwise it is at higher bounding
-                        % breakpoint
-                        curIndex1 =  index_node{j,1};
-                        curIndex2 =  index_node{j,2};
-                        cond = BinaryExpr(BinaryExpr.LTE,inputs{j}{1},coords_node{j,1});
-                        if j==1
-                            terms{j} = IteExpr(cond,BinaryExpr(BinaryExpr.MULTIPLY,curIndex1, Ast_dimJump{j}),...
-                                BinaryExpr(BinaryExpr.MULTIPLY,curIndex2, Ast_dimJump{j}));
-                        else
-                            terms{j} = IteExpr(cond,BinaryExpr(BinaryExpr.MULTIPLY,...
-                                BinaryExpr(BinaryExpr.MINUS,curIndex1,IntExpr(1)), Ast_dimJump{j}),...
-                                BinaryExpr(BinaryExpr.MULTIPLY,BinaryExpr(BinaryExpr.MINUS,curIndex2,IntExpr(1)), Ast_dimJump{j}));
-                        end
-                    end                    
-                else   % 'Nearest' case
-                    % defining returnTableIndex{1}
-                    disFromTableNode = cell(NumberOfTableDimensions,2);
-                    nearestIndex = cell(1,NumberOfTableDimensions);
-                    for i=1:NumberOfTableDimensions
-                        disFromTableNode{i,1} = VarIdExpr(sprintf('%s_disFromTableNode_dim_%d_1',blk_name,i));
-                        %vars = sprintf('%s\t%s:%s;\n',vars,disFromTableNode{i,1},lusInport_dt);
-                        vars{end+1} = LustreVar(disFromTableNode{i,1},lusInport_dt);
-                        disFromTableNode{i,2} = VarIdExpr(sprintf('%s_disFromTableNode_dim_%d_2',blk_name,i));
-                        %vars = sprintf('%s\t%s:%s;\n',vars,disFromTableNode{i,2},lusInport_dt);
-                        vars{end+1} = LustreVar(disFromTableNode{i,2},lusInport_dt);
-                        %body = sprintf('%s%s = %s - %s ;\n\t', body,disFromTableNode{i,1},inputs{i}{1},coords_node{i,1});
-                        %body = sprintf('%s%s = %s - %s ;\n\t', body,disFromTableNode{i,2},coords_node{i,2},inputs{i}{1});
-                        body{end+1} = LustreEq(disFromTableNode{i,1},BinaryExpr(BinaryExpr.MINUS,inputs{i}{1},coords_node{i,1}));
-                        body{end+1} = LustreEq(disFromTableNode{i,2},BinaryExpr(BinaryExpr.MINUS,coords_node{i,2},inputs{i}{1}));
-                        
-                        nearestIndex{i} = VarIdExpr(sprintf('%s_nearestIndex_dim_%d',blk_name,i));
-                        %vars = sprintf('%s%s:%s;\n',vars,nearestIndex{i},indexDataType);
-                        vars{end+1} = LustreVar(nearestIndex{i},indexDataType);
-                        %code = sprintf('%s = if(%s <= %s) then %s\n\t', nearestIndex{i},disFromTableNode{i,2},disFromTableNode{i,1},index_node{i,2});
-                        %body = sprintf('%s%s  else %s;\n\t', body,code, index_node{i,1});
-                        condC = BinaryExpr(BinaryExpr.LTE,disFromTableNode{i,2},disFromTableNode{i,1});
-                        body{end+1} = LustreEq(nearestIndex{i},IteExpr(condC,index_node{i,2},index_node{i,1}));
-                    end
-                    
-                    %value = '0';
-                    for j=1:NumberOfTableDimensions
-                        if j==1
-                            %value = sprintf('%s + %s*%d',value,nearestIndex{j}, dimJump(j));
-                            terms{j} = BinaryExpr(BinaryExpr.MULTIPLY,nearestIndex{j}, Ast_dimJump{j});
-                        else
-                            %value = sprintf('%s + (%s-1)*%d',value,nearestIndex{j}, dimJump(j));
-                            terms{j} = BinaryExpr(BinaryExpr.MULTIPLY,BinaryExpr(BinaryExpr.MINUS,nearestIndex{j},IntExpr(1)), Ast_dimJump{j});
-                        end
-                    end
-                end
-                %body = sprintf('%s%s = %s;\n\t', body,returnTableIndex{1}, value);
-                if NumberOfTableDimensions == 1
-                    rhs = terms{1};
-                elseif NumberOfTableDimensions == 2
-                    rhs = BinaryExpr(BinaryExpr.PLUS,terms{1},terms{2});
+            
+            % clipping
+            clipped_inputs = cell(1,NumberOfTableDimensions);
+            
+            for i=1:NumberOfTableDimensions
+                clipped_inputs{i} = VarIdExpr(sprintf('%s_clip_input_%d',blk_name,i));
+                %vars = sprintf('%s\t%s:%s;\n',vars,clipped_inputs{i},lusInport_dt);
+                vars{end+1} = LustreVar(clipped_inputs{i},lusInport_dt);
+                if strcmp(ExtrapMethod,'Clip')
+                    %code = sprintf('%s = if(%s<%s) then %s \n\t', clipped_inputs{i}, inputs{i}{1}, coords_node{i,1}, coords_node{i,1});
+                    %code = sprintf('%s  else if(%s > %s) then %s\n\t', code, inputs{i}{1}, coords_node{i,2}, coords_node{i,2});
+                    %body = sprintf('%s%s  else %s ;\n\t', body,code,inputs{i}{1});
+                    conds{1} = BinaryExpr(BinaryExpr.LT,inputs{i}{1}, coords_node{i,1});
+                    conds{2} = BinaryExpr(BinaryExpr.GT,inputs{i}{1}, coords_node{i,2});
+                    thens{1} = coords_node{i,1};
+                    thens{2} = coords_node{i,2};
+                    thens{3} = inputs{i}{1};
+                    rhs = IteExpr.nestedIteExpr(conds,thens);
+                    body{end+1} = LustreEq(clipped_inputs{i},rhs);
                 else
-                    rhs = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,terms);
+                    %body = sprintf('%s%s = %s ;\n\t', body,clipped_inputs{i},inputs{i}{1});
+                    body{end+1} = LustreEq(clipped_inputs{i},inputs{i}{1});
                 end
-                body{end+1} = LustreEq(returnTableIndex{1},rhs);
-                
-                % defining outputs{1}
-                %code = sprintf('%s = \n\t', outputs{1});
-                conds = cell(1,numel(table_elem)-1);
-                thens = cell(1,numel(table_elem));
-                for j=1:numel(table_elem)-1
-                    conds{j} = BinaryExpr(BinaryExpr.EQ,returnTableIndex{1},IntExpr(j));
-                    thens{j} = table_elem{j};
-%                     if j==1
-%                         code = sprintf('%s  if(%s = %d) then %s\n\t', code, returnTableIndex{1},j,table_elem{j});
-%                     else
-%                         code = sprintf('%s  else if(%s = %d) then %s\n\t', code, returnTableIndex{1},j,table_elem{j});
-%                     end
-                end
-                %body = sprintf('%s%s  else %s ;\n\t', body,code,table_elem{numel(table_elem)});
-                thens{numel(table_elem)} = table_elem{numel(table_elem)};
-                if numel(table_elem) == 1
-                    rhs = IteExpr(conds{1},thens{1},thens{2});
-                else
-                    rhs = IteExpr.nestedIteExpr(conds, thens);
-                end
-                body{end+1} = LustreEq(outputs{1},rhs);
-            else % perform interpolation
-                % clipping
-                clipped_inputs = cell(1,NumberOfTableDimensions);
-                
-                for i=1:NumberOfTableDimensions
-                    clipped_inputs{i} = VarIdExpr(sprintf('%s_clip_input_%d',blk_name,i));
-                    %vars = sprintf('%s\t%s:%s;\n',vars,clipped_inputs{i},lusInport_dt);
-                    vars{end+1} = LustreVar(clipped_inputs{i},lusInport_dt);
-                    if strcmp(ExtrapMethod,'Clip')
-                        %code = sprintf('%s = if(%s<%s) then %s \n\t', clipped_inputs{i}, inputs{i}{1}, coords_node{i,1}, coords_node{i,1});
-                        %code = sprintf('%s  else if(%s > %s) then %s\n\t', code, inputs{i}{1}, coords_node{i,2}, coords_node{i,2});
-                        %body = sprintf('%s%s  else %s ;\n\t', body,code,inputs{i}{1});
-                        conds{1} = BinaryExpr(BinaryExpr.LT,inputs{i}{1}, coords_node{i,1});
-                        conds{2} = BinaryExpr(BinaryExpr.GT,inputs{i}{1}, coords_node{i,2});
-                        thens{1} = coords_node{i,1};
-                        thens{2} = coords_node{i,2};
-                        thens{3} = inputs{i}{1};
-                        rhs = IteExpr.nestedIteExpr(conds,thens);
-                        body{end+1} = LustreEq(clipped_inputs{i},rhs);
-                    else
-                        %body = sprintf('%s%s = %s ;\n\t', body,clipped_inputs{i},inputs{i}{1});
-                        body{end+1} = LustreEq(clipped_inputs{i},inputs{i}{1});
-                    end
-                end
-                
-                if strcmp(InterpMethod,'Linear')
-                    % calculating linear shape function value
-                    denom_terms = cell(1,NumberOfTableDimensions);
-                    for i=1:NumberOfTableDimensions
-                        %denom = sprintf('%s*(%s-%s)',denom,coords_node{i,2},coords_node{i,1});
-                        denom_terms{i} = BinaryExpr(BinaryExpr.MINUS,coords_node{i,2},coords_node{i,1});
-                    end
-                    denom = BinaryExpr.BinaryMultiArgs(BinaryExpr.MULTIPLY,denom_terms);
-                    
-                    for i=1:numBoundNodes
-                        numerator_terms = cell(1,NumberOfTableDimensions);
-                        for j=1:NumberOfTableDimensions
-                            if shapeNodeSign(i,j)==-1
-                                %code = sprintf('%s*(%s-%s)',code,coords_node{j,2},clipped_inputs{j});
-                                numerator_terms{j} = BinaryExpr(BinaryExpr.MINUS,coords_node{j,2},clipped_inputs{j});
-                            else
-                                %code = sprintf('%s*(%s-%s)',code,clipped_inputs{j},coords_node{j,1});
-                                numerator_terms{j} = BinaryExpr(BinaryExpr.MINUS,clipped_inputs{j},coords_node{j,1});
-                            end
-                        end
-                        %body = sprintf('%s%s = (%s)/%s ;\n\t', body,N_shape_node{i}, code,denom);
-                        numerator = BinaryExpr.BinaryMultiArgs(BinaryExpr.MULTIPLY,numerator_terms);
-                        body{end+1} = LustreEq(N_shape_node{i},BinaryExpr(BinaryExpr.DIVIDE,numerator,denom));
-                    end
-                else  % Cubic spline  % not yet
-                    display_msg(sprintf('Cubic spline is not yet supported  in block %s',...
-                        blk.Origin_path), MsgType.ERROR, 'Lookup_nD_To_Lustre', '');
-                end
-                
-                %code = zero;
-                terms = cell(1,numBoundNodes);
-                for i=1:numBoundNodes
-                    %code = sprintf('%s+%s*%s ',code,N_shape_node{i},u_node{i});
-                    terms{i} = BinaryExpr(BinaryExpr.MULTIPLY,N_shape_node{i},u_node{i});
-                end
-                
-                %body = sprintf('%s%s =  %s ;\n\t', body, outputs{1}, code);
-                rhs = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,terms);
-                body{end+1} = LustreEq(outputs{1},rhs);
             end
+            
+            if strcmp(InterpMethod,'Linear')
+                % calculating linear shape function value
+                denom_terms = cell(1,NumberOfTableDimensions);
+                for i=1:NumberOfTableDimensions
+                    %denom = sprintf('%s*(%s-%s)',denom,coords_node{i,2},coords_node{i,1});
+                    denom_terms{i} = BinaryExpr(BinaryExpr.MINUS,coords_node{i,2},coords_node{i,1});
+                end
+                denom = BinaryExpr.BinaryMultiArgs(BinaryExpr.MULTIPLY,denom_terms);
+                
+                for i=1:numBoundNodes
+                    numerator_terms = cell(1,NumberOfTableDimensions);
+                    for j=1:NumberOfTableDimensions
+                        if shapeNodeSign(i,j)==-1
+                            %code = sprintf('%s*(%s-%s)',code,coords_node{j,2},clipped_inputs{j});
+                            numerator_terms{j} = BinaryExpr(BinaryExpr.MINUS,coords_node{j,2},clipped_inputs{j});
+                        else
+                            %code = sprintf('%s*(%s-%s)',code,clipped_inputs{j},coords_node{j,1});
+                            numerator_terms{j} = BinaryExpr(BinaryExpr.MINUS,clipped_inputs{j},coords_node{j,1});
+                        end
+                    end
+                    %body = sprintf('%s%s = (%s)/%s ;\n\t', body,N_shape_node{i}, code,denom);
+                    numerator = BinaryExpr.BinaryMultiArgs(BinaryExpr.MULTIPLY,numerator_terms);
+                    body{end+1} = LustreEq(N_shape_node{i},BinaryExpr(BinaryExpr.DIVIDE,numerator,denom));
+                end
+            else  % Cubic spline  % not yet
+                display_msg(sprintf('Cubic spline is not yet supported  in block %s',...
+                    blk.Origin_path), MsgType.ERROR, 'Lookup_nD_To_Lustre', '');
+            end
+            
+            %code = zero;
+            terms = cell(1,numBoundNodes);
+            for i=1:numBoundNodes
+                %code = sprintf('%s+%s*%s ',code,N_shape_node{i},u_node{i});
+                terms{i} = BinaryExpr(BinaryExpr.MULTIPLY,N_shape_node{i},u_node{i});
+            end
+            
+            %body = sprintf('%s%s =  %s ;\n\t', body, outputs{1}, code);
+            rhs = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,terms);
+            body{end+1} = LustreEq(outputs{1},rhs);
         end
         
+        function [body, vars] = addFinalCode_without_interpolation(...
+                outputs,inputs,indexDataType,blk_name,...
+                InterpMethod, NumberOfTableDimensions,...
+                coords_node,lusInport_dt,...
+                index_node,Ast_dimJump,table_elem)
+            % This function carries out the interpolation depending on algorithm
+            % option.  For the flat option, the value at the lower bounding
+            % breakpoint is used. For the nearest option, the closest
+            % bounding node for each dimension is used.  For the above option, the 
+            % value at the upper bounding breakpoint is used.  We are not
+            % calculating the distance from the interpolated point to each
+            % of the bounding node on the polytop containing the
+            % interpolated point.  For the "clipped" extrapolation option, the nearest
+            % breakpoint in each dimension is used. Cubic spline is not
+            % supported
+            body = {};
+            vars = {};
+            returnTableIndex{1} =  VarIdExpr(sprintf('%s_retTableInd_%d',blk_name,1));
+            vars{end+1} = LustreVar(returnTableIndex{1}, indexDataType);
+            terms = cell(1,NumberOfTableDimensions);
+            if strcmp(InterpMethod,'Flat')
+                % defining returnTableIndex{1}
+                %value = '0';
+                %value_n = IntExpr(0);
+                for j=1:NumberOfTableDimensions
+                    curIndex =  index_node{j,1};
+                    if j==1
+                        terms{j} = BinaryExpr(BinaryExpr.MULTIPLY,curIndex, Ast_dimJump{j});
+                    else
+                        terms{j} = BinaryExpr(BinaryExpr.MULTIPLY,BinaryExpr(BinaryExpr.MINUS,curIndex,IntExpr(1)), Ast_dimJump{j});
+                    end
+                end
+            elseif strcmp(InterpMethod,'Above')
+                % defining returnTableIndex{2} if input value is not at lower bounding breakpoint
+                for j=1:NumberOfTableDimensions
+                    % check to see if input is at lower bounding node,
+                    % if it is then curIndex equal lower bounding
+                    % breakpoint, otherwise it is at higher bounding
+                    % breakpoint
+                    curIndex1 =  index_node{j,1};
+                    curIndex2 =  index_node{j,2};
+                    cond = BinaryExpr(BinaryExpr.LTE,inputs{j}{1},coords_node{j,1});
+                    if j==1
+                        terms{j} = IteExpr(cond,BinaryExpr(BinaryExpr.MULTIPLY,curIndex1, Ast_dimJump{j}),...
+                            BinaryExpr(BinaryExpr.MULTIPLY,curIndex2, Ast_dimJump{j}));
+                    else
+                        terms{j} = IteExpr(cond,BinaryExpr(BinaryExpr.MULTIPLY,...
+                            BinaryExpr(BinaryExpr.MINUS,curIndex1,IntExpr(1)), Ast_dimJump{j}),...
+                            BinaryExpr(BinaryExpr.MULTIPLY,BinaryExpr(BinaryExpr.MINUS,curIndex2,IntExpr(1)), Ast_dimJump{j}));
+                    end
+                end
+            else   % 'Nearest' case
+                % defining returnTableIndex{1}
+                disFromTableNode = cell(NumberOfTableDimensions,2);
+                nearestIndex = cell(1,NumberOfTableDimensions);
+                for i=1:NumberOfTableDimensions
+                    disFromTableNode{i,1} = VarIdExpr(sprintf('%s_disFromTableNode_dim_%d_1',blk_name,i));
+                    vars{end+1} = LustreVar(disFromTableNode{i,1},lusInport_dt);
+                    disFromTableNode{i,2} = VarIdExpr(sprintf('%s_disFromTableNode_dim_%d_2',blk_name,i));
+                    vars{end+1} = LustreVar(disFromTableNode{i,2},lusInport_dt);
+                    body{end+1} = LustreEq(disFromTableNode{i,1},BinaryExpr(BinaryExpr.MINUS,inputs{i}{1},coords_node{i,1}));
+                    body{end+1} = LustreEq(disFromTableNode{i,2},BinaryExpr(BinaryExpr.MINUS,coords_node{i,2},inputs{i}{1}));
+                    
+                    nearestIndex{i} = VarIdExpr(sprintf('%s_nearestIndex_dim_%d',blk_name,i));
+                    vars{end+1} = LustreVar(nearestIndex{i},indexDataType);
+                    condC = BinaryExpr(BinaryExpr.LTE,disFromTableNode{i,2},disFromTableNode{i,1});
+                    body{end+1} = LustreEq(nearestIndex{i},IteExpr(condC,index_node{i,2},index_node{i,1}));
+                end
+                
+                %value = '0';
+                for j=1:NumberOfTableDimensions
+                    if j==1
+                        %value = sprintf('%s + %s*%d',value,nearestIndex{j}, dimJump(j));
+                        terms{j} = BinaryExpr(BinaryExpr.MULTIPLY,nearestIndex{j}, Ast_dimJump{j});
+                    else
+                        %value = sprintf('%s + (%s-1)*%d',value,nearestIndex{j}, dimJump(j));
+                        terms{j} = BinaryExpr(BinaryExpr.MULTIPLY,BinaryExpr(BinaryExpr.MINUS,nearestIndex{j},IntExpr(1)), Ast_dimJump{j});
+                    end
+                end
+            end
+            if NumberOfTableDimensions == 1
+                rhs = terms{1};
+            elseif NumberOfTableDimensions == 2
+                rhs = BinaryExpr(BinaryExpr.PLUS,terms{1},terms{2});
+            else
+                rhs = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,terms);
+            end
+            body{end+1} = LustreEq(returnTableIndex{1},rhs);
+            
+            % defining outputs{1}
+            conds = cell(1,numel(table_elem)-1);
+            thens = cell(1,numel(table_elem));
+            for j=1:numel(table_elem)-1
+                conds{j} = BinaryExpr(BinaryExpr.EQ,returnTableIndex{1},IntExpr(j));
+                thens{j} = table_elem{j};
+                %                     if j==1
+                %                         code = sprintf('%s  if(%s = %d) then %s\n\t', code, returnTableIndex{1},j,table_elem{j});
+                %                     else
+                %                         code = sprintf('%s  else if(%s = %d) then %s\n\t', code, returnTableIndex{1},j,table_elem{j});
+                %                     end
+            end
+            thens{numel(table_elem)} = table_elem{numel(table_elem)};
+            if numel(table_elem) == 1
+                rhs = IteExpr(conds{1},thens{1},thens{2});
+            else
+                rhs = IteExpr.nestedIteExpr(conds, thens);
+            end
+            body{end+1} = LustreEq(outputs{1},rhs);
+        end
+                
         function [body, vars] = addShapeFunctionCode(numBoundNodes,...
                 shapeNodeSign,blk_name,indexDataType,table_elem,...
                 NumberOfTableDimensions,index_node,Ast_dimJump,skipInterpolation,u_node)
@@ -524,18 +536,22 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
         end
         
         function [body, vars,numBoundNodes,u_node,N_shape_node,coords_node,index_node] = ...
-                addBoundNodeCode(NumberOfTableDimensions,...
-                blk_name,Breakpoints,skipInterpolation,lusInport_dt,indexDataType,...
-                BreakpointsForDimension,inputs)
+                addBoundNodeCode(blkParams,blk_name,Breakpoints,...
+                lusInport_dt,indexDataType, inputs)
             %  This function finds the bounding polytop which is required to define
             %  the shape functions.  For each dimension, there will be 2
             %  breakpoints that surround the coordinate of the interpolation
             %  point in that dimension.  For 2 dimensions, if the table is a
             %  mesh, then the polytop is a rectangle containing the
             %  interpolation point.
+            %  For the 'Flat' case, only lower index is needed.  
             body = {};
-            vars = {};            
-            numBoundNodes = 2^NumberOfTableDimensions;
+            vars = {};     
+            skipInterpolation = blkParams.skipInterpolation;
+            BreakpointsForDimension = blkParams.BreakpointsForDimension;
+            numBoundNodes = 2^blkParams.NumberOfTableDimensions;
+            InterpMethod = blkParams.InterpMethod;
+            NumberOfTableDimensions = blkParams.NumberOfTableDimensions;
             % defining nodes bounding element (coords_node{NumberOfTableDimensions,2}: dim1_low, dim1_high,
             % dim2_low, dim2_high,... dimn_low, dimn_high)
             
@@ -544,41 +560,41 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
             index_node = {};
             
             for i=1:NumberOfTableDimensions
-                % low node for dimension i
-                coords_node{i,1} = VarIdExpr(...
-                    sprintf('%s_coords_dim_%d_1',blk_name,i));
-                vars{end+1} = LustreVar(coords_node{i,1},lusInport_dt);
-                
+      
+                % low node for dimension i                
                 index_node{i,1} = VarIdExpr(...
                     sprintf('%s_index_dim_%d_1',blk_name,i));
+                index_node{i,2} = VarIdExpr(...
+                    sprintf('%s_index_dim_%d_2',blk_name,i));
                 vars{end+1} = LustreVar(index_node{i,1},indexDataType);
+                if ~strcmp(InterpMethod,'Flat')
+                    vars{end+1} = LustreVar(index_node{i,2},indexDataType);
+                end
                 
+                coords_node{i,1} = VarIdExpr(...
+                    sprintf('%s_coords_dim_%d_1',blk_name,i));
+ 
                 % high node for dimension i
                 coords_node{i,2} = VarIdExpr(...
                     sprintf('%s_coords_dim_%d_2',blk_name,i));
-                vars{end+1} = LustreVar(coords_node{i,2},lusInport_dt);
                 
-                index_node{i,2} = VarIdExpr(...
-                    sprintf('%s_index_dim_%d_2',blk_name,i));
-                vars{end+1} = LustreVar(index_node{i,2},indexDataType);
-                
+                if ~strcmp(InterpMethod,'Flat')
+                    vars{end+1} = LustreVar(coords_node{i,1},lusInport_dt);
+                    vars{end+1} = LustreVar(coords_node{i,2},lusInport_dt);
+                end
                 % looking for low node
                 cond_index = {};
                 then_index = {};
                 cond_coords = {};
                 then_coords = {};
-                %code = sprintf('%s = \n\t', coords_node{i,1});    % code for coordinate values                
-                %index_code = sprintf('%s = \n\t', index_node{i,1});  % index_code for indices
                 numberOfBreakPoint_cond = 0;
-                %fprintf('i: %d, numel BreakpointsForDimension(i): %d\n',i,numel(BreakpointsForDimension{i}));
+
                 for j=numel(BreakpointsForDimension{i}):-1:1
                     if j==numel(BreakpointsForDimension{i})
                         
                         if ~skipInterpolation
                             % for extrapolation, we want to use the last 2
                             % nodes
-                            %code = sprintf('%s  if(%s >= %s) then %s\n\t', code, inputs{i}{1},Breakpoints{i}{j},Breakpoints{i}{j-1});
-                            %index_code = sprintf('%s  if(%s >= %s) then %d\n\t', index_code, inputs{i}{1},Breakpoints{i}{j},(j-1));
                             
                             numberOfBreakPoint_cond = numberOfBreakPoint_cond + 1;
                             cond_index{end+1} =  BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j});
@@ -586,22 +602,14 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                             cond_coords{end+1} = BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j});
                             then_coords{end+1} = Breakpoints{i}{j-1};
                         else
-                            % for "flat" we want lower node to be last node
-                            %code = sprintf('%s  if(%s >= %s) then %s\n\t', code, inputs{i}{1},Breakpoints{i}{j},Breakpoints{i}{j});
-                            %index_code = sprintf('%s  if(%s >= %s) then %d\n\t', index_code, inputs{i}{1},Breakpoints{i}{j},(j));
-                            
+                            % for "flat" we want lower node to be last node                            
                             numberOfBreakPoint_cond = numberOfBreakPoint_cond + 1;
                             cond_index{end+1} = BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j});
                             then_index{end+1} = IntExpr(j);
                             cond_coords{end+1} = BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j});
-                            then_coords{end+1} = Breakpoints{i}{j-1};                            
-                            
-                        end
-                        
-                    else
-                        %code = sprintf('%s  else if(%s >= %s) then %s\n\t', code, inputs{i}{1},Breakpoints{i}{j},Breakpoints{i}{j});
-                        %index_code = sprintf('%s  else if(%s >= %s) then %d\n\t', index_code, inputs{i}{1},Breakpoints{i}{j},j);
-                        
+                            then_coords{end+1} = Breakpoints{i}{j-1};                                                        
+                        end                        
+                    else                       
                         numberOfBreakPoint_cond = numberOfBreakPoint_cond + 1;
                         cond_index{end+1} = BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j});
                         then_index{end+1} = IntExpr(j);
@@ -610,38 +618,30 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                         
                     end                    
                 end                
-                %body = sprintf('%s%s  else %d ;\n\t',body, index_code,1);
-                %body = sprintf('%s%s  else %s ;\n\t', body,code,Breakpoints{i}{1});
                 then_index{end+1} = IntExpr(1);
                 then_coords{end+1} = Breakpoints{i}{1};
                 
                 index_1_rhs = IteExpr.nestedIteExpr(cond_index,then_index);
                 coords_1_rhs = IteExpr.nestedIteExpr(cond_coords,then_coords);
                 body{end+1} = LustreEq(index_node{i,1}, index_1_rhs);
-                body{end+1} = LustreEq(coords_node{i,1}, coords_1_rhs);
-                %fprintf('i: %d, numberOfBreakPoint_cond: %d\n',i,numberOfBreakPoint_cond);
+                if ~strcmp(InterpMethod,'Flat')
+                    body{end+1} = LustreEq(coords_node{i,1}, coords_1_rhs);
+                end
                 
                 % looking for high node
                 cond_index = {};
                 then_index = {};
                 cond_coords = {};
                 then_coords = {};                
-%                 code = sprintf('%s = \n\t', coords_node{i,2});
-%                 index_code = sprintf('%s = \n\t', index_node{i,2});
+
                 for j=numel(BreakpointsForDimension{i}):-1:1
                     if j==numel(BreakpointsForDimension{i})
-                        %code = sprintf('%s  if(%s >= %s) then %s\n\t', code, inputs{i}{1},Breakpoints{i}{j},Breakpoints{i}{j});
-                        %index_code = sprintf('%s  if(%s >= %s) then %d\n\t', index_code, inputs{i}{1},Breakpoints{i}{j},j);
-
                         cond_index{end+1} = BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j});
                         then_index{end+1} = IntExpr((j));
                         cond_coords{end+1} = BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j});
                         then_coords{end+1} = Breakpoints{i}{j};
                     
-                    else
-                        %code = sprintf('%s  else if(%s >= %s) then %s\n\t', code, inputs{i}{1},Breakpoints{i}{j},Breakpoints{i}{j+1});
-                        %index_code = sprintf('%s  else if(%s >= %s) then %d\n\t', index_code, inputs{i}{1},Breakpoints{i}{j},(j+1));
-                       
+                    else                      
                         cond_index{end+1} = BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j});
                         then_index{end+1} = IntExpr(j+1);
                         cond_coords{end+1} = BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j});
@@ -650,17 +650,16 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                     end
                 end
                 
-                %body = sprintf('%s%s  else %d ;\n\t', body,index_code,2);
-                %body = sprintf('%s%s  else %s ;\n\t', body,code,Breakpoints{i}{2});
-                
                 then_index{end+1} = IntExpr(2);
                 then_coords{end+1} = Breakpoints{i}{2};        
-                
-                
+                                
                 index_2_rhs = IteExpr.nestedIteExpr(cond_index,then_index);
                 coords_2_rhs = IteExpr.nestedIteExpr(cond_coords,then_coords);
-                body{end+1} = LustreEq(index_node{i,2}, index_2_rhs);
-                body{end+1} = LustreEq(coords_node{i,2}, coords_2_rhs);                
+                
+                if ~strcmp(InterpMethod,'Flat')
+                    body{end+1} = LustreEq(index_node{i,2}, index_2_rhs);
+                    body{end+1} = LustreEq(coords_node{i,2}, coords_2_rhs);   
+                end
                 
                 
             end
