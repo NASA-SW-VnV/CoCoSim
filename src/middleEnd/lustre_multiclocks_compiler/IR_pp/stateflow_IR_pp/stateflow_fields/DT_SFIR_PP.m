@@ -12,7 +12,7 @@ for i=1:numel(new_ir.Data)
     [ Lustre_type, zero ] = SLX2LusUtils.get_lustre_dt( new_ir.Data{i}.Datatype);
     new_ir.Data{i}.Datatype = Lustre_type;
     if strcmp(new_ir.Data{i}.InitialValue, '')
-        new_ir.Data{i}.InitialValue = zero;
+        new_ir.Data{i}.InitialValue = zero.getValue();
     end
 end
 if isfield(new_ir, 'GraphicalFunctions')

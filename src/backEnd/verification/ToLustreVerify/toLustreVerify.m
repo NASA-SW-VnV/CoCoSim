@@ -71,7 +71,11 @@ if BackendType.isKIND2(backend)
         end
         mapping_file = xml_trace.json_file_path;
         try
-            cocoSpecKind2(nom_lustre_file, mapping_file, kind2_out);
+            status = cocoSpecKind2(nom_lustre_file, mapping_file, kind2_out);
+            if status
+                return;
+            end
+            VerificationMenu.displayHtmlVerificationResultsCallbackCode(model)
         catch me
             display_msg(me.getReport(), MsgType.DEBUG, 'toLustreVerify', '');
             display_msg('Something went wrong in Verification.', MsgType.ERROR, 'toLustreVerify', '');

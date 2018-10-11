@@ -33,12 +33,8 @@ classdef SS_To_LustreNode
             
             %% handling Stateflow
             if isfield(ss_ir, 'SFBlockType') && isequal(ss_ir.SFBlockType, 'Chart')
-                rt = sfroot;
-                m = rt.find('-isa', 'Simulink.BlockDiagram', 'Name',bdroot(ss_ir.Origin_path));
-                chart = m.find('-isa','Stateflow.Chart', 'Path', ss_ir.Origin_path);
-                [ char_node, chart_external_nodes] = write_Chart( chart, 0, xml_trace,'' );
-                main_node = RawLustreCode(sprintf(char_node));
-                external_nodes{1} = RawLustreCode(sprintf(chart_external_nodes));
+                [main_node, external_nodes, external_libraries] = ...
+                    SS_To_LustreNode.stateflowCode(ss_ir, xml_trace);
                 return;
             end
             %%
@@ -132,7 +128,21 @@ classdef SS_To_LustreNode
                 contract = LustreContract('', '', {}, {}, {}, ...
                     contractImports, true);
             end
-            
+            % If the Subsystem is VerificationSubsystem, then add virtual
+            % output
+            if isempty(node_outputs) ...
+                    && isfield(ss_ir, 'MaskType') ...
+                    && isequal(ss_ir.MaskType, 'VerificationSubsystem')
+                node_outputs{end+1} = LustreVar('VerificationSubsystem_virtual', 'bool');
+                body{end+1} = LustreEq(VarIdExpr('VerificationSubsystem_virtual'),  BooleanExpr(true));
+            end
+            % If the Subsystem has VerificationSubsystem, then add virtual
+            % variable
+            [hasVerificationSubsystem, hasNoOutputs, vsBlk] = SubSystem_To_Lustre.hasVerificationSubsystem(ss_ir);
+            if hasVerificationSubsystem && hasNoOutputs
+                vs_name = SLX2LusUtils.node_name_format(vsBlk);
+                variables{end+1} = LustreVar(strcat(vs_name, '_virtual'), 'bool');
+            end
             % Adding lustre comments tracking the original path
             comment = LustreComment(...
                 sprintf('Original block name: %s', ss_ir.Origin_path), true);
@@ -330,13 +340,13 @@ classdef SS_To_LustreNode
             end
             main_node = main_node.changeArrowExp(...
                 BinaryExpr(BinaryExpr.AND, ...
-                            BinaryExpr(BinaryExpr.EQ, ...
-                                        VarIdExpr(SLX2LusUtils.timeStepStr()),...
-                                        RealExpr('0.0')), ...
-                             BinaryExpr(BinaryExpr.EQ, ...
-                                        VarIdExpr(SLX2LusUtils.iterationVariable()),...
-                                        v)));
-                                    
+                BinaryExpr(BinaryExpr.EQ, ...
+                VarIdExpr(SLX2LusUtils.timeStepStr()),...
+                RealExpr('0.0')), ...
+                BinaryExpr(BinaryExpr.EQ, ...
+                VarIdExpr(SLX2LusUtils.iterationVariable()),...
+                v)));
+            
             main_node_inputs = [node_inputs, inputsMemory, additionalInputs];
             if ~isempty(additionalInputs) || ~isempty(inputsMemory)
                 main_node.setInputs(main_node_inputs);
@@ -521,6 +531,43 @@ classdef SS_To_LustreNode
                 if ismember(node_inputs_names{i}, memoryIds_names)
                     inputsMemory{end+1} = LustreVar(strcat('_pre_',...
                         node_inputs_names{i}), node_inputs{i}.getDT());
+                end
+            end
+        end
+        
+        %% Statflow support: use old compiler from github
+        function [main_node, external_nodes, external_libraries] = ...
+                stateflowCode(ss_ir, xml_trace)
+            external_nodes = {};
+            external_libraries = {};
+            rt = sfroot;
+            m = rt.find('-isa', 'Simulink.BlockDiagram', 'Name',bdroot(ss_ir.Origin_path));
+            chart = m.find('-isa','Stateflow.Chart', 'Path', ss_ir.Origin_path);
+            [ char_node, extern_Stateflow_nodes_fun] = write_Chart( chart, 0, xml_trace,'' );
+            main_node = RawLustreCode(sprintf(char_node));
+            if isempty(extern_Stateflow_nodes_fun)
+                return;
+            end
+            [~, I] = unique({extern_Stateflow_nodes_fun.Name});
+            extern_Stateflow_nodes_fun = extern_Stateflow_nodes_fun(I);
+            for i=1:numel(extern_Stateflow_nodes_fun)
+                fun = extern_Stateflow_nodes_fun(i);
+                if strcmp(fun.Name,'trigo')
+                    external_libraries{end + 1} = 'LustMathLib_lustrec_math';
+                elseif strcmp(fun.Name,'lustre_math_fun')
+                    external_libraries{end + 1} = 'LustMathLib_lustrec_math';
+                elseif strcmp(fun.Name,'lustre_conv_fun')
+                    external_libraries{end + 1} = 'LustDTLib_conv';
+                elseif strcmp(fun.Name,'after')
+                    external_nodes{end + 1} = RawLustreCode(sprintf(temporal_operators(fun)));
+                elseif strcmp(fun.Name, 'min') && strcmp(fun.Type, 'int*int')
+                    external_libraries{end + 1} = 'LustMathLib_min_int';
+                elseif strcmp(fun.Name, 'min') && strcmp(fun.Type, 'real*real')
+                    external_libraries{end + 1} = 'LustMathLib_min_real';
+                elseif strcmp(fun.Name, 'max') && strcmp(fun.Type, 'int*int')
+                    external_libraries{end + 1} = 'LustMathLib_max_int';
+                elseif strcmp(fun.Name, 'max') && strcmp(fun.Type, 'real*real')
+                    external_libraries{end + 1} = 'LustMathLib_max_real';
                 end
             end
         end

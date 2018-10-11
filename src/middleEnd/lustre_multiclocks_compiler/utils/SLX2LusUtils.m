@@ -392,6 +392,7 @@ classdef SLX2LusUtils < handle
             % A block is defined by its outputs, if a block does not
             % have outports, like Outport block, than will be defined by its
             % inports. E.g, Outport Out with width 2 -> Out_1, out_2
+            blksNamesDefinedByTheirInports = {'Outport', 'Goto'};
             needToLogTraceability = 0;
             if nargin > 3
                 % this function is only called with "xml_trace" variable in
@@ -422,7 +423,8 @@ classdef SLX2LusUtils < handle
                 end
                 type = 'Inports';
                 
-            elseif isempty(blk.CompiledPortWidths.Outport)
+            elseif isempty(blk.CompiledPortWidths.Outport) ...
+                    && ismember(blk.BlockType, blksNamesDefinedByTheirInports)
                 width = blk.CompiledPortWidths.Inport;
                 type = 'Inports';
             else
@@ -850,7 +852,12 @@ classdef SLX2LusUtils < handle
             end
             for i=1:numel(elems)
                 dt = elems(i).DataType;
-                if strncmp(dt, 'Bus:', 4)
+                try
+                    isBus = evalin('base', sprintf('isa(%s, ''Simulink.Bus'')',char(dt)));
+                catch
+                    isBus = false;
+                end
+                if isBus
                     dt = regexprep(dt, 'Bus:\s*', '');
                     in_matrix_dimension = [in_matrix_dimension,...
                         SLX2LusUtils.getDimensionsFromBusObject(dt)];

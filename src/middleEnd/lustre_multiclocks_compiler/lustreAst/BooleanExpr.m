@@ -14,6 +14,11 @@ classdef BooleanExpr < LustreExpr
         function obj = BooleanExpr(v)
             obj.value = v;
         end
+        %%
+        function v = getValue(obj)
+            v = obj.value;
+        end
+        %%
         function new_obj = deepCopy(obj)
             new_obj = BooleanExpr(obj.value);
         end

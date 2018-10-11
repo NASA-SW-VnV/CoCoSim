@@ -1375,7 +1375,7 @@ classdef LustrecUtils < handle
                                 diff=0;
                             else
                                 if yout_values(j) ~= 0
-                                    diff = abs(yout_values(j)-output_val);
+                                    diff = abs(double(yout_values(j))-output_val);
                                     % percentage of difference
                                     %diff = 100*abs(...
                                      %   (yout_values(j)-output_val)/yout_values(j));

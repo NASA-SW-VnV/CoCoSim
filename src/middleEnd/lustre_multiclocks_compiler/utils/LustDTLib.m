@@ -213,6 +213,13 @@ classdef LustDTLib
         end
        
         %%
+        function [node, external_nodes_i, opens, abstractedNodes] = get_conv(varargin)
+            opens = {'conv'};
+            abstractedNodes = {'lustrec DataType conversion Library'};
+            external_nodes_i = {};
+            node = '';
+        end
+        
         function [node, external_nodes, opens, abstractedNodes] = get_int_to_real(backend, varargin)
             if BackendType.isKIND2(backend)
                 opens = {};

@@ -44,6 +44,10 @@ end
 %% initialize outputs
 nom_lustre_file = '';
 xml_trace = [];
+status = 0;
+unsupportedOptions = {};
+abstractedBlocks = {};
+pp_model_full_path = '';
 %% Get Simulink model full path
 if exist(model_path, 'file') == 4
     model_path = which(model_path);
@@ -79,14 +83,18 @@ end
 
 %% Get start time
 t_start = tic;
-
-[unsupportedOptions, status, pp_model_full_path, ir_struct, output_dir, abstractedBlocks]= ...
-    ToLustreUnsupportedBlocks(model_path, const_files, backend, varargin);
-
-if status || ~isempty(unsupportedOptions)
+try
+    [unsupportedOptions, status, pp_model_full_path, ir_struct, output_dir, abstractedBlocks]= ...
+        ToLustreUnsupportedBlocks(model_path, const_files, backend, varargin);
+    
+    if status || ~isempty(unsupportedOptions)
+        return;
+    end
+catch me
+    display_msg(me.getReport(), MsgType.DEBUG, 'ToLustre', '');
+    status = 1;
     return;
 end
-
 [~, file_name, ~] = fileparts(pp_model_full_path);
 %% Definition of the generated output files names
 nom_lustre_file = fullfile(output_dir, strcat(file_name,'.', backend, '.lus'));
@@ -111,8 +119,11 @@ global model_struct
 model_struct = ir_struct.(IRUtils.name_format(file_name));
 main_sampleTime = model_struct.CompiledSampleTime;
 is_main_node = 1;
-[nodes_ast, contracts_ast, external_libraries] = recursiveGeneration(...
+[nodes_ast, contracts_ast, external_libraries, status] = recursiveGeneration(...
     model_struct, model_struct, main_sampleTime, is_main_node, backend, xml_trace);
+if status
+    return;
+end
 [external_lib_code, open_list, abstractedNodes] = getExternalLibrariesNodes(external_libraries, backend);
 abstractedBlocks = [abstractedBlocks, abstractedNodes];
 if ~isempty(abstractedBlocks)
@@ -166,15 +177,16 @@ ToLustre_datenum_map(model_path) = nom_lustre_file;
 end
 
 %%
-function [nodes_ast, contracts_ast, external_libraries] = recursiveGeneration(parent, blk, main_sampleTime, is_main_node, backend, xml_trace)
+function [nodes_ast, contracts_ast, external_libraries, error_status] = recursiveGeneration(parent, blk, main_sampleTime, is_main_node, backend, xml_trace)
 nodes_ast = {};
 contracts_ast = {};
 external_libraries = {};
-
-if isfield(blk, 'Content') && ~isempty(blk.Content)
+error_status = false;
+if isfield(blk, 'Content') && ~isempty(blk.Content) ...
+        && ~(isstruct(blk.Content) && isempty(fieldnames(blk.Content)))
     field_names = fieldnames(blk.Content);
     for i=1:numel(field_names)
-        [nodes_code_i, contracts_ast_i, external_libraries_i] = recursiveGeneration(blk, blk.Content.(field_names{i}), main_sampleTime, 0, backend, xml_trace);
+        [nodes_code_i, contracts_ast_i, external_libraries_i, error_status_i] = recursiveGeneration(blk, blk.Content.(field_names{i}), main_sampleTime, 0, backend, xml_trace);
         if ~isempty(nodes_code_i)
             nodes_ast = [ nodes_ast, nodes_code_i];
         end
@@ -182,12 +194,21 @@ if isfield(blk, 'Content') && ~isempty(blk.Content)
             contracts_ast{end + 1} = contracts_ast_i;
         end
         external_libraries = [external_libraries, external_libraries_i];
+        error_status = error_status_i || error_status;
     end
     [b, status] = getWriteType(blk);
     if status || ~b.isContentNeedToBeTranslated()
         return;
     end
-    [main_node, is_contract, external_nodes, external_libraries_i] = SS_To_LustreNode.subsystem2node(parent, blk, main_sampleTime, is_main_node, backend, xml_trace);
+    try
+        [main_node, is_contract, external_nodes, external_libraries_i] = SS_To_LustreNode.subsystem2node(parent, blk, main_sampleTime, is_main_node, backend, xml_trace);
+    catch me
+        display_msg(sprintf('Translation to Lustre of block %s has failed.', blk.Origin_path),...
+            MsgType.ERROR, 'write_body', '');
+        display_msg(me.getReport(), MsgType.DEBUG, 'write_body', '');
+        error_status = true;
+        return;
+    end
     external_libraries = [external_libraries, external_libraries_i];
     if iscell(external_nodes)
         nodes_ast = [ nodes_ast, external_nodes];

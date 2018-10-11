@@ -14,7 +14,11 @@ classdef IntExpr < LustreExpr
         function obj = IntExpr(v)
             obj.value = v;
         end
-        
+        %%
+        function v = getValue(obj)
+            v = obj.value;
+        end
+        %%
         function new_obj = deepCopy(obj)
             new_obj = IntExpr(obj.value);
         end

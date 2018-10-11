@@ -27,6 +27,11 @@ classdef SubSystem_To_Lustre < Block_To_Lustre
                     blk.Origin_path), MsgType.ERROR, 'SubSystem_To_Lustre', '')
                 return;
             end
+            if isempty(blk.CompiledPortWidths.Outport) ...
+                    && isfield(blk, 'MaskType') ...
+                    && isequal(blk.MaskType, 'VerificationSubsystem')
+                outputs{1} = VarIdExpr(strcat(node_name, '_virtual'));
+            end
             %% Check Enable, Trigger, Action case
             [isEnabledSubsystem, EnableShowOutputPortIsOn] = ...
                 SubSystem_To_Lustre.hasEnablePort(blk);
@@ -144,6 +149,25 @@ classdef SubSystem_To_Lustre < Block_To_Lustre
             end
         end
         %%
+        function [b, hasNoOutputs, vsBlk] = hasVerificationSubsystem(blk)
+            fields = fieldnames(blk.Content);
+            fields = ...
+                fields(...
+                cellfun(@(x) isfield(blk.Content.(x),'MaskType'), fields));
+            vFields = fields(...
+                cellfun(@(x) ...
+                strcmp(blk.Content.(x).MaskType,'VerificationSubsystem'), ...
+                fields));
+            b = ~isempty(vFields);
+            if b
+                vsBlk = blk.Content.(vFields{1});
+                hasNoOutputs = isempty(vsBlk.CompiledPortWidths.Outport);
+            else
+                vsBlk = [];
+                hasNoOutputs = [];
+            end
+            
+        end
         function [b, ShowOutputPortIsOn, StatesWhenEnabling] = hasEnablePort(blk)
             fields = fieldnames(blk.Content);
             fields = ...
