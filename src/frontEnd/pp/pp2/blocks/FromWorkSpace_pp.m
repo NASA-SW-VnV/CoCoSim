@@ -34,6 +34,7 @@ if not(isempty(fromWorkSpace_list))
                 end
             catch
             end
+            
             display_msg(fromWorkSpace_list{i}, MsgType.INFO, ...
                 'FromWorkSpace_pp', '');
             
@@ -46,7 +47,7 @@ if not(isempty(fromWorkSpace_list))
             if status
                 display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
                     VariableName, fromWorkSpace_list{i}), ...
-                    MsgType.ERROR, 'Constant_To_Lustr', '');
+                    MsgType.ERROR, 'FromWorkSpace_pp', '');
                 continue;
             end
             
@@ -58,13 +59,22 @@ if not(isempty(fromWorkSpace_list))
                 variableMatrix = zeros(n,m+1);
                 variableMatrix(:,1) = VariableName_value.Time;
                 variableMatrix(:,2:m+1) = VariableName_value.Data; 
+            % convert structure
             elseif isstruct(VariableName_value)
                 [n,m] = size(VariableName_value.signals.values);
                 variableMatrix = zeros(n,m+1);
                 variableMatrix(:,1) = VariableName_value.time;
                 variableMatrix(:,2:m+1) = VariableName_value.signals.values;                 
             end
-            % convert structure
+            % if vector input, then we will let FromWorkSpace_To_Lustre
+            % handle it
+            [n,m] = size(variableMatrix);
+            if m > 2
+                display_msg(sprintf('FromWorkSpace block %s will be handled through Lustre translation and not through pre-processing',...
+                    fromWorkSpace_list{i}), ...
+                    MsgType.INFO, 'FromWorkSpace_pp', '');
+                continue;
+            end                
             
             SampleTime = get_param(fromWorkSpace_list{i},'SampleTime');
             [SampleTime_value, ~, status] = SLXUtils.evalParam(...
@@ -75,7 +85,7 @@ if not(isempty(fromWorkSpace_list))
             if status
                 display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
                     SampleTime, fromWorkSpace_list{i}), ...
-                    MsgType.ERROR, 'Constant_To_Lustr', '');
+                    MsgType.ERROR, 'FromWorkSpace_pp', '');
                 continue;
             end
             outputDataType = get_param(fromWorkSpace_list{i}, 'OutDataTypeStr');
