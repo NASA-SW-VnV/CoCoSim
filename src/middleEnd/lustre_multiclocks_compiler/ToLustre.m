@@ -222,7 +222,9 @@ if isfield(blk, 'Content') && ~isempty(blk.Content) ...
     end    
 elseif isfield(blk, 'SFBlockType') && isequal(blk.SFBlockType, 'Chart')
     % Stateflow chart example
-    [main_node, ~, external_nodes, external_libraries_i] = SS_To_LustreNode.subsystem2node(parent, blk, main_sampleTime, is_main_node, backend, xml_trace);
+    %[main_node, ~, external_nodes, external_libraries_i] = SS_To_LustreNode.subsystem2node(parent, blk, main_sampleTime, is_main_node, backend, xml_trace);
+    [main_node, external_nodes, external_libraries_i ] = ...
+                SF_To_LustreNode.chart2node(parent,  blk,  main_sampleTime, backend, xml_trace);
     external_libraries = [external_libraries, external_libraries_i];
     if iscell(external_nodes)
         nodes_ast = [ nodes_ast, external_nodes];
