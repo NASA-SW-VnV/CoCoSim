@@ -85,7 +85,7 @@ end
 t_start = tic;
 try
     [unsupportedOptions, status, pp_model_full_path, ir_struct, output_dir, abstractedBlocks]= ...
-        ToLustreUnsupportedBlocks(model_path, const_files, backend, varargin);
+        ToLustreUnsupportedBlocks(model_path, const_files, backend, varargin{:});
     
     if status || ~isempty(unsupportedOptions)
         return;

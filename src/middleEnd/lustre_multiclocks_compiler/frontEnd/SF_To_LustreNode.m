@@ -19,13 +19,18 @@ classdef SF_To_LustreNode
             external_nodes = {};
             external_libraries = {};
             %% global varibale mapping between states and their nodes AST.
-            global SF_STATES_NODESAST_MAP;
+            global SF_STATES_NODESAST_MAP SF_STATES_PATH_MAP;
             %It's initialized for each call of this function
             SF_STATES_NODESAST_MAP = containers.Map('KeyType', 'char', 'ValueType', 'any');
-            
-            %% content
+            SF_STATES_PATH_MAP = containers.Map('KeyType', 'char', 'ValueType', 'any');
+            %% get content
             content = blk.StateflowContent;
-            
+            events = content.Events;
+            data = content.Data;
+            states = SF_To_LustreNode.orderStates(content.States);
+            for i=1:numel(states)
+                SF_STATES_PATH_MAP(states{i}.Path) = states{i};
+            end
             %% Go Over Stateflow Functions
             if isfield(content, 'GraphicalFunctions')
                 SFFunctions = content.GraphicalFunctions;
@@ -47,19 +52,12 @@ classdef SF_To_LustreNode
                     end
                 end
             end
-            %% get content
-            events = content.Events;
-            data = content.Data;
-            states = SF_To_LustreNode.orderStates(content.States);
+            
             %% Go over states
             for i=1:numel(states)
-                state_name = SF_To_LustreNode.getUniqueName(states{i});
-                if isKey(SF_STATES_NODESAST_MAP, state_name)
-                    %already handled in StateflowState_To_Lustre
-                    continue;
-                else
+                try
                     [node_i, external_nodes_i, external_libraries_i ] = ...
-                        StateflowState_To_Lustre.write_code(states{i});
+                        StateflowState_To_Lustre.write_code(states{i}, data);
                     if iscell(node_i)
                         external_nodes = [external_nodes, node_i];
                     else
@@ -67,14 +65,24 @@ classdef SF_To_LustreNode
                     end
                     external_nodes = [external_nodes, external_nodes_i];
                     external_libraries = [external_libraries, external_libraries_i];
+                catch me
+                    display_msg(sprintf('Translation of state %s failed', ...
+                        states{i}.Path),...
+                        MsgType.ERROR, 'SF_To_LustreNode', '');
+                    if strcmp(me.identifier, 'COCOSIM:STATEFLOW')
+                        display_msg(me.message, MsgType.ERROR, 'Fcn_To_Lustre', '');
+                    else
+                        display_msg(me.message, MsgType.DEBUG, 'Fcn_To_Lustre', '');
+                    end
                 end
             end
         end
         %%
         %% Get unique short name
         function unique_name = getUniqueName(object)
+            [~, name, ~] = fileparts(object.Name);
             id_str = sprintf('%.0f', object.Id);
-            unique_name = sprintf('%s_%s',SLX2LusUtils.name_format(object.Name),id_str );
+            unique_name = sprintf('%s_%s',SLX2LusUtils.name_format(name),id_str );
         end
         %% Order states
         function ordered = orderStates(states)

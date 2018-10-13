@@ -19,10 +19,15 @@ classdef SFIRPPUtils
         end
         
         function action_Array = split_actions(actions)
+            if ~isempty(actions) && iscell(actions)
+                actions = actions(~strcmp(actions, ''));
+                actions = MatlabUtils.strjoin(actions, '\n');
+            end
             delim = '(;|\n)';
             action_Array = regexp(actions, delim, 'split');
+            action_Array = cellfun(@(x) regexprep(x, '\s+', ''), ...
+                action_Array, 'UniformOutput', false);
             action_Array = action_Array(~strcmp(action_Array,''));
-            action_Array = action_Array(~strcmp(action_Array,' '));
         end%split_actions
         
         function [dt_str] = to_lustre_dt(simulink_dt)
