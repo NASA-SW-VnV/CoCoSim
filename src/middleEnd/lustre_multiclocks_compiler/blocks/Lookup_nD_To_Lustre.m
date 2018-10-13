@@ -267,7 +267,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
             InterpMethod = blkParams.InterpMethod;
             NumberOfTableDimensions = blkParams.NumberOfTableDimensions;
             BreakpointsForDimension = blkParams.BreakpointsForDimension;
-            numBoundNodes = 2*blkParams.NumberOfTableDimensions;
+            numBoundNodes = 2^blkParams.NumberOfTableDimensions;
             ExtrapMethod = blkParams.ExtrapMethod;
             
             % clipping
