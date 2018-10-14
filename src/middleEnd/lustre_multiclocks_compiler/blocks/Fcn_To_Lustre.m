@@ -39,7 +39,7 @@ classdef Fcn_To_Lustre < Block_To_Lustre
         end
         %%
         function options = getUnsupportedOptions(obj, parent, blk, varargin)
-            [tree, status, unsupportedExp] = Fcn_Exp_Parser(blk.Expr);
+            [tree, status, unsupportedExp] = Fcn_Exp_Parser.parse(blk.Expr);
             if status
                 obj.addUnsupported_options(sprintf('ParseError  character unsupported  %s in block %s', ...
                     unsupportedExp, blk.Origin_path));
@@ -65,7 +65,7 @@ classdef Fcn_To_Lustre < Block_To_Lustre
         function lusCode = expToLustre(obj, exp, parent, blk, inputs)
             display_msg(exp, MsgType.DEBUG, 'Fcn_To_Lustre', '');
             lusCode = VarIdExpr('');
-            [tree, status, unsupportedExp] = Fcn_Exp_Parser(exp);
+            [tree, status, unsupportedExp] = Fcn_Exp_Parser.parse(exp);
             if status
                 display_msg(sprintf('ParseError  character unsupported  %s in block %s', ...
                     unsupportedExp, blk.Origin_path), ...

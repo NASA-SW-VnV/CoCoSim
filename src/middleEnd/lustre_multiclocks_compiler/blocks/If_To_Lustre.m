@@ -35,7 +35,7 @@ classdef If_To_Lustre < Block_To_Lustre
             IfExp = If_To_Lustre.getIfExp(blk);
             nbOutputs=numel(blk.CompiledPortWidths.Outport);
             for j=1:nbOutputs
-                [tree, status, unsupportedExp] = Fcn_Exp_Parser(IfExp{j});
+                [tree, status, unsupportedExp] = Fcn_Exp_Parser.parse(IfExp{j});
                 if status
                     obj.addUnsupported_options(sprintf('ParseError  character unsupported  %s in block %s', ...
                         unsupportedExp, blk.Origin_path));
@@ -119,7 +119,7 @@ classdef If_To_Lustre < Block_To_Lustre
         function exp = formatConditionToLustre(obj, cond, inputs_cell, inputs_dt, parent, blk)
             %display_msg(cond, MsgType.DEBUG, 'If_To_Lustre', '');
             exp = VarIdExpr('');
-            [tree, status, unsupportedExp] = Fcn_Exp_Parser(cond);
+            [tree, status, unsupportedExp] = Fcn_Exp_Parser.parse(cond);
             if status
                 display_msg(sprintf('ParseError  character unsupported  %s in block %s', ...
                     unsupportedExp, blk.Origin_path), ...

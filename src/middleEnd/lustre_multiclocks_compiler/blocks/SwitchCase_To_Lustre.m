@@ -49,7 +49,7 @@ classdef SwitchCase_To_Lustre < Block_To_Lustre
             IfExp = obj.getIfExp(blk);
             nbOutputs = numel(blk.CompiledPortWidths.Outport);
             for j=1:nbOutputs
-                [tree, status, unsupportedExp] = Fcn_Exp_Parser(IfExp{j});
+                [tree, status, unsupportedExp] = Fcn_Exp_Parser.parse(IfExp{j});
                 if status
                     obj.addUnsupported_options(sprintf('ParseError  character unsupported  %s in block %s', ...
                         unsupportedExp, blk.Origin_path));

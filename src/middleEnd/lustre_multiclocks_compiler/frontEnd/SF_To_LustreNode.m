@@ -122,7 +122,7 @@ classdef SF_To_LustreNode
                 ignoreOutInputs = false;
             end
             action = strrep(action, ';', '');
-            [tree, status, unsupportedExp] = Fcn_Exp_Parser(action);
+            [tree, status, unsupportedExp] = Fcn_Exp_Parser.parse(action);
             outputs = {};
             inputs = {};
             if status
