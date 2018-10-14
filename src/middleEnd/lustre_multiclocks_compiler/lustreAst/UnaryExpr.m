@@ -62,6 +62,14 @@ classdef UnaryExpr < LustreExpr
             end
             new_obj = UnaryExpr(obj.op, new_expr, obj.withPar);
         end
+        %% This function is used by Stateflow function SF_To_LustreNode.getPseudoLusAction
+        function varIds = GetVarIds(obj)
+            if iscell(obj.expr)
+                varIds = obj.expr{1}.GetVarIds();
+            else
+                varIds = obj.expr.GetVarIds();
+            end
+        end
         %%
         function code = print(obj, backend)
             %TODO: check if LUSTREC syntax is OK for the other backends.

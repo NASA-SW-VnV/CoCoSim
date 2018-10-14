@@ -45,6 +45,13 @@ classdef IteExpr < LustreExpr
                 obj.ElseExpr.changeArrowExp(cond),...
                 obj.OneLine);
         end
+        %% This function is used by Stateflow function SF_To_LustreNode.getPseudoLusAction
+        function varIds = GetVarIds(obj)
+            vcondId = obj.condition.GetVarIds();
+            thenCondId = obj.thenExpr.GetVarIds();
+            elseCondId = obj.ElseExpr.GetVarIds();
+            varIds = [vcondId, thenCondId, elseCondId];
+        end
         %%
         function code = print(obj, backend)
             %TODO: check if LUSTREC syntax is OK for the other backends.

@@ -10,7 +10,7 @@ classdef TupleExpr < LustreExpr
         args;
     end
     
-    methods 
+    methods
         function obj = TupleExpr(args)
             obj.args = args;
         end
@@ -52,6 +52,18 @@ classdef TupleExpr < LustreExpr
                 new_args = obj.args.changeArrowExp(cond);
             end
             new_obj = TupleExpr(new_args);
+        end
+        %% This function is used by Stateflow function SF_To_LustreNode.getPseudoLusAction
+        function varIds = GetVarIds(obj)
+            varIds = {};
+            if iscell(obj.args)
+                for i=1:numel(obj.args)
+                    varIds_i = obj.args{i}.GetVarIds();
+                    varIds = [varIds, varIds_i];
+                end
+            else
+                varIds = obj.args.GetVarIds();
+            end
         end
         %%
         function code = print(obj, backend)

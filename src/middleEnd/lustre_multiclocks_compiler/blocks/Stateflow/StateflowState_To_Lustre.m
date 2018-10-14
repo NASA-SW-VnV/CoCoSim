@@ -14,13 +14,12 @@ classdef StateflowState_To_Lustre
         
         function  [main_node, external_nodes, external_libraries ] = ...
                 write_code(state, data)
-            global SF_STATES_NODESAST_MAP ;
             main_node = {};
             external_nodes = {};
             external_libraries = {};
             %% Create State actions
             [action_nodes,  external_libraries_i] = ...
-                StateflowState_To_Lustre.get_state_actions(state, data);
+                StateflowState_To_Lustre.get_state_actions(state);
             external_nodes = [external_nodes, action_nodes];
             external_libraries = [external_libraries, external_libraries_i];
             %% Create transitions actions:
@@ -46,24 +45,24 @@ classdef StateflowState_To_Lustre
         
         %% State actions
         function [action_nodes,  external_libraries] = ...
-                get_state_actions(state, data)
+                get_state_actions(state)
             action_nodes = {};
             %write_entry_action
             [entry_action_node, external_libraries] = ...
-                StateflowState_To_Lustre.write_entry_action(state, data);
+                StateflowState_To_Lustre.write_entry_action(state);
             if ~isempty(entry_action_node)
                 action_nodes{end+1} = entry_action_node;
             end
             %write_exit_action
             [exit_action_node, ext_lib] = ...
-                StateflowState_To_Lustre.write_exit_action(state, data);
+                StateflowState_To_Lustre.write_exit_action(state);
             if ~isempty(exit_action_node)
                 action_nodes{end+1} = exit_action_node;
             end
             %write_during_action
             external_libraries = [external_libraries, ext_lib];
             [during_action_node, ext_lib2] = ...
-                StateflowState_To_Lustre.write_during_action(state, data);
+                StateflowState_To_Lustre.write_during_action(state);
             if ~isempty(during_action_node)
                 action_nodes{end+1} = during_action_node;
             end
@@ -71,8 +70,8 @@ classdef StateflowState_To_Lustre
         end
         %ENTRY ACTION
         function [main_node, external_libraries] = ...
-                write_entry_action(state, data)
-            global SF_STATES_PATH_MAP;
+                write_entry_action(state)
+            global SF_STATES_NODESAST_MAP SF_STATES_PATH_MAP;
             external_libraries = {};
             main_node = {};
             body = {};
@@ -91,7 +90,7 @@ classdef StateflowState_To_Lustre
             end
             idParentName = StateflowState_To_Lustre.getStateIDName(...
                 SF_STATES_PATH_MAP(parentName));
-            body{1} = LustreComment('-- set state as active');
+            body{1} = LustreComment('set state as active');
             body{2} = LustreEq(VarIdExpr(idParentName), IntExpr(state.Id));
             outputs{1} = LustreVar(idParentName, 'int');
             
@@ -99,8 +98,19 @@ classdef StateflowState_To_Lustre
             actions = SFIRPPUtils.split_actions(state.Actions.Entry);
             nb_actions = numel(actions);
             for i=1:nb_actions
-                
+                [body{end+1}, outputs_i, inputs_i, external_libraries_i] = ...
+                    SF_To_LustreNode.getPseudoLusAction(actions{i});
+                outputs = [outputs, outputs_i];
+                inputs = [inputs, inputs_i];
+                external_libraries = [external_libraries, external_libraries_i];
             end
+            
+            %write children states entry action
+            [actions, outputs_i, inputs_i] = ...
+                StateflowState_To_Lustre.write_children_actions(state, 'Entry');
+            body = [body, actions];
+            outputs = [outputs, outputs_i];
+            inputs = [inputs, inputs_i];
             %create the node
             act_node_name = ...
                 StateflowState_To_Lustre.getEntryActionNodeName(state);
@@ -111,60 +121,245 @@ classdef StateflowState_To_Lustre
                 state.Path), true);
             main_node.setMetaInfo(comment);
             main_node.setBodyEqs(body);
+            outputs = LustreVar.uniqueVars(outputs);
+            inputs = LustreVar.uniqueVars(inputs);
             main_node.setOutputs(outputs);
-            
+            main_node.setInputs(inputs);
+            SF_STATES_NODESAST_MAP(act_node_name) = main_node;
         end
         %EXIT ACTION
         function [main_node, external_libraries] = ...
-                write_exit_action(state, data)
-            main_node = {};
+                write_exit_action(state)
+            global SF_STATES_NODESAST_MAP SF_STATES_PATH_MAP;
             external_libraries = {};
-            actions = SFIRPPUtils.split_actions(state.Actions.Exit);
-            if ~isempty(actions)
-                act_node_name = ...
-                    StateflowState_To_Lustre.getExitActionNodeName(state);
-                main_node = LustreNode();
-                main_node.setName(act_node_name);
-                comment = LustreComment(...
-                    sprintf('Exit action of state %s',...
-                    state.Path), true);
-                main_node.setMetaInfo(comment);
-                %TODO parse action
+            main_node = {};
+            body = {};
+            outputs = {};
+            inputs = {};
+            
+            parentName = fileparts(state.Path);
+            if isempty(parentName)
+                %main chart
+                return;
             end
+            
+            %write children states exit action
+            [actions, outputs_i, inputs_i] = ...
+                StateflowState_To_Lustre.write_children_actions(state, 'Exit');
+            body = [body, actions];
+            outputs = [outputs, outputs_i];
+            inputs = [inputs, inputs_i];
+
+            %actions code
+            actions = SFIRPPUtils.split_actions(state.Actions.Exit);
+            nb_actions = numel(actions);
+            for i=1:nb_actions
+                [body{end+1}, outputs_i, inputs_i, external_libraries_i] = ...
+                    SF_To_LustreNode.getPseudoLusAction(actions{i});
+                outputs = [outputs, outputs_i];
+                inputs = [inputs, inputs_i];
+                external_libraries = [external_libraries, external_libraries_i];
+            end            
+
+            %set state as inactive
+            if ~isKey(SF_STATES_PATH_MAP, parentName)
+                ME = MException('COCOSIM:STATEFLOW', ...
+                    'COMPILER ERROR: Not found state "%s" in SF_STATES_PATH_MAP', parentName);
+                throw(ME);
+            end
+            %isInner variable that tells if the transition that cause this
+            %exit action is an inner Transition
+            isInner = VarIdExpr('_isInner');
+            
+
+            idParentName = StateflowState_To_Lustre.getStateIDName(...
+                SF_STATES_PATH_MAP(parentName));
+            body{end + 1} = LustreComment('set state as inactive');
+            % idParentName = if (not isInner) then 0 else idParentName;
+            body{end + 1} = LustreEq(VarIdExpr(idParentName), ...
+                IteExpr(UnaryExpr(UnaryExpr.NOT, isInner), ...
+                        IntExpr(0), VarIdExpr(idParentName)));
+            outputs{end + 1} = LustreVar(idParentName, 'int');
+            inputs{end + 1} = LustreVar(idParentName, 'int');
+            % set state children as inactive
+            junctions = state.Composition.SubJunctions;
+            typs = cellfun(@(x) x.Type, junctions, 'UniformOutput', false);
+            hjunctions = junctions(strcmp(typs, 'HISTORY'));
+            if (~isempty(state.Composition.Substates) && isempty(hjunctions))
+                idStateName = StateflowState_To_Lustre.getStateIDName(state);
+                body{end+1} = LustreEq(VarIdExpr(idParentName), IntExpr(0));
+                outputs{end+1} = LustreVar(idStateName, 'int');
+            end
+            % add isInner as the last input
+            inputs{end + 1} = LustreVar(isInner, 'bool');
+            %create the node
+            act_node_name = ...
+                StateflowState_To_Lustre.getExitActionNodeName(state);
+            main_node = LustreNode();
+            main_node.setName(act_node_name);
+            comment = LustreComment(...
+                sprintf('Exit action of state %s',...
+                state.Path), true);
+            main_node.setMetaInfo(comment);
+            main_node.setBodyEqs(body);
+            outputs = LustreVar.uniqueVars(outputs);
+            inputs = LustreVar.uniqueVars(inputs);
+            main_node.setOutputs(outputs);
+            main_node.setInputs(inputs);
+            SF_STATES_NODESAST_MAP(act_node_name) = main_node;
         end
         %DURING ACTION
         function [main_node, external_libraries] = ...
-                write_during_action(state, data)
-            main_node = {};
+                write_during_action(state)
+            global SF_STATES_NODESAST_MAP SF_STATES_PATH_MAP;
             external_libraries = {};
+            main_node = {};
+            body = {};
+            outputs = {};
+            inputs = {};
+            
+            parentName = fileparts(state.Path);
+            if isempty(parentName)
+                %main chart
+                return;
+            end
+
+            %actions code
             actions = SFIRPPUtils.split_actions(state.Actions.During);
-            if ~isempty(actions)
-                act_node_name = ...
-                    StateflowState_To_Lustre.getDuringActionNodeName(state);
-                main_node = LustreNode();
-                main_node.setName(act_node_name);
-                comment = LustreComment(...
-                    sprintf('During action of state %s',...
-                    state.Path), true);
-                main_node.setMetaInfo(comment);
-                %TODO parse action
+            nb_actions = numel(actions);
+            for i=1:nb_actions
+                [body{end+1}, outputs_i, inputs_i, external_libraries_i] = ...
+                    SF_To_LustreNode.getPseudoLusAction(actions{i});
+                outputs = [outputs, outputs_i];
+                inputs = [inputs, inputs_i];
+                external_libraries = [external_libraries, external_libraries_i];
+            end       
+            % Inner transitions
+            %% TODO: code for inner transitions 
+            %create the node
+            act_node_name = ...
+                StateflowState_To_Lustre.getDuringActionNodeName(state);
+            main_node = LustreNode();
+            main_node.setName(act_node_name);
+            comment = LustreComment(...
+                sprintf('During action of state %s',...
+                state.Path), true);
+            main_node.setMetaInfo(comment);
+            main_node.setBodyEqs(body);
+            outputs = LustreVar.uniqueVars(outputs);
+            inputs = LustreVar.uniqueVars(inputs);
+            main_node.setOutputs(outputs);
+            main_node.setInputs(inputs);
+            SF_STATES_NODESAST_MAP(act_node_name) = main_node;
+        end
+        
+        %% write_children_actions
+        function [actions, outputs, inputs] = ...
+                write_children_actions(state, actionType)
+            actions = {};
+            outputs = {};
+            inputs = {};
+            global SF_STATES_NODESAST_MAP;
+            if isequal(state.Composition.Type, 'PARALLEL_AND')
+                %% TODO
+            else
+                childrenNames = state.Composition.Substates;
+                nb_children = numel(childrenNames);
+                childrenIDs = state.Composition.States;
+                idStateName = VarIdExpr(...
+                    StateflowState_To_Lustre.getStateIDName(state));
+                if nb_children >= 1 
+                    inputs{end+1} = LustreVar(idStateName, 'int');
+                end
+                default_transition = state.Composition.DefaultTransitions;
+                if isequal(actionType, 'Entry')...
+                        && ~isempty(default_transition)
+                    % we need to get the default condition code, as the
+                    % default transition decides what sub-state to enter while.
+                    % entering the state. This is the case where stateId ==
+                    % 0;
+                    %% TODO: get_initial_state_code
+                    
+                end
+                isOneChildEntry = isequal(actionType, 'Entry') ...
+                    && (nb_children == 1) && isempty(default_transition);
+                for i=1:nb_children
+                    %% TODO: optimize the number of calls
+                    if isequal(actionType, 'Entry')
+                        action_node_name = ...
+                            StateflowState_To_Lustre.getEntryActionNodeName(...
+                            childrenNames{i}, childrenIDs{i});
+                    else
+                        action_node_name = ...
+                            StateflowState_To_Lustre.getExitActionNodeName(...
+                            childrenNames{i}, childrenIDs{i});
+                    end
+                    if ~isKey(SF_STATES_NODESAST_MAP, action_node_name)
+                        ME = MException('COCOSIM:STATEFLOW', ...
+                            'COMPILER ERROR: Not found node name "%s" in SF_STATES_NODESAST_MAP', ...
+                            action_node_name);
+                        throw(ME);
+                    end
+                    actionNodeAst = SF_STATES_NODESAST_MAP(action_node_name);
+                    [call, oututs_Ids] = actionNodeAst.nodeCall();
+                    if isOneChildEntry
+                        actions{end+1} = LustreEq(oututs_Ids, call);
+                        outputs = [outputs, actionNodeAst.getOutputs()];
+                        inputs = [inputs, actionNodeAst.getInputs()];
+                    else
+                        cond = BinaryExpr(BinaryExpr.EQ, ...
+                            idStateName, IntExpr(childrenIDs{i}));
+                        actions{end+1} = LustreEq(oututs_Ids, ...
+                            IteExpr(cond, call, TupleExpr(oututs_Ids)));
+                        outputs = [outputs, actionNodeAst.getOutputs()];
+                        inputs = [inputs, actionNodeAst.getOutputs()];
+                        inputs = [inputs, actionNodeAst.getInputs()];
+                    end
+                    
+                end
+                if isequal(actionType, 'Entry') ...
+                        && nb_children == 0 && ...
+                        (~isempty(state.InnerTransitions)...
+                         || ~isempty(state.Composition.DefaultTransitions))
+                     %State that contains only transitions and junctions
+                     %inside
+                     actions{end+1} = LustreEq(idStateName, IntExpr(-1));
+                     inputs{end+1} = LustreVar(idStateName, 'int');
+                     outputs{end+1} = LustreVar(idStateName, 'int');
+                end
             end
         end
         %% Actions node name
-        function name = getEntryActionNodeName(state)
-            state_name = SF_To_LustreNode.getUniqueName(state);
+        function name = getEntryActionNodeName(state, id)
+            if nargin == 2
+                state_name = SF_To_LustreNode.getUniqueName(state, id);
+            else
+                state_name = SF_To_LustreNode.getUniqueName(state);
+            end
             name = strcat(state_name, '_EntryAction');
         end
-        function name = getExitActionNodeName(state)
-            state_name = SF_To_LustreNode.getUniqueName(state);
+        function name = getExitActionNodeName(state, id)
+            if nargin == 2
+                state_name = SF_To_LustreNode.getUniqueName(state, id);
+            else
+                state_name = SF_To_LustreNode.getUniqueName(state);
+            end
             name = strcat(state_name, '_ExitAction');
         end
-        function name = getDuringActionNodeName(state)
-            state_name = SF_To_LustreNode.getUniqueName(state);
+        function name = getDuringActionNodeName(state, id)
+            if nargin == 2
+                state_name = SF_To_LustreNode.getUniqueName(state, id);
+            else
+                state_name = SF_To_LustreNode.getUniqueName(state);
+            end
             name = strcat(state_name, '_DuringAction');
         end
-        function idName = getStateIDName(state)
-            state_name = SF_To_LustreNode.getUniqueName(state);
+        function idName = getStateIDName(state, id)
+            if nargin == 2
+                state_name = SF_To_LustreNode.getUniqueName(state, id);
+            else
+                state_name = SF_To_LustreNode.getUniqueName(state);
+            end
             idName = strcat(state_name, '_ChildID');
         end
     end

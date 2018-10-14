@@ -9,8 +9,8 @@ classdef BooleanExpr < LustreExpr
     properties
         value;
     end
-   
-    methods 
+    
+    methods
         function obj = BooleanExpr(v)
             obj.value = v;
         end
@@ -30,6 +30,10 @@ classdef BooleanExpr < LustreExpr
         function new_obj = changeArrowExp(obj, ~)
             new_obj = obj;
         end
+        %% This function is used by Stateflow function SF_To_LustreNode.getPseudoLusAction
+        function varIds = GetVarIds(obj)
+            varIds = {};
+        end
         %%
         function code = print(obj, ~)
             %TODO: check if LUSTREC syntax is OK for the other backends.
@@ -38,7 +42,7 @@ classdef BooleanExpr < LustreExpr
         
         function code = print_lustrec(obj)
             if isnumeric(obj.value) || islogical(obj.value)
-                if obj.value 
+                if obj.value
                     code = 'true';
                 else
                     code = 'false';
@@ -75,6 +79,6 @@ classdef BooleanExpr < LustreExpr
             code = obj.print_lustrec();
         end
     end
-
+    
 end
 

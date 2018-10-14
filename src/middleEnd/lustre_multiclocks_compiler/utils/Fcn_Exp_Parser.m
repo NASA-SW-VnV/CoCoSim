@@ -40,7 +40,13 @@ else
             [sym2, expr] = parseEA(expr);
             tree = {match,sym1,sym2};
         else
-            tree = sym1;
+            [match, expr] = parseEQ(expr);
+            if ~isempty(match)
+                [sym2, expr] = parseEA(expr);
+                tree = {match,sym1,sym2};
+            else
+                tree = sym1;
+            end
         end
     end
 end
@@ -282,9 +288,20 @@ else
     tree = '';
 end
 end
-%% > < <= >=, == !=, && ||
+% > < <= >=, == !=, && ||
 function [tree, expr] = parseRO(expr)
 regex = '^(<=?|>=?|==|!=|~=|&&?|\|\|?)';
+match = regexp(expr, regex, 'match', 'once');
+if ~isempty(match)
+    tree = match;
+    expr = regexprep(expr, regex,'');
+else
+    tree = '';
+end
+end
+% =
+function [tree, expr] = parseEQ(expr)
+regex = '^(=)';
 match = regexp(expr, regex, 'match', 'once');
 if ~isempty(match)
     tree = match;

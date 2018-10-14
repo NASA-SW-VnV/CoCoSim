@@ -88,7 +88,10 @@ classdef BinaryExpr < LustreExpr
                     obj.withPar);
             end
         end
-        
+        %% This function is used by Stateflow function SF_To_LustreNode.getPseudoLusAction
+        function varIds = GetVarIds(obj)
+            varIds = [obj.left.GetVarIds(), obj.right.GetVarIds()];
+        end
         %%
         function code = print(obj, backend)
             code = obj.print_lustrec(backend);

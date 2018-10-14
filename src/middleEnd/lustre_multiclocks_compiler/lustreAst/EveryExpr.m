@@ -54,6 +54,20 @@ classdef EveryExpr < LustreExpr
             new_obj = EveryExpr(obj.nodeName, ...
                 new_args, obj.cond.changeArrowExp(cond));
         end
+        %% This function is used by Stateflow function SF_To_LustreNode.getPseudoLusAction
+        function varIds = GetVarIds(obj)
+            varIds = {};
+            if iscell(obj.nodeArgs)
+                for i=1:numel(obj.nodeArgs)
+                    varIds_i = obj.nodeArgs{i}.GetVarIds();
+                    varIds = [varIds, varIds_i];
+                end
+            else
+                varIds = obj.nodeArgs.GetVarIds();
+            end
+            varId = obj.cond.GetVarIds();
+            varIds = [varIds, varId];
+        end
         %%
         function code = print(obj, backend)
             if BackendType.isKIND2(backend)

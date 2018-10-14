@@ -27,6 +27,11 @@ classdef AssertExpr < LustreExpr
         function new_obj = changeArrowExp(obj, cond)
             new_obj = AssertExpr(obj.exp.changeArrowExp(cond));
         end
+
+        %% This function is used by Stateflow function SF_To_LustreNode.getPseudoLusAction
+        function varIds = GetVarIds(obj)
+            varIds = obj.exp.GetVarIds();
+        end
         %%
         function code = print(obj, backend)
             %TODO: check if KIND2 syntax is OK for the other backends.

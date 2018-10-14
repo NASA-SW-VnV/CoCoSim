@@ -43,6 +43,48 @@ classdef LustreNode < LustreAst
             obj.isImported = false;
         end
 
+        %%
+        function setMetaInfo(obj, metaInfo)
+            obj.metaInfo = metaInfo;
+        end
+        function setName(obj, name)
+            obj.name = name;
+        end
+        function name = getName(obj)
+            name = obj.name;
+        end
+        function inputs = getInputs(obj)
+            inputs = obj.inputs;
+        end
+        function setInputs(obj, inputs)
+            obj.inputs = inputs;
+        end
+        function outputs = getOutputs(obj)
+            outputs = obj.outputs;
+        end
+        function setOutputs(obj, outputs)
+            obj.outputs = outputs;
+        end
+
+        function setLocalContract(obj, localContract)
+            obj.localContract = localContract;
+        end
+        function setLocalVars(obj, localVars)
+            obj.localVars = localVars;
+        end
+        function setBodyEqs(obj, bodyEqs)
+            obj.bodyEqs = bodyEqs;
+        end
+        function addBodyEqs(obj, eq)
+            obj.bodyEqs{end+1} = eq;
+        end
+        function setIsMain(obj, isMain)
+            obj.isMain = isMain;
+        end
+        function setIsImported(obj, isImported)
+            obj.isImported = isImported;
+        end
+        %%
         function new_obj = deepCopy(obj)
             if iscell(obj.inputs)
                 new_inputs = cellfun(@(x) x.deepCopy(), obj.inputs, 'UniformOutput', 0);
@@ -104,42 +146,16 @@ classdef LustreNode < LustreAst
                 obj.outputs, obj.localContract, obj.localVars, new_bodyEqs, ...
                 obj.isMain);
         end
+        %% This function is used for Stateflow
+        function [call, oututs_Ids] = nodeCall(obj)
+            inputs_Ids = cellfun(@(x) VarIdExpr(x.getId()), ...
+                obj.inputs, 'UniformOutput', false);
+            oututs_Ids = cellfun(@(x) VarIdExpr(x.getId()), ...
+                obj.outputs, 'UniformOutput', false);
+            call = NodeCallExpr(obj.name, inputs_Ids);
+        end
         
         %%
-        function setMetaInfo(obj, metaInfo)
-            obj.metaInfo = metaInfo;
-        end
-        function setName(obj, name)
-            obj.name = name;
-        end
-        function name = getName(obj)
-            name = obj.name;
-        end
-        function setInputs(obj, inputs)
-            obj.inputs = inputs;
-        end
-        function setOutputs(obj, outputs)
-            obj.outputs = outputs;
-        end
-        function setLocalContract(obj, localContract)
-            obj.localContract = localContract;
-        end
-        function setLocalVars(obj, localVars)
-            obj.localVars = localVars;
-        end
-        function setBodyEqs(obj, bodyEqs)
-            obj.bodyEqs = bodyEqs;
-        end
-        function addBodyEqs(obj, eq)
-            obj.bodyEqs{end+1} = eq;
-        end
-        function setIsMain(obj, isMain)
-            obj.isMain = isMain;
-        end
-        function setIsImported(obj, isImported)
-            obj.isImported = isImported;
-        end
-        
         function code = print(obj, backend)
             %TODO: check if LUSTREC syntax is OK for the other backends.
             code = obj.print_lustrec(backend);

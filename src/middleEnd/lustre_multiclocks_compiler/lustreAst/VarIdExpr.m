@@ -9,8 +9,8 @@ classdef VarIdExpr < LustreExpr
     properties
         id;%String
     end
-
-    methods 
+    
+    methods
         function obj = VarIdExpr(id)
             obj.id = id;
         end
@@ -30,6 +30,14 @@ classdef VarIdExpr < LustreExpr
         function new_obj = changeArrowExp(obj, ~)
             new_obj = obj;
         end
+        %% This function is used by Stateflow function SF_To_LustreNode.getPseudoLusAction
+        function varIds = GetVarIds(obj)
+            if iscell(obj.id)
+                varIds = obj.id;
+            else
+                varIds = {obj.id};
+            end
+        end
         %%
         function code = print(obj, backend)
             %TODO: check if LUSTREC syntax is OK for the other backends.
@@ -40,6 +48,7 @@ classdef VarIdExpr < LustreExpr
             if ischar(obj.id)
                 code = obj.id;
             elseif isa(obj.id, 'LustreExpr')
+                %Should not happen.
                 code = obj.id.print(backend);
             end
         end
@@ -57,6 +66,6 @@ classdef VarIdExpr < LustreExpr
             code = obj.print_lustrec(BackendType.PRELUDE);
         end
     end
-
+    
 end
 

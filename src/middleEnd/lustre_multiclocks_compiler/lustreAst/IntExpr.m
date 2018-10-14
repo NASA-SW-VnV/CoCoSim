@@ -9,8 +9,8 @@ classdef IntExpr < LustreExpr
     properties
         value;
     end
-   
-    methods 
+    
+    methods
         function obj = IntExpr(v)
             obj.value = v;
         end
@@ -31,6 +31,10 @@ classdef IntExpr < LustreExpr
             new_obj = obj;
         end
         
+        %% This function is used by Stateflow function SF_To_LustreNode.getPseudoLusAction
+        function varIds = GetVarIds(obj)
+            varIds = {};
+        end
         %%
         function code = print(obj, ~)
             %TODO: check if LUSTREC syntax is OK for the other backends.
@@ -41,7 +45,7 @@ classdef IntExpr < LustreExpr
             if isnumeric(obj.value) || islogical(obj.value)
                 code = sprintf('%.0f', obj.value);
             elseif ischar(obj.value)
-                if contains(obj.value, '.') 
+                if contains(obj.value, '.')
                     code = sprintf('%.0f', str2num(obj.value));
                 else
                     code = obj.value;
@@ -66,6 +70,6 @@ classdef IntExpr < LustreExpr
             code = obj.print_lustrec();
         end
     end
-
+    
 end
 

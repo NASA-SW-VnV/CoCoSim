@@ -14,7 +14,11 @@ classdef LustreComment < LustreExpr
     methods 
         function obj = LustreComment(text, isMultiLine)
             obj.text = text;
-            obj.isMultiLine = isMultiLine;
+            if nargin < 2
+                obj.isMultiLine = false;
+            else
+                obj.isMultiLine = isMultiLine;
+            end
         end
         
         function new_obj = deepCopy(obj)

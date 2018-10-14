@@ -29,7 +29,10 @@ classdef LocalPropertyExpr < LustreExpr
         function new_obj = changeArrowExp(obj, ~)
             new_obj = obj;
         end
-        
+        %% This function is used by Stateflow function SF_To_LustreNode.getPseudoLusAction
+        function varIds = GetVarIds(obj)
+            varIds = obj.exp.GetVarIds;
+        end
         %%
         function code = print(obj, backend)
             if BackendType.isPRELUDE(backend)

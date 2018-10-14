@@ -32,7 +32,10 @@ classdef RealExpr < LustreExpr
             new_obj = obj;
         end
         
-        
+        %% This function is used by Stateflow function SF_To_LustreNode.getPseudoLusAction
+        function varIds = GetVarIds(obj)
+            varIds = {};
+        end
         %%
         function code = print(obj, ~)
             %TODO: check if LUSTREC syntax is OK for the other backends.

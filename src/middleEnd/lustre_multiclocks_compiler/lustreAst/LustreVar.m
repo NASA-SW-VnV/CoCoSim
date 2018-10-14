@@ -10,8 +10,8 @@ classdef LustreVar < LustreAst
         name;%String
         type;%String
     end
-
-    methods 
+    
+    methods
         function obj = LustreVar(name, type)
             if isa(name, 'VarIdExpr')
                 obj.name = name.getId();
@@ -34,7 +34,10 @@ classdef LustreVar < LustreAst
         function new_obj = changeArrowExp(obj, ~)
             new_obj = obj;
         end
-        
+        %% This function is used by Stateflow function SF_To_LustreNode.getPseudoLusAction
+        function varIds = GetVarIds(obj)
+            varIds = {obj.name};
+        end
         %%
         function id = getId(obj)
             id = obj.name;
@@ -54,7 +57,7 @@ classdef LustreVar < LustreAst
             else
                 dt = obj.type;
             end
-                
+            
             code = sprintf('%s : %s;', obj.name, dt);
         end
         
@@ -71,6 +74,13 @@ classdef LustreVar < LustreAst
             code = obj.print_lustrec(BackendType.PRELUDE);
         end
     end
-
+    methods(Static)
+        function U = uniqueVars(vars)
+            Ids = cellfun(@(x) x.getId(), ...
+                vars, 'UniformOutput', false);
+            [~, I] = unique(Ids);
+            U = vars(I);
+        end
+    end
 end
 

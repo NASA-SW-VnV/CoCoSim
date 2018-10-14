@@ -11,7 +11,7 @@ classdef LustreEq < LustreAst
         rhs;
     end
     
-    methods 
+    methods
         function obj = LustreEq(lhs, rhs)
             if ischar(rhs)
                 obj.rhs = VarIdExpr(rhs);
@@ -66,6 +66,24 @@ classdef LustreEq < LustreAst
             new_obj = LustreEq(obj.lhs, new_rhs);
         end
         
+        %% Stateflow function
+        function [outputs, inputs] = GetVarIds(obj)
+            outputs = {};
+            inputs = {};
+            if iscell(obj.lhs)
+                for i=1:numel(obj.lhs)
+                    outputs_i = obj.lhs{i}.GetVarIds();
+                    outputs = [outputs, outputs_i];
+                end
+            else
+                outputs = obj.lhs.GetVarIds();
+            end
+            if iscell(obj.rhs)
+                inputs = obj.rhs{1}.GetVarIds();
+            else
+                inputs = obj.rhs.GetVarIds();
+            end
+        end
         %%
         function code = print(obj, backend)
             %TODO: check if LUSTREC syntax is OK for the other backends.

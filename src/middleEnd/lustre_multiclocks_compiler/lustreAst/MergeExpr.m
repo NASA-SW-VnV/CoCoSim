@@ -11,7 +11,7 @@ classdef MergeExpr < LustreExpr
         exprs;
     end
     
-    methods 
+    methods
         function obj = MergeExpr(clock, exprs)
             obj.clock = clock;
             obj.exprs = exprs;
@@ -48,7 +48,18 @@ classdef MergeExpr < LustreExpr
             end
             new_obj = MergeExpr(obj.clock, new_exprs);
         end
-        
+        %% This function is used by Stateflow function SF_To_LustreNode.getPseudoLusAction
+        function varIds = GetVarIds(obj)
+            varIds = {};
+            if iscell(obj.exprs)
+                for i=1:numel(obj.exprs)
+                    varIds_i = obj.exprs{i}.GetVarIds();
+                    varIds = [varIds, varIds_i];
+                end
+            else
+                varIds = obj.exprs.GetVarIds();
+            end
+        end
         %%
         function code = print(obj, backend)
             %TODO: check if LUSTREC syntax is OK for the other backends.
@@ -79,6 +90,6 @@ classdef MergeExpr < LustreExpr
             code = obj.print_lustrec(BackendType.PRELUDE);
         end
     end
-
+    
 end
 

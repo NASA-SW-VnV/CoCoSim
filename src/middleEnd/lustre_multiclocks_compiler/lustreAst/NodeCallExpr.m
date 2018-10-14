@@ -57,7 +57,18 @@ classdef NodeCallExpr < LustreExpr
             new_obj = NodeCallExpr(obj.nodeName, new_args);
         end
         
-        
+        %% This function is used by Stateflow function SF_To_LustreNode.getPseudoLusAction
+        function varIds = GetVarIds(obj)
+            varIds = {};
+            if iscell(obj.args)
+                for i=1:numel(obj.args)
+                    varIds_i = obj.args{i}.GetVarIds();
+                    varIds = [varIds, varIds_i];
+                end
+            else
+                varIds = obj.args.GetVarIds();
+            end
+        end
         %%
         function code = print(obj, backend)
             %TODO: check if LUSTREC syntax is OK for the other backends.
@@ -88,7 +99,7 @@ classdef NodeCallExpr < LustreExpr
     methods(Static)
         function args_str = getArgsStr(args, backend)
             if numel(args) > 1 || iscell(args)
-                if iscell(args{1})
+                if numel(args) >= 1 && iscell(args{1})
                     args_cell = cellfun(@(x) x{1}.print(backend), args, 'UniformOutput', 0);
                 else
                     args_cell = cellfun(@(x) x.print(backend), args, 'UniformOutput', 0);
