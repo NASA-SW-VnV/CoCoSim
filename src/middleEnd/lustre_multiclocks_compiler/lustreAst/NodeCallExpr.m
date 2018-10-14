@@ -98,21 +98,22 @@ classdef NodeCallExpr < LustreExpr
     
     methods(Static)
         function args_str = getArgsStr(args, backend)
-            if numel(args) > 1 || iscell(args)
-                if numel(args) >= 1 && iscell(args{1})
-                    args_cell = cellfun(@(x) x{1}.print(backend), args, 'UniformOutput', 0);
+%             try
+                if numel(args) > 1 || iscell(args)
+                    if numel(args) >= 1 && iscell(args{1})
+                        args_cell = cellfun(@(x) x{1}.print(backend), args, 'UniformOutput', 0);
+                    else
+                        args_cell = cellfun(@(x) x.print(backend), args, 'UniformOutput', 0);
+                    end
+                    args_str = MatlabUtils.strjoin(args_cell, ', ');
+                elseif numel(args) == 1
+                    args_str = args.print(backend);
                 else
-                    args_cell = cellfun(@(x) x.print(backend), args, 'UniformOutput', 0);
+                    args_str = '';
                 end
-                args_str = MatlabUtils.strjoin(args_cell, ', ');
-            elseif numel(args) == 1
-                args_str = args.print(backend);
-            else
-                args_str = '';
-            end
-        end
-        function new_callObj = NodeCallExpr.deepCopy(callObj)
-            
+%             catch me
+%                 me
+%             end
         end
     end
 end

@@ -19,20 +19,32 @@ function [tree, expr] = parseEA(expr)
 [sym1, expr] = parseEN(expr);
 [match, expr] = parsePlus(expr);
 if ~isempty(match)
-    [sym2, expr] = parseEA(expr);
-    if ~isempty(sym1)
-        tree = {'Plus',sym1,sym2};
+    %the case of x++
+    [match, expr] = parsePlus(expr);
+    if ~isempty(match)
+        tree = {'Plus',sym1, '1.0'};
     else
-        tree = {'Plus','0.0',sym2};
+        [sym2, expr] = parseEA(expr);
+        if ~isempty(sym1)
+            tree = {'Plus',sym1,sym2};
+        else
+            tree = {'Plus','0.0',sym2};
+        end
     end
 else
     [match, expr] = parseMinus(expr);
     if ~isempty(match)
-        [sym2, expr] = parseEA(expr);
-        if ~isempty(sym1)
-            tree = {'Minus',sym1,sym2};
+        %the case of x--
+        [match, expr] = parseMinus(expr);
+        if ~isempty(match)
+            tree = {'Minus',sym1, '1.0'};
         else
-            tree = {'Minus','0.0',sym2};
+            [sym2, expr] = parseEA(expr);
+            if ~isempty(sym1)
+                tree = {'Minus',sym1,sym2};
+            else
+                tree = {'Minus','0.0',sym2};
+            end
         end
     else
         [match, expr] = parseRO(expr);

@@ -114,10 +114,14 @@ classdef SF_To_LustreNode
             end
         end
         %% Action to Lustre
-        function [lus_action, outputs, inputs, external_libraries] = getPseudoLusAction(action, isCondition)
+        function [lus_action, outputs, inputs, external_libraries] = getPseudoLusAction(action, isCondition, ignoreOutInputs)
             if nargin < 2
                 isCondition = false;
             end
+            if nargin < 3
+                ignoreOutInputs = false;
+            end
+            action = strrep(action, ';', '');
             [tree, status, unsupportedExp] = Fcn_Exp_Parser(action);
             outputs = {};
             inputs = {};
@@ -138,6 +142,7 @@ classdef SF_To_LustreNode
                         me.message, action);
                     throw(ME);
                 else
+                    display_msg(me.getReport(), MsgType.DEBUG, 'getPseudoLusAction', '');
                     ME = MException('COCOSIM:STATEFLOW', ...
                         'Parsing Action "%s" has failed', action);
                     throw(ME);
@@ -145,8 +150,12 @@ classdef SF_To_LustreNode
             end
             if ~isCondition && ~isa(lus_action, 'LustreEq')
                 ME = MException('COCOSIM:STATEFLOW', ...
-                    'Action "%s" should be an assignement (e.g. outputs = f(inputs))', lus_action);
+                    'Action "%s" should be an assignement (e.g. outputs = f(inputs))', action);
                 throw(ME);
+            end
+            %this flag is used by unitTests.
+            if ignoreOutInputs
+                return;
             end
             if isCondition
                 inputs_names = lus_action.GetVarIds();

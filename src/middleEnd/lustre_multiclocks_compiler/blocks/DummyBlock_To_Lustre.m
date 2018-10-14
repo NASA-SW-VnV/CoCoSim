@@ -8,6 +8,7 @@ classdef DummyBlock_To_Lustre < Block_To_Lustre
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     properties
+        isBooleanExpr = 0;
     end
     
     methods
