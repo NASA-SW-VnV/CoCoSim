@@ -34,23 +34,23 @@ function [actions, conditions] = getAllSFActions(regression_path)
         for j = 1 : numel(charts)
             allStates = charts(j).find('-isa', 'Stateflow.State');
             allTransitions = charts(j).find('-isa', 'Stateflow.Transition');
-%             for sId = 1:numel(allStates)
-%                 display_msg(sprintf('State Expression:\n %s', allStates(sId).LabelString), ...
-%                     MsgType.INFO, 'getAllSFActions', '');
-%                 stateAction = edu.uiowa.chart.state.StateParser.parse(allStates(sId).LabelString);
-%                 Entry = cell(stateAction.entry);
-%                 During = cell(stateAction.during);
-%                 Exit = cell(stateAction.exit);
-%                 display_msg(sprintf('Entry Expression: %s', MatlabUtils.strjoin(Entry, ';')), ...
-%                     MsgType.RESULT, 'getAllSFActions', '');
-%                 display_msg(sprintf('During Expression: %s', MatlabUtils.strjoin(During, ';')), ...
-%                     MsgType.RESULT, 'getAllSFActions', '');
-%                 display_msg(sprintf('Exit Expression: %s', MatlabUtils.strjoin(Exit, ';')), ...
-%                     MsgType.RESULT, 'getAllSFActions', '');
-%                 actions = [actions, SFIRPPUtils.split_actions(Entry)];
-%                 actions = [actions, SFIRPPUtils.split_actions(During)];
-%                 actions = [actions, SFIRPPUtils.split_actions(Exit)];
-%             end
+            for sId = 1:numel(allStates)
+                display_msg(sprintf('State Expression:\n %s', allStates(sId).LabelString), ...
+                    MsgType.INFO, 'getAllSFActions', '');
+                stateAction = edu.uiowa.chart.state.StateParser.parse(allStates(sId).LabelString);
+                Entry = cell(stateAction.entry);
+                During = cell(stateAction.during);
+                Exit = cell(stateAction.exit);
+                display_msg(sprintf('Entry Expression: %s', MatlabUtils.strjoin(Entry, ';')), ...
+                    MsgType.RESULT, 'getAllSFActions', '');
+                display_msg(sprintf('During Expression: %s', MatlabUtils.strjoin(During, ';')), ...
+                    MsgType.RESULT, 'getAllSFActions', '');
+                display_msg(sprintf('Exit Expression: %s', MatlabUtils.strjoin(Exit, ';')), ...
+                    MsgType.RESULT, 'getAllSFActions', '');
+                actions = [actions, SFIRPPUtils.split_actions(Entry)];
+                actions = [actions, SFIRPPUtils.split_actions(During)];
+                actions = [actions, SFIRPPUtils.split_actions(Exit)];
+            end
             for tId = 1 : numel(allTransitions)
                 
                 %transitionObject = edu.uiowa.chart.transition.TransitionParser.parse(allTransitions(tId).LabelString);
@@ -64,14 +64,6 @@ function [actions, conditions] = getAllSFActions(regression_path)
                         MsgType.INFO, 'getAllSFActions', '');
                     display(transitionObject)
                     display(unsupportedExp)
-%                     display_msg(sprintf('Event Expression: %s', MatlabUtils.strjoin(Event, ';')), ...
-%                         MsgType.RESULT, 'getAllSFActions', '');
-%                     display_msg(sprintf('Condition Expression: %s', MatlabUtils.strjoin(Condition, ';')), ...
-%                         MsgType.RESULT, 'getAllSFActions', '');
-%                     display_msg(sprintf('ConditionAction Expression: %s', MatlabUtils.strjoin(ConditionAction, ';')), ...
-%                         MsgType.RESULT, 'getAllSFActions', '');
-%                     display_msg(sprintf('TransitionAction Expression: %s', MatlabUtils.strjoin(TransitionAction, ';')), ...
-%                         MsgType.RESULT, 'getAllSFActions', '');
                 end
                 actions = [actions, SFIRPPUtils.split_actions(ConditionAction)];
                 actions = [actions, SFIRPPUtils.split_actions(TransitionAction)];

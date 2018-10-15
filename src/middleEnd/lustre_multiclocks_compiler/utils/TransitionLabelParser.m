@@ -27,10 +27,14 @@ function [event, condition, condAction, transAction, expr] = parseE(e)
 end
 
 function [E, expr2] = parseEvent(expr1)
-    if ~contains(expr1, '/')
+    if ~contains(expr1, '[') && ~contains(expr1, '{') && ~contains(expr1, '/')
         % e.g. Set | Resume
         [~, ~, expr2] = Fcn_Exp_Parser.parse(expr1);
-        E = expr1(1:numel(expr1) - numel(expr2));
+        if numel(expr2) < numel(expr1)
+            E = expr1(1:numel(expr1) - numel(expr2));
+        else
+            E = '';
+        end
     else
         % an event can be "after(5, tick)"
         [sym, expr2] = Fcn_Exp_Parser.parseFunc(expr1);
@@ -43,13 +47,25 @@ function [E, expr2] = parseEvent(expr1)
                 if isempty(sym)
                     E = '';
                 else
-                    E = expr1(1:numel(expr1) - numel(expr2));
+                    if numel(expr2) < numel(expr1)
+                        E = expr1(1:numel(expr1) - numel(expr2));
+                    else
+                        E = '';
+                    end
                 end
             else
-                E = expr1(1:numel(expr1) - numel(expr2));
+                if numel(expr2) < numel(expr1)
+                    E = expr1(1:numel(expr1) - numel(expr2));
+                else
+                    E = '';
+                end
             end
         else
-            E = expr1(1:numel(expr1) - numel(expr2));
+            if numel(expr2) < numel(expr1)
+                E = expr1(1:numel(expr1) - numel(expr2));
+            else
+                E = '';
+            end
         end
     end
 end

@@ -1,4 +1,4 @@
-function actionToLustreTest()
+function notSupportedActions = actionToLustreTest()
     %ACTIONTOLUSTRETEST is checking if all the following expressions pass
     %through the parser that is used by the compiler.
     
@@ -8,33 +8,48 @@ function actionToLustreTest()
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    actions = {...
-        'out = 0', ...
-        'x++', ...
-        'out = abs(x)'};
+    notSupportedActions = {};
+    P = fileparts(mfilename('fullpath'));
+    mat_file = fullfile(P, 'scripts', 'sfdemosActions.mat');
+    if ~exist(mat_file, 'file')
+        display_msg(sprintf('File not found: %s', mat_file), ...
+            MsgType.ERROR, 'actionToLustreTest', '');
+        return;
+    end
+    M = load(mat_file);
+    actions = M.actions;
+    conditions = M.conditions;
+    
+    %add additional Actions here
+    additionalActions = {...
+        'x++'...
+        };
+    actions = [actions, additionalActions];
     
     for i = 1 : numel(actions)
         % The following call will raise an exception if something wrong.
         % That's how we will know which test is not passing through.
-        display_msg(sprintf('Original Expression: %s', actions{i}), ...
-            MsgType.INFO, 'actionToLustreTest', '');
-        lus_action = SF_To_LustreNode.getPseudoLusAction(actions{i}, false, true);
-        display_msg(sprintf('Lustre Expression: %s', lus_action.print('LUSTREC')), ...
-            MsgType.RESULT, 'actionToLustreTest', '');
+        
+        try
+            SF_To_LustreNode.getPseudoLusAction(actions{i}, false, true);
+        catch
+            display_msg(sprintf('Expression Failed: %s', actions{i}), ...
+                MsgType.INFO, 'actionToLustreTest', '');
+            notSupportedActions{end + 1} = actions{i};
+        end
     end
     
-    conditions = {...
-        'x == 1 || f(y) > x', ...
-        'f(y, x) > x'};
     
     for i = 1 : numel(conditions)
         % The following call will raise an exception if something wrong.
         % That's how we will know which test is not passing through.
-        display_msg(sprintf('Original Expression: %s', conditions{i}), ...
-            MsgType.INFO, 'actionToLustreTest', '');
-        lus_action = SF_To_LustreNode.getPseudoLusAction(conditions{i}, true, true);
-        display_msg(sprintf('Lustre Expression: %s', lus_action.print('LUSTREC')), ...
-            MsgType.RESULT, 'actionToLustreTest', '');
+        try
+            SF_To_LustreNode.getPseudoLusAction(conditions{i}, true, true);
+        catch
+            display_msg(sprintf('Condition failed: %s', conditions{i}), ...
+                MsgType.INFO, 'actionToLustreTest', '');
+            notSupportedActions{end + 1} = conditions{i};
+        end
     end
 end
 
