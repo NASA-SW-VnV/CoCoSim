@@ -19,7 +19,7 @@ classdef SF_To_LustreNode
             external_nodes = {};
             external_libraries = {};
             %% global varibale mapping between states and their nodes AST.
-            global SF_STATES_NODESAST_MAP SF_STATES_PATH_MAP SF_DATA_MAP;
+            global SF_STATES_NODESAST_MAP SF_STATES_PATH_MAP SF_JUNCTIONS_PATH_MAP SF_DATA_MAP;
             %It's initialized for each call of this function
             SF_STATES_NODESAST_MAP = containers.Map('KeyType', 'char', 'ValueType', 'any');
             SF_STATES_PATH_MAP = containers.Map('KeyType', 'char', 'ValueType', 'any');
@@ -34,6 +34,10 @@ classdef SF_To_LustreNode
             states = SF_To_LustreNode.orderStates(content.States);
             for i=1:numel(states)
                 SF_STATES_PATH_MAP(states{i}.Path) = states{i};
+            end
+            junctions = content.Junctions;
+            for i=1:numel(junctions)
+                SF_JUNCTIONS_PATH_MAP(junctions{i}.Path) = junctions{i};
             end
             %% Go Over Stateflow Functions
             if isfield(content, 'GraphicalFunctions')
@@ -57,11 +61,30 @@ classdef SF_To_LustreNode
                 end
             end
             
+            %% Go over Junctions
+            for i=1:numel(junctions)
+                try
+                    [external_nodes_i, external_libraries_i ] = ...
+                        StateflowJunction_To_Lustre.write_code(junctions{i});
+                    external_nodes = [external_nodes, external_nodes_i];
+                    external_libraries = [external_libraries, external_libraries_i];
+                catch me
+                    if strcmp(me.identifier, 'COCOSIM:STATEFLOW')
+                        display_msg(me.message, MsgType.ERROR, 'SF_To_LustreNode', '');
+                    else
+                        display_msg(me.getReport(), MsgType.DEBUG, 'SF_To_LustreNode', '');
+                    end
+                    display_msg(sprintf('Translation of Junction %s failed', ...
+                        junctions{i}.Path),...
+                        MsgType.ERROR, 'SF_To_LustreNode', '');
+                end
+            end
+            
             %% Go over states
             for i=1:numel(states)
                 try
                     [node_i, external_nodes_i, external_libraries_i ] = ...
-                        StateflowState_To_Lustre.write_code(states{i}, data);
+                        StateflowState_To_Lustre.write_code(states{i});
                     if iscell(node_i)
                         external_nodes = [external_nodes, node_i];
                     else
@@ -127,7 +150,7 @@ classdef SF_To_LustreNode
             inputs = {};
             if status
                 ME = MException('COCOSIM:STATEFLOW', ...
-                    'ParseError  character unsupported  %s in Action %s in StateFlow.', ...
+                    'ParseError: unsupported expression "%s" in Action %s in StateFlow.', ...
                     unsupportedExp, action);
                 throw(ME);
             end

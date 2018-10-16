@@ -14,7 +14,16 @@ classdef Fcn_Exp_Parser
     methods(Static)
         function [tree, status, unsupportedExp] = parse(exp)
             exp = regexprep(exp, '\s*', '');
-            [tree, status, unsupportedExp] = Fcn_Exp_Parser.parseE(exp);
+            try
+                [tree, status, unsupportedExp] = Fcn_Exp_Parser.parseE(exp);
+            catch me
+                if strcmp(me.identifier, 'COCOSIM:Fcn_Exp_Parser')
+                    display_msg(me.message, MsgType.ERROR, 'Fcn_Exp_Parser', '');
+                end
+                tree = {};
+                status = 1;
+                unsupportedExp = exp;
+            end
         end
         
         %%
@@ -27,16 +36,31 @@ classdef Fcn_Exp_Parser
         end
         
         %%
-        function [tree, expr] = parseEA(expr)
+        function [tree, expr, isAssignement] = parseEA(expr)
+            isAssignement = 0;
             [sym1, expr] = Fcn_Exp_Parser.parseEN(expr);
             [match, expr] = Fcn_Exp_Parser.parsePlus(expr);
             if ~isempty(match)
                 %the case of x++
                 [match, expr] = Fcn_Exp_Parser.parsePlus(expr);
                 if ~isempty(match)
-                    tree = {'Plus',sym1, '1.0'};
+                    %the case of x++
+                    if ischar(sym1)
+                        %sym1 is an ID
+                        tree = {'=', sym1, {'Plus',sym1, '1.0'}};
+                        isAssignement = 1;
+                    else
+                        tree = {'Plus',sym1, '1.0'};
+                    end
                 else
-                    [sym2, expr] = Fcn_Exp_Parser.parseEA(expr);
+                    [sym2, expr1, isEQ] = Fcn_Exp_Parser.parseEA(expr);
+                    if isEQ
+                        ME = MException('COCOSIM:Fcn_Exp_Parser', ...
+                            'PARSER ERROR: Assignement is not supported inside an expression in "%s"', ...
+                            expr);
+                        throw(ME);
+                    end
+                    expr = expr1;
                     if ~isempty(sym1)
                         tree = {'Plus',sym1,sym2};
                     else
@@ -46,12 +70,25 @@ classdef Fcn_Exp_Parser
             else
                 [match, expr] = Fcn_Exp_Parser.parseMinus(expr);
                 if ~isempty(match)
-                    %the case of x--
                     [match, expr] = Fcn_Exp_Parser.parseMinus(expr);
                     if ~isempty(match)
-                        tree = {'Minus',sym1, '1.0'};
+                        %the case of x--
+                        if ischar(sym1)
+                            %sym1 is an ID
+                            tree = {'=', sym1, {'Minus',sym1, '1.0'}};
+                            isAssignement = 1;
+                        else
+                            tree = {'Minus',sym1, '1.0'};
+                        end
                     else
-                        [sym2, expr] = Fcn_Exp_Parser.parseEA(expr);
+                        [sym2, expr1, isEQ] = Fcn_Exp_Parser.parseEA(expr);
+                        if isEQ
+                            ME = MException('COCOSIM:Fcn_Exp_Parser', ...
+                                'PARSER ERROR: Assignement is not supported inside an expression in "%s"', ...
+                                expr);
+                            throw(ME);
+                        end
+                        expr = expr1;
                         if ~isempty(sym1)
                             tree = {'Minus',sym1,sym2};
                         else
@@ -61,12 +98,26 @@ classdef Fcn_Exp_Parser
                 else
                     [match, expr] = Fcn_Exp_Parser.parseRO(expr);
                     if ~isempty(match)
-                        [sym2, expr] = Fcn_Exp_Parser.parseEA(expr);
+                        [sym2, expr1, isEQ] = Fcn_Exp_Parser.parseEA(expr);
+                        if isEQ
+                            ME = MException('COCOSIM:Fcn_Exp_Parser', ...
+                                'PARSER ERROR: Assignement is not supported inside an expression in "%s"', ...
+                                expr);
+                            throw(ME);
+                        end
+                        expr = expr1;
                         tree = {match,sym1,sym2};
                     else
                         [match, expr] = Fcn_Exp_Parser.parseEQ(expr);
                         if ~isempty(match)
-                            [sym2, expr] = Fcn_Exp_Parser.parseEA(expr);
+                            [sym2, expr1, isEQ] = Fcn_Exp_Parser.parseEA(expr);
+                            if isEQ
+                                ME = MException('COCOSIM:Fcn_Exp_Parser', ...
+                                    'PARSER ERROR: Assignement is not supported inside an expression in "%s"', ...
+                                    expr);
+                                throw(ME);
+                            end
+                            expr = expr1;
                             tree = {match,sym1,sym2};
                         else
                             tree = sym1;
@@ -101,12 +152,26 @@ classdef Fcn_Exp_Parser
         function [tree, expr] = parseEM2(expr, sym1)
             [match, expr] = Fcn_Exp_Parser.parseMult(expr);
             if ~isempty(match)
-                [sym2, expr] = Fcn_Exp_Parser.parseEA(expr);
+                [sym2, expr1, isEQ] = Fcn_Exp_Parser.parseEA(expr);
+                if isEQ
+                    ME = MException('COCOSIM:Fcn_Exp_Parser', ...
+                        'PARSER ERROR: Assignement is not supported inside an expression in "%s"', ...
+                        expr);
+                    throw(ME);
+                end
+                expr = expr1;
                 tree = {'Mult',sym1,sym2};
             else
                 [match, expr] = Fcn_Exp_Parser.parseDiv(expr);
                 if ~isempty(match)
-                    [sym2, expr] = Fcn_Exp_Parser.parseEA(expr);
+                    [sym2, expr1, isEQ] = Fcn_Exp_Parser.parseEA(expr);
+                    if isEQ
+                        ME = MException('COCOSIM:Fcn_Exp_Parser', ...
+                            'PARSER ERROR: Assignement is not supported inside an expression in "%s"', ...
+                            expr);
+                        throw(ME);
+                    end
+                    expr = expr1;
                     tree = {'Div',sym1,sym2};
                 else
                     tree = sym1;
@@ -117,12 +182,26 @@ classdef Fcn_Exp_Parser
             [sym1, expr] = Fcn_Exp_Parser.parseEP(expr);
             [match, expr] = Fcn_Exp_Parser.parseMult(expr);
             if ~isempty(match)
-                [sym2, expr] = Fcn_Exp_Parser.parseEA(expr);
+                [sym2, expr1, isEQ] = Fcn_Exp_Parser.parseEA(expr);
+                if isEQ
+                    ME = MException('COCOSIM:Fcn_Exp_Parser', ...
+                        'PARSER ERROR: Assignement is not supported inside an expression in "%s"', ...
+                        expr);
+                    throw(ME);
+                end
+                expr = expr1;
                 tree = {'Mult',sym1,sym2};
             else
                 [match, expr] = Fcn_Exp_Parser.parseDiv(expr);
                 if ~isempty(match)
-                    [sym2, expr] = Fcn_Exp_Parser.parseEA(expr);
+                    [sym2, expr1, isEQ] = Fcn_Exp_Parser.parseEA(expr);
+                    if isEQ
+                        ME = MException('COCOSIM:Fcn_Exp_Parser', ...
+                            'PARSER ERROR: Assignement is not supported inside an expression in "%s"', ...
+                            expr);
+                        throw(ME);
+                    end
+                    expr = expr1;
                     tree = {'Div',sym1,sym2};
                 else
                     tree = sym1;
@@ -169,7 +248,14 @@ classdef Fcn_Exp_Parser
         function [tree, expr] = parsePar(expr)
             if startsWith(expr, '(')
                 expr = regexprep(expr, '^\(', '');
-                [sym, expr] = Fcn_Exp_Parser.parseEA(expr);
+                [sym, expr1, isEQ] = Fcn_Exp_Parser.parseEA(expr);
+                if isEQ
+                    ME = MException('COCOSIM:Fcn_Exp_Parser', ...
+                        'PARSER ERROR: Assignement is not supported inside an expression in "%s"', ...
+                        expr);
+                    throw(ME);
+                end
+                expr = expr1;
                 expr = regexprep(expr, '^\)', '');
                 tree = {'Par', sym};
             else
@@ -196,7 +282,14 @@ classdef Fcn_Exp_Parser
                 funcname = regexp(expr, '^[A-Za-z0-9]+', 'match', 'once');
                 expr = regexprep(expr, regex,'');
                 if strcmp(funcname, 'u')
-                    [arg, expr] = Fcn_Exp_Parser.parseEA(expr);
+                    [arg, expr1, isEQ] = Fcn_Exp_Parser.parseEA(expr);
+                    if isEQ
+                        ME = MException('COCOSIM:Fcn_Exp_Parser', ...
+                            'PARSER ERROR: Assignement is not supported inside an expression in "%s"', ...
+                            expr);
+                        throw(ME);
+                    end
+                    expr = expr1;
                     expr = regexprep(expr, '^(\)|\])','');
                     tree = {'Func',funcname,arg};
                 else
@@ -226,7 +319,13 @@ classdef Fcn_Exp_Parser
                         end
                     end
                     for i=1:numel(args)
-                        [argi, ~] = Fcn_Exp_Parser.parseEA(args{i});
+                        [argi, ~, isEQ] = Fcn_Exp_Parser.parseEA(args{i});
+                        if isEQ
+                            ME = MException('COCOSIM:Fcn_Exp_Parser', ...
+                                'PARSER ERROR: Assignement is not supported inside an expression in "%s"', ...
+                                args{i});
+                            throw(ME);
+                        end
                         tree = [tree, {argi}];
                     end
                 end
