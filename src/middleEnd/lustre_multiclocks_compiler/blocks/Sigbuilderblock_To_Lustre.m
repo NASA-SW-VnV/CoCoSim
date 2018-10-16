@@ -10,11 +10,17 @@ classdef Sigbuilderblock_To_Lustre < Block_To_Lustre
     end
     
     methods
-        function  write_code(obj, parent, blk, xml_trace, varargin)
+        function  write_code(obj, parent, blk, xml_trace, ~, backend, varargin)
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             obj.addVariable(outputs_dt);
             [time,data,~] = signalbuilder(blk.Origin_path);
-            blk_name = SLX2LusUtils.node_name_format(blk);
+            blkParams = Sigbuilderblock_To_Lustre.readBlkParams(blk);
+            
+            model_name = strsplit(blk.Origin_path, '/');
+            model_name = model_name{1};
+            SampleTime = SLXUtils.getModelCompiledSampleTime(model_name);            
+            
+            %blk_name = SLX2LusUtils.node_name_format(blk);
 %             if numel(outputs) > 1
 %                 codes = cell(1, numel(outputs));
 %                 for i=1:numel(outputs)
@@ -26,7 +32,11 @@ classdef Sigbuilderblock_To_Lustre < Block_To_Lustre
 %                 codeAst = getSigBuilderCode(obj, time, data,1,blk_name);
 %                 obj.setCode(codeAst);
 %             end
-            [codeAst, vars] = getSigBuilderCode(obj, outputs, time, data,blk_name);
+            [codeAst, vars, external_lib] = getSigBuilderCode(obj, outputs,...
+                time, data,SampleTime,blkParams,backend);
+            if ~isempty(external_lib)
+                obj.addExternal_libraries(external_lib);
+            end            
             obj.addVariable(vars);
             obj.setCode(codeAst);
         end
@@ -41,12 +51,14 @@ classdef Sigbuilderblock_To_Lustre < Block_To_Lustre
             is_Abstracted = false;
         end
         %%
-        function [codeAst_all, vars_all] = getSigBuilderCode(obj,outputs,time,data,blk_name)
+        function [codeAst_all, vars_all, external_lib] = getSigBuilderCode(...
+                obj,outputs,time,data,SampleTime,blkParams,backend)
             % time is nx1 cell if there is more than 1 signal, time is
             % array of 1xm where m is the number of time index in the time
             % series
             codeAst_all = {};
             vars_all = {};
+            external_lib = {'LustMathLib_abs_real'};
             curTime = VarIdExpr(SLX2LusUtils.timeStepStr());
             interpolation = 1;
             for signal_index=1:numel(outputs)
@@ -57,30 +69,44 @@ classdef Sigbuilderblock_To_Lustre < Block_To_Lustre
                     time_array = time;
                     data_array = data;
                 end
+                
+                [time_array, data_array] = ...
+                    FromWorkspace_To_Lustre.handleOutputAfterFinalValue(...
+                    time_array, data_array, SampleTime,...
+                    blkParams.OutputAfterFinalValue);
+                
                 [codeAst, vars] = ...
                     Sigbuilderblock_To_Lustre.interpTimeSeries(...
-                        outputs{signal_index},time_array, data_array, ...
-                        blk_name,signal_index,interpolation, curTime);
+                    outputs{signal_index},time_array, data_array, ...
+                    blkParams,signal_index,interpolation, curTime,backend);
                 codeAst_all = [codeAst_all codeAst];
                 vars_all = [vars_all vars];
             end
         end
     end
     methods (Static)
+        
+        function blkParams = readBlkParams(blk)
+            blkParams = struct;
+            blkParams.OutputAfterFinalValue = blk.Content.FromWs.OutputAfterFinalValue;
+            blkParams.blk_name = SLX2LusUtils.node_name_format(blk);
+        end
         function [codeAst, vars] = interpTimeSeries(output,time_array, ...
-                data_array, blk_name,signal_index,interpolate,curTime)
+                data_array, blkParams,signal_index,interpolate,curTime,backend)
             % This function write code to interpolate a piecewise linear
             % time data series.  Time and data must be 1xm array where m is
             % number of data points in the time series.
+            
+
             astTime = cell(1,numel(time_array));
             astData = cell(1,numel(time_array));
             codeAst = cell(1,2*numel(time_array)+1);
             vars = cell(1,2*numel(time_array));
             for i=1:numel(time_array)
                 astTime{i} = ...
-                    VarIdExpr(sprintf('%s_time_%d_%d',blk_name,signal_index,i));
+                    VarIdExpr(sprintf('%s_time_%d_%d',blkParams.blk_name,signal_index,i));
                 astData{i} = ...
-                    VarIdExpr(sprintf('%s_data_%d_%d',blk_name,signal_index,i));
+                    VarIdExpr(sprintf('%s_data_%d_%d',blkParams.blk_name,signal_index,i));
                 codeAst{(i-1)*2+1} = LustreEq(astTime{i}, RealExpr(time_array(i)));
                 codeAst{(i-1)*2+2} = LustreEq(astData{i}, RealExpr(data_array(i)));
                 vars{(i-1)*2+1} = LustreVar(astTime{i},'real');
@@ -93,12 +119,13 @@ classdef Sigbuilderblock_To_Lustre < Block_To_Lustre
                 if time_array(i) == time_array(i+1)
                     continue;
                 else
+                    epsilon = eps(time_array(i+1));
                     lowerCond = BinaryExpr(BinaryExpr.GTE, ...
                         curTime, ...
-                        astTime{i});
+                        astTime{i}, [], BackendType.isLUSTREC(backend), epsilon);
                     upperCond = BinaryExpr(BinaryExpr.LT, ...
                         curTime, ...
-                        astTime{i+1});
+                        astTime{i+1}, [], BackendType.isLUSTREC(backend), epsilon);
                     
                     conds{end+1} = BinaryExpr(BinaryExpr.AND, lowerCond, upperCond);
                     if interpolate
