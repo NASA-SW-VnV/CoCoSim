@@ -852,6 +852,7 @@ classdef SLX2LusUtils < handle
             end
             for i=1:numel(elems)
                 dt = elems(i).DataType;
+                dt = strrep(dt, 'Bus: ', '');
                 try
                     isBus = evalin('base', sprintf('isa(%s, ''Simulink.Bus'')',char(dt)));
                 catch
