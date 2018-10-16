@@ -68,7 +68,7 @@ classdef PPUtils
             
             % replacing
             replace_one_block(blk,'pp_lib/DTF');
-            
+            set_param(blk, 'LinkStatus', 'inactive');
             %restoring info
             set_param(strcat(blk,'/DTFScalar/A'),...
                 'Value',A);

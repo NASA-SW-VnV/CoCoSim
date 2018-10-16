@@ -65,6 +65,7 @@ if not(isempty(dFilter_list))
             end
             
             PPUtils.replace_DTF_block(dFilter_list{i}, U_dims{i},num,denum);
+            set_param(dFilter_list{i}, 'LinkStatus', 'inactive');
         catch
             status = 1;
             errors_msg{end + 1} = sprintf('DiscreteFilter pre-process has failed for block %s', dFilter_list{i});

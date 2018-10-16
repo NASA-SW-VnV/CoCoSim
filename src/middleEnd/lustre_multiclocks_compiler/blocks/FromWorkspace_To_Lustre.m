@@ -131,7 +131,8 @@ classdef FromWorkspace_To_Lustre < Block_To_Lustre
                     vars_all = [vars_all vars];
                 end
             end
-            
+            external_lib = {'LustMathLib_abs_real'};
+            obj.addExternal_libraries(external_lib);
             obj.setCode( codeAst_all );      
             obj.addVariable(outputs_dt);
             obj.addVariable(vars_all);       

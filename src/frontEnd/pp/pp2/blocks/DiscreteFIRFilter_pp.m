@@ -73,6 +73,7 @@ if not(isempty(dFir_list))
             denum(1) = 1;
             
             PPUtils.replace_DTF_block(dFir_list{i}, U_dims{i},num,denum);
+            set_param(dFir_list{i}, 'LinkStatus', 'inactive');
         catch
             status = 1;
             errors_msg{end + 1} = sprintf('DiscreteFIRFilter pre-process has failed for block %s', dFir_list{i});
