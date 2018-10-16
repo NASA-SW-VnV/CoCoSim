@@ -61,6 +61,7 @@ if not(isempty(dtf_list))
             end
             
             PPUtils.replace_DTF_block(dtf_list{i}, U_dims{i},num,denum);
+            set_param(dtf_list{i}, 'LinkStatus', 'inactive');
         catch
             status = 1;
             errors_msg{end + 1} = sprintf('DiscreteTransferFcn pre-process has failed for block %s', dtf_list{i});
