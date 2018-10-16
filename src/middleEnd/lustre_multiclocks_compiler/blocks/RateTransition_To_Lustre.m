@@ -111,6 +111,13 @@ classdef RateTransition_To_Lustre < Block_To_Lustre
         end
         %%
         function options = getUnsupportedOptions(obj, ~, blk, ~, backend, varargin)
+            %% calculated by rateTransition_ir_pp
+            InportCompiledSampleTime = blk.InportCompiledSampleTime;
+            OutportCompiledSampleTime = blk.OutportCompiledSampleTime;
+            inTs = InportCompiledSampleTime(1);
+            outTs = OutportCompiledSampleTime(1);
+            inTsOffset = InportCompiledSampleTime(2);
+            outTsOffset = OutportCompiledSampleTime(2);            
             if BackendType.isKIND2(backend)
                 obj.addUnsupported_options(...
                     sprintf('multi-clocks in block "%s" is currently not supported by KIND2.', blk.Origin_path));
