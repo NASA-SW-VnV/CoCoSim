@@ -146,6 +146,7 @@ classdef SLXUtils
                                         assignin('base', f, f_v);
                                         [Value, valueDataType, status] = ...
                                             SLXUtils.evalParam(modelObj, parent, blk, param);
+                                        evalin('base', sprintf('clear %s', f));
                                         return;
                                     catch
                                     end
