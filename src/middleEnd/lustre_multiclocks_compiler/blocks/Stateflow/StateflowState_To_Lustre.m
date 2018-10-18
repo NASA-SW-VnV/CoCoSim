@@ -23,7 +23,7 @@ classdef StateflowState_To_Lustre
             external_nodes = [external_nodes, action_nodes];
             external_libraries = [external_libraries, external_libraries_i];
             %% Create transitions actions as external nodes that will be called by the states nodes.
-            function addNodes(t, isDefaultTrans)
+            function addNodes(t, isDefaultTrans, parent_path)
                 % Transition actions
                 [transition_nodes_j, external_libraries_j ] = ...
                     StateflowTransition_To_Lustre.get_Actions(t, state, ...
@@ -32,19 +32,25 @@ classdef StateflowState_To_Lustre
                 external_libraries = [external_libraries, external_libraries_j];
                 % Transition node
                 [transition_nodes_j, external_libraries_j ] = ...
-                    StateflowTransition_To_Lustre.get_TransitionNode(t, state, ...
-                    isDefaultTrans);
+                    StateflowTransition_To_Lustre.get_TransitionNode(t, state, isDefaultTrans, parent_path);
                 external_nodes = [external_nodes, {transition_nodes_j}];
                 external_libraries = [external_libraries, external_libraries_j];
             end
             
             T = state.Composition.DefaultTransitions;
             for i=1:numel(T)
-                addNodes(T{i}, true)
+                parentPath = state.Path;
+                addNodes(T{i}, true, parentPath)
             end
-            T = [state.OuterTransitions, state.InnerTransitions];
+            T = state.InnerTransitions;
             for i=1:numel(T)
-                addNodes(T{i}, false)
+                parentPath = state.Path;
+                addNodes(T{i}, false, parentPath)
+            end
+            T = state.OuterTransitions;
+            for i=1:numel(T)
+                parentPath = fileparts(state.Path);
+                addNodes(T{i}, false, parentPath)
             end
             %% Create state nodes if the states are not atomic.
             
@@ -184,7 +190,7 @@ classdef StateflowState_To_Lustre
             end
             %isInner variable that tells if the transition that cause this
             %exit action is an inner Transition
-            isInner = VarIdExpr('_isInner');
+            isInner = VarIdExpr(StateflowState_To_Lustre.isInnerStr());
             
             
             idParentName = StateflowState_To_Lustre.getStateIDName(...
@@ -196,6 +202,8 @@ classdef StateflowState_To_Lustre
                 IntExpr(0), VarIdExpr(idParentName)));
             outputs{end + 1} = LustreVar(idParentName, 'int');
             inputs{end + 1} = LustreVar(idParentName, 'int');
+            % add isInner input
+            inputs{end + 1} = LustreVar(isInner, 'bool');
             % set state children as inactive
             junctions = state.Composition.SubJunctions;
             typs = cellfun(@(x) x.Type, junctions, 'UniformOutput', false);
@@ -205,8 +213,7 @@ classdef StateflowState_To_Lustre
                 body{end+1} = LustreEq(VarIdExpr(idParentName), IntExpr(0));
                 outputs{end+1} = LustreVar(idStateName, 'int');
             end
-            % add isInner as the last input
-            inputs{end + 1} = LustreVar(isInner, 'bool');
+            
             %create the node
             act_node_name = ...
                 StateflowState_To_Lustre.getExitActionNodeName(state);
@@ -219,9 +226,13 @@ classdef StateflowState_To_Lustre
             main_node.setBodyEqs(body);
             outputs = LustreVar.uniqueVars(outputs);
             inputs = LustreVar.uniqueVars(inputs);
+            
             main_node.setOutputs(outputs);
             main_node.setInputs(inputs);
             SF_STATES_NODESAST_MAP(act_node_name) = main_node;
+        end
+        function v = isInnerStr()
+            v = '_isInner';
         end
         %DURING ACTION
         function [main_node, external_libraries] = ...
@@ -379,6 +390,22 @@ classdef StateflowState_To_Lustre
                 state_name = SF_To_LustreNode.getUniqueName(state);
             end
             idName = strcat(state_name, '_ChildID');
+        end
+        
+        %% Substates objects
+        function subStates = getSubStatesObjects(state)
+            global SF_STATES_PATH_MAP;
+            childrenNames = state.Composition.Substates;
+            subStates = cell(numel(childrenNames), 1);
+            for i=1:numel(childrenNames)
+                childPath = fullfile(state.Path, childrenNames{i});
+                if ~isKey(SF_STATES_PATH_MAP, childPath)
+                    ME = MException('COCOSIM:STATEFLOW', ...
+                        'COMPILER ERROR: Not found state "%s" in SF_STATES_PATH_MAP', childPath);
+                    throw(ME);
+                end
+                subStates{i} = SF_STATES_PATH_MAP(childPath);
+            end
         end
     end
     

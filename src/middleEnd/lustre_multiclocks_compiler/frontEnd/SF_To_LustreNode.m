@@ -23,6 +23,7 @@ classdef SF_To_LustreNode
             %It's initialized for each call of this function
             SF_STATES_NODESAST_MAP = containers.Map('KeyType', 'char', 'ValueType', 'any');
             SF_STATES_PATH_MAP = containers.Map('KeyType', 'char', 'ValueType', 'any');
+            SF_JUNCTIONS_PATH_MAP = containers.Map('KeyType', 'char', 'ValueType', 'any');
             SF_DATA_MAP = containers.Map('KeyType', 'char', 'ValueType', 'any');
             %% get content
             content = blk.StateflowContent;
@@ -31,7 +32,7 @@ classdef SF_To_LustreNode
             for i=1:numel(data)
                 SF_DATA_MAP(data{i}.Name) = data{i};
             end
-            states = SF_To_LustreNode.orderStates(content.States);
+            states = SF_To_LustreNode.orderObjects(content.States);
             for i=1:numel(states)
                 SF_STATES_PATH_MAP(states{i}.Path) = states{i};
             end
@@ -108,8 +109,16 @@ classdef SF_To_LustreNode
         %%
         %% Get unique short name
         function unique_name = getUniqueName(object, id)
-            if ischar(object) && nargin == 2
+            global SF_STATES_PATH_MAP;
+            if ischar(object) 
                 name = object;
+                if nargin == 1
+                    if isKey(SF_STATES_PATH_MAP, name)
+                        id = SF_STATES_PATH_MAP(name).Id;
+                    else
+                        error('%s not found in SF_STATES_PATH_MAP', name);
+                    end
+                end
             else
                 name = object.Name;
                 id = object.Id;
@@ -118,12 +127,22 @@ classdef SF_To_LustreNode
             id_str = sprintf('%.0f', id);
             unique_name = sprintf('%s_%s',SLX2LusUtils.name_format(name),id_str );
         end
-        %% Order states
-        function ordered = orderStates(states)
-            levels = cellfun(@(x) numel(regexp(x.Path, '/', 'split')), ...
-                states, 'UniformOutput', true);
-            [~, I] = sort(levels, 'descend');
-            ordered = states(I);
+        %% Order states, transitions ...
+        function ordered = orderObjects(objects, fieldName)
+            if nargin == 1
+                fieldName = 'Path';
+            end
+            if isequal(fieldName, 'Path')
+                levels = cellfun(@(x) numel(regexp(x.Path, '/', 'split')), ...
+                    objects, 'UniformOutput', true);
+                [~, I] = sort(levels, 'descend');
+                ordered = objects(I);
+            elseif isequal(fieldName, 'ExecutionOrder')
+                orders = cellfun(@(x) x.ExecutionOrder, ...
+                    objects, 'UniformOutput', true);
+                [~, I] = sort(orders, 'descend');
+                ordered = objects(I);
+            end
         end
         %% change events to data
         function data = eventsToData(events)
@@ -206,8 +225,8 @@ classdef SF_To_LustreNode
                     inputs{end + 1} = LustreVar(k, SF_DATA_MAP(k).Datatype);
                 else
                     ME = MException('COCOSIM:STATEFLOW', ...
-                        'Variable %s can not be found for state "%s"', ...
-                        k, state.Path);
+                        'Variable %s can not be found for Action "%s"', ...
+                        k, action);
                     throw(ME);
                 end
             end

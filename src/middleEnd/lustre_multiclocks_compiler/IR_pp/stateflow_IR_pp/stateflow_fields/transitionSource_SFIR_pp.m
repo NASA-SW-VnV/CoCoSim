@@ -11,7 +11,7 @@ function [ new_ir, status ] = transitionSource_SFIR_pp( new_ir )
         src = new_ir.States{i};
         % default transition
         [new_ir.States{i}.Composition.DefaultTransitions, status_i] = ...
-            adapt_transitions(src.Composition.DefaultTransitions, []);
+            adapt_transitions(src.Composition.DefaultTransitions, '');
         if status_i
             display_msg(['ERROR found in pre-processing state:' src.Path], ...
                 MsgType.ERROR, 'transitionSource_SFIR_pp', '');
@@ -20,7 +20,7 @@ function [ new_ir, status ] = transitionSource_SFIR_pp( new_ir )
         
         %OuterTransitions
         [new_ir.States{i}.OuterTransitions, status_i] = ...
-            adapt_transitions(src.OuterTransitions, src);
+            adapt_transitions(src.OuterTransitions, src.Path);
         if status_i
             display_msg(['ERROR found in pre-processing state:' src.Path], ...
                 MsgType.ERROR, 'transitionSource_SFIR_pp', '');
@@ -30,7 +30,7 @@ function [ new_ir, status ] = transitionSource_SFIR_pp( new_ir )
         
         %InnerTransitions
         [new_ir.States{i}.InnerTransitions, status_i] = ...
-            adapt_transitions(src.InnerTransitions, src);
+            adapt_transitions(src.InnerTransitions, src.Path);
         if status_i
             display_msg(['ERROR found in pre-processing state:' src.Path], ...
                 MsgType.ERROR, 'transitionSource_SFIR_pp', '');
@@ -43,7 +43,7 @@ function [ new_ir, status ] = transitionSource_SFIR_pp( new_ir )
     for i=1:numel(new_ir.Junctions)
         jun = new_ir.Junctions{i};
         [new_ir.Junctions{i}.OuterTransitions, status_i] = ...
-            adapt_transitions(jun.OuterTransitions, jun);
+            adapt_transitions(jun.OuterTransitions, jun.Path);
         if status_i
             display_msg(['ERROR found in Junction:' jun.Path], ...
                 MsgType.ERROR, 'transitionSource_SFIR_pp', '');
@@ -65,9 +65,9 @@ function [ new_ir, status ] = transitionSource_SFIR_pp( new_ir )
 end
 
 %%
-function [transitions, status] = adapt_transitions(transitions, src)
+function [transitions, status] = adapt_transitions(transitions, srcPath)
     status = 0;
     for i=1:numel(transitions)
-        transitions{i}.Source = src;
+        transitions{i}.Source = srcPath;
     end
 end
