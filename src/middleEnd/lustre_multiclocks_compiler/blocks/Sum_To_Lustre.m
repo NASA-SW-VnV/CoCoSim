@@ -20,7 +20,7 @@ classdef Sum_To_Lustre < Block_To_Lustre
         
         function  write_code(obj, parent, blk, xml_trace, ~, backend, varargin)
             
-            OutputDataTypeStr = blk.OutDataTypeStr;
+            OutputDataTypeStr = blk.CompiledPortDataTypes.Outport{1};
             AccumDataTypeStr = blk.AccumDataTypeStr;
             if strcmp(AccumDataTypeStr, 'Inherit: Inherit via internal rule')
                 AccumDataTypeStr = blk.CompiledPortDataTypes.Outport{1};
@@ -28,14 +28,7 @@ classdef Sum_To_Lustre < Block_To_Lustre
                 AccumDataTypeStr = blk.CompiledPortDataTypes.Inport{1};
             end
             
-            if strcmp(OutputDataTypeStr, 'Inherit: Inherit via internal rule')
-                OutputDataTypeStr = blk.CompiledPortDataTypes.Outport{1};
-            elseif strcmp(OutputDataTypeStr, 'Inherit: Same as first input')
-                OutputDataTypeStr = blk.CompiledPortDataTypes.Inport{1};
-            elseif strcmp(OutputDataTypeStr, 'Inherit: Same as accumulator')
-                OutputDataTypeStr = AccumDataTypeStr;
-            end
-            
+           
             isSumBlock = true;
             [codes, outputs_dt, additionalVars] = ...
                 Sum_To_Lustre.getSumProductCodes(obj, parent, blk, ...
