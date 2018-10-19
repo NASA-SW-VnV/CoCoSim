@@ -68,6 +68,10 @@ classdef StateflowTransition_To_Lustre
             transitionNode.setBodyEqs(body);
             outputs = LustreVar.uniqueVars(outputs);
             inputs = LustreVar.uniqueVars(inputs);
+            if isempty(inputs)
+                inputs{1} = ...
+                    LustreVar(SF_To_LustreNode.virtualVarStr(), 'bool');
+            end
             transitionNode.setOutputs(outputs);
             transitionNode.setInputs(inputs);
             SF_STATES_NODESAST_MAP(node_name) = transitionNode;
@@ -128,27 +132,33 @@ classdef StateflowTransition_To_Lustre
             external_nodes = {};
             external_libraries = {};
             actions = SFIRPPUtils.split_actions(action);
-            if ~isempty(actions)
-                body = {};
-                outputs = {};
-                inputs = {};
-                nb_actions = numel(actions);
-                for i=1:nb_actions
-                    [body{end+1}, outputs_i, inputs_i, external_libraries_i] = ...
-                        SF_To_LustreNode.getPseudoLusAction(actions{i});
-                    outputs = [outputs, outputs_i];
-                    inputs = [inputs, inputs_i];
-                    external_libraries = [external_libraries, external_libraries_i];
-                end
-                main_node = LustreNode();
-                main_node.setName(t_act_node_name);
-                main_node.setBodyEqs(body);
-                outputs = LustreVar.uniqueVars(outputs);
-                inputs = LustreVar.uniqueVars(inputs);
-                main_node.setOutputs(outputs);
-                main_node.setInputs(inputs);
-                SF_STATES_NODESAST_MAP(t_act_node_name) = main_node;
+            if isempty(actions)
+                return;
             end
+            body = {};
+            outputs = {};
+            inputs = {};
+            nb_actions = numel(actions);
+            for i=1:nb_actions
+                [body{end+1}, outputs_i, inputs_i, external_libraries_i] = ...
+                    SF_To_LustreNode.getPseudoLusAction(actions{i});
+                outputs = [outputs, outputs_i];
+                inputs = [inputs, inputs_i];
+                external_libraries = [external_libraries, external_libraries_i];
+            end
+            main_node = LustreNode();
+            main_node.setName(t_act_node_name);
+            main_node.setBodyEqs(body);
+            outputs = LustreVar.uniqueVars(outputs);
+            inputs = LustreVar.uniqueVars(inputs);
+            if isempty(inputs)
+                inputs{1} = ...
+                    LustreVar(SF_To_LustreNode.virtualVarStr(), 'bool');
+            end
+            main_node.setOutputs(outputs);
+            main_node.setInputs(inputs);
+            SF_STATES_NODESAST_MAP(t_act_node_name) = main_node;
+            
         end
         
         
@@ -194,9 +204,7 @@ classdef StateflowTransition_To_Lustre
             else
                 n = 0;
             end
-            if (strcmp(lastDestination.Type,'CONNECTIVE') ...
-                    || strcmp(lastDestination.Type,'HISTORY')) ...
-                    && n > 0
+            if strcmp(lastDestination.Type,'Junction') && n > 0
                 %keep getting the whole path to the final destination.
                 for i=1:n
                     t_list = [transitions, transitions2(i)];
@@ -227,30 +235,56 @@ classdef StateflowTransition_To_Lustre
         function [body, outputs, inputs, external_libraries, antiCondition] = ...
                 full_transition_code(transitions, isDefaultTrans, parentPath, ...
                 first_cond_should_be_printed, antiCondition)
-            
+            global SF_JUNCTIONS_PATH_MAP;
             % Execute all conditions actions along the transition full path.
             [body, outputs, inputs, external_libraries, trans_cond] = ...
                 StateflowTransition_To_Lustre.full_tran_cond_actions(...
                 transitions, first_cond_should_be_printed, antiCondition);
 
-            % If the path has no state as final destination,
+            % If the path has Junction of type CONNECTIVE as final destination,
             %only conditions Actions are executed
+            isHJ = false;
             if strcmp(transitions{end}.Destination.Type,'Junction')
-                return;
+                if isKey(SF_JUNCTIONS_PATH_MAP)
+                    hobject = SF_JUNCTIONS_PATH_MAP(transitions{end}.Destination.Name);
+                    if isequal(hobject.Type, 'HISTORY')
+                        isHJ = true;
+                    else
+                        return;
+                    end
+                else
+                    return;
+                end
             end
             
-            % Exit action, Transition actions and Entry action should be executed.
+            % Exit actionshould be executed.
             if ~isDefaultTrans
-                [body_i, outputs_i, inputs_i, external_libraries_i] = ...
+                [body_i, outputs_i, inputs_i] = ...
                     StateflowTransition_To_Lustre.full_tran_exit_actions(...
                     transitions, parentPath, trans_cond);
                 body = [body, body_i];
                 outputs = [outputs, outputs_i];
                 inputs = [inputs, inputs_i];
-                external_libraries = [external_libraries, external_libraries_i];
             end
+
+            % Transition actions
+            [body_i, outputs_i, inputs_i] = ...
+                StateflowTransition_To_Lustre.full_tran_trans_actions(...
+                transitions, trans_cond);
+            body = [body, body_i];
+            outputs = [outputs, outputs_i];
+            inputs = [inputs, inputs_i];
+
+            % Entry actions
+            [body_i, outputs_i, inputs_i, antiCondition] = ...
+                StateflowTransition_To_Lustre.full_tran_entry_actions(...
+                transitions, parentPath, trans_cond, isHJ);
+            body = [body, body_i];
+            outputs = [outputs, outputs_i];
+            inputs = [inputs, inputs_i];
         end
-        
+
+        %condition actions
         function [body, outputs, inputs, external_libraries, trans_cond] = ...
                 full_tran_cond_actions(transitions, ...
                 first_cond_should_be_printed, antiCondition)
@@ -309,13 +343,47 @@ classdef StateflowTransition_To_Lustre
             end
         end
         
-        function [body, outputs, inputs, external_libraries] = ...
+        %transition actions
+        function [body, outputs, inputs] = ...
+                full_tran_trans_actions(transitions, trans_cond)
+            global SF_STATES_NODESAST_MAP;
+            body = {};
+            outputs = {};
+            inputs = {};
+            nbTrans = numel(transitions);
+            
+            % Execute all transition actions along the transition full path.
+            for i=1:nbTrans
+                t = transitions{i};
+                source = t.Source;%Path of the source
+                transTransActionNodeName = ...
+                    StateflowTransition_To_Lustre.getTranActionNodeName(t, ...
+                    source);
+                if isKey(SF_STATES_NODESAST_MAP, transTransActionNodeName)
+                    %transition Action exists.
+                    actionNodeAst = SF_STATES_NODESAST_MAP(transTransActionNodeName);
+                    [call, oututs_Ids] = actionNodeAst.nodeCall();
+                    if isempty(trans_cond)
+                        body{end+1} = LustreEq(oututs_Ids, call);
+                        outputs = [outputs, actionNodeAst.getOutputs()];
+                        inputs = [inputs, actionNodeAst.getInputs()];
+                    else
+                        body{end+1} = LustreEq(oututs_Ids, ...
+                            IteExpr(trans_cond, call, TupleExpr(oututs_Ids)));
+                        outputs = [outputs, actionNodeAst.getOutputs()];
+                        inputs = [inputs, actionNodeAst.getOutputs()];
+                        inputs = [inputs, actionNodeAst.getInputs()];
+                    end
+                end
+            end
+        end
+        %exit actions
+        function [body, outputs, inputs] = ...
                 full_tran_exit_actions(transitions, parentPath, trans_cond)
             global SF_STATES_NODESAST_MAP SF_STATES_PATH_MAP;
             body = {};
             outputs = {};
             inputs = {};
-            external_libraries = {};
             %Add Exit Actions
             first_source = SF_STATES_PATH_MAP(transitions{1}.Source);
             last_destination = transitions{end}.Destination;
@@ -400,6 +468,135 @@ classdef StateflowTransition_To_Lustre
                     end
                 end
             end
+            %remove isInner input from the node inputs
+            inputs_name = cellfun(@(x) x.getId(), ...
+                inputs, 'UniformOutput', false);
+            inputs = inputs(~strcmp(inputs_name, ...
+                StateflowState_To_Lustre.isInnerStr()));
+        end
+
+        % Entry actions
+        function [body, outputs, inputs, antiCondition] = ...
+                full_tran_entry_actions(transitions, parentPath, trans_cond, isHJ)
+            global SF_STATES_NODESAST_MAP SF_STATES_PATH_MAP;
+            body = {};
+            outputs = {};
+            inputs = {};
+            antiCondition = trans_cond;
+            %Add Exit Actions
+            last_destination = transitions{end}.Destination;
+            if isHJ
+                dest_parent = StateflowTransition_To_Lustre.getParent(...
+                    last_destination);
+            else
+                dest_parent = SF_STATES_PATH_MAP(last_destination.Name);
+            end
+            first_source = transitions{1}.Source;
+            if ~strcmp(dest_parent.Path, parentPath)
+                %Go to the same level of the destination.
+                while ~StateflowTransition_To_Lustre.isParent(...
+                        StateflowTransition_To_Lustre.getParent(dest_parent),...
+                        first_source)
+                    childID = dest_parent.Id;
+                    childName = dest_parent.Name;
+                    dest_parent = ...
+                        StateflowTransition_To_Lustre.getParent(dest_parent);
+                    
+                    % set the child as active, so when the parent execute
+                    % entry action, it will enter the right child.
+                    if isHJ
+                        continue;
+                    end
+                    idParentName = StateflowState_To_Lustre.getStateIDName(...
+                        dest_parent);
+                    body{end + 1} = LustreComment(...
+                        sprintf('set state %s as active', childName));
+                    body{end + 1} = LustreEq(VarIdExpr(idParentName), IntExpr(childID));
+                    outputs{end + 1} = LustreVar(idParentName, 'int');
+                    
+                end
+                if isequal(dest_parent.Composition.Type,'AND')
+                    %Parallel state Enter.
+                    parent = ...
+                        StateflowTransition_To_Lustre.getParent(dest_parent);
+                    siblings = SF_To_LustreNode.orderObjects(...
+                        StateflowState_To_Lustre.getSubStatesObjects(parent), ...
+                        'ExecutionOrder');
+                    nbrsiblings = numel(siblings);
+                    for i=1:nbrsiblings
+                        %if nbrsiblings{i}.Id == dest_parent.Id
+                            %our parallel state we are entering
+                        %end
+                        entryNodeName = ...
+                            StateflowState_To_Lustre.getEntryActionNodeName(siblings{i});
+                        if isKey(SF_STATES_NODESAST_MAP, entryNodeName)
+                            %entry Action exists.
+                            actionNodeAst = SF_STATES_NODESAST_MAP(entryNodeName);
+                            [call, oututs_Ids] = actionNodeAst.nodeCall();
+                            if isempty(trans_cond)
+                                body{end+1} = LustreEq(oututs_Ids, call);
+                                outputs = [outputs, actionNodeAst.getOutputs()];
+                                inputs = [inputs, actionNodeAst.getInputs()];
+                            else
+                                body{end+1} = LustreEq(oututs_Ids, ...
+                                    IteExpr(trans_cond, call, TupleExpr(oututs_Ids)));
+                                outputs = [outputs, actionNodeAst.getOutputs()];
+                                inputs = [inputs, actionNodeAst.getOutputs()];
+                                inputs = [inputs, actionNodeAst.getInputs()];
+                            end
+                        end
+                        
+                    end
+                else
+                    %Not Parallel state Entry
+                    entryNodeName = ...
+                        StateflowState_To_Lustre.getEntryActionNodeName(dest_parent);
+                    if isKey(SF_STATES_NODESAST_MAP, entryNodeName)
+                        %condition Action exists.
+                        actionNodeAst = SF_STATES_NODESAST_MAP(entryNodeName);
+                        [call, oututs_Ids] = actionNodeAst.nodeCall();
+                        if isempty(trans_cond)
+                            body{end+1} = LustreEq(oututs_Ids, call);
+                            outputs = [outputs, actionNodeAst.getOutputs()];
+                            inputs = [inputs, actionNodeAst.getInputs()];
+                        else
+                            body{end+1} = LustreEq(oututs_Ids, ...
+                                IteExpr(trans_cond, call, TupleExpr(oututs_Ids)));
+                            outputs = [outputs, actionNodeAst.getOutputs()];
+                            inputs = [inputs, actionNodeAst.getOutputs()];
+                            inputs = [inputs, actionNodeAst.getInputs()];
+                        end
+                    end
+                end
+            else
+                % this is a case of inner transition where the destination is
+                %the parent state. We should not execute entry state of the parent
+                idState = StateflowState_To_Lustre.getStateIDName(...
+                    dest_parent);
+                body{end + 1} = LustreComment(...
+                    sprintf('set state %s as inactive', dest_parent.Name));
+                body{end + 1} = LustreEq(VarIdExpr(idState), IntExpr(dest_parent.Id));
+                outputs{end + 1} = LustreVar(idState, 'int');
+                entryNodeName = ...
+                    StateflowState_To_Lustre.getExitActionNodeName(dest_parent);
+                if isKey(SF_STATES_NODESAST_MAP, entryNodeName)
+                    %condition Action exists.
+                    actionNodeAst = SF_STATES_NODESAST_MAP(entryNodeName);
+                    [call, oututs_Ids] = actionNodeAst.nodeCall();
+                    if isempty(trans_cond)
+                        body{end+1} = LustreEq(oututs_Ids, call);
+                        outputs = [outputs, actionNodeAst.getOutputs()];
+                        inputs = [inputs, actionNodeAst.getInputs()];
+                    else
+                        body{end+1} = LustreEq(oututs_Ids, ...
+                            IteExpr(trans_cond, call, TupleExpr(oututs_Ids)));
+                        outputs = [outputs, actionNodeAst.getOutputs()];
+                        inputs = [inputs, actionNodeAst.getOutputs()];
+                        inputs = [inputs, actionNodeAst.getInputs()];
+                    end
+                end
+            end
+            
         end
         %% Utils functions
         function full_path_trace = get_full_path_trace(transitions, isDefaultTrans)
@@ -417,13 +614,21 @@ classdef StateflowTransition_To_Lustre
         end
         
         function is_parent = isParent(Parent,child)
-            if isfield(child, 'Path')
+            if isempty(child)
+                is_parent = true;
+                return;
+            end
+            if ischar(child)
+                childPath = child;
+            elseif isfield(child, 'Path')
                 childPath = child.Path;
             else
                 %in destination struct, Name refers to Path. IR problem
                 childPath = child.Name;
             end
-            if isfield(Parent, 'Path')
+            if ischar(Parent)
+                ParentPath = Parent;
+            elseif isfield(Parent, 'Path')
                 ParentPath = Parent.Path;
             else
                 %in destination struct, Name refers to Path. IR problem
@@ -488,6 +693,9 @@ classdef StateflowTransition_To_Lustre
             node_name = sprintf('%s_Tran_Act', transition_prefix);
         end
         function node_name = getTransitionNodeName(T, src, isDefaultTrans)
+            if nargin < 2
+                src = T.Source;
+            end
             if nargin < 3
                 if isempty(src)
                     isDefaultTrans = true;

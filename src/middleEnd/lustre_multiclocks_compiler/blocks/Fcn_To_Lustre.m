@@ -95,7 +95,10 @@ classdef Fcn_To_Lustre < Block_To_Lustre
             if ~exist('isStateFlow', 'var')
                 isStateFlow = false;
             end
-            code = VarIdExpr('');
+            code = '';
+            if isempty(tree)
+                return;
+            end
             if ischar(tree)
                 % the case of final term in a tree
                 if ~isStateFlow && strcmp(tree, 'u')

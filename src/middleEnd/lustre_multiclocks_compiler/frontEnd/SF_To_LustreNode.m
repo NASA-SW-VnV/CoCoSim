@@ -14,21 +14,22 @@ classdef SF_To_LustreNode
         function [main_node, external_nodes, external_libraries ] = ...
                 chart2node(parent,  blk,  main_sampleTime, backend, xml_trace)
             %the main function
-            %% initialize outputs
+            % initialize outputs
             main_node = {};
             external_nodes = {};
             external_libraries = {};
-            %% global varibale mapping between states and their nodes AST.
+            % global varibale mapping between states and their nodes AST.
             global SF_STATES_NODESAST_MAP SF_STATES_PATH_MAP SF_JUNCTIONS_PATH_MAP SF_DATA_MAP;
             %It's initialized for each call of this function
             SF_STATES_NODESAST_MAP = containers.Map('KeyType', 'char', 'ValueType', 'any');
             SF_STATES_PATH_MAP = containers.Map('KeyType', 'char', 'ValueType', 'any');
             SF_JUNCTIONS_PATH_MAP = containers.Map('KeyType', 'char', 'ValueType', 'any');
             SF_DATA_MAP = containers.Map('KeyType', 'char', 'ValueType', 'any');
-            %% get content
+
+            % get content
             content = blk.StateflowContent;
             events = SF_To_LustreNode.eventsToData(content.Events);
-            data = [events, content.Data];
+            data = [events; content.Data];
             for i=1:numel(data)
                 SF_DATA_MAP(data{i}.Name) = data{i};
             end
@@ -40,7 +41,7 @@ classdef SF_To_LustreNode
             for i=1:numel(junctions)
                 SF_JUNCTIONS_PATH_MAP(junctions{i}.Path) = junctions{i};
             end
-            %% Go Over Stateflow Functions
+            % Go Over Stateflow Functions
             if isfield(content, 'GraphicalFunctions')
                 SFFunctions = content.GraphicalFunctions;
                 for i=1:numel(SFFunctions)
@@ -62,7 +63,7 @@ classdef SF_To_LustreNode
                 end
             end
             
-            %% Go over Junctions
+            % Go over Junctions Outertransitions: condition/Transition Actions
             for i=1:numel(junctions)
                 try
                     [external_nodes_i, external_libraries_i ] = ...
@@ -81,24 +82,47 @@ classdef SF_To_LustreNode
                 end
             end
             
-            %% Go over states
+            % Go over states: for state actions
             for i=1:numel(states)
                 try
-                    [node_i, external_nodes_i, external_libraries_i ] = ...
-                        StateflowState_To_Lustre.write_code(states{i});
-                    if iscell(node_i)
-                        external_nodes = [external_nodes, node_i];
-                    else
-                        external_nodes{end+1} = node_i;
-                    end
+                    [external_nodes_i, external_libraries_i ] = ...
+                        StateflowState_To_Lustre.write_ActionsNodes(states{i});
                     external_nodes = [external_nodes, external_nodes_i];
-                    external_libraries = [external_libraries, external_libraries_i];
+                    external_libraries = [external_libraries, ...
+                        external_libraries_i];
                 catch me
                     
                     if strcmp(me.identifier, 'COCOSIM:STATEFLOW')
-                        display_msg(me.message, MsgType.ERROR, 'SF_To_LustreNode', '');
+                        display_msg(me.message, MsgType.ERROR,...
+                            'SF_To_LustreNode', '');
                     else
-                        display_msg(me.getReport(), MsgType.DEBUG, 'SF_To_LustreNode', '');
+                        display_msg(me.getReport(), MsgType.DEBUG, ...
+                            'SF_To_LustreNode', '');
+                    end
+                    display_msg(sprintf('Translation of state %s failed', ...
+                        states{i}.Path),...
+                        MsgType.ERROR, 'SF_To_LustreNode', '');
+                end
+            end
+            % Go over states: for state Transitions
+            % the previous loop should be performed before this one so all
+            % state actions signature are stored.
+            for i=1:numel(states)
+                try
+                    [external_nodes_i, external_libraries_i ] = ...
+                        StateflowState_To_Lustre.write_TransitionsNodes(...
+                        states{i});
+                    external_nodes = [external_nodes, external_nodes_i];
+                    external_libraries = [external_libraries, ...
+                        external_libraries_i];
+                catch me
+                    
+                    if strcmp(me.identifier, 'COCOSIM:STATEFLOW')
+                        display_msg(me.message, MsgType.ERROR, ...
+                            'SF_To_LustreNode', '');
+                    else
+                        display_msg(me.getReport(), MsgType.DEBUG, ...
+                            'SF_To_LustreNode', '');
                     end
                     display_msg(sprintf('Translation of state %s failed', ...
                         states{i}.Path),...
@@ -127,6 +151,9 @@ classdef SF_To_LustreNode
             id_str = sprintf('%.0f', id);
             unique_name = sprintf('%s_%s',SLX2LusUtils.name_format(name),id_str );
         end
+        function v = virtualVarStr()
+            v = '_SFvirtual';
+        end
         %% Order states, transitions ...
         function ordered = orderObjects(objects, fieldName)
             if nargin == 1
@@ -140,13 +167,13 @@ classdef SF_To_LustreNode
             elseif isequal(fieldName, 'ExecutionOrder')
                 orders = cellfun(@(x) x.ExecutionOrder, ...
                     objects, 'UniformOutput', true);
-                [~, I] = sort(orders, 'descend');
+                [~, I] = sort(orders);
                 ordered = objects(I);
             end
         end
         %% change events to data
         function data = eventsToData(events)
-            data = {};
+            data = cell(numel(events), 1);
             for i=1:numel(events)
                 data{i} = events{i};
                 data{i}.Datatype = 'bool';
@@ -189,6 +216,9 @@ classdef SF_To_LustreNode
                         'Parsing Action "%s" has failed', action);
                     throw(ME);
                 end
+            end
+            if isempty(lus_action)
+                return;
             end
             if ~isCondition && ~isa(lus_action, 'LustreEq')
                 ME = MException('COCOSIM:STATEFLOW', ...

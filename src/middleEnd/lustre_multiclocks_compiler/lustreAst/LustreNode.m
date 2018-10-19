@@ -156,14 +156,16 @@ classdef LustreNode < LustreAst
             oututs_Ids = cellfun(@(x) VarIdExpr(x.getId()), ...
                 obj.outputs, 'UniformOutput', false);
             
-            if isInner
-                for i=1:numel(inputs_Ids)
-                    if isequal(inputs_Ids{i}.getId(), ...
-                            StateflowState_To_Lustre.isInnerStr())
-                        inputs_Ids{i} = InnerValue;
-                    end
+            for i=1:numel(inputs_Ids)
+                if isInner && isequal(inputs_Ids{i}.getId(), ...
+                        StateflowState_To_Lustre.isInnerStr())
+                    inputs_Ids{i} = InnerValue;
+                elseif isequal(inputs_Ids{i}.getId(), ...
+                        SF_To_LustreNode.virtualVarStr())
+                    inputs_Ids{i} = BooleanExpr(true);
                 end
             end
+            
             call = NodeCallExpr(obj.name, inputs_Ids);
         end
         
