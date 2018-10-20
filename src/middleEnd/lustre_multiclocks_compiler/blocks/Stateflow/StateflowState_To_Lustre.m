@@ -11,7 +11,7 @@ classdef StateflowState_To_Lustre
     end
     
     methods(Static)
-        %%
+        %% State Actions and DefaultTransitions Nodes
         function  [external_nodes, external_libraries ] = ...
                 write_ActionsNodes(state)
             external_nodes = {};
@@ -55,12 +55,12 @@ classdef StateflowState_To_Lustre
             
         end
 
-        %%
+        %% InnerTransitions and  OuterTransitions Nodes
         function  [external_nodes, external_libraries ] = ...
                 write_TransitionsNodes(state)
             external_nodes = {};
             external_libraries = {};
-            %% Create transitions actions as external nodes that will be called by the states nodes.
+            % Create transitions actions as external nodes that will be called by the states nodes.
             function addNodes(t, isDefaultTrans, parent_path)
                 % Transition node
                 [transition_nodes_j, external_libraries_j ] = ...
@@ -80,6 +80,44 @@ classdef StateflowState_To_Lustre
                 addNodes(T{i}, false, parentPath)
             end            
             
+        end
+        
+        %% State Node
+        function [main_node, external_nodes, external_libraries ] = ...
+                write_StateNode(state)
+            global SF_STATES_NODESAST_MAP;
+            main_node = {};
+            external_nodes = {};
+            external_libraries = {};
+            body = {};
+            outputs = {};
+            inputs = {};
+            variables = {};
+            if isempty(state.Composition.Substates) ...
+                    && isempty(state.InnerTransitions) ...
+                    && isempty(state.Composition.DefaultTransitions)
+                return;
+            end
+            %create the node
+            node_name = ...
+                StateflowState_To_Lustre.getStateNodeName(state);
+            main_node = LustreNode();
+            main_node.setName(node_name);
+            comment = LustreComment(...
+                sprintf('Main node of state %s',...
+                state.Path), true);
+            main_node.setMetaInfo(comment);
+            main_node.setBodyEqs(body);
+            outputs = LustreVar.uniqueVars(outputs);
+            inputs = LustreVar.uniqueVars(inputs);
+            if isempty(inputs)
+                inputs{1} = ...
+                    LustreVar(SF_To_LustreNode.virtualVarStr(), 'bool');
+            end
+            main_node.setOutputs(outputs);
+            main_node.setInputs(inputs);
+            main_node.setLocalVars(variables);
+            SF_STATES_NODESAST_MAP(node_name) = main_node;
         end
         %%
         function options = getUnsupportedOptions(varargin)
@@ -453,6 +491,14 @@ classdef StateflowState_To_Lustre
             end
         end
         %% Actions node name
+        function name = getStateNodeName(state, id)
+            if nargin == 2
+                state_name = SF_To_LustreNode.getUniqueName(state, id);
+            else
+                state_name = SF_To_LustreNode.getUniqueName(state);
+            end
+            name = strcat(state_name, '_Node');
+        end
         function name = getEntryActionNodeName(state, id)
             if nargin == 2
                 state_name = SF_To_LustreNode.getUniqueName(state, id);
