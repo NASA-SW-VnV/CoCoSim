@@ -15,6 +15,7 @@ schema.autoDisableWhen = 'Busy';
 [backEnd_root, ~, ~] = fileparts(mfilename('fullpath'));
 menue_items = {};
 menue_items{end + 1} = fullfile(backEnd_root, 'unsupported_blocks','unsupportedBlocksMenu.m');
+menue_items{end + 1} = fullfile(backEnd_root, 'guidelines','checkGuidelinesMenu.m');
 menue_items{end + 1} = fullfile(backEnd_root, 'verification','verifyMenu.m');
 menue_items{end + 1} = fullfile(backEnd_root, 'test_case_generation','TestCaseGenMenu.m');
 menue_items{end + 1} = fullfile(backEnd_root, 'generate_invariants','generateInvariantsMenu.m');
