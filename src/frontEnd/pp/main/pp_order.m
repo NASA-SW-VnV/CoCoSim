@@ -36,7 +36,7 @@ else
     % -To add all supported blocks in `pp2` except `atomic_process.m`.
     %   Add 'pp2/blocks/*.m' to pp_handled_blocks and
     %   Add 'pp2/blocks/atomic_process.m' to pp_unhandled_blocks
-    % -To impose a specific order of functions calls see above.
+    % -To impose a specific order of functions calls see later.
     
     % add both std_pp and pp2
     pp_handled_blocks = {'std_pp/blocks/*.m',...

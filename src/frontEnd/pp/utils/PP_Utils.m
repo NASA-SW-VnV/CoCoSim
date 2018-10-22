@@ -48,6 +48,9 @@ classdef PP_Utils
             % order functions by priority and remove functions with -1 priority
             ordered_functions = {};
             keys = setdiff(sort(cell2mat(priority_map.keys)), -1);
+            if isempty(keys)
+                return;
+            end
             for key= keys
                 v_list = priority_map(key);
                 for i=1:numel(v_list)
