@@ -62,6 +62,38 @@ classdef MenuUtils
             end
             fclose(fid);
         end
+        function html_path = createHtmlListUsingHTMLITEM(title, items_list, html_path)
+            cocoSim_path = regexprep(mfilename('fullpath'), 'cocosim2/.+', 'cocosim2');
+            css_source = fullfile(cocoSim_path, 'lib', 'materialize' , 'css' , 'materialize.css');
+            html_text = fileread(fullfile(cocoSim_path, 'src', 'backEnd' , 'html_templates' , 'item_list.html'));
+            html_text = strrep(html_text, '[css_source]', css_source);
+            % update title
+            html_text = strrep(html_text, '[TITLE]', title);
+            %add Items text
+            items_text = cell(numel(items_list), 1);
+            if iscell(items_list)
+                for i=1:numel(items_list)
+                    items_text{i} = items_list{i}.print();
+                end
+            else
+                items_text{1} = items_list.print();
+            end
+            items_text = MatlabUtils.strjoin(items_text, '\n');
+            html_text = strrep(html_text, '[List_Items]', items_text);
+            [output_dir, ~, ~] = fileparts(html_path);
+            if exist(html_path, 'file')
+                delete(html_path);
+            end
+            if ~exist(output_dir, 'dir')
+                MatlabUtils.mkdir(output_dir);
+            end
+            fid = fopen(html_path, 'w+');
+            if ~strcmp(html_text, '')
+                fprintf(fid, html_text);
+                open(html_path);
+            end
+            fclose(fid);
+        end
     end
     
 end

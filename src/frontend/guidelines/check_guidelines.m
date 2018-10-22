@@ -51,7 +51,7 @@ function [report_path, status] = check_guidelines(model_path, varargin)
         
     end
     title = 'NASA Orion GN&C MATLAB/Simulink Standards';
-    report_path = MenuUtils.createHtmlList(title, items_list, report_path);
+    report_path = MenuUtils.createHtmlListUsingHTMLITEM(title, items_list, report_path);
     % warning on
     cd(oldDir);
     open(report_path);

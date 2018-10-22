@@ -12,9 +12,15 @@ classdef HtmlItem < handle
     methods
         function obj = HtmlItem(title, subtitles, color)
             obj.title = title;
-            obj.subtitles = subtitles;
-            if nargin < 3
-                obj.colorMap = containers.Map('KeyType', 'uint8', 'ValueType', 'char');
+            if nargin < 2
+                obj.subtitles = {};
+            elseif iscell(subtitles)
+                obj.subtitles = subtitles;
+            else
+                obj.subtitles = {subtitles};
+            end
+            if nargin < 3 || isempty(color)
+                obj.colorMap = containers.Map('KeyType', 'int32', 'ValueType', 'char');
                 obj.colorMap(4) = 'blue';
                 obj.colorMap(5) = 'cyan';
                 obj.colorMap(6) = 'red';
@@ -22,6 +28,7 @@ classdef HtmlItem < handle
             else
                 obj.color = color;
             end
+            
         end
         function setTitle(obj, title)
             obj.title = title;
@@ -44,6 +51,8 @@ classdef HtmlItem < handle
             end
             if isempty(obj.color)
                 Acolor = obj.colorMap(level);
+            else
+                Acolor = obj.color;
             end
             if isempty(obj.subtitles)
                 res = sprintf('<li class="collection-item"><div class="%s-text text-darken-2">%s</div></li>', ...
