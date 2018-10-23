@@ -21,8 +21,8 @@ classdef HtmlItem < handle
             end
             if nargin < 3 || isempty(color)
                 obj.colorMap = containers.Map('KeyType', 'int32', 'ValueType', 'char');
-                obj.colorMap(4) = 'blue';
-                obj.colorMap(5) = 'cyan';
+                obj.colorMap(4) = 'black';
+                obj.colorMap(5) = 'blue';
                 obj.colorMap(6) = 'red';
                 obj.color = '';
             else
