@@ -21,12 +21,14 @@ classdef LustreProgram < LustreAst
         
         function new_obj = deepCopy(obj)
             if iscell(obj.nodes)
-                new_nodes = cellfun(@(x) x.deepCopy(), obj.nodes, 'UniformOutput', 0);
+                new_nodes = cellfun(@(x) x.deepCopy(), obj.nodes, ...
+                    'UniformOutput', 0);
             else
                 new_nodes = obj.nodes.deepCopy();
             end
             if iscell(obj.contracts)
-                new_contracts = cellfun(@(x) x.deepCopy(), obj.contracts, 'UniformOutput', 0);
+                new_contracts = cellfun(@(x) x.deepCopy(), obj.contracts,...
+                    'UniformOutput', 0);
             else
                 new_contracts = obj.contracts.deepCopy();
             end
@@ -62,24 +64,42 @@ classdef LustreProgram < LustreAst
                         obj.opens{i});
                 end
             end
-            % contracts
+            % contracts and nodes
             if BackendType.isKIND2(backend)
-                for i=1:numel(obj.contracts)
-                    if isempty(obj.contracts{i})
+                nodesList = [obj.nodes, obj.contracts];
+            else
+                nodesList = obj.nodes;
+            end
+            
+            if BackendType.isKIND2(backend)
+                call_map = containers.Map('KeyType', 'char', ...
+                    'ValueType', 'any');
+                for i=1:numel(nodesList)
+                    if isempty(nodesList{i})
+                        continue;
+                    end
+                    call_map(nodesList{i}.name) = nodesList{i}.getNodesCalled();
+                end
+                % Print nodes in order of calling, because KIND2 Contracts 
+                % need all nodes used in the contract to be defined first.
+                alreadyPrinted = {};
+                for i=1:numel(nodesList)
+                    if isempty(nodesList{i})
+                        continue;
+                    end
+                    [lines, alreadyPrinted] = obj.printWithOrder(...
+                        nodesList, nodesList{i}.name, call_map, alreadyPrinted, lines, backend);
+                end
+            else
+                for i=1:numel(nodesList)
+                    if isempty(nodesList{i})
                         continue;
                     end
                     lines{end+1} = sprintf('%s\n', ...
-                        obj.contracts{i}.print(backend));
+                        nodesList{i}.print(backend));
                 end
             end
-            % modes
-            for i=1:numel(obj.nodes)
-                if isempty(obj.nodes{i})
-                    continue;
-                end
-                lines{end+1} = sprintf('%s\n', ...
-                    obj.nodes{i}.print(backend));
-            end
+            
             code = MatlabUtils.strjoin(lines, '');
         end
         
@@ -94,6 +114,25 @@ classdef LustreProgram < LustreAst
         end
         function code = print_prelude(obj)
             code = obj.print_lustrec(BackendType.PRELUDE);
+        end
+        
+        function [lines, alreadyPrinted] = printWithOrder(obj, ...
+                nodesList, nodeName, call_map, alreadyPrinted, lines, backend)
+            if isKey(call_map, nodeName)
+                subNodes = call_map(nodeName);
+                for i=1:numel(subNodes)
+                    [lines, alreadyPrinted] = obj.printWithOrder( ...
+                        nodesList, subNodes{i}, call_map, alreadyPrinted, lines, backend);
+                end
+            end
+            if ~ismember(nodeName, alreadyPrinted)
+                Names = cellfun(@(x) x.name, ...
+                    nodesList, 'UniformOutput', false);
+                node = nodesList{strcmp(Names, nodeName)};
+                lines{end+1} = sprintf('%s\n', ...
+                    node.print(backend));
+                alreadyPrinted{end + 1} = nodeName;
+            end
         end
     end
     

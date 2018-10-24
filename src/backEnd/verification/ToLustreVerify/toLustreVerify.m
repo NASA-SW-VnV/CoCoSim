@@ -62,25 +62,36 @@ if BackendType.isKIND2(backend)
     end
     if ~isempty(Assertions_list)
         OPTS = ' --slice_nodes false --check_subproperties true ';
-        [status, kind2_out] = Kind2Utils2.runKIND2(...
-            nom_lustre_file,...
-            top_node_name, ...
-            OPTS, KIND2, Z3);
+    elseif ~isempty(contractBlocks_list)
+        CoCoSimPreferences = load_coco_preferences();
+        if CoCoSimPreferences.compositionalAnalysis
+            OPTS = '--modular true --compositional true';
+        else
+            OPTS = '--modular true';
+        end
+    else
+        display_msg('No Property to check.', MsgType.RESULT, 'toLustreVerify', '');
+        return;
+    end
+    [status, kind2_out] = Kind2Utils2.runKIND2(...
+        nom_lustre_file,...
+        top_node_name, ...
+        OPTS, KIND2, Z3);
+    if status
+        return;
+    end
+    mapping_file = xml_trace.json_file_path;
+    try
+        status = cocoSpecKind2(nom_lustre_file, mapping_file, kind2_out);
         if status
             return;
         end
-        mapping_file = xml_trace.json_file_path;
-        try
-            status = cocoSpecKind2(nom_lustre_file, mapping_file, kind2_out);
-            if status
-                return;
-            end
-            VerificationMenu.displayHtmlVerificationResultsCallbackCode(model)
-        catch me
-            display_msg(me.getReport(), MsgType.DEBUG, 'toLustreVerify', '');
-            display_msg('Something went wrong in Verification.', MsgType.ERROR, 'toLustreVerify', '');
-        end
+        VerificationMenu.displayHtmlVerificationResultsCallbackCode(model)
+    catch me
+        display_msg(me.getReport(), MsgType.DEBUG, 'toLustreVerify', '');
+        display_msg('Something went wrong in Verification.', MsgType.ERROR, 'toLustreVerify', '');
     end
+    
 else
     if ~isempty(Assertions_list)
         display_msg('Verification of Assertion blocks is only supported by KIND2 model checker.', MsgType.ERROR, 'toLustreVerify', '');

@@ -155,7 +155,8 @@ classdef SS_To_LustreNode
                     node_inputs, ...
                     node_outputs, ...
                     variables, ...
-                    body);
+                    body, ...
+                    false);
             else
                 main_node = LustreNode(...
                     comment, ...
@@ -243,14 +244,20 @@ classdef SS_To_LustreNode
                     if isempty(srcBlk)
                         continue;
                     end
-                    for i=1:srcBlk.CompiledPortWidths.Outport(x.SrcPort+1)
+                    %get actual size after inlining.
+                    [names, ~] = SLX2LusUtils.getBlockOutputsNames(...
+                        parent_ir, srcBlk, x.SrcPort);
+                    for i=1:numel(names)
                         inputs_src_str{end+1} = sprintf('%.5f_%d', x.SrcBlock, x.SrcPort);
                     end
                 end
             end
             outputs_src_str = {};
             for i=1:numel(ss_ir.CompiledPortWidths.Outport)
-                for j=1:ss_ir.CompiledPortWidths.Outport(i)
+                %get actual size after inlining.
+                [names, ~] = SLX2LusUtils.getBlockOutputsNames(...
+                    parent_ir, ss_ir, i-1);
+                for j=1:numel(names)
                     outputs_src_str{end+1} = sprintf('%.5f_%d', ss_ir.Handle, i-1);
                 end
             end
@@ -277,7 +284,10 @@ classdef SS_To_LustreNode
                     I = find(strcmp(srcPortHandleStr, inputs_src_str));
                     if ~isempty(I)
                         % we may have inputs from the same blk.
-                        I = I(1:srcBlk.CompiledPortWidths.Outport(SrcPort+1));
+                        %get actual size after inlining.
+                        [names, ~] = SLX2LusUtils.getBlockOutputsNames(...
+                            parent_ir, srcBlk, SrcPort);
+                        I = I(1:numel(names));
                         contract_inputs = [contract_inputs,...
                             node_inputs_withoutDT(I)];
                         continue;

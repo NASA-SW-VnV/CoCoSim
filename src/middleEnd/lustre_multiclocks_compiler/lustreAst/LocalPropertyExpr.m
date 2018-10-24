@@ -33,6 +33,23 @@ classdef LocalPropertyExpr < LustreExpr
         function varIds = GetVarIds(obj)
             varIds = obj.exp.GetVarIds;
         end
+        
+        %% This function is used by KIND2 LustreProgram.print()
+        function nodesCalled = getNodesCalled(obj)
+            nodesCalled = {};
+            function addNodes(objects)
+                if iscell(objects)
+                    for i=1:numel(objects)
+                        nodesCalled = [nodesCalled, objects{i}.getNodesCalled()];
+                    end
+                else
+                    nodesCalled = [nodesCalled, objects.getNodesCalled()];
+                end
+            end
+            addNodes(obj.exp);
+        end
+        
+        
         %%
         function code = print(obj, backend)
             if BackendType.isPRELUDE(backend)

@@ -55,7 +55,22 @@ classdef AutomatonState < LustreExpr
         function new_obj = changeArrowExp(obj, ~)
             new_obj = obj;
         end
-        
+        %% This function is used by KIND2 LustreProgram.print()
+        function nodesCalled = getNodesCalled(obj)
+            nodesCalled = {};
+            function addNodes(objects)
+                if iscell(objects)
+                    for i=1:numel(objects)
+                        nodesCalled = [nodesCalled, objects{i}.getNodesCalled()];
+                    end
+                else
+                    nodesCalled = [nodesCalled, objects.getNodesCalled()];
+                end
+            end
+            addNodes(obj.strongTrans);
+            addNodes(obj.weakTrans);
+            addNodes(obj.body);
+        end
         %%
         function code = print(obj, backend)
             %TODO: check if lustrec syntax is OK for jkind and prelude.

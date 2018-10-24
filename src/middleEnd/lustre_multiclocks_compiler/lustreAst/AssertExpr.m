@@ -32,6 +32,11 @@ classdef AssertExpr < LustreExpr
         function varIds = GetVarIds(obj)
             varIds = obj.exp.GetVarIds();
         end
+        
+        %% This function is used by KIND2 LustreProgram.print()
+        function nodesCalled = getNodesCalled(obj)
+            nodesCalled = obj.exp.getNodesCalled();
+        end
         %%
         function code = print(obj, backend)
             %TODO: check if KIND2 syntax is OK for the other backends.

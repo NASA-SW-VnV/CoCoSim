@@ -36,6 +36,11 @@ classdef RealExpr < LustreExpr
         function varIds = GetVarIds(obj)
             varIds = {};
         end
+        %% This function is used by KIND2 LustreProgram.print()
+        function nodesCalled = getNodesCalled(obj)
+            nodesCalled = {};
+        end
+        
         %%
         function code = print(obj, ~)
             %TODO: check if LUSTREC syntax is OK for the other backends.

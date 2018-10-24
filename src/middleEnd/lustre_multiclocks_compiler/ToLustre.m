@@ -156,9 +156,18 @@ if fid==-1
     msg = sprintf('Opening file "%s" is not possible', nom_lustre_file);
     display_msg(msg, MsgType.ERROR, 'lustre_multiclocks_compiler', '');
 end
-Lustrecode = program.print(backend);
-fprintf(fid, '%s', Lustrecode);
-fclose(fid);
+try
+    Lustrecode = program.print(backend);
+    fprintf(fid, '%s', Lustrecode);
+    fclose(fid);
+catch me
+    display_msg('Printing Lustre AST to file failed',...
+        MsgType.ERROR, 'write_body', '');
+    display_msg(me.getReport(), MsgType.DEBUG, 'write_body', '');
+    status = 1;
+    return;
+end
+
 
 %% writing traceability
 xml_trace.write();
@@ -186,12 +195,13 @@ if isfield(blk, 'Content') && ~isempty(blk.Content) ...
         && ~(isstruct(blk.Content) && isempty(fieldnames(blk.Content)))
     field_names = fieldnames(blk.Content);
     for i=1:numel(field_names)
+        
         [nodes_code_i, contracts_ast_i, external_libraries_i, error_status_i] = recursiveGeneration(blk, blk.Content.(field_names{i}), main_sampleTime, 0, backend, xml_trace);
         if ~isempty(nodes_code_i)
             nodes_ast = [ nodes_ast, nodes_code_i];
         end
         if ~isempty(contracts_ast_i)
-            contracts_ast{end + 1} = contracts_ast_i;
+            contracts_ast = [ contracts_ast, contracts_ast_i];
         end
         external_libraries = [external_libraries, external_libraries_i];
         error_status = error_status_i || error_status;
@@ -219,12 +229,20 @@ if isfield(blk, 'Content') && ~isempty(blk.Content) ...
         contracts_ast{end + 1} = main_node;
     elseif ~isempty(main_node)
         nodes_ast{end + 1} = main_node;
-    end    
+    end
 elseif isfield(blk, 'SFBlockType') && isequal(blk.SFBlockType, 'Chart')
     % Stateflow chart example
     %[main_node, ~, external_nodes, external_libraries_i] = SS_To_LustreNode.subsystem2node(parent, blk, main_sampleTime, is_main_node, backend, xml_trace);
-    [main_node, external_nodes, external_libraries_i ] = ...
-                SF_To_LustreNode.chart2node(parent,  blk,  main_sampleTime, backend, xml_trace);
+    try
+        [main_node, external_nodes, external_libraries_i ] = ...
+            SF_To_LustreNode.chart2node(parent,  blk,  main_sampleTime, backend, xml_trace);
+    catch me
+        display_msg(sprintf('Translation to Lustre of block %s has failed.', blk.Origin_path),...
+            MsgType.ERROR, 'write_body', '');
+        display_msg(me.getReport(), MsgType.DEBUG, 'write_body', '');
+        error_status = true;
+        return;
+    end
     external_libraries = [external_libraries, external_libraries_i];
     if iscell(external_nodes)
         nodes_ast = [ nodes_ast, external_nodes];

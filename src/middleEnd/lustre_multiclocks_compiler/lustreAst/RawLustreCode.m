@@ -26,7 +26,10 @@ classdef RawLustreCode < LustreAst
         function new_obj = changeArrowExp(obj, ~)
             new_obj = obj;
         end
-        
+        %% This function is used by KIND2 LustreProgram.print()
+        function nodesCalled = getNodesCalled(obj)
+            nodesCalled = {};
+        end
         %%
         function code = print(obj, ~)
             %TODO: check if LUSTREC syntax is OK for the other backends.

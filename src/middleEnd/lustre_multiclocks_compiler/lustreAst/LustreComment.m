@@ -36,7 +36,10 @@ classdef LustreComment < LustreExpr
             new_obj = obj;
         end
         
-        
+        %% This function is used by KIND2 LustreProgram.print()
+        function nodesCalled = getNodesCalled(obj)
+            nodesCalled = {};
+        end
         %%
         function code = print(obj, backend)
             code = obj.print_lustrec(backend);

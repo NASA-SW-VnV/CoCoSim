@@ -43,6 +43,24 @@ classdef ContractImportExpr < LustreExpr
         function new_obj = changeArrowExp(obj, ~)
             new_obj = obj;
         end
+        
+        %% This function is used by KIND2 LustreProgram.print()
+        function nodesCalled = getNodesCalled(obj)
+            nodesCalled = {};
+            function addNodes(objects)
+                if iscell(objects)
+                    for i=1:numel(objects)
+                        nodesCalled = [nodesCalled, objects{i}.getNodesCalled()];
+                    end
+                else
+                    nodesCalled = [nodesCalled, objects.getNodesCalled()];
+                end
+            end
+            addNodes(obj.inputs);
+            addNodes(obj.outputs);
+            nodesCalled{end+1} = obj.name;
+        end
+        
         %%
         function code = print(obj, backend)
            if BackendType.isKIND2(backend)
@@ -57,11 +75,9 @@ classdef ContractImportExpr < LustreExpr
             code = '';
         end
         function code = print_kind2(obj, backend)
-            inputs_cell = cellfun(@(x) {x.print(backend)}, obj.inputs, 'UniformOutput', 0);
-            inputs_str = MatlabUtils.strjoin(inputs_cell, ', ');
-            outputs_cell = cellfun(@(x) {x.print(backend)}, obj.outputs, 'UniformOutput', 0);
-            outputs_str = MatlabUtils.strjoin(outputs_cell, ', ');
-            code = sprintf('import %s(%S) returns (%s);', ...
+            inputs_str = NodeCallExpr.getArgsStr(obj.inputs, backend);
+            outputs_str = NodeCallExpr.getArgsStr(obj.outputs, backend);
+            code = sprintf('import %s(%s) returns (%s);', ...
                 obj.name, inputs_str, outputs_str );
         end
         function code = print_zustre(obj)

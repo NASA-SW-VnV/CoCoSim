@@ -45,6 +45,10 @@ classdef AutomatonTransExpr < LustreExpr
             new_obj = obj;
         end
         
+        %% This function is used by KIND2 LustreProgram.print()
+        function nodesCalled = getNodesCalled(obj)
+            nodesCalled = obj.condition.getNodesCalled();
+        end
         %%
         function code = print(obj, backend)
             %TODO: check if lustrec syntax is OK for jkind and prelude.

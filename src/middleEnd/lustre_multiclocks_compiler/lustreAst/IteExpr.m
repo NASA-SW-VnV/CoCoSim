@@ -52,6 +52,25 @@ classdef IteExpr < LustreExpr
             elseCondId = obj.ElseExpr.GetVarIds();
             varIds = [vcondId, thenCondId, elseCondId];
         end
+        
+        %% This function is used by KIND2 LustreProgram.print()
+        function nodesCalled = getNodesCalled(obj)
+            nodesCalled = {};
+            function addNodes(objects)
+                if iscell(objects)
+                    for i=1:numel(objects)
+                        nodesCalled = [nodesCalled, objects{i}.getNodesCalled()];
+                    end
+                else
+                    nodesCalled = [nodesCalled, objects.getNodesCalled()];
+                end
+            end
+            addNodes(obj.condition);
+            addNodes(obj.thenExpr);
+            addNodes(obj.ElseExpr);
+        end
+        
+        
         %%
         function code = print(obj, backend)
             %TODO: check if LUSTREC syntax is OK for the other backends.

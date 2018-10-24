@@ -247,7 +247,7 @@ classdef SLX2LusUtils < handle
         %% Contract header
         function [node_inputs, node_outputs, ...
                     node_inputs_withoutDT, node_outputs_withoutDT ] = ...
-                    extractContractHeader(parent_ir, blk, main_sampleTime, xml_trace)
+                    extractContractHeader(parent_ir, contract, main_sampleTime, xml_trace)
                 % This function is creating the header of the contract.
                 % A contract is different from a node by having the same
                 % signature of the abstracted node. So we need to divide
@@ -267,13 +267,13 @@ classdef SLX2LusUtils < handle
                 isContractBlk = 0;
                 [~, contract_inputs, contract_outputs, ...
                     contract_inputs_withoutDT, contract_outputs_withoutDT ] = ...
-                    SLX2LusUtils.extractNodeHeader(parent_ir, blk, is_main_node, ...
+                    SLX2LusUtils.extractNodeHeader(parent_ir, contract, is_main_node, ...
                     isEnableORAction, isEnableAndTrigger, isContractBlk, main_sampleTime, xml_trace);
                 %change
                 % get Associated SS
-                if ~isfield(blk, 'AssociatedBlkHandle')
+                if ~isfield(contract, 'AssociatedBlkHandle')
                     display_msg(sprintf('Can not find AssociatedBlkHandle parameter in contract %s.', ...
-                        blk.Origin_path), MsgType.DEBUG, 'extractContractHeader', '');
+                        contract.Origin_path), MsgType.DEBUG, 'extractContractHeader', '');
                     % keep the same contract signature
                     node_inputs = contract_inputs;
                     node_outputs = contract_outputs;
@@ -283,11 +283,11 @@ classdef SLX2LusUtils < handle
                 end
                 % we assume PortConnectivity is ordered by the graphical
                 % order of inputs.
-                associatedBlkHandle = blk.AssociatedBlkHandle;
+                associatedBlkHandle = contract.AssociatedBlkHandle;
                 associatedBlk = get_struct(parent_ir, associatedBlkHandle);
                 if isempty(associatedBlk)
                     display_msg(sprintf('Can not find AssociatedBlkHandle parameter in contract %s.', ...
-                        blk.Origin_path), MsgType.DEBUG, 'extractContractHeader', '');
+                        contract.Origin_path), MsgType.DEBUG, 'extractContractHeader', '');
                     % keep the same contract signature
                     node_inputs = contract_inputs;
                     node_outputs = contract_outputs;
@@ -296,20 +296,23 @@ classdef SLX2LusUtils < handle
                     return;
                 end
                 curr_idx = 1;
-                for j=1:numel(blk.PortConnectivity)
-                    srcBlkHandle = blk.PortConnectivity(j).SrcBlock;
+                for j=1:numel(contract.PortConnectivity)
+                    srcBlkHandle = contract.PortConnectivity(j).SrcBlock;
                     if isempty(srcBlkHandle)
                         % skip "valid" output
                         continue;
                     end
-                    SrcPort = blk.PortConnectivity(j).SrcPort;
+                    SrcPort = contract.PortConnectivity(j).SrcPort;
                     if srcBlkHandle ~= associatedBlkHandle
                         srcBlk = get_struct(parent_ir, srcBlkHandle);
                         if isempty(srcBlk)
                             continue;
                         end
                         % input
-                        for i=1:srcBlk.CompiledPortWidths.Outport(SrcPort+1)
+                        %get actual size after inlining.
+                        [names, ~] = SLX2LusUtils.getBlockOutputsNames(...
+                            parent_ir, srcBlk, SrcPort);
+                        for i=1:numel(names)
                             node_inputs{end + 1} = contract_inputs{curr_idx};
                             node_inputs_withoutDT{end+1} =...
                                 contract_inputs_withoutDT{curr_idx};
@@ -317,7 +320,9 @@ classdef SLX2LusUtils < handle
                         end
                     else
                         % output
-                        for i=1:associatedBlk.CompiledPortWidths.Outport(SrcPort+1)
+                        [names, ~] = SLX2LusUtils.getBlockOutputsNames(...
+                            parent_ir, associatedBlk, SrcPort);
+                        for i=1:numel(names)
                             node_outputs{end + 1} = contract_inputs{curr_idx};
                             node_outputs_withoutDT{end+1} =...
                                 contract_inputs_withoutDT{curr_idx};
