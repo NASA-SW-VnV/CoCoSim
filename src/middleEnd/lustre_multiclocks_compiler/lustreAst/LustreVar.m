@@ -81,6 +81,11 @@ classdef LustreVar < LustreAst
             [~, I] = unique(Ids);
             U = vars(I);
         end
+        function U = removeVar(vars, v)
+            Ids = cellfun(@(x) x.getId(), ...
+                vars, 'UniformOutput', false);
+            U = vars(~strcmp(Ids, v));
+        end
     end
 end
 
