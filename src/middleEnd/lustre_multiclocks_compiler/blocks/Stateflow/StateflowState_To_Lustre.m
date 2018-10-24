@@ -74,14 +74,11 @@ classdef StateflowState_To_Lustre
         end
         
         %% State Node
-        function [main_node, external_nodes, external_libraries ] = ...
-                write_StateNode(state)
+        function main_node  = write_StateNode(state)
             global SF_STATES_NODESAST_MAP;
             main_node = {};
-            external_nodes = {};
-            external_libraries = {};
             
-            [outputs, inputs, variables, body] = ...
+            [outputs, inputs, body] = ...
                 StateflowState_To_Lustre.write_state_body(state);
             if isempty(body)
                 %no code is required
@@ -107,7 +104,28 @@ classdef StateflowState_To_Lustre
             end
             main_node.setOutputs(outputs);
             main_node.setInputs(inputs);
-            main_node.setLocalVars(variables);
+            SF_STATES_NODESAST_MAP(node_name) = main_node;
+        end
+        
+        %% Chart Node
+        function main_node  = write_ChartNode(chart, dataAndEvents)
+            global SF_STATES_NODESAST_MAP;
+            
+            [outputs, inputs, variable, body] = ...
+                StateflowState_To_Lustre.write_chart_body(chart, dataAndEvents);
+           
+            %create the node
+            node_name = ...
+                SF_To_LustreNode.getUniqueName(chart);
+            main_node = LustreNode();
+            main_node.setName(node_name);
+            comment = LustreComment(sprintf('Chart Node: %s', chart.Path),...
+                true);
+            main_node.setMetaInfo(comment);
+            main_node.setBodyEqs(body);            
+            main_node.setOutputs(outputs);
+            main_node.setInputs(inputs);
+            main_node.setLocalVars(variable);
             SF_STATES_NODESAST_MAP(node_name) = main_node;
         end
         %%
@@ -322,10 +340,6 @@ classdef StateflowState_To_Lustre
                 inputs = [inputs, inputs_i];
                 external_libraries = [external_libraries, external_libraries_i];
             end
-            % Inner transitions
-            %% TODO: code for inner transitions
-            %T = state.InnerTransitions;
-            
             if isempty(body)
                 return;
             end
@@ -482,120 +496,127 @@ classdef StateflowState_To_Lustre
         end
         
         %% state body
-        function [outputs, inputs, variables, body] = write_state_body(state)
-            global SF_STATES_NODESAST_MAP;
+        function [outputs, inputs, body] = write_state_body(state)
+            global SF_STATES_NODESAST_MAP SF_STATES_PATH_MAP;
             outputs = {};
             inputs = {};
-            variables = {};
             body = {};
 
+            parentPath = fileparts(state.Path);
+            isChart = false;
+            if isempty(parentPath)
+                isChart = true;
+            end
+            if ~isChart
+                %1st step: OuterTransition code
+                outerTransNodeName = ...
+                    StateflowState_To_Lustre.getStateOuterTransNodeName(state);
+                if isKey(SF_STATES_NODESAST_MAP, outerTransNodeName)
+                    nodeAst = SF_STATES_NODESAST_MAP(outerTransNodeName);
+                    [call, oututs_Ids] = nodeAst.nodeCall();
+                    body{end+1} = LustreEq(oututs_Ids, call);
+                    outputs = [outputs, nodeAst.getOutputs()];
+                    inputs = [inputs, nodeAst.getInputs()];
+                end
+                
+                %2nd step: During actions
+                idParentVar = VarIdExpr(...
+                    StateflowState_To_Lustre.getStateIDName(...
+                    SF_STATES_PATH_MAP(parentPath)));
+                cond_prefix = BinaryExpr(BinaryExpr.EQ,...
+                    idParentVar, IntExpr(state.Id));
+                during_act_node_name = ...
+                    StateflowState_To_Lustre.getDuringActionNodeName(state);
+                if isKey(SF_STATES_NODESAST_MAP, during_act_node_name)
+                    nodeAst = SF_STATES_NODESAST_MAP(during_act_node_name);
+                    
+                    [call, oututs_Ids] = nodeAst.nodeCall();
+                    body{end+1} = LustreEq(oututs_Ids, ...
+                        IteExpr(cond_prefix, call, TupleExpr(oututs_Ids)));
+                    outputs = [outputs, nodeAst.getOutputs()];
+                    inputs = [inputs, nodeAst.getOutputs()];
+                    inputs = [inputs, nodeAst.getInputs()];
+                    inputs{end + 1} = LustreVar(idParentVar, 'int');
+                end
+                
+                %3rd step: Inner transitions
+                innerTransNodeName = ...
+                    StateflowState_To_Lustre.getStateInnerTransNodeName(state);
+                if isKey(SF_STATES_NODESAST_MAP, innerTransNodeName)
+                    nodeAst = SF_STATES_NODESAST_MAP(innerTransNodeName);
+                    [call, oututs_Ids] = nodeAst.nodeCall();
+                    body{end+1} = LustreEq(oututs_Ids, ...
+                        IteExpr(cond_prefix, call, TupleExpr(oututs_Ids)));
+                    outputs = [outputs, nodeAst.getOutputs()];
+                    inputs = [inputs, nodeAst.getOutputs()];
+                    inputs = [inputs, nodeAst.getInputs()];
+                    inputs{end + 1} = LustreVar(idParentVar, 'int');
+                end
+            else
+                cond_prefix = {};
+            end
+            
+            %4th step: execute the active child
             children = StateflowState_To_Lustre.getSubStatesObjects(state);
             number_children = numel(children);
-            if number_children > 0
+            isParallel = isequal(state.Composition.Type, 'PARALLEL_AND');
+            if number_children > 0 && ~isParallel
                 idStateVar = VarIdExpr(...
                     StateflowState_To_Lustre.getStateIDName(state));
                 inputs{1} = LustreVar(idStateVar, 'int');
             end
-            automatonStateVar = StateflowState_To_Lustre.automatonStateVar();
-            variables{1} = LustreVar(automatonStateVar, 'int');
-            
-            
-            
-            %state entry: idState = 0
-            cond_prefix = ...
-                BinaryExpr(BinaryExpr.EQ, idStateVar, IntExpr(0));
-            entryNodeName = ...
-                StateflowState_To_Lustre.getEntryActionNodeName(state);
-            if isKey(SF_STATES_NODESAST_MAP, entryNodeName)
-                conds{end + 1} = cond_prefix;
-                codeNumber = numel(thens);
-                thens{end + 1} = IntExpr(codeNumber);
-                comment = sprintf('%s\n\t%d : %s', comment, codeNumber, entryNodeName);
-                NodeAst = SF_STATES_NODESAST_MAP(entryNodeName);
-                [call, oututs_Ids] = NodeAst.nodeCall();
-                codeCond = BinaryExpr(BinaryExpr.EQ, ...
-                    StateflowState_To_Lustre.automatonStateVar(), IntExpr(codeNumber));
-                body{end+1} = LustreEq(oututs_Ids, ...
-                    IteExpr(codeCond, call, TupleExpr(oututs_Ids)));
-                outputs = [outputs, NodeAst.getOutputs()];
-                inputs = [inputs, NodeAst.getOutputs()];
-                inputs = [inputs, NodeAst.getInputs()];
-            else
-                display_msg(sprintf('%s not found in SF_STATES_NODESAST_MAP', entryNodeName), ...
-                    MsgType.ERROR, 'StateflowState_To_Lustre', '');
-            end
-            
-            %transitions codes
             for i=1:number_children
                 child = children{i};
-                cond_prefix = ...
-                    BinaryExpr(BinaryExpr.EQ, idStateVar, IntExpr(child.Id));
-                transitions = ...
-                    SF_To_LustreNode.orderObjects(child.OuterTransitions, ...
-                    'ExecutionOrder');
-                for j=1:transitions
-                    [outputs_i, inputs_i, body_i, conds, thens, comment] = ...
-                        StateflowState_To_Lustre.write_trans_body(...
-                        transitions{j}, cond_prefix, conds, thens, comment);
-                    outputs = [outputs, outputs_i];
-                    inputs = [inputs, inputs_i];
-                    body = [body, body_i];
+                if ~isParallel
+                    cond = ...
+                        BinaryExpr(BinaryExpr.EQ, idStateVar, IntExpr(child.Id));
+                    if ~isempty(cond_prefix)
+                        cond = ...
+                            BinaryExpr(BinaryExpr.AND, cond, cond_prefix);
+                    end
+                else
+                    cond = {};
+                end
+                child_node_name = ...
+                    StateflowState_To_Lustre.getStateNodeName(child);
+                if isKey(SF_STATES_NODESAST_MAP, child_node_name)
+                    nodeAst = SF_STATES_NODESAST_MAP(child_node_name);
+                    [call, oututs_Ids] = nodeAst.nodeCall();
+                    if isempty(cond)
+                        body{end+1} = LustreEq(oututs_Ids, call);
+                        outputs = [outputs, nodeAst.getOutputs()];
+                        inputs = [inputs, nodeAst.getInputs()];
+                    else
+                        body{end+1} = LustreEq(oututs_Ids, ...
+                            IteExpr(cond, call, TupleExpr(oututs_Ids)));
+                        outputs = [outputs, nodeAst.getOutputs()];
+                        inputs = [inputs, nodeAst.getOutputs()];
+                        inputs = [inputs, nodeAst.getInputs()];
+                    end
                 end
             end
         end
-        %
-        function [outputs, inputs, body, conds, thens, comment] = ...
-                write_trans_body(T, cond_prefix, conds, thens, comment)
-            global SF_STATES_NODESAST_MAP;
-            outputs = {};
-            inputs = {};
+        
+        %% chart body
+        function [outputs, inputs, variable, body] = write_chart_body(chart, dataAndEvents)
             body = {};
-            transName = ...
-                StateflowTransition_To_Lustre.getTransitionNodeName(T);
-            if ~isKey(SF_STATES_NODESAST_MAP, transName)
-                display_msg(sprintf('%s not found in SF_STATES_NODESAST_MAP', transName), ...
-                    MsgType.ERROR, 'StateflowState_To_Lustre', '');
-                return;
-            end
+            variable = {};
+            
+            %create inputs
+            Scopes = cellfun(@(x) x.Scope, ...
+                dataAndEvents, 'UniformOutput', false);
+            inputsData = SF_To_LustreNode.orderObjects(...
+                dataAndEvents(strcmp(Scopes, 'Input')), 'Port');
+            inputs = cellfun(@(x) LustreVar(x.Name, x.Datatype), ...
+                inputsData, 'UniformOutput', false);
+            
+            %create outputs
+            outputsData = SF_To_LustreNode.orderObjects(...
+                dataAndEvents(strcmp(Scopes, 'Output')), 'Port');
+            outputs = cellfun(@(x) LustreVar(x.Name, x.Datatype), ...
+                outputsData, 'UniformOutput', false);
             
             
-            [condition, outputs_i, inputs_i, ~] = ...
-                SF_To_LustreNode.getPseudoLusAction(T.Condition, true);
-            outputs = [outputs, outputs_i];
-            inputs = [inputs, inputs_i];
-            [event, outputs_i, inputs_i, ~] = ...
-                SF_To_LustreNode.getPseudoLusAction(T.Event, true);
-            outputs = [outputs, outputs_i];
-            inputs = [inputs, inputs_i];
-            
-            if ~isempty(condition) && ~isempty(event)
-                transCond = BinaryExpr.BinaryMultiArgs(BinaryExpr.AND, ...
-                    {cond_prefix, condition, event});
-            elseif ~isempty(condition)
-                transCond = BinaryExpr(BinaryExpr.AND, cond_prefix, condition);
-            elseif ~isempty(event)
-                transCond = BinaryExpr(BinaryExpr.AND, cond_prefix, event);
-            else
-                transCond = cond_prefix;
-            end
-            conds{end + 1} = transCond;
-            codeNumber = numel(thens);
-            thens{end + 1} = IntExpr(codeNumber);
-            comment = sprintf('%s\n\t%d : %s', comment, codeNumber, transName);
-            NodeAst = SF_STATES_NODESAST_MAP(transName);
-            [call, oututs_Ids] = NodeAst.nodeCall();
-            codeCond = BinaryExpr(BinaryExpr.EQ, ...
-                StateflowState_To_Lustre.automatonStateVar(), IntExpr(codeNumber));
-            body{end+1} = LustreEq(oututs_Ids, ...
-                IteExpr(codeCond, call, TupleExpr(oututs_Ids)));
-            outputs = [outputs, NodeAst.getOutputs()];
-            inputs = [inputs, NodeAst.getOutputs()];
-            inputs = [inputs, NodeAst.getInputs()];
-            
-            
-        end
-        function v = automatonStateVar()
-            v = VarIdExpr('_automaton_state_number');
         end
         %% Actions node name
         

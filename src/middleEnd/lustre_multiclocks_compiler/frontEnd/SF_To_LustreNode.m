@@ -12,7 +12,7 @@ classdef SF_To_LustreNode
     
     methods(Static)
         function [main_node, external_nodes, external_libraries ] = ...
-                chart2node(parent,  blk,  main_sampleTime, backend, xml_trace)
+                chart2node(parent,  chart,  main_sampleTime, backend, xml_trace)
             %the main function
             % initialize outputs
             main_node = {};
@@ -27,7 +27,7 @@ classdef SF_To_LustreNode
             SF_DATA_MAP = containers.Map('KeyType', 'char', 'ValueType', 'any');
 
             % get content
-            content = blk.StateflowContent;
+            content = chart.StateflowContent;
             events = SF_To_LustreNode.eventsToData(content.Events);
             data = [events; content.Data];
             for i=1:numel(data)
@@ -129,6 +129,32 @@ classdef SF_To_LustreNode
                         MsgType.ERROR, 'SF_To_LustreNode', '');
                 end
             end
+            
+            % Go over states for state Nodes
+            for i=1:numel(states)
+                try
+                    node = StateflowState_To_Lustre.write_StateNode(...
+                        states{i});
+                    if ~isempty(node)
+                        external_nodes{end+1} = node;
+                    end
+                catch me
+                    
+                    if strcmp(me.identifier, 'COCOSIM:STATEFLOW')
+                        display_msg(me.message, MsgType.ERROR, ...
+                            'SF_To_LustreNode', '');
+                    else
+                        display_msg(me.getReport(), MsgType.DEBUG, ...
+                            'SF_To_LustreNode', '');
+                    end
+                    display_msg(sprintf('Translation of state %s failed', ...
+                        states{i}.Path),...
+                        MsgType.ERROR, 'SF_To_LustreNode', '');
+                end
+            end
+            
+            %Chart node
+            main_node  = StateflowState_To_Lustre.write_ChartNode(states{end}, data);
         end
         %%
         %% Get unique short name
@@ -166,8 +192,9 @@ classdef SF_To_LustreNode
                     objects, 'UniformOutput', true);
                 [~, I] = sort(levels, 'descend');
                 ordered = objects(I);
-            elseif isequal(fieldName, 'ExecutionOrder')
-                orders = cellfun(@(x) x.ExecutionOrder, ...
+            elseif isequal(fieldName, 'ExecutionOrder') ...
+                    || isequal(fieldName, 'Port')
+                orders = cellfun(@(x) x.(fieldName), ...
                     objects, 'UniformOutput', true);
                 [~, I] = sort(orders);
                 ordered = objects(I);
@@ -178,6 +205,9 @@ classdef SF_To_LustreNode
             data = cell(numel(events), 1);
             for i=1:numel(events)
                 data{i} = events{i};
+                if isequal(data{i}.Scope, 'Input')
+                    data{i}.Port = data{i}.Port - numel(events);%for ordering reasons
+                end
                 data{i}.Datatype = 'bool';
                 data{i}.CompiledType = 'boolean';
                 data{i}.InitialValue = 'false';
