@@ -6,12 +6,26 @@ classdef HtmlItem < handle
         title
         subtitles
         colorMap
-        color
+        text_color
+        icon_color
+        isBlkPath
     end
     
     methods
-        function obj = HtmlItem(title, subtitles, color)
+        function obj = HtmlItem(title, subtitles, text_color, icon_color, isBlkPath, clearTitle)
+            if ~exist('isBlkPath', 'var')
+                isBlkPath = false;
+            end
+            if ~exist('clearTitle', 'var')
+                clearTitle = true;
+            end
             obj.title = title;
+            if clearTitle
+                obj.title = HtmlItem.cleanTitle(obj.title);
+            end
+            if isBlkPath
+                obj.title = HtmlItem.addOpenCmd(obj.title);
+            end
             if nargin < 2
                 obj.subtitles = {};
             elseif iscell(subtitles)
@@ -19,16 +33,20 @@ classdef HtmlItem < handle
             else
                 obj.subtitles = {subtitles};
             end
-            if nargin < 3 || isempty(color)
+            if nargin < 3 || isempty(text_color)
                 obj.colorMap = containers.Map('KeyType', 'int32', 'ValueType', 'char');
                 obj.colorMap(4) = 'black';
                 obj.colorMap(5) = 'blue';
                 obj.colorMap(6) = 'red';
-                obj.color = '';
+                obj.text_color = '';
             else
-                obj.color = color;
+                obj.text_color = text_color;
             end
-            
+            if nargin < 4 || isempty(icon_color)
+                obj.icon_color = '';
+            else
+                obj.icon_color = icon_color;
+            end
         end
         function setTitle(obj, title)
             obj.title = title;
@@ -49,23 +67,41 @@ classdef HtmlItem < handle
             if ~exist('level', 'var')
                 level = 4;
             end
-            if isempty(obj.color)
-                Acolor = obj.colorMap(level);
+            if isempty(obj.text_color)
+                Textcolor = obj.colorMap(level);
             else
-                Acolor = obj.color;
+                Textcolor = obj.text_color;
             end
-            if isempty(obj.subtitles)
-                res = sprintf('<li class="collection-item"><div class="%s-text text-darken-2">%s</div></li>', ...
-                    Acolor, obj.title);
+            if isempty(obj.icon_color)
+                iconCode = '';
             else
-                resCell = cell(numel(obj.subtitles) + 1, 1);
-                resCell{1} = sprintf('<li class="collection-header"><div class="%s-text text-darken-2"><h%d>%s</h%d></div></li>', ...
-                    Acolor,level, obj.title, level);
-                for i=1:numel(obj.subtitles)
-                    resCell{i+1} = obj.subtitles{i}.print(level + 1);
+                if isequal(obj.icon_color, 'red')
+                    iconCode = sprintf('<i class="material-icons red-text"><h%d>do_not_disturb_on<h%d></i>', level, level);
+                else
+                    iconCode = sprintf('<i class="material-icons green-text"><h%d>check_circle<h%d></i>', level, level);
                 end
-                res = MatlabUtils.strjoin(resCell, '\n');
             end
+            header =  sprintf('<div class="collapsible-header">%s<div class="%s-text text-darken-2"><h%d>%s</h%d></div></div>\n', ...
+                    iconCode, Textcolor,level, obj.title, level);
+            if isempty(obj.subtitles)
+                res = sprintf('<li>\n%s\n</li>', header);
+            else
+                res = sprintf('<li>\n%s\n<div class="collapsible-body">\n<div class="row">\n<div class="col s12 m12">\n<ul class="collapsible" >\n', ...
+                    header);
+                for i=1:numel(obj.subtitles)
+                    res = [res ' ' obj.subtitles{i}.print(level + 1)];
+                end
+                res = [res, ' </ul>\n</div>\n</div>\n</div>\n</li>'];
+            end
+        end
+    end
+    methods(Static)
+        function title = cleanTitle(title)
+            title = strrep(title, '<', '&lt;');
+            title = strrep(title, '>', '&gt;');
+        end
+        function htmlCmd = addOpenCmd(blk)
+            htmlCmd = sprintf('<a href="matlab:open_and_hilite_hyperlink (''%s'',''error'')">%s</a>', blk, blk);
         end
     end
 end
