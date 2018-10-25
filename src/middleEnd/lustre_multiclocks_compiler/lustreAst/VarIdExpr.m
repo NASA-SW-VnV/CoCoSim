@@ -72,6 +72,12 @@ classdef VarIdExpr < LustreExpr
             code = obj.print_lustrec(BackendType.PRELUDE);
         end
     end
-    
+    methods(Static)
+        function r = ismemberVar(vars, v)
+            Ids = cellfun(@(x) x.getId(), ...
+                vars, 'UniformOutput', false);
+            r = ismember(v, Ids);
+        end
+    end
 end
 

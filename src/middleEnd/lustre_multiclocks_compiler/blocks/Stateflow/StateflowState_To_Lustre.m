@@ -108,11 +108,22 @@ classdef StateflowState_To_Lustre
         end
         
         %% Chart Node
-        function main_node  = write_ChartNode(chart, dataAndEvents)
+        function [main_node, external_nodes]  = write_ChartNode(parent, chart, dataAndEvents, events)
             global SF_STATES_NODESAST_MAP;
-            
+            external_nodes = {};
+            Scopes = cellfun(@(x) x.Scope, ...
+                events, 'UniformOutput', false);
+            inputEvents = SF_To_LustreNode.orderObjects(...
+                events(strcmp(Scopes, 'Input')), 'Port');
+            if ~isempty(inputEvents)
+                %create a node that do the multi call for each event
+                eventNode  = ...
+                    StateflowState_To_Lustre.write_ChartNodeWithEvents(...
+                    chart, inputEvents);
+                external_nodes{1} = eventNode;
+            end
             [outputs, inputs, variable, body] = ...
-                StateflowState_To_Lustre.write_chart_body(chart, dataAndEvents);
+                StateflowState_To_Lustre.write_chart_body(parent, chart, dataAndEvents, inputEvents);
            
             %create the node
             node_name = ...
@@ -126,6 +137,39 @@ classdef StateflowState_To_Lustre
             main_node.setOutputs(outputs);
             main_node.setInputs(inputs);
             main_node.setLocalVars(variable);
+            SF_STATES_NODESAST_MAP(node_name) = main_node;
+        end
+        
+        function main_node  = write_ChartNodeWithEvents(chart, inputEvents)
+            global SF_STATES_NODESAST_MAP;
+            main_node = {};
+            
+            [outputs, inputs, body] = ...
+                StateflowState_To_Lustre.write_ChartNodeWithEvents_body(chart, inputEvents);
+            if isempty(body)
+                %no code is required
+                return;
+            end
+            %create the node
+            node_name = ...
+                StateflowState_To_Lustre.getChartEventsNodeName(chart);
+            main_node = LustreNode();
+            main_node.setName(node_name);
+            comment = LustreComment(...
+                sprintf('Executing Events of state %s',...
+                chart.Path), true);
+            main_node.setMetaInfo(comment);
+            main_node.setBodyEqs(body);
+            outputs = LustreVar.uniqueVars(outputs);
+            inputs = LustreVar.uniqueVars(inputs);
+            if isempty(inputs)
+                inputs{1} = ...
+                    LustreVar(SF_To_LustreNode.virtualVarStr(), 'bool');
+            else
+                inputs = LustreVar.removeVar(inputs, SF_To_LustreNode.virtualVarStr());
+            end
+            main_node.setOutputs(outputs);
+            main_node.setInputs(inputs);
             SF_STATES_NODESAST_MAP(node_name) = main_node;
         end
         %%
@@ -598,27 +642,186 @@ classdef StateflowState_To_Lustre
         end
         
         %% chart body
-        function [outputs, inputs, variable, body] = write_chart_body(chart, dataAndEvents)
+        function [outputs, inputs, variables, body] = write_chart_body(...
+                parent, chart, dataAndEvents, inputEvents)
+            global SF_STATES_NODESAST_MAP;
             body = {};
-            variable = {};
+            variables = {};
             
             %create inputs
             Scopes = cellfun(@(x) x.Scope, ...
                 dataAndEvents, 'UniformOutput', false);
             inputsData = SF_To_LustreNode.orderObjects(...
                 dataAndEvents(strcmp(Scopes, 'Input')), 'Port');
-            inputs = cellfun(@(x) LustreVar(x.Name, x.Datatype), ...
+            inputs = cellfun(@(x) LustreVar(x.Name, x.LusDatatype), ...
                 inputsData, 'UniformOutput', false);
             
             %create outputs
             outputsData = SF_To_LustreNode.orderObjects(...
                 dataAndEvents(strcmp(Scopes, 'Output')), 'Port');
-            outputs = cellfun(@(x) LustreVar(x.Name, x.Datatype), ...
+            outputs = cellfun(@(x) LustreVar(x.Name, x.LusDatatype), ...
                 outputsData, 'UniformOutput', false);
             
+            %get chart node AST
+            if isempty(inputEvents)
+                chartNodeName = ...
+                    StateflowState_To_Lustre.getStateNodeName(chart);
+            else
+                chartNodeName = ...
+                    StateflowState_To_Lustre.getChartEventsNodeName(chart);
+            end
+            if ~isKey(SF_STATES_NODESAST_MAP, chartNodeName)
+                display_msg(...
+                    sprintf('%s not found in SF_STATES_NODESAST_MAP',...
+                    chartNodeName), ...
+                    MsgType.ERROR, 'StateflowTransition_To_Lustre', '');
+                return;
+            end
+            nodeAst = SF_STATES_NODESAST_MAP(chartNodeName);
+            [node_call, nodeCall_outputs_Ids] = nodeAst.nodeCall();
+            nodeCall_outputs_Names = cellfun(@(x) x.getId(), ...
+                nodeCall_outputs_Ids, 'UniformOutput', false);
+            nodeCall_inputs_Ids = node_call.getArgs();
+            nodeCall_inputs_Names = cellfun(@(x) x.getId(), ...
+                nodeCall_inputs_Ids, 'UniformOutput', false);
             
+            %local variables
+            for i=1:numel(dataAndEvents)
+                d = dataAndEvents{i};
+                if isequal(d.Scope, 'Input')...
+                        ||isequal(d.Scope, 'Output')
+                    continue;
+                end
+                d_name = d.Name;
+                if ~ismember(d_name, nodeCall_outputs_Names) ...
+                        &&  ~ismember(d_name, nodeCall_inputs_Names)
+                    % not used
+                    continue;
+                end
+                [v, ~, status] = ...
+                    Constant_To_Lustre.getValueFromParameter(parent, chart, d.InitialValue);
+                if status
+                    display_msg(sprintf('InitialOutput %s in block %s not found neither in Matlab workspace or in Model workspace',...
+                        d.InitialValue, chart.Path), ...
+                        MsgType.ERROR, 'Outport_To_Lustre', '');
+                    v = 0;
+                end
+                if isequal(d.Scope, 'Parameter')
+                    if isstruct(v) && isfield(v,'Value')
+                        v = v.Value;
+                    elseif isa(v, 'Simulink.Parameter')
+                        v = v.Value;
+                    end
+                end
+                IC_Var = SLX2LusUtils.num2LusExp(v, d.LusDatatype);
+                
+                d_lastName = strcat(d.Name, '__2');
+                variables{end+1} = LustreVar(d_name, d.LusDatatype);
+                if isequal(d.Scope, 'Local')
+                    if ismember(d_name, nodeCall_outputs_Names)
+                        body{end+1} = LustreEq(...
+                            VarIdExpr(d_name), ...
+                            BinaryExpr(BinaryExpr.ARROW, IC_Var, ...
+                            UnaryExpr(UnaryExpr.PRE, VarIdExpr(d_lastName))));
+                        variables{end+1} = LustreVar(d_lastName, d.LusDatatype);
+                        nodeCall_outputs_Ids = ...
+                            StateflowState_To_Lustre.changeVar(...
+                            nodeCall_outputs_Ids, d_name, d_lastName);
+                    else
+                        %local variable that was not modified in the chart
+                        body{end+1} = LustreEq(VarIdExpr(d_name), IC_Var);
+                    end
+                elseif isequal(d.Scope, 'Constant')
+                    body{end+1} = LustreEq(VarIdExpr(d_name), IC_Var);  
+                elseif isequal(d.Scope, 'Parameter')
+                    body{end+1} = LustreEq(VarIdExpr(d_name), IC_Var);  
+                end
+            end
+            
+            %state IDs
+            for i=1:numel(nodeCall_inputs_Names)
+                if ~VarIdExpr.ismemberVar()
+                end
+            end
+            
+            %Node Call
+            body{end+1} = LustreEq(nodeCall_outputs_Ids, node_call);
+        end
+        
+        %
+        function [outputs, inputs, body] = ...
+                write_ChartNodeWithEvents_body(chart, events)
+            global SF_STATES_NODESAST_MAP;
+            outputs = {};
+            inputs = {};
+            body = {};
+            Scopes = cellfun(@(x) x.Scope, ...
+                events, 'UniformOutput', false);
+            inputEvents = SF_To_LustreNode.orderObjects(...
+                events(strcmp(Scopes, 'Input')), 'Port');
+            inputEventsNames = cellfun(@(x) x.Name, ...
+                inputEvents, 'UniformOutput', false);
+            inputEventsVars = cellfun(@(x) VarIdExpr(x.Name), ...
+                inputEvents, 'UniformOutput', false);
+            chartNodeName = ...
+                StateflowState_To_Lustre.getStateNodeName(chart);
+            if isKey(SF_STATES_NODESAST_MAP, chartNodeName)
+                nodeAst = SF_STATES_NODESAST_MAP(chartNodeName);
+                [orig_call, oututs_Ids] = nodeAst.nodeCall();
+                outputs = [outputs, nodeAst.getOutputs()];
+                inputs = [inputs, nodeAst.getOutputs()];
+                inputs = [inputs, nodeAst.getInputs()];
+                for i=1:numel(inputEventsNames)
+                    call = StateflowState_To_Lustre.changeEvents(...
+                        orig_call, inputEventsNames, inputEventsNames{i});
+                    cond_prefix = VarIdExpr(inputEventsNames{i});
+                    body{end+1} = LustreEq(oututs_Ids, ...
+                        IteExpr(cond_prefix, call, TupleExpr(oututs_Ids)));
+                end
+                body{end+1} = LustreComment('If no event occured, time step wakes up the chart');
+                allEventsCond = UnaryExpr(UnaryExpr.NOT, ...
+                    BinaryExpr.BinaryMultiArgs(BinaryExpr.OR, inputEventsVars));
+                body{end+1} = LustreEq(oututs_Ids, ...
+                    IteExpr(allEventsCond, orig_call, TupleExpr(oututs_Ids)));
+            else
+                display_msg(...
+                    sprintf('%s not found in SF_STATES_NODESAST_MAP',...
+                    chartNodeName), ...
+                    MsgType.ERROR, 'StateflowTransition_To_Lustre', '');
+                return;
+            end
+        end
+        function call = changeEvents(call, EventsNames, E)
+            args = call.getArgs();
+            inputs_Ids = cellfun(@(x) VarIdExpr(x.getId()), ...
+                args, 'UniformOutput', false);
+            for i=1:numel(inputs_Ids)
+                if isequal(inputs_Ids{i}.getId(), E)
+                    inputs_Ids{i} = BooleanExpr(true);
+                elseif ismember(inputs_Ids{i}.getId(), EventsNames)
+                    inputs_Ids{i} = BooleanExpr(false);
+                end
+            end
+            
+            call = NodeCallExpr(call.nodeName, inputs_Ids);
+        end
+        function params = changeVar(params, oldName, newName)
+            for i=1:numel(params)
+                if isequal(params{i}.getId(), oldName)
+                    params{i} = VarIdExpr(newName);
+                end
+            end
         end
         %% Actions node name
+        
+        function name = getChartEventsNodeName(state, id)
+            if nargin == 2
+                state_name = SF_To_LustreNode.getUniqueName(state, id);
+            else
+                state_name = SF_To_LustreNode.getUniqueName(state);
+            end
+            name = strcat(state_name, '_EventsNode');
+        end
         
         function name = getStateNodeName(state, id)
             if nargin == 2

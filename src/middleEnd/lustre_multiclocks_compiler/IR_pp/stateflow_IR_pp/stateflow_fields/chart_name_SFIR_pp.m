@@ -24,7 +24,7 @@ origin_name_pattern = strcat('^', new_ir.Path);
 new_ir.States = adapt_states_name(new_ir.States, origin_name_pattern, new_name);
 
 new_ir.Junctions = adapt_junctions_name(new_ir.Junctions, origin_name_pattern, new_name);
-
+new_ir.Origin_path = new_ir.Path;
 new_ir.Path = new_name;
 
 for i=1:numel(new_ir.GraphicalFunctions)
@@ -35,6 +35,7 @@ end
 %% adapt root name
 function states = adapt_states_name(states, origin_name_pattern, new_name)
 for i=1:numel(states)
+    states{i}.Origin_path = states{i}.Path;
     states{i}.Path = regexprep(states{i}.Path, origin_name_pattern, new_name);
     
     states{i}.OuterTransitions = adapt_transitions_name(...
@@ -52,6 +53,7 @@ end
 %% adapt junctions root name
 function junctions = adapt_junctions_name(junctions, origin_name_pattern, new_name)
 for i=1:numel(junctions)
+    junctions{i}.Origin_path = junctions{i}.Path;
     junctions{i}.Path = regexprep(junctions{i}.Path, origin_name_pattern, new_name);
     
     junctions{i}.OuterTransitions = adapt_transitions_name(...
@@ -63,6 +65,7 @@ end
 %% adapt root name for transitions
 function trans = adapt_transitions_name(trans, origin_name_pattern, new_name)
 for j=1:numel(trans)
+    trans{j}.Destination.Origin_path = trans{j}.Destination.Name;
     trans{j}.Destination.Name =  ...
         regexprep(...
         trans{j}.Destination.Name,...

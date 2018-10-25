@@ -80,7 +80,7 @@ classdef LustreProgram < LustreAst
                     end
                     call_map(nodesList{i}.name) = nodesList{i}.getNodesCalled();
                 end
-                % Print nodes in order of calling, because KIND2 Contracts 
+                % Print nodes in order of calling, because KIND2 Contracts
                 % need all nodes used in the contract to be defined first.
                 alreadyPrinted = {};
                 for i=1:numel(nodesList)
@@ -129,9 +129,11 @@ classdef LustreProgram < LustreAst
                 Names = cellfun(@(x) x.name, ...
                     nodesList, 'UniformOutput', false);
                 node = nodesList{strcmp(Names, nodeName)};
-                lines{end+1} = sprintf('%s\n', ...
-                    node.print(backend));
-                alreadyPrinted{end + 1} = nodeName;
+                if ~isempty(node)
+                    lines{end+1} = sprintf('%s\n', ...
+                        node.print(backend));
+                    alreadyPrinted{end + 1} = nodeName;
+                end
             end
         end
     end

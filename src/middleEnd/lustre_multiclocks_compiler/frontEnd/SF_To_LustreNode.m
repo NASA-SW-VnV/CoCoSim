@@ -29,9 +29,9 @@ classdef SF_To_LustreNode
             % get content
             content = chart.StateflowContent;
             events = SF_To_LustreNode.eventsToData(content.Events);
-            data = [events; content.Data];
-            for i=1:numel(data)
-                SF_DATA_MAP(data{i}.Name) = data{i};
+            dataAndEvents = [events; content.Data];
+            for i=1:numel(dataAndEvents)
+                SF_DATA_MAP(dataAndEvents{i}.Name) = dataAndEvents{i};
             end
             states = SF_To_LustreNode.orderObjects(content.States);
             for i=1:numel(states)
@@ -154,7 +154,10 @@ classdef SF_To_LustreNode
             end
             
             %Chart node
-            main_node  = StateflowState_To_Lustre.write_ChartNode(states{end}, data);
+            [main_node, external_nodes_i] =...
+                StateflowState_To_Lustre.write_ChartNode(parent, states{end}, dataAndEvents, events);
+            external_nodes = [external_nodes, ...
+                external_nodes_i];
         end
         %%
         %% Get unique short name
@@ -208,7 +211,8 @@ classdef SF_To_LustreNode
                 if isequal(data{i}.Scope, 'Input')
                     data{i}.Port = data{i}.Port - numel(events);%for ordering reasons
                 end
-                data{i}.Datatype = 'bool';
+                data{i}.LusDatatype = 'bool';
+                data{i}.Datatype = 'Event';
                 data{i}.CompiledType = 'boolean';
                 data{i}.InitialValue = 'false';
                 data{i}.ArraySize = '-1';
@@ -273,7 +277,7 @@ classdef SF_To_LustreNode
             for i=1:numel(outputs_names)
                 k = outputs_names{i};
                 if isKey(SF_DATA_MAP, k)
-                    outputs{end + 1} = LustreVar(k, SF_DATA_MAP(k).Datatype);
+                    outputs{end + 1} = LustreVar(k, SF_DATA_MAP(k).LusDatatype);
                 else
                     ME = MException('COCOSIM:STATEFLOW', ...
                         'Variable %s can not be found for state "%s"', ...
@@ -284,7 +288,7 @@ classdef SF_To_LustreNode
             for i=1:numel(inputs_names)
                 k = inputs_names{i};
                 if isKey(SF_DATA_MAP, k)
-                    inputs{end + 1} = LustreVar(k, SF_DATA_MAP(k).Datatype);
+                    inputs{end + 1} = LustreVar(k, SF_DATA_MAP(k).LusDatatype);
                 else
                     ME = MException('COCOSIM:STATEFLOW', ...
                         'Variable %s can not be found for Action "%s"', ...
