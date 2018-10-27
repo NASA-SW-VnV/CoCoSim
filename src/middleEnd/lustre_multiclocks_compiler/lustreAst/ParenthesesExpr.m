@@ -9,61 +9,43 @@ classdef ParenthesesExpr < LustreExpr
     properties
         expr;
     end
-
-    methods 
+    
+    methods
         function obj = ParenthesesExpr(expr)
-            obj.expr = expr;
+            if iscell(expr) && numel(expr) == 1
+                obj.expr = expr{1};
+            else
+                obj.expr = expr;
+            end
         end
         function expr = getExp(obj)
             expr = obj.expr;
         end
         
         function new_obj = deepCopy(obj)
-            if iscell(obj.expr)
-                new_expr = cellfun(@(x) x.deepCopy(), obj.expr, 'UniformOutput', 0);
-            else
-                new_expr = obj.expr.deepCopy();
-            end
+            new_expr = obj.expr.deepCopy();
             new_obj = ParenthesesExpr(new_expr);
         end
-         
+        
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
-            if iscell(obj.expr)
-                [new_expr, varIds] = obj.expr{1}.changePre2Var();
-            else
-                [new_expr, varIds] = obj.expr.changePre2Var();
-            end
+            [new_expr, varIds] = obj.expr.changePre2Var();
             new_obj = ParenthesesExpr(new_expr);
         end
         function new_obj = changeArrowExp(obj, cond)
-            if iscell(obj.expr)
-                new_expr = cellfun(@(x) x.changeArrowExp(cond), obj.expr, 'UniformOutput', 0);
-            else
-                new_expr = obj.expr.changeArrowExp(cond);
-            end
+            new_expr = obj.expr.changeArrowExp(cond);
             new_obj = ParenthesesExpr(new_expr);
         end
         %% This function is used by Stateflow function SF_To_LustreNode.getPseudoLusAction
         function varIds = GetVarIds(obj)
-            if iscell(obj.expr)
-                varIds = obj.expr{1}.GetVarIds();
-            else
-                varIds = obj.expr.GetVarIds();
-            end
+            varIds = obj.expr.GetVarIds();
         end
         
         %% This function is used by KIND2 LustreProgram.print()
         function nodesCalled = getNodesCalled(obj)
             nodesCalled = {};
             function addNodes(objects)
-                if iscell(objects)
-                    for i=1:numel(objects)
-                        nodesCalled = [nodesCalled, objects{i}.getNodesCalled()];
-                    end
-                else
-                    nodesCalled = [nodesCalled, objects.getNodesCalled()];
-                end
+                nodesCalled = [nodesCalled, objects.getNodesCalled()];
             end
             addNodes(obj.expr);
         end
@@ -91,6 +73,6 @@ classdef ParenthesesExpr < LustreExpr
             code = obj.print_lustrec(BackendType.PRELUDE);
         end
     end
-
+    
 end
 

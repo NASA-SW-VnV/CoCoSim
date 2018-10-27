@@ -14,62 +14,48 @@ classdef MergeExpr < LustreExpr
     methods
         function obj = MergeExpr(clock, exprs)
             obj.clock = clock;
-            obj.exprs = exprs;
+            if iscell(exprs)
+                obj.exprs = exprs;
+            else
+                obj.exprs{1} = exprs;
+            end
         end
         
         function new_obj = deepCopy(obj)
-            if iscell(obj.exprs)
-                new_exprs = cellfun(@(x) x.deepCopy(), obj.exprs, 'UniformOutput', 0);
-            else
-                new_exprs = obj.exprs.deepCopy();
-            end
+            new_exprs = cellfun(@(x) x.deepCopy(), obj.exprs, 'UniformOutput', 0);
+            
             new_obj = MergeExpr(obj.clock, new_exprs);
         end
         
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
             varIds = {};
-            if iscell(obj.exprs)
-                new_exprs = {};
-                for i=1:numel(obj.exprs)
-                    [new_exprs{i}, varIds_i] = obj.exprs{i}.changePre2Var();
-                    varIds = [varIds, varIds_i];
-                end
-            else
-                [new_exprs, varIds] = obj.exprs.changePre2Var();
+            new_exprs = {};
+            for i=1:numel(obj.exprs)
+                [new_exprs{i}, varIds_i] = obj.exprs{i}.changePre2Var();
+                varIds = [varIds, varIds_i];
             end
             new_obj = MergeExpr(obj.clock, new_exprs);
         end
         function new_obj = changeArrowExp(obj, cond)
-            if iscell(obj.exprs)
-                new_exprs = cellfun(@(x) x.changeArrowExp(cond), obj.exprs, 'UniformOutput', 0);
-            else
-                new_exprs = obj.exprs.changeArrowExp(cond);
-            end
+            new_exprs = cellfun(@(x) x.changeArrowExp(cond), obj.exprs, 'UniformOutput', 0);
+            
             new_obj = MergeExpr(obj.clock, new_exprs);
         end
         %% This function is used by Stateflow function SF_To_LustreNode.getPseudoLusAction
         function varIds = GetVarIds(obj)
             varIds = {};
-            if iscell(obj.exprs)
-                for i=1:numel(obj.exprs)
-                    varIds_i = obj.exprs{i}.GetVarIds();
-                    varIds = [varIds, varIds_i];
-                end
-            else
-                varIds = obj.exprs.GetVarIds();
+            for i=1:numel(obj.exprs)
+                varIds_i = obj.exprs{i}.GetVarIds();
+                varIds = [varIds, varIds_i];
             end
         end
         %% This function is used by KIND2 LustreProgram.print()
         function nodesCalled = getNodesCalled(obj)
             nodesCalled = {};
             function addNodes(objects)
-                if iscell(objects)
-                    for i=1:numel(objects)
-                        nodesCalled = [nodesCalled, objects{i}.getNodesCalled()];
-                    end
-                else
-                    nodesCalled = [nodesCalled, objects.getNodesCalled()];
+                for i=1:numel(objects)
+                    nodesCalled = [nodesCalled, objects{i}.getNodesCalled()];
                 end
             end
             addNodes(obj.exprs);
@@ -81,13 +67,10 @@ classdef MergeExpr < LustreExpr
         end
         
         function code = print_lustrec(obj, backend)
-            if iscell(obj.exprs)
-                exprs_cell = cellfun(@(x) sprintf('(%s)', x.print(backend)),...
-                    obj.exprs, 'UniformOutput', 0);
-                exprs_str = MatlabUtils.strjoin(exprs_cell, '\n\t\t');
-            else
-                exprs_str = obj.exprs.print(backend);
-            end
+            exprs_cell = cellfun(@(x) sprintf('(%s)', x.print(backend)),...
+                obj.exprs, 'UniformOutput', 0);
+            exprs_str = MatlabUtils.strjoin(exprs_cell, '\n\t\t');
+            
             code = sprintf('(merge %s\n\t\t %s)', obj.clock.print(backend), exprs_str);
         end
         

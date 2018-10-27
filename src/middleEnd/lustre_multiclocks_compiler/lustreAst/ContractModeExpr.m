@@ -15,23 +15,23 @@ classdef ContractModeExpr < LustreExpr
     methods
         function obj = ContractModeExpr(name, requires, ensures)
             obj.name = name;
-            obj.requires = requires;
-            obj.ensures = ensures;
+            if ~iscell(requires)
+                obj.requires{1} = requires;
+            else
+                obj.requires = requires;
+            end
+            if ~iscell(ensures)
+                obj.ensures{1} = ensures;
+            else
+                obj.ensures = ensures;
+            end
         end
         
         function new_obj = deepCopy(obj)
-            if iscell(obj.requires)
-                new_requires = cellfun(@(x) x.deepCopy(), obj.requires, ...
-                    'UniformOutput', 0);
-            else
-                new_requires = obj.requires.deepCopy();
-            end
-            if iscell(obj.ensures)
-                new_ensures = cellfun(@(x) x.deepCopy(), obj.ensures, ...
-                    'UniformOutput', 0);
-            else
-                new_ensures = obj.ensures.deepCopy();
-            end
+            new_requires = cellfun(@(x) x.deepCopy(), obj.requires, ...
+                'UniformOutput', 0);
+            new_ensures = cellfun(@(x) x.deepCopy(), obj.ensures, ...
+                'UniformOutput', 0);
             new_obj = ContractModeExpr(obj.name, new_requires, new_ensures);
         end
         %% This functions are used for ForIterator block
@@ -47,12 +47,8 @@ classdef ContractModeExpr < LustreExpr
         function nodesCalled = getNodesCalled(obj)
             nodesCalled = {};
             function addNodes(objects)
-                if iscell(objects)
-                    for i=1:numel(objects)
-                        nodesCalled = [nodesCalled, objects{i}.getNodesCalled()];
-                    end
-                else
-                    nodesCalled = [nodesCalled, objects.getNodesCalled()];
+                for i=1:numel(objects)
+                    nodesCalled = [nodesCalled, objects{i}.getNodesCalled()];
                 end
             end
             addNodes(obj.requires);

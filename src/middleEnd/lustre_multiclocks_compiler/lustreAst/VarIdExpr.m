@@ -12,7 +12,11 @@ classdef VarIdExpr < LustreExpr
     
     methods
         function obj = VarIdExpr(id)
-            obj.id = id;
+            if ~iscell(id) && numel(id) == 1
+                obj.id = id{1};
+            else
+                obj.id = id;
+            end
         end
         function id = getId(obj)
             id = obj.id;
@@ -32,11 +36,7 @@ classdef VarIdExpr < LustreExpr
         end
         %% This function is used by Stateflow function SF_To_LustreNode.getPseudoLusAction
         function varIds = GetVarIds(obj)
-            if iscell(obj.id)
-                varIds = obj.id;
-            else
-                varIds = {obj.id};
-            end
+            varIds = {obj.id};
         end
         
         %% This function is used by KIND2 LustreProgram.print()
@@ -73,7 +73,7 @@ classdef VarIdExpr < LustreExpr
         end
     end
     methods(Static)
-        function r = ismemberVar(vars, v)
+        function r = ismemberVar(v, vars)
             Ids = cellfun(@(x) x.getId(), ...
                 vars, 'UniformOutput', false);
             r = ismember(v, Ids);

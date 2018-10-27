@@ -11,10 +11,14 @@ classdef LustreAutomaton < LustreExpr
         states
     end
     
-    methods 
+    methods
         function obj = LustreAutomaton(name, states)
             obj.name = name;
-            obj.states = states;
+            if iscell(states)
+                obj.states = states;
+            else
+                obj.states{1} = states;
+            end
         end
         
         function new_obj = deepCopy(obj)
@@ -44,12 +48,8 @@ classdef LustreAutomaton < LustreExpr
         function nodesCalled = getNodesCalled(obj)
             nodesCalled = {};
             function addNodes(objects)
-                if iscell(objects)
-                    for i=1:numel(objects)
-                        nodesCalled = [nodesCalled, objects{i}.getNodesCalled()];
-                    end
-                else
-                    nodesCalled = [nodesCalled, objects.getNodesCalled()];
+                for i=1:numel(objects)
+                    nodesCalled = [nodesCalled, objects{i}.getNodesCalled()];
                 end
             end
             addNodes(obj.states);
@@ -66,7 +66,7 @@ classdef LustreAutomaton < LustreExpr
             % Strong transition
             for i=1:numel(obj.states)
                 lines{end+1} = sprintf('%s\n', ...
-                        obj.states{i}.print(backend));
+                    obj.states{i}.print(backend));
             end
             code = MatlabUtils.strjoin(lines, '');
         end
@@ -84,6 +84,6 @@ classdef LustreAutomaton < LustreExpr
             code = obj.print_lustrec(BackendType.PRELUDE);
         end
     end
-
+    
 end
 

@@ -14,36 +14,40 @@ classdef AutomatonState < LustreExpr
         body;
     end
     
-    methods 
+    methods
         function obj = AutomatonState(name, local_vars, strongTrans, weakTrans, body)
             obj.name = name;
-            obj.local_vars = local_vars;
-            obj.strongTrans = strongTrans;
-            obj.weakTrans = weakTrans;
-            obj.body = body;
+            if ~iscell(local_vars)
+                obj.local_vars{1} = local_vars;
+            else
+                obj.local_vars = local_vars;
+            end
+            if ~iscell(strongTrans)
+                obj.strongTrans{1} = strongTrans;
+            else
+                obj.strongTrans = strongTrans;
+            end
+            if ~iscell(weakTrans)
+                obj.weakTrans{1} = weakTrans;
+            else
+                obj.weakTrans = weakTrans;
+            end
+            if ~iscell(body)
+                obj.body{1} = body;
+            else
+                obj.body = body;
+            end
         end
         
         function new_obj = deepCopy(obj)
-            if iscell(obj.local_vars)
-                new_local_vars = cellfun(@(x) x.deepCopy(), obj.local_vars, 'UniformOutput', 0);
-            else
-                new_local_vars = obj.local_vars.deepCopy();
-            end
-            if iscell(obj.strongTrans)
-                new_strongTrans = cellfun(@(x) x.deepCopy(), obj.strongTrans, 'UniformOutput', 0);
-            else
-                new_strongTrans = obj.strongTrans.deepCopy();
-            end
-            if iscell(obj.weakTrans)
-                new_weakTrans = cellfun(@(x) x.deepCopy(), obj.weakTrans, 'UniformOutput', 0);
-            else
-                new_weakTrans = obj.weakTrans.deepCopy();
-            end
-            if iscell(obj.body)
-                new_body = cellfun(@(x) x.deepCopy(), obj.body, 'UniformOutput', 0);
-            else
-                new_body = obj.body.deepCopy();
-            end
+            new_local_vars = cellfun(@(x) x.deepCopy(), obj.local_vars, 'UniformOutput', 0);
+            
+            new_strongTrans = cellfun(@(x) x.deepCopy(), obj.strongTrans, 'UniformOutput', 0);
+            
+            new_weakTrans = cellfun(@(x) x.deepCopy(), obj.weakTrans, 'UniformOutput', 0);
+            
+            new_body = cellfun(@(x) x.deepCopy(), obj.body, 'UniformOutput', 0);
+            
             new_obj = AutomatonState(obj.name, new_local_vars, ...
                 new_strongTrans, new_weakTrans, new_body);
         end
@@ -59,13 +63,10 @@ classdef AutomatonState < LustreExpr
         function nodesCalled = getNodesCalled(obj)
             nodesCalled = {};
             function addNodes(objects)
-                if iscell(objects)
-                    for i=1:numel(objects)
-                        nodesCalled = [nodesCalled, objects{i}.getNodesCalled()];
-                    end
-                else
-                    nodesCalled = [nodesCalled, objects.getNodesCalled()];
+                for i=1:numel(objects)
+                    nodesCalled = [nodesCalled, objects{i}.getNodesCalled()];
                 end
+                
             end
             addNodes(obj.strongTrans);
             addNodes(obj.weakTrans);
@@ -80,16 +81,9 @@ classdef AutomatonState < LustreExpr
             lines = {};
             lines{1} = sprintf('\tstate %s:\n', obj.name);
             % Strong transition
-            if iscell(obj.strongTrans)
-                for i=1:numel(obj.strongTrans)
-                    lines{end+1} = sprintf('\tunless %s', ...
-                        obj.strongTrans{i}.print(backend));
-                end
-            else
-                for i=1:numel(obj.strongTrans)
-                    lines{end+1} = sprintf('\tunless %s', ...
-                        obj.strongTrans(i).print(backend));
-                end
+            for i=1:numel(obj.strongTrans)
+                lines{end+1} = sprintf('\tunless %s', ...
+                    obj.strongTrans{i}.print(backend));
             end
             %local variables
             if ~isempty(obj.local_vars)
@@ -100,20 +94,13 @@ classdef AutomatonState < LustreExpr
             lines{end+1} = sprintf('\tlet\n');
             for i=1:numel(obj.body)
                 lines{end+1} = sprintf('\t\t%s\n', ...
-                        obj.body{i}.print(backend));
+                    obj.body{i}.print(backend));
             end
             lines{end+1} = sprintf('\ttel\n');
             % weak transition
-            if iscell(obj.weakTrans)
-                for i=1:numel(obj.weakTrans)
-                    lines{end+1} = sprintf('\tuntil %s\n', ...
-                        obj.weakTrans{i}.print(backend));
-                end
-            else
-                for i=1:numel(obj.weakTrans)
-                    lines{end+1} = sprintf('\tuntil %s\n', ...
-                        obj.weakTrans(i).print(backend));
-                end
+            for i=1:numel(obj.weakTrans)
+                lines{end+1} = sprintf('\tuntil %s\n', ...
+                    obj.weakTrans{i}.print(backend));
             end
             code = MatlabUtils.strjoin(lines, '');
         end
@@ -131,6 +118,6 @@ classdef AutomatonState < LustreExpr
             code = obj.print_lustrec(BackendType.PRELUDE);
         end
     end
-
+    
 end
 

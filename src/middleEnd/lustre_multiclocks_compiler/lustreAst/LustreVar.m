@@ -15,10 +15,16 @@ classdef LustreVar < LustreAst
         function obj = LustreVar(name, type)
             if isa(name, 'VarIdExpr')
                 obj.name = name.getId();
+            elseif iscell(name) && numel(name) == 1
+                obj.name = name{1};
             else
                 obj.name = name;
             end
-            obj.type = type;
+            if iscell(type) && numel(type) == 1
+                obj.type = type{1};
+            else
+                obj.type = type;
+            end
         end
         
         function new_obj = deepCopy(obj)

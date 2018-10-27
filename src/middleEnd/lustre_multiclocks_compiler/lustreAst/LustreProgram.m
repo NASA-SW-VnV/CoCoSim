@@ -14,24 +14,28 @@ classdef LustreProgram < LustreAst
     
     methods
         function obj = LustreProgram(opens, nodes, contracts)
-            obj.opens = opens;
-            obj.nodes = nodes;
-            obj.contracts = contracts;
+            if iscell(opens)
+                obj.opens = opens;
+            else
+                obj.opens{1} = opens;
+            end
+            if iscell(nodes)
+                obj.nodes = nodes;
+            else
+                obj.nodes{1} = nodes;
+            end
+            if iscell(contracts)
+                obj.contracts = contracts;
+            else
+                obj.contracts{1} = contracts;
+            end
         end
         
         function new_obj = deepCopy(obj)
-            if iscell(obj.nodes)
-                new_nodes = cellfun(@(x) x.deepCopy(), obj.nodes, ...
-                    'UniformOutput', 0);
-            else
-                new_nodes = obj.nodes.deepCopy();
-            end
-            if iscell(obj.contracts)
-                new_contracts = cellfun(@(x) x.deepCopy(), obj.contracts,...
-                    'UniformOutput', 0);
-            else
-                new_contracts = obj.contracts.deepCopy();
-            end
+            new_nodes = cellfun(@(x) x.deepCopy(), obj.nodes, ...
+                'UniformOutput', 0);
+            new_contracts = cellfun(@(x) x.deepCopy(), obj.contracts,...
+                'UniformOutput', 0);
             new_obj = LustreProgram(obj.opens, new_nodes, new_contracts);
         end
         

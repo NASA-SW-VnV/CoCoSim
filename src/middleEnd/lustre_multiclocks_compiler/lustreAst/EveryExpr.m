@@ -15,30 +15,27 @@ classdef EveryExpr < LustreExpr
     methods
         function obj = EveryExpr(nodeName, nodeArgs, cond)
             obj.nodeName = nodeName;
-            obj.nodeArgs = nodeArgs;
+            if ~iscell(nodeArgs)
+                obj.nodeArgs{1} = nodeArgs;
+            else
+                obj.nodeArgs = nodeArgs;
+            end
             obj.cond = cond;
         end
         
         function new_obj = deepCopy(obj)
-            if iscell(obj.nodeArgs)
-                new_args = cellfun(@(x) x.deepCopy(), obj.nodeArgs, 'UniformOutput', 0);
-            else
-                new_args = obj.nodeArgs.deepCopy();
-            end
+            new_args = cellfun(@(x) x.deepCopy(), obj.nodeArgs, 'UniformOutput', 0);
+            
             new_obj = EveryExpr(obj.nodeName, ...
                 new_args, obj.cond.deepCopy());
         end
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
             varIds = {};
-            if iscell(obj.nodeArgs)
-                new_exprs = {};
-                for i=1:numel(obj.nodeArgs)
-                    [new_exprs{i}, varIds_i] = obj.nodeArgs{i}.changePre2Var();
-                    varIds = [varIds, varIds_i];
-                end
-            else
-                [new_exprs, varIds] = obj.nodeArgs.changePre2Var();
+            new_exprs = {};
+            for i=1:numel(obj.nodeArgs)
+                [new_exprs{i}, varIds_i] = obj.nodeArgs{i}.changePre2Var();
+                varIds = [varIds, varIds_i];
             end
             [condE, varId] = obj.cond.changePre2Var();
             varIds = [varIds, varId];
@@ -46,24 +43,17 @@ classdef EveryExpr < LustreExpr
                 new_exprs, condE);
         end
         function new_obj = changeArrowExp(obj, cond)
-            if iscell(obj.nodeArgs)
-                new_args = cellfun(@(x) x.changeArrowExp(cond), obj.nodeArgs, 'UniformOutput', 0);
-            else
-                new_args = obj.nodeArgs.changeArrowExp(cond);
-            end
+            new_args = cellfun(@(x) x.changeArrowExp(cond), obj.nodeArgs, 'UniformOutput', 0);
+            
             new_obj = EveryExpr(obj.nodeName, ...
                 new_args, obj.cond.changeArrowExp(cond));
         end
         %% This function is used by Stateflow function SF_To_LustreNode.getPseudoLusAction
         function varIds = GetVarIds(obj)
             varIds = {};
-            if iscell(obj.nodeArgs)
-                for i=1:numel(obj.nodeArgs)
-                    varIds_i = obj.nodeArgs{i}.GetVarIds();
-                    varIds = [varIds, varIds_i];
-                end
-            else
-                varIds = obj.nodeArgs.GetVarIds();
+            for i=1:numel(obj.nodeArgs)
+                varIds_i = obj.nodeArgs{i}.GetVarIds();
+                varIds = [varIds, varIds_i];
             end
             varId = obj.cond.GetVarIds();
             varIds = [varIds, varId];

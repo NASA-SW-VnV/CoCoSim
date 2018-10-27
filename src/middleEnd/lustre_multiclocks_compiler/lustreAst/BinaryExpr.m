@@ -38,8 +38,16 @@ classdef BinaryExpr < LustreExpr
         %%
         function obj = BinaryExpr(op, left, right, withPar, addEpsilon, epsilon)
             obj.op = op;
-            obj.left = left;
-            obj.right = right;
+            if iscell(left)
+                obj.left = left{1};
+            else
+                obj.left = left;
+            end
+            if iscell(right)
+                obj.right = right{1};
+            else
+                obj.right = right;
+            end
             if ~exist('withPar', 'var') || isempty(withPar)
                 obj.withPar = true;
             else
@@ -97,13 +105,7 @@ classdef BinaryExpr < LustreExpr
         function nodesCalled = getNodesCalled(obj)
             nodesCalled = {};
             function addNodes(objects)
-                if iscell(objects)
-                    for i=1:numel(objects)
-                        nodesCalled = [nodesCalled, objects{i}.getNodesCalled()];
-                    end
-                else
-                    nodesCalled = [nodesCalled, objects.getNodesCalled()];
-                end
+                nodesCalled = [nodesCalled, objects.getNodesCalled()];
             end
             addNodes(obj.left);
             addNodes(obj.right);
@@ -114,12 +116,6 @@ classdef BinaryExpr < LustreExpr
             code = obj.print_lustrec(backend);
         end
         function code = print_lustrec(obj, backend)
-            if iscell(obj.left) && numel(obj.left) == 1
-                obj.left = obj.left{1};
-            end
-            if iscell(obj.right) && numel(obj.right) == 1
-                obj.right = obj.right{1};
-            end
             if obj.addEpsilon ...
                     && (isequal(obj.op, '>=') || isequal(obj.op, '>') ...
                     || isequal(obj.op, '<=') || isequal(obj.op, '<'))

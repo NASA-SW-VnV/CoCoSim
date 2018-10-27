@@ -23,7 +23,11 @@ classdef UnaryExpr < LustreExpr
     methods
         function obj = UnaryExpr(op, expr, withPar)
             obj.op = op;
-            obj.expr = expr;
+            if iscell(expr) && numel(expr) == 1
+                obj.expr = expr{1};
+            else
+                obj.expr = expr;
+            end
             if exist('withPar', 'var')
                 obj.withPar = withPar;
             else
@@ -32,20 +36,12 @@ classdef UnaryExpr < LustreExpr
         end
         
         function new_obj = deepCopy(obj)
-            if iscell(obj.expr)
-                new_expr = cellfun(@(x) x.deepCopy(), obj.expr, 'UniformOutput', 0);
-            else
-                new_expr = obj.expr.deepCopy();
-            end
+            new_expr = obj.expr.deepCopy();
             new_obj = UnaryExpr(obj.op, new_expr, obj.withPar);
         end
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
-            if iscell(obj.expr)
-                v = obj.expr{1};
-            else
-                v = obj.expr;
-            end
+            v = obj.expr;
             if isequal(obj.op, UnaryExpr.PRE) && isa(v, 'VarIdExpr')
                 varIds{1} = v;
                 new_obj = VarIdExpr(strcat('_pre_', v.getId()));
@@ -55,33 +51,19 @@ classdef UnaryExpr < LustreExpr
             end
         end
         function new_obj = changeArrowExp(obj, cond)
-            if iscell(obj.expr)
-                new_expr = cellfun(@(x) x.changeArrowExp(cond), obj.expr, 'UniformOutput', 0);
-            else
-                new_expr = obj.expr.changeArrowExp(cond);
-            end
+            new_expr = obj.expr.changeArrowExp(cond);
             new_obj = UnaryExpr(obj.op, new_expr, obj.withPar);
         end
         %% This function is used by Stateflow function SF_To_LustreNode.getPseudoLusAction
         function varIds = GetVarIds(obj)
-            if iscell(obj.expr)
-                varIds = obj.expr{1}.GetVarIds();
-            else
-                varIds = obj.expr.GetVarIds();
-            end
+            varIds = obj.expr.GetVarIds();
         end
         
         %% This function is used by KIND2 LustreProgram.print()
         function nodesCalled = getNodesCalled(obj)
             nodesCalled = {};
             function addNodes(objects)
-                if iscell(objects)
-                    for i=1:numel(objects)
-                        nodesCalled = [nodesCalled, objects{i}.getNodesCalled()];
-                    end
-                else
-                    nodesCalled = [nodesCalled, objects.getNodesCalled()];
-                end
+                nodesCalled = [nodesCalled, objects.getNodesCalled()];
             end
             addNodes(obj.expr);
         end
@@ -92,11 +74,7 @@ classdef UnaryExpr < LustreExpr
             code = obj.print_lustrec(backend);
         end
         
-        function code = print_lustrec(obj, backend)
-            if iscell(obj.expr) && numel(obj.expr) == 1
-                obj.expr = obj.expr{1};
-            end
-            
+        function code = print_lustrec(obj, backend) 
             if obj.withPar
                 code = sprintf('(%s %s)', ...
                     obj.op, ...

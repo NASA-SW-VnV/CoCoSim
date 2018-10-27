@@ -155,7 +155,7 @@ classdef SF_To_LustreNode
             
             %Chart node
             [main_node, external_nodes_i] =...
-                StateflowState_To_Lustre.write_ChartNode(parent, states{end}, dataAndEvents, events);
+                StateflowState_To_Lustre.write_ChartNode(parent, chart, states{end}, dataAndEvents, events);
             external_nodes = [external_nodes, ...
                 external_nodes_i];
         end

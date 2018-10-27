@@ -15,9 +15,21 @@ classdef IteExpr < LustreExpr
     
     methods
         function obj = IteExpr(condition, thenExpr, ElseExpr, OneLine)
-            obj.condition = condition;
-            obj.thenExpr = thenExpr;
-            obj.ElseExpr = ElseExpr;
+            if iscell(condition)
+                obj.condition = condition{1};
+            else
+                obj.condition = condition;
+            end
+            if iscell(thenExpr)
+                obj.thenExpr = thenExpr{1};
+            else
+                obj.thenExpr = thenExpr;
+            end
+            if iscell(ElseExpr)
+                obj.ElseExpr = ElseExpr{1};
+            else
+                obj.ElseExpr = ElseExpr;
+            end
             if exist('OneLine', 'var')
                 obj.OneLine = OneLine;
             else
@@ -57,13 +69,7 @@ classdef IteExpr < LustreExpr
         function nodesCalled = getNodesCalled(obj)
             nodesCalled = {};
             function addNodes(objects)
-                if iscell(objects)
-                    for i=1:numel(objects)
-                        nodesCalled = [nodesCalled, objects{i}.getNodesCalled()];
-                    end
-                else
-                    nodesCalled = [nodesCalled, objects.getNodesCalled()];
-                end
+                nodesCalled = [nodesCalled, objects.getNodesCalled()];
             end
             addNodes(obj.condition);
             addNodes(obj.thenExpr);
@@ -79,16 +85,6 @@ classdef IteExpr < LustreExpr
         
         
         function code = print_lustrec(obj, backend)
-            if iscell(obj.thenExpr) && numel(obj.thenExpr) == 1
-                obj.thenExpr = obj.thenExpr{1};
-            end
-            if iscell(obj.ElseExpr) && numel(obj.ElseExpr) == 1
-                obj.ElseExpr = obj.ElseExpr{1};
-            end
-            if iscell(obj.condition) && numel(obj.condition) == 1
-                obj.condition = obj.condition{1};
-            end
-            
             if obj.OneLine
                 code = sprintf('(if %s then %s else %s)', ...
                     obj.condition.print(backend),...

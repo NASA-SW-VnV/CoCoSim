@@ -13,7 +13,11 @@ classdef AssertExpr < LustreExpr
     methods
         
         function obj = AssertExpr(exp)
-            obj.exp = exp;
+            if iscell(exp)
+                obj.exp = exp{1};
+            else
+                obj.exp = exp;
+            end
         end
         
         function new_obj = deepCopy(obj)

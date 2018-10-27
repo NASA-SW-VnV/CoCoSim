@@ -15,23 +15,21 @@ classdef ContractImportExpr < LustreExpr
     methods
         function obj = ContractImportExpr(name, inputs, outputs)
             obj.name = name;
-            obj.inputs = inputs;
-            obj.outputs = outputs;
+            if ~iscell(inputs)
+                obj.inputs{1} = inputs;
+            else
+                obj.inputs = inputs;
+            end
+            if ~iscell(outputs)
+                obj.outputs{1} = outputs;
+            else
+                obj.outputs = outputs;
+            end
         end
         
         function new_obj = deepCopy(obj)
-            if iscell(obj.inputs)
-                new_inputs = cellfun(@(x) x.deepCopy(), obj.inputs, 'UniformOutput', 0);
-            else
-                new_inputs = obj.inputs.deepCopy();
-            end
-            
-            if iscell(obj.outputs)
-                new_outputs = cellfun(@(x) x.deepCopy(), obj.outputs, 'UniformOutput', 0);
-            else
-                new_outputs = obj.outputs.deepCopy();
-            end
-            
+            new_inputs = cellfun(@(x) x.deepCopy(), obj.inputs, 'UniformOutput', 0);
+            new_outputs = cellfun(@(x) x.deepCopy(), obj.outputs, 'UniformOutput', 0);
             new_obj = ContractImportExpr(obj.name, ...
                 new_inputs, new_outputs);
         end
@@ -48,12 +46,8 @@ classdef ContractImportExpr < LustreExpr
         function nodesCalled = getNodesCalled(obj)
             nodesCalled = {};
             function addNodes(objects)
-                if iscell(objects)
-                    for i=1:numel(objects)
-                        nodesCalled = [nodesCalled, objects{i}.getNodesCalled()];
-                    end
-                else
-                    nodesCalled = [nodesCalled, objects.getNodesCalled()];
+                for i=1:numel(objects)
+                    nodesCalled = [nodesCalled, objects{i}.getNodesCalled()];
                 end
             end
             addNodes(obj.inputs);
@@ -63,7 +57,7 @@ classdef ContractImportExpr < LustreExpr
         
         %%
         function code = print(obj, backend)
-           if BackendType.isKIND2(backend)
+            if BackendType.isKIND2(backend)
                 code = obj.print_kind2(backend);
             else
                 code = '';

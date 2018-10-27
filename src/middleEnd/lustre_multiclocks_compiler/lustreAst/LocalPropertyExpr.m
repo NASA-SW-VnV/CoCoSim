@@ -14,7 +14,11 @@ classdef LocalPropertyExpr < LustreExpr
     methods
         function obj = LocalPropertyExpr(id, exp)
             obj.id = id;
-            obj.exp = exp;
+            if iscell(exp)
+                obj.exp = exp{1};
+            else
+                obj.exp = exp;
+            end
         end
         function new_obj = deepCopy(obj)
             new_obj = LocalPropertyExpr(obj.id, ...
@@ -38,13 +42,7 @@ classdef LocalPropertyExpr < LustreExpr
         function nodesCalled = getNodesCalled(obj)
             nodesCalled = {};
             function addNodes(objects)
-                if iscell(objects)
-                    for i=1:numel(objects)
-                        nodesCalled = [nodesCalled, objects{i}.getNodesCalled()];
-                    end
-                else
-                    nodesCalled = [nodesCalled, objects.getNodesCalled()];
-                end
+                nodesCalled = [nodesCalled, objects.getNodesCalled()];
             end
             addNodes(obj.exp);
         end

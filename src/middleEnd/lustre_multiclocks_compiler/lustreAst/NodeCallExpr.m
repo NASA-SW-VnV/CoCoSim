@@ -14,71 +14,60 @@ classdef NodeCallExpr < LustreExpr
     methods
         function obj = NodeCallExpr(nodeName, args)
             obj.nodeName = nodeName;
-            obj.args = args;
+            if ~iscell(args)
+                obj.args{1} = args;
+            else
+                obj.args = args;
+            end
         end
         
         function args = getArgs(obj)
             args = obj.args;
         end
-        function  setArgs(obj, arg)
-            obj.args = arg;
+        function  setArgs(obj, args)
+            if ~iscell(args)
+                obj.args{1} = args;
+            else
+                obj.args = args;
+            end
         end
         
         function new_obj = deepCopy(obj)
-            if iscell(obj.args)
-                new_args = cellfun(@(x) x.deepCopy(), obj.args, 'UniformOutput', 0);
-            else
-                new_args = obj.args.deepCopy();
-            end
+            new_args = cellfun(@(x) x.deepCopy(), obj.args, 'UniformOutput', 0);
             new_obj = NodeCallExpr(obj.nodeName, new_args);
         end
         
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
             varIds = {};
-            if iscell(obj.args)
-                new_args = {};
-                for i=1:numel(obj.args)
-                    [new_args{i}, varIds_i] = obj.args{i}.changePre2Var();
-                    varIds = [varIds, varIds_i];
-                end
-            else
-                [new_args, varIds] = obj.args.changePre2Var();
+            new_args = cell(numel(obj.args), 1);
+            for i=1:numel(obj.args)
+                [new_args{i}, varIds_i] = obj.args{i}.changePre2Var();
+                varIds = [varIds, varIds_i];
             end
             new_obj = NodeCallExpr(obj.nodeName, new_args);
         end
         
         function new_obj = changeArrowExp(obj, cond)
-            if iscell(obj.args)
-                new_args = cellfun(@(x) x.changeArrowExp(cond), obj.args, 'UniformOutput', 0);
-            else
-                new_args = obj.args.changeArrowExp(cond);
-            end
+            new_args = cellfun(@(x) x.changeArrowExp(cond), obj.args, 'UniformOutput', 0);
+            
             new_obj = NodeCallExpr(obj.nodeName, new_args);
         end
         
         %% This function is used by Stateflow function SF_To_LustreNode.getPseudoLusAction
         function varIds = GetVarIds(obj)
             varIds = {};
-            if iscell(obj.args)
-                for i=1:numel(obj.args)
-                    varIds_i = obj.args{i}.GetVarIds();
-                    varIds = [varIds, varIds_i];
-                end
-            else
-                varIds = obj.args.GetVarIds();
+            for i=1:numel(obj.args)
+                varIds_i = obj.args{i}.GetVarIds();
+                varIds = [varIds, varIds_i];
             end
         end
         %% This function is used by KIND2 LustreProgram.print()
         function nodesCalled = getNodesCalled(obj)
             nodesCalled = {};
             function addNodes(objects)
-                if iscell(objects)
-                    for i=1:numel(objects)
-                        nodesCalled = [nodesCalled, objects{i}.getNodesCalled()];
-                    end
-                else
-                    nodesCalled = [nodesCalled, objects.getNodesCalled()];
+                for i=1:numel(objects)
+                    nodesCalled = [nodesCalled, objects{i}.getNodesCalled()];
                 end
             end
             addNodes(obj.args);
@@ -91,7 +80,6 @@ classdef NodeCallExpr < LustreExpr
         end
         
         function code = print_lustrec(obj, backend)
-            
             code = sprintf('%s(%s)', ...
                 obj.nodeName, ...
                 NodeCallExpr.getArgsStr(obj.args, backend));
@@ -113,22 +101,22 @@ classdef NodeCallExpr < LustreExpr
     
     methods(Static)
         function args_str = getArgsStr(args, backend)
-%             try
-                if numel(args) > 1 || iscell(args)
-                    if numel(args) >= 1 && iscell(args{1})
-                        args_cell = cellfun(@(x) x{1}.print(backend), args, 'UniformOutput', 0);
-                    else
-                        args_cell = cellfun(@(x) x.print(backend), args, 'UniformOutput', 0);
-                    end
-                    args_str = MatlabUtils.strjoin(args_cell, ', ');
-                elseif numel(args) == 1
-                    args_str = args.print(backend);
+            %             try
+            if numel(args) > 1 || iscell(args)
+                if numel(args) >= 1 && iscell(args{1})
+                    args_cell = cellfun(@(x) x{1}.print(backend), args, 'UniformOutput', 0);
                 else
-                    args_str = '';
+                    args_cell = cellfun(@(x) x.print(backend), args, 'UniformOutput', 0);
                 end
-%             catch me
-%                 me
-%             end
+                args_str = MatlabUtils.strjoin(args_cell, ', ');
+            elseif numel(args) == 1
+                args_str = args.print(backend);
+            else
+                args_str = '';
+            end
+            %             catch me
+            %                 me
+            %             end
         end
     end
 end
