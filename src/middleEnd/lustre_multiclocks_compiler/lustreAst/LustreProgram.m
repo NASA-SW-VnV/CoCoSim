@@ -132,11 +132,13 @@ classdef LustreProgram < LustreAst
             if ~ismember(nodeName, alreadyPrinted)
                 Names = cellfun(@(x) x.name, ...
                     nodesList, 'UniformOutput', false);
-                node = nodesList{strcmp(Names, nodeName)};
-                if ~isempty(node)
-                    lines{end+1} = sprintf('%s\n', ...
-                        node.print(backend));
-                    alreadyPrinted{end + 1} = nodeName;
+                if ismember(nodeName, Names)
+                    node = nodesList{strcmp(Names, nodeName)};
+                    if ~isempty(node)
+                        lines{end+1} = sprintf('%s\n', ...
+                            node.print(backend));
+                        alreadyPrinted{end + 1} = nodeName;
+                    end
                 end
             end
         end

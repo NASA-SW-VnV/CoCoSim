@@ -33,7 +33,7 @@ classdef LustreContract < LustreAst
                 obj.setInputs(inputs);
                 obj.setOutputs(outputs);
                 obj.setLocalVars(localVars);
-                obj.setLocalEqs(localEqs);
+                obj.setBody(localEqs);
                 obj.islocalContract = islocalContract;
             end
         end
@@ -78,7 +78,7 @@ classdef LustreContract < LustreAst
         function addVar(obj, v)
             obj.localVars{end+1} = v;
         end
-        function setLocalEqs(obj, localEqs)
+        function setBody(obj, localEqs)
             if ~iscell(localEqs)
                 obj.localEqs{1} = localEqs;
             else

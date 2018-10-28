@@ -15,12 +15,18 @@ classdef LustreEq < LustreAst
         function obj = LustreEq(lhs, rhs)
             if ischar(rhs)
                 obj.rhs = VarIdExpr(rhs);
+            elseif iscell(rhs) && numel(rhs) == 1
+                obj.rhs = rhs{1};
             elseif iscell(rhs)
                 obj.rhs = TupleExpr(rhs);
             else
                 obj.rhs = rhs;
             end
-            if iscell(rhs)
+            if ischar(lhs)
+                obj.lhs = VarIdExpr(lhs);
+            elseif iscell(lhs) && numel(lhs) == 1
+                obj.lhs = lhs{1};
+            elseif iscell(lhs)
                 obj.lhs = TupleExpr(lhs);
             else
                 obj.lhs = lhs;
@@ -71,9 +77,13 @@ classdef LustreEq < LustreAst
         
         
         function code = print_lustrec(obj, backend)
+            try
             lhs_str = obj.lhs.print(backend);
             rhs_str = obj.rhs.print(backend);
             code = sprintf('%s = %s;', lhs_str, rhs_str);
+            catch me
+                me
+            end
         end
         
         function code = print_kind2(obj)

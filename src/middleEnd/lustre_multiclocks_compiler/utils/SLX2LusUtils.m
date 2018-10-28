@@ -954,11 +954,16 @@ classdef SLX2LusUtils < handle
             end
             new_callObj = callObj.deepCopy();
             args = new_callObj.getArgs();
-            if isempty(args)
+            if iscell(args) && numel(args) == 1
+                new_args = args{1};
+            else
+                new_args = args;
+            end
+            if isempty(new_args)
                 new_callObj.setArgs(arg);
-            elseif isa(args, 'NodeCallExpr')
+            elseif isa(new_args, 'NodeCallExpr')
                 new_callObj.setArgs(...
-                    SLX2LusUtils.setArgInConvFormat(args, arg));
+                    SLX2LusUtils.setArgInConvFormat(new_args, arg));
             end
         end
         function [external_lib, conv_format] = dataType_conversion(inport_dt, outport_dt, RndMeth, SaturateOnIntegerOverflow)

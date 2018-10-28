@@ -12,8 +12,10 @@ classdef VarIdExpr < LustreExpr
     
     methods
         function obj = VarIdExpr(id)
-            if ~iscell(id) && numel(id) == 1
+            if iscell(id) && numel(id) == 1
                 obj.id = id{1};
+            elseif iscell(id)
+                obj.id = TupleExpr(id);
             else
                 obj.id = id;
             end

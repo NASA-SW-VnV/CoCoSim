@@ -27,6 +27,8 @@ function [event, condition, condAction, transAction, expr] = parseE(e)
 end
 
 function [E, expr2] = parseEvent(expr1)
+    E = '';
+    % e.g. Set | Resume
     if ~contains(expr1, '[') && ~contains(expr1, '{') && ~contains(expr1, '/')
         % e.g. Set | Resume
         [~, ~, expr2] = Fcn_Exp_Parser.parse(expr1);
@@ -35,39 +37,43 @@ function [E, expr2] = parseEvent(expr1)
         else
             E = '';
         end
-    else
-        % an event can be "after(5, tick)"
-        [sym, expr2] = Fcn_Exp_Parser.parseFunc(expr1);
-        if isempty(sym)
-            % an event can be "E"
-            [sym, expr2] = Fcn_Exp_Parser.parseVar(expr1);
-            if isempty(sym)
-                % an event can be "(E | F)"
-                [sym, expr2] = Fcn_Exp_Parser.parsePar(expr1);
-                if isempty(sym)
-                    E = '';
-                else
-                    if numel(expr2) < numel(expr1)
-                        E = expr1(1:numel(expr1) - numel(expr2));
-                    else
-                        E = '';
-                    end
-                end
-            else
-                if numel(expr2) < numel(expr1)
-                    E = expr1(1:numel(expr1) - numel(expr2));
-                else
-                    E = '';
-                end
-            end
-        else
-            if numel(expr2) < numel(expr1)
-                E = expr1(1:numel(expr1) - numel(expr2));
-            else
-                E = '';
-            end
-        end
+        return;
     end
+    
+    % an event can be "after(5, tick)"
+    [sym, expr2] = Fcn_Exp_Parser.parseFunc(expr1);
+    if ~isempty(sym)
+        if numel(expr2) < numel(expr1)
+            E = expr1(1:numel(expr1) - numel(expr2));
+        else
+            E = '';
+        end
+        return;
+    end
+    % an event can be "E"
+    [sym, expr2] = Fcn_Exp_Parser.parseVar(expr1);
+    if ~isempty(sym)
+        if numel(expr2) < numel(expr1)
+            E = expr1(1:numel(expr1) - numel(expr2));
+        else
+            E = '';
+        end
+        return;
+    end
+    
+    
+    % an event can be "(E | F)"
+    [sym, expr2] = Fcn_Exp_Parser.parsePar(expr1);
+    if ~isempty(sym)
+        if numel(expr2) < numel(expr1)
+            E = expr1(1:numel(expr1) - numel(expr2));
+        else
+            E = '';
+        end
+        return;
+    end
+    
+    
 end
 
 

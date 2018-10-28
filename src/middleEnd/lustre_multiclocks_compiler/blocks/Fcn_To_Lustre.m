@@ -219,7 +219,11 @@ classdef Fcn_To_Lustre < Block_To_Lustre
                         Fcn_To_Lustre.tree2code(obj, tree{3}, parent, blk, inputs, inputs_dt, isStateFlow), ...
                         false);
                     obj.isBooleanExpr = 1;
-                    
+                 
+                case 'Array'
+                    code = Fcn_To_Lustre.parseOtherFunc(obj, tree, ...
+                        parent, blk, inputs, inputs_dt, isStateFlow, ...
+                        '[', ']');
                 case 'Func'
                     switch tree{2}
                         % Handling function declared in ('Func','func_name','arg1', 'arg2, ..,'argn')
@@ -290,60 +294,10 @@ classdef Fcn_To_Lustre < Block_To_Lustre
                             code = NodeCallExpr('pow', ...
                                 Fcn_To_Lustre.tree2code(obj, tree{3}, parent, blk, inputs, inputs_dt, isStateFlow), ...
                                 Fcn_To_Lustre.tree2code(obj, tree{4}, parent, blk, inputs, inputs_dt, isStateFlow));
-                        case 'u'
-                            if isStateFlow
-                                %TODO: u(..) in Stateflow?
-                            else
-                                %u refers to an input in IF, Switch and Fcn
-                                %blocks
-                                input_idx = str2double(tree{3});
-                                code = inputs{1}{input_idx};
-                            end
                         otherwise
-                            if ~isempty(regexp(tree{2}, 'u\d+', 'match'))
-                                % case of u1, u2 ...
-                                if isStateFlow
-                                    %TODO: u1(..) in Stateflow?
-                                else
-                                    input_number = str2double(regexp(tree{2}, 'u(\d+)', 'tokens', 'once'));
-                                    arrayIndex = str2double(tree{3});
-                                    code = inputs{input_number}{arrayIndex};
-                                end
-                            else
-                                try
-                                    % eval in base expression such as
-                                    % A(1,1) or single(1e-18) ...
-                                    v = evalin('base', ...
-                                        sprintf('%s(%s)', tree{2}, ...
-                                        MatlabUtils.strjoin(tree(3:end), ', ')));
-                                    v_class = class(v);
-                                    if contains(v_class, 'int')
-                                        code = IntExpr(v);
-                                    elseif isequal(v_class, 'boolean') ...
-                                            || isequal(v_class, 'logical')
-                                        code = BooleanExpr(v);
-                                    else
-                                        code = RealExpr(v);
-                                    end
-                                catch
-                                    if isStateFlow
-                                        %handling Stateflow functions will
-                                        %be in a seperate function.
-                                        args = {};
-                                        for i=3:numel(tree)
-                                            args{end + 1} = ...
-                                                Fcn_To_Lustre.tree2code(obj, tree{i}, ...
-                                                parent, blk, inputs, inputs_dt, isStateFlow);
-                                        end
-                                        code = NodeCallExpr(tree{2}, args);
-                                    else
-                                        ME = MException('COCOSIM:TREE2CODE', ...
-                                            'Function "%s" is not handled in Block %s',...
-                                            tree{2}, blk.Origin_path);
-                                        throw(ME);
-                                    end
-                                end
-                            end
+                            code = Fcn_To_Lustre.parseOtherFunc(obj, tree, ...
+                                parent, blk, inputs, inputs_dt, isStateFlow, ...
+                                '(', ')');
                     end
                 otherwise
                     if isStateFlow
@@ -358,6 +312,63 @@ classdef Fcn_To_Lustre < Block_To_Lustre
                     throw(ME);
             end
             
+        end
+        
+        function code = parseOtherFunc(obj, tree, parent, blk, inputs, inputs_dt, isStateFlow, lpar, rpar)
+            code = '';
+            if isequal(tree{2}, 'u')
+                if isStateFlow
+                    %TODO: u(..) in Stateflow?
+                else
+                    %u refers to an input in IF, Switch and Fcn
+                    %blocks
+                    input_idx = str2double(tree{3});
+                    code = inputs{1}{input_idx};
+                end
+            elseif ~isempty(regexp(tree{2}, 'u\d+', 'match'))
+                % case of u1, u2 ...
+                if isStateFlow
+                    %TODO: u1(..) in Stateflow?
+                else
+                    input_number = str2double(regexp(tree{2}, 'u(\d+)', 'tokens', 'once'));
+                    arrayIndex = str2double(tree{3});
+                    code = inputs{input_number}{arrayIndex};
+                end
+            else
+                try
+                    % eval in base expression such as
+                    % A(1,1) or single(1e-18) ...
+                    v = evalin('base', ...
+                        sprintf('%s%s%s%s', tree{2}, lpar, ...
+                        MatlabUtils.strjoin(tree(3:end), ', '), rpar));
+                    v_class = class(v);
+                    if contains(v_class, 'int')
+                        code = IntExpr(v);
+                    elseif isequal(v_class, 'boolean') ...
+                            || isequal(v_class, 'logical')
+                        code = BooleanExpr(v);
+                    else
+                        code = RealExpr(v);
+                    end
+                catch
+                    if isStateFlow
+                        %handling Stateflow functions will
+                        %be in a seperate function.
+                        args = {};
+                        for i=3:numel(tree)
+                            args{end + 1} = ...
+                                Fcn_To_Lustre.tree2code(obj, tree{i}, ...
+                                parent, blk, inputs, inputs_dt, isStateFlow);
+                        end
+                        code = NodeCallExpr(tree{2}, args);
+                    else
+                        ME = MException('COCOSIM:TREE2CODE', ...
+                            'Function "%s" is not handled in Block %s',...
+                            tree{2}, blk.Origin_path);
+                        throw(ME);
+                    end
+                end
+            end
         end
     end
     

@@ -75,8 +75,16 @@ classdef LustreNode < LustreAst
         end
         
         function setLocalContract(obj, localContract)
-            if ~iscell(localContract) && numel(localContract) == 1
-                obj.localContract{1} = localContract;
+            if iscell(localContract) && numel(localContract) == 1
+                obj.localContract = localContract{1};
+            elseif iscell(localContract) && numel(localContract) > 1
+                display_msg(...
+                    sprintf(['Node %s has more than one contract.', ...
+                    ' A node can contain only one local contract. ', ...
+                    'The first one will be used.'], obj.name), ...
+                    MsgType.ERROR, 'LustreNode', '');
+                
+                obj.localContract = localContract{1};
             else
                 obj.localContract = localContract;
             end
@@ -111,7 +119,7 @@ classdef LustreNode < LustreAst
         function new_obj = deepCopy(obj)
             new_inputs = cellfun(@(x) x.deepCopy(), obj.inputs, 'UniformOutput', 0);
             new_outputs = cellfun(@(x) x.deepCopy(), obj.outputs, 'UniformOutput', 0);
-            new_localContract = cellfun(@(x) x.deepCopy(), obj.localContract, 'UniformOutput', 0);
+            new_localContract = obj.localContract.deepCopy();
             new_localVars = cellfun(@(x) x.deepCopy(), obj.localVars, 'UniformOutput', 0);
             new_bodyEqs = cellfun(@(x) x.deepCopy(), obj.bodyEqs, 'UniformOutput', 0);
             new_obj = LustreNode(obj.metaInfo, obj.name,...
@@ -200,8 +208,12 @@ classdef LustreNode < LustreAst
         function nodesCalled = getNodesCalled(obj)
             nodesCalled = {};
             function addNodes(objects)
-                for i=1:numel(objects)
-                    nodesCalled = [nodesCalled, objects{i}.getNodesCalled()];
+                if iscell(objects)
+                    for i=1:numel(objects)
+                        nodesCalled = [nodesCalled, objects{i}.getNodesCalled()];
+                    end
+                else
+                    nodesCalled = [nodesCalled, objects.getNodesCalled()];
                 end
             end
             addNodes(obj.localContract);
