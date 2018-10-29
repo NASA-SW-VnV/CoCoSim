@@ -32,7 +32,13 @@ classdef LustreEq < LustreAst
                 obj.lhs = lhs;
             end
         end
-        
+        function lhs = getLhs(obj)
+            lhs = obj.lhs;
+        end
+        function rhs = getRhs(obj)
+            rhs = obj.rhs;
+        end
+        %%
         function new_obj = deepCopy(obj)
             new_lhs = obj.lhs.deepCopy();
             new_rhs = obj.rhs.deepCopy();
@@ -60,7 +66,11 @@ classdef LustreEq < LustreAst
             outputs = obj.lhs.GetVarIds();
             inputs = obj.rhs.GetVarIds();
         end
-        
+        function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft)
+            new_rhs = obj.rhs.pseudoCode2Lustre(outputs_map, false);
+            [new_lhs, outputs_map] = obj.lhs.pseudoCode2Lustre(outputs_map, true);
+            new_obj = LustreEq(new_lhs, new_rhs);
+        end
         %% This function is used by KIND2 LustreProgram.print()
         function nodesCalled = getNodesCalled(obj)
             nodesCalled = {};

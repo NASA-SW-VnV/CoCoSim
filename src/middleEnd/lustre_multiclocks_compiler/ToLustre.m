@@ -231,9 +231,13 @@ if isfield(blk, 'Content') && ~isempty(blk.Content) ...
         nodes_ast{end + 1} = main_node;
     end
 elseif isfield(blk, 'SFBlockType') && isequal(blk.SFBlockType, 'Chart')
-    % Stateflow chart example
-    %[main_node, ~, external_nodes, external_libraries_i] = SS_To_LustreNode.subsystem2node(parent, blk, main_sampleTime, is_main_node, backend, xml_trace);
+    
     try
+        % OLD compiler
+        %[main_node, ~, external_nodes, external_libraries_i] = ...
+        %    SS_To_LustreNode.subsystem2node(parent, blk, main_sampleTime, is_main_node, backend, xml_trace);
+        
+        % new compiler
         [main_node, external_nodes, external_libraries_i ] = ...
             SF_To_LustreNode.chart2node(parent,  blk,  main_sampleTime, backend, xml_trace);
     catch me

@@ -40,7 +40,12 @@ classdef ParenthesesExpr < LustreExpr
         function varIds = GetVarIds(obj)
             varIds = obj.expr.GetVarIds();
         end
-        
+        % This function is used in Stateflow compiler to change from imperative
+        % code to Lustre
+        function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft)
+            [new_exp, outputs_map] = obj.expr.pseudoCode2Lustre(outputs_map, isLeft);
+            new_obj = ParenthesesExpr(new_exp);
+        end
         %% This function is used by KIND2 LustreProgram.print()
         function nodesCalled = getNodesCalled(obj)
             nodesCalled = {};

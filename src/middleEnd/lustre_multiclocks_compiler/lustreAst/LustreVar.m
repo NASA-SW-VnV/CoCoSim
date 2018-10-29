@@ -44,6 +44,13 @@ classdef LustreVar < LustreAst
         function varIds = GetVarIds(obj)
             varIds = {obj.name};
         end
+        % this function is used in Stateflow compiler to change from imperative
+        % code to Lustre
+        function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft)
+            vId = VarIdExpr(obj.name);
+            [new_vId, outputs_map] = vId.pseudoCode2Lustre(outputs_map, isLeft);
+            new_obj = LustreVar(new_vId, obj.type);
+        end
         %%
         function id = getId(obj)
             id = obj.name;

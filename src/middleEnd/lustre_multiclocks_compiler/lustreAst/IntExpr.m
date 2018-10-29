@@ -35,6 +35,11 @@ classdef IntExpr < LustreExpr
         function varIds = GetVarIds(obj)
             varIds = {};
         end
+        % This function is used in Stateflow compiler to change from imperative
+        % code to Lustre
+        function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft)
+            new_obj = obj;
+        end
         
         %% This function is used by KIND2 LustreProgram.print()
         function nodesCalled = getNodesCalled(obj)

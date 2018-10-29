@@ -55,6 +55,13 @@ classdef ContractImportExpr < LustreExpr
             nodesCalled{end+1} = obj.name;
         end
         
+        %% This function is used in Stateflow compiler to change from imperative
+        % code to Lustre
+        function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft)
+            new_outputs = cellfun(@(x) x.pseudoCode2Lustre(outputs_map, false), obj.outputs, 'UniformOutput', 0);
+            new_obj = ContractImportExpr(obj.name, ...
+                obj.inputs, new_outputs);
+        end
         %%
         function code = print(obj, backend)
             if BackendType.isKIND2(backend)

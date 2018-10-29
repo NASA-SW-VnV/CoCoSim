@@ -31,7 +31,11 @@ classdef NodeCallExpr < LustreExpr
                 obj.args = args;
             end
         end
+        function name = getNodeName(obj)
+            name = obj.nodeName;
+        end
         
+        %%
         function new_obj = deepCopy(obj)
             new_args = cellfun(@(x) x.deepCopy(), obj.args, 'UniformOutput', 0);
             new_obj = NodeCallExpr(obj.nodeName, new_args);
@@ -61,6 +65,13 @@ classdef NodeCallExpr < LustreExpr
                 varIds_i = obj.args{i}.GetVarIds();
                 varIds = [varIds, varIds_i];
             end
+        end
+        % This function is used in Stateflow compiler to change from imperative
+        % code to Lustre
+        function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft)
+            new_args = cellfun(@(x) x.pseudoCode2Lustre(outputs_map, false),...
+                obj.args, 'UniformOutput', 0);
+            new_obj = NodeCallExpr(obj.nodeName, new_args);
         end
         %% This function is used by KIND2 LustreProgram.print()
         function nodesCalled = getNodesCalled(obj)

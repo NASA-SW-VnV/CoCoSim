@@ -55,7 +55,17 @@ classdef ContractModeExpr < LustreExpr
             addNodes(obj.ensures);
         end
         
-        
+        %% This function is used in Stateflow compiler to change from imperative
+        % code to Lustre
+        function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft)
+            new_requires = cellfun(@(x) x.pseudoCode2Lustre(outputs_map, false),...
+                obj.requires, ...
+                'UniformOutput', 0);
+            new_ensures = cellfun(@(x) x.pseudoCode2Lustre(outputs_map, false),...
+                obj.ensures, ...
+                'UniformOutput', 0);
+            new_obj = ContractModeExpr(obj.name, new_requires, new_ensures);
+        end
         %%
         function code = print(obj, backend)
             if BackendType.isKIND2(backend)

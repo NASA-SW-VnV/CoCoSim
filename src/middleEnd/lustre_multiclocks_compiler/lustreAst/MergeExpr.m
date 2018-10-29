@@ -23,7 +23,6 @@ classdef MergeExpr < LustreExpr
         
         function new_obj = deepCopy(obj)
             new_exprs = cellfun(@(x) x.deepCopy(), obj.exprs, 'UniformOutput', 0);
-            
             new_obj = MergeExpr(obj.clock, new_exprs);
         end
         
@@ -49,6 +48,13 @@ classdef MergeExpr < LustreExpr
                 varIds_i = obj.exprs{i}.GetVarIds();
                 varIds = [varIds, varIds_i];
             end
+        end
+         % This function is used in Stateflow compiler to change from imperative
+        % code to Lustre
+        function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft)
+            new_exprs = cellfun(@(x) x.pseudoCode2Lustre(outputs_map, false),...
+                obj.exprs, 'UniformOutput', 0);
+            new_obj = MergeExpr(obj.clock, new_exprs);
         end
         %% This function is used by KIND2 LustreProgram.print()
         function nodesCalled = getNodesCalled(obj)

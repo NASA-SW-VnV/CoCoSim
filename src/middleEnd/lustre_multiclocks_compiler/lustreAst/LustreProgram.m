@@ -47,7 +47,12 @@ classdef LustreProgram < LustreAst
         function new_obj = changeArrowExp(obj, ~)
             new_obj = obj;
         end
-        
+        %% This function is used in Stateflow compiler to change from imperative
+        % code to Lustre
+        function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft)
+            %it is not used by stateflow.
+            new_obj = obj;
+        end
         %%
         function code = print(obj, backend)
             %TODO: check if LUSTREC syntax is OK for the other backends.

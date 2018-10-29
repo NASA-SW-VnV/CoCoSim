@@ -25,7 +25,6 @@ classdef EveryExpr < LustreExpr
         
         function new_obj = deepCopy(obj)
             new_args = cellfun(@(x) x.deepCopy(), obj.nodeArgs, 'UniformOutput', 0);
-            
             new_obj = EveryExpr(obj.nodeName, ...
                 new_args, obj.cond.deepCopy());
         end
@@ -58,7 +57,14 @@ classdef EveryExpr < LustreExpr
             varId = obj.cond.GetVarIds();
             varIds = [varIds, varId];
         end
-        
+        % This function is used in Stateflow compiler to change from imperative
+        % code to Lustre
+        function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft)
+            new_args = cellfun(@(x) x.pseudoCode2Lustre(outputs_map, false),...
+                obj.nodeArgs, 'UniformOutput', 0);
+            new_obj = EveryExpr(obj.nodeName, ...
+                new_args, obj.cond.deepCopy());
+        end
         %% This function is used by KIND2 LustreProgram.print()
         function nodesCalled = getNodesCalled(obj)
             nodesCalled = {};

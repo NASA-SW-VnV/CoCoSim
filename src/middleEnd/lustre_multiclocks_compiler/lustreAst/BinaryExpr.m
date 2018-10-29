@@ -101,6 +101,17 @@ classdef BinaryExpr < LustreExpr
             varIds = [obj.left.GetVarIds(), obj.right.GetVarIds()];
         end
         
+        % This function is used in Stateflow compiler to change from imperative
+        % code to Lustre
+        function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft)
+            %BinaryExpr is always on the right of an Equation
+            [leftExp, ~] = obj.left.pseudoCode2Lustre(outputs_map, false);
+            [rightExp, ~] = obj.right.pseudoCode2Lustre(outputs_map, false);
+            new_obj = BinaryExpr(obj.op,...
+                leftExp,...
+                rightExp, ...
+                obj.withPar);
+        end
         %% This function is used by KIND2 LustreProgram.print()
         function nodesCalled = getNodesCalled(obj)
             nodesCalled = {};

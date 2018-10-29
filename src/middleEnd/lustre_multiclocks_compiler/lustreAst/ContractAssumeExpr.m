@@ -42,7 +42,12 @@ classdef ContractAssumeExpr < LustreExpr
             end
             addNodes(obj.exp);
         end
-        
+        %% This function is used in Stateflow compiler to change from imperative
+        % code to Lustre
+        function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft)
+            [new_exp, outputs_map] = obj.exp.pseudoCode2Lustre(outputs_map, isLeft);
+            new_obj = ContractAssumeExpr(obj.id, new_exp);
+        end
         %%
         function code = print(obj, backend)
             if BackendType.isKIND2(backend)

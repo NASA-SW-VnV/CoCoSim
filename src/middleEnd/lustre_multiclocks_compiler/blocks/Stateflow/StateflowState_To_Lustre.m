@@ -135,7 +135,12 @@ classdef StateflowState_To_Lustre
             main_node.setMetaInfo(comment);
             main_node.setBodyEqs(body);            
             main_node.setOutputs(outputs);
+            if isempty(inputs)
+                inputs{1} = ...
+                    LustreVar(SF_To_LustreNode.virtualVarStr(), 'bool');
+            end
             main_node.setInputs(inputs);
+            
             main_node.setLocalVars(variable);
             SF_STATES_NODESAST_MAP(node_name) = main_node;
         end
@@ -451,7 +456,7 @@ classdef StateflowState_To_Lustre
                     inputs = [inputs, actionNodeAst.getInputs()];
                 end
             else
-                
+                concurrent_actions = {};
                 idStateVar = VarIdExpr(...
                     StateflowState_To_Lustre.getStateIDName(state));
                 if nb_children >= 1
@@ -473,7 +478,7 @@ classdef StateflowState_To_Lustre
                         actionNodeAst = SF_STATES_NODESAST_MAP(node_name);
                         [call, oututs_Ids] = actionNodeAst.nodeCall();
                         
-                        actions{end+1} = LustreEq(oututs_Ids, ...
+                        concurrent_actions{end+1} = LustreEq(oututs_Ids, ...
                             IteExpr(cond, call, TupleExpr(oututs_Ids)));
                         outputs = [outputs, actionNodeAst.getOutputs()];
                         inputs = [inputs, actionNodeAst.getOutputs()];
@@ -512,13 +517,13 @@ classdef StateflowState_To_Lustre
                             true, BooleanExpr(false));
                     end
                     if isOneChildEntry
-                        actions{end+1} = LustreEq(oututs_Ids, call);
+                        concurrent_actions{end+1} = LustreEq(oututs_Ids, call);
                         outputs = [outputs, actionNodeAst.getOutputs()];
                         inputs = [inputs, actionNodeAst.getInputs()];
                     else
                         cond = BinaryExpr(BinaryExpr.EQ, ...
                             idStateVar, IntExpr(childrenIDs{i}));
-                        actions{end+1} = LustreEq(oututs_Ids, ...
+                        concurrent_actions{end+1} = LustreEq(oututs_Ids, ...
                             IteExpr(cond, call, TupleExpr(oututs_Ids)));
                         outputs = [outputs, actionNodeAst.getOutputs()];
                         inputs = [inputs, actionNodeAst.getOutputs()];
@@ -532,9 +537,13 @@ classdef StateflowState_To_Lustre
                         || ~isempty(state.Composition.DefaultTransitions))
                     %State that contains only transitions and junctions
                     %inside
-                    actions{end+1} = LustreEq(idStateVar, IntExpr(-1));
+                    concurrent_actions{end+1} = LustreEq(idStateVar, IntExpr(-1));
                     inputs{end+1} = LustreVar(idStateVar, 'int');
                     outputs{end+1} = LustreVar(idStateVar, 'int');
+                end
+                
+                if ~isempty(concurrent_actions)
+                    actions{1} = ConcurrentAssignments(concurrent_actions);
                 end
             end
         end
@@ -545,7 +554,7 @@ classdef StateflowState_To_Lustre
             outputs = {};
             inputs = {};
             body = {};
-
+            children_actions = {};
             parentPath = fileparts(state.Path);
             isChart = false;
             if isempty(parentPath)
@@ -607,7 +616,7 @@ classdef StateflowState_To_Lustre
                     [call, oututs_Ids] = nodeAst.nodeCall();
                     cond = BinaryExpr(BinaryExpr.EQ,...
                         idStateVar, IntExpr(0));
-                    body{end+1} = LustreEq(oututs_Ids, ...
+                    children_actions{end+1} = LustreEq(oututs_Ids, ...
                         IteExpr(cond, call, TupleExpr(oututs_Ids)));
                     outputs = [outputs, nodeAst.getOutputs()];
                     inputs = [inputs, nodeAst.getOutputs()];
@@ -645,17 +654,20 @@ classdef StateflowState_To_Lustre
                     nodeAst = SF_STATES_NODESAST_MAP(child_node_name);
                     [call, oututs_Ids] = nodeAst.nodeCall();
                     if isempty(cond)
-                        body{end+1} = LustreEq(oututs_Ids, call);
+                        children_actions{end+1} = LustreEq(oututs_Ids, call);
                         outputs = [outputs, nodeAst.getOutputs()];
                         inputs = [inputs, nodeAst.getInputs()];
                     else
-                        body{end+1} = LustreEq(oututs_Ids, ...
+                        children_actions{end+1} = LustreEq(oututs_Ids, ...
                             IteExpr(cond, call, TupleExpr(oututs_Ids)));
                         outputs = [outputs, nodeAst.getOutputs()];
                         inputs = [inputs, nodeAst.getOutputs()];
                         inputs = [inputs, nodeAst.getInputs()];
                     end
                 end
+            end
+            if ~isempty(children_actions)
+                body{end+1} = ConcurrentAssignments(children_actions);
             end
         end
         
@@ -706,8 +718,7 @@ classdef StateflowState_To_Lustre
             %local variables
             for i=1:numel(dataAndEvents)
                 d = dataAndEvents{i};
-                if isequal(d.Scope, 'Input')...
-                        ||isequal(d.Scope, 'Output')
+                if isequal(d.Scope, 'Input')
                     continue;
                 end
                 d_name = d.Name;
@@ -733,9 +744,23 @@ classdef StateflowState_To_Lustre
                 end
                 IC_Var = SLX2LusUtils.num2LusExp(v, d.LusDatatype);
                 
-                d_lastName = strcat(d_name, '__2');
-                variables{end+1,1} = LustreVar(d_name, d.LusDatatype);
-                if isequal(d.Scope, 'Local')
+                if ~isequal(d.Scope, 'Output')
+                    variables{end+1,1} = LustreVar(d_name, d.LusDatatype);
+                end
+                if isequal(d.Scope, 'Output')
+                    d_firstName = strcat(d_name, '__1');
+                    if ismember(d_name, nodeCall_inputs_Names)
+                        body{end+1} = LustreEq(...
+                            VarIdExpr(d_firstName), ...
+                            BinaryExpr(BinaryExpr.ARROW, IC_Var, ...
+                            UnaryExpr(UnaryExpr.PRE, VarIdExpr(d_name))));
+                        variables{end+1,1} = LustreVar(d_firstName, d.LusDatatype);
+                        nodeCall_inputs_Ids = ...
+                            StateflowState_To_Lustre.changeVar(...
+                            nodeCall_inputs_Ids, d_name, d_firstName);
+                    end
+                elseif isequal(d.Scope, 'Local') 
+                    d_lastName = strcat(d_name, '__2');
                     if ismember(d_name, nodeCall_outputs_Names)
                         body{end+1} = LustreEq(...
                             VarIdExpr(d_name), ...
@@ -758,6 +783,8 @@ classdef StateflowState_To_Lustre
             
             %state IDs
             allVars = [variables; outputs; inputs];
+            nodeCall_inputs_Names = cellfun(@(x) x.getId(), ...
+                nodeCall_inputs_Ids, 'UniformOutput', false);
             for i=1:numel(nodeCall_inputs_Names)
                 v_name = nodeCall_inputs_Names{i};
                 if ~VarIdExpr.ismemberVar(v_name, allVars)
@@ -805,6 +832,7 @@ classdef StateflowState_To_Lustre
                 end
             end
             %Node Call
+            node_call = NodeCallExpr(node_call.getNodeName(), nodeCall_inputs_Ids);
             body{end+1} = LustreEq(nodeCall_outputs_Ids, node_call);
         end
         

@@ -127,7 +127,23 @@ classdef LustreContract < LustreAst
             new_obj = obj;
         end
         
-        
+        %% This function is used in Stateflow compiler to change from imperative
+        % code to Lustre
+        function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft)
+            if obj.islocalContract
+                %Only import contracts are supported for the moment.
+                for i=1:numel(obj.localEqs)
+                    if isa(obj.localEqs{i}, 'ContractImportExpr')
+                        [obj.localEqs{i}, outputs_map] = ...
+                            obj.localEqs{i}.pseudoCode2Lustre(outputs_map);
+                    end
+                end
+                new_obj = obj;
+            else
+                %it is not used by stateflow.
+                new_obj = obj;
+            end
+        end
         %% This function is used by KIND2 LustreProgram.print()
         function nodesCalled = getNodesCalled(obj)
             nodesCalled = {};

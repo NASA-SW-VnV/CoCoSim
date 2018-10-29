@@ -141,7 +141,7 @@ classdef StateflowTransition_To_Lustre
             end
             % create body
 
-            [body, outputs, inputs, external_libraries, foundTerminatorJun] = ...
+            [body, outputs, inputs, variables, external_libraries, foundTerminatorJun] = ...
                 StateflowTransition_To_Lustre.transitions_code(T, ...
                 isDefaultTrans, isInnerTrans, ...
                 parentPath, cond_prefix, idStateVar);
@@ -168,8 +168,10 @@ classdef StateflowTransition_To_Lustre
             else
                 inputs = LustreVar.removeVar(inputs, SF_To_LustreNode.virtualVarStr());
             end
+            variables = LustreVar.uniqueVars(variables);
             transitionNode.setOutputs(outputs);
             transitionNode.setInputs(inputs);
+            transitionNode.setLocalVars(variables);
             SF_STATES_NODESAST_MAP(node_name) = transitionNode;
         end
         %% Condition and Transition Actions
@@ -262,7 +264,7 @@ classdef StateflowTransition_To_Lustre
         
         
         %% Transition code
-        function [body, outputs, inputs, external_libraries, foundTerminatorJun] = ...
+        function [body, outputs, inputs, variables, external_libraries, foundTerminatorJun] = ...
                 transitions_code(transitions, isDefaultTrans, isInnerTrans, parentPath, ...
                 cond_prefix, idStateVar, fullPathT)
             if ~exist('fullPathT', 'var')
@@ -271,12 +273,13 @@ classdef StateflowTransition_To_Lustre
             body = {};
             outputs = {};
             inputs = {};
+            variables = {};
             external_libraries = {};
             n = numel(transitions);
             foundTerminatorJun = false;
             for i=1:n
                 t_list = [fullPathT, transitions(i)];
-                [body_i, outputs_i, inputs_i, external_libraries_i, ...
+                [body_i, outputs_i, inputs_i, variables_i, external_libraries_i, ...
                     foundTerminatorJun_i] = ...
                     StateflowTransition_To_Lustre.evaluate_Transition(...
                     transitions{i}, isDefaultTrans, isInnerTrans, parentPath, ...
@@ -284,11 +287,12 @@ classdef StateflowTransition_To_Lustre
                 body = [ body , body_i ];
                 outputs = [ outputs , outputs_i ] ;
                 inputs = [ inputs , inputs_i ] ;
+                variables = [variables, variables_i];
                 external_libraries = [external_libraries , external_libraries_i];
                 foundTerminatorJun = foundTerminatorJun_i || foundTerminatorJun;
             end
         end
-        function [body, outputs, inputs, external_libraries, foundTerminatorJun] = ...
+        function [body, outputs, inputs, variables, external_libraries, foundTerminatorJun] = ...
                 evaluate_Transition(t, isDefaultTrans, isInnerTrans, parentPath, ...
                 cond_prefix, idStateVar, fullPathT)
             global SF_STATES_NODESAST_MAP SF_JUNCTIONS_PATH_MAP;
@@ -296,6 +300,7 @@ classdef StateflowTransition_To_Lustre
             outputs = {};
             inputs = {};
             external_libraries = {};
+            variables = {};
             foundTerminatorJun = false;
             % Transition is marked for evaluation.
             % Does the transition have a condition?
@@ -314,12 +319,19 @@ classdef StateflowTransition_To_Lustre
             end
             
             if ~isempty(condition)
-                %execute condition action
                 if ~isempty(cond_prefix)
                     trans_cond = BinaryExpr(BinaryExpr.AND, cond_prefix, condition);
                 else
                     trans_cond = condition;
                 end
+                % add condition variable so the condition action can not change
+                % the truth value of the condition.
+                condName = StateflowTransition_To_Lustre.getCondActionName(t);
+                body{end+1} = LustreEq(VarIdExpr(condName), trans_cond);
+                trans_cond = VarIdExpr(condName);
+                variables{end+1} = LustreVar(condName, 'bool');
+                %execute condition action
+                
                 transCondActionNodeName = ...
                     StateflowTransition_To_Lustre.getCondActionNodeName(t);
                 if isKey(SF_STATES_NODESAST_MAP, transCondActionNodeName)
@@ -369,7 +381,7 @@ classdef StateflowTransition_To_Lustre
                         else
                             %the junction has outgoing transitions
                             %Repeat the algorithm
-                            [body_i, outputs_i, inputs_i, ...
+                            [body_i, outputs_i, inputs_i, variables_i, ...
                                 external_libraries_i, foundTerminatorJun] = ...
                                 StateflowTransition_To_Lustre.transitions_code(...
                                 transitions2, isDefaultTrans, isInnerTrans, parentPath, ...
@@ -377,6 +389,7 @@ classdef StateflowTransition_To_Lustre
                             body = [body, body_i];
                             outputs = [outputs, outputs_i];
                             inputs = [inputs, inputs_i];
+                            variables = [variables, variables_i];
                             external_libraries = [external_libraries, external_libraries_i];
                         end
                         return;
@@ -755,6 +768,17 @@ classdef StateflowTransition_To_Lustre
                 sourceName, ...
                 SF_To_LustreNode.getUniqueName(dst), id_str );
             
+        end
+        function node_name = getCondActionName(T)
+            src = T.Source;
+            if isempty(src)
+                isDefaultTrans = true;
+            else
+                isDefaultTrans = false;
+            end
+            transition_prefix = ...
+                StateflowTransition_To_Lustre.getUniqueName(T, src, isDefaultTrans);
+            node_name = sprintf('%s_Cond', transition_prefix);
         end
         function node_name = getCondActionNodeName(T, src, isDefaultTrans)
             if nargin < 2

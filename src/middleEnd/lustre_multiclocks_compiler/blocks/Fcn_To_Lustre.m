@@ -111,7 +111,7 @@ classdef Fcn_To_Lustre < Block_To_Lustre
                     tokens = regexp(tree, '^[a-zA-z]\w*', 'match');
                     if isempty(tokens)
                         %numeric value
-                        if strcmp(inputs_dt, 'real')
+                        if strcmp(inputs_dt, 'real') || isempty(inputs_dt)
                             code = RealExpr(str2double(tree));
                         elseif strcmp(inputs_dt, 'bool')
                             code = BooleanExpr(str2double(tree));
@@ -129,7 +129,7 @@ classdef Fcn_To_Lustre < Block_To_Lustre
                                     'Not found Variable "%s" in block "%s"', tokens{1}, blk.Origin_path);
                                 throw(ME);
                             end
-                            if strcmp(inputs_dt, 'real')
+                            if strcmp(inputs_dt, 'real')|| isempty(inputs_dt)
                                 code = RealExpr(value);
                             elseif strcmp(inputs_dt, 'bool')
                                 code = BooleanExpr(value);

@@ -64,7 +64,20 @@ classdef IteExpr < LustreExpr
             elseCondId = obj.ElseExpr.GetVarIds();
             varIds = [vcondId, thenCondId, elseCondId];
         end
-        
+        % This function is used in Stateflow compiler to change from imperative
+        % code to Lustre
+        function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft)
+            new_obj = IteExpr(obj.condition.pseudoCode2Lustre(outputs_map, false),...
+                obj.thenExpr.pseudoCode2Lustre(outputs_map, false),...
+                obj.ElseExpr.pseudoCode2Lustre(outputs_map, false),...
+                obj.OneLine);
+        end
+        function [new_obj, outputs_map] = pseudoCode2Lustre_OnlyElseExp(obj, outputs_map, old_outputs_map)
+            new_obj = IteExpr(obj.condition.pseudoCode2Lustre(old_outputs_map, false),...
+                obj.thenExpr.pseudoCode2Lustre(old_outputs_map, false),...
+                obj.ElseExpr.pseudoCode2Lustre(outputs_map, false),...
+                obj.OneLine);
+        end
         %% This function is used by KIND2 LustreProgram.print()
         function nodesCalled = getNodesCalled(obj)
             nodesCalled = {};

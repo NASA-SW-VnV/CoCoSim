@@ -23,7 +23,9 @@ classdef VarIdExpr < LustreExpr
         function id = getId(obj)
             id = obj.id;
         end
-        
+        function setId(obj, name)
+            obj.id = name;
+        end
         function new_obj = deepCopy(obj)
             new_obj = VarIdExpr(obj.id);
         end
@@ -39,6 +41,22 @@ classdef VarIdExpr < LustreExpr
         %% This function is used by Stateflow function SF_To_LustreNode.getPseudoLusAction
         function varIds = GetVarIds(obj)
             varIds = {obj.id};
+        end
+        % this function is used in Stateflow compiler to change from imperative
+        % code to Lustre
+        function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft)
+            new_obj = obj.deepCopy();
+            if ~isempty(outputs_map) && isKey(outputs_map, obj.getId())
+                occ = outputs_map(obj.getId());
+                if isLeft
+                    %increase number of occurance
+                    occ = occ + 1;
+                end
+                if occ > 0
+                    new_obj.setId(strcat(obj.getId(), '__', num2str(occ)));
+                    outputs_map(obj.getId()) = occ;
+                end
+            end
         end
         
         %% This function is used by KIND2 LustreProgram.print()

@@ -18,9 +18,14 @@ classdef Chart_To_Lustre < Block_To_Lustre
         function  write_code(obj, parent, blk, xml_trace, varargin)
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             [inputs] = SLX2LusUtils.getBlockInputsNames(parent, blk);
-            % This current version is using old lustre compiler for Stateflow
-            node_name = get_full_name( blk, true );
-            
+            if isempty(inputs)
+                inputs{1} = BooleanExpr(true);
+            end
+            % if using old lustre compiler for Stateflow. Uncomment this
+            %node_name = get_full_name( blk, true );
+            % the new compiler
+            node_name = SLX2LusUtils.node_name_format(blk);
+           
             code = LustreEq(outputs, NodeCallExpr(node_name, inputs));
 
             obj.setCode( code );

@@ -32,7 +32,6 @@ classdef TupleExpr < LustreExpr
         
         function new_obj = deepCopy(obj)
             new_args = cellfun(@(x) x.deepCopy(), obj.args, 'UniformOutput', 0);
-            
             new_obj = TupleExpr(new_args);
         end
         %% This functions are used for ForIterator block
@@ -59,6 +58,16 @@ classdef TupleExpr < LustreExpr
                 varIds = [varIds, obj.args{i}.GetVarIds()];
             end
             
+        end
+        % This function is used in Stateflow compiler to change from imperative
+        % code to Lustre
+        function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft)
+            new_args = cell(numel(obj.args), 1);
+            for i=1:numel(obj.args)
+                [new_args{i}, outputs_map] = ...
+                    obj.args{i}.pseudoCode2Lustre(outputs_map, isLeft);
+            end
+            new_obj = TupleExpr(new_args);
         end
         %% This function is used by KIND2 LustreProgram.print()
         function nodesCalled = getNodesCalled(obj)

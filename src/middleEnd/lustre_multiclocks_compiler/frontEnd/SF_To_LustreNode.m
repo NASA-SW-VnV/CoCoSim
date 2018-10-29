@@ -158,6 +158,12 @@ classdef SF_To_LustreNode
                 StateflowState_To_Lustre.write_ChartNode(parent, chart, states{end}, dataAndEvents, events);
             external_nodes = [external_nodes, ...
                 external_nodes_i];
+            
+            %change from imperative code to Lustre
+            %main_node = main_node.pseudoCode2Lustre();% already handled
+            for i=1:numel(external_nodes)
+                external_nodes{i} = external_nodes{i}.pseudoCode2Lustre();
+            end
         end
         %%
         %% Get unique short name

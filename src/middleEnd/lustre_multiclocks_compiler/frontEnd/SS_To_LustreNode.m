@@ -32,11 +32,12 @@ classdef SS_To_LustreNode
             end
             
             %% handling Stateflow
-            if isfield(ss_ir, 'SFBlockType') && isequal(ss_ir.SFBlockType, 'Chart')
-                [main_node, external_nodes, external_libraries] = ...
-                    SS_To_LustreNode.stateflowCode(ss_ir, xml_trace);
-                return;
-            end
+            %Old Compiler. The new compiler is handling SF Chart in SF_To_LustreNode
+            % if isfield(ss_ir, 'SFBlockType') && isequal(ss_ir.SFBlockType, 'Chart')
+            %     [main_node, external_nodes, external_libraries] = ...
+            %         SS_To_LustreNode.stateflowCode(ss_ir, xml_trace);
+            %     return;
+            % end
             %%
             
             if isContractBlk && ~BackendType.isKIND2(backend)

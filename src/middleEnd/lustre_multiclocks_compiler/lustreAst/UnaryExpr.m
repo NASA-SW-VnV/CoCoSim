@@ -58,7 +58,15 @@ classdef UnaryExpr < LustreExpr
         function varIds = GetVarIds(obj)
             varIds = obj.expr.GetVarIds();
         end
-        
+        % This function is used in Stateflow compiler to change from imperative
+        % code to Lustre
+        function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft)
+            %UnaryExpr is always on the right of an Equation
+            [new_expr, ~] = obj.expr.pseudoCode2Lustre(outputs_map, false);
+            new_obj = UnaryExpr(obj.op,...
+                new_expr,...
+                obj.withPar);
+        end
         %% This function is used by KIND2 LustreProgram.print()
         function nodesCalled = getNodesCalled(obj)
             nodesCalled = {};

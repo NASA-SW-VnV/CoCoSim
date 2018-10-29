@@ -11,7 +11,7 @@ classdef LustreComment < LustreExpr
         isMultiLine;
     end
     
-    methods 
+    methods
         function obj = LustreComment(text, isMultiLine)
             obj.text = text;
             if nargin < 2
@@ -33,6 +33,12 @@ classdef LustreComment < LustreExpr
         end
         
         function new_obj = changeArrowExp(obj, ~)
+            new_obj = obj;
+        end
+        
+        %% This function is used in Stateflow compiler to change from imperative
+        % code to Lustre
+        function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft)
             new_obj = obj;
         end
         
@@ -70,6 +76,6 @@ classdef LustreComment < LustreExpr
             code = obj.print_lustrec(BackendType.PRELUDE);
         end
     end
-
+    
 end
 
