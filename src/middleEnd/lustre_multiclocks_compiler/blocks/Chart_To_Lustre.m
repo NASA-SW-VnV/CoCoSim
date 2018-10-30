@@ -16,19 +16,43 @@ classdef Chart_To_Lustre < Block_To_Lustre
     methods
         
         function  write_code(obj, parent, blk, xml_trace, varargin)
-            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
-            [inputs] = SLX2LusUtils.getBlockInputsNames(parent, blk);
-            if isempty(inputs)
-                inputs{1} = BooleanExpr(true);
-            end
             % if using old lustre compiler for Stateflow. Uncomment this
             %node_name = get_full_name( blk, true );
             % the new compiler
             node_name = SLX2LusUtils.node_name_format(blk);
+            
+            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+            [inputs] = SLX2LusUtils.getBlockInputsNames(parent, blk);
+            [triggerInputs] = SLX2LusUtils.getSubsystemTriggerInputsNames(parent, blk);
+            codes = {};
+            if ~isempty(triggerInputs)
+                cond = cell(1, blk.CompiledPortWidths.Trigger);
+                for i=1:blk.CompiledPortWidths.Trigger
+                    TriggerType = blk.StateflowContent.Events{i}.Trigger;
+                    [lusTriggerportDataType, zero] = SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Trigger{1});
+                    [triggerCode, status] = SLX2LusUtils.getResetCode(...
+                        TriggerType, lusTriggerportDataType, triggerInputs{i} , zero);
+                    if status
+                        display_msg(sprintf('This External reset type [%s] is not supported in block %s.', ...
+                            TriggerType, blk.Origin_path), ...
+                            MsgType.ERROR, 'Constant_To_Lustre', '');
+                        return;
+                    end
+                    v_name = sprintf('%s_Event%d', node_name, i);
+                    obj.addVariable(LustreVar(v_name, 'bool'));
+                    codes{end+1} = LustreEq(VarIdExpr(v_name), triggerCode);
+                    cond{i} = VarIdExpr(v_name);
+                end
+                inputs = [cond, inputs];
+            end
+            if isempty(inputs)
+                inputs{1} = BooleanExpr(true);
+            end
+            
            
-            code = LustreEq(outputs, NodeCallExpr(node_name, inputs));
+            codes{end+1} = LustreEq(outputs, NodeCallExpr(node_name, inputs));
 
-            obj.setCode( code );
+            obj.setCode( codes );
             obj.addVariable(outputs_dt); 
         end
         
@@ -41,6 +65,6 @@ classdef Chart_To_Lustre < Block_To_Lustre
             is_Abstracted = false;
         end
     end
-    
+
 end
 

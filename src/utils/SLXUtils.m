@@ -282,16 +282,16 @@ classdef SLXUtils
         function [input_struct, ...
                 simulation_step, ...
                 stop_time] = get_random_test(slx_file_name, inports, inputEvents_names, nb_steps,IMAX, IMIN)
-            if ~exist('inputEvents_names', 'var')
+            if nargin < 3
                 inputEvents_names = {};
             end
-            if ~exist('nb_steps', 'var')
+            if nargin < 4
                 nb_steps = 100;
             end
-            if ~exist('IMAX', 'var')
+            if nargin < 5
                 IMAX = 500;
             end
-            if ~exist('IMIN', 'var')
+            if nargin < 6
                 IMIN = -500;
             end
             numberOfInports = numel(inports);
@@ -323,10 +323,13 @@ classdef SLXUtils
                     min = IMIN(1);
                     max = IMAX(1);
                 end
-                if find(strcmp(inputEvents_names,inports(i).name))
-                    input_struct.signals(i).values = square((numberOfInports-i+1)*rand(1)*input_struct.time);
-                    input_struct.signals(i).dimensions = 1;
-                elseif strcmp(LusValidateUtils.get_lustre_dt(inports(i).datatype),'bool')
+                %TODO: To use 'square', the following product must be licensed, installed, and enabled:
+                %   Signal Processing Toolbox
+%                 if find(strcmp(inputEvents_names,inports(i).name))
+%                     input_struct.signals(i).values = square((numberOfInports-i+1)*rand(1)*input_struct.time);
+%                     input_struct.signals(i).dimensions = 1;
+%                 else
+                if strcmp(LusValidateUtils.get_lustre_dt(inports(i).datatype),'bool')
                     input_struct.signals(i).values = LusValidateUtils.construct_random_booleans(nb_steps, min, max, dim);
                     input_struct.signals(i).dimensions = dim;
                 elseif strcmp(LusValidateUtils.get_lustre_dt(inports(i).datatype),'int')

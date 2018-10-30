@@ -50,7 +50,7 @@ classdef StateflowTransition_To_Lustre
             idStateValue = IntExpr(0);
             isDefaultTrans = true;
             isInnerTrans = false;
-            cond_prefix = BinaryExpr(BinaryExpr.EQ, idStateVar, IntExpr(0));
+            state_cond = BinaryExpr(BinaryExpr.EQ, idStateVar, IntExpr(0));
             node_name = ...
                 StateflowState_To_Lustre.getStateDefaultTransNodeName(state);
             comment = LustreComment(...
@@ -58,7 +58,7 @@ classdef StateflowTransition_To_Lustre
             [transitionNode, external_libraries] = ...
                 StateflowTransition_To_Lustre.getTransitionsNode(T, parentPath, ...
                 idStateVar, idStateValue,...
-                cond_prefix, isDefaultTrans, isInnerTrans, ...
+                state_cond, isDefaultTrans, isInnerTrans, ...
                 node_name, comment);
         end
         
@@ -82,7 +82,7 @@ classdef StateflowTransition_To_Lustre
             idStateValue = IntExpr(state.Id);
             isDefaultTrans = false;
             isInnerTrans = true;
-            cond_prefix = BinaryExpr(BinaryExpr.EQ, idStateVar, IntExpr(state.Id));
+            state_cond = BinaryExpr(BinaryExpr.EQ, idStateVar, IntExpr(state.Id));
             node_name = ...
                 StateflowState_To_Lustre.getStateInnerTransNodeName(state);
             comment = LustreComment(...
@@ -90,7 +90,7 @@ classdef StateflowTransition_To_Lustre
             [transitionNode, external_libraries] = ...
                 StateflowTransition_To_Lustre.getTransitionsNode(T, parentPath, ...
                 idStateVar, idStateValue,...
-                cond_prefix, isDefaultTrans, isInnerTrans, ...
+                state_cond, isDefaultTrans, isInnerTrans, ...
                 node_name, comment);
         end
         %get_OuterTransitionsNode
@@ -112,7 +112,7 @@ classdef StateflowTransition_To_Lustre
             idStateValue = IntExpr(state.Id);
             isDefaultTrans = false;
             isInnerTrans = false;
-            cond_prefix = BinaryExpr(BinaryExpr.EQ, idStateVar, IntExpr(state.Id));
+            state_cond = BinaryExpr(BinaryExpr.EQ, idStateVar, IntExpr(state.Id));
             node_name = ...
                 StateflowState_To_Lustre.getStateOuterTransNodeName(state);
             comment = LustreComment(...
@@ -120,14 +120,14 @@ classdef StateflowTransition_To_Lustre
             [transitionNode, external_libraries] = ...
                 StateflowTransition_To_Lustre.getTransitionsNode(T, parentPath, ...
                 idStateVar, idStateValue,...
-                cond_prefix, isDefaultTrans, isInnerTrans, ...
+                state_cond, isDefaultTrans, isInnerTrans, ...
                 node_name, comment);
         end
         %getTransitionsNode
         function [transitionNode, external_libraries] = ...
                 getTransitionsNode(T, parentPath, ...
                 idStateVar, idStateValue,...
-                cond_prefix, isDefaultTrans, isInnerTrans, ...
+                state_cond, isDefaultTrans, isInnerTrans, ...
                 node_name, comment)
             global SF_STATES_NODESAST_MAP;
             transitionNode = {};
@@ -144,7 +144,7 @@ classdef StateflowTransition_To_Lustre
             [body, outputs, inputs, variables, external_libraries, foundTerminatorJun] = ...
                 StateflowTransition_To_Lustre.transitions_code(T, ...
                 isDefaultTrans, isInnerTrans, ...
-                parentPath, cond_prefix, idStateVar);
+                parentPath, state_cond, {}, idStateVar);
             % Go back to stateId if the junction termination happened.
             if foundTerminatorJun
                 body{end+1} = LustreEq(idStateVar, ...
@@ -266,7 +266,7 @@ classdef StateflowTransition_To_Lustre
         %% Transition code
         function [body, outputs, inputs, variables, external_libraries, foundTerminatorJun] = ...
                 transitions_code(transitions, isDefaultTrans, isInnerTrans, parentPath, ...
-                cond_prefix, idStateVar, fullPathT)
+                state_cond, cond_prefix, idStateVar, fullPathT)
             if ~exist('fullPathT', 'var')
                 fullPathT = {};
             end
@@ -283,7 +283,7 @@ classdef StateflowTransition_To_Lustre
                     foundTerminatorJun_i] = ...
                     StateflowTransition_To_Lustre.evaluate_Transition(...
                     transitions{i}, isDefaultTrans, isInnerTrans, parentPath, ...
-                    cond_prefix, idStateVar, t_list);
+                    state_cond, cond_prefix, idStateVar, t_list);
                 body = [ body , body_i ];
                 outputs = [ outputs , outputs_i ] ;
                 inputs = [ inputs , inputs_i ] ;
@@ -294,7 +294,7 @@ classdef StateflowTransition_To_Lustre
         end
         function [body, outputs, inputs, variables, external_libraries, foundTerminatorJun] = ...
                 evaluate_Transition(t, isDefaultTrans, isInnerTrans, parentPath, ...
-                cond_prefix, idStateVar, fullPathT)
+                state_cond, cond_prefix, idStateVar, fullPathT)
             global SF_STATES_NODESAST_MAP SF_JUNCTIONS_PATH_MAP;
             body = {};
             outputs = {};
@@ -320,39 +320,45 @@ classdef StateflowTransition_To_Lustre
             
             if ~isempty(condition)
                 if ~isempty(cond_prefix)
-                    trans_cond = BinaryExpr(BinaryExpr.AND, cond_prefix, condition);
+                    trans_cond = BinaryExpr.BinaryMultiArgs(BinaryExpr.AND,...
+                        {state_cond, cond_prefix, condition});
                 else
-                    trans_cond = condition;
-                end
-                % add condition variable so the condition action can not change
-                % the truth value of the condition.
-                condName = StateflowTransition_To_Lustre.getCondActionName(t);
-                body{end+1} = LustreEq(VarIdExpr(condName), trans_cond);
-                trans_cond = VarIdExpr(condName);
-                variables{end+1} = LustreVar(condName, 'bool');
-                %execute condition action
-                
-                transCondActionNodeName = ...
-                    StateflowTransition_To_Lustre.getCondActionNodeName(t);
-                if isKey(SF_STATES_NODESAST_MAP, transCondActionNodeName)
-                    %condition Action exists.
-                    actionNodeAst = SF_STATES_NODESAST_MAP(transCondActionNodeName);
-                    [call, oututs_Ids] = actionNodeAst.nodeCall();
-                    if isempty(trans_cond)
-                        body{end+1} = LustreEq(oututs_Ids, call);
-                        outputs = [outputs, actionNodeAst.getOutputs()];
-                        inputs = [inputs, actionNodeAst.getInputs()];
-                    else
-                        body{end+1} = LustreEq(oututs_Ids, ...
-                            IteExpr(trans_cond, call, TupleExpr(oututs_Ids)));
-                        outputs = [outputs, actionNodeAst.getOutputs()];
-                        inputs = [inputs, actionNodeAst.getOutputs()];
-                        inputs = [inputs, actionNodeAst.getInputs()];
-                    end
+                    trans_cond = BinaryExpr(BinaryExpr.AND, state_cond, condition);
                 end
             else
-                trans_cond = cond_prefix;
+                if ~isempty(cond_prefix)
+                    trans_cond = BinaryExpr(BinaryExpr.AND, state_cond, cond_prefix);
+                else
+                    trans_cond = state_cond;
+                end
             end
+            % add condition variable so the condition action can not change
+            % the truth value of the condition.
+            condName = StateflowTransition_To_Lustre.getCondActionName(t);
+            body{end+1} = LustreEq(VarIdExpr(condName), trans_cond);
+            trans_cond = VarIdExpr(condName);
+            variables{end+1} = LustreVar(condName, 'bool');
+            %execute condition action
+            
+            transCondActionNodeName = ...
+                StateflowTransition_To_Lustre.getCondActionNodeName(t);
+            if isKey(SF_STATES_NODESAST_MAP, transCondActionNodeName)
+                %condition Action exists.
+                actionNodeAst = SF_STATES_NODESAST_MAP(transCondActionNodeName);
+                [call, oututs_Ids] = actionNodeAst.nodeCall();
+                if isempty(trans_cond)
+                    body{end+1} = LustreEq(oututs_Ids, call);
+                    outputs = [outputs, actionNodeAst.getOutputs()];
+                    inputs = [inputs, actionNodeAst.getInputs()];
+                else
+                    body{end+1} = LustreEq(oututs_Ids, ...
+                        IteExpr(trans_cond, call, TupleExpr(oututs_Ids)));
+                    outputs = [outputs, actionNodeAst.getOutputs()];
+                    inputs = [inputs, actionNodeAst.getOutputs()];
+                    inputs = [inputs, actionNodeAst.getInputs()];
+                end
+            end
+            
             
             %Is the destination a state or a junction?
             destination = t.Destination;
@@ -385,7 +391,7 @@ classdef StateflowTransition_To_Lustre
                                 external_libraries_i, foundTerminatorJun] = ...
                                 StateflowTransition_To_Lustre.transitions_code(...
                                 transitions2, isDefaultTrans, isInnerTrans, parentPath, ...
-                                trans_cond, idStateVar, fullPathT);
+                                state_cond, trans_cond, idStateVar, fullPathT);
                             body = [body, body_i];
                             outputs = [outputs, outputs_i];
                             inputs = [inputs, inputs_i];
