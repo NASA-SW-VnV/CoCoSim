@@ -23,20 +23,17 @@ if Block_To_Lustre.ignored(sub_blk)
     isIgnored = 1;
     return;
 end
-
 if isfield(sub_blk, 'Mask') && strcmp(sub_blk.Mask, 'on')
     masktype = sub_blk.MaskType;
     fun_name = [Block_To_Lustre.blkTypeFormat(masktype) '_To_Lustre'];
-    fun_path = which(fun_name);
-    if isempty(fun_path)
+    if exist(fun_name, 'file') ~= 2
         type = sub_blk.BlockType;
         fun_name = [Block_To_Lustre.blkTypeFormat(type) '_To_Lustre'];
     end
 elseif isfield(sub_blk, 'SFBlockType')
     sfblockType = sub_blk.SFBlockType;
     fun_name = [Block_To_Lustre.blkTypeFormat(sfblockType) '_To_Lustre'];
-    fun_path = which(fun_name);
-    if isempty(fun_path)
+    if exist(fun_name, 'file') ~= 2
         type = sub_blk.BlockType;
         fun_name = [Block_To_Lustre.blkTypeFormat(type) '_To_Lustre'];
     end
@@ -44,8 +41,7 @@ else
     type = sub_blk.BlockType;
     fun_name = [Block_To_Lustre.blkTypeFormat(type) '_To_Lustre'];
 end
-fun_path = which(fun_name);
-if isempty(fun_path)
+if exist(fun_name, 'file') ~= 2
     status = 1;
     if ~isempty(masktype)
         msg = sprintf('Block "%s" with BlockType "%s" and MaskType "%s" is not supported', sub_blk.Origin_path, type, masktype);
@@ -57,12 +53,8 @@ if isempty(fun_path)
     display_msg(msg, MsgType.ERROR, 'getWriteType', '');
     return;
 else
-    [parent, fname, ~] = fileparts(fun_path);
-    PWD = pwd;
-    if ~isempty(parent); cd(parent); end
-    h = str2func(fname);
+    h = str2func(fun_name);
     b = h();
-    if ~isempty(parent); cd(PWD); end
 end
 
 end

@@ -5,14 +5,15 @@ function [ ] = toLustreVerify(model_full_path,  const_files, backend, varargin)
 % All Rights Reserved.
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-if ~exist('const_files', 'var') || isempty(const_files)
+if nargin < 2 || isempty(const_files)
     const_files = {};
 end
-if ~exist('backend', 'var') || isempty(backend)
+if nargin < 3 || isempty(backend)
     backend = BackendType.KIND2;
 end
 
-
+% Get start time
+t_start = now;
 %% run ToLustre
 [nom_lustre_file, xml_trace, status, unsupportedOptions, ...
     abstractedBlocks, pp_model_full_path] = ...
@@ -31,8 +32,7 @@ if BackendType.isKIND2(backend)
         return;
     end
 end
-% Get start time
-t_start = now;
+
 
 
 %% Get the list of verification blocks: Assertion, Proof Objective, Contracts, Observers.
