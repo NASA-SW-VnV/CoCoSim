@@ -15,6 +15,8 @@ function [nom_lustre_file, xml_trace, status, unsupportedOptions, abstractedBloc
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%% Get start time
+t_start = tic;
 
 %% inputs treatment
 if nargin < 1
@@ -31,6 +33,7 @@ forceGeneration = 0;
 for i=1:numel(varargin)
     if strcmp(varargin{i}, 'forceCodeGen')
         forceGeneration = 1;
+        break;
     end
 end
 if ~forceGeneration
@@ -81,8 +84,7 @@ if ~forceGeneration && isKey(ToLustre_datenum_map, model_path)
     end
 end
 
-%% Get start time
-t_start = tic;
+
 try
     [unsupportedOptions, status, pp_model_full_path, ir_struct, output_dir, abstractedBlocks]= ...
         ToLustreUnsupportedBlocks(model_path, const_files, backend, varargin{:});
@@ -172,6 +174,10 @@ end
 %% writing traceability
 xml_trace.write();
 
+%% save results in mat file.
+save(mat_file, 'xml_trace', 'status', 'unsupportedOptions', 'abstractedBlocks', 'pp_model_full_path');
+ToLustre_datenum_map(model_path) = nom_lustre_file;
+
 %% display report files
 t_finish = toc(t_start);
 display_msg(Lustrecode, MsgType.DEBUG, 'lustre_multiclocks_compiler', '');
@@ -180,9 +186,7 @@ display_msg(msg, MsgType.RESULT, 'lustre_multiclocks_compiler', '');
 msg = sprintf('Lustre generation finished in %f seconds', t_finish);
 display_msg(msg, MsgType.RESULT, 'lustre_multiclocks_compiler', '');
 
-%% save results in mat file.
-save(mat_file, 'xml_trace', 'status', 'unsupportedOptions', 'abstractedBlocks', 'pp_model_full_path');
-ToLustre_datenum_map(model_path) = nom_lustre_file;
+
 end
 
 %%

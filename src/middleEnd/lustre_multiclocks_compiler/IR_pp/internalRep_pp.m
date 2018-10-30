@@ -1,4 +1,4 @@
-function [ new_ir ] = internalRep_pp( new_ir, json_export, output_dir )
+function [ new_ir, ir_handle_struct_map ] = internalRep_pp( new_ir, json_export, output_dir )
 %IR_PP pre-process the IR for cocoSim to adapte the IR to the compiler or
 %make some analysis in the IR level.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -28,7 +28,8 @@ if isstruct(functions) && isfield(functions, 'name')
         new_ir = fh(new_ir);
     end
 end
-
+[~, model_name, ~] = fileparts(new_ir.meta.file_path);
+ir_handle_struct_map = get_ir_handle_struct_map(new_ir, model_name);
 
 %% export json
 if json_export
@@ -74,3 +75,22 @@ display_msg('Done with the IR pre-processing', MsgType.INFO, 'internalRep_pp', '
 
 end
 
+function handle_struct_map = get_ir_handle_struct_map(ir_struct, block_name)
+
+handle_struct_map = containers.Map('KeyType','double', 'ValueType','any');
+
+
+if isfield(ir_struct.(block_name),'Handle')
+    handle_struct_map(ir_struct.(block_name).Handle) = ir_struct.(block_name);
+end
+
+
+if isfield(ir_struct.(block_name), 'Content')
+    fields = fieldnames(ir_struct.(block_name).Content);
+    for i=1:numel(fields)
+        handle_struct_map_i = get_ir_handle_struct_map(ir_struct.(block_name).Content, fields{i});
+        handle_struct_map = [handle_struct_map; handle_struct_map_i];
+    end
+end
+
+end

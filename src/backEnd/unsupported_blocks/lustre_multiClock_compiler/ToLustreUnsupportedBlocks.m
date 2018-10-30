@@ -27,9 +27,12 @@ if ~exist('const_files', 'var') || isempty(const_files)
     const_files = {};
 end
 mode_display = 1;
+skip_unsupportedblocks = 0;
 for i=1:numel(varargin)
     if strcmp(varargin{i}, 'nodisplay')
         mode_display = 0;
+    elseif strcmp(varargin{i}, 'skip_unsupportedblocks')
+        skip_unsupportedblocks = 1;
     end
 end
 if ~exist('backend', 'var') || isempty(backend)
@@ -91,10 +94,16 @@ if ~exist(output_dir, 'dir'); mkdir(output_dir); end
 display_msg('Building internal format', MsgType.INFO, 'ToLustreUnsupportedBlocks', '');
 [ir_struct, ~, ~, ~] = cocosim_IR(model_full_path,  0, output_dir);
 % Pre-process IR
-[ir_struct] = internalRep_pp(ir_struct, 1, output_dir);
+global ir_handle_struct_map;
+[ir_struct, ir_handle_struct_map] = internalRep_pp(ir_struct, 1, output_dir);
+
 
 
 %% Unsupported blocks detection
+if skip_unsupportedblocks
+    display_msg('Skipping unsupported blocks detection', Constants.INFO, 'ToLustreUnsupportedBlocks', '');
+    return;
+end
 display_msg('Unsupported blocks detection', Constants.INFO, 'ToLustreUnsupportedBlocks', '');
 
 
