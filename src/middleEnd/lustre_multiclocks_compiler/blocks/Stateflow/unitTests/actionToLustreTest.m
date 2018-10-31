@@ -31,7 +31,7 @@ function notSupportedActions = actionToLustreTest()
         % That's how we will know which test is not passing through.
         
         try
-            SF_To_LustreNode.getPseudoLusAction(actions{i}, false, true);
+            getPseudoLusAction(actions{i}, false, true);
         catch
             display_msg(sprintf('Expression Failed: %s', actions{i}), ...
                 MsgType.INFO, 'actionToLustreTest', '');
@@ -44,7 +44,7 @@ function notSupportedActions = actionToLustreTest()
         % The following call will raise an exception if something wrong.
         % That's how we will know which test is not passing through.
         try
-            SF_To_LustreNode.getPseudoLusAction(conditions{i}, true, true);
+            getPseudoLusAction(conditions{i}, true, true);
         catch
             display_msg(sprintf('Condition failed: %s', conditions{i}), ...
                 MsgType.INFO, 'actionToLustreTest', '');

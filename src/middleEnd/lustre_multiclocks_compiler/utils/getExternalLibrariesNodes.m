@@ -46,7 +46,7 @@ for i=1:numel(external_libraries)
         continue;
     end
     if ischar(node)
-        lustre_nodes{end + 1} = RawLustreCode(node);
+        lustre_nodes{end + 1} = RawLustreCode(node, lib);
     else
         lustre_nodes{end + 1} = node;
     end

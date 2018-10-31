@@ -53,7 +53,7 @@ classdef Kind2Utils2
             if ~exist('timeout', 'var')
                 CoCoSimPreferences = load_coco_preferences();
                 if isfield(CoCoSimPreferences, 'verificationTimeout')
-                    timeout = num2str(CoCoSimPreferences.verificationTimeout * 60);
+                    timeout = num2str(CoCoSimPreferences.verificationTimeout);
                 else
                     timeout = '120';
                 end

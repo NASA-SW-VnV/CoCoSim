@@ -32,12 +32,19 @@ classdef SS_To_LustreNode
             end
             
             %% handling Stateflow
-            %Old Compiler. The new compiler is handling SF Chart in SF_To_LustreNode
-            % if isfield(ss_ir, 'SFBlockType') && isequal(ss_ir.SFBlockType, 'Chart')
-            %     [main_node, external_nodes, external_libraries] = ...
-            %         SS_To_LustreNode.stateflowCode(ss_ir, xml_trace);
-            %     return;
-            % end
+            try
+                TOLUSTRE_SF_COMPILER = evalin('base', 'TOLUSTRE_SF_COMPILER');
+            catch
+                TOLUSTRE_SF_COMPILER =2;
+            end
+            if TOLUSTRE_SF_COMPILER == 1
+                %Old Compiler. The new compiler is handling SF Chart in SF_To_LustreNode
+                if isfield(ss_ir, 'SFBlockType') && isequal(ss_ir.SFBlockType, 'Chart')
+                    [main_node, external_nodes, external_libraries] = ...
+                        SS_To_LustreNode.stateflowCode(ss_ir, xml_trace);
+                    return;
+                end
+            end
             %%
             
             if isContractBlk && ~BackendType.isKIND2(backend)
@@ -555,7 +562,8 @@ classdef SS_To_LustreNode
             m = rt.find('-isa', 'Simulink.BlockDiagram', 'Name',bdroot(ss_ir.Origin_path));
             chart = m.find('-isa','Stateflow.Chart', 'Path', ss_ir.Origin_path);
             [ char_node, extern_Stateflow_nodes_fun] = write_Chart( chart, 0, xml_trace,'' );
-            main_node = RawLustreCode(sprintf(char_node));
+            node_name = get_full_name( chart, true );
+            main_node = RawLustreCode(sprintf(char_node), node_name);
             if isempty(extern_Stateflow_nodes_fun)
                 return;
             end
@@ -570,7 +578,7 @@ classdef SS_To_LustreNode
                 elseif strcmp(fun.Name,'lustre_conv_fun')
                     external_libraries{end + 1} = 'LustDTLib_conv';
                 elseif strcmp(fun.Name,'after')
-                    external_nodes{end + 1} = RawLustreCode(sprintf(temporal_operators(fun)));
+                    external_nodes{end + 1} = RawLustreCode(sprintf(temporal_operators(fun)), 'after');
                 elseif strcmp(fun.Name, 'min') && strcmp(fun.Type, 'int*int')
                     external_libraries{end + 1} = 'LustMathLib_min_int';
                 elseif strcmp(fun.Name, 'min') && strcmp(fun.Type, 'real*real')

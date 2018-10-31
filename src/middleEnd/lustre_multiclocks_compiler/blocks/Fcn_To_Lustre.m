@@ -101,7 +101,9 @@ classdef Fcn_To_Lustre < Block_To_Lustre
             end
             if ischar(tree)
                 % the case of final term in a tree
-                if ~isStateFlow && strcmp(tree, 'u')
+                if strcmp(tree, 'true') || strcmp(tree, 'false')
+                    code = BooleanExpr(tree);
+                elseif ~isStateFlow && strcmp(tree, 'u')
                     %the case of u with no index
                     code = inputs{1}{1};
                 elseif ~isStateFlow && ~isempty(regexp(tree, 'u\d+', 'match'))

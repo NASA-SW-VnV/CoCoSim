@@ -8,15 +8,22 @@ classdef RawLustreCode < LustreAst
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     properties
         code
+        name
     end
     
     methods 
-        function obj = RawLustreCode(code)
+        function obj = RawLustreCode(code, name)
             obj.code = code;
+            if nargin == 2
+                %for Raw Lustre Node
+                obj.name = name;
+            else
+                obj.name = '';
+            end
         end
         
         function new_obj = deepCopy(obj)
-            new_obj = RawLustreCode(obj.code);
+            new_obj = RawLustreCode(obj.code, obj.name);
         end
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)

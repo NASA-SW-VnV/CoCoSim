@@ -249,7 +249,7 @@ classdef StateflowTransition_To_Lustre
             nb_actions = numel(actions);
             for i=1:nb_actions
                 [body{end+1}, outputs_i, inputs_i, external_libraries_i] = ...
-                    SF_To_LustreNode.getPseudoLusAction(actions{i});
+                    getPseudoLusAction(actions{i});
                 outputs = [outputs, outputs_i];
                 inputs = [inputs, inputs_i];
                 external_libraries = [external_libraries, external_libraries_i];
@@ -315,11 +315,11 @@ classdef StateflowTransition_To_Lustre
             % Transition is marked for evaluation.
             % Does the transition have a condition?
             [condition, outputs_i, inputs_i, ~] = ...
-                SF_To_LustreNode.getPseudoLusAction(t.Condition, true);
+                getPseudoLusAction(t.Condition, true);
             outputs = [outputs, outputs_i];
             inputs = [inputs, inputs_i];
             [event, outputs_i, inputs_i, ~] = ...
-                SF_To_LustreNode.getPseudoLusAction(t.Event, true);
+                getPseudoLusAction(t.Event, true);
             outputs = [outputs, outputs_i];
             inputs = [inputs, inputs_i];  
             if ~isempty(condition) && ~isempty(event)

@@ -245,7 +245,7 @@ classdef StateflowState_To_Lustre
                 nb_actions = numel(actions);
                 for i=1:nb_actions
                     [body{end+1}, outputs_i, inputs_i, external_libraries_i] = ...
-                        SF_To_LustreNode.getPseudoLusAction(actions{i});
+                        getPseudoLusAction(actions{i});
                     outputs = [outputs, outputs_i];
                     inputs = [inputs, inputs_i];
                     external_libraries = [external_libraries, external_libraries_i];
@@ -307,7 +307,7 @@ classdef StateflowState_To_Lustre
             nb_actions = numel(actions);
             for i=1:nb_actions
                 [body{end+1}, outputs_i, inputs_i, external_libraries_i] = ...
-                    SF_To_LustreNode.getPseudoLusAction(actions{i});
+                    getPseudoLusAction(actions{i});
                 outputs = [outputs, outputs_i];
                 inputs = [inputs, inputs_i];
                 external_libraries = [external_libraries, external_libraries_i];
@@ -391,7 +391,7 @@ classdef StateflowState_To_Lustre
             
             for i=1:nb_actions
                 [body{end+1}, outputs_i, inputs_i, external_libraries_i] = ...
-                    SF_To_LustreNode.getPseudoLusAction(actions{i});
+                    getPseudoLusAction(actions{i});
                 outputs = [outputs, outputs_i];
                 inputs = [inputs, inputs_i];
                 external_libraries = [external_libraries, external_libraries_i];

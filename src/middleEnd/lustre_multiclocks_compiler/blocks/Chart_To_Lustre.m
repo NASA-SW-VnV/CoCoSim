@@ -16,10 +16,18 @@ classdef Chart_To_Lustre < Block_To_Lustre
     methods
         
         function  write_code(obj, parent, blk, xml_trace, varargin)
-            % if using old lustre compiler for Stateflow. Uncomment this
-            %node_name = get_full_name( blk, true );
-            % the new compiler
-            node_name = SLX2LusUtils.node_name_format(blk);
+            try
+                TOLUSTRE_SF_COMPILER = evalin('base', 'TOLUSTRE_SF_COMPILER');
+            catch
+                TOLUSTRE_SF_COMPILER =2;
+            end
+            if TOLUSTRE_SF_COMPILER == 1
+                % if using old lustre compiler for Stateflow. Uncomment this
+                node_name = get_full_name( blk, true );
+            else
+                % the new compiler
+                node_name = SLX2LusUtils.node_name_format(blk);
+            end
             
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             [inputs] = SLX2LusUtils.getBlockInputsNames(parent, blk);

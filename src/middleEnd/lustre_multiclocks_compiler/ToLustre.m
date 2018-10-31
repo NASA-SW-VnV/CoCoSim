@@ -245,13 +245,20 @@ if isfield(blk, 'Content') && ~isempty(blk.Content) ...
 elseif isfield(blk, 'SFBlockType') && isequal(blk.SFBlockType, 'Chart')
     
     try
-        % OLD compiler
-        %[main_node, ~, external_nodes, external_libraries_i] = ...
-        %    SS_To_LustreNode.subsystem2node(parent, blk, main_sampleTime, is_main_node, backend, xml_trace);
-        
-        % new compiler
-        [main_node, external_nodes, external_libraries_i ] = ...
-            SF_To_LustreNode.chart2node(parent,  blk,  main_sampleTime, backend, xml_trace);
+        try
+            TOLUSTRE_SF_COMPILER = evalin('base', 'TOLUSTRE_SF_COMPILER');
+        catch
+            TOLUSTRE_SF_COMPILER =2;
+        end
+        if TOLUSTRE_SF_COMPILER == 1
+            % OLD compiler
+            [main_node, ~, external_nodes, external_libraries_i] = ...
+                SS_To_LustreNode.subsystem2node(parent, blk, main_sampleTime, is_main_node, backend, xml_trace);
+        else
+            % new compiler
+            [main_node, external_nodes, external_libraries_i ] = ...
+                SF_To_LustreNode.chart2node(parent,  blk,  main_sampleTime, backend, xml_trace);
+        end
     catch me
         display_msg(sprintf('Translation to Lustre of block %s has failed.', blk.Origin_path),...
             MsgType.ERROR, 'write_body', '');
