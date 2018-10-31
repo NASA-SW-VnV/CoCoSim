@@ -3,28 +3,32 @@ classdef HtmlItem < handle
     %   Detailed explanation goes here
     
     properties
-        title
-        subtitles
+        title  % string description of guideline being checked
+        subtitles % list of HtmlItem for sub guideline results
         colorMap
-        text_color
-        icon_color
-        isBlkPath
+        text_color % text for title color
+        icon_color % collapsible icon color if there are subtitles
+        isBlkPath  % Path to offending Simulink block
     end
     
     methods
-        function obj = HtmlItem(title, subtitles, text_color, icon_color, isBlkPath, clearTitle)
+        function obj = HtmlItem(title, subtitles, text_color, icon_color,...
+                isBlkPath, cleanTitle)
             if ~exist('isBlkPath', 'var')
                 isBlkPath = false;
             end
-            if ~exist('clearTitle', 'var')
-                clearTitle = true;
+            if ~exist('cleanTitle', 'var')
+                cleanTitle = true;
             end
             obj.title = title;
-            if clearTitle
+            if cleanTitle
                 obj.title = HtmlItem.cleanTitle(obj.title);
             end
             if isBlkPath
-                obj.title = HtmlItem.addOpenCmd(obj.title);
+                name = get_param(title, 'Name');
+                parent = get_param(title, 'Parent');
+                obj.title = sprintf('%s in <a href="matlab:open_and_hilite_hyperlink (''%s'',''error'')">%s</a>', name, title, parent);
+                %obj.title = HtmlItem.addOpenCmd(obj.title);
             end
             if nargin < 2
                 obj.subtitles = {};
