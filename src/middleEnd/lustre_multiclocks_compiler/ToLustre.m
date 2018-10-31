@@ -16,7 +16,10 @@ function [nom_lustre_file, xml_trace, status, unsupportedOptions, abstractedBloc
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% global variables
-global TOLUSTRE_ENUMS_MAP;
+global TOLUSTRE_ENUMS_MAP KIND2 Z3 LUSTREC;
+if isempty(LUSTREC) || isempty(KIND2)
+    tools_config;
+end
 TOLUSTRE_ENUMS_MAP = containers.Map('KeyType', 'char', 'ValueType', 'any');
 %% Get start time
 t_start = tic;
@@ -170,6 +173,7 @@ try
     Lustrecode = program.print(backend);
     fprintf(fid, '%s', Lustrecode);
     fclose(fid);
+    display_msg(Lustrecode, MsgType.DEBUG, 'lustre_multiclocks_compiler', '');
 catch me
     display_msg('Printing Lustre AST to file failed',...
         MsgType.ERROR, 'write_body', '');
@@ -186,9 +190,20 @@ xml_trace.write();
 save(mat_file, 'xml_trace', 'status', 'unsupportedOptions', 'abstractedBlocks', 'pp_model_full_path');
 ToLustre_datenum_map(model_path) = nom_lustre_file;
 
+%% check lustre syntax
+if BackendType.isKIND2(backend)
+    [syntax_status, output] = Kind2Utils2.checkSyntaxError(nom_lustre_file, KIND2, Z3);
+elseif BackendType.isLUSTREC(backend)
+    [~, syntax_status, output] = LustrecUtils.generate_lusi(nom_lustre_file, LUSTREC );
+end
+if syntax_status
+    display_msg('Simulink To Lustre Syntax check has failed. The parsing error is the following:', MsgType.ERROR, 'TOLUSTRE', '');
+    display_msg(output, MsgType.ERROR, 'TOLUSTRE', '');
+    status = syntax_status;
+end
 %% display report files
 t_finish = toc(t_start);
-display_msg(Lustrecode, MsgType.DEBUG, 'lustre_multiclocks_compiler', '');
+
 msg = sprintf('Lustre File generated:%s', nom_lustre_file);
 display_msg(msg, MsgType.RESULT, 'lustre_multiclocks_compiler', '');
 msg = sprintf('Lustre generation finished in %f seconds', t_finish);

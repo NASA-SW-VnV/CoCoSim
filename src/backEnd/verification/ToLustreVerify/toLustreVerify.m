@@ -5,6 +5,7 @@ function [ ] = toLustreVerify(model_full_path,  const_files, backend, varargin)
 % All Rights Reserved.
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+global KIND2 Z3;
 if nargin < 2 || isempty(const_files)
     const_files = {};
 end
@@ -23,15 +24,7 @@ t_start = now;
 if status || ~isempty(unsupportedOptions)
     return;
 end
-if BackendType.isKIND2(backend)
-    tools_config;
-    [status, output] = Kind2Utils2.checkSyntaxError(nom_lustre_file, KIND2, Z3);
-    if status
-        display_msg('Simulink To Lustre has failed.', MsgType.ERROR, 'toLustreVerify', '');
-        display_msg(output, MsgType.DEBUG, 'toLustreVerify', '');
-        return;
-    end
-end
+
 
 
 

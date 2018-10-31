@@ -22,7 +22,9 @@
 % 3- Set your own paths by redefining the variables : ZUSTRE, LUSTREC,
 %   KIND2
 
-global tools_config_already_run;
+global tools_config_already_run LUSTREC LUSTREC_OPTS LUSTRET ...
+    LUCTREC_INCLUDE_DIR ZUSTRE Z3 KIND2 JKIND SEAHORN...
+    WLLVM WLLVMPP EXTRACT_BC IKOS;
 if isempty(tools_config_already_run)
     tools_config_already_run = 0;
 else

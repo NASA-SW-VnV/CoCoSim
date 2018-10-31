@@ -40,8 +40,9 @@ classdef LustrecUtils < handle
             end
         end
         %%
-        function [lusi_path, status] = generate_lusi(lus_file_path, LUSTREC )
+        function [lusi_path, status, lusi_out] = generate_lusi(lus_file_path, LUSTREC )
             % generate Lusi file
+            lusi_out = '';
             [lus_dir, lus_fname, ~] = fileparts(lus_file_path);
             lusi_path = fullfile(lus_dir,strcat(lus_fname, '.lusi'));
             if BUtils.isLastModified(lus_file_path, lusi_path)
@@ -52,8 +53,8 @@ classdef LustrecUtils < handle
             end
             msg = sprintf('generating lusi for "%s"\n',lus_file_path);
             display_msg(msg, MsgType.INFO, 'generate_lusi', '');
-            command = sprintf('%s  -lusi  "%s"',...
-                LUSTREC, lus_file_path);
+            command = sprintf('%s  -lusi  -d "%s" "%s"',...
+                LUSTREC, lus_dir, lus_file_path);
             msg = sprintf('LUSI_LUSTREC_COMMAND : %s\n',command);
             display_msg(msg, MsgType.INFO, 'generate_lusi', '');
             [status, lusi_out] = system(command);
@@ -62,7 +63,6 @@ classdef LustrecUtils < handle
                 display_msg(err, MsgType.ERROR, 'generate_lusi', '');
                 display_msg(err, MsgType.DEBUG, 'generate_lusi', '');
                 display_msg(lusi_out, MsgType.DEBUG, 'generate_lusi', '');
-                cd(OldPwd);
                 return
             end
             

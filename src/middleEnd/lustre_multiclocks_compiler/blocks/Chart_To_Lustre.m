@@ -64,7 +64,31 @@ classdef Chart_To_Lustre < Block_To_Lustre
             obj.addVariable(outputs_dt); 
         end
         
-        function options = getUnsupportedOptions(obj,~, ~, varargin)
+        function options = getUnsupportedOptions(obj,~, blk, varargin)
+            % Check inputs and outputs dimenstion
+            InportsWidth = blk.CompiledPortWidths.Inport;
+            for i=1:numel(InportsWidth)
+                if InportsWidth(i) > 1
+                    obj.addUnsupported_options(...
+                        sprintf(['Inport number %d in block %s is not a '...
+                         'scalare. Only scalar inputs are supported in Stateflow chart.'],....
+                         i, blk.Origin_path));
+                end
+            end
+            OutportsWidth = blk.CompiledPortWidths.Outport;
+            for i=1:numel(OutportsWidth)
+                if OutportsWidth(i) > 1
+                    obj.addUnsupported_options(...
+                        sprintf(['Outport number %d in block %s is not a '...
+                         'scalare. Only scalar outputs are supported in Stateflow chart.'],....
+                         i, blk.Origin_path));
+                end
+            end
+            % get all states unsupportedOptions
+            
+            % get all junctions unsupported Options
+            
+            
             options = obj.unsupported_options;
             
         end
