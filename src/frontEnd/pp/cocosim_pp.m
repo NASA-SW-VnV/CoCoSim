@@ -127,9 +127,9 @@ warning off
 for i=1:numel(ordered_pp_functions)
     [dirname, func_name, ~] = fileparts(ordered_pp_functions{i});
     cd(dirname);
-    if use_backup
-        save_system(new_model_base)
-        %save_ppmodel(new_model_base, new_file_path);
+    if bdIsDirty(new_model_base) && use_backup
+        %make sure to save the previous successful pp.
+        save_system(new_model_base);
     end
     fh = str2func(func_name);
     try
