@@ -7,18 +7,20 @@ function [results, passed] = jc_0221(model)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % ORION GN&C MATLAB/Simulink Standards
     % jc_0221: Usable characters for signal line names
+
     results = {};
     passed = 1;
     totalFail = 0;
     
     % Find all lines that has non alphabetic caracter, number or underscore
+    title = 'Allowed Characters are [a-zA-Z_0-9]';
     fsList = ppList(...
         find_system(model, 'Regexp', 'on','FindAll','on',...
         'type','line', 'Name', '\W'));
-    
-    title = 'Allowed Characters are [a-zA-Z_]';
-    [noSpecialCaracters, numFail] = ...
-        GuidelinesUtils.process_find_system_results(fsList,title, false, false);
+        
+    [noSpecialCharacters, numFail] = ...
+        GuidelinesUtils.process_find_system_results(fsList,title, ...
+        false, false);
     totalFail = totalFail + numFail;
     
     % Should not start with a number
@@ -27,9 +29,9 @@ function [results, passed] = jc_0221(model)
         'type','line', 'Name', '^[\d_]'));
     title = 'Should not start with a number or underscore';
     [shouldNotStartWithNumber, numFail] = ...
-        GuidelinesUtils.process_find_system_results(fsList,title,  false, false);
+        GuidelinesUtils.process_find_system_results(fsList,title,...
+        false, false);
     totalFail = totalFail + numFail;
-    
     
     % cannot have more than one consecutive underscore
     fsList = ppList(...
@@ -37,7 +39,8 @@ function [results, passed] = jc_0221(model)
         'type','line', 'Name', '__'));
     title = 'cannot have more than one consecutive underscore';
     [list3, numFail] = ...
-        GuidelinesUtils.process_find_system_results(fsList,title,  false, false);
+        GuidelinesUtils.process_find_system_results(fsList,title,...
+        false, false);
     totalFail = totalFail + numFail;
     
     % cannot end with an underscore
@@ -46,7 +49,8 @@ function [results, passed] = jc_0221(model)
         'type','line', 'Name', '_$'));
     title = 'cannot end with an underscore';
     [list4, numFail] = ...
-        GuidelinesUtils.process_find_system_results(fsList,title,  false, false);
+        GuidelinesUtils.process_find_system_results(fsList,title,...
+        false, false);
     totalFail = totalFail + numFail;
     
     if totalFail > 0
@@ -55,19 +59,19 @@ function [results, passed] = jc_0221(model)
     else
         color = 'green';
     end
-    
-    
+        
     %the main guideline
     title = 'jc_0221: Usable characters for signal line names';
     results{end+1} = HtmlItem(title, ...
-        {noSpecialCaracters, ...
+        {noSpecialCharacters, ...
         shouldNotStartWithNumber, ...
         list3, list4}, color, color);
 end
 
 function newList = ppList(list)
     %remove empty lines
-    Names = arrayfun(@(x) get_param(x, 'Name'), list, 'UniformOutput', false);
+    Names = arrayfun(@(x) get_param(x, 'Name'), list, 'UniformOutput',...
+        false);
     list = list(~strcmp(Names, ''));
     %add parent
     newList = arrayfun(@(x) ...
