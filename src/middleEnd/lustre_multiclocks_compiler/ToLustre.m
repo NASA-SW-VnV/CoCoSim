@@ -15,6 +15,9 @@ function [nom_lustre_file, xml_trace, status, unsupportedOptions, abstractedBloc
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%% global variables
+global TOLUSTRE_ENUMS_MAP;
+TOLUSTRE_ENUMS_MAP = containers.Map('KeyType', 'char', 'ValueType', 'any');
 %% Get start time
 t_start = tic;
 
@@ -137,7 +140,12 @@ end
 %TODO: change it to AST
 nodes_ast = [external_lib_code, nodes_ast];
 %% create LustreProgram
-program =  LustreProgram(open_list, nodes_ast, contracts_ast);
+keys = TOLUSTRE_ENUMS_MAP.keys();
+enumsAst = cell(numel(keys), 1);
+for i=1:numel(keys)
+    enumsAst{i} = EnumTypeExpr(keys{i}, TOLUSTRE_ENUMS_MAP(keys{i}));
+end            
+program =  LustreProgram(open_list, enumsAst, nodes_ast, contracts_ast);
 
 % copy Kind2 libraries
 if BackendType.isKIND2(backend) 

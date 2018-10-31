@@ -232,11 +232,13 @@ classdef StateflowState_To_Lustre
                         'COMPILER ERROR: Not found state "%s" in SF_STATES_PATH_MAP', parentName);
                     throw(ME);
                 end
-                idParentName = StateflowState_To_Lustre.getStateIDName(...
-                    SF_STATES_PATH_MAP(parentName));
+                state_parent = SF_STATES_PATH_MAP(parentName);
+                idParentName = StateflowState_To_Lustre.getStateIDName(state_parent);
+                [stateEnumType, childName] = ...
+                    StateflowState_To_Lustre.addStateEnum(state_parent, state);
                 body{1} = LustreComment('set state as active');
-                body{2} = LustreEq(VarIdExpr(idParentName), IntExpr(state.Id));
-                outputs{1} = LustreVar(idParentName, 'int');
+                body{2} = LustreEq(VarIdExpr(idParentName), VarIdExpr(childName));
+                outputs{1} = LustreVar(idParentName, stateEnumType);
                 
                 %actions code
                 actions = SFIRPPUtils.split_actions(state.Actions.Entry);
@@ -321,16 +323,18 @@ classdef StateflowState_To_Lustre
             %exit action is an inner Transition
             isInner = VarIdExpr(StateflowState_To_Lustre.isInnerStr());
             
-            
-            idParentName = StateflowState_To_Lustre.getStateIDName(...
-                SF_STATES_PATH_MAP(parentName));
+            state_parent = SF_STATES_PATH_MAP(parentName);
+            idParentName = StateflowState_To_Lustre.getStateIDName(state_parent);
+            [stateEnumType, childName] = ...
+                    StateflowState_To_Lustre.addStateEnum(state_parent, [], ...
+                    false, false, true);
             body{end + 1} = LustreComment('set state as inactive');
             % idParentName = if (not isInner) then 0 else idParentName;
             body{end + 1} = LustreEq(VarIdExpr(idParentName), ...
                 IteExpr(UnaryExpr(UnaryExpr.NOT, isInner), ...
-                IntExpr(0), VarIdExpr(idParentName)));
-            outputs{end + 1} = LustreVar(idParentName, 'int');
-            inputs{end + 1} = LustreVar(idParentName, 'int');
+                VarIdExpr(childName), VarIdExpr(idParentName)));
+            outputs{end + 1} = LustreVar(idParentName, stateEnumType);
+            inputs{end + 1} = LustreVar(idParentName, stateEnumType);
             % add isInner input
             inputs{end + 1} = LustreVar(isInner, 'bool');
             % set state children as inactive
@@ -339,8 +343,11 @@ classdef StateflowState_To_Lustre
             hjunctions = junctions(strcmp(typs, 'HISTORY'));
             if (~isempty(state.Composition.Substates) && isempty(hjunctions))
                 idStateName = StateflowState_To_Lustre.getStateIDName(state);
-                body{end+1} = LustreEq(VarIdExpr(idStateName), IntExpr(0));
-                outputs{end+1} = LustreVar(idStateName, 'int');
+                [stateEnumType, childName] = ...
+                    StateflowState_To_Lustre.addStateEnum(state, [], ...
+                    false, false, true);
+                body{end+1} = LustreEq(VarIdExpr(idStateName), VarIdExpr(childName));
+                outputs{end+1} = LustreVar(idStateName, stateEnumType);
             end
             
             %create the node
@@ -459,8 +466,11 @@ classdef StateflowState_To_Lustre
                 concurrent_actions = {};
                 idStateVar = VarIdExpr(...
                     StateflowState_To_Lustre.getStateIDName(state));
+                [stateEnumType, stateInactiveEnum] = ...
+                    StateflowState_To_Lustre.addStateEnum(state, [], ...
+                    false, false, true);
                 if nb_children >= 1
-                    inputs{end+1} = LustreVar(idStateVar, 'int');
+                    inputs{end+1} = LustreVar(idStateVar, stateEnumType);
                 end
                 default_transition = state.Composition.DefaultTransitions;
                 if isequal(actionType, 'Entry')...
@@ -473,7 +483,7 @@ classdef StateflowState_To_Lustre
                     node_name = ...
                         StateflowState_To_Lustre.getStateDefaultTransNodeName(state);
                     cond = BinaryExpr(BinaryExpr.EQ, ...
-                        idStateVar, IntExpr(0));
+                        idStateVar, VarIdExpr(stateInactiveEnum));
                     if isKey(SF_STATES_NODESAST_MAP, node_name)
                         actionNodeAst = SF_STATES_NODESAST_MAP(node_name);
                         [call, oututs_Ids] = actionNodeAst.nodeCall();
@@ -521,8 +531,13 @@ classdef StateflowState_To_Lustre
                         outputs = [outputs, actionNodeAst.getOutputs()];
                         inputs = [inputs, actionNodeAst.getInputs()];
                     else
+                        childName = SF_To_LustreNode.getUniqueName(...
+                            childrenNames{i}, childrenIDs{i});
+                        [~, childEnum] = ...
+                            StateflowState_To_Lustre.addStateEnum(...
+                            state, childName);
                         cond = BinaryExpr(BinaryExpr.EQ, ...
-                            idStateVar, IntExpr(childrenIDs{i}));
+                            idStateVar, VarIdExpr(childEnum));
                         concurrent_actions{end+1} = LustreEq(oututs_Ids, ...
                             IteExpr(cond, call, TupleExpr(oututs_Ids)));
                         outputs = [outputs, actionNodeAst.getOutputs()];
@@ -537,9 +552,13 @@ classdef StateflowState_To_Lustre
                         || ~isempty(state.Composition.DefaultTransitions))
                     %State that contains only transitions and junctions
                     %inside
-                    concurrent_actions{end+1} = LustreEq(idStateVar, IntExpr(-1));
-                    inputs{end+1} = LustreVar(idStateVar, 'int');
-                    outputs{end+1} = LustreVar(idStateVar, 'int');
+                    [stateEnumType, stateInnerTransEnum] = ...
+                        StateflowState_To_Lustre.addStateEnum(state, [], ...
+                        true, false, false);
+                    concurrent_actions{end+1} = LustreEq(idStateVar,...
+                        VarIdExpr(stateInnerTransEnum));
+                    inputs{end+1} = LustreVar(idStateVar, stateEnumType);
+                    outputs{end+1} = LustreVar(idStateVar, stateEnumType);
                 end
                 
                 if ~isempty(concurrent_actions)
@@ -562,6 +581,9 @@ classdef StateflowState_To_Lustre
             end
             idStateVar = VarIdExpr(...
                     StateflowState_To_Lustre.getStateIDName(state));
+            [idStateEnumType, idStateInactiveEnum] = ...
+                    StateflowState_To_Lustre.addStateEnum(state, [], ...
+                    false, false, true);    
             if ~isChart
                 %1st step: OuterTransition code
                 outerTransNodeName = ...
@@ -575,11 +597,13 @@ classdef StateflowState_To_Lustre
                 end
                 
                 %2nd step: During actions
+                parent = SF_STATES_PATH_MAP(parentPath);
                 idParentVar = VarIdExpr(...
-                    StateflowState_To_Lustre.getStateIDName(...
-                    SF_STATES_PATH_MAP(parentPath)));
+                    StateflowState_To_Lustre.getStateIDName(parent));
+                [idParentEnumType, idParentStateEnum] = ...
+                    StateflowState_To_Lustre.addStateEnum(parent, state);    
                 cond_prefix = BinaryExpr(BinaryExpr.EQ,...
-                    idParentVar, IntExpr(state.Id));
+                    idParentVar, VarIdExpr(idParentStateEnum));
                 during_act_node_name = ...
                     StateflowState_To_Lustre.getDuringActionNodeName(state);
                 if isKey(SF_STATES_NODESAST_MAP, during_act_node_name)
@@ -591,7 +615,7 @@ classdef StateflowState_To_Lustre
                     outputs = [outputs, nodeAst.getOutputs()];
                     inputs = [inputs, nodeAst.getOutputs()];
                     inputs = [inputs, nodeAst.getInputs()];
-                    inputs{end + 1} = LustreVar(idParentVar, 'int');
+                    inputs{end + 1} = LustreVar(idParentVar, idParentEnumType);
                 end
                 
                 %3rd step: Inner transitions
@@ -605,7 +629,7 @@ classdef StateflowState_To_Lustre
                     outputs = [outputs, nodeAst.getOutputs()];
                     inputs = [inputs, nodeAst.getOutputs()];
                     inputs = [inputs, nodeAst.getInputs()];
-                    inputs{end + 1} = LustreVar(idParentVar, 'int');
+                    inputs{end + 1} = LustreVar(idParentVar, idParentEnumType);
                 end
             else
                 
@@ -615,16 +639,16 @@ classdef StateflowState_To_Lustre
                     nodeAst = SF_STATES_NODESAST_MAP(entry_act_node_name);
                     [call, oututs_Ids] = nodeAst.nodeCall();
                     cond = BinaryExpr(BinaryExpr.EQ,...
-                        idStateVar, IntExpr(0));
+                        idStateVar, VarIdExpr(idStateInactiveEnum));
                     children_actions{end+1} = LustreEq(oututs_Ids, ...
                         IteExpr(cond, call, TupleExpr(oututs_Ids)));
                     outputs = [outputs, nodeAst.getOutputs()];
                     inputs = [inputs, nodeAst.getOutputs()];
                     inputs = [inputs, nodeAst.getInputs()];
-                    inputs{end + 1} = LustreVar(idStateVar, 'int');
+                    inputs{end + 1} = LustreVar(idStateVar, idStateEnumType);
                 end
                 chart_prefix = BinaryExpr(BinaryExpr.NEQ,...
-                    idStateVar, IntExpr(0));
+                    idStateVar, VarIdExpr(idStateInactiveEnum));
                 cond_prefix = {};
             end
             
@@ -633,14 +657,16 @@ classdef StateflowState_To_Lustre
             number_children = numel(children);
             isParallel = isequal(state.Composition.Type, 'PARALLEL_AND');
             if number_children > 0 && ~isParallel
-                inputs{1} = LustreVar(idStateVar, 'int');
+                inputs{1} = LustreVar(idStateVar, idStateEnumType);
             end
             for i=1:number_children
                 child = children{i};
                 cond = {};
                 if ~isParallel
-                    cond = ...
-                        BinaryExpr(BinaryExpr.EQ, idStateVar, IntExpr(child.Id));
+                    [~, childEnum] = ...
+                        StateflowState_To_Lustre.addStateEnum(state, child);
+                    cond = BinaryExpr(BinaryExpr.EQ, ...
+                        idStateVar, VarIdExpr(childEnum));
                     if ~isempty(cond_prefix)
                         cond = ...
                             BinaryExpr(BinaryExpr.AND, cond, cond_prefix);
@@ -791,19 +817,26 @@ classdef StateflowState_To_Lustre
                     if MatlabUtils.endsWith(v_name, ...
                             StateflowState_To_Lustre.getStateIDSuffix())
                         %State ID
-                        variables{end+1,1} = LustreVar(v_name, 'int');
+                        v_type = strrep(v_name, ...
+                            StateflowState_To_Lustre.getStateIDSuffix(), ...
+                            StateflowState_To_Lustre.getStateEnumSuffix());
+                        v_inactive = VarIdExpr(upper(...
+                            strrep(v_name, ...
+                            StateflowState_To_Lustre.getStateIDSuffix(), ...
+                            '_INACTIVE')));
+                        variables{end+1,1} = LustreVar(v_name, v_type);
                         if ismember(v_name, nodeCall_outputs_Names)
                             v_lastName = strcat(v_name, '__2');
                             body{end+1} = LustreEq(...
                                 VarIdExpr(v_name), ...
-                                BinaryExpr(BinaryExpr.ARROW, IntExpr(0), ...
+                                BinaryExpr(BinaryExpr.ARROW, v_inactive, ...
                                 UnaryExpr(UnaryExpr.PRE, VarIdExpr(v_lastName))));
-                            variables{end+1,1} = LustreVar(v_lastName, 'int');
+                            variables{end+1,1} = LustreVar(v_lastName, v_type);
                             nodeCall_outputs_Ids = ...
                                 StateflowState_To_Lustre.changeVar(...
                                 nodeCall_outputs_Ids, v_name, v_lastName);
                         else
-                            body{end+1} = LustreEq(VarIdExpr(v_name), IntExpr(0));
+                            body{end+1} = LustreEq(VarIdExpr(v_name), v_inactive);
                         end
                     else
                         %UNKNOWN Variable
@@ -822,7 +855,10 @@ classdef StateflowState_To_Lustre
                 if ~VarIdExpr.ismemberVar(v_name, allVars)
                     if MatlabUtils.endsWith(v_name, ...
                             StateflowState_To_Lustre.getStateIDSuffix())
-                        variables{end+1,1} = LustreVar(v_name, 'int');
+                        v_type = strrep(v_name, ...
+                            StateflowState_To_Lustre.getStateIDSuffix(), ...
+                            StateflowState_To_Lustre.getStateEnumSuffix());
+                        variables{end+1,1} = LustreVar(v_name, v_type);
                     else
                         %UNKNOWN Variable
                         display_msg(sprintf('Variable %s in Chart %s not found',...
@@ -956,19 +992,52 @@ classdef StateflowState_To_Lustre
             end
             name = strcat(state_name, '_DuringAction');
         end
+        
+        % State ID functions
         function suf = getStateIDSuffix()
             suf = '__ChildID';
         end
-        function idName = getStateIDName(state, id)
-            if nargin == 2
-                state_name = SF_To_LustreNode.getUniqueName(state, id);
-            else
-                state_name = SF_To_LustreNode.getUniqueName(state);
-            end
+        function idName = getStateIDName(state)
+            state_name = lower(...
+                SF_To_LustreNode.getUniqueName(state));
             idName = strcat(state_name, ...
                 StateflowState_To_Lustre.getStateIDSuffix());
         end
-        
+        function suf = getStateEnumSuffix()
+            suf = '__Children';
+        end
+        function idName = getStateEnumType(state)
+            state_name = lower(...
+                SF_To_LustreNode.getUniqueName(state));
+            idName = strcat(state_name, ...
+                StateflowState_To_Lustre.getStateEnumSuffix());
+        end
+        function [stateEnumType, childName] = ...
+                addStateEnum(state, child, isInner, isJunction, inactive)
+            global SF_STATES_ENUMS_MAP;
+            stateEnumType = StateflowState_To_Lustre.getStateEnumType(state);
+            state_name = upper(...
+                SF_To_LustreNode.getUniqueName(state));
+            if nargin >= 3 && isInner
+                childName = strcat(state_name, '_InnerTransition');
+            elseif nargin >= 4 && isJunction
+                childName = strcat(state_name, '_StoppedInJunction');
+            elseif nargin == 5 && inactive
+                childName = strcat(state_name, '_INACTIVE');
+            elseif ischar(child)
+                %child is given using SF_To_LustreNode.getUniqueName
+                childName = upper(child);
+            else
+                childName = upper(...
+                    SF_To_LustreNode.getUniqueName(child));
+            end
+            if ~isKey(SF_STATES_ENUMS_MAP, stateEnumType)
+                SF_STATES_ENUMS_MAP(stateEnumType) = {childName};
+            elseif ~ismember(childName, SF_STATES_ENUMS_MAP(stateEnumType))
+                SF_STATES_ENUMS_MAP(stateEnumType) = [...
+                    SF_STATES_ENUMS_MAP(stateEnumType), childName];
+            end
+        end
         %% Substates objects
         function subStates = getSubStatesObjects(state)
             global SF_STATES_PATH_MAP;

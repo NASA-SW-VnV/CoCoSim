@@ -7,13 +7,19 @@ classdef LustreProgram < LustreAst
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     properties
+        types;
         opens;
         nodes;
         contracts;
     end
     
     methods
-        function obj = LustreProgram(opens, nodes, contracts)
+        function obj = LustreProgram(opens, types, nodes, contracts)
+            if iscell(types)
+                obj.types = types;
+            else
+                obj.types{1} = types;
+            end
             if iscell(opens)
                 obj.opens = opens;
             else
@@ -32,11 +38,13 @@ classdef LustreProgram < LustreAst
         end
         
         function new_obj = deepCopy(obj)
+            new_types = cellfun(@(x) x.deepCopy(), obj.types,...
+                'UniformOutput', 0);
             new_nodes = cellfun(@(x) x.deepCopy(), obj.nodes, ...
                 'UniformOutput', 0);
             new_contracts = cellfun(@(x) x.deepCopy(), obj.contracts,...
                 'UniformOutput', 0);
-            new_obj = LustreProgram(obj.opens, new_nodes, new_contracts);
+            new_obj = LustreProgram(obj.opens, new_types, new_nodes, new_contracts);
         end
         
         %% This functions are used for ForIterator block
@@ -63,16 +71,21 @@ classdef LustreProgram < LustreAst
             lines = {};
             %opens
             if (BackendType.isKIND2(backend) || BackendType.isJKIND(backend))
-                for i=1:numel(obj.opens)
-                    lines{end+1} = sprintf('include "%s.lus"\n', ...
-                        obj.opens{i});
-                end
+                lines = [lines, ...
+                    cellfun(@(x) sprintf('include "%s.lus"\n', x), obj.opens, ...
+                    'UniformOutput', false)];
             else
-                for i=1:numel(obj.opens)
-                    lines{end+1} = sprintf('#open <%s>\n', ...
-                        obj.opens{i});
-                end
+                lines = [lines, ...
+                    cellfun(@(x) sprintf('#open <%s>\n', x), obj.opens, ...
+                    'UniformOutput', false)];
             end
+            
+            %types
+            lines = [lines, ...
+                cellfun(@(x) sprintf('%s', x.print(backend)), obj.types, ...
+                'UniformOutput', false)];
+            
+            
             % contracts and nodes
             if BackendType.isKIND2(backend)
                 nodesList = [obj.nodes, obj.contracts];

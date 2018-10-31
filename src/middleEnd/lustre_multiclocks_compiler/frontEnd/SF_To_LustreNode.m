@@ -19,13 +19,14 @@ classdef SF_To_LustreNode
             external_nodes = {};
             external_libraries = {};
             % global varibale mapping between states and their nodes AST.
-            global SF_STATES_NODESAST_MAP SF_STATES_PATH_MAP SF_JUNCTIONS_PATH_MAP SF_DATA_MAP;
+            global SF_STATES_NODESAST_MAP SF_STATES_PATH_MAP ...
+                SF_JUNCTIONS_PATH_MAP SF_DATA_MAP SF_STATES_ENUMS_MAP TOLUSTRE_ENUMS_MAP;
             %It's initialized for each call of this function
             SF_STATES_NODESAST_MAP = containers.Map('KeyType', 'char', 'ValueType', 'any');
             SF_STATES_PATH_MAP = containers.Map('KeyType', 'char', 'ValueType', 'any');
             SF_JUNCTIONS_PATH_MAP = containers.Map('KeyType', 'char', 'ValueType', 'any');
             SF_DATA_MAP = containers.Map('KeyType', 'char', 'ValueType', 'any');
-
+            SF_STATES_ENUMS_MAP = containers.Map('KeyType', 'char', 'ValueType', 'any');
             % get content
             content = chart.StateflowContent;
             events = SF_To_LustreNode.eventsToData(content.Events);
@@ -163,6 +164,12 @@ classdef SF_To_LustreNode
             %main_node = main_node.pseudoCode2Lustre();% already handled
             for i=1:numel(external_nodes)
                 external_nodes{i} = external_nodes{i}.pseudoCode2Lustre();
+            end
+            
+            % add Stateflow Enumerations to ToLustre set of enumerations.
+            keys = SF_STATES_ENUMS_MAP.keys();
+            for i=1:numel(keys)
+                TOLUSTRE_ENUMS_MAP(keys{i}) = SF_STATES_ENUMS_MAP(keys{i});
             end
         end
         %%
