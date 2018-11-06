@@ -1,9 +1,13 @@
 package cocosim.matlab2IR;
 
+import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.charset.StandardCharsets;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -16,6 +20,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import cocosim.emgrammar.EMBaseListener;
 import cocosim.emgrammar.EMLexer;
 import cocosim.emgrammar.EMParser;
+import cocosim.matlab2Lustre.EM2Lustre.LusEmitter;
 
 /*################################################################################
 #
@@ -873,6 +878,42 @@ public class EM2JSON {
 
 	}
 
+	// Main Functions
+	public static String StringToIR(String matlabCode) {
+		try {
+			InputStream stream = new ByteArrayInputStream(matlabCode.getBytes(StandardCharsets.UTF_8.name()));
+			return InputStreamToIR(stream);
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return null;
+	}
+	
+	public static String InputStreamToIR(InputStream stream) {
+		ANTLRInputStream input = null;
+		try {
+			input = new ANTLRInputStream(stream);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
+		EMLexer lexer = new EMLexer( input);
+		CommonTokenStream tokens = new CommonTokenStream(lexer);
+		EMParser parser = new EMParser(tokens);
+		parser.setBuildParseTree(true);
+		ParseTree tree = parser.emfile();
+		ParseTreeWalker walker = new ParseTreeWalker();
+		JSONEmitter converter = new JSONEmitter();
+		walker.walk(converter, tree);	
+		String result = converter.getJSON(tree);
+		
+		return result;
+
+	}
+	
 	public static void main(String[] args) throws Exception {
 		String inputFile = null;
 		String file_name = null;

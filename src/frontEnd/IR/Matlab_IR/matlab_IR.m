@@ -15,10 +15,10 @@ if isempty(em_jar_path)
     status = 1;
     return;
 end
+[fun_dir, fun_name, ~] = fileparts(fun_path);
 if exist('dst_path', 'var') && ~isempty(dst_path)
-    fun_ir_path = dst_path;
+    fun_ir_path = fullfile(dst_path, strcat(fun_name, '.json'));
 else
-    [fun_dir, fun_name, ~] = fileparts(fun_path);
     fun_ir_path = fullfile(fun_dir, strcat(fun_name, '.json'));
 end
 cmd = sprintf('java -classpath %s cocosim.matlab2IR.EM2JSON %s %s', ...

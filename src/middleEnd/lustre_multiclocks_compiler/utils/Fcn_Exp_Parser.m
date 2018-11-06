@@ -1,6 +1,9 @@
 classdef Fcn_Exp_Parser
     %Fcn_Exp_Parser generates a tree from a mathematical expression in Fcn
     %Block. Fcn Block in Simulink has limited grammar.
+    %This function is parsing an expression from left to right. It is not
+    %respecting the order of arithmetic operations. 
+    %e.g. 3*2 > x*4 => {'Mult', '3', {'>', '2'. {'Mult', 'x', '4'}}}
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
