@@ -9,8 +9,6 @@ classdef If_To_Lustre < Block_To_Lustre
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     properties
-        % needed for Fcn_To_Lustre.tree2code
-        isBooleanExpr = 1;
     end
     
     methods
@@ -32,20 +30,15 @@ classdef If_To_Lustre < Block_To_Lustre
         function options = getUnsupportedOptions(obj, parent, blk, varargin)
             % add your unsuported options list here
             [inputs, inports_dt] = If_To_Lustre.getInputs(parent, blk);
+            data_map = Fcn_To_Lustre.createDataMap(inputs, inports_dt);
             IfExp = If_To_Lustre.getIfExp(blk);
             nbOutputs=numel(blk.CompiledPortWidths.Outport);
             for j=1:nbOutputs
-                [tree, status, unsupportedExp] = Fcn_Exp_Parser.parse(IfExp{j});
+                [~, status] = If_To_Lustre.formatConditionToLustre(obj, ...
+                    IfExp{j}, inputs, data_map, parent, blk);
                 if status
                     obj.addUnsupported_options(sprintf('ParseError  character unsupported  %s in block %s', ...
                         unsupportedExp, blk.Origin_path));
-                end
-                try
-                    Fcn_To_Lustre.tree2code(obj, tree, parent, blk, inputs, inports_dt{1});
-                catch me
-                    if strcmp(me.identifier, 'COCOSIM:TREE2CODE')
-                        obj.addUnsupported_options(me.message);
-                    end
                 end
             end
             options = obj.unsupported_options;
@@ -63,7 +56,9 @@ classdef If_To_Lustre < Block_To_Lustre
             inports_dt = cell(1, numel(widths));
             for i=1:numel(widths)
                 inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
-                inports_dt{i} = SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Inport(i));
+                dt = SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Inport(i));
+                inports_dt{i} = arrayfun(@(x) dt, (1:numel(inputs{i})), ...
+                    'UniformOutput', false);
             end
         end
         function IfExp = getIfExp(blk)
@@ -84,9 +79,10 @@ classdef If_To_Lustre < Block_To_Lustre
             end
             thens = cell(1, n_conds + 1);
             conds = cell(1, n_conds);
+            data_map = Fcn_To_Lustre.createDataMap(inputs, inports_dt);
             for j=1:nbOutputs
                 lusCond = If_To_Lustre.formatConditionToLustre(obj, ...
-                    IfExp{j}, inputs, inports_dt, parent, blk);
+                    IfExp{j}, inputs, data_map, parent, blk);
                 if j==nbOutputs && isempty(IfExp{j})
                     %default condition
                     thens{j} = If_To_Lustre.outputsValues(nbOutputs, j);
@@ -116,23 +112,17 @@ classdef If_To_Lustre < Block_To_Lustre
         
         
         %% new version of parsing Lustre expression.
-        function exp = formatConditionToLustre(obj, cond, inputs_cell, inputs_dt, parent, blk)
+        function [exp, status] = formatConditionToLustre(obj, cond, inputs_cell, data_map, parent, blk)
             %display_msg(cond, MsgType.DEBUG, 'If_To_Lustre', '');
-            exp = VarIdExpr('');
-            [tree, status, unsupportedExp] = Fcn_Exp_Parser.parse(cond);
+            expected_dt = 'bool';
+            [exp, status] = ...
+                Exp2Lus.expToLustre(obj, cond, parent, blk, inputs_cell, ...
+                data_map, expected_dt);
+            
             if status
-                display_msg(sprintf('ParseError  character unsupported  %s in block %s', ...
-                    unsupportedExp, blk.Origin_path), ...
-                    MsgType.ERROR, 'IF_To_Lustre', '');
+                display_msg(sprintf('Block %s is not supported', blk.Origin_path), ...
+                    MsgType.ERROR, 'If_To_Lustre.formatConditionToLustre', '');
                 return;
-            end
-            try
-                exp = Fcn_To_Lustre.tree2code(obj, tree, parent, blk, inputs_cell, inputs_dt{1});
-            catch me
-                if strcmp(me.identifier, 'COCOSIM:TREE2CODE')
-                    display_msg(me.message, ...
-                        MsgType.ERROR, 'IF_To_Lustre', '');
-                end
             end
         end
         

@@ -12,8 +12,15 @@ classdef Exp2Lus < handle
     end
     
     methods (Static = true)
-        function [lusCode, status] = expToLustre(BlkObj, exp, parent, blk, inputs, data_map, expected_dt)
+        function [lusCode, status] = expToLustre(BlkObj, exp, parent, blk, inputs, data_map, expected_dt, isStateFlow)
+            if ~exist('isStateFlow', 'var')
+                isStateFlow = false;
+            end
+            status = 0;
             lusCode = VarIdExpr('');
+            if isempty(exp)
+                return;
+            end
             %pre-process exp
             orig_exp = exp;
             exp = strrep(orig_exp, '!=', '~=');
@@ -23,9 +30,10 @@ classdef Exp2Lus < handle
             try
                 em2json =  cocosim.matlab2IR.EM2JSON;
                 IR_string = em2json.StringToIR(exp);
-                IR = json_decode(IR_string);
+                IR = json_decode(char(IR_string));
                 tree = IR.statements(1);
             catch me
+                status = 1;
                 display_msg(sprintf('ParseError for expression "%s" in block %s', ...
                     orig_exp, blk.Origin_path), ...
                     MsgType.ERROR, 'Exp2Lus.expToLustre', '');
@@ -33,19 +41,20 @@ classdef Exp2Lus < handle
                 return;
             end
             try
-                lusCode = Exp2Lus.tree2code(BlkObj, tree, parent, blk, inputs, data_map, expected_dt);
+                lusCode = Exp2Lus.tree2code(BlkObj, tree, parent, blk, inputs, data_map, expected_dt, isStateFlow);
             catch me
                 status = 1;
+                display_msg(me.getReport(), MsgType.DEBUG, 'Exp2Lus.expToLustre', '');
                 if strcmp(me.identifier, 'COCOSIM:TREE2CODE')
                     display_msg(sprintf('ParseError for expression "%s" in block %s', ...
                         orig_exp, blk.Origin_path), ...
                         MsgType.ERROR, 'Exp2Lus.expToLustre', '');
-                    display_msg(me.message, MsgType.DEBUG, 'Exp2Lus.expToLustre', '');
+                    
                     return;
                 end
             end
             
-        end 
+        end
         function code = tree2code(obj, tree, parent, blk, inputs, data_map, expected_dt, isStateFlow)
             %this function is extended to be used by If-Block,
             %SwitchCase and Fcn blocks. Also it is used by Stateflow
@@ -65,13 +74,20 @@ classdef Exp2Lus < handle
                 return;
             end
             if isequal(tree_type, 'constant')
-                code = constant2code(tree.value, expected_dt);
+                code = Exp2Lus.constant2code(tree.value, expected_dt);
                 return;
             end
+            tree_dt = Exp2Lus.treeDT(tree, inputs, data_map, expected_dt, isStateFlow);
             switch tree_type
                 case {'plus_minus', 'mtimes', 'mrdivide', ...
                         'relopGL', 'relopEQ_NE', ...
                         'relopAND', 'relopelAND', 'relopOR', 'relopelOR'}
+                    operands_dt = tree_dt;
+                    if ismember(tree_type, {'relopGL', 'relopEQ_NE'})
+                        left_dt = Exp2Lus.treeDT(tree.leftExp, inputs, data_map, expected_dt, isStateFlow);
+                        right_dt = Exp2Lus.treeDT(tree.rightExp, inputs, data_map, expected_dt, isStateFlow);
+                        operands_dt = Exp2Lus.upperDT(left_dt, right_dt, expected_dt);
+                    end
                     if isequal(tree_type, 'plus_minus')
                         op = tree.operator;
                     elseif isequal(tree_type, 'mtimes')
@@ -80,28 +96,29 @@ classdef Exp2Lus < handle
                         op = BinaryExpr.DIVIDE;
                     elseif isequal(tree_type, 'relopGL')
                         op = tree.operator;
-                        obj.isBooleanExpr = 1;
+                        
                     elseif isequal(tree_type, 'relopEQ_NE')
                         if isequal(tree.operator, '==')
                             op = BinaryExpr.EQ;
                         else
                             op = BinaryExpr.NEQ;
                         end
-                        obj.isBooleanExpr = 1;
+                        
                     elseif ismember(tree_type, {'relopAND', 'relopelAND'})
                         %TODO relopelAND is bitwise AND
                         op = BinaryExpr.AND;
-                        obj.isBooleanExpr = 1;
+                        
                     elseif ismember(tree_type, {'relopOR', 'relopelOR'})
                         %TODO relopelOR is bitwise OR
                         op = BinaryExpr.OR;
-                        obj.isBooleanExpr = 1;
+                        
                     end
+                    
                     code = BinaryExpr(op, ...
-                        Exp2Lus.tree2code(obj, tree.leftExp, parent, blk, inputs, data_map, expected_dt, isStateFlow), ...
-                        Exp2Lus.tree2code(obj, tree.rightExp, parent, blk, inputs, data_map, expected_dt, isStateFlow), ...
+                        Exp2Lus.tree2code(obj, tree.leftExp, parent, blk, inputs, data_map, operands_dt, isStateFlow), ...
+                        Exp2Lus.tree2code(obj, tree.rightExp, parent, blk, inputs, data_map, operands_dt, isStateFlow), ...
                         false);
-                
+                    
                 case 'unaryExpression'
                     if isequal(tree.operator, '~') || isequal(tree.operator, '!')
                         op = UnaryExpr.NOT;
@@ -110,23 +127,31 @@ classdef Exp2Lus < handle
                     else
                         op = tree.operator;
                     end
+                    
                     code = UnaryExpr(op, ...
-                        Exp2Lus.tree2code(obj, tree.rightExp, parent, blk, inputs, data_map, expected_dt, isStateFlow), ...
+                        Exp2Lus.tree2code(obj, tree.rightExp, parent, blk, inputs, data_map, tree_dt, isStateFlow), ...
                         false);
+                    
                 case 'parenthesedExpression'
+                    tree_dt = expected_dt;
                     code = ParenthesesExpr(...
-                        Exp2Lus.tree2code(obj, tree.expression, parent, blk, inputs, data_map, expected_dt, isStateFlow));
-             
+                        Exp2Lus.tree2code(obj, tree.expression, parent, blk, inputs, data_map, tree_dt, isStateFlow));
+                    
                 case 'mpower'
+                    tree_dt = 'real';
                     obj.addExternal_libraries('LustMathLib_lustrec_math');
                     code = NodeCallExpr('pow', ...
-                        Exp2Lus.tree2code(obj, tree.leftExp, parent, blk, inputs, data_map, expected_dt, isStateFlow), ...
-                        Exp2Lus.tree2code(obj, tree.rightExp, parent, blk, inputs, data_map, expected_dt, isStateFlow));
+                        Exp2Lus.tree2code(obj, tree.leftExp, parent, blk, inputs, data_map, tree_dt, isStateFlow), ...
+                        Exp2Lus.tree2code(obj, tree.rightExp, parent, blk, inputs, data_map, tree_dt, isStateFlow));
+                                        
                 case 'assignment'
+                    tree_dt = expected_dt;%no need for casting type.
+                    assignment_dt = Exp2Lus.treeDT(tree, inputs, data_map, expected_dt, isStateFlow);
                     code = LustreEq(...
-                        Exp2Lus.tree2code(obj, tree.leftExp, parent, blk, inputs, data_map, expected_dt, isStateFlow), ...
-                        Exp2Lus.tree2code(obj, tree.rightExp, parent, blk, inputs, data_map, expected_dt, isStateFlow) ...
+                        Exp2Lus.tree2code(obj, tree.leftExp, parent, blk, inputs, data_map, assignment_dt, isStateFlow), ...
+                        Exp2Lus.tree2code(obj, tree.rightExp, parent, blk, inputs, data_map, assignment_dt, isStateFlow) ...
                         );
+                    
                 case 'fun_indexing'
                     tree_ID = tree.ID;
                     switch tree_ID
@@ -137,9 +162,10 @@ classdef Exp2Lus < handle
                                 'sinh','cosh', ...
                                 'abs', 'sgn', ...
                                 'ceil', 'floor'}
+                            tree_dt = Exp2Lus.treeDT(tree, inputs, data_map, expected_dt, isStateFlow);
                             if isequal(tree_ID, 'abs') ...
-                                    || isequal(tree_ID, 'sgn') 
-                                fun_name = strcat(tree_ID, '_', expected_dt);
+                                    || isequal(tree_ID, 'sgn')
+                                fun_name = strcat(tree_ID, '_', tree_dt);
                                 lib_name = strcat('LustMathLib_', fun_name);
                                 obj.addExternal_libraries(lib_name);
                                 
@@ -148,26 +174,28 @@ classdef Exp2Lus < handle
                                     'sin','cos','tan',...
                                     'asin','acos','atan', ...
                                     'sinh','cosh'})
+                                
                                 fun_name = tree_ID;
                                 obj.addExternal_libraries('LustMathLib_lustrec_math');
                                 
                             elseif isequal(tree_ID, 'ceil') ...
                                     || isequal(tree_ID, 'floor')
+                                
                                 fun_name = strcat('_', tree_ID);
                                 lib_name = strcat('LustDTLib_', fun_name);
                                 obj.addExternal_libraries(lib_name);
                                 
                             else
                                 fun_name = tree_ID;
-                                
                             end
                             code = NodeCallExpr(fun_name,...
-                                Exp2Lus.tree2code(obj, tree.parameters(1), parent, blk, inputs, data_map, expected_dt, isStateFlow));
-                            
-                        %function with two arguments
+                                Exp2Lus.tree2code(obj, tree.parameters(1), parent, blk, inputs, data_map, tree_dt, isStateFlow));
+                                                        
+                            %function with two arguments
                         case {'rem', 'atan2', 'power'}
+                            tree_dt = Exp2Lus.treeDT(tree, inputs, data_map, expected_dt, isStateFlow);
                             if isequal(tree_ID, 'atan2') ...
-                                    || isequal(tree_ID, 'power') 
+                                    || isequal(tree_ID, 'power')
                                 obj.addExternal_libraries('LustMathLib_lustrec_math');
                                 if isequal(tree_ID, 'power')
                                     fun_name = 'pow';
@@ -188,22 +216,27 @@ classdef Exp2Lus < handle
                             end
                             
                             code = NodeCallExpr(fun_name, ...
-                                Exp2Lus.tree2code(obj, tree.parameters(1), parent, blk, inputs, data_map, expected_dt, isStateFlow), ...
-                                Exp2Lus.tree2code(obj, tree.parameters(2), parent, blk, inputs, data_map, expected_dt, isStateFlow));
+                                {Exp2Lus.tree2code(obj, tree.parameters(1), parent, blk, inputs, data_map, tree_dt, isStateFlow), ...
+                                Exp2Lus.tree2code(obj, tree.parameters(2), parent, blk, inputs, data_map, tree_dt, isStateFlow)});
+                            
                             
                         case 'hypot'
+                            
+                            tree_dt = 'real';
                             obj.addExternal_libraries('LustMathLib_lustrec_math');
                             arg1 = Exp2Lus.tree2code(obj, tree.parameters(1), ...
-                                parent, blk, inputs, data_map, expected_dt, isStateFlow);
+                                parent, blk, inputs, data_map, tree_dt, isStateFlow);
                             arg1 = BinaryExpr(BinaryExpr.MULTIPLY, arg1, arg1);
                             arg2 = Exp2Lus.tree2code(obj, tree.parameters(2),...
-                                parent, blk, inputs, data_map, expected_dt, isStateFlow);
+                                parent, blk, inputs, data_map, tree_dt, isStateFlow);
                             arg2 = BinaryExpr(BinaryExpr.MULTIPLY, arg2, arg2);
+                            
+                            
                             code = NodeCallExpr('sqrt', arg1, arg2);
                         otherwise
                             code = Exp2Lus.parseOtherFunc(obj, tree, ...
-                                parent, blk, inputs, data_map, expected_dt, isStateFlow, ...
-                                '(', ')');
+                                parent, blk, inputs, data_map, ...
+                                expected_dt, isStateFlow);
                     end
                 otherwise
                     if isStateFlow
@@ -217,7 +250,8 @@ classdef Exp2Lus < handle
                     end
                     throw(ME);
             end
-            
+            % convert tree DT to what is expected.
+            code = Exp2Lus.convertDT(obj, code, tree_dt, expected_dt);
         end
         
         function code = constant2code(v, expected_dt)
@@ -263,22 +297,12 @@ classdef Exp2Lus < handle
                 %from workspace to be called within the chart
                 %actions.
                 %We keep it as VarID
-                
-                dt = data_map(id).LusDatatype;
-                if isequal(dt, expected_dt)
-                    code = VarIdExpr(id);
+                if isfield(data_map(id), 'LusDatatype')
+                    dt = data_map(id).LusDatatype;
                 else
-                    [external_lib, conv_format] =...
-                        SLX2LusUtils.dataType_conversion(dt, expected_dt);
-                    if ~isempty(external_lib)
-                        obj.addExternal_libraries(external_lib);
-                        code = ...
-                            SLX2LusUtils.setArgInConvFormat(...
-                            conv_format, VarIdExpr(id));
-                    else
-                        code = VarIdExpr(id);
-                    end
+                    dt = data_map(id);
                 end
+                code = Exp2Lus.convertDT(obj, VarIdExpr(id), dt, expected_dt);
             else
                 %code = VarIdExpr(var_name);
                 ME = MException('COCOSIM:TREE2CODE', ...
@@ -287,47 +311,44 @@ classdef Exp2Lus < handle
                 throw(ME);
             end
         end
-        function code = parseOtherFunc(obj, tree, parent, blk, inputs, expected_dt, isStateFlow, lpar, rpar)
-            code = '';
-            if isequal(tree.ID, 'u')
-                if isStateFlow
-                    %TODO: u(..) in Stateflow?
+        function code = parseOtherFunc(obj, tree, parent, blk, inputs, data_map, expected_dt, isStateFlow)
+            if ~isStateFlow && isequal(tree.ID, 'u')
+                %"u" refers to an input in IF, Switch and Fcn
+                %blocks
+                if isequal(tree.parameters(1).type, 'constant')
+                    %the case of u(1), u(2) ...
+                    input_idx = str2double(tree.parameters(1).value);
+                    code = inputs{1}{input_idx};
                 else
-                    %"u" refers to an input in IF, Switch and Fcn
-                    %blocks
-                    if isequal(tree.parameters(1).type, 'constant')
-                        %the case of u(1), u(2) ... 
-                        input_idx = str2double(tree.parameters(1).value);
-                        code = inputs{1}{input_idx};
-                    else
-                        code = '';
-                    end
+                    ME = MException('COCOSIM:TREE2CODE', ...
+                        'expression "%s" is not supported in block "%s"', ...
+                        tree.text, blk.Origin_path);
+                    throw(ME);
                 end
-            elseif ~isempty(regexp(tree.ID, 'u\d+', 'match'))
+                
+            elseif ~isStateFlow &&  ~isempty(regexp(tree.ID, 'u\d+', 'match'))
                 % case of u1, u2 ...
-                if isStateFlow
-                    %TODO: u1(..) in Stateflow?
+                input_number = str2double(regexp(tree.ID, 'u(\d+)', 'tokens', 'once'));
+                if isequal(tree.parameters(1).type, 'constant')
+                    arrayIndex = str2double(tree.parameters(1).value);
+                    code = inputs{input_number}{arrayIndex};
                 else
-                    input_number = str2double(regexp(tree.ID, 'u(\d+)', 'tokens', 'once'));
-                    if isequal(tree.parameters(1).type, 'constant')
-                        arrayIndex = str2double(tree.parameters(1).value);
-                        code = inputs{input_number}{arrayIndex};
-                    else
-                        code = '';
-                    end
+                    ME = MException('COCOSIM:TREE2CODE', ...
+                        'expression "%s" is not supported in block "%s"', ...
+                        tree.text, blk.Origin_path);
+                    throw(ME);
                 end
             else
                 try
                     % eval in base expression such as
                     % A(1,1) or single(1e-18) ...
-                    exp = sprintf('%s%s%s%s', tree{2}, lpar, ...
-                        MatlabUtils.strjoin(tree(3:end), ', '), rpar);
+                    exp = tree.text;
                     [value, ~, status] = ...
                         Constant_To_Lustre.getValueFromParameter(parent, blk, exp);
                     if status
                         ME = MException('COCOSIM:TREE2CODE', ...
-                            'Not found Variable "%s" in block "%s"', ...
-                            tokens{1}, blk.Origin_path);
+                            'Not found Variable "%s" in block "%s" or in workspace', ...
+                            exp, blk.Origin_path);
                         throw(ME);
                     end
                     if strcmp(expected_dt, 'real') ...
@@ -342,13 +363,13 @@ classdef Exp2Lus < handle
                     if isStateFlow
                         %TODO: handling Stateflow functions will
                         %be in a seperate function.
-                        args = {};
-                        for i=3:numel(tree)
-                            args{end + 1} = ...
-                                Exp2Lus.tree2code(obj, tree{i}, ...
-                                parent, blk, inputs, expected_dt, isStateFlow);
+                        args = cell(numel(tree.parameters), 1);
+                        for i=1:numel(tree.parameters)
+                            args{i} = ...
+                                Exp2Lus.tree2code(obj, tree.parameters(i), ...
+                                parent, blk, inputs, data_map, expected_dt, isStateFlow);
                         end
-                        code = NodeCallExpr(tree{2}, args);
+                        code = NodeCallExpr(tree.ID, args);
                     else
                         ME = MException('COCOSIM:TREE2CODE', ...
                             'Function "%s" is not handled in Block %s',...
@@ -359,7 +380,174 @@ classdef Exp2Lus < handle
             end
         end
         
+        function code = convertDT(obj, code, input_dt, output_dt)
+            if isempty(input_dt) || isempty(output_dt) || isequal(input_dt, output_dt)
+                return;
+            end
+            conv = strcat(input_dt, '_to_', output_dt);
+            obj.addExternal_libraries(strcat('LustDTLib_', conv));
+            code = NodeCallExpr(conv, code);
+        end
+        function dt = upperDT(left_dt, right_dt, expected_dt)
+            if isempty(left_dt) && isempty(right_dt) 
+                dt = expected_dt;
+                return;
+            end
+            if isempty(left_dt)
+                dt = right_dt;
+                return;
+            end
+            if isempty(right_dt)
+                dt = left_dt;
+                return;
+            end   
+            if isequal(left_dt, 'real') || isequal(right_dt, 'real')
+                dt = 'real';
+            elseif isequal(left_dt, 'int') || isequal(right_dt, 'int')
+                dt = 'int';
+            else
+                dt = 'bool';
+            end
+        end
         
+        function dt = treeDT(tree, inputs, data_map, expected_dt, isStateFlow)
+            %this function is extended to be used by If-Block,
+            %SwitchCase and Fcn blocks. Also it is used by Stateflow
+            %actions
+            dt = '';
+            if isempty(tree)
+                return;
+            end
+            tree_type = tree.type;
+            if isequal(tree_type, 'ID')
+                dt = Exp2Lus.ID2DT(tree.name, inputs, data_map, isStateFlow);
+                return;
+            end
+            if isequal(tree_type, 'constant')
+                if isequal(tree.dataType, 'Integer')
+                    dt = 'int';
+                else
+                    dt = 'real';
+                end
+                return;
+            end
+            switch tree_type
+                case {'relopAND', 'relopelAND',...
+                        'relopOR', 'relopelOR', ...
+                        'relopGL', 'relopEQ_NE'}
+                    dt = 'bool';
+                case {'plus_minus', 'mtimes', 'mrdivide'}
+                    left_dt = Exp2Lus.treeDT(tree.leftExp, inputs, data_map, expected_dt, isStateFlow);
+                    right_dt = Exp2Lus.treeDT(tree.rightExp, inputs, data_map, expected_dt, isStateFlow);
+                    dt = Exp2Lus.upperDT(left_dt, right_dt, expected_dt);
+                    
+                case 'unaryExpression'
+                    if isequal(tree.operator, '~') || isequal(tree.operator, '!')
+                        dt = 'bool';
+                    else
+                        dt = Exp2Lus.treeDT(tree.rightExp, inputs, data_map, expected_dt, isStateFlow);
+                    end
+                case 'parenthesedExpression'
+                    dt = Exp2Lus.treeDT(tree.expression, inputs, data_map, expected_dt, isStateFlow);
+                    
+                case 'mpower'
+                    dt = 'real';
+                    
+                case 'assignment'
+                    dt = Exp2Lus.treeDT(tree.leftExp, inputs, data_map, expected_dt, isStateFlow);
+                    
+                case 'fun_indexing'
+                    tree_ID = tree.ID;
+                    switch tree_ID
+                        case {'abs', 'sgn'}
+                            dt = Exp2Lus.treeDT(tree.parameters(1), inputs, data_map, expected_dt, isStateFlow);
+                        case 'rem'
+                            param1 = Exp2Lus.treeDT(tree.parameters(1), inputs, data_map, expected_dt, isStateFlow);
+                            param2 = Exp2Lus.treeDT(tree.parameters(2), inputs, data_map, expected_dt, isStateFlow);
+                            dt = Exp2Lus.upperDT(param1, param2, expected_dt);
+                        case {'sqrt', 'exp', 'log', 'log10',...
+                                'sin','cos','tan',...
+                                'asin','acos','atan','atan2', 'power', ...
+                                'sinh','cosh', ...
+                                'ceil', 'floor', 'hypot'}
+                            dt = 'real';                        
+                        otherwise
+                            dt = Exp2Lus.OtherFuncDT(tree, inputs, data_map, expected_dt, isStateFlow);
+                    end
+                otherwise
+                    dt = expected_dt;
+            end
+            
+        end
+        
+        function dt = OtherFuncDT(tree, inputs, data_map, expected_dt, isStateFlow)
+            dt = expected_dt;
+            if ~isStateFlow && isequal(tree.ID, 'u')
+                %"u" refers to an input in IF, Switch and Fcn
+                %blocks
+                if isequal(tree.parameters(1).type, 'constant')
+                    %the case of u(1), u(2) ...
+                    input_idx = str2double(tree.parameters(1).value);
+                    dt = Exp2Lus.getVarDT(data_map, ...
+                        inputs{1}{input_idx}.getId());
+                    return;
+                end
+                
+            elseif ~isStateFlow &&  ~isempty(regexp(tree.ID, 'u\d+', 'match'))
+                % case of u1, u2 ...
+                input_number = str2double(regexp(tree.ID, 'u(\d+)', 'tokens', 'once'));
+                if isequal(tree.parameters(1).type, 'constant')
+                    arrayIndex = str2double(tree.parameters(1).value);
+                    dt = Exp2Lus.getVarDT(data_map, ...
+                        inputs{input_number}{arrayIndex}.getId());
+                    return;
+                end
+            else
+                %TODO Stateflow functions
+            end
+        end
+        
+        
+        function dt = ID2DT(id, inputs, data_map, isStateFlow)
+            % the case of final term in a tree
+            if strcmp(id, 'true') || strcmp(id, 'false')
+                dt = 'bool';
+                
+            elseif ~isStateFlow && strcmp(id, 'u')
+                %the case of u with no index
+                dt = Exp2Lus.getVarDT(data_map, inputs{1}{1}.getId());
+                
+            elseif ~isStateFlow && ~isempty(regexp(id, 'u\d+', 'match'))
+                input_idx = regexp(id, 'u(\d+)', 'tokens', 'once');
+                dt = Exp2Lus.getVarDT(data_map, ...
+                    inputs{str2double(input_idx)}{1}.getId());
+                
+            elseif isKey(data_map, id)
+                if isfield(data_map(id), 'LusDatatype')
+                    dt = data_map(id).LusDatatype;
+                else
+                    dt = data_map(id);
+                end
+            else
+                dt = '';
+            end
+        end
+        
+        function dt = getVarDT(data_map, var_name)
+            if ~isKey(data_map, var_name)
+                dt = '';
+                return;
+            end
+            if isfield(data_map(var_name), 'LusDatatype')
+                dt = data_map(var_name).LusDatatype;
+            elseif ischar(data_map(var_name))
+                dt = data_map(var_name);
+            else
+                ME = MException('COCOSIM:TREE2CODE', ...
+                    'Variable data_map is not well defined');
+                throw(ME);
+            end
+        end
     end
 end
 

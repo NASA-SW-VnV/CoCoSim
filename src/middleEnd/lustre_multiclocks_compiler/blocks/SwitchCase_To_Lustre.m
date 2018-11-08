@@ -9,8 +9,6 @@ classdef SwitchCase_To_Lustre < Block_To_Lustre
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     properties
-        % needed for Fcn_To_Lustre.tree2code
-        isBooleanExpr = 1;
     end
     
     methods
@@ -46,20 +44,15 @@ classdef SwitchCase_To_Lustre < Block_To_Lustre
         %%
         function options = getUnsupportedOptions(obj, parent, blk, varargin)
             [inputs, inports_dt] = obj.getInputs( parent, blk);
+            data_map = Fcn_To_Lustre.createDataMap(inputs, inports_dt);
             IfExp = obj.getIfExp(blk);
             nbOutputs = numel(blk.CompiledPortWidths.Outport);
             for j=1:nbOutputs
-                [tree, status, unsupportedExp] = Fcn_Exp_Parser.parse(IfExp{j});
+                [~, status] = If_To_Lustre.formatConditionToLustre(obj, ...
+                    IfExp{j}, inputs, data_map, parent, blk);
                 if status
                     obj.addUnsupported_options(sprintf('ParseError  character unsupported  %s in block %s', ...
                         unsupportedExp, blk.Origin_path));
-                end
-                try
-                    Fcn_To_Lustre.tree2code(obj, tree, parent, blk, inputs, inports_dt{1});
-                catch me
-                    if strcmp(me.identifier, 'COCOSIM:TREE2CODE')
-                        obj.addUnsupported_options(me.message);
-                    end
                 end
             end
             options = obj.unsupported_options;
@@ -105,16 +98,18 @@ classdef SwitchCase_To_Lustre < Block_To_Lustre
                 % inputs{1} = {'In1_1', 'In1_2', 'In1_3'}
                 % and inputs{2} = {'In2_1'}
                 inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
-                inports_dt{i} = SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Inport(i));
-                if ~strcmp(inports_dt{i}, 'int')
-                    [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inports_dt{i}, 'int');
+                dt = SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Inport(i));
+                if ~strcmp(dt, 'int')
+                    [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(dt, 'int');
                     if ~isempty(external_lib)
                         obj.addExternal_libraries(external_lib);
                         inputs{i} = cellfun(@(x) ...
                             SLX2LusUtils.setArgInConvFormat(conv_format,x), inputs{i}, 'un', 0);
                     end
-                    inports_dt{i} = 'int';
+                    dt = 'int';
                 end
+                inports_dt{i} = arrayfun(@(x) dt, (1:numel(inputs{i})), ...
+                    'UniformOutput', false);
             end
         end
     end

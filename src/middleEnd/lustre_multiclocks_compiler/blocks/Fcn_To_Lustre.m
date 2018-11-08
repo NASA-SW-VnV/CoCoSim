@@ -8,60 +8,50 @@ classdef Fcn_To_Lustre < Block_To_Lustre
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     properties
-        isBooleanExpr = 0;
     end
     
     methods
         
-        function  write_code(obj, parent, blk, xml_trace, varargin)
-            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
-            outputDataType = blk.CompiledPortDataTypes.Outport{1};
+        
+        function  status = write_code(obj, parent, blk, xml_trace, varargin)
+            if isempty(xml_trace)
+                %comming from getUnsupportedOptions
+                [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk);
+            else
+                [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+            end
             
             inputs{1} = SLX2LusUtils.getBlockInputsNames(parent, blk, 1);
-            inport_dt = blk.CompiledPortDataTypes.Inport(1);
-            %converts the input data type(s) to
-            %its output data type
-            if ~strcmp(inport_dt, outputDataType)
-                RndMeth = blk.RndMeth;
-                SaturateOnIntegerOverflow = blk.SaturateOnIntegerOverflow;
-                [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, outputDataType, RndMeth, SaturateOnIntegerOverflow);
-                if ~isempty(external_lib)
-                    obj.addExternal_libraries(external_lib);
-                    inputs{1} = cellfun(@(x) ...
-                        SLX2LusUtils.setArgInConvFormat(conv_format,x), inputs{1}, 'un', 0);
-                end
-            end
             
-            obj.isBooleanExpr = 0;
+            inputs_dt{1} = arrayfun(@(x) 'real', (1:numel(inputs{1})), ...
+                'UniformOutput', false);
+            
+            data_map = Fcn_To_Lustre.createDataMap(inputs, inputs_dt);
+            
+            expected_dt = 'real';
+            
             [lusCode, status] = ...
-                Exp2Lus.expToLustre(obj, blk.Expr, parent, blk, inputs);
+                Exp2Lus.expToLustre(obj, blk.Expr, parent, blk, inputs, ...
+                data_map, expected_dt);
+            
             if status
-                display_msg(sprintf('ParseError  character unsupported  %s in block %s', ...
-                    unsupportedExp, blk.Origin_path), ...
-                    MsgType.ERROR, 'Exp2Lus.expToLustre', '');
+                display_msg(sprintf('Block %s is not supported', blk.Origin_path), ...
+                    MsgType.ERROR, 'Fcn_To_Lustre.write_code', '');
                 return;
             end
-            if obj.isBooleanExpr
-                lusCode = IteExpr(lusCode, RealExpr('1.0'),  RealExpr('0.0'));
-            end
+            
+           
             obj.setCode(LustreEq(outputs{1}, lusCode));
             obj.addVariable(outputs_dt);
+            
         end
         %%
         function options = getUnsupportedOptions(obj, parent, blk, varargin)
-            [tree, status, unsupportedExp] = Fcn_Exp_Parser.parse(blk.Expr);
+            % calling write_code because this block manipulate Expressions.
+            status = obj.write_code(parent, blk, [], varargin);
             if status
                 obj.addUnsupported_options(sprintf('ParseError  character unsupported  %s in block %s', ...
-                    unsupportedExp, blk.Origin_path));
-            end
-            obj.isBooleanExpr = 0;
-            try
-                inputs{1} = SLX2LusUtils.getBlockInputsNames(parent, blk, 1);
-                Fcn_To_Lustre.tree2code(obj, tree, parent, blk, inputs, 'real');
-            catch me
-                if strcmp(me.identifier, 'COCOSIM:TREE2CODE')
-                    obj.addUnsupported_options(me.message);
-                end
+                    blk.Expr, blk.Origin_path));
             end
             options = obj.unsupported_options;
         end
@@ -70,6 +60,15 @@ classdef Fcn_To_Lustre < Block_To_Lustre
             is_Abstracted = ~isempty(obj.getExternalLibraries);
         end
     end
-    
+    methods(Static)
+        function data_map = createDataMap(inputs, inputs_dt)
+            data_map = containers.Map('KeyType', 'char', 'ValueType', 'char');
+            for i=1:numel(inputs)
+                for j=1:numel(inputs{i})
+                    data_map(inputs{i}{j}.getId()) = inputs_dt{i}{j};
+                end
+            end
+        end
+    end
 end
 

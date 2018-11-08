@@ -67,6 +67,9 @@ classdef Block_To_Lustre < handle
                 end
             end
         end
+        function setVariables(obj, vars)
+            obj.variables = vars;
+        end
         function addUnsupported_options(obj, option)
             if iscell(option)
                 obj.unsupported_options = [obj.unsupported_options, option];
@@ -84,6 +87,9 @@ classdef Block_To_Lustre < handle
             else
                 obj.external_libraries{end +1} = lib;
             end
+        end
+        function setExternal_libraries(obj, lib)
+            obj.external_libraries = lib;
         end
         function addExtenal_node(obj, nodeAst)
             if iscell(nodeAst)
