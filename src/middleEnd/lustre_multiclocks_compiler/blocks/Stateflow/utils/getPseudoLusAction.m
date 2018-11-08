@@ -1,39 +1,31 @@
 function [lus_action, outputs, inputs, external_libraries] = getPseudoLusAction(action, isCondition, ignoreOutInputs)
+    global SF_DATA_MAP;
     if nargin < 2
         isCondition = false;
     end
     if nargin < 3
         ignoreOutInputs = false;
     end
-    action = strrep(action, ';', '');
-    [tree, status, unsupportedExp] = Fcn_Exp_Parser.parse(action);
     outputs = {};
     inputs = {};
+    
+    obj = DummyBlock_To_Lustre();
+    [lus_action, status] = ...
+        Exp2Lus.expToLustre(obj, action, [], [], [], ...
+        SF_DATA_MAP, '', true);
     if status
         ME = MException('COCOSIM:STATEFLOW', ...
-            'ParseError: unsupported expression "%s" in Action %s in StateFlow.', ...
-            unsupportedExp, action);
+            'ParseError: unsupported Action %s in StateFlow.', action);
         throw(ME);
     end
-    obj = DummyBlock_To_Lustre();
-    try
-        lus_action = Fcn_To_Lustre.tree2code(obj, tree, [], [], [], [], true);
-        external_libraries = obj.getExternalLibraries();
-    catch me
-        if strcmp(me.identifier, 'COCOSIM:TREE2CODE')
-            ME = MException('COCOSIM:STATEFLOW', ...
-                '%s in Action %s', ...
-                me.message, action);
-            throw(ME);
-        else
-            display_msg(me.getReport(), MsgType.DEBUG, 'getPseudoLusAction', '');
-            ME = MException('COCOSIM:STATEFLOW', ...
-                'Parsing Action "%s" has failed', action);
-            throw(ME);
-        end
-    end
-    if isempty(lus_action)
+    external_libraries = obj.getExternalLibraries();
+    
+    if isempty(lus_action) 
         return;
+    end
+    if isa(lus_action, 'NodeCallExpr')
+        %TODO Stateflow functions. Switch it to LustreEq
+        
     end
     if ~isCondition && ~isa(lus_action, 'LustreEq')
         ME = MException('COCOSIM:STATEFLOW', ...
@@ -52,7 +44,7 @@ function [lus_action, outputs, inputs, external_libraries] = getPseudoLusAction(
     end
     outputs_names = unique(outputs_names);
     inputs_names = unique(inputs_names);
-    global SF_DATA_MAP;
+    
     for i=1:numel(outputs_names)
         k = outputs_names{i};
         if isKey(SF_DATA_MAP, k)

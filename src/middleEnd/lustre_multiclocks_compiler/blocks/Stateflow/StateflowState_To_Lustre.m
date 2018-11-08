@@ -604,6 +604,7 @@ classdef StateflowState_To_Lustre
                     StateflowState_To_Lustre.addStateEnum(parent, state);    
                 cond_prefix = BinaryExpr(BinaryExpr.EQ,...
                     idParentVar, VarIdExpr(idParentStateEnum));
+                inputs{end + 1} = LustreVar(idParentVar, idParentEnumType);
                 during_act_node_name = ...
                     StateflowState_To_Lustre.getDuringActionNodeName(state);
                 if isKey(SF_STATES_NODESAST_MAP, during_act_node_name)
@@ -615,7 +616,7 @@ classdef StateflowState_To_Lustre
                     outputs = [outputs, nodeAst.getOutputs()];
                     inputs = [inputs, nodeAst.getOutputs()];
                     inputs = [inputs, nodeAst.getInputs()];
-                    inputs{end + 1} = LustreVar(idParentVar, idParentEnumType);
+                    
                 end
                 
                 %3rd step: Inner transitions
@@ -629,7 +630,6 @@ classdef StateflowState_To_Lustre
                     outputs = [outputs, nodeAst.getOutputs()];
                     inputs = [inputs, nodeAst.getOutputs()];
                     inputs = [inputs, nodeAst.getInputs()];
-                    inputs{end + 1} = LustreVar(idParentVar, idParentEnumType);
                 end
             else
                 
@@ -657,7 +657,7 @@ classdef StateflowState_To_Lustre
             number_children = numel(children);
             isParallel = isequal(state.Composition.Type, 'PARALLEL_AND');
             if number_children > 0 && ~isParallel
-                inputs{1} = LustreVar(idStateVar, idStateEnumType);
+                inputs{end + 1} = LustreVar(idStateVar, idStateEnumType);
             end
             for i=1:number_children
                 child = children{i};
@@ -866,6 +866,26 @@ classdef StateflowState_To_Lustre
                             MsgType.ERROR, 'Outport_To_Lustre', '');
                     end
                 end
+            end
+            % set unused outputs to their initial values or zero
+            for i=1:numel(outputsData)
+                d = outputsData{i};
+                d_name = d.Name;
+                if ismember(d_name, nodeCall_outputs_Names) 
+                    % it's used
+                    continue;
+                end
+                [v, ~, status] = ...
+                    Constant_To_Lustre.getValueFromParameter(parent, blk, d.InitialValue);
+                if status
+                    display_msg(...
+                        sprintf('InitialOutput %s in Chart %s not found neither in Matlab workspace or in Model workspace',...
+                        d.InitialValue, chart.Path), ...
+                        MsgType.ERROR, 'Outport_To_Lustre', '');
+                    v = 0;
+                end
+                IC_Var = SLX2LusUtils.num2LusExp(v, d.LusDatatype);
+                body{end+1} = LustreEq(VarIdExpr(d_name), IC_Var);
             end
             %Node Call
             node_call = NodeCallExpr(node_call.getNodeName(), nodeCall_inputs_Ids);

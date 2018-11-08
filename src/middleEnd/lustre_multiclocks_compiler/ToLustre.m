@@ -200,6 +200,8 @@ if syntax_status
     display_msg('Simulink To Lustre Syntax check has failed. The parsing error is the following:', MsgType.ERROR, 'TOLUSTRE', '');
     display_msg(output, MsgType.ERROR, 'TOLUSTRE', '');
     status = syntax_status;
+else
+    display_msg('Simulink To Lustre Syntax check passed successfully.', MsgType.RESULT, 'TOLUSTRE', '');
 end
 %% display report files
 t_finish = toc(t_start);

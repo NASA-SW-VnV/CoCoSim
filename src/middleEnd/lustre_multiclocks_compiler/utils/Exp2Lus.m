@@ -17,7 +17,7 @@ classdef Exp2Lus < handle
                 isStateFlow = false;
             end
             status = 0;
-            lusCode = VarIdExpr('');
+            lusCode = '';
             if isempty(exp)
                 return;
             end
