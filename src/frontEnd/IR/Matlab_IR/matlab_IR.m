@@ -16,20 +16,17 @@ if isempty(em_jar_path)
     return;
 end
 [fun_dir, fun_name, ~] = fileparts(fun_path);
-if exist('dst_path', 'var') && ~isempty(dst_path)
+if nargin == 2 && ~isempty(dst_path)
     fun_ir_path = fullfile(dst_path, strcat(fun_name, '.json'));
 else
     fun_ir_path = fullfile(fun_dir, strcat(fun_name, '.json'));
 end
-cmd = sprintf('java -classpath %s cocosim.matlab2IR.EM2JSON %s %s', ...
-    em_jar_path, fun_path, fun_ir_path);
-msg = sprintf('COMMAND %s.', cmd);
-display_msg(msg, MsgType.DEBUG, 'matlab_IR', '');
 
-[status, cmd_output] = system(cmd);
-
-if status
-    msg = sprintf('COMMAND %s failed. %s', cmd, cmd_output);
+em2json =  cocosim.matlab2IR.EM2JSON;
+try
+    em2json.MFileToIR(fun_path, fun_ir_path);
+catch
+    msg = sprintf('Could not generate Matlab IR for %s', fun_path);
     display_msg(msg, MsgType.ERROR, 'matlab_IR', '');
     return;
 end
