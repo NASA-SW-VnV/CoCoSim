@@ -867,7 +867,12 @@ classdef StateflowState_To_Lustre
                     end
                 end
             end
+            %Node Call
+            node_call = NodeCallExpr(node_call.getNodeName(), nodeCall_inputs_Ids);
+            body{end+1} = LustreEq(nodeCall_outputs_Ids, node_call);
+            
             % set unused outputs to their initial values or zero
+            body{end+1} = LustreComment('Set unused outputs');
             for i=1:numel(outputsData)
                 d = outputsData{i};
                 d_name = d.Name;
@@ -887,9 +892,7 @@ classdef StateflowState_To_Lustre
                 IC_Var = SLX2LusUtils.num2LusExp(v, d.LusDatatype);
                 body{end+1} = LustreEq(VarIdExpr(d_name), IC_Var);
             end
-            %Node Call
-            node_call = NodeCallExpr(node_call.getNodeName(), nodeCall_inputs_Ids);
-            body{end+1} = LustreEq(nodeCall_outputs_Ids, node_call);
+            
         end
         
         %
