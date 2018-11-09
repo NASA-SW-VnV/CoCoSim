@@ -16,7 +16,8 @@ function [nom_lustre_file, xml_trace, status, unsupportedOptions, abstractedBloc
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% global variables
-global TOLUSTRE_ENUMS_MAP KIND2 Z3 LUSTREC;
+global TOLUSTRE_ENUMS_MAP KIND2 Z3 LUSTREC CHECK_SF_ACTIONS;
+CHECK_SF_ACTIONS = 1;
 if isempty(LUSTREC) || isempty(KIND2)
     tools_config;
 end
@@ -39,7 +40,9 @@ forceGeneration = 0;
 for i=1:numel(varargin)
     if strcmp(varargin{i}, 'forceCodeGen')
         forceGeneration = 1;
-        break;
+    end
+    if strcmp(varargin{i}, 'skip_sf_actions_check')
+        CHECK_SF_ACTIONS = 0;
     end
 end
 if ~forceGeneration
