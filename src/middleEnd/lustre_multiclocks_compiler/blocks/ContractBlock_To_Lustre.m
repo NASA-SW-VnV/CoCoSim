@@ -32,7 +32,7 @@ classdef ContractBlock_To_Lustre < Block_To_Lustre
                 format = [format, ...
                     'Please Create a Subsystem from the block and linked it again to the contract.'];
                 obj.addUnsupported_options(...
-                    sprintf(format, blk.Origin_path, associatedBlk.Origin_path));
+                    sprintf(format, HtmlItem.addOpenCmd(blk.Origin_path), associatedHtmlItem.addOpenCmd(blk.Origin_path)));
             end
             options = obj.unsupported_options;
             

@@ -33,7 +33,7 @@ classdef MultiPortSwitch_To_Lustre < Block_To_Lustre
                 indexShift = indexShift + 1;
             elseif strcmp(blk.DataPortOrder, 'Specify indices')
                 display_msg(sprintf('Specify indices is not supported  in block %s',...
-                    blk.Origin_path), MsgType.ERROR, 'MultiportSwitch_To_Lustre', '');
+                    HtmlItem.addOpenCmd(blk.Origin_path)), MsgType.ERROR, 'MultiportSwitch_To_Lustre', '');
             end
             
             codes = cell(1, numel(outputs) + 1); 
@@ -104,12 +104,12 @@ classdef MultiPortSwitch_To_Lustre < Block_To_Lustre
             if strcmp(blk.DataPortOrder, 'Specify indices')
                 obj.addUnsupported_options(...
                     sprintf('Specify indices is not supported  in block %s',...
-                    blk.Origin_path));
+                    HtmlItem.addOpenCmd(blk.Origin_path)));
             end    
             if strcmp(blk.AllowDiffInputSizes, 'on')
                 obj.addUnsupported_options(...
                     sprintf('Allow different data input sizes is not supported  in block %s',...
-                    blk.Origin_path));
+                    HtmlItem.addOpenCmd(blk.Origin_path)));
             end             
             options = obj.unsupported_options;
         end

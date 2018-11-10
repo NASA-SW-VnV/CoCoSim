@@ -168,19 +168,19 @@ classdef Assignment_To_Lustre < Block_To_Lustre
             in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(blk.CompiledPortDimensions.Inport);
             if in_matrix_dimension{1}.numDs>7
                 msg = sprintf('More than 7 dimensions is not supported in block %s',...
-                    blk.Origin_path);
+                    HtmlItem.addOpenCmd(blk.Origin_path));
                 obj.addUnsupported_options(msg);
             end
             if isequal(blk.OutputInitialize, 'Specify size for each dimension in table')
                 msg = sprintf('OutputInitialize Parameter in block %s is not supported. It should be set to "Initialize using input port <Y0>"',...
-                    blk.Origin_path);
+                    HtmlItem.addOpenCmd(blk.Origin_path));
                 obj.addUnsupported_options(msg);
             end
             
             for i=1:numel(blk.IndexOptionArray)
                 if strcmp(blk.IndexOptionArray{i}, 'Starting and ending indices (port)')
                     msg = sprintf('IndexOption  %s not supported in block %s',...
-                        blk.IndexOptionArray{i}, blk.Origin_path);
+                        blk.IndexOptionArray{i}, HtmlItem.addOpenCmd(blk.Origin_path));
                     obj.addUnsupported_options(msg);
                 end
             end
@@ -280,7 +280,7 @@ classdef Assignment_To_Lustre < Block_To_Lustre
             
             if numOutDims>7
                 display_msg(sprintf('More than 7 dimensions is not supported in block %s',...
-                    blk.Origin_path), ...
+                    HtmlItem.addOpenCmd(blk.Origin_path)), ...
                     MsgType.ERROR, 'Assignment_To_Lustre', '');
             end            
             U_index = {};
@@ -394,7 +394,7 @@ classdef Assignment_To_Lustre < Block_To_Lustre
             if numel(in_matrix_dimension{1}.dims) > 7
                 
                 display_msg(sprintf('More than 7 dimensions is not supported in block %s',...
-                    blk.Origin_path), ...
+                    HtmlItem.addOpenCmd(blk.Origin_path)), ...
                     MsgType.ERROR, 'Assignment_To_Lustre', '');
             end
             for i=1:numel(outputs)
@@ -628,12 +628,12 @@ classdef Assignment_To_Lustre < Block_To_Lustre
                     end
                 elseif strcmp(blk.IndexOptionArray{i}, 'Starting and ending indices (port)')
                      display_msg(sprintf('IndexOption  %s not supported in block %s',...
-                        blk.IndexOptionArray{i}, blk.Origin_path), ...
+                        blk.IndexOptionArray{i}, HtmlItem.addOpenCmd(blk.Origin_path)), ...
                         MsgType.ERROR, AssignSelectToLustre, '');                   
                 else
                     % should not be here
                     display_msg(sprintf('IndexOption  %s not recognized in block %s',...
-                        blk.IndexOptionArray{i}, blk.Origin_path), ...
+                        blk.IndexOptionArray{i}, HtmlItem.addOpenCmd(blk.Origin_path)), ...
                         MsgType.ERROR, AssignSelectToLustre, '');
                 end
                 if strcmp(IndexMode, 'Zero-based') && indPortNumber(i) == 0

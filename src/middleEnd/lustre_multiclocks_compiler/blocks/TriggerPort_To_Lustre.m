@@ -19,7 +19,7 @@ classdef TriggerPort_To_Lustre < Block_To_Lustre
             if strcmp(blk.TriggerType, 'function-call')
                 obj.addUnsupported_options(...
                     sprintf('Option function-call is not supported in TriggerPort block %s', ...
-                    blk.Origin_path));
+                    HtmlItem.addOpenCmd(blk.Origin_path)));
             end
             options = obj.unsupported_options;
         end

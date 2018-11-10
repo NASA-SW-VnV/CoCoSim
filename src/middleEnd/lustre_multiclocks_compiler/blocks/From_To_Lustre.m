@@ -18,7 +18,7 @@ classdef From_To_Lustre < Block_To_Lustre
             if ~isempty(goToPath)
                 GotoHandle = get_param(goToPath{1}, 'Handle');
             else
-                display_msg(sprintf('From block %s has no GoTo', blk.Origin_path),...
+                display_msg(sprintf('From block %s has no GoTo', HtmlItem.addOpenCmd(blk.Origin_path)),...
                     MsgType.WARNING, 'From_To_Lustre', '');
                 return;
             end
@@ -39,7 +39,7 @@ classdef From_To_Lustre < Block_To_Lustre
                 'LookUnderMasks', 'all', 'BlockType','Goto','GotoTag',blk.GotoTag);
             if isempty(goToPath)
                 obj.addUnsupported_options(...
-                    sprintf('From block %s has no GoTo', blk.Origin_path));
+                    sprintf('From block %s has no GoTo', HtmlItem.addOpenCmd(blk.Origin_path)));
             end
             options = obj.unsupported_options;
             

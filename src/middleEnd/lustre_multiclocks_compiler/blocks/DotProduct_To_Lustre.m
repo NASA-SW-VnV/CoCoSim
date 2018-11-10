@@ -54,7 +54,7 @@ classdef DotProduct_To_Lustre < Block_To_Lustre
         function options = getUnsupportedOptions(obj, ~, blk, varargin)
             obj.unsupported_options = {...
                 sprintf('Block %s is supported by Pre-processing check the pre-processing errors.',...
-                blk.Origin_path)};            
+                HtmlItem.addOpenCmd(blk.Origin_path))};            
             options = obj.unsupported_options;
         end
         %%

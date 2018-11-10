@@ -150,7 +150,7 @@ classdef Math_To_Lustre < Block_To_Lustre
                 in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(blk.CompiledPortDimensions.Inport);
                 if in_matrix_dimension{1}.numDs > 2
                     display_msg(sprintf('Matrix size > 2 is not supported for transpose/hermitian operator in block %s',...
-                        blk.Origin_path), MsgType.ERROR, 'Math_To_Lustre', '');
+                        HtmlItem.addOpenCmd(blk.Origin_path)), MsgType.ERROR, 'Math_To_Lustre', '');
                 end
                 if numel(in_matrix_dimension{1}.dims) == 1
                     in_matrix_dimension{1}.dims(2) = 1;
@@ -175,7 +175,7 @@ classdef Math_To_Lustre < Block_To_Lustre
                 in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(blk.CompiledPortDimensions.Inport);
                 if in_matrix_dimension{1}.numDs > 2
                     obj.addUnsupported_options(sprintf('Matrix size > 2 is not supported for transpose/hermitian operator in block %s',...
-                        blk.Origin_path));
+                        HtmlItem.addOpenCmd(blk.Origin_path)));
                 end
             end
             options = obj.unsupported_options;

@@ -71,7 +71,7 @@ classdef Abs_To_Lustre < Block_To_Lustre
         function options = getUnsupportedOptions(obj, ~, blk, varargin)
             if ~strcmp(blk.OutMax, '[]') || ~strcmp(blk.OutMin, '[]')
                 obj.addUnsupported_options(...
-                    sprintf('The minimum/maximum value is not supported in block %s', blk.Origin_path));
+                    sprintf('The minimum/maximum value is not supported in block %s', HtmlItem.addOpenCmd(blk.Origin_path)));
             end
             options = obj.unsupported_options;
         end

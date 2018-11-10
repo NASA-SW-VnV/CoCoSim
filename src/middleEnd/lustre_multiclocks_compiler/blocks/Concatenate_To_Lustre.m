@@ -26,13 +26,13 @@ classdef Concatenate_To_Lustre < Block_To_Lustre
                     Constant_To_Lustre.getValueFromParameter(parent, blk, blk.ConcatenateDimension);
                 if status
                     display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
-                        blk.ConcatenateDimension, blk.Origin_path), ...
+                        blk.ConcatenateDimension, HtmlItem.addOpenCmd(blk.Origin_path)), ...
                         MsgType.ERROR, 'Concatenate_To_Lustre', '');
                     return;
                 end
                 if numel(in_matrix_dimension) > 7
                     display_msg(sprintf('More than 7 dimensions is not supported in block %s ',...
-                        blk.Origin_path), ...
+                        HtmlItem.addOpenCmd(blk.Origin_path)), ...
                         MsgType.ERROR, 'Concatenate_To_Lustre', '');
                     return;
                 end
@@ -42,7 +42,7 @@ classdef Concatenate_To_Lustre < Block_To_Lustre
                     [codes] = Concatenate_To_Lustre.concatenateDimension1(inputs, outputs,in_matrix_dimension);
                 else
                     display_msg(sprintf('ConcatenateDimension > 2 in block %s',...
-                        blk.Origin_path), ...
+                        HtmlItem.addOpenCmd(blk.Origin_path)), ...
                         MsgType.ERROR, 'Constant_To_Lustr', '');
                     return;
                 end
@@ -57,16 +57,16 @@ classdef Concatenate_To_Lustre < Block_To_Lustre
                 Constant_To_Lustre.getValueFromParameter(parent, blk, blk.ConcatenateDimension);
             if status
                 obj.addUnsupported_options(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
-                    blk.ConcatenateDimension, blk.Origin_path));
+                    blk.ConcatenateDimension, HtmlItem.addOpenCmd(blk.Origin_path)));
             end
 %             if numel(blk.CompiledPortDimensions.Inport) > 7
 %                 obj.addUnsupported_options(...
 %                     sprintf('More than 7 dimensions is not supported in block %s',...
-%                     blk.Origin_path));
+%                     HtmlItem.addOpenCmd(blk.Origin_path)));
 %             end
             if ConcatenateDimension > 2
                 obj.addUnsupported_options(sprintf('ConcatenateDimension > 2 in block %s',...
-                        blk.Origin_path));
+                        HtmlItem.addOpenCmd(blk.Origin_path)));
             end
             options = obj.unsupported_options;
         end

@@ -92,19 +92,19 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
             [NumberOfTableDimensions, ~, ~] = ...
                 Constant_To_Lustre.getValueFromParameter(parent, blk, blk.NumberOfTableDimensions);
             if NumberOfTableDimensions >= 7
-                obj.addUnsupported_options(sprintf('More than 7 dimensions is not supported in block %s', blk.Origin_path));
+                obj.addUnsupported_options(sprintf('More than 7 dimensions is not supported in block %s', HtmlItem.addOpenCmd(blk.Origin_path)));
             end
             if strcmp(blk.InterpMethod, 'Cubic spline')
-                obj.addUnsupported_options(sprintf('Cubic spline interpolation is not support in block %s', blk.Origin_path));
+                obj.addUnsupported_options(sprintf('Cubic spline interpolation is not support in block %s', HtmlItem.addOpenCmd(blk.Origin_path)));
             end            	
             if strcmp(blk.DataSpecification, 'Lookup table object')
-                obj.addUnsupported_options(sprintf('Lookup table object option for DataSpecification is not support in block %s', blk.Origin_path));
+                obj.addUnsupported_options(sprintf('Lookup table object option for DataSpecification is not support in block %s', HtmlItem.addOpenCmd(blk.Origin_path)));
             end                
             if NumberOfTableDimensions >= 3 ...
                     && isequal(blk.TableDataTypeStr, 'Inherit: Same as output') ...
                     && ~isequal(blk.CompiledPortDataTypes.Outport{1}, 'double') ...
                     && ~isequal(blk.CompiledPortDataTypes.Outport{1}, 'single')
-                obj.addUnsupported_options(sprintf('Lookup table "%s" has a Table DataType set different from double/Single which is not supported for dimension greater than 2.', blk.Origin_path));
+                obj.addUnsupported_options(sprintf('Lookup table "%s" has a Table DataType set different from double/Single which is not supported for dimension greater than 2.', HtmlItem.addOpenCmd(blk.Origin_path)));
             end
 
             options = obj.unsupported_options;
@@ -324,7 +324,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                 end
             else  % Cubic spline  % not yet
                 display_msg(sprintf('Cubic spline is not yet supported  in block %s',...
-                    blk.Origin_path), MsgType.ERROR, 'Lookup_nD_To_Lustre', '');
+                    HtmlItem.addOpenCmd(blk.Origin_path)), MsgType.ERROR, 'Lookup_nD_To_Lustre', '');
             end
             
             %code = zero;
@@ -872,7 +872,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
             if ~isLookupTableDynamic
                 if strcmp(blk.DataSpecification, 'Lookup table object')
                     display_msg(sprintf('Lookup table object fir DataSpecification in block %s is not supported',...
-                        blk.Origin_path), ...
+                        HtmlItem.addOpenCmd(blk.Origin_path)), ...
                         MsgType.ERROR, 'Lookup_nD_To_Lustre', '');
                 end
             end
@@ -908,7 +908,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                     blkParams.yIsBounded = 1;
                 elseif strcmp(blk.InterpMethod, 'Cubic spline')
                     display_msg(sprintf('Cubic spline interpolation in block %s is not supported',...
-                        blk.Origin_path), ...
+                        HtmlItem.addOpenCmd(blk.Origin_path)), ...
                         MsgType.ERROR, 'Lookup_nD_To_Lustre', '');
                 else
                     blkParams.InterpMethod = 'Linear';
@@ -1166,7 +1166,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                 end                
             else
                 display_msg(sprintf('More than 3 dimensions is not supported for contract in block %s',...
-                    blk.Origin_path), MsgType.ERROR, 'Lookup_nD_To_Lustre', '');
+                    HtmlItem.addOpenCmd(blk.Origin_path)), MsgType.ERROR, 'Lookup_nD_To_Lustre', '');
             end
         end
         

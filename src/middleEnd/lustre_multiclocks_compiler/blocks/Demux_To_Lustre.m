@@ -16,7 +16,7 @@ classdef Demux_To_Lustre < Block_To_Lustre
             
             if strcmp(blk.BusSelectionMode, 'on')
                 display_msg(sprintf('BusSelectionMode on is not supported in block %s',...
-                    blk.Origin_path), ...
+                    HtmlItem.addOpenCmd(blk.Origin_path)), ...
                     MsgType.ERROR, 'Demux_To_Lustre', '');
             end
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
@@ -55,7 +55,7 @@ classdef Demux_To_Lustre < Block_To_Lustre
             if strcmp(blk.BusSelectionMode, 'on')
                 obj.addUnsupported_options(...
                     sprintf('BusSelectionMode on is not supported in block %s',...
-                    blk.Origin_path));
+                    HtmlItem.addOpenCmd(blk.Origin_path)));
             end
             options = obj.unsupported_options;
         end

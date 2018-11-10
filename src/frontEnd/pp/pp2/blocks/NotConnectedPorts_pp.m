@@ -38,13 +38,27 @@ if not(isempty(all_blocks))
                         SrcBlkH = get_param(constant_handle, 'PortHandles');
                         DstBlkH = obj.PortHandles;
                         
-                        port_numer = str2double(p.Type);
-                        line = get_param(DstBlkH.Inport(port_numer), 'line');
+                        if isequal(p.Type, 'trigger')
+                            portHandle = DstBlkH.Trigger(1);
+                        elseif isequal(p.Type, 'enable')
+                            portHandle = DstBlkH.Enable(1);
+                        elseif isequal(p.Type, 'state')
+                            portHandle = DstBlkH.State(1);
+                        elseif isequal(p.Type, 'ifaction')
+                            portHandle = DstBlkH.Ifaction(1);
+                        else
+                            type = strrep(p.Type, 'LConn', '');
+                            type = strrep(type, 'RConn', '');
+                            port_numer = str2double(type);
+                            portHandle = DstBlkH.Inport(port_numer);
+                        end
+                        
+                        line = get_param(portHandle, 'line');
                         if line ~= -1
                             delete_line(line);
                         end
                         add_line(obj.Parent, SrcBlkH.Outport(1),...
-                            DstBlkH.Inport(port_numer), 'autorouting', 'on');
+                            portHandle, 'autorouting', 'on');
                         
                     elseif  isempty(p.SrcBlock) && isempty(p.DstBlock)
                         terminator_path = fullfile(obj.Parent, 'UnconnectedPort');

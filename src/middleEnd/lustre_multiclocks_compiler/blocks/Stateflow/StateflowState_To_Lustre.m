@@ -11,6 +11,14 @@ classdef StateflowState_To_Lustre
     end
     
     methods(Static)
+        %%
+        function options = getUnsupportedOptions(state, varargin)
+            options = {};
+        end
+        function is_Abstracted = isAbstracted(varargin)
+            is_Abstracted = false;
+        end
+        
         %% State Actions and DefaultTransitions Nodes
         function  [external_nodes, external_libraries ] = ...
                 write_ActionsNodes(state)
@@ -177,13 +185,7 @@ classdef StateflowState_To_Lustre
             main_node.setInputs(inputs);
             SF_STATES_NODESAST_MAP(node_name) = main_node;
         end
-        %%
-        function options = getUnsupportedOptions(varargin)
-            options = {};
-        end
-        function is_Abstracted = isAbstracted(varargin)
-            is_Abstracted = false;
-        end
+        
         
         %% State actions
         function [action_nodes,  external_libraries] = ...

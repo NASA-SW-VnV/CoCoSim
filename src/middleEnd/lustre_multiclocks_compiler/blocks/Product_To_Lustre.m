@@ -43,13 +43,13 @@ classdef Product_To_Lustre < Block_To_Lustre
                             if blk.CompiledPortWidths.Inport(i) > 49
                                 obj.addUnsupported_options(...
                                     sprintf('Option Matrix(*) with division is not supported in block %s in inport %d. Only less than 8x8 Matrix inversion is supported.', ...
-                                    blk.Origin_path, i));
+                                    HtmlItem.addOpenCmd(blk.Origin_path), i));
                             end
                         else
                             if blk.CompiledPortWidths.Inport(i) > 16
                                 obj.addUnsupported_options(...
                                     sprintf('Option Matrix(*) with division is not supported in block %s in inport %d. Only less than 5x5 Matrix inversion is supported.', ...
-                                    blk.Origin_path, i));
+                                    HtmlItem.addOpenCmd(blk.Origin_path), i));
                             end
                         end
                     end

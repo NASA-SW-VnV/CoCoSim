@@ -1,4 +1,4 @@
-function [b, status, type, masktype, isIgnored] = getWriteType(sub_blk)
+function [b, status, type, masktype, sfblockType, isIgnored] = getWriteType(sub_blk)
 % getWriteType returns the handle of class corresponding to blockType/MaskType
 % of the block in parameter.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

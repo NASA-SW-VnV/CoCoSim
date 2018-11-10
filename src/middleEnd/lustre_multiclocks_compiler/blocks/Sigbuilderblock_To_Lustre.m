@@ -13,10 +13,10 @@ classdef Sigbuilderblock_To_Lustre < Block_To_Lustre
         function  write_code(obj, parent, blk, xml_trace, ~, backend, varargin)
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             obj.addVariable(outputs_dt);
-            [time,data,~] = signalbuilder(blk.Origin_path);
+            [time,data,~] = signalbuilder(HtmlItem.addOpenCmd(blk.Origin_path));
             blkParams = Sigbuilderblock_To_Lustre.readBlkParams(blk);
             
-            model_name = strsplit(blk.Origin_path, '/');
+            model_name = strsplit(HtmlItem.addOpenCmd(blk.Origin_path), '/');
             model_name = model_name{1};
             SampleTime = SLXUtils.getModelCompiledSampleTime(model_name);            
             

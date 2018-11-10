@@ -103,7 +103,7 @@ classdef BusSelector_To_Lustre < Block_To_Lustre
                 else
                     ME = MException('COCOSIM:BusSelector_To_Lustre', ...
                         'Block %s with type %s is not supported.', ...
-                        blk.Origin_path, InportDT);
+                        HtmlItem.addOpenCmd(blk.Origin_path), InportDT);
                     throw(ME);
                 end
             end
@@ -120,7 +120,7 @@ classdef BusSelector_To_Lustre < Block_To_Lustre
             if numel(inport_cell_dimension) ~= numel(inputSignalsInlined) ...
                     && numel(inport_cell_dimension) ~= 1
                 ME = MException('COCOSIM:BusSelector_To_Lustre', ...
-                    'Block %s is not supported. Inport and Outport Dimensions are not compatible.', blk.Origin_path);
+                    'Block %s is not supported. Inport and Outport Dimensions are not compatible.', HtmlItem.addOpenCmd(blk.Origin_path));
                 throw(ME);
             end
             if numel(inport_cell_dimension) == 1
@@ -131,7 +131,7 @@ classdef BusSelector_To_Lustre < Block_To_Lustre
                    % we can not do mapping between inputs and outpus if all
                    % of the inputs are used.
                     ME = MException('COCOSIM:BusSelector_To_Lustre', ...
-                        'Block %s is not supported. All inputs are selected.', blk.Origin_path);
+                        'Block %s is not supported. All inputs are selected.', HtmlItem.addOpenCmd(blk.Origin_path));
                     throw(ME);
                 end
                 inputIdx = 1;
@@ -151,7 +151,7 @@ classdef BusSelector_To_Lustre < Block_To_Lustre
                         inputIdx = inputIdx + width;
                     else
                         ME = MException('COCOSIM:BusSelector_To_Lustre', ...
-                            'Block %s is not supported. Input Signal "%s" was not found.', blk.Origin_path, inputSignal);
+                            'Block %s is not supported. Input Signal "%s" was not found.', HtmlItem.addOpenCmd(blk.Origin_path), inputSignal);
                         throw(ME);
                     end
                 end

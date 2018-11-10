@@ -31,7 +31,7 @@ classdef RateTransition_To_Lustre < Block_To_Lustre
                         type = 'Copy';
                     else
                         display_msg(sprintf('RateTransition block "%s" is not supported. inTsOffset should be equal to outTsOffset.', ...
-                            blk.Origin_path), MsgType.ERROR, 'RateTransition_To_Lustre','');
+                            HtmlItem.addOpenCmd(blk.Origin_path)), MsgType.ERROR, 'RateTransition_To_Lustre','');
                         return;
                     end
                 elseif inTs < outTs % fast to slow
@@ -39,7 +39,7 @@ classdef RateTransition_To_Lustre < Block_To_Lustre
                         type = 'ZOH';
                     else
                         display_msg(sprintf('RateTransition block "%s" is not supported.\n The following conditionin should be met: Ts = outTs / N and inTsOffset = outTsOffset =0.', ...
-                            blk.Origin_path), MsgType.ERROR, 'RateTransition_To_Lustre','');
+                            HtmlItem.addOpenCmd(blk.Origin_path)), MsgType.ERROR, 'RateTransition_To_Lustre','');
                         return;
                     end
                 else %inTs > outTs : slow to fast
@@ -47,13 +47,13 @@ classdef RateTransition_To_Lustre < Block_To_Lustre
                         type = '1/z';
                     else
                         display_msg(sprintf('RateTransition block "%s" is not supported.\n The following conditionin should be met: Ts = outTs * N and inTsOffset = outTsOffset =0.', ...
-                            blk.Origin_path), MsgType.ERROR, 'RateTransition_To_Lustre','');
+                            HtmlItem.addOpenCmd(blk.Origin_path)), MsgType.ERROR, 'RateTransition_To_Lustre','');
                         return;
                     end
                 end
             else
                 display_msg(sprintf('RateTransition block "%s" is not supported. Data Integrity and Determinism should be checked', ...
-                    blk.Origin_path), MsgType.ERROR, 'RateTransition_To_Lustre','');
+                    HtmlItem.addOpenCmd(blk.Origin_path)), MsgType.ERROR, 'RateTransition_To_Lustre','');
                 return;
             end
             
@@ -120,28 +120,28 @@ classdef RateTransition_To_Lustre < Block_To_Lustre
             outTsOffset = OutportCompiledSampleTime(2);            
             if BackendType.isKIND2(backend)
                 obj.addUnsupported_options(...
-                    sprintf('multi-clocks in block "%s" is currently not supported by KIND2.', blk.Origin_path));
+                    sprintf('multi-clocks in block "%s" is currently not supported by KIND2.', HtmlItem.addOpenCmd(blk.Origin_path)));
             else
                 if strcmp(blk.Integrity, 'on') && strcmp(blk.Deterministic, 'on')
                     if inTs == outTs
                         if inTsOffset ~= outTsOffset
                             obj.addUnsupported_options(sprintf('RateTransition block "%s" is not supported. inTsOffset should be equal to outTsOffset.', ...
-                                blk.Origin_path));
+                                HtmlItem.addOpenCmd(blk.Origin_path)));
                         end
                     elseif inTs < outTs % fast to slow
                         if ~(mod(int32(outTs/inTs),1)==0 &&  inTsOffset == outTsOffset && inTsOffset == 0)
                             obj.addUnsupported_options(sprintf('RateTransition block "%s" is not supported.\n The following conditionin should be met: Ts = outTs / N and inTsOffset = outTsOffset =0.', ...
-                                blk.Origin_path));
+                                HtmlItem.addOpenCmd(blk.Origin_path)));
                         end
                     else %inTs > outTs : slow to fast
                         if ~(mod(int32(inTs/outTs),1)==0 &&  inTsOffset == outTsOffset && inTsOffset == 0)
                             obj.addUnsupported_options(sprintf('RateTransition block "%s" is not supported.\n The following conditionin should be met: Ts = outTs * N and inTsOffset = outTsOffset =0.', ...
-                                blk.Origin_path));
+                                HtmlItem.addOpenCmd(blk.Origin_path)));
                         end
                     end
                 else
                     obj.addUnsupported_options(sprintf('RateTransition block "%s" is not supported. Data Integrity and Determinism should be checked', ...
-                        blk.Origin_path));
+                        HtmlItem.addOpenCmd(blk.Origin_path)));
                 end
             end
             options = obj.unsupported_options;

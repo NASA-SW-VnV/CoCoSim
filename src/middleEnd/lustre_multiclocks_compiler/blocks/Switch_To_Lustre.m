@@ -18,7 +18,7 @@ classdef Switch_To_Lustre < Block_To_Lustre
             
             if strcmp(blk.AllowDiffInputSizes, 'on')
                 display_msg(sprintf('The Allow different data input sizes option is not support in block %s',...
-                    blk.Origin_path), MsgType.ERROR, 'Switch_To_Lustre', '');
+                    HtmlItem.addOpenCmd(blk.Origin_path)), MsgType.ERROR, 'Switch_To_Lustre', '');
             end
             
             widths = blk.CompiledPortWidths.Inport;
@@ -30,7 +30,7 @@ classdef Switch_To_Lustre < Block_To_Lustre
                 Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Threshold);
             if status
                 display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
-                    blk.Threshold, blk.Origin_path), ...
+                    blk.Threshold, HtmlItem.addOpenCmd(blk.Origin_path)), ...
                     MsgType.ERROR, 'Constant_To_Lustre', '');
                 return;
             end
@@ -120,11 +120,11 @@ classdef Switch_To_Lustre < Block_To_Lustre
         function options = getUnsupportedOptions(obj, ~, blk, varargin)
             if ~strcmp(blk.OutMax, '[]') || ~strcmp(blk.OutMin, '[]')
                 obj.addUnsupported_options(...
-                    sprintf('The minimum/maximum value is not support in block %s', blk.Origin_path));
+                    sprintf('The minimum/maximum value is not support in block %s', HtmlItem.addOpenCmd(blk.Origin_path)));
             end
             if strcmp(blk.AllowDiffInputSizes, 'on')
                 obj.addUnsupported_options(...
-                    sprintf('The Allow different data input sizes option is not support in block %s', blk.Origin_path));
+                    sprintf('The Allow different data input sizes option is not support in block %s', HtmlItem.addOpenCmd(blk.Origin_path)));
             end
             options = obj.unsupported_options;
         end

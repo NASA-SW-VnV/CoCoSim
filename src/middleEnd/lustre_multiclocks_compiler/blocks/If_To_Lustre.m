@@ -38,7 +38,7 @@ classdef If_To_Lustre < Block_To_Lustre
                     IfExp{j}, inputs, data_map, parent, blk);
                 if status
                     obj.addUnsupported_options(sprintf('ParseError  character unsupported  %s in block %s', ...
-                        unsupportedExp, blk.Origin_path));
+                        unsupportedExp, HtmlItem.addOpenCmd(blk.Origin_path)));
                 end
             end
             options = obj.unsupported_options;
@@ -120,7 +120,7 @@ classdef If_To_Lustre < Block_To_Lustre
                 data_map, expected_dt);
             
             if status
-                display_msg(sprintf('Block %s is not supported', blk.Origin_path), ...
+                display_msg(sprintf('Block %s is not supported', HtmlItem.addOpenCmd(blk.Origin_path)), ...
                     MsgType.ERROR, 'If_To_Lustre.formatConditionToLustre', '');
                 return;
             end

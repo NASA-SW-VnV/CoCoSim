@@ -43,7 +43,7 @@ classdef Trigonometry_To_Lustre < Block_To_Lustre
             unsupportedOp = {'cos + jsin'};
             if ismember(operator, unsupportedOp)
                 display_msg(sprintf('The "%s" operator is not supported in block %s',...
-                    operator, blk.Origin_path), MsgType.ERROR, 'Trigonometry_To_Lustre', '');
+                    operator, HtmlItem.addOpenCmd(blk.Origin_path)), MsgType.ERROR, 'Trigonometry_To_Lustre', '');
                 return;
             elseif strcmp(operator, 'sincos')
                 index = 0;
@@ -83,7 +83,7 @@ classdef Trigonometry_To_Lustre < Block_To_Lustre
             unsupportedOp = {'cos + jsin'};
             if ismember(blk.Operator, unsupportedOp)
                 obj.addUnsupported_options(...
-                    sprintf('The "%s" option is not supported in block %s', blk.Operator, blk.Origin_path));
+                    sprintf('The "%s" option is not supported in block %s', blk.Operator, HtmlItem.addOpenCmd(blk.Origin_path)));
             end
            
             options = obj.unsupported_options;

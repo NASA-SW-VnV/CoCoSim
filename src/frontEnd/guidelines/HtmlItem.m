@@ -14,10 +14,10 @@ classdef HtmlItem < handle
     methods
         function obj = HtmlItem(title, subtitles, text_color, icon_color,...
                 isBlkPath, cleanTitle)
-            if ~exist('isBlkPath', 'var')
+            if nargin <= 4 || isempty(isBlkPath)
                 isBlkPath = false;
             end
-            if ~exist('cleanTitle', 'var')
+            if nargin <= 5
                 cleanTitle = true;
             end
             obj.title = title;
@@ -97,6 +97,14 @@ classdef HtmlItem < handle
                 end
                 res = [res, ' </ul>\n</div>\n</div>\n</div>\n</li>'];
             end
+        end
+        
+        function res = print_noHTML(obj)
+            lines{1} = obj.title;
+            for i=1:numel(obj.subtitles)
+                lines{end+1} = obj.subtitles{i}.print_noHTML();
+            end
+            res = MatlabUtils.strjoin(lines, '\n');
         end
     end
     methods(Static)

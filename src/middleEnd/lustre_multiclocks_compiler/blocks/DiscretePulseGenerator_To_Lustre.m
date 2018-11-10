@@ -25,7 +25,7 @@ classdef DiscretePulseGenerator_To_Lustre < Block_To_Lustre
             PulseType = blk.PulseType;  % 'Time based' or 'Sample based'
             if strcmp(blk.TimeSource, 'Use external signal')
                 display_msg(sprintf('Option "Use external signal" is not supported for block %s',...
-                    blk.Origin_path), ...
+                    HtmlItem.addOpenCmd(blk.Origin_path)), ...
                     MsgType.ERROR, 'DiscretePulseGenerator_To_Lustre', '');
                 return;
             end
@@ -33,7 +33,7 @@ classdef DiscretePulseGenerator_To_Lustre < Block_To_Lustre
                 Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Amplitude);
             if status
                 display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
-                    blk.Amplitude, blk.Origin_path), ...
+                    blk.Amplitude, HtmlItem.addOpenCmd(blk.Origin_path)), ...
                     MsgType.ERROR, 'DiscretePulseGenerator_To_Lustre', '');
                 return;
             end
@@ -42,7 +42,7 @@ classdef DiscretePulseGenerator_To_Lustre < Block_To_Lustre
                 Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Period);
             if status
                 display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
-                    blk.Period, blk.Origin_path), ...
+                    blk.Period, HtmlItem.addOpenCmd(blk.Origin_path)), ...
                     MsgType.ERROR, 'DiscretePulseGenerator_To_Lustre', '');
                 return;
             end
@@ -51,7 +51,7 @@ classdef DiscretePulseGenerator_To_Lustre < Block_To_Lustre
                 Constant_To_Lustre.getValueFromParameter(parent, blk, blk.PulseWidth);
             if status
                 display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
-                    blk.PulseWidth, blk.Origin_path), ...
+                    blk.PulseWidth, HtmlItem.addOpenCmd(blk.Origin_path)), ...
                     MsgType.ERROR, 'DiscretePulseGenerator_To_Lustre', '');
                 return;
             end
@@ -60,7 +60,7 @@ classdef DiscretePulseGenerator_To_Lustre < Block_To_Lustre
                 Constant_To_Lustre.getValueFromParameter(parent, blk, blk.PhaseDelay);
             if status
                 display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
-                    blk.PhaseDelay, blk.Origin_path), ...
+                    blk.PhaseDelay, HtmlItem.addOpenCmd(blk.Origin_path)), ...
                     MsgType.ERROR, 'DiscretePulseGenerator_To_Lustre', '');
                 return;
             end
@@ -138,32 +138,32 @@ classdef DiscretePulseGenerator_To_Lustre < Block_To_Lustre
                 Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Amplitude);
             if status
                 obj.addUnsupported_options(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
-                    blk.Amplitude, blk.Origin_path));
+                    blk.Amplitude, HtmlItem.addOpenCmd(blk.Origin_path)));
             end
             
             [~, ~, status] = ...
                 Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Period);
             if status
                 obj.addUnsupported_options(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
-                    blk.Period, blk.Origin_path));
+                    blk.Period, HtmlItem.addOpenCmd(blk.Origin_path)));
             end
             
             [~, ~, status] = ...              
                 Constant_To_Lustre.getValueFromParameter(parent, blk, blk.PulseWidth);
             if status
                 obj.addUnsupported_options(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
-                    blk.PulseWidth, blk.Origin_path));
+                    blk.PulseWidth, HtmlItem.addOpenCmd(blk.Origin_path)));
             end
             
             [~, ~, status] = ...
                 Constant_To_Lustre.getValueFromParameter(parent, blk, blk.PhaseDelay);
             if status
                 obj.addUnsupported_options(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
-                    blk.PhaseDelay, blk.Origin_path));
+                    blk.PhaseDelay, HtmlItem.addOpenCmd(blk.Origin_path)));
             end
             if strcmp(blk.TimeSource, 'Use external signal')
                 obj.addUnsupported_options(sprintf('Option "Use external signal" is not supported for block %s',...
-                    blk.Origin_path));
+                    HtmlItem.addOpenCmd(blk.Origin_path)));
             end
             options = obj.unsupported_options;
         end

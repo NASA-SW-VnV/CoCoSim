@@ -13,6 +13,9 @@ classdef Exp2Lus < handle
     
     methods (Static = true)
         function [lusCode, status] = expToLustre(BlkObj, exp, parent, blk, inputs, data_map, expected_dt, isStateFlow)
+            if isempty(blk)
+                blk.Origin_path = 'Stateflow chart';
+            end
             if ~exist('isStateFlow', 'var')
                 isStateFlow = false;
             end

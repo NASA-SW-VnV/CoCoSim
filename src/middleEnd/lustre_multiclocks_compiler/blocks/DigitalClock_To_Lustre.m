@@ -51,7 +51,7 @@ classdef DigitalClock_To_Lustre < Block_To_Lustre
                 Constant_To_Lustre.getValueFromParameter(parent, blk, blk.SampleTime);
             if status
                 obj.addUnsupported_options(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
-                    blk.SampleTime, blk.Origin_path));
+                    blk.SampleTime, HtmlItem.addOpenCmd(blk.Origin_path)));
             end
             
             options = obj.unsupported_options;

@@ -23,7 +23,7 @@ classdef ContractModeBlock_To_Lustre < Block_To_Lustre
         function  write_code(obj, parent, blk, varargin)
             
             if ~SLX2LusUtils.isContractBlk(parent)
-                display_msg(sprintf('Mode block "%s" should not be outside a Contract Subsystem', blk.Origin_path),...
+                display_msg(sprintf('Mode block "%s" should not be outside a Contract Subsystem', HtmlItem.addOpenCmd(blk.Origin_path)),...
                     MsgType.ERROR, 'ContractModeBlock_To_Lustre', '');
                 return;
             end
@@ -66,7 +66,7 @@ classdef ContractModeBlock_To_Lustre < Block_To_Lustre
             % add your unsuported options list here
             if ~SLX2LusUtils.isContractBlk(parent)
                 obj.addUnsupported_options(...
-                    sprintf('Mode block "%s" should not be outside a Contract Subsystem', blk.Origin_path));
+                    sprintf('Mode block "%s" should not be outside a Contract Subsystem', HtmlItem.addOpenCmd(blk.Origin_path)));
             end
            options = obj.unsupported_options;
            

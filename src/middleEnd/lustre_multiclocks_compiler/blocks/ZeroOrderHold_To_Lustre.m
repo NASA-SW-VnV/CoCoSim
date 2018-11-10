@@ -35,7 +35,7 @@ classdef ZeroOrderHold_To_Lustre < Block_To_Lustre
         function options = getUnsupportedOptions(obj,~, blk, ~, backend, varargin)
             if BackendType.isKIND2(backend)
                 obj.addUnsupported_options(...
-                    sprintf('multi-clocks in block "%s" is currently not supported by KIND2.', blk.Origin_path));
+                    sprintf('multi-clocks in block "%s" is currently not supported by KIND2.', HtmlItem.addOpenCmd(blk.Origin_path)));
             end
             options = obj.unsupported_options;
         end

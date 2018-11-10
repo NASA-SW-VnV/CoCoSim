@@ -371,7 +371,7 @@ classdef SLXUtils
                 set_param(configSet, 'SaveState', 'on');
                 set_param(configSet, 'StateSaveName', 'xout');
                 set_param(configSet, 'OutputSaveName', 'yout');
-                set_param(configSet, 'ExtMode', 'on');
+                try set_param(configSet, 'ExtMode', 'on');catch, end
                 set_param(configSet, 'LoadExternalInput', 'on');
                 set_param(configSet, 'ExternalInput', 'input_struct');
                 hws = get_param(slx_file_name, 'modelworkspace');

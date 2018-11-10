@@ -19,7 +19,7 @@ classdef RandomNumber_To_Lustre < Block_To_Lustre
                 Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Mean);
             if status
                 display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
-                    blk.Mean, blk.Origin_path), ...
+                    blk.Mean, HtmlItem.addOpenCmd(blk.Origin_path)), ...
                     MsgType.ERROR, 'Constant_To_Lustre', '');
                 return;
             end
@@ -27,7 +27,7 @@ classdef RandomNumber_To_Lustre < Block_To_Lustre
                 Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Variance);
             if status
                 display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
-                    blk.Variance, blk.Origin_path), ...
+                    blk.Variance, HtmlItem.addOpenCmd(blk.Origin_path)), ...
                     MsgType.ERROR, 'Constant_To_Lustre', '');
                 return;
             end
@@ -63,13 +63,13 @@ classdef RandomNumber_To_Lustre < Block_To_Lustre
                 Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Mean);
             if status
                 obj.addUnsupported_options(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
-                    blk.Mean, blk.Origin_path));
+                    blk.Mean, HtmlItem.addOpenCmd(blk.Origin_path)));
             end
             [~, ~, status] = ...
                 Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Variance);
             if status
                 obj.addUnsupported_options(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
-                    blk.Variance, blk.Origin_path));
+                    blk.Variance, HtmlItem.addOpenCmd(blk.Origin_path)));
             end
             options = obj.unsupported_options;
         end

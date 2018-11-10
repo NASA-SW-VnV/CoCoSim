@@ -20,7 +20,7 @@ classdef block_diagram_To_Lustre < Block_To_Lustre
                     || SubSystem_To_Lustre.hasResetPort(blk)
                 obj.addUnsupported_options(...
                     sprintf('Block diagram "%s" with Enable/Trigger/Reset port in root level is not supported.', ...
-                    blk.Origin_path));
+                    HtmlItem.addOpenCmd(blk.Origin_path)));
             end
             options = obj.unsupported_options;
         end

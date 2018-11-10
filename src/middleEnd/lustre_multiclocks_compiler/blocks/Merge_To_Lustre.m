@@ -17,7 +17,7 @@ classdef Merge_To_Lustre < Block_To_Lustre
             %% check if it is supported
             if strcmp(blk.AllowUnequalInputPortWidths, 'on')
                 display_msg(sprintf('Merge block "%s" is not supported. CoCoSim supports only Merge blocks with equal Input Port widths', ...
-                    blk.Origin_path), MsgType.ERROR, 'Merge_To_Lustre', '');
+                    HtmlItem.addOpenCmd(blk.Origin_path)), MsgType.ERROR, 'Merge_To_Lustre', '');
                 return;
             end
             widths = blk.CompiledPortWidths.Inport;
@@ -40,7 +40,7 @@ classdef Merge_To_Lustre < Block_To_Lustre
             end
             if ~is_supported
                 display_msg(sprintf('Merge block "%s" is not supported. CoCoSim supports only Merge blocks that are connected to conditionally-executed subsystem', ...
-                    blk.Origin_path), MsgType.ERROR, 'Merge_To_Lustre', '');
+                    HtmlItem.addOpenCmd(blk.Origin_path)), MsgType.ERROR, 'Merge_To_Lustre', '');
                 return;
             end
             %% Step 1: Get the block outputs names, 
@@ -112,7 +112,7 @@ classdef Merge_To_Lustre < Block_To_Lustre
         function options = getUnsupportedOptions(obj,parent, blk, varargin)
             if strcmp(blk.AllowUnequalInputPortWidths, 'on')
                 display_msg(sprintf('Merge block "%s" is not supported. CoCoSim supports only Merge blocks with equal Input Port widths', ...
-                    blk.Origin_path));
+                    HtmlItem.addOpenCmd(blk.Origin_path)));
             end
             widths = blk.CompiledPortWidths.Inport;
             is_supported = true;
@@ -130,7 +130,7 @@ classdef Merge_To_Lustre < Block_To_Lustre
             end
             if ~is_supported
                 obj.addUnsupported_options(sprintf('Merge block "%s" is not supported. CoCoSim supports only Merge blocks that are connected to conditionally-executed subsystem', ...
-                    blk.Origin_path));
+                    HtmlItem.addOpenCmd(blk.Origin_path)));
             end
            options = obj.unsupported_options;
            

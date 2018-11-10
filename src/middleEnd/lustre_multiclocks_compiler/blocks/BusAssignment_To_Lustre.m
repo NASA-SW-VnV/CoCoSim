@@ -34,7 +34,7 @@ classdef BusAssignment_To_Lustre < Block_To_Lustre
                     inputs_i = SignalsInputsMap(AssignedSignals{i});
                 else
                     display_msg(sprintf('Block %s with type %s is not supported.',...
-                        blk.Origin_path, AssignedSignals{i}),...
+                        HtmlItem.addOpenCmd(blk.Origin_path), AssignedSignals{i}),...
                         MsgType.ERROR, 'BusAssignment_To_Lustre', '');
                     continue;
                 end
@@ -62,7 +62,7 @@ classdef BusAssignment_To_Lustre < Block_To_Lustre
                 for i=1:numel(AssignedSignals)
                     if ~isKey(SignalsInputsMap, AssignedSignals{i})
                         obj.addUnsupported_options(sprintf('Block %s with type %s is not supported.',...
-                            blk.Origin_path, AssignedSignals{i}));
+                            HtmlItem.addOpenCmd(blk.Origin_path), AssignedSignals{i}));
                     end
                 end
             catch me
@@ -104,7 +104,7 @@ classdef BusAssignment_To_Lustre < Block_To_Lustre
                 else
                     ME = MException('COCOSIM:BusAssignment_To_Lustre', ...
                         'Block %s with type %s is not supported.', ...
-                        blk.Origin_path, InportDT);
+                        HtmlItem.addOpenCmd(blk.Origin_path), InportDT);
                     throw(ME);
                 end
             end

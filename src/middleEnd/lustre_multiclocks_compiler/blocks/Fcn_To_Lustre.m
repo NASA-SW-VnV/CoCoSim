@@ -35,7 +35,7 @@ classdef Fcn_To_Lustre < Block_To_Lustre
                 data_map, expected_dt);
             
             if status
-                display_msg(sprintf('Block %s is not supported', blk.Origin_path), ...
+                display_msg(sprintf('Block %s is not supported', HtmlItem.addOpenCmd(blk.Origin_path)), ...
                     MsgType.ERROR, 'Fcn_To_Lustre.write_code', '');
                 return;
             end
@@ -51,7 +51,7 @@ classdef Fcn_To_Lustre < Block_To_Lustre
             status = obj.write_code(parent, blk, [], varargin);
             if status
                 obj.addUnsupported_options(sprintf('ParseError  character unsupported  %s in block %s', ...
-                    blk.Expr, blk.Origin_path));
+                    blk.Expr, HtmlItem.addOpenCmd(blk.Origin_path)));
             end
             options = obj.unsupported_options;
         end

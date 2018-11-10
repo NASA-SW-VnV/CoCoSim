@@ -16,7 +16,8 @@ function [nom_lustre_file, xml_trace, status, unsupportedOptions, abstractedBloc
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% global variables
-global TOLUSTRE_ENUMS_MAP KIND2 Z3 LUSTREC CHECK_SF_ACTIONS;
+global TOLUSTRE_ENUMS_MAP KIND2 Z3 LUSTREC CHECK_SF_ACTIONS ERROR_MSG;
+ERROR_MSG = {};
 CHECK_SF_ACTIONS = 1;
 if isempty(LUSTREC) || isempty(KIND2)
     tools_config;
@@ -43,6 +44,13 @@ for i=1:numel(varargin)
     end
     if strcmp(varargin{i}, 'skip_sf_actions_check')
         CHECK_SF_ACTIONS = 0;
+    end
+end
+if CHECK_SF_ACTIONS
+    try
+        skip_sf_actions_check = evalin('base', 'skip_sf_actions_check');
+        CHECK_SF_ACTIONS = ~skip_sf_actions_check;
+    catch
     end
 end
 if ~forceGeneration
@@ -194,17 +202,25 @@ save(mat_file, 'xml_trace', 'status', 'unsupportedOptions', 'abstractedBlocks', 
 ToLustre_datenum_map(model_path) = nom_lustre_file;
 
 %% check lustre syntax
-if BackendType.isKIND2(backend)
-    [syntax_status, output] = Kind2Utils2.checkSyntaxError(nom_lustre_file, KIND2, Z3);
-elseif BackendType.isLUSTREC(backend)
-    [~, syntax_status, output] = LustrecUtils.generate_lusi(nom_lustre_file, LUSTREC );
-end
-if syntax_status
-    display_msg('Simulink To Lustre Syntax check has failed. The parsing error is the following:', MsgType.ERROR, 'TOLUSTRE', '');
-    display_msg(output, MsgType.ERROR, 'TOLUSTRE', '');
-    status = syntax_status;
+if isempty(ERROR_MSG)
+    if BackendType.isKIND2(backend)
+        [syntax_status, output] = Kind2Utils2.checkSyntaxError(nom_lustre_file, KIND2, Z3);
+    elseif BackendType.isLUSTREC(backend)
+        [~, syntax_status, output] = LustrecUtils.generate_lusi(nom_lustre_file, LUSTREC );
+    end
+    if syntax_status
+        display_msg('Simulink To Lustre Syntax check has failed. The parsing error is the following:', MsgType.ERROR, 'TOLUSTRE', '');
+        display_msg(output, MsgType.ERROR, 'TOLUSTRE', '');
+        status = syntax_status;
+    else
+        display_msg('Simulink To Lustre Syntax check passed successfully.', MsgType.RESULT, 'TOLUSTRE', '');
+    end
 else
-    display_msg('Simulink To Lustre Syntax check passed successfully.', MsgType.RESULT, 'TOLUSTRE', '');
+    html_path = fullfile(output_dir, strcat(file_name, '_error_messages.html'));
+    MenuUtils.createHtmlList('ERRORS LIST', ERROR_MSG, html_path);
+    msg = sprintf('ERRORS report is in : %s', html_path);
+    display_msg(msg, MsgType.ERROR, 'ToLustre', '');
+    status = 1;
 end
 %% display report files
 t_finish = toc(t_start);

@@ -42,13 +42,13 @@ classdef Gain_To_Lustre < Block_To_Lustre
                 Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Gain);
             if status
                 display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
-                    blk.Gain, blk.Origin_path), ...
+                    blk.Gain, HtmlItem.addOpenCmd(blk.Origin_path)), ...
                     MsgType.ERROR, 'Constant_To_Lustr', '');
                 return;
             end
             if numel(gain) > 1
                 display_msg(sprintf('Matrix/Vector Gain "%s" in Gain block "%s" is supported in pre-processing. See pre-processing errors.',...
-                    blk.Gain, blk.Origin_path), ...
+                    blk.Gain, HtmlItem.addOpenCmd(blk.Origin_path)), ...
                     MsgType.ERROR, 'Constant_To_Lustr', '');
                 return;
             end
@@ -77,17 +77,17 @@ classdef Gain_To_Lustre < Block_To_Lustre
             obj.unsupported_options = {};
             if ~strcmp(blk.OutMax, '[]') || ~strcmp(blk.OutMin, '[]')
                 obj.addUnsupported_options(...
-                    sprintf('The minimum/maximum value is not supported in block %s', blk.Origin_path));
+                    sprintf('The minimum/maximum value is not supported in block %s', HtmlItem.addOpenCmd(blk.Origin_path)));
             end
             [gain, ~, status] = ...
                 Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Gain);
             if status
                 obj.addUnsupported_options(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
-                    blk.Gain, blk.Origin_path));
+                    blk.Gain, HtmlItem.addOpenCmd(blk.Origin_path)));
             end
             if numel(gain) > 1
                 obj.addUnsupported_options(sprintf('Matrix/Vector Gain "%s" in Gain block "%s" should be supported in pre-processing (Gain_pp). See pre-processing errors above.',...
-                    blk.Gain, blk.Origin_path));
+                    blk.Gain, HtmlItem.addOpenCmd(blk.Origin_path)));
             end
             options = obj.unsupported_options;
         end

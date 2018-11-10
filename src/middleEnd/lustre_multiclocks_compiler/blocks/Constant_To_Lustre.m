@@ -20,7 +20,7 @@ classdef Constant_To_Lustre < Block_To_Lustre
                 Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Value);
             if status
                 display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
-                    blk.Value, blk.Origin_path), ...
+                    blk.Value, HtmlItem.addOpenCmd(blk.Origin_path)), ...
                     MsgType.ERROR, 'Constant_To_Lustr', '');
                 return;
             end
@@ -54,7 +54,7 @@ classdef Constant_To_Lustre < Block_To_Lustre
                 Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Value);
             if status
                 obj.addUnsupported_options(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
-                    blk.Value, blk.Origin_path));
+                    blk.Value, HtmlItem.addOpenCmd(blk.Origin_path)));
             end
             options = obj.unsupported_options;
         end
@@ -66,7 +66,7 @@ classdef Constant_To_Lustre < Block_To_Lustre
     methods(Static = true)
         function [Value, valueDataType, status] = ...
                 getValueFromParameter(parent, blk, param)
-            model_name = regexp(blk.Origin_path, filesep, 'split');
+            model_name = regexp(HtmlItem.addOpenCmd(blk.Origin_path), filesep, 'split');
             model_name = model_name{1};
             [Value, valueDataType, status] = ...
                 SLXUtils.evalParam(model_name, parent, blk, param);

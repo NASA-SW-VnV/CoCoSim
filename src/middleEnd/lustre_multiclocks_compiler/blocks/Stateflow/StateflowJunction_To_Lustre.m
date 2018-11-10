@@ -28,6 +28,9 @@ classdef StateflowJunction_To_Lustre
         end
         %%
         function options = getUnsupportedOptions(varargin)
+            %TODO: check for loops in junctions: get outer transitions, get all their
+            %possible destinations names and check in junction name is one of possible
+            %destination.
             options = {};
         end
         function is_Abstracted = isAbstracted(varargin)

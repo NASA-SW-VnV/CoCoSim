@@ -14,7 +14,7 @@ classdef FromWorkspace_To_Lustre < Block_To_Lustre
         
         function  write_code(obj, parent, blk, xml_trace, ~, backend, varargin)
   
-            model_name = strsplit(blk.Origin_path, '/');
+            model_name = strsplit(HtmlItem.addOpenCmd(blk.Origin_path), '/');
             model_name = model_name{1};
             SampleTime = SLXUtils.getModelCompiledSampleTime(model_name);
             
@@ -30,7 +30,7 @@ classdef FromWorkspace_To_Lustre < Block_To_Lustre
                 Constant_To_Lustre.getValueFromParameter(parent, blk, VariableName);
             if status
                 display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
-                    VariableName, blk.Origin_path), ...
+                    VariableName, HtmlItem.addOpenCmd(blk.Origin_path)), ...
                     MsgType.ERROR, 'Constant_To_Lustr', '');
                 return;
             end
@@ -55,7 +55,7 @@ classdef FromWorkspace_To_Lustre < Block_To_Lustre
                 dims = variable.signals.dimensions;
             else
                 display_msg(sprintf('Workspace variable must be numeric arrays or struct in block %s',...
-                    blk.Origin_path), MsgType.ERROR, 'FromWorkspace_To_Lustre', '');
+                    HtmlItem.addOpenCmd(blk.Origin_path)), MsgType.ERROR, 'FromWorkspace_To_Lustre', '');
                 return;
             end
 
@@ -116,7 +116,7 @@ classdef FromWorkspace_To_Lustre < Block_To_Lustre
 %                     data_array = [data_array, data_array(end)];
 %                 else   % Cyclic repetition not supported
 %                     display_msg(sprintf('Option %s is not supported in block %s',...
-%                         blk.OutputAfterFinalValue, blk.Origin_path), ...
+%                         blk.OutputAfterFinalValue, HtmlItem.addOpenCmd(blk.Origin_path)), ...
 %                         MsgType.ERROR, 'FromWorkspace_To_Lustre', '');
 %                     return;
 %                 end
@@ -145,7 +145,7 @@ classdef FromWorkspace_To_Lustre < Block_To_Lustre
                 Constant_To_Lustre.getValueFromParameter(parent, blk, VariableName);
             if status
                 obj.addUnsupported_options(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
-                    VariableName, blk.Origin_path));
+                    VariableName, HtmlItem.addOpenCmd(blk.Origin_path)));
             end
 %             t = [0, 0];
 %             if isnumeric(variable)
@@ -157,13 +157,13 @@ classdef FromWorkspace_To_Lustre < Block_To_Lustre
             if ~isnumeric(variable) & ~isstruct(variable) & ~isa(variable,'timeseries')
                 obj.addUnsupported_options(...
                     sprintf('Workspace variable must be numeric arrays, time series or struct with time and data in block %s',...
-                    blk.Origin_path));
+                    HtmlItem.addOpenCmd(blk.Origin_path)));
             end
             %unsupported options
             if strcmp(blk.OutputAfterFinalValue, 'Cyclic repetition')
                 obj.addUnsupported_options(...
                     sprintf('Option %s is not supported in block %s',...
-                    blk.OutputAfterFinalValue, blk.Origin_path));
+                    blk.OutputAfterFinalValue, HtmlItem.addOpenCmd(blk.Origin_path)));
             end
             % What if Sample Time of block variable is different from Model ST 
             options = obj.unsupported_options;
@@ -196,7 +196,7 @@ classdef FromWorkspace_To_Lustre < Block_To_Lustre
                 data_array = [data_array, data_array(end)];
             else   % Cyclic repetition not supported
                 display_msg(sprintf('Option %s is not supported in block %s',...
-                    option, blk.Origin_path), ...
+                    option, HtmlItem.addOpenCmd(blk.Origin_path)), ...
                     MsgType.ERROR, 'FromWorkspace_To_Lustre', '');
                 return;
             end
