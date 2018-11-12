@@ -33,12 +33,15 @@ classdef SLX2LusUtils < handle
         end
         %% adapt blocks names to be a valid lustre names.
         function str_out = name_format(str)
-            newline = sprintf('\n');
             str_out = strrep(str, newline, '');
             str_out = strrep(str_out, ' ', '');
             str_out = strrep(str_out, '-', '_minus_');
             str_out = strrep(str_out, '+', '_plus_');
             str_out = strrep(str_out, '*', '_mult_');
+            str_out = strrep(str_out, '>', '_gt_');
+            str_out = strrep(str_out, '>=', '_gte_');
+            str_out = strrep(str_out, '<', '_lt_');
+            str_out = strrep(str_out, '<=', '_lte_');
             str_out = strrep(str_out, '.', '_dot_');
             str_out = strrep(str_out, '#', '_sharp_');
             str_out = strrep(str_out, '(', '_lpar_');
