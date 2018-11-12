@@ -71,6 +71,9 @@ function states = adapt_states(states)
                         action = 'not defined';
                     else
                         action = states{i}.Actions.(f);
+                        if iscell(action)
+                            action = MatlabUtils.strjoin(action, '\n');
+                        end
                     end
                     display_msg(...
                         sprintf('We assumed "%s" action is : %s',f, action),...
@@ -117,6 +120,9 @@ function transitions = adapt_transitions(transitions, statePath, transitionType)
                         action = 'not defined';
                     else
                         action = transitions{i}.(f);
+                        if iscell(action)
+                            action = MatlabUtils.strjoin(action, '\n');
+                        end
                     end
                     display_msg(...
                         sprintf('We assumed "%s" of the transition is : %s',f, action),...
