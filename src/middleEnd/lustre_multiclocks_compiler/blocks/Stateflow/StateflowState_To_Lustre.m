@@ -632,11 +632,12 @@ classdef StateflowState_To_Lustre
                     body{end+1} = LustreEq(oututs_Ids, call);
                     outputs = [outputs, nodeAst.getOutputs()];
                     inputs = [inputs, nodeAst.getInputs()];
-                    
-                    cond_prefix = VarIdExpr(...
-                        StateflowTransition_To_Lustre.getTerminationCondName());
-                    outputs = LustreVar.removeVar(outputs, cond_prefix);
-                    variables{end+1} = LustreVar(cond_prefix, 'bool');
+                    cond_name = ...
+                        StateflowTransition_To_Lustre.getTerminationCondName();
+                    outputs = LustreVar.removeVar(outputs, cond_name);
+                    variables{end+1} = LustreVar(cond_name, 'bool');
+                    cond_prefix = UnaryExpr(UnaryExpr.NOT,...
+                        VarIdExpr(cond_name));
                 else
                     cond_prefix = {};
                 end
