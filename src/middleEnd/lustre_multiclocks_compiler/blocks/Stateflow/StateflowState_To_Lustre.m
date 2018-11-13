@@ -86,7 +86,7 @@ classdef StateflowState_To_Lustre
             global SF_STATES_NODESAST_MAP;
             main_node = {};
             
-            [outputs, inputs, body] = ...
+            [outputs, inputs, body, variables] = ...
                 StateflowState_To_Lustre.write_state_body(state);
             if isempty(body)
                 %no code is required
@@ -112,6 +112,7 @@ classdef StateflowState_To_Lustre
             end
             main_node.setOutputs(outputs);
             main_node.setInputs(inputs);
+            main_node.setLocalVars(variables);
             SF_STATES_NODESAST_MAP(node_name) = main_node;
         end
         
@@ -603,7 +604,7 @@ classdef StateflowState_To_Lustre
         end
         
         %% state body
-        function [outputs, inputs, body] = write_state_body(state)
+        function [outputs, inputs, body, variables] = write_state_body(state)
             global SF_STATES_NODESAST_MAP SF_STATES_PATH_MAP;
             outputs = {};
             inputs = {};
@@ -634,6 +635,8 @@ classdef StateflowState_To_Lustre
                     
                     cond_prefix = VarIdExpr(...
                         StateflowTransition_To_Lustre.getTerminationCondName());
+                    outputs = LustreVar.removeVar(outputs, cond_prefix);
+                    variables{end+1} = LustreVar(cond_prefix, 'bool');
                 else
                     cond_prefix = {};
                 end

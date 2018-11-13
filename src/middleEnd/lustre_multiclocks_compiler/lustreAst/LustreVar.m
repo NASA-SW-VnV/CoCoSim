@@ -102,6 +102,9 @@ classdef LustreVar < LustreAst
             U = vars(I);
         end
         function U = removeVar(vars, v)
+            if isa(v, 'VarIdExpr') || isa(v, 'LustreVar')
+                v = v.getId();
+            end
             Ids = cellfun(@(x) x.getId(), ...
                 vars, 'UniformOutput', false);
             U = vars(~strcmp(Ids, v));
