@@ -51,8 +51,8 @@ function [lus_action, outputs, inputs, external_libraries] = getPseudoLusAction(
             outputs{end + 1} = LustreVar(k, SF_DATA_MAP(k).LusDatatype);
         else
             ME = MException('COCOSIM:STATEFLOW', ...
-                'Variable %s can not be found for state "%s"', ...
-                k, state.Path);
+                'Variable %s can not be found for action "%s"', ...
+                k, action);
             throw(ME);
         end
     end

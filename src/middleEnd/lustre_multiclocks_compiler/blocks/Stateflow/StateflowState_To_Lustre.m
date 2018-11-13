@@ -107,7 +107,7 @@ classdef StateflowState_To_Lustre
             if isempty(inputs)
                 inputs{1} = ...
                     LustreVar(SF_To_LustreNode.virtualVarStr(), 'bool');
-            else
+            elseif numel(inputs) > 1
                 inputs = LustreVar.removeVar(inputs, SF_To_LustreNode.virtualVarStr());
             end
             main_node.setOutputs(outputs);
@@ -178,7 +178,7 @@ classdef StateflowState_To_Lustre
             if isempty(inputs)
                 inputs{1} = ...
                     LustreVar(SF_To_LustreNode.virtualVarStr(), 'bool');
-            else
+            elseif numel(inputs) > 1
                 inputs = LustreVar.removeVar(inputs, SF_To_LustreNode.virtualVarStr());
             end
             main_node.setOutputs(outputs);
@@ -246,11 +246,22 @@ classdef StateflowState_To_Lustre
                 actions = SFIRPPUtils.split_actions(state.Actions.Entry);
                 nb_actions = numel(actions);
                 for i=1:nb_actions
-                    [body{end+1}, outputs_i, inputs_i, external_libraries_i] = ...
-                        getPseudoLusAction(actions{i});
-                    outputs = [outputs, outputs_i];
-                    inputs = [inputs, inputs_i];
-                    external_libraries = [external_libraries, external_libraries_i];
+                    try
+                        [body{end+1}, outputs_i, inputs_i, external_libraries_i] = ...
+                            getPseudoLusAction(actions{i});
+                        outputs = [outputs, outputs_i];
+                        inputs = [inputs, inputs_i];
+                        external_libraries = [external_libraries, external_libraries_i];
+                    catch me
+                        if strcmp(me.identifier, 'COCOSIM:STATEFLOW')
+                            display_msg(me.message, MsgType.ERROR, 'write_entry_action', '');
+                        else
+                            display_msg(me.getReport(), MsgType.DEBUG, 'write_entry_action', '');
+                        end
+                        display_msg(sprintf('Entry Action failed for state %s', ...
+                            state.Path),...
+                            MsgType.ERROR, 'write_entry_action', '');
+                    end
                 end
             end
             %write children states entry action
@@ -274,7 +285,7 @@ classdef StateflowState_To_Lustre
             if isempty(inputs)
                 inputs{1} = ...
                     LustreVar(SF_To_LustreNode.virtualVarStr(), 'bool');
-            else
+            elseif numel(inputs) > 1
                 inputs = LustreVar.removeVar(inputs, SF_To_LustreNode.virtualVarStr());
             end
             main_node.setOutputs(outputs);
@@ -308,11 +319,22 @@ classdef StateflowState_To_Lustre
             actions = SFIRPPUtils.split_actions(state.Actions.Exit);
             nb_actions = numel(actions);
             for i=1:nb_actions
-                [body{end+1}, outputs_i, inputs_i, external_libraries_i] = ...
-                    getPseudoLusAction(actions{i});
-                outputs = [outputs, outputs_i];
-                inputs = [inputs, inputs_i];
-                external_libraries = [external_libraries, external_libraries_i];
+                try
+                    [body{end+1}, outputs_i, inputs_i, external_libraries_i] = ...
+                        getPseudoLusAction(actions{i});
+                    outputs = [outputs, outputs_i];
+                    inputs = [inputs, inputs_i];
+                    external_libraries = [external_libraries, external_libraries_i];
+                catch me
+                    if strcmp(me.identifier, 'COCOSIM:STATEFLOW')
+                        display_msg(me.message, MsgType.ERROR, 'write_exit_action', '');
+                    else
+                        display_msg(me.getReport(), MsgType.DEBUG, 'write_exit_action', '');
+                    end
+                    display_msg(sprintf('Exit Action failed for state %s', ...
+                        state.Path),...
+                        MsgType.ERROR, 'write_exit_action', '');
+                end
             end
             
             %set state as inactive
@@ -392,11 +414,22 @@ classdef StateflowState_To_Lustre
             nb_actions = numel(actions);
             
             for i=1:nb_actions
-                [body{end+1}, outputs_i, inputs_i, external_libraries_i] = ...
-                    getPseudoLusAction(actions{i});
-                outputs = [outputs, outputs_i];
-                inputs = [inputs, inputs_i];
-                external_libraries = [external_libraries, external_libraries_i];
+                try
+                    [body{end+1}, outputs_i, inputs_i, external_libraries_i] = ...
+                        getPseudoLusAction(actions{i});
+                    outputs = [outputs, outputs_i];
+                    inputs = [inputs, inputs_i];
+                    external_libraries = [external_libraries, external_libraries_i];
+                catch me
+                    if strcmp(me.identifier, 'COCOSIM:STATEFLOW')
+                        display_msg(me.message, MsgType.ERROR, 'write_during_action', '');
+                    else
+                        display_msg(me.getReport(), MsgType.DEBUG, 'write_during_action', '');
+                    end
+                    display_msg(sprintf('During Action failed for state %s', ...
+                        state.Path),...
+                        MsgType.ERROR, 'write_during_action', '');
+                end
             end
             if isempty(body)
                 return;
@@ -416,7 +449,7 @@ classdef StateflowState_To_Lustre
             if isempty(inputs)
                 inputs{1} = ...
                     LustreVar(SF_To_LustreNode.virtualVarStr(), 'bool');
-            else
+            elseif numel(inputs) > 1
                 inputs = LustreVar.removeVar(inputs, SF_To_LustreNode.virtualVarStr());
             end
             main_node.setOutputs(outputs);
@@ -574,6 +607,7 @@ classdef StateflowState_To_Lustre
             global SF_STATES_NODESAST_MAP SF_STATES_PATH_MAP;
             outputs = {};
             inputs = {};
+            variables = {};
             body = {};
             children_actions = {};
             parentPath = fileparts(state.Path);
@@ -587,6 +621,7 @@ classdef StateflowState_To_Lustre
                     StateflowState_To_Lustre.addStateEnum(state, [], ...
                     false, false, true);    
             if ~isChart
+                parent = SF_STATES_PATH_MAP(parentPath);   
                 %1st step: OuterTransition code
                 outerTransNodeName = ...
                     StateflowState_To_Lustre.getStateOuterTransNodeName(state);
@@ -596,17 +631,16 @@ classdef StateflowState_To_Lustre
                     body{end+1} = LustreEq(oututs_Ids, call);
                     outputs = [outputs, nodeAst.getOutputs()];
                     inputs = [inputs, nodeAst.getInputs()];
+                    
+                    cond_prefix = VarIdExpr(...
+                        StateflowTransition_To_Lustre.getTerminationCondName());
+                else
+                    cond_prefix = {};
                 end
                 
                 %2nd step: During actions
-                parent = SF_STATES_PATH_MAP(parentPath);
-                idParentVar = VarIdExpr(...
-                    StateflowState_To_Lustre.getStateIDName(parent));
-                [idParentEnumType, idParentStateEnum] = ...
-                    StateflowState_To_Lustre.addStateEnum(parent, state);    
-                cond_prefix = BinaryExpr(BinaryExpr.EQ,...
-                    idParentVar, VarIdExpr(idParentStateEnum));
-                inputs{end + 1} = LustreVar(idParentVar, idParentEnumType);
+                
+                
                 during_act_node_name = ...
                     StateflowState_To_Lustre.getDuringActionNodeName(state);
                 if isKey(SF_STATES_NODESAST_MAP, during_act_node_name)
@@ -632,6 +666,8 @@ classdef StateflowState_To_Lustre
                     outputs = [outputs, nodeAst.getOutputs()];
                     inputs = [inputs, nodeAst.getOutputs()];
                     inputs = [inputs, nodeAst.getInputs()];
+                    cond_prefix = VarIdExpr(...
+                        StateflowTransition_To_Lustre.getTerminationCondName());
                 end
             else
                 
@@ -649,9 +685,9 @@ classdef StateflowState_To_Lustre
                     inputs = [inputs, nodeAst.getInputs()];
                     inputs{end + 1} = LustreVar(idStateVar, idStateEnumType);
                 end
-                chart_prefix = BinaryExpr(BinaryExpr.NEQ,...
+                cond_prefix = BinaryExpr(BinaryExpr.NEQ,...
                     idStateVar, VarIdExpr(idStateInactiveEnum));
-                cond_prefix = {};
+                %cond_prefix = {};
             end
             
             %4th step: execute the active child
@@ -663,18 +699,17 @@ classdef StateflowState_To_Lustre
             end
             for i=1:number_children
                 child = children{i};
-                cond = {};
-                if ~isParallel
+                if isParallel
+                    cond = cond_prefix;
+                else
                     [~, childEnum] = ...
                         StateflowState_To_Lustre.addStateEnum(state, child);
                     cond = BinaryExpr(BinaryExpr.EQ, ...
                         idStateVar, VarIdExpr(childEnum));
-                    if ~isempty(cond_prefix)
+                    if ~isempty(cond_prefix) && ~isChart
                         cond = ...
                             BinaryExpr(BinaryExpr.AND, cond, cond_prefix);
                     end
-                elseif isChart
-                    cond = chart_prefix;
                 end
                 child_node_name = ...
                     StateflowState_To_Lustre.getStateNodeName(child);
