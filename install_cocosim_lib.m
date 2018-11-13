@@ -4,7 +4,7 @@
 % All Rights Reserved.
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function install_cocosim(force)
+function install_cocosim_lib(force)
 %INSTALL_COCOSIM is installing tools (such ass lustrec, kind2) and updating
 %the external libraries.
 persistent install_cocosim_already_run;
