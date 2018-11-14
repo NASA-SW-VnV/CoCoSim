@@ -605,7 +605,7 @@ classdef StateflowState_To_Lustre
         
         %% state body
         function [outputs, inputs, body, variables] = write_state_body(state)
-            global SF_STATES_NODESAST_MAP SF_STATES_PATH_MAP;
+            global SF_STATES_NODESAST_MAP ;%SF_STATES_PATH_MAP;
             outputs = {};
             inputs = {};
             variables = {};
@@ -622,8 +622,9 @@ classdef StateflowState_To_Lustre
                     StateflowState_To_Lustre.addStateEnum(state, [], ...
                     false, false, true);    
             if ~isChart
-                parent = SF_STATES_PATH_MAP(parentPath);   
+                %parent = SF_STATES_PATH_MAP(parentPath);   
                 %1st step: OuterTransition code
+                cond_prefix = {};
                 outerTransNodeName = ...
                     StateflowState_To_Lustre.getStateOuterTransNodeName(state);
                 if isKey(SF_STATES_NODESAST_MAP, outerTransNodeName)
@@ -633,13 +634,13 @@ classdef StateflowState_To_Lustre
                     outputs = [outputs, nodeAst.getOutputs()];
                     inputs = [inputs, nodeAst.getInputs()];
                     cond_name = ...
-                        StateflowTransition_To_Lustre.getTerminationCondName();
-                    outputs = LustreVar.removeVar(outputs, cond_name);
-                    variables{end+1} = LustreVar(cond_name, 'bool');
-                    cond_prefix = UnaryExpr(UnaryExpr.NOT,...
-                        VarIdExpr(cond_name));
-                else
-                    cond_prefix = {};
+                        StateflowTransition_To_Lustre.getValidPathCondName();
+                    if VarIdExpr.ismemberVar(cond_name, oututs_Ids)
+                        outputs = LustreVar.removeVar(outputs, cond_name);
+                        variables{end+1} = LustreVar(cond_name, 'bool');
+                        cond_prefix = UnaryExpr(UnaryExpr.NOT,...
+                            VarIdExpr(cond_name));
+                    end
                 end
                 
                 %2nd step: During actions
@@ -651,12 +652,15 @@ classdef StateflowState_To_Lustre
                     nodeAst = SF_STATES_NODESAST_MAP(during_act_node_name);
                     
                     [call, oututs_Ids] = nodeAst.nodeCall();
-                    body{end+1} = LustreEq(oututs_Ids, ...
-                        IteExpr(cond_prefix, call, TupleExpr(oututs_Ids)));
+                    if isempty(cond_prefix)
+                        body{end+1} = LustreEq(oututs_Ids, call);
+                    else
+                        body{end+1} = LustreEq(oututs_Ids, ...
+                            IteExpr(cond_prefix, call, TupleExpr(oututs_Ids)));
+                        inputs = [inputs, nodeAst.getOutputs()];
+                    end
                     outputs = [outputs, nodeAst.getOutputs()];
-                    inputs = [inputs, nodeAst.getOutputs()];
                     inputs = [inputs, nodeAst.getInputs()];
-                    
                 end
                 
                 %3rd step: Inner transitions
@@ -665,13 +669,43 @@ classdef StateflowState_To_Lustre
                 if isKey(SF_STATES_NODESAST_MAP, innerTransNodeName)
                     nodeAst = SF_STATES_NODESAST_MAP(innerTransNodeName);
                     [call, oututs_Ids] = nodeAst.nodeCall();
-                    body{end+1} = LustreEq(oututs_Ids, ...
-                        IteExpr(cond_prefix, call, TupleExpr(oututs_Ids)));
                     outputs = [outputs, nodeAst.getOutputs()];
-                    inputs = [inputs, nodeAst.getOutputs()];
                     inputs = [inputs, nodeAst.getInputs()];
-                    cond_prefix = VarIdExpr(...
-                        StateflowTransition_To_Lustre.getTerminationCondName());
+                    cond_name = ...
+                        StateflowTransition_To_Lustre.getValidPathCondName();
+                    if VarIdExpr.ismemberVar(condName, oututs_Ids)
+                        outputs = LustreVar.removeVar(outputs, cond_name);
+                    end
+                    if isempty(cond_prefix)
+                        body{end+1} = LustreEq(oututs_Ids, call);
+                        if VarIdExpr.ismemberVar(cond_name, oututs_Ids)
+                            variables{end+1} = LustreVar(cond_name, 'bool');
+                            cond_prefix = UnaryExpr(UnaryExpr.NOT,...
+                                VarIdExpr(cond_name));
+                        end
+                    else
+                        if VarIdExpr.ismemberVar(cond_name, oututs_Ids)
+                            new_cond_name = strcat(cond_name, '_INNER');
+                            lhs_oututs_Ids = ...
+                                StateflowState_To_Lustre.changeVar(...
+                                oututs_Ids, cond_name, new_cond_name);
+                            rhs_oututs_Ids = ...
+                                StateflowState_To_Lustre.changeVar(...
+                                oututs_Ids, cond_name, 'false');
+                            body{end+1} = LustreEq(lhs_oututs_Ids, ...
+                                IteExpr(cond_prefix, call, TupleExpr(rhs_oututs_Ids)));
+                            inputs = [inputs, nodeAst.getOutputs()];
+                            inputs = LustreVar.removeVar(inputs, cond_name);
+                            %add Inner termination condition
+                            cond_prefix = UnaryExpr(UnaryExpr.NOT,...
+                                BinaryExpr(BinaryExpr.OR, ...
+                                VarIdExpr(cond_name), VarIdExpr(new_cond_name)));
+                        else
+                            body{end+1} = LustreEq(oututs_Ids, ...
+                                IteExpr(cond_prefix, call, TupleExpr(oututs_Ids)));
+                            inputs = [inputs, nodeAst.getOutputs()];
+                        end
+                    end
                 end
             else
                 
@@ -734,7 +768,11 @@ classdef StateflowState_To_Lustre
                 end
             end
             if ~isempty(children_actions)
-                body{end+1} = ConcurrentAssignments(children_actions);
+                if isParallel
+                    body = [body, children_actions];
+                else
+                    body{end+1} = ConcurrentAssignments(children_actions);
+                end
             end
         end
         

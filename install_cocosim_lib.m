@@ -58,21 +58,24 @@ if exist(coco_git_dir, 'dir')
     cd(coco_git_dir); 
     commands = {sprintf('git pull; git checkout %s', cocosim_branch), ...
         sprintf('git pull origin %s', cocosim_branch)};
+    pull_idex = 1;
 else
     MatlabUtils.mkdir(coco_git_dir); 
     cd(coco_git_dir)
     commands = {' git init; touch .gitconfig; git config --local http.sslverify false', ...
         sprintf('git remote add -f origin %s', cocosim_url), ...
         sprintf('git pull origin %s', cocosim_branch)};
+    pull_idex = 3;
 end
+sys_out = cell(numel(commands), 1);
 for i=1:numel(commands)
-    [status, sys_out] = system(commands{i}, '-echo');
+    [status, sys_out{i}] = system(commands{i}, '-echo');
     if status
-        fprintf('Can not run git:\n%s \n', sys_out) ;
+        fprintf('Can not run git:\n%s \n', sys_out{i}) ;
         return;
     end
 end
-if ~force && contains(sys_out, 'Already up to date.')
+if ~force && contains(sys_out{pull_idex}, 'Already up to date.')
     %no need to copy files, nothing new from github
     return;
 end

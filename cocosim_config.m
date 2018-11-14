@@ -20,7 +20,7 @@ addpath(fullfile(cocoSim_root, 'tools'));
 
 %% First configuration, Zustre, Kind2 and Lustrec
 % Go to tools/tools_config and follow instructions
-install_cocosim();
+install_cocosim_lib();
 tools_config;
 
 
