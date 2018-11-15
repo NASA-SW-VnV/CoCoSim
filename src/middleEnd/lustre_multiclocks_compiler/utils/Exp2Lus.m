@@ -144,8 +144,8 @@ classdef Exp2Lus < handle
                     tree_dt = 'real';
                     obj.addExternal_libraries('LustMathLib_lustrec_math');
                     code = NodeCallExpr('pow', ...
-                        Exp2Lus.tree2code(obj, tree.leftExp, parent, blk, inputs, data_map, tree_dt, isStateFlow), ...
-                        Exp2Lus.tree2code(obj, tree.rightExp, parent, blk, inputs, data_map, tree_dt, isStateFlow));
+                        {Exp2Lus.tree2code(obj, tree.leftExp, parent, blk, inputs, data_map, tree_dt, isStateFlow), ...
+                        Exp2Lus.tree2code(obj, tree.rightExp, parent, blk, inputs, data_map, tree_dt, isStateFlow)});
                                         
                 case 'assignment'
                     tree_dt = expected_dt;%no need for casting type.
@@ -235,7 +235,7 @@ classdef Exp2Lus < handle
                             arg2 = BinaryExpr(BinaryExpr.MULTIPLY, arg2, arg2);
                             
                             
-                            code = NodeCallExpr('sqrt', arg1, arg2);
+                            code = NodeCallExpr('sqrt', {arg1, arg2});
                         otherwise
                             code = Exp2Lus.parseOtherFunc(obj, tree, ...
                                 parent, blk, inputs, data_map, ...
