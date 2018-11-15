@@ -98,10 +98,12 @@ classdef SS_To_LustreNode
                     c = {};
                     for i=1:numel(clocks)
                         T = clocks{i};
+                        if T(1) < 0 || isinf(T(1))
+                            continue;
+                        end
                         st_n = T(1)/main_sampleTime(1);
                         ph_n = T(2)/main_sampleTime(1);
-                        if ~((st_n == 1 || st_n == 0 || isinf(st_n) || isnan(st_n))...
-                                && (ph_n == 0 || isinf(ph_n) || isnan(ph_n)))
+                        if ~SLX2LusUtils.isIgnoredSampleTime(st_n, ph_n)
                             clk_name = SLX2LusUtils.clockName(st_n, ph_n);
                             clk_args{1} =  VarIdExpr(sprintf('%.0f',st_n));
                             clk_args{2} =  VarIdExpr(sprintf('%.0f',ph_n));

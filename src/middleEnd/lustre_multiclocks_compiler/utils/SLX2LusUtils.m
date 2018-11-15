@@ -1184,6 +1184,10 @@ classdef SLX2LusUtils < handle
         function time_step = clockName(st_n, ph_n)
             time_step = sprintf('_clk_%.0f_%.0f', st_n, ph_n);
         end
+        function b = isIgnoredSampleTime(st_n, ph_n)
+            b = (st_n == 1 || st_n == 0 || isinf(st_n) || isnan(st_n))...
+                && (ph_n == 0 || isinf(ph_n) || isnan(ph_n));
+        end
         function clocks_list = getRTClocksSTR(blk, main_sampleTime)
             clocks_list = {};
             clocks = blk.CompiledSampleTime;
@@ -1196,8 +1200,7 @@ classdef SLX2LusUtils < handle
                     end
                     st_n = T(1)/main_sampleTime(1);
                     ph_n = T(2)/main_sampleTime(1);
-                    if ~((st_n == 1 || st_n == 0 || isinf(st_n) || isnan(st_n))...
-                                && (ph_n == 0 || isinf(ph_n) || isnan(ph_n)))
+                    if ~SLX2LusUtils.isIgnoredSampleTime(st_n, ph_n)
                         clocks_list{end+1} = SLX2LusUtils.clockName(st_n, ph_n);
                     end
                 end
