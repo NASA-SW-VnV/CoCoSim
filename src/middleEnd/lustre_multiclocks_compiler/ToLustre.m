@@ -217,7 +217,8 @@ if isempty(ERROR_MSG)
     end
 else
     html_path = fullfile(output_dir, strcat(file_name, '_error_messages.html'));
-    MenuUtils.createHtmlList('ERRORS LIST', ERROR_MSG, html_path);
+    htmlList = cellfun(@(x) HtmlItem(x, {}, 'black', [], [], false),ERROR_MSG, 'UniformOutput', false);
+    MenuUtils.createHtmlListUsingHTMLITEM('ERRORS LIST', htmlList, html_path);
     msg = sprintf('ERRORS report is in : %s', html_path);
     display_msg(msg, MsgType.ERROR, 'ToLustre', '');
     status = 1;

@@ -34,6 +34,8 @@ classdef SLX2LusUtils < handle
         %% adapt blocks names to be a valid lustre names.
         function str_out = name_format(str)
             str_out = strrep(str, newline, '');
+            str_out = regexprep(str_out, '^\s', '_');
+            str_out = regexprep(str_out, '\s$', '_');
             str_out = strrep(str_out, ' ', '');
             str_out = strrep(str_out, '-', '_minus_');
             str_out = strrep(str_out, '+', '_plus_');

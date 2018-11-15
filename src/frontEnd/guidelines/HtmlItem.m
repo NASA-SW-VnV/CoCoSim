@@ -34,6 +34,10 @@ classdef HtmlItem < handle
                 obj.subtitles = {};
             elseif iscell(subtitles)
                 obj.subtitles = subtitles;
+            elseif numel(subtitles) > 1
+                for i=1:numel(subtitles)
+                    obj.subtitles{i} = subtitles(i);
+                end
             else
                 obj.subtitles = {subtitles};
             end

@@ -197,11 +197,11 @@ function  [unsupportedOptionsMap, abstractedBlocks]  = blockUnsupportedOptions( 
         if ~isIgnored
             msg = sprintf('Block "%s" with Type "%s" is not supported', ...
                 HtmlItem.addOpenCmd(blk.Origin_path), blkType);
-            htmlMsg = HtmlItem(msg, {}, 'black');
+            htmlMsg = HtmlItem(msg, {}, 'black', [], [], false);
             if isKey(unsupportedOptionsMap, blkType)
-                unsupportedOptionsMap(blkType) = [unsupportedOptionsMap(blkType), htmlMsg];
+                unsupportedOptionsMap(blkType) = [unsupportedOptionsMap(blkType), {htmlMsg}];
             else
-                unsupportedOptionsMap(blkType) = htmlMsg;
+                unsupportedOptionsMap(blkType) = {htmlMsg};
             end
         end
         return;

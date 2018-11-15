@@ -10,19 +10,23 @@ function [status, errors_msg] = BlockName_pp(model)
     errors_msg = {};
     
     % Processing all blocks
-    block_list = find_system(model,'Regexp','on','Name','\W');
+    block_list = find_system(model,'LookUnderMasks', 'all', 'FindAll', 'on', 'Regexp','on','Name','\W');
     if not(isempty(block_list))
         display_msg('Processing special characters in block names...', Constants.INFO, ...
             'BlockName_pp', '');
         for i=1:length(block_list)
             try
-                display_msg(block_list{i}, Constants.INFO, 'rename_numerical_prefix', '');
-                name = get_param(block_list{i},'Name');
-                set_param(block_list{i},'Name',...
-                    SLX2LusUtils.name_format(name));
-            catch
+                path = fullfile(get_param(block_list(i), 'Parent'), get_param(block_list(i), 'Name'));
+                display_msg(path, Constants.INFO, 'rename_numerical_prefix', '');
+                name = get_param(block_list(i),'Name');
+                %remove / before calling SLX2LusUtils.name_format
+                new_name = strrep(name, '/', '_');
+                set_param(block_list(i),'Name',...
+                    SLX2LusUtils.name_format(new_name));
+            catch me
+                display_msg(me.getReport(), MsgType.DEBUG, 'PP', '');
                 status = 1;
-                errors_msg{end + 1} = sprintf('BlockName pre-process has failed for block %s', block_list{i});
+                errors_msg{end + 1} = sprintf('BlockName pre-process has failed for block %s', path);
                 continue;
             end
         end
