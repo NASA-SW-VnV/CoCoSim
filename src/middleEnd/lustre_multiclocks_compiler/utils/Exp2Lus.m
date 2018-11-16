@@ -269,14 +269,26 @@ classdef Exp2Lus < handle
         end
         function code = ID2code(obj, id, parent, blk, inputs, data_map, expected_dt, isStateFlow)
             % the case of final term in a tree
-            if strcmp(id, 'true') || strcmp(id, 'false')
-                code = BooleanExpr(id);
+            if ~isStateFlow && ~isempty(regexp(id, 'u\d+', 'match'))
+                input_idx = regexp(id, 'u(\d+)', 'tokens', 'once');
+                try id = inputs{str2double(input_idx)}{1}.getId();catch, end
             elseif ~isStateFlow && strcmp(id, 'u')
                 %the case of u with no index
-                code = inputs{1}{1};
-            elseif ~isStateFlow && ~isempty(regexp(id, 'u\d+', 'match'))
-                input_idx = regexp(id, 'u(\d+)', 'tokens', 'once');
-                code = inputs{str2double(input_idx)}{1};
+                try id = inputs{1}{1}.getId();catch, end
+            end
+            if strcmp(id, 'true') || strcmp(id, 'false')
+                code = BooleanExpr(id);
+            elseif isKey(data_map, id)
+                %We assume Stateflow does not support variables
+                %from workspace to be called within the chart
+                %actions.
+                %We keep it as VarID
+                if isfield(data_map(id), 'LusDatatype')
+                    dt = data_map(id).LusDatatype;
+                else
+                    dt = data_map(id);
+                end
+                code = Exp2Lus.convertDT(obj, VarIdExpr(id), dt, expected_dt);
             elseif ~isStateFlow
                 %check for variables in workspace
                 [value, ~, status] = ...
@@ -295,17 +307,6 @@ classdef Exp2Lus < handle
                 else
                     code = IntExpr(value);
                 end
-            elseif isKey(data_map, id)
-                %We assume Stateflow does not support variables
-                %from workspace to be called within the chart
-                %actions.
-                %We keep it as VarID
-                if isfield(data_map(id), 'LusDatatype')
-                    dt = data_map(id).LusDatatype;
-                else
-                    dt = data_map(id);
-                end
-                code = Exp2Lus.convertDT(obj, VarIdExpr(id), dt, expected_dt);
             else
                 %code = VarIdExpr(var_name);
                 ME = MException('COCOSIM:TREE2CODE', ...

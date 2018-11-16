@@ -26,7 +26,11 @@ persistent pp_datenum_map;
 if isempty(pp_datenum_map)
     pp_datenum_map = containers.Map('KeyType', 'char', 'ValueType', 'double');
 end
-skip_pp = 0;
+try
+    skip_pp = evalin('base', 'skip_pp');
+catch
+    skip_pp = 0;
+end
 use_backup = 0 ;
 for i=1:numel(varargin)
 %     disp(varargin{i})
@@ -43,6 +47,7 @@ for i=1:numel(varargin)
 end
 status = 0;
 if skip_pp
+    display_msg('SKIP_PP flag is given, the pre-processing will be skipped.', MsgType.INFO, 'PP', '');
     new_file_path = model_path;
     return;
 end

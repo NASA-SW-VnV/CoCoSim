@@ -38,7 +38,7 @@ classdef If_To_Lustre < Block_To_Lustre
                     IfExp{j}, inputs, data_map, parent, blk);
                 if status
                     obj.addUnsupported_options(sprintf('ParseError  character unsupported  %s in block %s', ...
-                        unsupportedExp, HtmlItem.addOpenCmd(blk.Origin_path)));
+                        IfExp{j}, HtmlItem.addOpenCmd(blk.Origin_path)));
                 end
             end
             options = obj.unsupported_options;
