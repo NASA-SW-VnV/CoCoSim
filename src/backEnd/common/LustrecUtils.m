@@ -1371,11 +1371,13 @@ classdef LustrecUtils < handle
                         if ~isempty(output_value)
                             output_val_str = output_value{2};
                             output_val = str2num(output_val_str(2:end-1));
-                            if yout_values(j)==inf
+                            y_value = yout_values(j);
+                            if isinf(y_value) || isnan(y_value)...
+                                    || isinf(output_val) || isnan(output_val)
                                 diff=0;
                             else
-                                if yout_values(j) ~= 0
-                                    diff = abs(double(yout_values(j))-output_val);
+                                if y_value ~= 0
+                                    diff = abs(double(y_value)-output_val);
                                     % percentage of difference
                                     %diff = 100*abs(...
                                      %   (yout_values(j)-output_val)/yout_values(j));

@@ -89,7 +89,9 @@ end
 
 %% Create the input struct for the simulation
 nb_steps = 100;
-if exist('min_max_constraints','var') && numel(min_max_constraints) > 0
+if exist('min_max_constraints','var') ...
+        && iscell(min_max_constraints) ...
+        && numel(min_max_constraints) > 0
     IMIN = min_max_constraints{:,2};
     IMAX = min_max_constraints{:,3};
 else

@@ -420,7 +420,8 @@ classdef SLX2LusUtils < handle
             % datatypes.
             if numel(blk.CompiledPortDataTypes.Outport) == 1 ...
                     && strcmp(blk.CompiledPortDataTypes.Outport{1}, 'auto') ...
-                    && ~isempty(blk.CompiledPortWidths.Inport)
+                    && ~isempty(blk.CompiledPortWidths.Inport)...
+                    && ~isequal(blk.BlockType, 'SubSystem') 
                 
                 if numel(blk.CompiledPortWidths.Inport) > 1 ...
                         && isequal(blk.BlockType, 'BusCreator') 
@@ -473,6 +474,24 @@ classdef SLX2LusUtils < handle
                             lus_dt = SLX2LusUtils.getpreBlockLusDT(parent, blk, portNumber);
                             isBus = false;
                         end
+                    elseif isequal(blk.BlockType, 'SubSystem') 
+                        %get all blocks names
+                        fields = fieldnames(blk.Content);
+                        
+                        % remove blocks without BlockType (e.g annotations)
+                        fields = ...
+                            fields(...
+                            cellfun(@(x) isfield(blk.Content.(x),'BlockType'), fields));
+                        
+                        % get only blocks with BlockType=type
+                        Portsfields = ...
+                            fields(...
+                            cellfun(@(x) strcmp(blk.Content.(x).BlockType,'Outport'), fields));
+                        % get their ports number
+                        ports = cellfun(@(x) str2num(blk.Content.(x).Port), Portsfields);
+                        outportBlk = blk.Content.(Portsfields{ports == portNumber});
+                        lus_dt = SLX2LusUtils.getpreBlockLusDT( blk, outportBlk, 1);
+                        isBus = false;
                     else
                         try
                             pH = get_param(blk.Origin_path, 'PortHandles');

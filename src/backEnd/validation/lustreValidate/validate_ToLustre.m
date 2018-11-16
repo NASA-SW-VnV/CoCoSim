@@ -16,9 +16,9 @@ lus_file_path = '';
 %close all simulink models
 bdclose('all')
 %% define parameters if not given by the user
-
+[model_path, file_name, ~] = fileparts(char(model_full_path));
 if ~exist('min_max_constraints', 'var') || isempty(min_max_constraints)
-    min_max_constraints = [];
+    min_max_constraints = SLXUtils.constructInportsMinMaxConstraints(model_full_path, -300, 300);
 end
 
 if ~exist('deep_CEX', 'var') || isempty(deep_CEX)
@@ -44,7 +44,7 @@ else
     options = {'nodisplay'};
 end
 
-[model_path, file_name, ext] = fileparts(char(model_full_path));
+
 addpath(model_path);
 %% generate lustre code
 try
