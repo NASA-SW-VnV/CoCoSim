@@ -27,7 +27,11 @@ function [unsupportedOptions, ...
         const_files = {};
     end
     mode_display = 1;
-    skip_unsupportedblocks = 0;
+    try
+        skip_unsupportedblocks = evalin('base', 'skip_unsupportedblocks');
+    catch
+        skip_unsupportedblocks = 0;
+    end
     for i=1:numel(varargin)
         if strcmp(varargin{i}, 'nodisplay')
             mode_display = 0;
@@ -101,7 +105,7 @@ function [unsupportedOptions, ...
     
     %% Unsupported blocks detection
     if skip_unsupportedblocks
-        display_msg('Skipping unsupported blocks detection', Constants.INFO, 'ToLustreUnsupportedBlocks', '');
+        display_msg('skip_unsupportedblocks flag is given. Skipping unsupported blocks detection', Constants.INFO, 'ToLustreUnsupportedBlocks', '');
         return;
     end
     display_msg('Unsupported blocks detection', Constants.INFO, 'ToLustreUnsupportedBlocks', '');
