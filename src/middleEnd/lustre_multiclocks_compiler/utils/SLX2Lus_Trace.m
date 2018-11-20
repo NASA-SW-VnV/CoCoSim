@@ -208,6 +208,8 @@ classdef SLX2Lus_Trace < handle
             if isa(trace_root, 'char')
                 DOMNODE = xmlread(trace_root);
                 xRoot = DOMNODE.getDocumentElement;
+            elseif isa(trace_root, 'SLX2Lus_Trace')
+                xRoot = trace_root.traceRootNode;
             else
                 xRoot = trace_root;
             end
@@ -220,6 +222,60 @@ classdef SLX2Lus_Trace < handle
                     break;
                 end
                 
+            end
+        end
+        
+        function simulink_block_name = get_Simulink_block_from_lustre_node_name(...
+                trace_root, lustre_node_name, Sim_file_name, new_model_name)
+            if ischar(trace_root)
+                DOMNODE = xmlread(trace_root);
+                xRoot = DOMNODE.getDocumentElement;
+            elseif isa(trace_root, 'SLX2Lus_Trace')
+                xRoot = trace_root.traceRootNode;
+            else
+                xRoot = trace_root;
+            end
+            simulink_block_name = '';
+            xml_nodes = xRoot.getElementsByTagName('Node');
+            for idx_node=0:xml_nodes.getLength-1
+                lustre_name = xml_nodes.item(idx_node).getAttribute('NodeName');
+                if strcmp(lustre_name,lustre_node_name)
+                    simulink_block_name = char(xml_nodes.item(idx_node).getAttribute('OriginPath'));
+                    if nargin == 4
+                        simulink_block_name = regexprep(simulink_block_name,strcat('^',Sim_file_name,'/(\w)'),strcat(new_model_name,'/$1'));
+                    end
+                    break;
+                end
+                
+            end
+        end
+        % get variables +inputs + outputs names of a node
+        function variables_names = get_tracable_variables(xRoot, node_name)
+            
+            variables_names = {};
+            nodes = xRoot.getElementsByTagName('Node');
+            for idx_node=0:nodes.getLength-1
+                block_name_node = nodes.item(idx_node).getAttribute('NodeName');
+                if strcmp(block_name_node, node_name)
+                    inputs = nodes.item(idx_node).getElementsByTagName('OutputList');
+                    for idx_input=0:inputs.getLength-1
+                        input = inputs.item(idx_input);
+                        variables_names{end + 1} = ...
+                            char(input.getAttribute('VariableName='));
+                    end
+                    outputs = nodes.item(idx_node).getElementsByTagName('Output');
+                    for idx_output=0:outputs.getLength-1
+                        output = outputs.item(idx_output);
+                        variables_names{end + 1} = ...
+                            char(output.getAttribute('VariableName='));
+                    end
+                    variables = nodes.item(idx_node).getElementsByTagName('VarList');
+                    for idx_var=0:variables.getLength-1
+                        var = variables.item(idx_var);
+                        variables_names{end + 1} = ...
+                            char(var.getAttribute('VariableName='));
+                    end
+                end
             end
         end
     end

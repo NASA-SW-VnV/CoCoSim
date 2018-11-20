@@ -219,7 +219,7 @@ if ~isempty(mcdc_variables_names)
         originalNamesMap(local.name) = local.original_name;
     end
     % get tracable variables names
-    traceable_variables = XMLUtils.get_tracable_variables(mdlTraceRoot,...
+    traceable_variables = SLX2Lus_Trace.get_tracable_variables(mdlTraceRoot,...
         nodes.(node).original_name);
     
     [instructionsIDs, inputList]= get_mcdc_instructions(mcdc_variables_names, ...
@@ -296,8 +296,11 @@ fields = fieldnames(annotations);
 for i=1:numel(fields)
     if ismember('mcdc', annotations.(fields{i}).key) ...
             && ismember('coverage', annotations.(fields{i}).key)
-        variables_names{numel(variables_names) + 1} = ...
-            annotations.(fields{i}).eexpr.qfexpr.value;
+        try
+            variables_names{end + 1} = ...
+                annotations.(fields{i}).eexpr.qfexpr{1}.value;
+        catch
+        end
     end
 end
 

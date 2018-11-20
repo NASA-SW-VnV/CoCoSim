@@ -1,11 +1,13 @@
-function [ T,  new_model_name] = mutation_tests( model_full_path,...
+function [ T,  harness_model_name, status] = mutation_tests( model_full_path,...
     nb_steps, IMIN, IMAX, max_nb_test, min_coverage, exportToWs, mkHarnessMdl )
 %mutation_tests Summary of this function goes here
 %   Detailed explanation goes here
 
+status = 0;
 if ~exist(model_full_path, 'file')
     display_msg(['File not foudn: ' model_full_path],...
         MsgType.ERROR, 'mutation_tests', '');
+    status = 1;
     return;
 else
     model_full_path = which(model_full_path);
@@ -37,10 +39,13 @@ end
 addpath(model_path);
 load_system(model_full_path);
 %% Compile model
-[lus_full_path, ~, ~, ~, ~, xml_trace] = lustre_compiler(model_full_path);
-[output_dir, node_name, ~] = fileparts(lus_full_path);
-[ T, ~ ] = lustret_test_mutation( xml_trace.model_full_path, ...
+[lus_full_path, xml_trace, ~, ~, ~, pp_model_full_path] = ...
+    ToLustre(model_full_path, [], 'KIND2');
+[output_dir, lus_file_name, ~] = fileparts(lus_full_path);
+[~, node_name, ~] = fileparts(lus_file_name);%remove .LUSTREC/.KIND2 from name.
+[ T, ~, status ] = lustret_test_mutation( pp_model_full_path, ...
     lus_full_path, ...
+    xml_trace, ...
     node_name,...
     nb_steps,...
     IMIN, ...
@@ -58,10 +63,10 @@ if exportToWs
 end
 
 %%
-new_model_name = '';
+harness_model_name = '';
 if mkHarnessMdl
     if ~exist(output_dir, 'dir'), mkdir(output_dir); end
-    new_model_name = SLXUtils.makeharness(T, slx_file_name, output_dir, '_mutations');
+    harness_model_name = SLXUtils.makeharness(T, slx_file_name, output_dir, '_mutations');
 end
 end
 

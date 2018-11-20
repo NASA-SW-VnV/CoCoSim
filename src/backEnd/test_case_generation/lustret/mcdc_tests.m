@@ -29,10 +29,11 @@ status = 0;
 
 % Compile model
 try
-    [lus_full_path, ~, ~, ~, ~, mdl_trace, ~] = lustre_compiler(model_full_path);
-    [output_dir, main_node, ~] = fileparts(lus_full_path);
-    % the model name might changed to _PP.
-    slx_file_name = main_node;
+    [lus_full_path, xml_trace, ~, ~, ~, pp_model_full_path] = ...
+        ToLustre(model_full_path);
+    [output_dir, lus_file_name, ~] = fileparts(lus_full_path);
+    [~, main_node, ~] = fileparts(lus_file_name);%remove .LUSTREC/.KIND2 from name.
+    [~, slx_file_name, ~] = fileparts(pp_model_full_path);
 catch ME
     display_msg(['Compilation failed for model ' slx_file_name], ...
         MsgType.ERROR, 'mcdcToSimulink', '');
@@ -124,7 +125,7 @@ end
 % generate mcdc Simulink blocks
 
 try
-    [status, mcdc_model_path, mcdc_trace] = mcdc2slx(mcdc_IR_path, mdl_trace, ...
+    [status, mcdc_model_path, mcdc_trace] = mcdc2slx(mcdc_IR_path, xml_trace, ...
         output_dir, ...
         [], ...
         [], ...
@@ -150,7 +151,7 @@ try
     for idx_node=0:nodes.getLength-1
         mcdc_blk_name = char(nodes.item(idx_node).getAttribute('block_name'));
         node_name = char(nodes.item(idx_node).getAttribute('node_name'));
-        simulink_block_name = XMLUtils.get_Simulink_block_from_lustre_node_name(mdl_trace, ...
+        simulink_block_name = XMLUtils.get_Simulink_block_from_lustre_node_name(xml_trace, ...
             node_name, slx_file_name, new_model_name);
         isBaseName = false;
         if isempty(simulink_block_name)

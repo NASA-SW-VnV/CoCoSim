@@ -355,6 +355,10 @@ classdef SLXUtils
                 if strcmp(LusValidateUtils.get_lustre_dt(inports(i).datatype),'bool')
                     input_struct.signals(i).values = LusValidateUtils.construct_random_booleans(nb_steps, min, max, dim);
                     input_struct.signals(i).dimensions = dim;
+                elseif strcmp(inports(i).datatype,'int')
+                    input_struct.signals(i).values = LusValidateUtils.construct_random_integers(nb_steps, min, max, 'int32', dim);
+                    input_struct.signals(i).dimensions = dim;
+                    
                 elseif strcmp(LusValidateUtils.get_lustre_dt(inports(i).datatype),'int')
                     input_struct.signals(i).values = LusValidateUtils.construct_random_integers(nb_steps, min, max, inports(i).datatype, dim);
                     input_struct.signals(i).dimensions = dim;

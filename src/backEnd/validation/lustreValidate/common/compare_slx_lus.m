@@ -124,7 +124,7 @@ if tests_method == 1 || tests_method == 2
     T = [T, input_struct];
     
     for i=1:numel(T)
-        [valid,...
+        [valid_i,...
             lustrec_failed, ...
             lustrec_binary_failed,...
             sim_failed, ...
@@ -147,7 +147,10 @@ if tests_method == 1 || tests_method == 2
             f_msg = [f_msg 'LustreC binary Output ' fullfile(output_dir,'outputs_values') '\n'];
             display_msg(f_msg, MsgType.RESULT, 'validation', '');
         end
-        if ~valid
+        if valid_i && valid == -1
+            valid = 1;
+        else
+            valid = 0;
             break;
         end
     end

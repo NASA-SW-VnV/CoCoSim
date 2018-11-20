@@ -16,7 +16,7 @@ classdef LustrecUtils < handle
             t = regexprep(t, '\\', '\\\');
             t = regexprep(t, '!=', '<>');
             if strcmp(dest, 'Kind2')
-                t = regexprep(t, '\(\*! /coverage/mcdc/:', '(* /coverage/mcdc/:');
+                t = regexprep(t, '\(\*! /coverage/mcdc/', '(* /coverage/mcdc/');
             end
         end
         

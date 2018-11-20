@@ -91,7 +91,7 @@ catch ME
 end
 
 
-if ~lustrec_failed && ~sim_failed && ~lustrec_binary_failed && ~valid && (deep_CEX > 0)
+if ~lustrec_failed && ~sim_failed && ~lustrec_binary_failed && valid~=1 && (deep_CEX > 0)
     validate_componentsV2(model_full_path, file_name, file_name, output_dir, ...
         deep_CEX, tests_method, model_checker, show_model, min_max_constraints, options);
     %     validate_components(model_full_path, file_name, file_name, ...
