@@ -44,8 +44,5 @@ end
 
 function SimulinkCompilerCallback(callbackInfo)
 model_full_path = MenuUtils.get_file_name(gcs);
-lus_full_path = lustre_compiler(model_full_path);
-output_dir = fullfile(fileparts(lus_full_path), 'C');
-rtwbuild_C_code(model_full_path, output_dir);
-
+rtwbuild_C_code(model_full_path);
 end

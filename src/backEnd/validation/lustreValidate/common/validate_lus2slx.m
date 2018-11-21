@@ -204,7 +204,7 @@ for i=1:numel(ss)
     end
     display_msg(['Validating SubSystem ' ss{i}], MsgType.INFO, 'validation', '');
     origin_ss = regexprep(ss{i}, strcat('^',file_name,'/'), strcat(base_name,'_emf/'));
-    node_name = XMLUtils.get_lustre_node_from_Simulink_block_name(trace_file_name,origin_ss);
+    node_name = SLX2Lus_Trace.get_lustre_node_from_Simulink_block_name(trace_file_name,origin_ss);
     if ~strcmp(node_name, '')
         [new_model_path, ~] = SLXUtils.crete_model_from_subsystem(file_name, ss{i}, output_dir );
         try

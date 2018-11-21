@@ -28,19 +28,12 @@ classdef ImportLusUtils
                 cocosim_trace_file, ...
                 createNewFile)
             
+            narginchk(3,4);
             
             status = 0;
             [coco_dir, ~, ~] = fileparts(lus_json_path);
             [model_dir, base_name, ~] = fileparts(model_path);
-            if ~exist('cocosim_trace_file', 'var')
-                cocosim_trace_file = fullfile(coco_dir,strcat(base_name,'.cocosim.trace.xml'));
-                if ~exist(cocosim_trace_file, 'file')
-                    display_msg(sprintf('Traceability file is required for file %s', lus_json_path), ...
-                        MsgType.ERROR, 'ImportLusUtils', '');
-                    status = 1;
-                    return;
-                end
-            end
+            
             if ~exist('createNewFile', 'var')
                 createNewFile = 0;
             end
@@ -96,7 +89,7 @@ classdef ImportLusUtils
                 nodes = data.nodes;
                 for node = fieldnames(nodes)'
                     original_name = nodes.(node{1}).original_name;
-                    simulink_block_name = XMLUtils.get_Simulink_block_from_lustre_node_name(xRoot, ...
+                    simulink_block_name = SLX2Lus_Trace.get_Simulink_block_from_lustre_node_name(xRoot, ...
                         original_name, base_name, new_model_name);
                     if strcmp(simulink_block_name, '')
                         continue;
@@ -191,7 +184,7 @@ classdef ImportLusUtils
         %%
         function input_block_name = get_input_block_name_from_variable(xRoot, node, var_name, Sim_file_name,new_model_name)
             
-            input_block_name = XMLUtils.get_block_name_from_variable_using_xRoot(xRoot, node, var_name);
+            input_block_name = SLX2Lus_Trace.get_SlxBlockName_from_LusVar_UsingXML(xRoot, node, var_name);
             input_block_name = regexprep(input_block_name,strcat('^',Sim_file_name,'/(\w)'),strcat(new_model_name,'/$1'));
         end
         

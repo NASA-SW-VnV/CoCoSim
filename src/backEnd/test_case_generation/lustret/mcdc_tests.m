@@ -151,7 +151,7 @@ try
     for idx_node=0:nodes.getLength-1
         mcdc_blk_name = char(nodes.item(idx_node).getAttribute('block_name'));
         node_name = char(nodes.item(idx_node).getAttribute('node_name'));
-        simulink_block_name = XMLUtils.get_Simulink_block_from_lustre_node_name(xml_trace, ...
+        simulink_block_name = SLX2Lus_Trace.get_Simulink_block_from_lustre_node_name(xml_trace, ...
             node_name, slx_file_name, new_model_name);
         isBaseName = false;
         if isempty(simulink_block_name)

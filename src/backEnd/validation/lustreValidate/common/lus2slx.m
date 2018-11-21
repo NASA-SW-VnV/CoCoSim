@@ -57,7 +57,7 @@ end
 new_model_path = fullfile(output_dir,strcat(new_model_name,'.slx'));
 trace_file_name = fullfile(output_dir, ...
     strcat(cocospec_name, '.emf.trace.xml'));
-xml_trace = XML_Trace(new_model_path, trace_file_name);
+xml_trace = SLX2Lus_Trace(new_model_path, trace_file_name);
 xml_trace.init();
 if exist(new_model_path,'file')
     if BUtils.isLastModified(json_path, new_model_path) && ~force
