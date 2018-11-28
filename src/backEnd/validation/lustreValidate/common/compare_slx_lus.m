@@ -92,8 +92,8 @@ nb_steps = 100;
 if exist('min_max_constraints','var') ...
         && iscell(min_max_constraints) ...
         && numel(min_max_constraints) > 0
-    IMIN = min_max_constraints{:,2};
-    IMAX = min_max_constraints{:,3};
+    IMIN = cellfun(@(x) x{2}, min_max_constraints);
+    IMAX = cellfun(@(x) x{3}, min_max_constraints);
 else
     IMIN = -300;
     IMAX = 300;
