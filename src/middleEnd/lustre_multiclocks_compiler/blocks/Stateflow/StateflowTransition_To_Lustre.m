@@ -56,7 +56,7 @@ classdef StateflowTransition_To_Lustre
             node_name = ...
                 StateflowState_To_Lustre.getStateDefaultTransNodeName(state);
             comment = LustreComment(...
-                sprintf('Default transitions of state %s', state.Path), true);
+                sprintf('Default transitions of state %s', state.Origin_path), true);
             [transitionNode, external_libraries] = ...
                 StateflowTransition_To_Lustre.getTransitionsNode(T, parentPath, ...
                 isDefaultTrans, ...
@@ -88,7 +88,7 @@ classdef StateflowTransition_To_Lustre
             node_name = ...
                 StateflowState_To_Lustre.getStateInnerTransNodeName(state);
             comment = LustreComment(...
-                sprintf('Inner transitions of state %s', state.Path), true);
+                sprintf('Inner transitions of state %s', state.Origin_path), true);
             [transitionNode, external_libraries] = ...
                 StateflowTransition_To_Lustre.getTransitionsNode(T, parentPath, ...
                 isDefaultTrans, ...
@@ -118,7 +118,7 @@ classdef StateflowTransition_To_Lustre
             node_name = ...
                 StateflowState_To_Lustre.getStateOuterTransNodeName(state);
             comment = LustreComment(...
-                sprintf('Outer transitions of state %s', state.Path), true);
+                sprintf('Outer transitions of state %s', state.Origin_path), true);
             [transitionNode, external_libraries] = ...
                 StateflowTransition_To_Lustre.getTransitionsNode(T, parentPath, ...
                 isDefaultTrans, ...
@@ -203,9 +203,9 @@ classdef StateflowTransition_To_Lustre
                     end
                     comment = LustreComment(...
                         sprintf('Transition from %s %s to %s ExecutionOrder %d %s',...
-                        source_state.Path,...
+                        source_state.Origin_path,...
                         suffix, ...
-                        T.Destination.Name, ...
+                        T.Destination.Origin_path, ...
                         T.ExecutionOrder, type), true);
                     main_node.setMetaInfo(comment);
                 end
@@ -650,9 +650,17 @@ classdef StateflowTransition_To_Lustre
                         StateflowState_To_Lustre.addStateEnum(dest_parent, child);
                     body{end + 1} = LustreComment(...
                         sprintf('set state %s as active', child.Name));
-                    body{end + 1} = LustreEq(VarIdExpr(idParentName), ...
-                        VarIdExpr(idParentStateEnum));
-                    outputs{end + 1} = LustreVar(idParentName, idParentEnumType);
+                    if isempty(trans_cond)
+                        body{end + 1} = LustreEq(VarIdExpr(idParentName), ...
+                            VarIdExpr(idParentStateEnum));
+                        outputs{end + 1} = LustreVar(idParentName, idParentEnumType);
+                    else
+                        body{end+1} = LustreEq(VarIdExpr(idParentName), ...
+                            IteExpr(trans_cond, VarIdExpr(idParentStateEnum), ...
+                            VarIdExpr(idParentName)));
+                        outputs{end + 1} = LustreVar(idParentName, idParentEnumType);
+                        inputs{end+1} = LustreVar(idParentName, idParentEnumType);
+                    end
                     
                 end
                 if isequal(dest_parent.Composition.Type,'AND')
@@ -672,7 +680,7 @@ classdef StateflowTransition_To_Lustre
                         if isKey(SF_STATES_NODESAST_MAP, entryNodeName)
                             %entry Action exists.
                             actionNodeAst = SF_STATES_NODESAST_MAP(entryNodeName);
-                            [call, oututs_Ids] = actionNodeAst.nodeCall();
+                            [call, oututs_Ids] = actionNodeAst.nodeCall(true, BooleanExpr(false));
                             if isempty(trans_cond)
                                 body{end+1} = LustreEq(oututs_Ids, call);
                                 outputs = [outputs, actionNodeAst.getOutputs()];
@@ -693,7 +701,7 @@ classdef StateflowTransition_To_Lustre
                         StateflowState_To_Lustre.getEntryActionNodeName(dest_parent);
                     if isKey(SF_STATES_NODESAST_MAP, entryNodeName)
                         actionNodeAst = SF_STATES_NODESAST_MAP(entryNodeName);
-                        [call, oututs_Ids] = actionNodeAst.nodeCall();
+                        [call, oututs_Ids] = actionNodeAst.nodeCall(true, BooleanExpr(false));
                         if isempty(trans_cond)
                             body{end+1} = LustreEq(oututs_Ids, call);
                             outputs = [outputs, actionNodeAst.getOutputs()];
@@ -719,15 +727,23 @@ classdef StateflowTransition_To_Lustre
                         false, false, true);
                     body{end + 1} = LustreComment(...
                         sprintf('set state %s as inactive', dest_parent.Name));
-                    body{end + 1} = LustreEq(VarIdExpr(idState), ...
-                        VarIdExpr(idStateInactiveEnum));
-                    outputs{end + 1} = LustreVar(idState, idStateEnumType);
+                    if isempty(trans_cond)
+                        body{end + 1} = LustreEq(VarIdExpr(idState), ...
+                            VarIdExpr(idStateInactiveEnum));
+                        outputs{end + 1} = LustreVar(idState, idStateEnumType);
+                    else
+                        body{end+1} = LustreEq(VarIdExpr(idState), ...
+                            IteExpr(trans_cond, VarIdExpr(idStateInactiveEnum), ...
+                            VarIdExpr(idState)));
+                        outputs{end + 1} = LustreVar(idState, idStateEnumType);
+                        inputs{end+1} = LustreVar(idState, idStateEnumType);
+                    end
                 end
                 entryNodeName = ...
                     StateflowState_To_Lustre.getEntryActionNodeName(dest_parent);
                 if isKey(SF_STATES_NODESAST_MAP, entryNodeName)
                     actionNodeAst = SF_STATES_NODESAST_MAP(entryNodeName);
-                    [call, oututs_Ids] = actionNodeAst.nodeCall();
+                    [call, oututs_Ids] = actionNodeAst.nodeCall(true, BooleanExpr(true));
                     if isempty(trans_cond)
                         body{end+1} = LustreEq(oututs_Ids, call);
                         outputs = [outputs, actionNodeAst.getOutputs()];
@@ -741,7 +757,11 @@ classdef StateflowTransition_To_Lustre
                     end
                 end
             end
-            
+            %remove isInner input from the node inputs
+            inputs_name = cellfun(@(x) x.getId(), ...
+                inputs, 'UniformOutput', false);
+            inputs = inputs(~strcmp(inputs_name, ...
+                StateflowState_To_Lustre.isInnerStr()));
         end
         %% Utils functions
         function full_path_trace = get_full_path_trace(transitions, isDefaultTrans)

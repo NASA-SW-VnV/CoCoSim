@@ -99,7 +99,7 @@ classdef StateflowState_To_Lustre
             main_node.setName(node_name);
             comment = LustreComment(...
                 sprintf('Main node of state %s',...
-                state.Path), true);
+                state.Origin_path), true);
             main_node.setMetaInfo(comment);
             main_node.setBodyEqs(body);
             outputs = LustreVar.uniqueVars(outputs);
@@ -139,7 +139,7 @@ classdef StateflowState_To_Lustre
                 SLX2LusUtils.node_name_format(blk);
             main_node = LustreNode();
             main_node.setName(node_name);
-            comment = LustreComment(sprintf('Chart Node: %s', chart.Path),...
+            comment = LustreComment(sprintf('Chart Node: %s', chart.Origin_path),...
                 true);
             main_node.setMetaInfo(comment);
             main_node.setBodyEqs(body);            
@@ -171,7 +171,7 @@ classdef StateflowState_To_Lustre
             main_node.setName(node_name);
             comment = LustreComment(...
                 sprintf('Executing Events of state %s',...
-                chart.Path), true);
+                chart.Origin_path), true);
             main_node.setMetaInfo(comment);
             main_node.setBodyEqs(body);
             outputs = LustreVar.uniqueVars(outputs);
@@ -243,16 +243,29 @@ classdef StateflowState_To_Lustre
                 body{2} = LustreEq(VarIdExpr(idParentName), VarIdExpr(childName));
                 outputs{1} = LustreVar(idParentName, stateEnumType);
                 
+                %isInner variable that tells if the transition that cause this
+                %exit action is an inner Transition
+                isInner = VarIdExpr(StateflowState_To_Lustre.isInnerStr());
+                inputs{end + 1} = LustreVar(isInner, 'bool');
                 %actions code
                 actions = SFIRPPUtils.split_actions(state.Actions.Entry);
                 nb_actions = numel(actions);
                 for i=1:nb_actions
                     try
-                        [body{end+1}, outputs_i, inputs_i, external_libraries_i] = ...
+                        [lus_action, outputs_i, inputs_i, external_libraries_i] = ...
                             getPseudoLusAction(actions{i});
-                        outputs = [outputs, outputs_i];
-                        inputs = [inputs, inputs_i];
-                        external_libraries = [external_libraries, external_libraries_i];
+                        if isa(lus_action, 'LustreEq')
+                            body{end+1} = LustreEq(lus_action.getLhs(), ...
+                                IteExpr(UnaryExpr(UnaryExpr.NOT, isInner), ...
+                                lus_action.getRhs(), lus_action.getLhs()));
+                            outputs = [outputs, outputs_i];
+                            inputs = [inputs, inputs_i, outputs_i];
+                            external_libraries = [external_libraries, external_libraries_i];
+                        elseif ~isempty(lus_action)
+                            display_msg(sprintf(...
+                                'Action "%s" in state %s should be an assignement (e.g. outputs = f(inputs))',...
+                                actions{i}, state.Origin_path), MsgType.ERROR, 'write_entry_action', '');
+                        end
                     catch me
                         if strcmp(me.identifier, 'COCOSIM:STATEFLOW')
                             display_msg(me.message, MsgType.ERROR, 'write_entry_action', '');
@@ -260,7 +273,7 @@ classdef StateflowState_To_Lustre
                             display_msg(me.getReport(), MsgType.DEBUG, 'write_entry_action', '');
                         end
                         display_msg(sprintf('Entry Action failed for state %s', ...
-                            state.Path),...
+                            state.Origin_path),...
                             MsgType.ERROR, 'write_entry_action', '');
                     end
                 end
@@ -278,7 +291,7 @@ classdef StateflowState_To_Lustre
             main_node.setName(act_node_name);
             comment = LustreComment(...
                 sprintf('Entry action of state %s',...
-                state.Path), true);
+                state.Origin_path), true);
             main_node.setMetaInfo(comment);
             main_node.setBodyEqs(body);
             outputs = LustreVar.uniqueVars(outputs);
@@ -316,16 +329,29 @@ classdef StateflowState_To_Lustre
             outputs = [outputs, outputs_i];
             inputs = [inputs, inputs_i];
             
+            %isInner variable that tells if the transition that cause this
+            %exit action is an inner Transition
+            isInner = VarIdExpr(StateflowState_To_Lustre.isInnerStr());
+            
             %actions code
             actions = SFIRPPUtils.split_actions(state.Actions.Exit);
             nb_actions = numel(actions);
             for i=1:nb_actions
                 try
-                    [body{end+1}, outputs_i, inputs_i, external_libraries_i] = ...
+                    [lus_action, outputs_i, inputs_i, external_libraries_i] = ...
                         getPseudoLusAction(actions{i});
-                    outputs = [outputs, outputs_i];
-                    inputs = [inputs, inputs_i];
-                    external_libraries = [external_libraries, external_libraries_i];
+                    if isa(lus_action, 'LustreEq')
+                        body{end+1} = LustreEq(lus_action.getLhs(), ...
+                            IteExpr(UnaryExpr(UnaryExpr.NOT, isInner), ...
+                            lus_action.getRhs(), lus_action.getLhs()));
+                        outputs = [outputs, outputs_i];
+                        inputs = [inputs, inputs_i, outputs_i];
+                        external_libraries = [external_libraries, external_libraries_i];
+                    elseif ~isempty(lus_action) 
+                        display_msg(sprintf(...
+                            'Action "%s" in state %s should be an assignement (e.g. outputs = f(inputs))',...
+                            actions{i}, state.Origin_path), MsgType.ERROR, 'write_exit_action', '');
+                    end
                 catch me
                     if strcmp(me.identifier, 'COCOSIM:STATEFLOW')
                         display_msg(me.message, MsgType.ERROR, 'write_exit_action', '');
@@ -333,7 +359,7 @@ classdef StateflowState_To_Lustre
                         display_msg(me.getReport(), MsgType.DEBUG, 'write_exit_action', '');
                     end
                     display_msg(sprintf('Exit Action failed for state %s', ...
-                        state.Path),...
+                        state.Origin_path),...
                         MsgType.ERROR, 'write_exit_action', '');
                 end
             end
@@ -344,9 +370,7 @@ classdef StateflowState_To_Lustre
                     'COMPILER ERROR: Not found state "%s" in SF_STATES_PATH_MAP', parentName);
                 throw(ME);
             end
-            %isInner variable that tells if the transition that cause this
-            %exit action is an inner Transition
-            isInner = VarIdExpr(StateflowState_To_Lustre.isInnerStr());
+            
             
             state_parent = SF_STATES_PATH_MAP(parentName);
             idParentName = StateflowState_To_Lustre.getStateIDName(state_parent);
@@ -382,7 +406,7 @@ classdef StateflowState_To_Lustre
             main_node.setName(act_node_name);
             comment = LustreComment(...
                 sprintf('Exit action of state %s',...
-                state.Path), true);
+                state.Origin_path), true);
             main_node.setMetaInfo(comment);
             main_node.setBodyEqs(body);
             outputs = LustreVar.uniqueVars(outputs);
@@ -428,7 +452,7 @@ classdef StateflowState_To_Lustre
                         display_msg(me.getReport(), MsgType.DEBUG, 'write_during_action', '');
                     end
                     display_msg(sprintf('During Action failed for state %s', ...
-                        state.Path),...
+                        state.Origin_path),...
                         MsgType.ERROR, 'write_during_action', '');
                 end
             end
@@ -442,7 +466,7 @@ classdef StateflowState_To_Lustre
             main_node.setName(act_node_name);
             comment = LustreComment(...
                 sprintf('During action of state %s',...
-                state.Path), true);
+                state.Origin_path), true);
             main_node.setMetaInfo(comment);
             main_node.setBodyEqs(body);
             outputs = LustreVar.uniqueVars(outputs);
@@ -488,12 +512,8 @@ classdef StateflowState_To_Lustre
                         throw(ME);
                     end
                     actionNodeAst = SF_STATES_NODESAST_MAP(action_node_name);
-                    if isequal(actionType, 'Entry')
-                        [call, oututs_Ids] = actionNodeAst.nodeCall();
-                    else
-                        [call, oututs_Ids] = actionNodeAst.nodeCall(...
-                            true, BooleanExpr(false));
-                    end
+                    [call, oututs_Ids] = actionNodeAst.nodeCall(...
+                        true, BooleanExpr(false));
                     actions{end+1} = LustreEq(oututs_Ids, call);
                     outputs = [outputs, actionNodeAst.getOutputs()];
                     inputs = [inputs, actionNodeAst.getInputs()];
@@ -556,12 +576,8 @@ classdef StateflowState_To_Lustre
                         throw(ME);
                     end
                     actionNodeAst = SF_STATES_NODESAST_MAP(action_node_name);
-                    if isequal(actionType, 'Entry')
-                        [call, oututs_Ids] = actionNodeAst.nodeCall();
-                    else
-                        [call, oututs_Ids] = actionNodeAst.nodeCall(...
-                            true, BooleanExpr(false));
-                    end
+                    [call, oututs_Ids] = actionNodeAst.nodeCall(...
+                        true, BooleanExpr(false));
                     if isOneChildEntry
                         concurrent_actions{end+1} = LustreEq(oututs_Ids, call);
                         outputs = [outputs, actionNodeAst.getOutputs()];
@@ -673,7 +689,7 @@ classdef StateflowState_To_Lustre
                     inputs = [inputs, nodeAst.getInputs()];
                     cond_name = ...
                         StateflowTransition_To_Lustre.getValidPathCondName();
-                    if VarIdExpr.ismemberVar(condName, oututs_Ids)
+                    if VarIdExpr.ismemberVar(cond_name, oututs_Ids)
                         outputs = LustreVar.removeVar(outputs, cond_name);
                     end
                     if isempty(cond_prefix)
@@ -686,6 +702,7 @@ classdef StateflowState_To_Lustre
                     else
                         if VarIdExpr.ismemberVar(cond_name, oututs_Ids)
                             new_cond_name = strcat(cond_name, '_INNER');
+                            variables{end+1} = LustreVar(new_cond_name, 'bool');
                             lhs_oututs_Ids = ...
                                 StateflowState_To_Lustre.changeVar(...
                                 oututs_Ids, cond_name, new_cond_name);
@@ -713,7 +730,7 @@ classdef StateflowState_To_Lustre
                     StateflowState_To_Lustre.getEntryActionNodeName(state);
                 if isKey(SF_STATES_NODESAST_MAP, entry_act_node_name)
                     nodeAst = SF_STATES_NODESAST_MAP(entry_act_node_name);
-                    [call, oututs_Ids] = nodeAst.nodeCall();
+                    [call, oututs_Ids] = nodeAst.nodeCall(true, BooleanExpr(false));
                     cond = BinaryExpr(BinaryExpr.EQ,...
                         idStateVar, VarIdExpr(idStateInactiveEnum));
                     children_actions{end+1} = LustreEq(oututs_Ids, ...
@@ -722,6 +739,11 @@ classdef StateflowState_To_Lustre
                     inputs = [inputs, nodeAst.getOutputs()];
                     inputs = [inputs, nodeAst.getInputs()];
                     inputs{end + 1} = LustreVar(idStateVar, idStateEnumType);
+                    %remove isInner input from the node inputs
+                    inputs_name = cellfun(@(x) x.getId(), ...
+                        inputs, 'UniformOutput', false);
+                    inputs = inputs(~strcmp(inputs_name, ...
+                        StateflowState_To_Lustre.isInnerStr()));
                 end
                 cond_prefix = BinaryExpr(BinaryExpr.NEQ,...
                     idStateVar, VarIdExpr(idStateInactiveEnum));
@@ -836,7 +858,7 @@ classdef StateflowState_To_Lustre
                     Constant_To_Lustre.getValueFromParameter(parent, blk, d.InitialValue);
                 if status
                     display_msg(sprintf('InitialOutput %s in Chart %s not found neither in Matlab workspace or in Model workspace',...
-                        d.InitialValue, chart.Path), ...
+                        d.InitialValue, chart.Origin_path), ...
                         MsgType.ERROR, 'Outport_To_Lustre', '');
                     v = 0;
                 end
@@ -920,7 +942,7 @@ classdef StateflowState_To_Lustre
                     else
                         %UNKNOWN Variable
                         display_msg(sprintf('Variable %s in Chart %s not found',...
-                            v_name, chart.Path), ...
+                            v_name, chart.Origin_path), ...
                             MsgType.ERROR, 'Outport_To_Lustre', '');
                     end
                 end
@@ -941,7 +963,7 @@ classdef StateflowState_To_Lustre
                     else
                         %UNKNOWN Variable
                         display_msg(sprintf('Variable %s in Chart %s not found',...
-                            v_name, chart.Path), ...
+                            v_name, chart.Origin_path), ...
                             MsgType.ERROR, 'Outport_To_Lustre', '');
                     end
                 end
@@ -964,7 +986,7 @@ classdef StateflowState_To_Lustre
                 if status
                     display_msg(...
                         sprintf('InitialOutput %s in Chart %s not found neither in Matlab workspace or in Model workspace',...
-                        d.InitialValue, chart.Path), ...
+                        d.InitialValue, chart.Origin_path), ...
                         MsgType.ERROR, 'Outport_To_Lustre', '');
                     v = 0;
                 end

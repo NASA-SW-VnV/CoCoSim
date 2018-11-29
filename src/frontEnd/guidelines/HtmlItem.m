@@ -89,11 +89,16 @@ classdef HtmlItem < handle
                     iconCode = sprintf('<i class="material-icons green-text"><h%d>check_circle<h%d></i>', level, level);
                 end
             end
-            header =  sprintf('<div class="collapsible-header">%s<div class="%s-text text-darken-2"><h%d>%s</h%d></div></div>\n', ...
-                    iconCode, Textcolor,level, obj.title, level);
+            if isempty(obj.subtitles)
+                dropDownCode = '';
+            else
+                dropDownCode = sprintf('<i class="material-icons black-text"><h%d>arrow_drop_down<h%d></i>', level, level);
+            end
+            header =  sprintf('<div class="collapsible-header">%s<div class="%s-text text-darken-2"><h%d>%s</h%d></div>%s</div>\n', ...
+                    iconCode, Textcolor,level, obj.title, level, dropDownCode);
             if isempty(obj.subtitles)
                 res = sprintf('<li>\n%s\n</li>', header);
-            else
+            else                
                 res = sprintf('<li>\n%s\n<div class="collapsible-body">\n<div class="row">\n<div class="col s12 m12">\n<ul class="collapsible" >\n', ...
                     header);
                 for i=1:numel(obj.subtitles)
