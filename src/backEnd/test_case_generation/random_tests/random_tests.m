@@ -30,8 +30,8 @@ end
 addpath(model_path);
 load_system(model_full_path);
 %% Get model inports informations
-[inports, inputEvents_names] = SLXUtils.get_model_inputs_info(model_full_path);
-[T, ~, ~] = SLXUtils.get_random_test(slx_file_name, inports, inputEvents_names, nb_steps,IMAX, IMIN);
+[inports, ~] = SLXUtils.get_model_inputs_info(model_full_path);
+[T, ~, ~] = SLXUtils.get_random_test(slx_file_name, inports, nb_steps,IMAX, IMIN);
 new_model_name = '';
 if exportToWs
     assignin('base', strcat(slx_file_name, '_random_tests'), T);

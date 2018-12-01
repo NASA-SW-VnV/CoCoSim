@@ -278,6 +278,17 @@ classdef SLXUtils
             %warning on;
         end
         %%
+        function isBus = isSimulinkBus(SignalName)
+            %TODO: check model workspace
+            try
+                isBus = evalin('base',...
+                    sprintf('isa(%s, ''Simulink.Bus'')',...
+                    SignalName));
+            catch
+                isBus = false;
+            end
+        end
+        %%
         function min_max_constraints = constructInportsMinMaxConstraints(model_full_path, IMIN_DEFAULT, IMAX_DEFAULT)
             
             [~, model_name, ~] = fileparts(char(model_full_path));
@@ -303,12 +314,10 @@ classdef SLXUtils
             end
         end
         %% create random vector test
-        function [input_struct, ...
+        function [ds, ...
                 simulation_step, ...
-                stop_time] = get_random_test(slx_file_name, inports, inputEvents_names, nb_steps,IMAX, IMIN)
-            if nargin < 3
-                inputEvents_names = {};
-            end
+                stop_time] = get_random_test(slx_file_name, inports, nb_steps,IMAX, IMIN)
+            
             if nargin < 4
                 nb_steps = 100;
             end
@@ -331,10 +340,11 @@ classdef SLXUtils
                 simulation_step = 1;
             end
             stop_time = (nb_steps - 1)*simulation_step;
-            input_struct.time = (0:simulation_step:stop_time)';
-            input_struct.signals = [];
+            time = (0:simulation_step:stop_time)';
+            ds = Simulink.SimulationData.Dataset;
             for i=1:numberOfInports
-                input_struct.signals(i).name = inports(i).name;
+                element = Simulink.SimulationData.Signal;
+                element.Name = inports(i).name;
                 if isfield(inports(i), 'dimension')
                     dim = inports(i).dimension;
                 else
@@ -347,37 +357,45 @@ classdef SLXUtils
                     min = IMIN(1);
                     max = IMAX(1);
                 end
-                %TODO: To use 'square', the following product must be licensed, installed, and enabled:
-                %   Signal Processing Toolbox
-%                 if find(strcmp(inputEvents_names,inports(i).name))
-%                     input_struct.signals(i).values = square((numberOfInports-i+1)*rand(1)*input_struct.time);
-%                     input_struct.signals(i).dimensions = 1;
-%                 else
-                if strcmp(LusValidateUtils.get_lustre_dt(inports(i).datatype),'bool')
-                    input_struct.signals(i).values = LusValidateUtils.construct_random_booleans(nb_steps, min, max, dim);
-                    input_struct.signals(i).dimensions = dim;
+                isBus = SLXUtils.isSimulinkBus(inports(i).datatype);
+                lus_dt = SLX2LusUtils.get_lustre_dt(inports(i).datatype);
+                if isBus
+                    errordlg('Bus Signals are not supported for simulation. Work in progress!');
+                elseif strcmp(lus_dt,'bool')
+                    element.Values = timeseries(...
+                        LusValidateUtils.construct_random_booleans(nb_steps, min, max, dim), ...
+                        time);
+                    %input_struct.signals(i).dimensions = dim;
                 elseif strcmp(inports(i).datatype,'int')
-                    input_struct.signals(i).values = LusValidateUtils.construct_random_integers(nb_steps, min, max, 'int32', dim);
-                    input_struct.signals(i).dimensions = dim;
+                    element.Values = timeseries(...
+                        LusValidateUtils.construct_random_integers(nb_steps, min, max, 'int32', dim), ...
+                        time);
+                    %input_struct.signals(i).dimensions = dim;
                     
-                elseif strcmp(LusValidateUtils.get_lustre_dt(inports(i).datatype),'int')
-                    input_struct.signals(i).values = LusValidateUtils.construct_random_integers(nb_steps, min, max, inports(i).datatype, dim);
-                    input_struct.signals(i).dimensions = dim;
+                elseif contains(inports(i).datatype,'int')
+                    element.Values = timeseries(...
+                        LusValidateUtils.construct_random_integers(nb_steps, min, max, inports(i).datatype, dim), ...
+                        time);
+                    %input_struct.signals(i).dimensions = dim;
                 elseif strcmp(inports(i).datatype,'single')
-                    input_struct.signals(i).values = single(LusValidateUtils.construct_random_doubles(nb_steps, min, max, dim));
-                    input_struct.signals(i).dimensions = dim;
+                    element.Values = timeseries(...
+                        single(LusValidateUtils.construct_random_doubles(nb_steps, min, max, dim)), ...
+                        time);
+                    %input_struct.signals(i).dimensions = dim;
                 else
-                    input_struct.signals(i).values = LusValidateUtils.construct_random_doubles(nb_steps, min, max, dim);
-                    input_struct.signals(i).dimensions = dim;
+                    element.Values = timeseries(...
+                        LusValidateUtils.construct_random_doubles(nb_steps, min, max, dim), ...
+                        time);
+                    %input_struct.signals(i).dimensions = dim;
                 end
-                
+                ds{i} = element;
             end
             
         end
         
         %% Simulate the model
         function simOut = simulate_model(slx_file_name, ...
-                input_struct, ...
+                input_dataset, ...
                 simulation_step,...
                 stop_time,...
                 numberOfInports,...
@@ -391,7 +409,7 @@ classdef SLXUtils
             set_param(configSet, 'FixedStep', num2str(simulation_step));
             set_param(configSet, 'StartTime', '0.0');
             set_param(configSet, 'StopTime',  num2str(stop_time));
-            set_param(configSet, 'SaveFormat', 'Structure');
+            set_param(configSet, 'SaveFormat', 'Dataset');
             set_param(configSet, 'SaveOutput', 'on');
             set_param(configSet, 'SaveTime', 'on');
             
@@ -401,10 +419,10 @@ classdef SLXUtils
                 set_param(configSet, 'OutputSaveName', 'yout');
                 try set_param(configSet, 'ExtMode', 'on');catch, end
                 set_param(configSet, 'LoadExternalInput', 'on');
-                set_param(configSet, 'ExternalInput', 'input_struct');
+                set_param(configSet, 'ExternalInput', 'input_dataset');
                 hws = get_param(slx_file_name, 'modelworkspace');
-                hws.assignin('input_struct',eval('input_struct'));
-                assignin('base','input_struct',input_struct);
+                hws.assignin('input_dataset',eval('input_dataset'));
+                assignin('base','input_dataset',input_dataset);
                 if show_models
                     open(slx_file_name)
                 end

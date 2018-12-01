@@ -456,13 +456,8 @@ classdef SLX2LusUtils < handle
                         % this is the case of virtual bus, we need to do back
                         % propagation to find the real datatypes
                         if isfield(blk, 'BusObject') && ~isempty(blk.BusObject)
-                            try
-                                isBus = evalin('base',...
-                                    sprintf('isa(%s, ''Simulink.Bus'')',...
-                                    blk.BusObject));
-                            catch
-                                isBus = false;
-                            end
+                            isBus = SLXUtils.isSimulinkBus(blk.BusObject);
+                            
                             if isBus
                                 lus_dt =...
                                     SLX2LusUtils.getLustreTypesFromBusObject(blk.BusObject);
@@ -594,13 +589,7 @@ classdef SLX2LusUtils < handle
                         return;
                     end
                 end
-                try
-                    isBus = evalin('base',...
-                        sprintf('isa(%s, ''Simulink.Bus'')',...
-                        SignalName));
-                catch
-                    isBus = false;
-                end
+                isBus = SLXUtils.isSimulinkBus(SignalName);
                 if isBus
                     lus_dt =...
                         SLX2LusUtils.getLustreTypesFromBusObject(SignalName);
@@ -796,11 +785,8 @@ classdef SLX2LusUtils < handle
                     % considering enumaration as int
                     m = evalin('base', sprintf('enumeration(''%s'')',char(slx_dt)));
                     if isempty(m)
-                        try
-                            isBus = evalin('base', sprintf('isa(%s, ''Simulink.Bus'')',char(slx_dt)));
-                        catch
-                            isBus = false;
-                        end
+                        isBus = SLXUtils.isSimulinkBus(char(slx_dt));
+                        
                         if isBus
                             Lustre_type = SLX2LusUtils.getLustreTypesFromBusObject(char(slx_dt));
                         else
@@ -882,11 +868,8 @@ classdef SLX2LusUtils < handle
             for i=1:numel(elems)
                 dt = elems(i).DataType;
                 dt = strrep(dt, 'Bus: ', '');
-                try
-                    isBus = evalin('base', sprintf('isa(%s, ''Simulink.Bus'')',char(dt)));
-                catch
-                    isBus = false;
-                end
+                isBus = SLXUtils.isSimulinkBus(char(dt));
+                
                 if isBus
                     dt = regexprep(dt, 'Bus:\s*', '');
                     in_matrix_dimension = [in_matrix_dimension,...
