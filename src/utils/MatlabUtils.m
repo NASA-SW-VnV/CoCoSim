@@ -8,7 +8,7 @@ classdef MatlabUtils
         
         %%
         function out = naming(nomsim)
-            [a, b]=regexp (nomsim, '/', 'split');
+            [a, ~]=regexp (nomsim, '/', 'split');
             out = strcat(a{numel(a)-1},'_',a{end});
         end
         
@@ -62,34 +62,7 @@ classdef MatlabUtils
             res = struct2(ia) ;
         end
         
-        %% inlining multidimension variables
-        function [y_inlined, status, msg] = inline_values(y)
-            status = 0;
-            msg = '';
-            dim = size(y);
-            if numel(dim)==1
-                y_inlined = y;
-            elseif numel(dim)==2
-                y_inlined = [];
-                for idr=1:dim(1)
-                    y_inlined = [y_inlined; y(idr,:)'];
-                end
-            elseif numel(dim)== 3
-                y_inlined = [];
-                for z=1:dim(3)
-                    ylocal = y(:,:,z);
-                    for idr=1:dim(1)
-                        y_inlined = [y_inlined; ylocal(idr,:)'];
-                    end
-                end
-            else
-                msg = ['We do not support dimension ' num2str(dim)];
-                display_msg(msg, ...
-                    MsgType.ERROR, 'Constant_To_Lustre.inline_value', '');
-                status = 1;
-                return;
-            end
-        end
+
         %%
         function tf = startsWith(s, pattern)
             try
@@ -122,6 +95,22 @@ classdef MatlabUtils
                 catch E
                     throw(E);
                 end
+            end
+        end
+        
+        %% delete files using regular expressions:
+        %e.g. rm *_PP.slx
+        function reg_delete(basedir, reg_exp)
+            all_files = dir(fullfile(basedir,'**', reg_exp));
+            if isfield(all_files, 'folder')
+                files_path = arrayfun(@(x) [x.folder '/' x.name], all_files, 'UniformOutput', 0);
+            elseif isfield(all_files, 'name')
+                files_path = {all_files.name};
+            else
+                files_path = {};
+            end
+            for i=1:numel(files_path)
+                delete(files_path{i});
             end
         end
         %% Concat cell array with a specific delimator

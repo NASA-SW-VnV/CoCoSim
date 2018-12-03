@@ -1337,6 +1337,10 @@ classdef LustrecUtils < handle
                 display_msg(binary_out, MsgType.DEBUG, 'extract_lustre_outputs', '');
                 cd(PWD);
                 return
+            else
+                % remove *simu_in* files
+                MatlabUtils.reg_delete(binary_dir, '*simu.in*');
+                MatlabUtils.reg_delete(binary_dir, '*simu.out*');
             end
         end
         %% compare Simulin outputs and Lustre outputs
@@ -1353,6 +1357,12 @@ classdef LustrecUtils < handle
             index_out = 0;
             for i=0:nb_steps-1
                 for k=1:numberOfOutputs
+                    if isa(yout{k}.Values, 'struct')
+                        msg = sprintf('Output Signals of type Simulink.Bus are not supported in validation. Work in progress!');
+                        error('Output Signal %d is of type Simulink.Bus which is not supported in validation. Work in progress!', ...
+                            k);
+                        %break;
+                    end
                     yout_values = yout{k}.Values.getsamples(i+1).Data;
                     width = numel(yout_values);
                     for j=1:width
@@ -1432,27 +1442,32 @@ classdef LustrecUtils < handle
         function show_CEX(error_index,...
                 input_dataset, ...
                 yout, ...
-                outputs_array )
+                outputs_array, cex_file_path )
+            fid = fopen(cex_file_path, 'w');
             numberOfInports = numel(input_dataset.getElementNames);
             numberOfOutputs = numel(yout.getElementNames);
             index_out = 0;
             for i=0:error_index-1
                 f_msg = sprintf('*****step : %d**********\n',i+1);
                 display_msg(f_msg, MsgType.RESULT, 'CEX', '');
+                fprintf(fid, f_msg);
                 f_msg = sprintf('*****inputs: \n');
                 display_msg(f_msg, MsgType.RESULT, 'CEX', '');
+                fprintf(fid, f_msg);
                 for j=1:numberOfInports
                     in = input_dataset{j}.Values.getsamples(i+1).Data;
                     width = numel(in);
-                    name = input_dataset{j}.BlockPath.getBlock(1);
+                    name = input_dataset{j}.Name;
                     for k=1:width
                         f_msg = sprintf('input %s_%d: %f\n',name,k,in(k));
                         display_msg(f_msg, MsgType.RESULT, 'CEX', '');
+                        fprintf(fid, f_msg);
                     end
                 end
                 
                 f_msg = sprintf('*****outputs: \n');
                 display_msg(f_msg, MsgType.RESULT, 'CEX', '');
+                fprintf(fid, f_msg);
                 for k=1:numberOfOutputs
                     yout_values = yout{k}.Values.getsamples(i+1).Data;
                     width = numel(yout_values);
@@ -1468,19 +1483,23 @@ classdef LustrecUtils < handle
                             f_msg = sprintf('output %s(%d): %10.16f\n',...
                                 output_name1, j, yout_values(j));
                             display_msg(f_msg, MsgType.RESULT, 'CEX', '');
+                            fprintf(fid, f_msg);
                             f_msg = sprintf('Lustre output %s: %10.16f\n',...
                                 output_name,output_val);
                             display_msg(f_msg, MsgType.RESULT, 'CEX', '');
+                            fprintf(fid, f_msg);
                         else
                             f_msg = sprintf('strang behavour of output %s',...
                                 outputs_array{numberOfOutputs*i+k});
                             display_msg(f_msg, MsgType.WARNING, 'CEX', '');
+                            fprintf(fid, f_msg);
                             return;
                         end
                     end
                 end
                 
             end
+            fclose(fid);
         end
         
         %% run comparaison
@@ -1508,18 +1527,24 @@ classdef LustrecUtils < handle
             % define local variables
             OldPwd = pwd;
             if ~isa(input_dataSet, 'Simulink.SimulationData.Dataset')
-                msg = sprintf('Input Signals should be of call Simulink.SimulationData.Dataset');
+                msg = sprintf('Input Signals should be of class Simulink.SimulationData.Dataset');
                 display_msg(msg, MsgType.ERROR, 'validation', '');
                 sim_failed = 1;
                 return;
             end
-            try
-                time = input_dataSet{1}.Values.Time;
-            catch
-                msg = sprintf('Input Signals should be of call Simulink.SimulationData.Dataset');
-                display_msg(msg, MsgType.ERROR, 'validation', '');
-                sim_failed = 1;
-                return;
+            numberOfInports = numel(input_dataSet.getElementNames);
+            if numberOfInports >= 1
+                try
+                    time = input_dataSet{1}.Values.Time;
+                catch
+                    msg = sprintf('Input Signals should be of class Simulink.SimulationData.Dataset');
+                    display_msg(msg, MsgType.ERROR, 'validation', '');
+                    sim_failed = 1;
+                    return;
+                end
+            else
+                st = SLXUtils.getModelCompiledSampleTime(slx_file_name);
+                time = (0:st:100)';
             end
             nb_steps = numel(time);
             if nb_steps >= 2
@@ -1528,9 +1553,9 @@ classdef LustrecUtils < handle
                 simulation_step = 1;
             end
             stop_time = time(end);
-            numberOfInports = numel(input_dataSet.getElementNames);
             
-            [~, lus_file_name, ~] = fileparts(char(lus_file_path));
+            
+            [lus_file_dir, lus_file_name, ~] = fileparts(char(lus_file_path));
             
             % Copile the lustre code to C
             tools_config;
@@ -1615,8 +1640,11 @@ classdef LustrecUtils < handle
                     display_msg(f_msg, MsgType.RESULT, 'validation', '');
                     f_msg = sprintf('Here is the counter example:\n');
                     display_msg(f_msg, MsgType.RESULT, 'validation', '');
+                    t = datetime('now','Format','dd-MM-yyyy''@''HHmmss');
+                    cex_file_path = fullfile(lus_file_dir, ...
+                        strcat('cex_', char(t), '.txt'));
                     LustrecUtils.show_CEX(...
-                        error_index, input_dataSet, yout, outputs_array );
+                        error_index, input_dataSet, yout, outputs_array, cex_file_path );
                     f_msg = sprintf('The difference between outputs %s is :%2.10f\%\n',diff_name, diff);
                     display_msg(f_msg, MsgType.RESULT, 'CEX', '');
                 else
