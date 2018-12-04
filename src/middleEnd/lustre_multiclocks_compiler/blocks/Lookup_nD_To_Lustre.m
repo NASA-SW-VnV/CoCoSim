@@ -282,9 +282,9 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                         conds{1} = BinaryExpr(BinaryExpr.LT,inputs{i}{1}, coords_node{i,1}, [], BackendType.isLUSTREC(backend));
                         conds{2} = BinaryExpr(BinaryExpr.GT,inputs{i}{1}, coords_node{i,2}, [], BackendType.isLUSTREC(backend));                        
                     else
-                        epsilon = eps(BreakpointsForDimension{i}(1));
+                        epsilon = Lookup_nD_To_Lustre.calculate_eps(BreakpointsForDimension{i}, 1);
                         conds{1} = BinaryExpr(BinaryExpr.LT,inputs{i}{1}, coords_node{i,1}, [], BackendType.isLUSTREC(backend), epsilon);
-                        epsilon = eps(BreakpointsForDimension{i}(2));
+                        epsilon = Lookup_nD_To_Lustre.calculate_eps(BreakpointsForDimension{i}, 2);
                         conds{2} = BinaryExpr(BinaryExpr.GT,inputs{i}{1}, coords_node{i,2}, [], BackendType.isLUSTREC(backend), epsilon);
                     end
                     thens{1} = coords_node{i,1};
@@ -415,7 +415,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                     if blkParams.isLookupTableDynamic
                         condC = BinaryExpr(BinaryExpr.LTE,disFromTableNode{i,2},disFromTableNode{i,1}, [], BackendType.isLUSTREC(backend));
                     else
-                        epsilon = eps(BreakpointsForDimension{i}(2));
+                        epsilon = Lookup_nD_To_Lustre.calculate_eps(BreakpointsForDimension{i}, 2);
                         condC = BinaryExpr(BinaryExpr.LTE,disFromTableNode{i,2},disFromTableNode{i,1}, [], BackendType.isLUSTREC(backend), epsilon);
                     end
                     body{end+1} = LustreEq(nearestIndex{i},IteExpr(condC,index_node{i,2},index_node{i,1}));
@@ -641,7 +641,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                                 cond_index{end+1} =  BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], BackendType.isLUSTREC(backend));
                                 cond_coords{end+1} = BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], BackendType.isLUSTREC(backend));
                             else
-                                epsilon = eps(BreakpointsForDimension{i}(j));
+                                epsilon = Lookup_nD_To_Lustre.calculate_eps(BreakpointsForDimension{i}, j);
                                 cond_index{end+1} =  BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], BackendType.isLUSTREC(backend), epsilon);
                                 cond_coords{end+1} = BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], BackendType.isLUSTREC(backend), epsilon);
                             end
@@ -654,7 +654,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                                 cond_index{end+1} = BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], BackendType.isLUSTREC(backend));
                                 cond_coords{end+1} = BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], BackendType.isLUSTREC(backend));
                             else
-                                epsilon = eps(BreakpointsForDimension{i}(j));
+                                epsilon = Lookup_nD_To_Lustre.calculate_eps(BreakpointsForDimension{i}, j);
                                 cond_index{end+1} = BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], BackendType.isLUSTREC(backend), epsilon);
                                 cond_coords{end+1} = BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], BackendType.isLUSTREC(backend), epsilon);
                             end
@@ -667,7 +667,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                             cond_index{end+1} = BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], BackendType.isLUSTREC(backend));
                             cond_coords{end+1} = BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], BackendType.isLUSTREC(backend));
                         else
-                            epsilon = eps(BreakpointsForDimension{i}(j));
+                            epsilon = Lookup_nD_To_Lustre.calculate_eps(BreakpointsForDimension{i}, j);
                             cond_index{end+1} = BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], BackendType.isLUSTREC(backend), epsilon);
                             cond_coords{end+1} = BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], BackendType.isLUSTREC(backend), epsilon);
                         end
@@ -697,7 +697,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                             cond_index{end+1} = BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], BackendType.isLUSTREC(backend));
                             cond_coords{end+1} = BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], BackendType.isLUSTREC(backend));
                         else
-                            epsilon = eps(BreakpointsForDimension{i}(j));
+                            epsilon = Lookup_nD_To_Lustre.calculate_eps(BreakpointsForDimension{i}, j);
                             cond_index{end+1} = BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], BackendType.isLUSTREC(backend), epsilon);
                             cond_coords{end+1} = BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], BackendType.isLUSTREC(backend), epsilon);
                         end
@@ -709,7 +709,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                             cond_index{end+1} = BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], BackendType.isLUSTREC(backend));
                             cond_coords{end+1} = BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], BackendType.isLUSTREC(backend));
                         else
-                            epsilon = eps(BreakpointsForDimension{i}(j));
+                            epsilon = Lookup_nD_To_Lustre.calculate_eps(BreakpointsForDimension{i}, j);
                             cond_index{end+1} = BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], BackendType.isLUSTREC(backend), epsilon);
                             cond_coords{end+1} = BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], BackendType.isLUSTREC(backend), epsilon);
                         end
@@ -773,7 +773,16 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                 
             end
         end
-        
+        function ep = calculate_eps(BP, j)
+            fraction = 1e6;
+            if j == 1
+                ep = abs(BP(2) - BP(1)) / fraction;
+            elseif j == numel(BP)
+                ep = abs(BP(j-1) - BP(j)) / fraction;
+            else
+                ep = min(abs(BP(j-1) - BP(j)), abs(BP(j+1) - BP(j))) / fraction;
+            end
+        end
         function [body,vars,Breakpoints] = ...
                 addBreakpointCode(BreakpointsForDimension,blk_name,...
                 lusInport_dt,isLookupTableDynamic,inputs,NumberOfTableDimensions)

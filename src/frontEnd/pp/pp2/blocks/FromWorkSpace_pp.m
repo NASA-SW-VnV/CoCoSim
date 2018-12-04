@@ -75,7 +75,11 @@ if not(isempty(fromWorkSpace_list))
                     MsgType.INFO, 'FromWorkSpace_pp', '');
                 continue;
             end                
-            
+            % if value at time 0 is not given
+            if variableMatrix(1,1) ~= 0
+                new_value = zeros(1, m);
+                variableMatrix = [new_value; variableMatrix];
+            end
             SampleTime = get_param(fromWorkSpace_list{i},'SampleTime');
             [SampleTime_value, ~, status] = SLXUtils.evalParam(...
                 model, ...
