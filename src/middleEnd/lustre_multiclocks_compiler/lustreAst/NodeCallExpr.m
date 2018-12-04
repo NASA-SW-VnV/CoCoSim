@@ -43,6 +43,14 @@ classdef NodeCallExpr < LustreExpr
         %% simplify expression
         function new_obj = simplify(obj)
             new_args = cellfun(@(x) x.simplify(), obj.args, 'UniformOutput', 0);
+            % remove parentheses from arguments.
+            for i=1:numel(new_args)
+                if isa(new_args{i}, 'ParenthesesExpr')
+                    new_args{i} = new_args{i}.getExp();
+                elseif isa(new_args{i}, 'BinaryExpr') || isa(new_args{i}, 'UnaryExpr')
+                    new_args{i}.setPar(false);
+                end
+            end
             new_obj = NodeCallExpr(obj.nodeName, new_args);
         end
         %% This functions are used for ForIterator block

@@ -45,10 +45,29 @@ classdef IteExpr < LustreExpr
         end
         %% simplify expression
         function new_obj = simplify(obj)
-            new_obj = IteExpr(obj.condition.simplify(),...
-                obj.thenExpr.simplify(),...
-                obj.ElseExpr.simplify(),...
-                obj.OneLine);
+            new_cond = obj.condition.simplify();
+            new_then = obj.thenExpr.simplify();
+            new_else = obj.ElseExpr.simplify();
+            % simplify trivial if-and-else
+            % if true then x else y => x
+            if isa(obj.condition, 'BooleanExpr')
+               if isnumeric(obj.condition.getValue()) || islogical(obj.condition.getValue())
+                   if obj.condition.getValue()
+                       new_obj = new_then;
+                   else
+                       new_obj = new_else;
+                   end
+                   return;
+               elseif isequal(obj.condition.getValue(), 'true')
+                   new_obj = new_then;
+                   return;
+               elseif isequal(obj.condition.getValue(), 'false')
+                   new_obj = new_else;
+                   return;
+               end
+            end
+            new_obj = IteExpr(new_cond, new_then, new_else, obj.OneLine);
+            
         end
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)

@@ -64,6 +64,10 @@ classdef BinaryExpr < LustreExpr
                 obj.epsilon = epsilon;
             end
         end
+        
+        function setPar(obj, withPar)
+            obj.withPar = withPar;
+        end
         %% deepCopy
         function new_obj = deepCopy(obj)
             new_obj = BinaryExpr(obj.op,...
@@ -74,9 +78,38 @@ classdef BinaryExpr < LustreExpr
         
          %% simplify expression
         function new_obj = simplify(obj)
-            new_obj = BinaryExpr(obj.op,...
-                obj.left.simplify(),...
-                obj.right.simplify(), ...
+            new_op = obj.op;
+            left_exp = obj.left.simplify();
+            right_exp = obj.right.simplify();
+            % x + (-y) => x - y, x - (-y) => x+y
+            if isa(right_exp, 'UnaryExpr') ...
+                    && isequal(right_exp.op, UnaryExpr.NEG) 
+                if isequal(new_op, BinaryExpr.PLUS)
+                    right_exp = right_exp.expr;
+                    new_op = BinaryExpr.MINUS;
+                elseif isequal(new_op, BinaryExpr.MINUS)
+                    right_exp = right_exp.expr;
+                    new_op = BinaryExpr.PLUS;
+                end
+            end
+            % x+0 => x, x -0 => x
+            if (isequal(new_op, BinaryExpr.MINUS) ...
+                    || isequal(new_op, BinaryExpr.PLUS) )
+                if isequal(new_op, BinaryExpr.PLUS) ...
+                        && (isa(left_exp, 'IntExpr') || isa(left_exp, 'RealExpr'))...
+                        && left_exp.getValue() == 0
+                    new_obj = right_exp;
+                    return;
+                end
+                if (isa(right_exp, 'IntExpr') || isa(right_exp, 'RealExpr'))...
+                        && right_exp.getValue() == 0
+                    new_obj = left_exp;
+                    return;
+                end
+            end
+            new_obj = BinaryExpr(new_op,...
+                left_exp,...
+                right_exp, ...
                 obj.withPar);
         end
         %% This functions are used for ForIterator block

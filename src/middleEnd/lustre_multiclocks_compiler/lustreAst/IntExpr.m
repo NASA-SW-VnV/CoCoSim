@@ -24,7 +24,12 @@ classdef IntExpr < LustreExpr
         end
         %% simplify expression
         function new_obj = simplify(obj)
-            new_obj = obj;
+            if isnumeric(obj.value) && obj.value < 0
+                % -1 => -(1)
+                new_obj = UnaryExpr(UnaryExpr.NEG, IntExpr(-obj.value));
+            else
+                new_obj = obj;
+            end
         end
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)

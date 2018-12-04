@@ -23,6 +23,11 @@ classdef AssertExpr < LustreExpr
         function new_obj = deepCopy(obj)
             new_obj = AssertExpr(obj.exp.deepCopy());
         end
+        
+        %% simplify expression
+        function new_obj = simplify(obj)
+            new_obj = AssertExpr(obj.exp.simplify());
+        end
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
             new_obj = obj;
@@ -47,10 +52,7 @@ classdef AssertExpr < LustreExpr
             nodesCalled = obj.exp.getNodesCalled();
         end
         
-        %% simplify expression
-        function new_obj = simplify(obj)
-            new_obj = AssertExpr(obj.exp.simplify());
-        end
+        
         
         %%
         function code = print(obj, backend)

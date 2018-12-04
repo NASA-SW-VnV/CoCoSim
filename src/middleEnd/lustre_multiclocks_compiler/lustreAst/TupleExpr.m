@@ -38,7 +38,12 @@ classdef TupleExpr < LustreExpr
         %% simplify expression
         function new_obj = simplify(obj)
             new_args = cellfun(@(x) x.simplify(), obj.args, 'UniformOutput', 0);
-            new_obj = TupleExpr(new_args);
+            % (x) => x
+            if numel(new_args) == 1
+                new_obj = new_args{1};
+            else
+                new_obj = TupleExpr(new_args);
+            end
         end
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)

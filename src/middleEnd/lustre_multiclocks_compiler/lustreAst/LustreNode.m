@@ -119,7 +119,11 @@ classdef LustreNode < LustreAst
         function new_obj = deepCopy(obj)
             new_inputs = cellfun(@(x) x.deepCopy(), obj.inputs, 'UniformOutput', 0);
             new_outputs = cellfun(@(x) x.deepCopy(), obj.outputs, 'UniformOutput', 0);
-            new_localContract = obj.localContract.deepCopy();
+            if isempty(obj.localContract)
+                new_localContract = obj.localContract;
+            else
+                new_localContract = obj.localContract.deepCopy();
+            end
             new_localVars = cellfun(@(x) x.deepCopy(), obj.localVars, 'UniformOutput', 0);
             new_bodyEqs = cellfun(@(x) x.deepCopy(), obj.bodyEqs, 'UniformOutput', 0);
             new_obj = LustreNode(obj.metaInfo, obj.name,...
@@ -130,7 +134,9 @@ classdef LustreNode < LustreAst
         %% simplify expression
         function new_obj = simplify(obj)
             new_obj = obj;
-            new_obj.setLocalContract(new_obj.localContract.simplify());
+            if ~isempty(obj.localContract)
+                new_obj.setLocalContract(new_obj.localContract.simplify());
+            end
             new_obj.setBodyEqs(...
                 cellfun(@(x) x.simplify(), new_obj.bodyEqs, 'UniformOutput', 0));
             
@@ -194,7 +200,7 @@ classdef LustreNode < LustreAst
             for i=1:numel(obj.bodyEqs)
                 if ~isa(obj.bodyEqs{i}, 'LustreEq') ...
                         && ~isa(obj.bodyEqs{i}, 'ConcurrentAssignments')
-                    %Keep Assertions, localProperties till the end to use 
+                    %Keep Assertions, localProperties till the end to use
                     %the last occurance.
                     I = [I i];
                     continue;

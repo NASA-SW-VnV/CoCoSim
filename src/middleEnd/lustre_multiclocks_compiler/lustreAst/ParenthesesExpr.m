@@ -29,7 +29,11 @@ classdef ParenthesesExpr < LustreExpr
         %% simplify expression
         function new_obj = simplify(obj)
             new_expr = obj.expr.simplify();
-            new_obj = ParenthesesExpr(new_expr);
+            if isa(new_expr, 'ParenthesesExpr')
+                new_obj = ParenthesesExpr(new_expr.getExp());
+            else
+                new_obj = ParenthesesExpr(new_expr);
+            end
         end
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
