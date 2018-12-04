@@ -325,13 +325,13 @@ classdef SLXUtils
                 simulation_step, ...
                 stop_time] = get_random_test(slx_file_name, inports, nb_steps,IMAX, IMIN)
             
-            if nargin < 4
+            if nargin < 3
                 nb_steps = 100;
             end
-            if nargin < 5
+            if nargin < 4
                 IMAX = 500;
             end
-            if nargin < 6
+            if nargin < 5
                 IMIN = -500;
             end
             numberOfInports = numel(inports);
