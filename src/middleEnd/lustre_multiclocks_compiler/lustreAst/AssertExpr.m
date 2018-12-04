@@ -46,6 +46,12 @@ classdef AssertExpr < LustreExpr
         function nodesCalled = getNodesCalled(obj)
             nodesCalled = obj.exp.getNodesCalled();
         end
+        
+        %% simplify expression
+        function new_obj = simplify(obj)
+            new_obj = AssertExpr(obj.exp.simplify());
+        end
+        
         %%
         function code = print(obj, backend)
             %TODO: check if KIND2 syntax is OK for the other backends.

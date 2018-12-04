@@ -223,14 +223,15 @@ classdef LustDTLib
         function [node, external_nodes, opens, abstractedNodes] = get_int_to_real(backend, varargin)
             if BackendType.isKIND2(backend)
                 opens = {};
-                abstractedNodes = {'int_to_real'};
+                abstractedNodes = {};
                 external_nodes = {};
                 node = LustreNode();
                 node.setName('int_to_real');
                 node.setInputs(LustreVar('x', 'int'));
                 node.setOutputs(LustreVar('y', 'real'));
                 node.setIsMain(false); 
-                node.setIsImported(true);
+                node.setBodyEqs(LustreEq(VarIdExpr('y'), ...
+                    UnaryExpr(UnaryExpr.REAL, VarIdExpr('x'))));
             else
                 opens = {'conv'};
                 abstractedNodes = {};
@@ -242,14 +243,18 @@ classdef LustDTLib
         function [node, external_nodes, opens, abstractedNodes] = get_real_to_int(backend, varargin)
             if BackendType.isKIND2(backend)
                 opens = {};
-                abstractedNodes = {'real_to_int'};
-                external_nodes = {};
+                abstractedNodes = {};
+                external_nodes = {'LustDTLib__Floor', 'LustDTLib__Ceiling'};
                 node = LustreNode();
                 node.setName('real_to_int');
                 node.setInputs(LustreVar('x', 'real'));
                 node.setOutputs(LustreVar('y', 'int'));
                 node.setIsMain(false); 
-                node.setIsImported(true);
+                ifAst = IteExpr(...
+                    BinaryExpr(BinaryExpr.GTE, VarIdExpr('x'), RealExpr('0.0')), ...
+                    NodeCallExpr('_Floor', VarIdExpr('x')), ...
+                    NodeCallExpr('_Ceiling', VarIdExpr('x')));
+                node.setBodyEqs(LustreEq(VarIdExpr('y'), ifAst));
             else
                 opens = {'conv'};
                 abstractedNodes = {};
@@ -260,7 +265,7 @@ classdef LustDTLib
         
         function [node, external_nodes, opens, abstractedNodes] = get__Floor(backend, varargin)
             if BackendType.isKIND2(backend)
-                abstractedNodes = {'Floor'};
+                abstractedNodes = {};
                 opens = {};
                 external_nodes = {};
                 node = LustreNode();
@@ -268,7 +273,8 @@ classdef LustDTLib
                 node.setInputs(LustreVar('x', 'real'));
                 node.setOutputs(LustreVar('y', 'int'));
                 node.setIsMain(false); 
-                node.setIsImported(true);
+                node.setBodyEqs(LustreEq(VarIdExpr('y'), ...
+                    UnaryExpr(UnaryExpr.INT, VarIdExpr('x'))));
             else
                 opens = {'conv'};
                 abstractedNodes = {};
@@ -281,65 +287,8 @@ classdef LustDTLib
         % returning a real instead of int.
         function [node, external_nodes, opens, abstractedNodes] = get__floor(backend, varargin)
             if BackendType.isKIND2(backend)
-                abstractedNodes = {'floor'};
-                opens = {};
-                external_nodes = {};
-                % y - 1.0 < x <= y
-                contractElts{1} = ContractGuaranteeExpr('', ...
-                    BinaryExpr(BinaryExpr.AND, ...
-                                BinaryExpr(BinaryExpr.LT, ...
-                                            BinaryExpr(BinaryExpr.MINUS, ...
-                                                        VarIdExpr('y'), ...
-                                                        RealExpr('1.0'), ...
-                                                        false),...
-                                            VarIdExpr('x')), ...
-                                BinaryExpr(BinaryExpr.LTE, ...
-                                            VarIdExpr('x'),...
-                                            VarIdExpr('y')),...
-                                false));
-                contract = LustreContract();
-                contract.setBody(contractElts);
-                node = LustreNode();
-                node.setName('_floor');
-                node.setInputs(LustreVar('x', 'real'));
-                node.setOutputs(LustreVar('y', 'real'));
-                node.setLocalContract(contract);
-                node.setIsMain(false); 
-                node.setIsImported(true);
-            else
-                opens = {'conv'};
                 abstractedNodes = {};
-                external_nodes = {};
-                node = {};
-            end
-        end
-        
-
-        function [node, external_nodes, opens, abstractedNodes] = get__Ceiling(backend, varargin)
-            if BackendType.isKIND2(backend)
                 opens = {};
-                abstractedNodes = {'Ceiling'};
-                external_nodes = {};
-                node = LustreNode();
-                node.setName('_Ceiling');
-                node.setInputs(LustreVar('x', 'real'));
-                node.setOutputs(LustreVar('y', 'int'));
-                node.setIsMain(false); 
-                node.setIsImported(true);
-            else
-                opens = {'conv'};
-                abstractedNodes = {};
-                external_nodes = {};
-                node = {};
-            end
-
-        end
-        % this one for "Rounding" block, it is different from Ceiling by
-        % returning a real instead of int.
-        function [node, external_nodes, opens, abstractedNodes] = get__ceil(backend, varargin)
-            if BackendType.isKIND2(backend)
-                opens = {};
-                abstractedNodes = {'ceil'};
                 external_nodes = {};
                 % y  <= x < y + 1.0
                 contractElts{1} = ContractGuaranteeExpr('', ...
@@ -358,12 +307,77 @@ classdef LustDTLib
                 contract = LustreContract();
                 contract.setBody(contractElts);
                 node = LustreNode();
+                node.setName('_floor');
+                node.setInputs(LustreVar('x', 'real'));
+                node.setOutputs(LustreVar('y', 'real'));
+                node.setLocalContract(contract);
+                node.setIsMain(false); 
+                node.setBodyEqs(LustreEq(VarIdExpr('y'), ...
+                    UnaryExpr(UnaryExpr.REAL, ...
+                    UnaryExpr(UnaryExpr.INT, VarIdExpr('x')))));
+            else
+                opens = {'conv'};
+                abstractedNodes = {};
+                external_nodes = {};
+                node = {};
+            end
+        end
+        
+
+        function [node, external_nodes, opens, abstractedNodes] = get__Ceiling(backend, varargin)
+            if BackendType.isKIND2(backend)
+                opens = {};
+                abstractedNodes = {};
+                external_nodes = {'LustDTLib__Floor'};
+                node = LustreNode();
+                node.setName('_Ceiling');
+                node.setInputs(LustreVar('x', 'real'));
+                node.setOutputs(LustreVar('y', 'int'));
+                node.setIsMain(false); 
+                node.setBodyEqs(LustreEq(VarIdExpr('y'), ...
+                    UnaryExpr(UnaryExpr.NEG, ...
+                    NodeCallExpr('_Floor', ...
+                    UnaryExpr(UnaryExpr.NEG, VarIdExpr('x'), false)))));
+            else
+                opens = {'conv'};
+                abstractedNodes = {};
+                external_nodes = {};
+                node = {};
+            end
+
+        end
+        % this one for "Rounding" block, it is different from Ceiling by
+        % returning a real instead of int.
+        function [node, external_nodes, opens, abstractedNodes] = get__ceil(backend, varargin)
+            if BackendType.isKIND2(backend)
+                opens = {};
+                abstractedNodes = {};
+                external_nodes = {'LustDTLib__Ceiling'};
+                
+                % y - 1.0 < x <= y
+                contractElts{1} = ContractGuaranteeExpr('', ...
+                    BinaryExpr(BinaryExpr.AND, ...
+                                BinaryExpr(BinaryExpr.LT, ...
+                                            BinaryExpr(BinaryExpr.MINUS, ...
+                                                        VarIdExpr('y'), ...
+                                                        RealExpr('1.0'), ...
+                                                        false),...
+                                            VarIdExpr('x')), ...
+                                BinaryExpr(BinaryExpr.LTE, ...
+                                            VarIdExpr('x'),...
+                                            VarIdExpr('y')),...
+                                false));
+                contract = LustreContract();
+                contract.setBody(contractElts);
+                node = LustreNode();
                 node.setName('_ceil');
                 node.setInputs(LustreVar('x', 'real'));
                 node.setOutputs(LustreVar('y', 'real'));
                 node.setLocalContract(contract);
                 node.setIsMain(false); 
-                node.setIsImported(true);
+                node.setBodyEqs(LustreEq(VarIdExpr('y'), ...
+                    UnaryExpr(UnaryExpr.REAL, ...
+                    NodeCallExpr('_Ceiling', VarIdExpr('x')))));
             else
                 opens = {'conv'};
                 abstractedNodes = {};
@@ -375,26 +389,29 @@ classdef LustDTLib
         
                 
         % Round Rounds number to the nearest representable value.
-        %If a tie occurs, rounds positive numbers toward positive infinity and rounds negative numbers toward negative infinity. Equivalent to the Fixed-Point Designer round function.
+        % If a tie occurs, rounds positive numbers toward positive infinity 
+        % and rounds negative numbers toward negative infinity. 
+        % Equivalent to the Fixed-Point Designer round function.
         function [node, external_nodes, opens, abstractedNodes] = get__Round(backend, varargin)
-            % format = '--Rounds number to the nearest representable value.\n';
-            % format = [format , '--If a tie occurs,rounds positive numbers toward positive infinity and rounds negative numbers toward negative infinity\n '];
-            % format = [ format ,'node _Round (x: real)\nreturns(y:int);\nlet\n\t'];
-            % format = [ format , 'y = if (x >= 0.5) then _Floor(x + 0.5)\n\t\t'];
-            % format = [ format , ' else if (x > -0.5) then 0 \n\t\t'];
-            % format = [ format , ' else _Ceiling(x - 0.5);'];
-            % format = [ format , '\ntel\n\n'];       
-            % node = sprintf(format);
             if BackendType.isKIND2(backend)
                 opens = {};
-                abstractedNodes = {'Round'};
-                external_nodes = {};
+                abstractedNodes = {};
+                external_nodes = {'LustDTLib__Floor', 'LustDTLib__Ceiling'};
                 node = LustreNode();
                 node.setName('_Round');
                 node.setInputs(LustreVar('x', 'real'));
                 node.setOutputs(LustreVar('y', 'int'));
                 node.setIsMain(false); 
-                node.setIsImported(true);
+                ifAst = IteExpr(...
+                    BinaryExpr(BinaryExpr.EQ, VarIdExpr('x'), RealExpr('0.0')),...
+                    IntExpr(0), ...
+                    IteExpr(...
+                    BinaryExpr(BinaryExpr.GT, VarIdExpr('x'), RealExpr('0.0')), ...
+                    NodeCallExpr('_Floor', ...
+                    BinaryExpr(BinaryExpr.PLUS, VarIdExpr('x'), RealExpr('0.5'))), ...
+                    NodeCallExpr('_Ceiling', ...
+                    BinaryExpr(BinaryExpr.MINUS, VarIdExpr('x'), RealExpr('0.5')))));
+                node.setBodyEqs(LustreEq(VarIdExpr('y'), ifAst));
             else
                 opens = {'conv'};
                 abstractedNodes = {};
@@ -402,13 +419,13 @@ classdef LustDTLib
                 node = {};
             end
         end
-        % this one for "Rounding" block, it is different from Ceiling by
+        % this one for "Rounding" block, it is different from Round by
         % returning a real instead of int.
         function [node, external_nodes, opens, abstractedNodes] = get__round(backend, varargin)
             if BackendType.isKIND2(backend)
                 opens = {};
-                abstractedNodes = {'round'};
-                external_nodes = {'LustMathLib_abs_real'};
+                abstractedNodes = {};
+                external_nodes = {'LustMathLib_abs_real', 'LustDTLib_Round'};
                 % abs(x - y) < 1.0
                 contractElts{1} = ContractGuaranteeExpr('', ...
                     BinaryExpr(BinaryExpr.LTE, ...
@@ -427,7 +444,9 @@ classdef LustDTLib
                 node.setOutputs(LustreVar('y', 'real'));
                 node.setLocalContract(contract);
                 node.setIsMain(false); 
-                node.setIsImported(true);
+                node.setBodyEqs(LustreEq(VarIdExpr('y'), ...
+                    UnaryExpr(UnaryExpr.REAL, ...
+                    NodeCallExpr('_Round', VarIdExpr('x')))));
             else
                 opens = {'conv'};
                 abstractedNodes = {};
@@ -444,59 +463,25 @@ classdef LustDTLib
             %Equivalent to the Fixed-Point Designer? convergent function.
             opens = {};
             abstractedNodes = {};
-            % format = '--Rounds number to the nearest representable value.\n ';
-            % format = [ format ,'node _Convergent (x: real)\nreturns(y:int);\nlet\n\t'];
-            % format = [ format , 'y = if (x > 0.5) then\n\t\t\t'];
-            % format = [ format ,           'if (fmod(x, 2.0) = 0.5) '];
-            % format = [ format ,               ' then _Floor(x)\n\t\t\t'];
-            % format = [ format ,           ' else _Floor(x + 0.5)\n\t\t'];
-            % format = [ format ,      ' else\n\t\t'];
-            % format = [ format ,           ' if (x >= -0.5) then 0 \n\t\t'];
-            % format = [ format ,             ' else \n\t\t\t'];
-            % format = [ format ,                   ' if (fmod(x, 2.0) = -0.5) then _Ceiling(x)\n\t\t\t'];
-            % format = [ format ,                   ' else _Ceiling(x - 0.5);'];
-            % format = [ format , '\ntel\n\n'];
-            % 
-            % node = sprintf(format);
-
-            cond1 = BinaryExpr(BinaryExpr.GT,VarIdExpr('x'),RealExpr('0.5'));
-            cond2 = BinaryExpr(BinaryExpr.EQ, ...
-                NodeCallExpr('fmod', {VarIdExpr('x'),RealExpr('2.0')}), ...
-                RealExpr('0.5'));
-            cond3 = BinaryExpr(BinaryExpr.GTE,...
-                VarIdExpr('x'),...
-                UnaryExpr(UnaryExpr.NEG, RealExpr('0.5')));
-            cond4 = BinaryExpr(BinaryExpr.EQ, ...
-                NodeCallExpr('fmod', {VarIdExpr('x'),RealExpr('2.0')}),...
-                UnaryExpr(UnaryExpr.NEG, RealExpr('0.5')));
-            then1 = NodeCallExpr('_Floor', VarIdExpr('x'));
-            then2 = NodeCallExpr('_Floor', ...
-                BinaryExpr(BinaryExpr.PLUS,VarIdExpr('x'), ...
-                RealExpr('0.5')));
-            then3 = IntExpr(0);
-            then4 = NodeCallExpr('_Ceiling', VarIdExpr('x'));
-            then5 = NodeCallExpr('_Ceiling', ...
-                BinaryExpr(BinaryExpr.MINUS, ...
-                            VarIdExpr('x'),...
-                            RealExpr('0.5')));
-            
-            ite1_cond = cond1;
-            ite1_then = IteExpr(cond2,...
-                                then1,...
-                                then2);
-            ite1_else = IteExpr(cond3,...
-                                then3,...
-                                IteExpr(cond4,...
-                                        then4,...
-                                        then5));
-
-
             node_name = '_Convergent';
+            % y = floor(x+1/2) + ceiling((x-0.5)/2) - floor((x-0.5)/2) - 1
             bodyElts{1} = LustreEq(...
                 VarIdExpr('y'), ...
-                IteExpr(ite1_cond,...
-                        ite1_then,...
-                        ite1_else));
+                IteExpr(...
+                BinaryExpr(BinaryExpr.EQ, VarIdExpr('x'), RealExpr('0.0')),...
+                IntExpr(0), ...
+                BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS, {...
+                NodeCallExpr('_Floor', BinaryExpr(BinaryExpr.PLUS,VarIdExpr('x'),RealExpr('0.5'))), ...
+                NodeCallExpr('_Ceiling', BinaryExpr(...
+                                        BinaryExpr.DIVIDE,...
+                                        BinaryExpr(BinaryExpr.MINUS,VarIdExpr('x'),RealExpr('0.5')),...
+                                        RealExpr(2))), ...
+                UnaryExpr(UnaryExpr.NEG, ...
+                 NodeCallExpr('_Floor', BinaryExpr(...
+                                        BinaryExpr.DIVIDE,...
+                                        BinaryExpr(BinaryExpr.MINUS,VarIdExpr('x'),RealExpr('0.5')),...
+                                        RealExpr(2)))), ...
+                IntExpr(-1)})));
 
             node = LustreNode();
             node.setMetaInfo('--Rounds number to the nearest representable value.');

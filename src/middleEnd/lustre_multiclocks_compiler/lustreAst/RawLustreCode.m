@@ -25,6 +25,11 @@ classdef RawLustreCode < LustreAst
         function new_obj = deepCopy(obj)
             new_obj = RawLustreCode(obj.code, obj.name);
         end
+        
+        %% simplify expression
+        function new_obj = simplify(obj)
+            new_obj = obj;
+        end
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
             new_obj = obj;
@@ -43,6 +48,8 @@ classdef RawLustreCode < LustreAst
         function nodesCalled = getNodesCalled(obj)
             nodesCalled = {};
         end
+        
+        
         %%
         function code = print(obj, ~)
             %TODO: check if LUSTREC syntax is OK for the other backends.

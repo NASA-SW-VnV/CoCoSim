@@ -64,11 +64,19 @@ classdef BinaryExpr < LustreExpr
                 obj.epsilon = epsilon;
             end
         end
-        %%
+        %% deepCopy
         function new_obj = deepCopy(obj)
             new_obj = BinaryExpr(obj.op,...
                 obj.left.deepCopy(),...
                 obj.right.deepCopy(), ...
+                obj.withPar);
+        end
+        
+         %% simplify expression
+        function new_obj = simplify(obj)
+            new_obj = BinaryExpr(obj.op,...
+                obj.left.simplify(),...
+                obj.right.simplify(), ...
                 obj.withPar);
         end
         %% This functions are used for ForIterator block
@@ -121,6 +129,8 @@ classdef BinaryExpr < LustreExpr
             addNodes(obj.left);
             addNodes(obj.right);
         end
+        
+       
         
         %%
         function code = print(obj, backend)

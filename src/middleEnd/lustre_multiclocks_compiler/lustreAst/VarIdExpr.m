@@ -26,10 +26,15 @@ classdef VarIdExpr < LustreExpr
         function setId(obj, name)
             obj.id = name;
         end
+        
+        %% deep copy
         function new_obj = deepCopy(obj)
             new_obj = VarIdExpr(obj.id);
         end
-        
+        %% simplify expression
+        function new_obj = simplify(obj)
+            new_obj = obj;
+        end
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
             new_obj = obj;

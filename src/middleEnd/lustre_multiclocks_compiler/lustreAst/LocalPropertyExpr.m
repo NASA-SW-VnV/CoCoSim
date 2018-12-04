@@ -25,6 +25,12 @@ classdef LocalPropertyExpr < LustreExpr
                 obj.exp.deepCopy());
         end
         
+        %% simplify expression
+        function new_obj = simplify(obj)
+            new_obj = LocalPropertyExpr(obj.id, ...
+                obj.exp.simplify());
+        end
+        
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
             new_obj = obj;
@@ -53,6 +59,9 @@ classdef LocalPropertyExpr < LustreExpr
             [new_exp, outputs_map] = obj.exp.pseudoCode2Lustre(outputs_map, isLeft);
             new_obj = LocalPropertyExpr(obj.id, new_exp);
         end
+        
+        
+        
         %%
         function code = print(obj, backend)
             if BackendType.isPRELUDE(backend)

@@ -29,6 +29,15 @@ classdef LustreAutomaton < LustreExpr
             new_obj = LustreAutomaton(obj.name,...
                 new_states);
         end
+        %% simplify expression
+        function new_obj = simplify(obj)
+            new_states = cell(1, numel(obj.states));
+            for i=1:numel(obj.states)
+                new_states{i} = obj.states{i}.simplify();
+            end
+            new_obj = LustreAutomaton(obj.name,...
+                new_states);
+        end
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
             new_obj = obj;
@@ -61,6 +70,9 @@ classdef LustreAutomaton < LustreExpr
             %TODO: Not done for this class yet, as it is not used by stateflow.
             new_obj = obj;
         end
+        
+        
+        
         %%
         function code = print(obj, backend)
             %TODO: check if LUSTREC syntax is OK for the other backends.

@@ -79,6 +79,20 @@ classdef AutomatonState < LustreExpr
             addNodes(obj.weakTrans);
             addNodes(obj.body);
         end
+        %% simplify expression
+        function new_obj = simplify(obj)
+            new_local_vars = cellfun(@(x) x.simplify(), obj.local_vars, 'UniformOutput', 0);
+            
+            new_strongTrans = cellfun(@(x) x.simplify(), obj.strongTrans, 'UniformOutput', 0);
+            
+            new_weakTrans = cellfun(@(x) x.simplify(), obj.weakTrans, 'UniformOutput', 0);
+            
+            new_body = cellfun(@(x) x.simplify(), obj.body, 'UniformOutput', 0);
+            
+            new_obj = AutomatonState(obj.name, new_local_vars, ...
+                new_strongTrans, new_weakTrans, new_body);
+        end
+        
         %%
         function code = print(obj, backend)
             %TODO: check if lustrec syntax is OK for jkind and prelude.

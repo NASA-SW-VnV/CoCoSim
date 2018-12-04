@@ -21,10 +21,18 @@ classdef ContractGuaranteeExpr < LustreExpr
             end
         end
         
+        %% deepcopy
         function new_obj = deepCopy(obj)
             new_obj = ContractGuaranteeExpr(obj.id, ...
                 obj.exp.deepCopy());
         end
+        
+        %% simplify expression
+        function new_obj = simplify(obj)
+            new_obj = ContractGuaranteeExpr(obj.id, ...
+                obj.exp.simplify());
+        end
+        
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
             new_obj = obj;
@@ -49,6 +57,8 @@ classdef ContractGuaranteeExpr < LustreExpr
             [new_exp, outputs_map] = obj.exp.pseudoCode2Lustre(outputs_map, isLeft);
             new_obj = ContractGuaranteeExpr(obj.id, new_exp);
         end
+        
+        
         %%
         function code = print(obj, backend)
             if BackendType.isKIND2(backend)

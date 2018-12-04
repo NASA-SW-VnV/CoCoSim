@@ -39,6 +39,10 @@ classdef EnumTypeExpr < LustreExpr
         function new_obj = deepCopy(obj)
             new_obj = EnumTypeExpr(obj.enum_name, obj.enum_args);
         end
+        %% simplify expression
+        function new_obj = simplify(obj)
+            new_obj = obj;
+        end
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
             varIds = {};
@@ -60,6 +64,9 @@ classdef EnumTypeExpr < LustreExpr
         function nodesCalled = getNodesCalled(~)
             nodesCalled = {};
         end
+        
+        
+        
         %%
         function code = print(obj, backend)
             %TODO: check if LUSTREC syntax is OK for the other backends.

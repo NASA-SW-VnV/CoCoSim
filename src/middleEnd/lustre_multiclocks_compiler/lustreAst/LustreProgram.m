@@ -61,6 +61,12 @@ classdef LustreProgram < LustreAst
             %it is not used by stateflow.
             new_obj = obj;
         end
+        
+        %% simplify expression
+        function new_obj = simplify(obj)
+            new_obj = obj;
+        end
+        
         %%
         function code = print(obj, backend)
             %TODO: check if LUSTREC syntax is OK for the other backends.

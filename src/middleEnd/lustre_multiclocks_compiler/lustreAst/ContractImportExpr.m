@@ -33,6 +33,13 @@ classdef ContractImportExpr < LustreExpr
             new_obj = ContractImportExpr(obj.name, ...
                 new_inputs, new_outputs);
         end
+        %% simplify expression
+        function new_obj = simplify(obj)
+            new_inputs = cellfun(@(x) x.simplify(), obj.inputs, 'UniformOutput', 0);
+            new_outputs = cellfun(@(x) x.simplify(), obj.outputs, 'UniformOutput', 0);
+            new_obj = ContractImportExpr(obj.name, ...
+                new_inputs, new_outputs);
+        end
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
             new_obj = obj;
@@ -62,6 +69,8 @@ classdef ContractImportExpr < LustreExpr
             new_obj = ContractImportExpr(obj.name, ...
                 obj.inputs, new_outputs);
         end
+        
+        
         %%
         function code = print(obj, backend)
             if BackendType.isKIND2(backend)

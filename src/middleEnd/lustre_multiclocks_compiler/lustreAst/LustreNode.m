@@ -127,7 +127,14 @@ classdef LustreNode < LustreAst
                 new_outputs, new_localContract, new_localVars, new_bodyEqs, ...
                 obj.isMain);
         end
-        
+        %% simplify expression
+        function new_obj = simplify(obj)
+            new_obj = obj;
+            new_obj.setLocalContract(new_obj.localContract.simplify());
+            new_obj.setBodyEqs(...
+                cellfun(@(x) x.simplify(), new_obj.bodyEqs, 'UniformOutput', 0));
+            
+        end
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
             varIds = {};
@@ -241,6 +248,9 @@ classdef LustreNode < LustreAst
             addNodes(obj.localContract);
             addNodes(obj.bodyEqs);
         end
+        
+        
+        
         %%
         function code = print(obj, backend)
             %TODO: check if LUSTREC syntax is OK for the other backends.

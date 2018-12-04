@@ -25,7 +25,11 @@ classdef MergeExpr < LustreExpr
             new_exprs = cellfun(@(x) x.deepCopy(), obj.exprs, 'UniformOutput', 0);
             new_obj = MergeExpr(obj.clock, new_exprs);
         end
-        
+        %% simplify expression
+        function new_obj = simplify(obj)
+            new_exprs = cellfun(@(x) x.simplify(), obj.exprs, 'UniformOutput', 0);
+            new_obj = MergeExpr(obj.clock, new_exprs);
+        end
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
             varIds = {};
@@ -66,6 +70,9 @@ classdef MergeExpr < LustreExpr
             end
             addNodes(obj.exprs);
         end
+        
+        
+        
         %%
         function code = print(obj, backend)
             %TODO: check if LUSTREC syntax is OK for the other backends.

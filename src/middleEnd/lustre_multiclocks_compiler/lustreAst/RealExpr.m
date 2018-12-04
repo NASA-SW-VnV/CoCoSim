@@ -22,7 +22,10 @@ classdef RealExpr < LustreExpr
         function new_obj = deepCopy(obj)
             new_obj = RealExpr(obj.value);
         end
-        
+        %% simplify expression
+        function new_obj = simplify(obj)
+            new_obj = obj;
+        end
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
             new_obj = obj;
@@ -47,6 +50,8 @@ classdef RealExpr < LustreExpr
             nodesCalled = {};
         end
         
+        
+        
         %%
         function code = print(obj, ~)
             %TODO: check if LUSTREC syntax is OK for the other backends.
@@ -67,6 +72,8 @@ classdef RealExpr < LustreExpr
                     MsgType.ERROR, 'BooleanExpr', '');
                 code = obj.value;
             end
+            %3.43040000 => 3.4304 code has always "." in it
+            code = regexprep(code, '0+$', '0');
         end
         
         function code = print_kind2(obj)

@@ -28,6 +28,12 @@ classdef EveryExpr < LustreExpr
             new_obj = EveryExpr(obj.nodeName, ...
                 new_args, obj.cond.deepCopy());
         end
+        %% simplify expression
+        function new_obj = simplify(obj)
+            new_args = cellfun(@(x) x.simplify(), obj.nodeArgs, 'UniformOutput', 0);
+            new_obj = EveryExpr(obj.nodeName, ...
+                new_args, obj.cond.simplify());
+        end
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
             varIds = {};
@@ -63,7 +69,7 @@ classdef EveryExpr < LustreExpr
             new_args = cellfun(@(x) x.pseudoCode2Lustre(outputs_map, false),...
                 obj.nodeArgs, 'UniformOutput', 0);
             new_obj = EveryExpr(obj.nodeName, ...
-                new_args, obj.cond.deepCopy());
+                new_args, obj.cond);
         end
         %% This function is used by KIND2 LustreProgram.print()
         function nodesCalled = getNodesCalled(obj)
@@ -81,6 +87,8 @@ classdef EveryExpr < LustreExpr
             addNodes(obj.cond);
             nodesCalled{end+1} = obj.nodeName;
         end
+        
+        
         
         
         %%

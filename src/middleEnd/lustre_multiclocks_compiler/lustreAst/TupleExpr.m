@@ -34,6 +34,12 @@ classdef TupleExpr < LustreExpr
             new_args = cellfun(@(x) x.deepCopy(), obj.args, 'UniformOutput', 0);
             new_obj = TupleExpr(new_args);
         end
+        
+        %% simplify expression
+        function new_obj = simplify(obj)
+            new_args = cellfun(@(x) x.simplify(), obj.args, 'UniformOutput', 0);
+            new_obj = TupleExpr(new_args);
+        end
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
             varIds = {};
@@ -79,6 +85,8 @@ classdef TupleExpr < LustreExpr
             end
             addNodes(obj.args);
         end
+        
+        
         %%
         function code = print(obj, backend)
             %TODO: check if LUSTREC syntax is OK for the other backends.

@@ -39,6 +39,14 @@ classdef UnaryExpr < LustreExpr
             new_expr = obj.expr.deepCopy();
             new_obj = UnaryExpr(obj.op, new_expr, obj.withPar);
         end
+        
+        %% simplify expression
+        function new_obj = simplify(obj)
+            new_expr = obj.expr.simplify();
+            if isa(new_expr, 'UnaryExpr') && isequal(new_expr.op, obj.op)
+            end
+            new_obj = UnaryExpr(obj.op, new_expr, obj.withPar);
+        end
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
             v = obj.expr;
@@ -75,6 +83,8 @@ classdef UnaryExpr < LustreExpr
             end
             addNodes(obj.expr);
         end
+        
+        
         
         %%
         function code = print(obj, backend)

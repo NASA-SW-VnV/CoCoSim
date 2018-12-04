@@ -25,7 +25,7 @@ classdef AutomatonTransExpr < LustreExpr
                 obj.resume_state = state_name;
             end
         end
-        
+        %% deepCopy
         function new_obj = deepCopy(obj)
             if obj.is_restart
                 state_name = obj.restart_state;
@@ -34,6 +34,17 @@ classdef AutomatonTransExpr < LustreExpr
             end
             new_obj = AutomatonTransExpr(...
                 obj.condition.deepCopy(), ...
+                obj.is_restart, state_name);
+        end
+        %% simplify expression
+        function new_obj = simplify(obj)
+            if obj.is_restart
+                state_name = obj.restart_state;
+            else
+                state_name = obj.resume_state;
+            end
+            new_obj = AutomatonTransExpr(...
+                obj.condition.simplify(), ...
                 obj.is_restart, state_name);
         end
         %% This functions are used for ForIterator block
@@ -56,6 +67,8 @@ classdef AutomatonTransExpr < LustreExpr
             %TODO: Not done for this class yet, as it is not used by stateflow.
             new_obj = obj;
         end
+        
+        
         %%
         function code = print(obj, backend)
             %TODO: check if lustrec syntax is OK for jkind and prelude.

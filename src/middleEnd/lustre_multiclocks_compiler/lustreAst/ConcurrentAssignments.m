@@ -31,8 +31,14 @@ classdef ConcurrentAssignments < LustreExpr
             end
         end
         
+        %% deepcopy
         function new_obj = deepCopy(obj)
             new_assignments = cellfun(@(x) x.deepCopy(), obj.assignments, 'UniformOutput', 0);
+            new_obj = ConcurrentAssignments(new_assignments);
+        end
+        %% simplify expression
+        function new_obj = simplify(obj)
+            new_assignments = cellfun(@(x) x.simplify(), obj.assignments, 'UniformOutput', 0);
             new_obj = ConcurrentAssignments(new_assignments);
         end
         %% This functions are used for ForIterator block
@@ -95,6 +101,9 @@ classdef ConcurrentAssignments < LustreExpr
             end
             addNodes(obj.assignments);
         end
+        
+        
+        
         %%
         function code = print(obj, backend)
             %TODO: check if LUSTREC syntax is OK for the other backends.

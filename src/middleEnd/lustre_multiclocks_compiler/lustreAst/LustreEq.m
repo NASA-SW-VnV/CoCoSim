@@ -44,6 +44,13 @@ classdef LustreEq < LustreAst
             new_rhs = obj.rhs.deepCopy();
             new_obj = LustreEq(new_lhs, new_rhs);
         end
+        
+        %% simplify expression
+        function new_obj = simplify(obj)
+            new_lhs = obj.lhs.simplify();
+            new_rhs = obj.rhs.simplify();
+            new_obj = LustreEq(new_lhs, new_rhs);
+        end
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
             varIds = {};
@@ -79,6 +86,8 @@ classdef LustreEq < LustreAst
             end
             addNodes(obj.rhs);
         end
+        
+        
         %%
         function code = print(obj, backend)
             %TODO: check if LUSTREC syntax is OK for the other backends.

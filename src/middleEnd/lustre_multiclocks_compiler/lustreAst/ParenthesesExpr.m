@@ -26,7 +26,11 @@ classdef ParenthesesExpr < LustreExpr
             new_expr = obj.expr.deepCopy();
             new_obj = ParenthesesExpr(new_expr);
         end
-        
+        %% simplify expression
+        function new_obj = simplify(obj)
+            new_expr = obj.expr.simplify();
+            new_obj = ParenthesesExpr(new_expr);
+        end
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
             [new_expr, varIds] = obj.expr.changePre2Var();

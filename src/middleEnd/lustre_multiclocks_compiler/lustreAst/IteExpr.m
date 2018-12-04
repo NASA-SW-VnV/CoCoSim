@@ -43,6 +43,13 @@ classdef IteExpr < LustreExpr
                 obj.ElseExpr.deepCopy(),...
                 obj.OneLine);
         end
+        %% simplify expression
+        function new_obj = simplify(obj)
+            new_obj = IteExpr(obj.condition.simplify(),...
+                obj.thenExpr.simplify(),...
+                obj.ElseExpr.simplify(),...
+                obj.OneLine);
+        end
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
             [cond, vcondId] = obj.condition.changePre2Var();
@@ -88,6 +95,7 @@ classdef IteExpr < LustreExpr
             addNodes(obj.thenExpr);
             addNodes(obj.ElseExpr);
         end
+        
         
         
         %%

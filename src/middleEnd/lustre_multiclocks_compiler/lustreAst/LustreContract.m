@@ -118,6 +118,14 @@ classdef LustreContract < LustreAst
                 new_outputs, new_localVars, new_localEqs, ...
                 obj.islocalContract);
         end
+        
+        %% simplify expression
+        function new_obj = simplify(obj)
+            new_obj = obj.deepCopy();
+            new_localEqs = cellfun(@(x) x.simplify(), new_obj.localEqs, ...
+                'UniformOutput', 0);
+            new_obj.setBody(new_localEqs);
+        end
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
             new_obj = obj;
@@ -154,6 +162,8 @@ classdef LustreContract < LustreAst
             end
             addNodes(obj.localEqs);
         end
+        
+        
         
         %%
         function code = print(obj, backend)

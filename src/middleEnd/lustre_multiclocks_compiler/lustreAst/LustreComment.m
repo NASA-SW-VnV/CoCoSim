@@ -26,6 +26,11 @@ classdef LustreComment < LustreExpr
                 obj.isMultiLine);
         end
         
+        %% simplify expression
+        function new_obj = simplify(obj)
+            new_obj = obj;
+        end
+        
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
             new_obj = obj;
@@ -46,6 +51,9 @@ classdef LustreComment < LustreExpr
         function nodesCalled = getNodesCalled(obj)
             nodesCalled = {};
         end
+        
+        
+        
         %%
         function code = print(obj, backend)
             code = obj.print_lustrec(backend);
