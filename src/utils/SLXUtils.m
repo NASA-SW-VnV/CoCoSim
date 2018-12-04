@@ -278,12 +278,19 @@ classdef SLXUtils
             %warning on;
         end
         %%
-        function isBus = isSimulinkBus(SignalName)
-            %TODO: check model workspace
+        function [isBus, bus] = isSimulinkBus(SignalName, model)
+            bus = [];
+            if nargin >= 2
+                hws = get_param(model, 'modelworkspace') ;
+                if hasVariable(hws,SignalName)
+                    bus = getVariable(hws,SignalName);
+                    isBus = isa(bus, 'Simulink.Bus');
+                    return;
+                end
+            end
             try
-                isBus = evalin('base',...
-                    sprintf('isa(%s, ''Simulink.Bus'')',...
-                    SignalName));
+                bus = evalin('base', SignalName);
+                isBus = isa(bus, 'Simulink.Bus');
             catch
                 isBus = false;
             end
@@ -357,42 +364,55 @@ classdef SLXUtils
                     min = IMIN(1);
                     max = IMAX(1);
                 end
-                isBus = SLXUtils.isSimulinkBus(inports(i).datatype);
-                lus_dt = SLX2LusUtils.get_lustre_dt(inports(i).datatype);
-                if isBus
-                    errordlg('Bus Signals are not supported for simulation. Work in progress!');
-                elseif strcmp(lus_dt,'bool')
-                    element.Values = timeseries(...
-                        LusValidateUtils.construct_random_booleans(nb_steps, min, max, dim), ...
-                        time);
-                    %input_struct.signals(i).dimensions = dim;
-                elseif strcmp(inports(i).datatype,'int')
-                    element.Values = timeseries(...
-                        LusValidateUtils.construct_random_integers(nb_steps, min, max, 'int32', dim), ...
-                        time);
-                    %input_struct.signals(i).dimensions = dim;
-                    
-                elseif contains(inports(i).datatype,'int')
-                    element.Values = timeseries(...
-                        LusValidateUtils.construct_random_integers(nb_steps, min, max, inports(i).datatype, dim), ...
-                        time);
-                    %input_struct.signals(i).dimensions = dim;
-                elseif strcmp(inports(i).datatype,'single')
-                    element.Values = timeseries(...
-                        single(LusValidateUtils.construct_random_doubles(nb_steps, min, max, dim)), ...
-                        time);
-                    %input_struct.signals(i).dimensions = dim;
-                else
-                    element.Values = timeseries(...
-                        LusValidateUtils.construct_random_doubles(nb_steps, min, max, dim), ...
-                        time);
-                    %input_struct.signals(i).dimensions = dim;
-                end
+                element.Values = SLXUtils.get_random_values(time, nb_steps, min, max, dim, inports(i).datatype);
                 ds{i} = element;
             end
             
         end
-        
+        function Values = get_random_values(time, nb_steps, min, max, dim, dt)
+            [isBus, bus] = SLXUtils.isSimulinkBus(dt);
+            lus_dt = SLX2LusUtils.get_lustre_dt(dt);
+            if isBus
+                Values = SLXUtils.construct_random_bus_values(bus, time, nb_steps, min, max, dim);
+            elseif strcmp(lus_dt,'bool')
+                Values = timeseries(...
+                    LusValidateUtils.construct_random_booleans(nb_steps, min, max, dim), ...
+                    time);
+            elseif strcmp(dt,'int')
+                Values = timeseries(...
+                    LusValidateUtils.construct_random_integers(nb_steps, min, max, 'int32', dim), ...
+                    time);
+                
+            elseif contains(dt,'int')
+                Values = timeseries(...
+                    LusValidateUtils.construct_random_integers(nb_steps, min, max, dt, dim), ...
+                    time);
+            elseif strcmp(dt,'single')
+                Values = timeseries(...
+                    single(LusValidateUtils.construct_random_doubles(nb_steps, min, max, dim)), ...
+                    time);
+            else
+                Values = timeseries(...
+                    LusValidateUtils.construct_random_doubles(nb_steps, min, max, dim), ...
+                    time);
+            end
+        end
+        function values = construct_random_bus_values(bus, time, nb_steps, min, max, dim)
+            values = [];
+            if prod(dim) > 1
+                errordlg('Array Bus Signals are not supported for simulation. Work in progress!');
+            end
+            try
+                elems = bus.getLeafBusElements;
+            catch
+                return;
+            end
+            for i=1:numel(elems)
+                dt = elems(i).DataType;
+                dim = elems(i).Dimensions;
+                values.(elems(i).Name) = SLXUtils.get_random_values(time, nb_steps, min, max, dim, dt);
+            end
+        end
         %% Simulate the model
         function simOut = simulate_model(slx_file_name, ...
                 input_dataset, ...
@@ -410,6 +430,7 @@ classdef SLXUtils
             set_param(configSet, 'StartTime', '0.0');
             set_param(configSet, 'StopTime',  num2str(stop_time));
             set_param(configSet, 'SaveFormat', 'Dataset');
+            set_param(configSet, 'DatasetSignalFormat', 'timeseries');
             set_param(configSet, 'SaveOutput', 'on');
             set_param(configSet, 'SaveTime', 'on');
             

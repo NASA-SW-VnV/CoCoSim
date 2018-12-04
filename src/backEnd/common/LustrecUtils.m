@@ -1259,27 +1259,18 @@ classdef LustrecUtils < handle
         %% transform input struct to lustre format (inlining values)
         function [lustre_input_values, status] = getLustreInputValuesFormat(...
                 input_dataSet, ...
-                nb_steps)
-            number_of_inputs = 0;
+                time)
+            nb_steps = numel(time);
+            number_of_inputs = LustrecUtils.getNumberOfInputs(input_dataSet, nb_steps);
             status = 0;
-            for i=1:numel(input_dataSet.getElementNames)
-                dim = input_dataSet{i}.Values.getdatasamplesize;
-                
-                if numel(dim)==1
-                    number_of_inputs = number_of_inputs + nb_steps*dim;
-                else
-                    number_of_inputs =...
-                        number_of_inputs + nb_steps*(prod(dim));
-                end
-            end
             % Translate input_stract to lustre format (inline the inputs)
-            if numel(input_dataSet.getElementNames)>=1
+            if number_of_inputs>=1
                 lustre_input_values = ones(number_of_inputs,1);
                 index = 0;
                 for i=1:nb_steps
                     for j=1:numel(input_dataSet.getElementNames)
                         %[signal_values, width] = LustrecUtils.inline_array(input_dataSet.signals(j), i-1);
-                        signal_values = input_dataSet{j}.Values.getsamples(i).Data;
+                        signal_values = LustrecUtils.getSignalValuesUsingTime(input_dataSet{j}.Values, time(i));
                         width = numel(signal_values);
                         index2 = index + width;
                         lustre_input_values(index+1:index2) = signal_values;
@@ -1291,7 +1282,49 @@ classdef LustrecUtils < handle
                 lustre_input_values = ones(1*nb_steps,1);
             end
         end
-        
+        function number_of_inputs = getNumberOfInputs(ds, nb_steps)
+            number_of_inputs = 0;
+            if isa(ds, 'Simulink.SimulationData.Dataset')
+                for i=1:numel(ds.getElementNames)
+                    number_of_inputs = number_of_inputs + ...
+                        LustrecUtils.getNumberOfInputs(ds{i}.Values, nb_steps);
+                end
+            elseif isa(ds, 'timeseries')
+                dim = ds.getdatasamplesize;
+                number_of_inputs = nb_steps*(prod(dim));
+            elseif isa(ds, 'struct')
+                fields = fieldnames(ds);
+                for i=1:numel(fields)
+                    number_of_inputs = number_of_inputs + ...
+                        LustrecUtils.getNumberOfInputs(ds.(fields{i}), nb_steps);
+                end
+            end
+        end
+        function signal_values = getSignalValuesUsingTime(ds, t)
+            signal_values = [];
+            if isa(ds, 'timeseries')
+                signal_values = double(ds.getsampleusingtime(t).Data);
+                signal_values = reshape(signal_values, [numel(signal_values), 1]);
+            elseif isa(ds, 'struct')
+                fields = fieldnames(ds);
+                for i=1:numel(fields)
+                    signal_values = [signal_values ; ...
+                        LustrecUtils.getSignalValuesUsingTime(ds.(fields{i}), t)];
+                end
+            end
+        end
+        function width = getSignalWidth(ds)
+            width = 0;
+            if isa(ds, 'timeseries')
+                width = prod(ds.getdatasamplesize);
+            elseif isa(ds, 'struct')
+                fields = fieldnames(ds);
+                for i=1:numel(fields)
+                    width = width + ...
+                        LustrecUtils.getSignalWidth(ds.(fields{i}));
+                end
+            end
+        end
         %% print input_values for lustre binary
         function status = printLustreInputValues(...
                 lustre_input_values,...
@@ -1344,37 +1377,64 @@ classdef LustrecUtils < handle
             end
         end
         %% compare Simulin outputs and Lustre outputs
-        function [valid, error_index, diff_name, diff] = ...
-                compare_Simu_outputs_with_Lus_outputs(yout,...
+        function [valid, cex_msg, diff_name, diff] = ...
+                compare_Simu_outputs_with_Lus_outputs(...
+                input_dataset, ...
+                yout,...
                 outputs_array, ...
                 eps, ...
-                nb_steps)
+                time)
             diff_name = '';
             diff = 0;
             numberOfOutputs = numel(yout.getElementNames);
+            numberOfInports = numel(input_dataset.getElementNames);
             valid = true;
-            error_index = 1;
+            cex_msg = {};
             index_out = 0;
-            for i=0:nb_steps-1
-                for k=1:numberOfOutputs
-                    if isa(yout{k}.Values, 'struct')
-                        msg = sprintf('Output Signals of type Simulink.Bus are not supported in validation. Work in progress!');
-                        error('Output Signal %d is of type Simulink.Bus which is not supported in validation. Work in progress!', ...
-                            k);
-                        %break;
+            out_width = zeros(numberOfOutputs,1);
+            for k=1:numberOfOutputs
+                out_width(k) = LustrecUtils.getSignalWidth(yout{k}.Values);
+            end
+            for i=1:numel(time)
+                cex_msg{end+1} = sprintf('*****time : %f**********\n',time(i));
+                cex_msg{end+1} = sprintf('*****inputs: \n');
+                for j=1:numberOfInports
+                    in = LustrecUtils.getSignalValuesUsingTime(input_dataset{j}.Values, time(i));
+                    in_width = numel(in);
+                    name = input_dataset{j}.Name;
+                    for jk=1:in_width
+                        cex_msg{end+1} = sprintf('input %s_%d: %f\n',name,jk,in(jk));
                     end
-                    yout_values = yout{k}.Values.getsamples(i+1).Data;
-                    width = numel(yout_values);
-                    for j=1:width
+                end
+                cex_msg{end+1} = sprintf('*****outputs: \n');
+                found_output = false;
+                for k=1:numberOfOutputs
+                    yout_values = LustrecUtils.getSignalValuesUsingTime(yout{k}.Values, time(i));
+                    if isempty(yout_values)
+                        % signal is not defined in the current timestep
+                        index_out = index_out + out_width(k);
+                        continue;
+                    end
+                    found_output = true;
+                    for j=1:out_width(k)
                         index_out = index_out + 1;
                         output_value = ...
                             regexp(outputs_array{index_out},...
                             '\s*:\s*',...
                             'split');
                         if ~isempty(output_value)
+                            lus_output_name = output_value{1};
                             output_val_str = output_value{2};
                             output_val = str2num(output_val_str(2:end-1));
                             y_value = yout_values(j);
+                            
+                            slx_output_name =...
+                                BUtils.naming_alone(yout{k}.BlockPath.getBlock(1));
+                            cex_msg{end+1} = sprintf('Simulink output %s(%d): %10.16f\n',...
+                                slx_output_name, j, y_value);
+                            cex_msg{end+1} = sprintf('Lustre output %s: %10.16f\n',...
+                                lus_output_name,output_val);
+                            
                             if isinf(y_value) || isnan(y_value)...
                                     || isinf(output_val) || isnan(output_val)
                                 diff=0;
@@ -1383,7 +1443,7 @@ classdef LustrecUtils < handle
                                     diff = abs(double(y_value)-output_val);
                                     % percentage of difference
                                     %diff = 100*abs(...
-                                     %   (yout_values(j)-output_val)/yout_values(j));
+                                    %   (yout_values(j)-output_val)/yout_values(j));
                                 else
                                     diff = abs(output_val);
                                 end
@@ -1393,12 +1453,13 @@ classdef LustrecUtils < handle
                                 diff_name =  ...
                                     BUtils.naming_alone(yout{k}.BlockPath.getBlock(1));
                                 diff_name =  strcat(diff_name, '(',num2str(j), ')');
-                                error_index = i+1;
+                                error_index = i;
                                 break
                             end
                         else
                             warn = sprintf('strange behavour of output %s',...
-                                outputs_array{numberOfOutputs*i+k});
+                                outputs_array{numberOfOutputs*(i-1)+k});
+                            cex_msg{end+1} = warn;
                             display_msg(warn,...
                                 MsgType.WARNING,...
                                 'compare_Simu_outputs_with_Lus_outputs',...
@@ -1407,9 +1468,13 @@ classdef LustrecUtils < handle
                             break;
                         end
                     end
+                    
                     if  ~valid
                         break;
                     end
+                end
+                if ~found_output
+                    cex_msg{end+1} = sprintf('No Output saved for this time step.\n');
                 end
                 if  ~valid
                     break;
@@ -1439,70 +1504,30 @@ classdef LustrecUtils < handle
         
         
         %% Show CEX
-        function show_CEX(error_index,...
-                input_dataset, ...
-                yout, ...
-                outputs_array, cex_file_path )
+        function show_CEX(cex_msg, cex_file_path )
             fid = fopen(cex_file_path, 'w');
-            numberOfInports = numel(input_dataset.getElementNames);
-            numberOfOutputs = numel(yout.getElementNames);
-            index_out = 0;
-            for i=0:error_index-1
-                f_msg = sprintf('*****step : %d**********\n',i+1);
+            for i=1:numel(cex_msg)
+                f_msg = cex_msg{i};
                 display_msg(f_msg, MsgType.RESULT, 'CEX', '');
                 fprintf(fid, f_msg);
-                f_msg = sprintf('*****inputs: \n');
-                display_msg(f_msg, MsgType.RESULT, 'CEX', '');
-                fprintf(fid, f_msg);
-                for j=1:numberOfInports
-                    in = input_dataset{j}.Values.getsamples(i+1).Data;
-                    width = numel(in);
-                    name = input_dataset{j}.Name;
-                    for k=1:width
-                        f_msg = sprintf('input %s_%d: %f\n',name,k,in(k));
-                        display_msg(f_msg, MsgType.RESULT, 'CEX', '');
-                        fprintf(fid, f_msg);
-                    end
-                end
-                
-                f_msg = sprintf('*****outputs: \n');
-                display_msg(f_msg, MsgType.RESULT, 'CEX', '');
-                fprintf(fid, f_msg);
-                for k=1:numberOfOutputs
-                    yout_values = yout{k}.Values.getsamples(i+1).Data;
-                    width = numel(yout_values);
-                    for j=1:width
-                        index_out = index_out + 1;
-                        output_value = regexp(outputs_array{index_out},'\s*:\s*','split');
-                        if ~isempty(output_value)
-                            output_name = output_value{1};
-                            output_val = output_value{2};
-                            output_val = str2num(output_val(2:end-1));
-                            output_name1 =...
-                                BUtils.naming_alone(yout{k}.BlockPath.getBlock(1));
-                            f_msg = sprintf('output %s(%d): %10.16f\n',...
-                                output_name1, j, yout_values(j));
-                            display_msg(f_msg, MsgType.RESULT, 'CEX', '');
-                            fprintf(fid, f_msg);
-                            f_msg = sprintf('Lustre output %s: %10.16f\n',...
-                                output_name,output_val);
-                            display_msg(f_msg, MsgType.RESULT, 'CEX', '');
-                            fprintf(fid, f_msg);
-                        else
-                            f_msg = sprintf('strang behavour of output %s',...
-                                outputs_array{numberOfOutputs*i+k});
-                            display_msg(f_msg, MsgType.WARNING, 'CEX', '');
-                            fprintf(fid, f_msg);
-                            return;
-                        end
-                    end
-                end
-                
             end
             fclose(fid);
         end
         
         %% run comparaison
+        function time = getTimefromDataset(ds)
+            time = [];
+            if isa(ds, 'Simulink.SimulationData.Dataset')
+                time = LustrecUtils.getTimefromDataset(ds{1}.Values);
+            elseif isa(ds, 'timeseries')
+                time = ds.Time;
+            elseif isa(ds, 'struct')
+                fields = fieldnames(ds);
+                if numel(fields) >= 1
+                    time = LustrecUtils.getTimefromDataset(ds.(fields{1}));
+                end
+            end
+        end
         function [valid,...
                 lustrec_failed, ...
                 lustrec_binary_failed,...
@@ -1528,17 +1553,16 @@ classdef LustrecUtils < handle
             OldPwd = pwd;
             if ~isa(input_dataSet, 'Simulink.SimulationData.Dataset')
                 msg = sprintf('Input Signals should be of class Simulink.SimulationData.Dataset');
-                display_msg(msg, MsgType.ERROR, 'validation', '');
+                display_msg(msg, MsgType.ERROR, 'LustrecUtils.run_comparaison', '');
                 sim_failed = 1;
                 return;
             end
             numberOfInports = numel(input_dataSet.getElementNames);
             if numberOfInports >= 1
-                try
-                    time = input_dataSet{1}.Values.Time;
-                catch
+                time = LustrecUtils.getTimefromDataset(input_dataSet);
+                if isempty(time)
                     msg = sprintf('Input Signals should be of class Simulink.SimulationData.Dataset');
-                    display_msg(msg, MsgType.ERROR, 'validation', '');
+                    display_msg(msg, MsgType.ERROR, 'LustrecUtils.run_comparaison', '');
                     sim_failed = 1;
                     return;
                 end
@@ -1574,7 +1598,7 @@ classdef LustrecUtils < handle
             
             % transform input_struct to Lustre format
             [lustre_input_values, status] = ...
-                LustrecUtils.getLustreInputValuesFormat(input_dataSet, nb_steps);
+                LustrecUtils.getLustreInputValuesFormat(input_dataSet, time);
             if status
                 lustrec_failed = 1;
                 return
@@ -1625,11 +1649,13 @@ classdef LustrecUtils < handle
                 end
                 assignin('base','yout',yout);
                 outputs_array = importdata(output_file_name,'\n');
-                [valid, error_index, diff_name, diff] = ...
-                    LustrecUtils.compare_Simu_outputs_with_Lus_outputs(yout,...
+                [valid, cex_msg, diff_name, diff] = ...
+                    LustrecUtils.compare_Simu_outputs_with_Lus_outputs(...
+                    input_dataSet, ...
+                    yout,...
                     outputs_array, ...
                     eps, ...
-                    nb_steps);
+                    time);
                 
                 
                 
@@ -1643,8 +1669,7 @@ classdef LustrecUtils < handle
                     t = datetime('now','Format','dd-MM-yyyy''@''HHmmss');
                     cex_file_path = fullfile(lus_file_dir, ...
                         strcat('cex_', char(t), '.txt'));
-                    LustrecUtils.show_CEX(...
-                        error_index, input_dataSet, yout, outputs_array, cex_file_path );
+                    LustrecUtils.show_CEX(cex_msg, cex_file_path );
                     f_msg = sprintf('The difference between outputs %s is :%2.10f\%\n',diff_name, diff);
                     display_msg(f_msg, MsgType.RESULT, 'CEX', '');
                 else
