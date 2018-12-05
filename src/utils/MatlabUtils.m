@@ -62,7 +62,10 @@ classdef MatlabUtils
             res = struct2(ia) ;
         end
         
-
+        %% removeEmpty
+        function l = removeEmpty(l)
+            l = l(cellfun(@(x) ~isempty(x), l));
+        end
         %%
         function tf = startsWith(s, pattern)
             try

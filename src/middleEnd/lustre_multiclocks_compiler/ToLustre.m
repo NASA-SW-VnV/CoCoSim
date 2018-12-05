@@ -155,13 +155,17 @@ function [nom_lustre_file, xml_trace, status, unsupportedOptions, abstractedBloc
             MsgType.WARNING, 'ToLustreUnsupportedBlocks', '');
     end
     %TODO: change it to AST
-    nodes_ast = [external_lib_code, nodes_ast];
+    if ~isempty(external_lib_code)
+        nodes_ast = [external_lib_code, nodes_ast];
+    end
     %% create LustreProgram
     keys = TOLUSTRE_ENUMS_MAP.keys();
     enumsAst = cell(numel(keys), 1);
     for i=1:numel(keys)
         enumsAst{i} = EnumTypeExpr(keys{i}, TOLUSTRE_ENUMS_MAP(keys{i}));
     end
+    nodes_ast = MatlabUtils.removeEmpty(nodes_ast);
+    contracts_ast = MatlabUtils.removeEmpty(contracts_ast);
     program =  LustreProgram(open_list, enumsAst, nodes_ast, contracts_ast);
     if cocosim_optim
         program = program.simplify();

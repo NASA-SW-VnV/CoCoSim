@@ -90,10 +90,10 @@ classdef LustreContract < LustreAst
         end
         
         %%
-        function dt = getDT(localVars, varID)
+        function dt = getDT(obj, localVars, varID)
             dt = '';
             for i=1:numel(localVars)
-                if isequal(localVars{i}.id, varID)
+                if isequal(localVars{i}.getId(), varID)
                     dt = localVars{i}.type;
                     break;
                 end
@@ -241,13 +241,17 @@ classdef LustreContract < LustreAst
                 else
                     var = eq.lhs;
                 end
-                if ~isa(var, 'LustreVar')
+                if ~isa(var, 'LustreVar') && ~isa(var, 'VarIdExpr')
                     continue;
                 end
-                varDT = getDT(obj.localVars, var.id);
+                if isa(var, 'LustreVar')
+                    varDT = var.getDT();
+                else
+                    varDT = obj.getDT(obj.localVars, var.getId());
+                end
                 
                 lines{end+1} = sprintf('\tvar %s : %s = %s;\n', ...
-                    var.id, varDT, eq.rhs.print(backend));
+                    var.getId(), varDT, eq.rhs.print(backend));
             end
         end
     end
