@@ -132,8 +132,17 @@ classdef LustreNode < LustreAst
                 obj.isMain);
         end
         %% simplify expression
+        function nb_occ = nbOccuranceVar(obj, var)
+            nb_occ_perEq = cellfun(@(x) x.nbOccuranceVar(var), obj.bodyEqs, 'UniformOutput', true);
+            nb_occ = sum(nb_occ_perEq);
+        end
+        %
+        function new_obj = substituteVars(obj)
+            new_obj = LustreNode.contractNode_substituteVars(obj);
+        end
+        %
         function new_obj = simplify(obj)
-            new_obj = obj;
+            new_obj = obj.substituteVars();
             if ~isempty(obj.localContract)
                 new_obj.setLocalContract(new_obj.localContract.simplify());
             end
@@ -323,6 +332,72 @@ classdef LustreNode < LustreAst
             code = obj.print_lustrec(BackendType.PRELUDE);
         end
     end
-    
+    methods(Static)
+       function new_obj = contractNode_substituteVars(obj)
+            new_obj = obj.deepCopy();
+            new_localVars = new_obj.localVars;
+            % include ConcurrentAssignments as normal Eqts
+            new_bodyEqs = {};
+            for i=1:numel(new_obj.bodyEqs)
+                if isa(new_obj.bodyEqs{i}, 'ConcurrentAssignments')
+                    new_bodyEqs = [new_bodyEqs, new_obj.bodyEqs{i}.getAssignments()];
+                else
+                    new_bodyEqs{end+1} = new_obj.bodyEqs{i};
+                end
+            end
+            %ignore simplification if there is automaton
+            eqsClass = cellfun(@(x) class(x), new_bodyEqs, 'UniformOutput', false);
+            if ismember('LustreAutomaton', eqsClass)
+                return;
+            end
+            EveryEqs = new_bodyEqs(strcmp(eqsClass,'EveryExpr'));
+            EveryConds = cellfun(@(x) x.cond, EveryEqs, 'UniformOutput', false);
+            % go over Assignments
+            for i=1:numel(new_bodyEqs)
+                % e.g. y = f(x); 
+                if isa(new_bodyEqs{i}, 'LustreEq')...
+                        && isa(new_bodyEqs{i}.getLhs(), 'VarIdExpr')
+                    var = new_bodyEqs{i}.getLhs();
+                    rhs = new_bodyEqs{i}.getRhs();
+                    new_var = ParenthesesExpr(rhs.deepCopy());
+                    
+                    % if rhs class is IteExpr, skip it. To hep debugging.
+                    if isa(rhs, 'IteExpr')
+                        continue;
+                    end
+                    % if used on its definition, skip it
+                    %e.g. x = 0 -> pre x + 1;
+                    if rhs.nbOccuranceVar(var) >= 1
+                        continue;
+                    end
+                    nb_occ_perEq = cellfun(@(x) x.nbOccuranceVar(var), new_bodyEqs, 'UniformOutput', true);
+                    % skip var if it is never used or used more than once. 
+                    % For code readability and CEX debugging.
+                    if sum(nb_occ_perEq) ~= 1
+                        continue;
+                    end
+                    
+                    % check the variable is not used in EveryExpr condition.
+                    nb_occ_perEveryCond = cellfun(@(x) x.nbOccuranceVar(var), EveryConds, 'UniformOutput', true);
+                    if ~isempty(nb_occ_perEveryCond) && sum(nb_occ_perEveryCond) >= 1
+                        continue;
+                    end
+                    
+                    
+                    %delete the current Eqts
+                    new_bodyEqs{i} = DummyExpr();
+                    %remove it from variables
+                    new_localVars = LustreVar.removeVar(new_localVars, var);
+                    % change var by new_var
+                    new_bodyEqs = cellfun(@(x) x.substituteVars(var, new_var), new_bodyEqs, 'UniformOutput', false);
+                end
+            end
+            % remove dummyExpr
+            eqsClass = cellfun(@(x) class(x), new_bodyEqs, 'UniformOutput', false);
+            new_bodyEqs = new_bodyEqs(~strcmp(eqsClass, 'DummyExpr'));
+            new_obj.setBodyEqs(new_bodyEqs);
+            new_obj.setLocalVars(new_localVars);
+        end 
+    end
 end
 

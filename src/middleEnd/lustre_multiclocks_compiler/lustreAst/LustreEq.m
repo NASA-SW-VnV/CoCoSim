@@ -51,6 +51,17 @@ classdef LustreEq < LustreAst
             new_rhs = obj.rhs.simplify();
             new_obj = LustreEq(new_lhs, new_rhs);
         end
+        
+        %% nbOcc
+        function nb_occ = nbOccuranceVar(obj, var)
+            nb_occ = obj.rhs.nbOccuranceVar(var);
+        end
+        %% substituteVars
+        function new_obj = substituteVars(obj, oldVar, newVar)
+            new_lhs = obj.lhs.substituteVars(oldVar, newVar);
+            new_rhs = obj.rhs.substituteVars(oldVar, newVar);
+            new_obj = LustreEq(new_lhs, new_rhs);
+        end
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
             varIds = {};

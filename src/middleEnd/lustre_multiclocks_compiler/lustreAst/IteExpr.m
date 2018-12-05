@@ -43,6 +43,7 @@ classdef IteExpr < LustreExpr
                 obj.ElseExpr.deepCopy(),...
                 obj.OneLine);
         end
+        
         %% simplify expression
         function new_obj = simplify(obj)
             new_cond = obj.condition.simplify();
@@ -51,24 +52,34 @@ classdef IteExpr < LustreExpr
             % simplify trivial if-and-else
             % if true then x else y => x
             if isa(obj.condition, 'BooleanExpr')
-               if isnumeric(obj.condition.getValue()) || islogical(obj.condition.getValue())
-                   if obj.condition.getValue()
-                       new_obj = new_then;
-                   else
-                       new_obj = new_else;
-                   end
-                   return;
-               elseif isequal(obj.condition.getValue(), 'true')
-                   new_obj = new_then;
-                   return;
-               elseif isequal(obj.condition.getValue(), 'false')
-                   new_obj = new_else;
-                   return;
-               end
+                if obj.condition.getValue()
+                    new_obj = new_then;
+                else
+                    new_obj = new_else;
+                end
+                return;
+                
             end
             new_obj = IteExpr(new_cond, new_then, new_else, obj.OneLine);
             
         end
+        
+         %% substituteVars 
+        function new_obj = substituteVars(obj, oldVar, newVar)
+            new_obj = IteExpr(obj.condition.substituteVars(oldVar, newVar),...
+                obj.thenExpr.substituteVars(oldVar, newVar),...
+                obj.ElseExpr.substituteVars(oldVar, newVar),...
+                obj.OneLine);
+        end
+        
+        
+        %% nbOccurance
+        function nb_occ = nbOccuranceVar(obj, var)
+            nb_occ = obj.condition.nbOccuranceVar(var) ...
+                + obj.thenExpr.nbOccuranceVar(var)...
+                + obj.ElseExpr.nbOccuranceVar(var);
+        end
+        
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
             [cond, vcondId] = obj.condition.changePre2Var();

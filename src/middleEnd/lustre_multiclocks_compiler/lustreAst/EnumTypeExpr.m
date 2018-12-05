@@ -43,6 +43,14 @@ classdef EnumTypeExpr < LustreExpr
         function new_obj = simplify(obj)
             new_obj = obj;
         end
+        %% nbOccurance
+        function nb_occ = nbOccuranceVar(obj, var)
+            nb_occ = 0;
+        end
+        %% substituteVars 
+        function new_obj = substituteVars(obj, varargin)
+            new_obj = obj;
+        end
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
             varIds = {};

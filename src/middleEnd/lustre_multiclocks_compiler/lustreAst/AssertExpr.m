@@ -28,6 +28,15 @@ classdef AssertExpr < LustreExpr
         function new_obj = simplify(obj)
             new_obj = AssertExpr(obj.exp.simplify());
         end
+        %% nbOcc
+        function nb_occ = nbOccuranceVar(obj, var)
+            nb_occ = obj.exp.nbOccuranceVar(var);
+        end
+        %% substituteVars
+        function new_obj = substituteVars(obj, oldVar, newVar)
+            new_obj = AssertExpr(...
+                obj.exp.substituteVars(oldVar, newVar));
+        end
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
             new_obj = obj;
@@ -36,7 +45,7 @@ classdef AssertExpr < LustreExpr
         function new_obj = changeArrowExp(obj, cond)
             new_obj = AssertExpr(obj.exp.changeArrowExp(cond));
         end
-
+        
         %% This function is used by Stateflow function SF_To_LustreNode.getPseudoLusAction
         function varIds = GetVarIds(obj)
             varIds = obj.exp.GetVarIds();

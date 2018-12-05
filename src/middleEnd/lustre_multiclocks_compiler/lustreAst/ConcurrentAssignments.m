@@ -41,6 +41,16 @@ classdef ConcurrentAssignments < LustreExpr
             new_assignments = cellfun(@(x) x.simplify(), obj.assignments, 'UniformOutput', 0);
             new_obj = ConcurrentAssignments(new_assignments);
         end
+        %% nbOccuranceVar
+        function nb_occ = nbOccuranceVar(obj, var)
+            nb_occ_perEq = cellfun(@(x) x.nbOccuranceVar(var), obj.assignments, 'UniformOutput', true);
+            nb_occ = sum(nb_occ_perEq);
+        end
+        %% substituteVars
+        function new_obj = substituteVars(obj, oldVar, newVar)
+            new_assignments = cellfun(@(x) x.substituteVars(oldVar, newVar), obj.assignments, 'UniformOutput', 0);
+            new_obj = ConcurrentAssignments(new_assignments);
+        end
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
             varIds = {};

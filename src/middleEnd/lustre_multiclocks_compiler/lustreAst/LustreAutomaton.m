@@ -38,6 +38,14 @@ classdef LustreAutomaton < LustreExpr
             new_obj = LustreAutomaton(obj.name,...
                 new_states);
         end
+        %% nbOccuranceVar ignored in Automaton
+        function nb_occ = nbOccuranceVar(varargin)
+            nb_occ = 0;
+        end
+        %% substituteVars ignored in Automaton
+        function new_obj = substituteVars(obj, varargin)
+            new_obj = obj;
+        end
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
             new_obj = obj;

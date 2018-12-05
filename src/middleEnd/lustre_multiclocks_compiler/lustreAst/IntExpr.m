@@ -16,7 +16,15 @@ classdef IntExpr < LustreExpr
         end
         %%
         function v = getValue(obj)
-            v = obj.value;
+            if isnumeric(obj.value) || islogical(obj.value)
+                v =  obj.value;
+            elseif ischar(obj.value)
+                v = int32(str2num(obj.value));
+            else
+                display_msg(sprintf('%s is not a lustre Int Expression', obj.value), ...
+                    MsgType.ERROR, 'IntExpr', '');
+                v = obj.value;
+            end
         end
         %%
         function new_obj = deepCopy(obj)
@@ -31,6 +39,14 @@ classdef IntExpr < LustreExpr
                 new_obj = obj;
             end
         end
+        %% nbOccurance
+        function nb_occ = nbOccuranceVar(varargin)
+            nb_occ = 0;
+        end
+        %% substituteVars
+        function new_obj = substituteVars(obj, varargin)
+            new_obj = obj;
+        end
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
             new_obj = obj;
@@ -41,17 +57,17 @@ classdef IntExpr < LustreExpr
         end
         
         %% This function is used by Stateflow function SF_To_LustreNode.getPseudoLusAction
-        function varIds = GetVarIds(obj)
+        function varIds = GetVarIds(~)
             varIds = {};
         end
         % This function is used in Stateflow compiler to change from imperative
         % code to Lustre
-        function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft)
+        function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, ~)
             new_obj = obj;
         end
         
         %% This function is used by KIND2 LustreProgram.print()
-        function nodesCalled = getNodesCalled(obj)
+        function nodesCalled = getNodesCalled(~)
             nodesCalled = {};
         end
         
@@ -64,19 +80,7 @@ classdef IntExpr < LustreExpr
         end
         
         function code = print_lustrec(obj)
-            if isnumeric(obj.value) || islogical(obj.value)
-                code = sprintf('%.0f', obj.value);
-            elseif ischar(obj.value)
-                if contains(obj.value, '.')
-                    code = sprintf('%.0f', str2num(obj.value));
-                else
-                    code = obj.value;
-                end
-            else
-                display_msg(sprintf('%s is not a lustre boolean Expression', obj.value), ...
-                    MsgType.ERROR, 'BooleanExpr', '');
-                code = obj.value;
-            end
+            code = sprintf('%.0f', obj.getValue());
         end
         
         function code = print_kind2(obj)

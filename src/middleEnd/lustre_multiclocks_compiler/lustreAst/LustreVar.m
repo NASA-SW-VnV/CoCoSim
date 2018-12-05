@@ -36,6 +36,15 @@ classdef LustreVar < LustreAst
             new_obj = obj;
         end
         
+        %% nbOccuranceVar
+        function nb_occ = nbOccuranceVar(~, ~)
+            nb_occ = 0;
+        end
+        
+         %% substituteVars
+        function new_obj = substituteVars(obj, varargin)
+            new_obj = obj;
+        end
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
             new_obj = obj;

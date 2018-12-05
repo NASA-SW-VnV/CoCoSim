@@ -40,6 +40,19 @@ classdef ContractImportExpr < LustreExpr
             new_obj = ContractImportExpr(obj.name, ...
                 new_inputs, new_outputs);
         end
+        
+        %% nbOccurance
+        function nb_occ = nbOccuranceVar(obj, var)
+            nb_occ = obj.inputs.nbOccuranceVar(var) + obj.outputs.nbOccuranceVar(var);
+        end
+        
+        %% substituteVars 
+        function new_obj = substituteVars(obj, oldVar, newVar)
+            new_inputs = cellfun(@(x) x.substituteVars(oldVar, newVar), obj.inputs, 'UniformOutput', 0);
+            new_outputs = cellfun(@(x) x.substituteVars(oldVar, newVar), obj.outputs, 'UniformOutput', 0);
+            new_obj = ContractImportExpr(obj.name, ...
+                new_inputs, new_outputs);
+        end
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
             new_obj = obj;

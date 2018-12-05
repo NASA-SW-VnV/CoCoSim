@@ -30,6 +30,15 @@ classdef LocalPropertyExpr < LustreExpr
             new_obj = LocalPropertyExpr(obj.id, ...
                 obj.exp.simplify());
         end
+        %% nbOccurance
+        function nb_occ = nbOccuranceVar(obj, var)
+            nb_occ = obj.exp.nbOccuranceVar(var);
+        end
+        
+         %% substituteVars 
+        function new_obj = substituteVars(obj, oldVar, newVar)
+            new_obj = LocalPropertyExpr(obj.id, obj.exp.substituteVars(oldVar, newVar));
+        end
         
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)

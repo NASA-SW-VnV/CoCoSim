@@ -75,7 +75,13 @@ classdef BinaryExpr < LustreExpr
                 obj.right.deepCopy(), ...
                 obj.withPar);
         end
-        
+        %% substituteVars
+        function new_obj = substituteVars(obj, oldVar, newVar)
+            new_obj = BinaryExpr(obj.op,...
+                obj.left.substituteVars( oldVar, newVar),...
+                obj.right.substituteVars( oldVar, newVar), ...
+                obj.withPar);
+        end
          %% simplify expression
         function new_obj = simplify(obj)
             new_op = obj.op;
@@ -112,6 +118,10 @@ classdef BinaryExpr < LustreExpr
                 right_exp, ...
                 obj.withPar);
         end
+        %% nbOcc
+        function nb_occ = nbOccuranceVar(obj, var)
+            nb_occ = obj.left.nbOccuranceVar(var) + obj.right.nbOccuranceVar(var);
+        end
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
             varIds = {};
@@ -144,7 +154,7 @@ classdef BinaryExpr < LustreExpr
         
         % This function is used in Stateflow compiler to change from imperative
         % code to Lustre
-        function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft)
+        function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, ~)
             %BinaryExpr is always on the right of an Equation
             [leftExp, ~] = obj.left.pseudoCode2Lustre(outputs_map, false);
             [rightExp, ~] = obj.right.pseudoCode2Lustre(outputs_map, false);

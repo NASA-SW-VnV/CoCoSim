@@ -35,6 +35,23 @@ classdef VarIdExpr < LustreExpr
         function new_obj = simplify(obj)
             new_obj = obj;
         end
+        
+        %% nbOcc
+        function nb_occ = nbOccuranceVar(obj, var)
+            if isequal(obj.getId(), var.getId())
+                nb_occ = 1;
+            else
+                nb_occ = 0;
+            end
+        end
+        %% substituteVars
+        function new_obj = substituteVars(obj, var, newVar)
+            if isequal(obj.getId(), var.getId())
+                new_obj =  newVar;
+            else
+                new_obj = obj;
+            end
+        end
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
             new_obj = obj;

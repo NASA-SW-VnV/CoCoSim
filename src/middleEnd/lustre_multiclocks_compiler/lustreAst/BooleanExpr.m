@@ -16,7 +16,23 @@ classdef BooleanExpr < LustreExpr
         end
         %%
         function v = getValue(obj)
-            v = obj.value;
+            if isnumeric(obj.value) || islogical(obj.value)
+                v = obj.value;
+            elseif ischar(obj.value)
+                if isequal(obj.value, 'true') || isequal(obj.value, 'false')
+                    v = eval(obj.value);
+                else
+                    if str2num(obj.value) ~= 0
+                        v = true;
+                    else
+                        v = false;
+                    end
+                end
+            else
+                display_msg(sprintf('%s is not a lustre boolean Expression', obj.value), ...
+                    MsgType.ERROR, 'BooleanExpr', '');
+                v = obj.value;
+            end
         end
         %%
         function new_obj = deepCopy(obj)
@@ -26,6 +42,16 @@ classdef BooleanExpr < LustreExpr
         function new_obj = simplify(obj)
             new_obj = obj;
         end
+        %% nbOcc
+        function nb_occ = nbOccuranceVar(varargin)
+            nb_occ = 0;
+        end
+        
+        %% substituteVars
+        function new_obj = substituteVars(obj, varargin)
+            new_obj = obj;
+        end
+        
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
             new_obj = obj;
@@ -35,17 +61,17 @@ classdef BooleanExpr < LustreExpr
             new_obj = obj;
         end
         %% This function is used by Stateflow function SF_To_LustreNode.getPseudoLusAction
-        function varIds = GetVarIds(obj)
+        function varIds = GetVarIds(~)
             varIds = {};
         end
         % This function is used in Stateflow compiler to change from imperative
         % code to Lustre
-        function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft)
+        function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, ~)
             new_obj = obj;
         end
         
         %% This function is used by KIND2 LustreProgram.print()
-        function nodesCalled = getNodesCalled(obj)
+        function nodesCalled = getNodesCalled(~)
             nodesCalled = {};
         end
         
@@ -58,28 +84,14 @@ classdef BooleanExpr < LustreExpr
         end
         
         function code = print_lustrec(obj)
-            if isnumeric(obj.value) || islogical(obj.value)
-                if obj.value
-                    code = 'true';
-                else
-                    code = 'false';
-                end
-            elseif ischar(obj.value)
-                if isequal(obj.value, 'true') || isequal(obj.value, 'false')
-                    code = obj.value;
-                else
-                    if str2num(obj.value) ~= 0
-                        code = 'true';
-                    else
-                        code = 'false';
-                    end
-                end
+            if obj.getValue()
+                code = 'true';
             else
-                display_msg(sprintf('%s is not a lustre boolean Expression', obj.value), ...
-                    MsgType.ERROR, 'BooleanExpr', '');
-                code = obj.value;
+                code = 'false';
             end
         end
+        
+        
         
         
         

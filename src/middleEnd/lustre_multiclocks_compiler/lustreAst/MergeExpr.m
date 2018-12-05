@@ -30,6 +30,16 @@ classdef MergeExpr < LustreExpr
             new_exprs = cellfun(@(x) x.simplify(), obj.exprs, 'UniformOutput', 0);
             new_obj = MergeExpr(obj.clock, new_exprs);
         end
+        %% nbOccuranceVar
+        function nb_occ = nbOccuranceVar(obj, var)
+            nb_occ_perEq = cellfun(@(x) x.nbOccuranceVar(var), obj.exprs, 'UniformOutput', true);
+            nb_occ = sum(nb_occ_perEq);
+        end
+        %% substituteVars
+        function new_obj = substituteVars(obj, oldVar, newVar)
+            new_exprs = cellfun(@(x) x.substituteVars(oldVar, newVar), obj.exprs, 'UniformOutput', 0);
+            new_obj = MergeExpr(obj.clock, new_exprs);
+        end
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
             varIds = {};
@@ -47,7 +57,7 @@ classdef MergeExpr < LustreExpr
         end
         %% This function is used by Stateflow function SF_To_LustreNode.getPseudoLusAction
         function varIds = GetVarIds(obj)
-            varIds = {};
+            varIds = obj.clock.GetVarIds();
             for i=1:numel(obj.exprs)
                 varIds_i = obj.exprs{i}.GetVarIds();
                 varIds = [varIds, varIds_i];

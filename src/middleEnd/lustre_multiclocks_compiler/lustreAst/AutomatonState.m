@@ -92,7 +92,14 @@ classdef AutomatonState < LustreExpr
             new_obj = AutomatonState(obj.name, new_local_vars, ...
                 new_strongTrans, new_weakTrans, new_body);
         end
-        
+         %% nbOccuranceVar ignored in Automaton
+        function nb_occ = nbOccuranceVar(varargin)
+            nb_occ = 0;
+        end
+        %% substituteVars ignored in Automaton
+        function new_obj = substituteVars(obj, varargin)
+            new_obj = obj;
+        end
         %%
         function code = print(obj, backend)
             %TODO: check if lustrec syntax is OK for jkind and prelude.

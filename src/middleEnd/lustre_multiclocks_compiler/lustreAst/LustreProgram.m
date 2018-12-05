@@ -47,6 +47,14 @@ classdef LustreProgram < LustreAst
             new_obj = LustreProgram(obj.opens, new_types, new_nodes, new_contracts);
         end
         
+        function new_obj = simplify(obj)
+            new_nodes = cellfun(@(x) x.simplify(), obj.nodes, ...
+                'UniformOutput', 0);
+            new_contracts = cellfun(@(x) x.simplify(), obj.contracts,...
+                'UniformOutput', 0);
+            new_obj = LustreProgram(obj.opens, obj.types, new_nodes, new_contracts);
+        end
+        
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
             new_obj = obj;
@@ -57,16 +65,15 @@ classdef LustreProgram < LustreAst
         end
         %% This function is used in Stateflow compiler to change from imperative
         % code to Lustre
-        function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft)
+        function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, ~)
             %it is not used by stateflow.
             new_obj = obj;
         end
-        
-        %% simplify expression
-        function new_obj = simplify(obj)
-            new_obj = obj;
+       
+        %% nbOccuranceVar is used within a node
+        function nb_occ = nbOccuranceVar(varargin)
+            nb_occ = 0;
         end
-        
         %%
         function code = print(obj, backend)
             %TODO: check if LUSTREC syntax is OK for the other backends.

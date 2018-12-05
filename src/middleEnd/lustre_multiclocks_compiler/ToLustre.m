@@ -48,6 +48,11 @@ function [nom_lustre_file, xml_trace, status, unsupportedOptions, abstractedBloc
     catch
         CHECK_SF_ACTIONS = 1;
     end
+    try
+        cocosim_optim = evalin('base', 'cocosim_optim');
+    catch
+        cocosim_optim = 1;
+    end
     for i=1:numel(varargin)
         if strcmp(varargin{i}, 'nodisplay')
             mode_display = 0;
@@ -55,6 +60,8 @@ function [nom_lustre_file, xml_trace, status, unsupportedOptions, abstractedBloc
             forceGeneration = 1;
         elseif strcmp(varargin{i}, 'skip_sf_actions_check')
             CHECK_SF_ACTIONS = 0;
+        elseif strcmp(varargin{i}, 'skip_optim')
+            cocosim_optim = 0;
         end
     end
     %% initialize outputs
@@ -156,7 +163,9 @@ function [nom_lustre_file, xml_trace, status, unsupportedOptions, abstractedBloc
         enumsAst{i} = EnumTypeExpr(keys{i}, TOLUSTRE_ENUMS_MAP(keys{i}));
     end
     program =  LustreProgram(open_list, enumsAst, nodes_ast, contracts_ast);
-    
+    if cocosim_optim
+        program = program.simplify();
+    end
     % copy Kind2 libraries
     if BackendType.isKIND2(backend)
         if ismember('lustrec_math', open_list)

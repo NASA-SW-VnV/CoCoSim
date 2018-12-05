@@ -35,6 +35,16 @@ classdef ParenthesesExpr < LustreExpr
                 new_obj = ParenthesesExpr(new_expr);
             end
         end
+        %% nbOccuranceVar
+        function nb_occ = nbOccuranceVar(obj, var)
+            nb_occ = obj.expr.nbOccuranceVar(var);
+        end
+        
+        %% substituteVars
+        function new_obj = substituteVars(obj, var, newVar)
+            new_expr = obj.expr.substituteVars(var, newVar);
+            new_obj = ParenthesesExpr(new_expr);
+        end
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
             [new_expr, varIds] = obj.expr.changePre2Var();

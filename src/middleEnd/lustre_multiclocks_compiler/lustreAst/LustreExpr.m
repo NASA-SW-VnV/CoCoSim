@@ -13,6 +13,7 @@ classdef LustreExpr < LustreAst
         deepCopy(obj)
         changePre2Var(obj)
         simplify(obj)
+        nbOccuranceVar(obj)
         print(obj, backend)
         print_lustrec(obj)
         print_kind2(obj)

@@ -9,14 +9,22 @@ classdef RealExpr < LustreExpr
     properties
         value;
     end
-   
-    methods 
+    
+    methods
         function obj = RealExpr(v)
             obj.value = v;
         end
         %%
         function v = getValue(obj)
-            v = obj.value;
+            if isnumeric(obj.value) || islogical(obj.value)
+                v =  obj.value;
+            elseif ischar(obj.value)
+                v = str2double(obj.value);
+            else
+                display_msg(sprintf('%s is not a lustre Real Expression', obj.value), ...
+                    MsgType.ERROR, 'RealExpr', '');
+                v = obj.value;
+            end
         end
         %%
         function new_obj = deepCopy(obj)
@@ -26,6 +34,15 @@ classdef RealExpr < LustreExpr
         function new_obj = simplify(obj)
             new_obj = obj;
         end
+        %% nbOccuranceVar
+        function nb_occ = nbOccuranceVar(varargin)
+            nb_occ = 0;
+        end
+        %% substituteVars
+        function new_obj = substituteVars(obj, varargin)
+            new_obj = obj;
+        end
+        
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
             new_obj = obj;
@@ -36,17 +53,17 @@ classdef RealExpr < LustreExpr
         end
         
         %% This function is used by Stateflow function SF_To_LustreNode.getPseudoLusAction
-        function varIds = GetVarIds(obj)
+        function varIds = GetVarIds(~)
             varIds = {};
         end
         % This function is used in Stateflow compiler to change from imperative
         % code to Lustre
-        function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft)
+        function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, ~)
             new_obj = obj;
         end
         
         %% This function is used by KIND2 LustreProgram.print()
-        function nodesCalled = getNodesCalled(obj)
+        function nodesCalled = getNodesCalled(~)
             nodesCalled = {};
         end
         
@@ -59,19 +76,7 @@ classdef RealExpr < LustreExpr
         end
         
         function code = print_lustrec(obj)
-            if isnumeric(obj.value) || islogical(obj.value)
-                code = sprintf('%.15f', obj.value);
-            elseif ischar(obj.value) 
-                if contains(obj.value, '.')
-                    code = obj.value;
-                else
-                    code = sprintf('%.15f', str2num(obj.value));
-                end
-            else
-                display_msg(sprintf('%s is not a lustre boolean Expression', obj.value), ...
-                    MsgType.ERROR, 'BooleanExpr', '');
-                code = obj.value;
-            end
+            code = sprintf('%.15f', obj.getValue());
             %3.43040000 => 3.4304 code has always "." in it
             code = regexprep(code, '0+$', '0');
         end
@@ -89,6 +94,6 @@ classdef RealExpr < LustreExpr
             code = obj.print_lustrec();
         end
     end
-
+    
 end
 

@@ -42,6 +42,19 @@ classdef ContractModeExpr < LustreExpr
                 'UniformOutput', 0);
             new_obj = ContractModeExpr(obj.name, new_requires, new_ensures);
         end
+        
+        %% nbOccurance
+        function nb_occ = nbOccuranceVar(obj, var)
+            nb_occ = obj.requires.nbOccuranceVar(var) + obj.ensures.nbOccuranceVar(var);
+        end
+        %% substituteVars 
+        function new_obj = substituteVars(obj, oldVar, newVar)
+            new_requires = cellfun(@(x) x.substituteVars(oldVar, newVar), obj.requires, ...
+                'UniformOutput', 0);
+            new_ensures = cellfun(@(x) x.substituteVars(oldVar, newVar), obj.ensures, ...
+                'UniformOutput', 0);
+            new_obj = ContractModeExpr(obj.name, new_requires, new_ensures);
+        end
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
             new_obj = obj;

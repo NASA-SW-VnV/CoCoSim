@@ -12,20 +12,20 @@ classdef LustreContract < LustreAst
         inputs; %list of Vars
         outputs;
         localVars;
-        localEqs;
+        bodyEqs;
         islocalContract;
     end
     
     methods
         function obj = LustreContract(metaInfo, name, inputs, ...
-                outputs, localVars, localEqs, islocalContract)
+                outputs, localVars, bodyEqs, islocalContract)
             if nargin == 0
                 obj.metaInfo = '';
                 obj.name = '';
                 obj.inputs = {};
                 obj.outputs = {};
                 obj.localVars = {};
-                obj.localEqs = {};
+                obj.bodyEqs = {};
                 obj.islocalContract = 1;
             else
                 obj.metaInfo = metaInfo;
@@ -33,7 +33,7 @@ classdef LustreContract < LustreAst
                 obj.setInputs(inputs);
                 obj.setOutputs(outputs);
                 obj.setLocalVars(localVars);
-                obj.setBody(localEqs);
+                obj.setBodyEqs(bodyEqs);
                 obj.islocalContract = islocalContract;
             end
         end
@@ -78,15 +78,15 @@ classdef LustreContract < LustreAst
         function addVar(obj, v)
             obj.localVars{end+1} = v;
         end
-        function setBody(obj, localEqs)
-            if ~iscell(localEqs)
-                obj.localEqs{1} = localEqs;
+        function setBodyEqs(obj, bodyEqs)
+            if ~iscell(bodyEqs)
+                obj.bodyEqs{1} = bodyEqs;
             else
-                obj.localEqs = localEqs;
+                obj.bodyEqs = bodyEqs;
             end
         end
         function addLocalEqs(obj, eq)
-            obj.localEqs{end+1} = eq;
+            obj.bodyEqs{end+1} = eq;
         end
         
         %%
@@ -110,7 +110,7 @@ classdef LustreContract < LustreAst
             new_localVars = cellfun(@(x) x.deepCopy(), obj.localVars, ...
                 'UniformOutput', 0);
             
-            new_localEqs = cellfun(@(x) x.deepCopy(), obj.localEqs, ...
+            new_localEqs = cellfun(@(x) x.deepCopy(), obj.bodyEqs, ...
                 'UniformOutput', 0);
             
             new_obj = LustreContract(obj.metaInfo, obj.name,...
@@ -121,11 +121,23 @@ classdef LustreContract < LustreAst
         
         %% simplify expression
         function new_obj = simplify(obj)
-            new_obj = obj.deepCopy();
-            new_localEqs = cellfun(@(x) x.simplify(), new_obj.localEqs, ...
+            new_obj = obj.substituteVars();
+            new_localEqs = cellfun(@(x) x.simplify(), new_obj.bodyEqs, ...
                 'UniformOutput', 0);
-            new_obj.setBody(new_localEqs);
+            new_obj.setBodyEqs(new_localEqs);
         end
+        
+        %% nbOccuranceVar
+        function nb_occ = nbOccuranceVar(obj, var)
+            nb_occ_perEq = cellfun(@(x) x.nbOccuranceVar(var), obj.bodyEqs, 'UniformOutput', true);
+            nb_occ = sum(nb_occ_perEq);
+        end
+        
+         %% substituteVars 
+        function new_obj = substituteVars(obj)
+            new_obj = LustreNode.contractNode_substituteVars(obj);
+        end
+        
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
             new_obj = obj;
@@ -140,10 +152,10 @@ classdef LustreContract < LustreAst
         function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft)
             if obj.islocalContract
                 %Only import contracts are supported for the moment.
-                for i=1:numel(obj.localEqs)
-                    if isa(obj.localEqs{i}, 'ContractImportExpr')
-                        [obj.localEqs{i}, outputs_map] = ...
-                            obj.localEqs{i}.pseudoCode2Lustre(outputs_map);
+                for i=1:numel(obj.bodyEqs)
+                    if isa(obj.bodyEqs{i}, 'ContractImportExpr')
+                        [obj.bodyEqs{i}, outputs_map] = ...
+                            obj.bodyEqs{i}.pseudoCode2Lustre(outputs_map);
                     end
                 end
                 new_obj = obj;
@@ -160,7 +172,7 @@ classdef LustreContract < LustreAst
                     nodesCalled = [nodesCalled, objects{i}.getNodesCalled()];
                 end
             end
-            addNodes(obj.localEqs);
+            addNodes(obj.bodyEqs);
         end
         
         
@@ -216,8 +228,8 @@ classdef LustreContract < LustreAst
         
         %% utils
         function lines = getLustreEq(obj, lines, backend)
-            for i=1:numel(obj.localEqs)
-                eq = obj.localEqs{i};
+            for i=1:numel(obj.bodyEqs)
+                eq = obj.bodyEqs{i};
                 if ~isa(eq, 'LustreEq')
                     % assumptions, guarantees, modes...
                     lines{end+1} = sprintf('\t%s\n', ...

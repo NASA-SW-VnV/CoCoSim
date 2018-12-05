@@ -1,5 +1,5 @@
-classdef LustreComment < LustreExpr
-    %LustreComment
+classdef DummyExpr < LustreExpr
+    %DummyExpr
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -7,23 +7,13 @@ classdef LustreComment < LustreExpr
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     properties
-        text;
-        isMultiLine;
+        
     end
     
     methods
-        function obj = LustreComment(text, isMultiLine)
-            obj.text = text;
-            if nargin < 2
-                obj.isMultiLine = false;
-            else
-                obj.isMultiLine = isMultiLine;
-            end
-        end
         
         function new_obj = deepCopy(obj)
-            new_obj = LustreComment(obj.text,...
-                obj.isMultiLine);
+            new_obj = obj;
         end
         
         %% simplify expression
@@ -34,7 +24,7 @@ classdef LustreComment < LustreExpr
         function nb_occ = nbOccuranceVar(varargin)
             nb_occ = 0;
         end
-        %% substituteVars
+         %% substituteVars
         function new_obj = substituteVars(obj, varargin)
             new_obj = obj;
         end
@@ -55,41 +45,32 @@ classdef LustreComment < LustreExpr
         end
         
         %% This function is used by KIND2 LustreProgram.print()
-        function nodesCalled = getNodesCalled(varargin)
+        function nodesCalled = getNodesCalled(~)
             nodesCalled = {};
         end
         
         
         
         %%
-        function code = print(obj, backend)
-            code = obj.print_lustrec(backend);
+        function code = print(varargin)
+            code = '';
         end
-        function code = print_lustrec(obj, ~)
-            if isempty(obj.text)
-                return;
-            end
-            if obj.isMultiLine
-                code = sprintf('(*\n%s\n*)\n', ...
-                    obj.text);
-            else
-                code = sprintf('--%s', ...
-                    obj.text);
-            end
+        function code = print_lustrec(varargin)
+            code = '';
+        end
+        function code = print_kind2(varargin)
+            code = '';
+        end
+        function code = print_zustre(varargin)
+            code = '';
+        end
+        function code = print_jkind(varargin)
+            code = '';
+        end
+        function code = print_prelude(varargin)
+            code = '';
         end
         
-        function code = print_kind2(obj)
-            code = obj.print_lustrec(BackendType.KIND2);
-        end
-        function code = print_zustre(obj)
-            code = obj.print_lustrec(BackendType.ZUSTRE);
-        end
-        function code = print_jkind(obj)
-            code = obj.print_lustrec(BackendType.JKIND);
-        end
-        function code = print_prelude(obj)
-            code = obj.print_lustrec(BackendType.PRELUDE);
-        end
     end
     
 end

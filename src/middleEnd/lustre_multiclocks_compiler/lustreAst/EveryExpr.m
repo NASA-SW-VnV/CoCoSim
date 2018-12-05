@@ -34,6 +34,18 @@ classdef EveryExpr < LustreExpr
             new_obj = EveryExpr(obj.nodeName, ...
                 new_args, obj.cond.simplify());
         end
+        
+        %% substituteVars 
+        function new_obj = substituteVars(obj, oldVar, newVar)
+            new_args = cellfun(@(x) x.substituteVars(oldVar, newVar), obj.nodeArgs, 'UniformOutput', 0);
+            new_obj = EveryExpr(obj.nodeName, ...
+                new_args, obj.cond);
+        end
+        %% nbOccurance
+        function nb_occ = nbOccuranceVar(obj, var)
+            nb_occ_perEq = cellfun(@(x) x.nbOccuranceVar(var), obj.nodeArgs, 'UniformOutput', true);
+            nb_occ = sum(nb_occ_perEq);
+        end
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
             varIds = {};

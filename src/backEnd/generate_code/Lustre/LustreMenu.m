@@ -4,19 +4,32 @@
 % All Rights Reserved.
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function schema = LustreMenu(callbackInfo)
-schema = sl_action_schema;
+function schema = LustreMenu(~)
+schema = sl_container_schema;
 schema.label = 'Lustre';
-schema.callback = @LusCompilerCallback;
+schema.statustip = 'Generate Lustre Code';
+schema.autoDisableWhen = 'Busy';
+schema.childrenFcns = {@getKind, @getLustrec};
 end
 
+function schema = getKind(varargin)
+schema = sl_action_schema;
+schema.label = 'Kind2';
+schema.callback =  @(x) LusCompilerCallback(BackendType.KIND2, x);
+end
 
-function LusCompilerCallback(callbackInfo)
+function schema = getLustrec(varargin)
+schema = sl_action_schema;
+schema.label = 'LustreC';
+schema.callback =  @(x) LusCompilerCallback(BackendType.LUSTREC, x);
+end
+
+function LusCompilerCallback(bckend, ~)
 try
     mdl_full_path = MenuUtils.get_file_name(gcs);
     CoCoSimPreferences = load_coco_preferences();
     if CoCoSimPreferences.lustreCompiler == 1
-        ToLustre(mdl_full_path);
+        ToLustre(mdl_full_path, [], bckend);
     elseif CoCoSimPreferences.lustreCompiler == 2
         cocoSpecCompiler(mdl_full_path);
     else

@@ -53,6 +53,17 @@ classdef NodeCallExpr < LustreExpr
             end
             new_obj = NodeCallExpr(obj.nodeName, new_args);
         end
+        
+        %% nbOccuranceVar
+        function nb_occ = nbOccuranceVar(obj, var)
+            nb_occ_perEq = cellfun(@(x) x.nbOccuranceVar(var), obj.args, 'UniformOutput', true);
+            nb_occ = sum(nb_occ_perEq);
+        end
+        %% substituteVars
+        function new_obj = substituteVars(obj, var, newVar)
+            new_args = cellfun(@(x) x.substituteVars(var, newVar), obj.args, 'UniformOutput', 0);
+            new_obj = NodeCallExpr(obj.nodeName, new_args);
+        end
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
             varIds = {};
