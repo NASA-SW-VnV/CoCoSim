@@ -23,7 +23,7 @@ classdef Kind2Utils2
         function [status, solver_output] = runKIND2(...
                 verif_lus_path,...
                 node, ...
-                OPTS, KIND2, Z3, timeout)
+                OPTS, KIND2, Z3, timeout, timeout_analysis)
             
             status = 0;
             
@@ -39,6 +39,9 @@ classdef Kind2Utils2
             if nargin >= 2 && ~isempty(node)
                 OPTS = sprintf('%s --lus_main %s', OPTS, node);
             end
+            if nargin >= 7 && ~isempty(timeout_analysis)
+                OPTS = sprintf('%s --timeout_analysis %d', OPTS, timeout_analysis);
+            end
             %
             if nargin < 4
                 tools_config;
@@ -50,7 +53,7 @@ classdef Kind2Utils2
                 end
             end
             %
-            if ~exist('timeout', 'var')
+            if ~exist('timeout', 'var') || isempty(timeout)
                 CoCoSimPreferences = load_coco_preferences();
                 if isfield(CoCoSimPreferences, 'verificationTimeout')
                     timeout = num2str(CoCoSimPreferences.verificationTimeout);

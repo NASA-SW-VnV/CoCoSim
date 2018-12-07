@@ -1,9 +1,21 @@
 node imported acos (x: real) returns (y: real) ;
+(*@contract
+     	guarantee (y >= 0.0 and y <= 3.1416);
+*)
 node imported acosh (x: real) returns (y: real) ;
 node imported asin (x: real) returns (y: real) ;
+(*@contract
+     	guarantee (y >= -1.5708 and y <= 1.5708);
+*)
 node imported asinh (x: real) returns (y: real) ;
 node imported atan (x: real) returns (y: real) ;
+(*@contract
+     	guarantee (y >= -1.5708 and y <= 1.5708);
+*)
 node imported atan2(x:real; n: real) returns (y: real) ;
+(*@contract
+     	guarantee (y >= -3.1416 and y <= 3.1416);
+*)
 node imported atanh (x: real) returns (y: real) ;
 node imported cbrt (x: real) returns (y: real) ;
 node imported cos (x: real) returns (y: real) ;
@@ -20,6 +32,12 @@ node imported fmod (x,y: real) returns (z: real) ;
 node imported log (x: real) returns (y: real) ;
 node imported log10 (x: real) returns (y: real) ;
 node imported pow (x:real; n: real) returns (y: real) ;
+(*@contract
+        assume n >= 0.0;
+     	guarantee (n > 1.0) => y > x;
+     	guarantee (n = 1.0) => y = x;
+        guarantee (n < 1.0) => y < x;
+*)
 node imported round (x: real) returns (y: real) ;
 node imported sin (x: real) returns (y: real) ;
 (*@contract

@@ -53,15 +53,22 @@ if BackendType.isKIND2(backend)
         display_msg('Having both Assertion/Proof blocks and contracts are not supported in KIND2.', MsgType.ERROR, 'toLustreVerify', '');
         return;
     end
+    CoCoSimPreferences = load_coco_preferences();
+    if isfield(CoCoSimPreferences, 'verificationTimeout')
+        timeout = CoCoSimPreferences.verificationTimeout;
+    else
+        timeout = 120;
+    end
     if ~isempty(Assertions_list)
         OPTS = ' --slice_nodes false --check_subproperties true ';
+        timeout_analysis = timeout / numel(Assertions_list);
     elseif ~isempty(contractBlocks_list)
-        CoCoSimPreferences = load_coco_preferences();
         if CoCoSimPreferences.compositionalAnalysis
             OPTS = '--modular true --compositional true';
         else
             OPTS = '--modular true';
         end
+        timeout_analysis = timeout / numel(contractBlocks_list);
     else
         display_msg('No Property to check.', MsgType.RESULT, 'toLustreVerify', '');
         return;
@@ -69,7 +76,7 @@ if BackendType.isKIND2(backend)
     [status, kind2_out] = Kind2Utils2.runKIND2(...
         nom_lustre_file,...
         top_node_name, ...
-        OPTS, KIND2, Z3);
+        OPTS, KIND2, Z3, timeout, timeout_analysis);
     if status
         return;
     end

@@ -18,10 +18,20 @@ classdef ContractValidatorBlock_To_Lustre < Block_To_Lustre
             
         end
         
-        function options = getUnsupportedOptions(obj, varargin)
+        function options = getUnsupportedOptions(obj,parent, blk, varargin)
             % add your unsuported options list here
-           options = obj.unsupported_options;
-           
+            %Check Validator inports should be all one
+            %dimensional booleans
+            for i=1:numel(blk.CompiledPortWidths.Inport)
+                if blk.CompiledPortWidths.Inport(i) > 1
+                    obj.addUnsupported_options(...
+                        sprintf('Expected Scalar Boolean in Inport %d in Block Validator %s, got a width of %d.', ...
+                        i, blk.Origin_path, blk.CompiledPortWidths.Inport(i)));
+                end
+            end
+            options = obj.unsupported_options;
+            
+            
         end
         %%
         function is_Abstracted = isAbstracted(varargin)

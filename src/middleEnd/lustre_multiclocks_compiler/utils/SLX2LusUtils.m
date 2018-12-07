@@ -566,7 +566,8 @@ classdef SLX2LusUtils < handle
                     return;
                 end
                 SignalName = SignalHierarchy.SignalName;
-                if isempty(SignalHierarchy.SignalName)
+                if isempty(SignalHierarchy.SignalName) ...
+                        || SLXUtils.isSimulinkBus(SignalHierarchy.BusObject)
                     SignalName = SignalHierarchy.BusObject;
                 end
                 if isempty(SignalName)

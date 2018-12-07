@@ -9,6 +9,11 @@ function new_model_path = transformContractToSLDV(model_path)
         errordlg('Simulink Design Verifier is needed.')
     end
     [~, model, ~] = fileparts(new_model_path);
+    % remove all model reference
+    try
+        ModelReference_pp(model);
+    catch
+    end
     contractBlocks_list = find_system(model, ...
         'LookUnderMasks', 'all',  'MaskType', 'ContractBlock');
     if isempty(contractBlocks_list)
@@ -85,9 +90,31 @@ function status = transformContract(block)
     delete_block(validator_blk);
     delete_block(outport_blk);
     
-    set_param(block, 'MaskType', 'VerificationSubsystem');
-    set_param(block, 'TreatAsAtomicUnit', 'on');
+    %delete mask
     p = Simulink.Mask.get(block);
-    p.set('Display', ...
+    p.delete
+    %create new mask
+    set_param(block, 'TreatAsAtomicUnit', 'on');
+    p = Simulink.Mask.create(block);
+    p.set('Type', 'VerificationSubsystem',...
+        'Display', ...
         'image(imread(''sldvicon_versubsys.png'',''BackGroundColor'',[1 1 1]),''center'');');
+    
+    
+    % remove Guarantee, Assume and Mode MaskType
+    guarantees = find_system(block, 'LookUnderMasks', 'all', ...
+        'SearchDepth', 1, 'MaskType', 'ContractGuaranteeBlock');
+    for i=1:numel(guarantees)
+        set_param(guarantees{i}, 'MaskType', '');
+    end
+    assumes = find_system(block, 'LookUnderMasks', 'all', ...
+        'SearchDepth', 1, 'MaskType', 'ContractAssumeBlock');
+    for i=1:numel(assumes)
+        set_param(assumes{i}, 'MaskType', '');
+    end
+    modes = find_system(block, 'LookUnderMasks', 'all', ...
+        'SearchDepth', 1, 'MaskType', 'ContractModeBlock');
+    for i=1:numel(modes)
+        set_param(modes{i}, 'MaskType', '');
+    end
 end

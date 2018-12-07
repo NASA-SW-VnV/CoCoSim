@@ -71,7 +71,7 @@ else
     LUSTRET = fullfile(solvers_path, 'bin', 'lustret');
     LUCTREC_INCLUDE_DIR = fullfile(solvers_path, 'include', 'lustrec');
     ZUSTRE = fullfile(solvers_path, 'bin', 'zustre');
-    Z3 = fullfile(solvers_path,'spacer', 'bin', 'z3');
+    Z3 = fullfile(solvers_path,'z3', 'bin', 'z3');
     KIND2 = fullfile(solvers_path, 'bin', 'kind2');
     JKIND = 'Path to Jkind binary';
     SEAHORN = 'PATH';

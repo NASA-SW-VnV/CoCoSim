@@ -27,8 +27,10 @@ if not(isempty(contractBlocks_list))
         display_msg(contractBlocks_list{i}, MsgType.DEBUG, 'KindContract_pp', '');
         % setting the MaskType
         try
-            set_param(contractBlocks_list{i},'MaskType',...
-                get_param(contractBlocks_list{i}, 'ContractBlockType'));
+            if isempty(get_param(contractBlocks_list{i},'MaskType'))
+                set_param(contractBlocks_list{i},'MaskType',...
+                    get_param(contractBlocks_list{i}, 'ContractBlockType'));
+            end
         catch me
             display_msg(me.getReport(), MsgType.DEBUG, 'KindContract_pp', '');
         end
