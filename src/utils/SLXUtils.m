@@ -269,8 +269,11 @@ classdef SLXUtils
                 elseif numel(dimension) >= 3
                     dimension = dimension(2:end);
                 end
+                width_struct = get_param(block,'CompiledPortWidths');
+                width = width_struct.Outport;
                 model_inputs_struct = [model_inputs_struct, struct('name',BUtils.naming_alone(block),...
-                    'datatype', DataType, 'dimension', dimension)];
+                    'datatype', DataType, 'dimension', dimension, ...
+                    'width', width)];
                 
             end
             code_off=sprintf('%s([], [], [], ''term'')', slx_file_name);

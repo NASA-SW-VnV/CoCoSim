@@ -21,9 +21,18 @@ classdef StateflowState_To_Lustre
         
         %% State Actions and DefaultTransitions Nodes
         function  [external_nodes, external_libraries ] = ...
-                write_ActionsNodes(state)
+                write_ActionsNodes(state, data_map)
             external_nodes = {};
             external_libraries = {};
+            % Create transitions actions as external nodes that will be called by the states nodes.
+            function addNodes(t, isDefaultTrans)
+                % Transition actions
+                [transition_nodes_j, external_libraries_j ] = ...
+                    StateflowTransition_To_Lustre.get_Actions(t, data_map, state, ...
+                    isDefaultTrans);
+                external_nodes = [external_nodes, transition_nodes_j];
+                external_libraries = [external_libraries, external_libraries_j];
+            end
             
             % Default Transitions
             T = state.Composition.DefaultTransitions;
@@ -31,7 +40,7 @@ classdef StateflowState_To_Lustre
                 addNodes(T{i}, true)
             end
             [node,  external_libraries_i] = ...
-                StateflowTransition_To_Lustre.get_DefaultTransitionsNode(state);
+                StateflowTransition_To_Lustre.get_DefaultTransitionsNode(state, data_map);
             if ~isempty(node)
                 external_nodes{end+1} = node;
             end
@@ -39,19 +48,11 @@ classdef StateflowState_To_Lustre
             
             % Create State actions as external nodes that will be called by the states nodes.
             [action_nodes,  external_libraries_i] = ...
-                StateflowState_To_Lustre.get_state_actions(state);
+                StateflowState_To_Lustre.get_state_actions(state, data_map);
             external_nodes = [external_nodes, action_nodes];
             external_libraries = [external_libraries, external_libraries_i];
             
-            % Create transitions actions as external nodes that will be called by the states nodes.
-            function addNodes(t, isDefaultTrans)
-                % Transition actions
-                [transition_nodes_j, external_libraries_j ] = ...
-                    StateflowTransition_To_Lustre.get_Actions(t, state, ...
-                    isDefaultTrans);
-                external_nodes = [external_nodes, transition_nodes_j];
-                external_libraries = [external_libraries, external_libraries_j];
-            end
+            
             T = state.InnerTransitions;
             for i=1:numel(T)
                 addNodes(T{i}, false)
@@ -65,16 +66,16 @@ classdef StateflowState_To_Lustre
         
         %% InnerTransitions and  OuterTransitions Nodes
         function  [external_nodes, external_libraries ] = ...
-                write_TransitionsNodes(state)
+                write_TransitionsNodes(state, data_map)
             external_nodes = {};
             [node, external_libraries] = ...
-                StateflowTransition_To_Lustre.get_InnerTransitionsNode(state);
+                StateflowTransition_To_Lustre.get_InnerTransitionsNode(state, data_map);
             if ~isempty(node)
                 external_nodes{end+1} = node;
             end
             
             [node,  external_libraries_i] = ...
-                StateflowTransition_To_Lustre.get_OuterTransitionsNode(state);
+                StateflowTransition_To_Lustre.get_OuterTransitionsNode(state, data_map);
             if ~isempty(node)
                 external_nodes{end+1} = node;
             end
@@ -190,24 +191,24 @@ classdef StateflowState_To_Lustre
         
         %% State actions
         function [action_nodes,  external_libraries] = ...
-                get_state_actions(state)
+                get_state_actions(state, data_map)
             action_nodes = {};
             %write_entry_action
             [entry_action_node, external_libraries] = ...
-                StateflowState_To_Lustre.write_entry_action(state);
+                StateflowState_To_Lustre.write_entry_action(state, data_map);
             if ~isempty(entry_action_node)
                 action_nodes{end+1} = entry_action_node;
             end
             %write_exit_action
             [exit_action_node, ext_lib] = ...
-                StateflowState_To_Lustre.write_exit_action(state);
+                StateflowState_To_Lustre.write_exit_action(state, data_map);
             if ~isempty(exit_action_node)
                 action_nodes{end+1} = exit_action_node;
             end
             %write_during_action
             external_libraries = [external_libraries, ext_lib];
             [during_action_node, ext_lib2] = ...
-                StateflowState_To_Lustre.write_during_action(state);
+                StateflowState_To_Lustre.write_during_action(state, data_map);
             if ~isempty(during_action_node)
                 action_nodes{end+1} = during_action_node;
             end
@@ -215,7 +216,7 @@ classdef StateflowState_To_Lustre
         end
         %% ENTRY ACTION
         function [main_node, external_libraries] = ...
-                write_entry_action(state)
+                write_entry_action(state, data_map)
             global SF_STATES_NODESAST_MAP SF_STATES_PATH_MAP;
             external_libraries = {};
             main_node = {};
@@ -253,7 +254,7 @@ classdef StateflowState_To_Lustre
                 for i=1:nb_actions
                     try
                         [lus_action, outputs_i, inputs_i, external_libraries_i] = ...
-                            getPseudoLusAction(actions{i});
+                            getPseudoLusAction(actions{i}, data_map);
                         if isa(lus_action, 'LustreEq')
                             body{end+1} = LustreEq(lus_action.getLhs(), ...
                                 IteExpr(UnaryExpr(UnaryExpr.NOT, isInner), ...
@@ -308,20 +309,34 @@ classdef StateflowState_To_Lustre
         end
         %% EXIT ACTION
         function [main_node, external_libraries] = ...
-                write_exit_action(state)
+                write_exit_action(state, data_map)
             global SF_STATES_NODESAST_MAP SF_STATES_PATH_MAP;
             external_libraries = {};
             main_node = {};
             body = {};
             outputs = {};
             inputs = {};
-            
+            variables = {};
             parentName = fileparts(state.Path);
             if isempty(parentName)
                 %main chart
                 return;
             end
+            %get stateEnumType
+            idStateName = StateflowState_To_Lustre.getStateIDName(state);
+            [stateEnumType, stateInactive] = ...
+                StateflowState_To_Lustre.addStateEnum(state, [], ...
+                false, false, true);
             
+            % history junctions
+            junctions = state.Composition.SubJunctions;
+            typs = cellfun(@(x) x.Type, junctions, 'UniformOutput', false);
+            hjunctions = junctions(strcmp(typs, 'HISTORY'));
+            if ~isempty(hjunctions)
+                variables{end+1} = LustreVar('_HistoryJunction', stateEnumType);
+                body{end+1} = LustreEq(VarIdExpr('_HistoryJunction'),...
+                    VarIdExpr(idStateName));
+            end
             %write children states exit action
             [actions, outputs_i, inputs_i] = ...
                 StateflowState_To_Lustre.write_children_actions(state, 'Exit');
@@ -339,7 +354,7 @@ classdef StateflowState_To_Lustre
             for i=1:nb_actions
                 try
                     [lus_action, outputs_i, inputs_i, external_libraries_i] = ...
-                        getPseudoLusAction(actions{i});
+                        getPseudoLusAction(actions{i}, data_map);
                     if isa(lus_action, 'LustreEq')
                         body{end+1} = LustreEq(lus_action.getLhs(), ...
                             IteExpr(UnaryExpr(UnaryExpr.NOT, isInner), ...
@@ -374,29 +389,28 @@ classdef StateflowState_To_Lustre
             
             state_parent = SF_STATES_PATH_MAP(parentName);
             idParentName = StateflowState_To_Lustre.getStateIDName(state_parent);
-            [stateEnumType, childName] = ...
+            [parentEnumType, parentInactive] = ...
                     StateflowState_To_Lustre.addStateEnum(state_parent, [], ...
                     false, false, true);
             body{end + 1} = LustreComment('set state as inactive');
             % idParentName = if (not isInner) then 0 else idParentName;
             body{end + 1} = LustreEq(VarIdExpr(idParentName), ...
                 IteExpr(UnaryExpr(UnaryExpr.NOT, isInner), ...
-                VarIdExpr(childName), VarIdExpr(idParentName)));
-            outputs{end + 1} = LustreVar(idParentName, stateEnumType);
-            inputs{end + 1} = LustreVar(idParentName, stateEnumType);
+                VarIdExpr(parentInactive), VarIdExpr(idParentName)));
+            outputs{end + 1} = LustreVar(idParentName, parentEnumType);
+            inputs{end + 1} = LustreVar(idParentName, parentEnumType);
             % add isInner input
             inputs{end + 1} = LustreVar(isInner, 'bool');
             % set state children as inactive
-            junctions = state.Composition.SubJunctions;
-            typs = cellfun(@(x) x.Type, junctions, 'UniformOutput', false);
-            hjunctions = junctions(strcmp(typs, 'HISTORY'));
-            if (~isempty(state.Composition.Substates) && isempty(hjunctions))
-                idStateName = StateflowState_To_Lustre.getStateIDName(state);
-                [stateEnumType, childName] = ...
-                    StateflowState_To_Lustre.addStateEnum(state, [], ...
-                    false, false, true);
-                body{end+1} = LustreEq(VarIdExpr(idStateName), VarIdExpr(childName));
-                outputs{end+1} = LustreVar(idStateName, stateEnumType);
+            
+            if ~isempty(state.Composition.Substates)  
+                if ~isempty(hjunctions)
+                    body{end+1} = LustreEq(VarIdExpr(idStateName), ...
+                        VarIdExpr('_HistoryJunction'));
+                else
+                    body{end+1} = LustreEq(VarIdExpr(idStateName), VarIdExpr(stateInactive));
+                    outputs{end+1} = LustreVar(idStateName, stateEnumType);
+                end
             end
             
             %create the node
@@ -420,7 +434,7 @@ classdef StateflowState_To_Lustre
         end
         %% DURING ACTION
         function [main_node, external_libraries] = ...
-                write_during_action(state)
+                write_during_action(state, data_map)
             global SF_STATES_NODESAST_MAP;
             external_libraries = {};
             main_node = {};
@@ -441,7 +455,7 @@ classdef StateflowState_To_Lustre
             for i=1:nb_actions
                 try
                     [body{end+1}, outputs_i, inputs_i, external_libraries_i] = ...
-                        getPseudoLusAction(actions{i});
+                        getPseudoLusAction(actions{i}, data_map);
                     outputs = [outputs, outputs_i];
                     inputs = [inputs, inputs_i];
                     external_libraries = [external_libraries, external_libraries_i];
@@ -791,7 +805,14 @@ classdef StateflowState_To_Lustre
             end
             if ~isempty(children_actions)
                 if isParallel
-                    body = [body, children_actions];
+                    if isChart
+                        % entry action condition is concurrent with
+                        % substates nodes call.
+                        body = MatlabUtils.concat(children_actions(2:end),...
+                            children_actions(1));
+                    else
+                        body = [body, children_actions];
+                    end
                 else
                     body{end+1} = ConcurrentAssignments(children_actions);
                 end

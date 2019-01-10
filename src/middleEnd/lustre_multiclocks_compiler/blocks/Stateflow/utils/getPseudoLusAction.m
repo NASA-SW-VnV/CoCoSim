@@ -1,9 +1,9 @@
-function [lus_action, outputs, inputs, external_libraries] = getPseudoLusAction(action, isCondition, ignoreOutInputs)
-    global SF_DATA_MAP;
-    if nargin < 2
+function [lus_action, outputs, inputs, external_libraries] = ...
+        getPseudoLusAction(action, data_map, isCondition, ignoreOutInputs)
+    if nargin < 3
         isCondition = false;
     end
-    if nargin < 3
+    if nargin < 4
         ignoreOutInputs = false;
     end
     outputs = {};
@@ -12,7 +12,7 @@ function [lus_action, outputs, inputs, external_libraries] = getPseudoLusAction(
     obj = DummyBlock_To_Lustre();
     [lus_action, status] = ...
         Exp2Lus.expToLustre(obj, action, [], [], [], ...
-        SF_DATA_MAP, '', true);
+        data_map, '', true);
     if status
         ME = MException('COCOSIM:STATEFLOW', ...
             'ParseError: unsupported Action %s in StateFlow.', action);
@@ -24,7 +24,8 @@ function [lus_action, outputs, inputs, external_libraries] = getPseudoLusAction(
         return;
     end
     if isa(lus_action, 'NodeCallExpr')
-        %TODO Stateflow functions. Switch it to LustreEq
+        %TODO Stateflow functions without explicit outputs. 
+        %Switch it to LustreEq
         
     end
     if ~isCondition && ~isa(lus_action, 'LustreEq')
@@ -32,7 +33,7 @@ function [lus_action, outputs, inputs, external_libraries] = getPseudoLusAction(
             'Action "%s" should be an assignement (e.g. outputs = f(inputs))', action);
         throw(ME);
     end
-    %this flag is used by unitTests.
+    %ignoreOutInputs flag is used by unitTests.
     if ignoreOutInputs
         return;
     end
@@ -47,8 +48,8 @@ function [lus_action, outputs, inputs, external_libraries] = getPseudoLusAction(
     
     for i=1:numel(outputs_names)
         k = outputs_names{i};
-        if isKey(SF_DATA_MAP, k)
-            outputs{end + 1} = LustreVar(k, SF_DATA_MAP(k).LusDatatype);
+        if isKey(data_map, k)
+            outputs{end + 1} = LustreVar(k, data_map(k).LusDatatype);
         else
             ME = MException('COCOSIM:STATEFLOW', ...
                 'Variable %s can not be found for action "%s"', ...
@@ -58,8 +59,8 @@ function [lus_action, outputs, inputs, external_libraries] = getPseudoLusAction(
     end
     for i=1:numel(inputs_names)
         k = inputs_names{i};
-        if isKey(SF_DATA_MAP, k)
-            inputs{end + 1} = LustreVar(k, SF_DATA_MAP(k).LusDatatype);
+        if isKey(data_map, k)
+            inputs{end + 1} = LustreVar(k, data_map(k).LusDatatype);
         else
             ME = MException('COCOSIM:STATEFLOW', ...
                 'Variable %s can not be found for Action "%s"', ...

@@ -5,7 +5,24 @@ classdef MatlabUtils
     
     methods (Static = true)
         
-        
+        %% concatenate 1-D vectors
+        function r = concat(v1, v2)
+            [n1, ~] = size(v1);
+            [n2, ~] = size(v2);
+            if n1 == 1
+                if n2 == 1
+                    r = [v1, v2];
+                else
+                    r = [v1, v2'];
+                end
+            else
+                if n2 == 1
+                    r = [v1; v2'];
+                else
+                    r = [v1; v2];
+                end
+            end
+        end
         %%
         function out = naming(nomsim)
             [a, ~]=regexp (nomsim, '/', 'split');

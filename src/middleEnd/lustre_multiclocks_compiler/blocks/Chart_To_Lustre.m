@@ -123,11 +123,7 @@ classdef Chart_To_Lustre < Block_To_Lustre
             end
             
             %% add unsupported features
-            if ~isempty(SFContent.GraphicalFunctions)
-                obj.addUnsupported_options(...
-                    sprintf('Stateflow Functions in chart %s are not supported. Work in progress!' ,....
-                    HtmlItem.addOpenCmd(blk.Origin_path)));
-            end
+            
             if ~isempty(SFContent.SimulinkFunctions)
                 obj.addUnsupported_options(...
                     sprintf('Simulink Functions in chart %s are not supported. Work in progress!' ,....
@@ -194,7 +190,12 @@ classdef Chart_To_Lustre < Block_To_Lustre
                 obj.addUnsupported_options(...
                     StateflowTransition_To_Lustre.getUnsupportedOptions(transitions{i}));
             end
-            
+            %% get all graphical functions unsupported Options
+            graphicalFunctions = SFContent.GraphicalFunctions;
+            for i=1:numel(graphicalFunctions)
+                obj.addUnsupported_options(...
+                    StateflowGraphicalFunction_To_Lustre.getUnsupportedOptions(graphicalFunctions{i}, blk));
+            end
             options = obj.unsupported_options;
             
         end

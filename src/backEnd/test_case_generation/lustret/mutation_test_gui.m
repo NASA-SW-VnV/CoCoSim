@@ -268,5 +268,5 @@ catch me
     display_msg(me.message, MsgType.ERROR, 'mutation_test_gui', '');
     display_msg(me.getReport(), MsgType.DEBUG, 'mutation_test_gui', '');
 end
-close(handles.figure1)
+try close(handles.figure1), catch,end
 end

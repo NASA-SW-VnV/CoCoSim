@@ -27,8 +27,8 @@ classdef Exp2Lus < handle
             %pre-process exp
             orig_exp = exp;
             exp = strrep(orig_exp, '!=', '~=');
-            exp = strrep(exp, '[', '(');
-            exp = strrep(exp, ']', ')');
+            %exp = strrep(exp, '[', '(');%not good for [x, y] = f(in1..);
+            %exp = strrep(exp, ']', ')');
             %get exp IR
             try
                 em2json =  cocosim.matlab2IR.EM2JSON;
@@ -47,13 +47,15 @@ classdef Exp2Lus < handle
                 lusCode = Exp2Lus.tree2code(BlkObj, tree, parent, blk, inputs, data_map, expected_dt, isStateFlow);
             catch me
                 status = 1;
-                display_msg(me.getReport(), MsgType.DEBUG, 'Exp2Lus.expToLustre', '');
+                
                 if strcmp(me.identifier, 'COCOSIM:TREE2CODE')
+                    display_msg(me.message, MsgType.ERROR, 'Exp2Lus.expToLustre', '')
                     display_msg(sprintf('ParseError for expression "%s" in block %s', ...
                         orig_exp, blk.Origin_path), ...
                         MsgType.ERROR, 'Exp2Lus.expToLustre', '');
-                    
                     return;
+                else
+                    display_msg(me.getReport(), MsgType.DEBUG, 'Exp2Lus.expToLustre', '');
                 end
             end
             
@@ -62,7 +64,7 @@ classdef Exp2Lus < handle
             %this function is extended to be used by If-Block,
             %SwitchCase and Fcn blocks. Also it is used by Stateflow
             %actions
-            if ~exist('isStateFlow', 'var')
+            if nargin < 8
                 isStateFlow = false;
             end
             code = '';
@@ -149,9 +151,25 @@ classdef Exp2Lus < handle
                                         
                 case 'assignment'
                     tree_dt = expected_dt;%no need for casting type.
-                    assignment_dt = Exp2Lus.treeDT(tree, inputs, data_map, expected_dt, isStateFlow);
+                    assignment_dt = Exp2Lus.treeDT(tree, inputs, data_map,...
+                        expected_dt, isStateFlow);
+                    if isequal(tree.leftExp.type, 'matrix')
+                        elts = tree.leftExp.rows{1};
+                        args = cell(numel(elts), 1);
+                        for i=1:numel(elts)
+                            args{i} = ...
+                                Exp2Lus.tree2code(obj, elts(i), ...
+                                parent, blk, inputs, data_map, '',...
+                                isStateFlow);
+                        end
+                        left = TupleExpr(args);
+                    else
+                        left = Exp2Lus.tree2code(obj, tree.leftExp, ...
+                            parent, blk, inputs, data_map, assignment_dt,...
+                            isStateFlow);
+                    end
                     code = LustreEq(...
-                        Exp2Lus.tree2code(obj, tree.leftExp, parent, blk, inputs, data_map, assignment_dt, isStateFlow), ...
+                        left, ...
                         Exp2Lus.tree2code(obj, tree.rightExp, parent, blk, inputs, data_map, assignment_dt, isStateFlow) ...
                         );
                     
@@ -164,7 +182,12 @@ classdef Exp2Lus < handle
                                 'asin','acos','atan', ...
                                 'sinh','cosh', ...
                                 'abs', 'sgn', ...
-                                'ceil', 'floor'}
+                                'ceil', 'floor', ...
+                                'int8', 'int16', 'int32', ...
+                                'uint8', 'uint16', 'uint32', ...
+                                'double', 'single', 'boolean'}
+                            conv_format = {};
+                            isConversion = false;
                             tree_dt = Exp2Lus.treeDT(tree, inputs, data_map, expected_dt, isStateFlow);
                             if isequal(tree_ID, 'abs') ...
                                     || isequal(tree_ID, 'sgn')
@@ -187,13 +210,47 @@ classdef Exp2Lus < handle
                                 fun_name = strcat('_', tree_ID);
                                 lib_name = strcat('LustDTLib_', fun_name);
                                 obj.addExternal_libraries(lib_name);
-                                
+                            elseif ismember(tree_ID, ...
+                                    {'int8', 'int16', 'int32', ...
+                                    'uint8', 'uint16', 'uint32', ...
+                                    'double', 'single', 'boolean'})
+                                tree_dt = SLX2LusUtils.get_lustre_dt(tree_ID);
+                                param = tree.parameters(1);
+                                if isequal(param.type, 'constant')
+                                    v = eval(tree.text);
+                                    if ismember(tree_ID, ...
+                                            {'int8', 'int16', 'int32', ...
+                                            'uint8', 'uint16', 'uint32'})
+                                        code = IntExpr(v);
+                                    elseif ismember(tree_ID,{'double', 'single'})
+                                        code = RealExpr(v);
+                                    else
+                                        code = BooleanExpr(v);
+                                    end
+                                    return;
+                                else
+                                    param_dt = Exp2Lus.treeDT(param, ...
+                                        inputs, data_map, '', isStateFlow);
+                                    [external_lib, conv_format] = ...
+                                        SLX2LusUtils.dataType_conversion(param_dt, tree_ID);
+                                    if ~isempty(external_lib)
+                                        obj.addExternal_libraries(external_lib);
+                                        isConversion = true;
+                                    else
+                                        fun_name = tree_ID;
+                                    end
+                                end
                             else
                                 fun_name = tree_ID;
                             end
-                            code = NodeCallExpr(fun_name,...
-                                Exp2Lus.tree2code(obj, tree.parameters(1), parent, blk, inputs, data_map, tree_dt, isStateFlow));
-                                                        
+                            x = Exp2Lus.tree2code(obj, tree.parameters(1),...
+                                parent, blk, inputs, data_map, tree_dt, ...
+                                isStateFlow);
+                            if isConversion
+                                code = SLX2LusUtils.setArgInConvFormat(conv_format,x);
+                            else
+                                code = NodeCallExpr(fun_name, x);
+                            end                    
                             %function with two arguments
                         case {'rem', 'atan2', 'power'}
                             tree_dt = Exp2Lus.treeDT(tree, inputs, data_map, expected_dt, isStateFlow);
@@ -316,7 +373,32 @@ classdef Exp2Lus < handle
             end
         end
         function code = parseOtherFunc(obj, tree, parent, blk, inputs, data_map, expected_dt, isStateFlow)
-            if ~isStateFlow && isequal(tree.ID, 'u')
+            global SF_GRAPHICALFUNCTIONS_MAP;
+            if isStateFlow && SF_GRAPHICALFUNCTIONS_MAP.isKey(tree.ID)
+                func = SF_GRAPHICALFUNCTIONS_MAP(tree.ID);
+                params_dt =  {};
+                for i=1:numel(func.Data)
+                    d = func.Data{i};
+                    if isequal(d.Scope, 'Input')
+                        params_dt{end+1} = d.LusDatatype;
+                    end
+                end
+                if numel(params_dt) ~= numel(tree.parameters)
+                    ME = MException('COCOSIM:TREE2CODE', ...
+                        'Function "%s" expected %d parameters but got %d',...
+                        tree.ID, numel(params_dt), numel(tree.parameters));
+                    throw(ME);
+                end
+                args = cell(numel(tree.parameters), 1);
+                for i=1:numel(tree.parameters)
+                    args{i} = ...
+                        Exp2Lus.tree2code(obj, tree.parameters{i}, ...
+                        parent, blk, inputs, data_map, params_dt{i},...
+                        isStateFlow);
+                end
+                sf_name = SF_To_LustreNode.getUniqueName(func);
+                code = NodeCallExpr(sf_name, args);
+            elseif ~isStateFlow && isequal(tree.ID, 'u')
                 %"u" refers to an input in IF, Switch and Fcn
                 %blocks
                 if isequal(tree.parameters(1).type, 'constant')
@@ -364,22 +446,12 @@ classdef Exp2Lus < handle
                         code = IntExpr(value);
                     end
                 catch
-                    if isStateFlow
-                        %TODO: handling Stateflow functions will
-                        %be in a seperate function.
-                        args = cell(numel(tree.parameters), 1);
-                        for i=1:numel(tree.parameters)
-                            args{i} = ...
-                                Exp2Lus.tree2code(obj, tree.parameters(i), ...
-                                parent, blk, inputs, data_map, expected_dt, isStateFlow);
-                        end
-                        code = NodeCallExpr(tree.ID, args);
-                    else
-                        ME = MException('COCOSIM:TREE2CODE', ...
-                            'Function "%s" is not handled in Block %s',...
-                            tree{2}, blk.Origin_path);
-                        throw(ME);
-                    end
+                    
+                    ME = MException('COCOSIM:TREE2CODE', ...
+                        'Function "%s" is not handled in Block %s',...
+                        tree.ID, blk.Origin_path);
+                    throw(ME);
+                    
                 end
             end
         end

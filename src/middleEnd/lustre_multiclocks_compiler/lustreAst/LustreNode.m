@@ -340,7 +340,8 @@ classdef LustreNode < LustreAst
             new_bodyEqs = {};
             for i=1:numel(new_obj.bodyEqs)
                 if isa(new_obj.bodyEqs{i}, 'ConcurrentAssignments')
-                    new_bodyEqs = [new_bodyEqs, new_obj.bodyEqs{i}.getAssignments()];
+                    new_bodyEqs = MatlabUtils.concat(new_bodyEqs, ...
+                        new_obj.bodyEqs{i}.getAssignments());
                 else
                     new_bodyEqs{end+1} = new_obj.bodyEqs{i};
                 end

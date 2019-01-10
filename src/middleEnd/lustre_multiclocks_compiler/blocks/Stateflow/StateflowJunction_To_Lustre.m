@@ -13,13 +13,13 @@ classdef StateflowJunction_To_Lustre
     methods(Static)
         
         function  [external_nodes, external_libraries ] = ...
-                write_code(junction)
+                write_code(junction, data_map)
             external_nodes = {};
             external_libraries = {};
             T = junction.OuterTransitions;
             for i=1:numel(T)
                 [transition_nodes_j, external_libraries_j ] = ...
-                    StateflowTransition_To_Lustre.get_Actions(T{i}, junction, ...
+                    StateflowTransition_To_Lustre.get_Actions(T{i}, data_map, junction, ...
                     false);
                 external_nodes = [external_nodes, transition_nodes_j];
                 external_libraries = [external_libraries, external_libraries_j];

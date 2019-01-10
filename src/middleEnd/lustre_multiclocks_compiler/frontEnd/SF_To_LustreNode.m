@@ -20,13 +20,15 @@ classdef SF_To_LustreNode
             external_libraries = {};
             % global varibale mapping between states and their nodes AST.
             global SF_STATES_NODESAST_MAP SF_STATES_PATH_MAP ...
-                SF_JUNCTIONS_PATH_MAP SF_DATA_MAP SF_STATES_ENUMS_MAP TOLUSTRE_ENUMS_MAP;
+                SF_JUNCTIONS_PATH_MAP SF_STATES_ENUMS_MAP ...
+                SF_GRAPHICALFUNCTIONS_MAP TOLUSTRE_ENUMS_MAP;
             %It's initialized for each call of this function
             SF_STATES_NODESAST_MAP = containers.Map('KeyType', 'char', 'ValueType', 'any');
             SF_STATES_PATH_MAP = containers.Map('KeyType', 'char', 'ValueType', 'any');
             SF_JUNCTIONS_PATH_MAP = containers.Map('KeyType', 'char', 'ValueType', 'any');
-            SF_DATA_MAP = containers.Map('KeyType', 'char', 'ValueType', 'any');
             SF_STATES_ENUMS_MAP = containers.Map('KeyType', 'char', 'ValueType', 'any');
+            SF_GRAPHICALFUNCTIONS_MAP = containers.Map('KeyType', 'char', 'ValueType', 'any');
+            SF_DATA_MAP = containers.Map('KeyType', 'char', 'ValueType', 'any');
             % get content
             content = chart.StateflowContent;
             events = SF_To_LustreNode.eventsToData(content.Events);
@@ -46,13 +48,14 @@ classdef SF_To_LustreNode
             if isfield(content, 'GraphicalFunctions')
                 SFFunctions = content.GraphicalFunctions;
                 for i=1:numel(SFFunctions)
+                    SF_GRAPHICALFUNCTIONS_MAP(SFFunctions{i}.Name) = SFFunctions{i};
                     sf_name = SF_To_LustreNode.getUniqueName(SFFunctions{i});
                     if isKey(SF_STATES_NODESAST_MAP, sf_name)
                         %already handled
                         continue;
                     else
                         [node_i, external_nodes_i, external_libraries_i ] = ...
-                            StateflowFunction_To_Lustre.write_code();
+                            StateflowGraphicalFunction_To_Lustre.write_code(SFFunctions{i});
                         if iscell(node_i)
                             external_nodes = [external_nodes, node_i];
                         else
@@ -68,7 +71,7 @@ classdef SF_To_LustreNode
             for i=1:numel(junctions)
                 try
                     [external_nodes_i, external_libraries_i ] = ...
-                        StateflowJunction_To_Lustre.write_code(junctions{i});
+                        StateflowJunction_To_Lustre.write_code(junctions{i}, SF_DATA_MAP);
                     external_nodes = [external_nodes, external_nodes_i];
                     external_libraries = [external_libraries, external_libraries_i];
                 catch me
@@ -87,7 +90,8 @@ classdef SF_To_LustreNode
             for i=1:numel(states)
                 try
                     [external_nodes_i, external_libraries_i ] = ...
-                        StateflowState_To_Lustre.write_ActionsNodes(states{i});
+                        StateflowState_To_Lustre.write_ActionsNodes(...
+                        states{i}, SF_DATA_MAP);
                     external_nodes = [external_nodes, external_nodes_i];
                     external_libraries = [external_libraries, ...
                         external_libraries_i];
@@ -112,7 +116,7 @@ classdef SF_To_LustreNode
                 try
                     [external_nodes_i, external_libraries_i ] = ...
                         StateflowState_To_Lustre.write_TransitionsNodes(...
-                        states{i});
+                        states{i}, SF_DATA_MAP);
                     external_nodes = [external_nodes, external_nodes_i];
                     external_libraries = [external_libraries, ...
                         external_libraries_i];

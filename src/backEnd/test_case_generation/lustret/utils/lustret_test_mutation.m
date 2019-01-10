@@ -176,10 +176,12 @@ main_node_struct = LustrecUtils.extract_node_struct(lus_full_path, node_name, LU
 verification_files = {};
 nb_err = 0;
 for i=1:numel(mutants_paths)
-    display_msg(['Generating C binary of mutant number ' num2str(i) ], MsgType.INFO, 'lustret_mutation_generation', '');
+    display_msg(['Generating C binary of mutant number ' num2str(i) ],...
+        MsgType.INFO, 'lustret_mutation_generation', '');
     mutant_file_path = mutants_paths{i};
     try
-        verif_lus_path = LustrecUtils.create_mutant_verif_file(lus_full_path, mutant_file_path, main_node_struct, node_name, node_name_mutant);
+        verif_lus_path = LustrecUtils.create_mutant_verif_file(...
+            lus_full_path, mutant_file_path, main_node_struct, node_name, node_name_mutant);
     catch
         continue;
     end
@@ -201,13 +203,19 @@ end
 %% generate random tests
 display_msg('Generating random tests', MsgType.INFO, 'lustret_test_mutation', '');
 nb_test = 0;
-% Need to correct the following, We can not use Simulink model information
-% if it has not the same input names as the lustre node.
-% We keep taking information from Lustre code.
-% if ~isempty(model_full_path)
-%     [inports, inputEvents_names] = SLXUtils.get_model_inputs_info(model_full_path);
-% else
+
+[inports_slx, ~] = SLXUtils.get_model_inputs_info(model_full_path);
 inports = main_node_struct.inputs;
+%adapt inports_lus DataType
+k=0;
+for i=1:numel(inports_slx)
+    %we assume inputs are inlined.
+    width = inports_slx(i).width;
+    for j=1:width
+        k = k +1;
+        inports(k).datatype = inports_slx(i).datatype;
+    end
+end
 % end
 T = [];
 nb_verif = numel(verification_files);

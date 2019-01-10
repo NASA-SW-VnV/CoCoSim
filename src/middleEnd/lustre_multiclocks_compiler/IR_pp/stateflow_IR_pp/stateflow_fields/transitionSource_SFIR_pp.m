@@ -53,6 +53,10 @@ function [ new_ir, status ] = transitionSource_SFIR_pp( new_ir )
     end
     
     for i=1:numel(new_ir.GraphicalFunctions)
+        % default transition
+        [new_ir.GraphicalFunctions{i}.Composition.DefaultTransitions, ~] = ...
+            adapt_transitions(new_ir.GraphicalFunctions{i}.Composition.DefaultTransitions, '');
+        % junctions
         [new_ir.GraphicalFunctions{i}, status_i] = transitionSource_SFIR_pp( new_ir.GraphicalFunctions{i} );
         if status_i
             display_msg(['ERROR found in StateflowFunction:' new_ir.GraphicalFunctions{i}.origin_path], ...
@@ -68,6 +72,9 @@ end
 function [transitions, status] = adapt_transitions(transitions, srcPath)
     status = 0;
     for i=1:numel(transitions)
+        if isfield(transitions{i}, 'Source')
+            continue;
+        end
         transitions{i}.Source = srcPath;
     end
 end
