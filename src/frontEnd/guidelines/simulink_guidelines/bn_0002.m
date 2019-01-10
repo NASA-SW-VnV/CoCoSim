@@ -7,33 +7,47 @@ function [results, passed] = bn_0002(model)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % ORION GN&C MATLAB/Simulink Standards
     % bn_0002: Signal name length limit
+    % 32 characters is the maximum limit
 
     results = {};
-    title = 'bn_0002: Signal name length limit';
+    passed = 1;
+    totalFail = 0;
     
-    signalList = ppList(...
-        find_system(model, 'Regexp', 'on','FindAll','on',...
-        'type','line'));    
+    title = 'maximum limit of 32 characters';
     
-    [results{1}, ~] = ...
-        GuidelinesUtils.process_find_system_results(signalList,title,...
-        false, false); 
-    passed = isempty(signalList);
-
-end
-
-
-function newList = ppList(list)
-    %remove empty lines
-    Names = arrayfun(@(x) get_param(x, 'Name'), list, 'UniformOutput',...
+    signalList = find_system(model, 'Regexp', 'on','FindAll','on',...
+        'type','line');
+    
+    % get names from handles
+    Names = arrayfun(@(x) get_param(x, 'Name'), signalList, 'UniformOutput',...
         false);
-    %list = list(~strcmp(Names, '')&&);
-    % lind name length less than 5
-    list = list(length(Names)>5);
+    lengths = cellfun(@(x) length(x), Names);
+    % remove names less than
+    list = signalList(lengths > 32);
     %add parent
-    newList = arrayfun(@(x) ...
+    failedList = arrayfun(@(x) ...
         sprintf('%s in %s', ...
         HtmlItem.cleanTitle(get_param(x, 'Name')), ...
         HtmlItem.addOpenCmd(get_param(x, 'Parent'))), ...
         list, 'UniformOutput', false);
+    %numFail = numel(list);
+    [max_limit_32_chars_in_name, numFail] = ...
+        GuidelinesUtils.process_find_system_results(failedList,title,...
+        false, false); 
+    totalFail = totalFail + numFail;
+    
+    if totalFail > 0
+        passed = 0;
+        color = 'red';
+    else
+        color = 'green';
+    end
+
+    title = 'bn_0002: Signal name length limit';
+    results{end+1} = HtmlItem(title, ...
+        {max_limit_32_chars_in_name}, ...
+        color, color);    
+
 end
+
+

@@ -1,4 +1,4 @@
-function [results, passed] = jc_0221(model)
+function [results, passed] = hyl_0302(model)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -6,7 +6,7 @@ function [results, passed] = jc_0221(model)
     % Author: Khanh Trinh <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % ORION GN&C MATLAB/Simulink Standards
-    % jc_0221: Usable characters for signal line names
+    % hyl_0302: Usable characters for block names
 
     results = {};
     passed = 1;
@@ -14,12 +14,11 @@ function [results, passed] = jc_0221(model)
     
     % Find all lines that has non alphabetic caracter, number or underscore
     title = 'Allowed Characters are [a-zA-Z_0-9]';
-%     fsList1 =  find_system(model, 'Regexp', 'on','FindAll','on',...
-%         'type','line', 'Name', '\W');
-%     fsList2 = find_system(model, 'Regexp', 'on','FindAll','on',...
-%         'type','line', 'Name', '^<\w+>$');
-    failedList = GuidelinesUtils.allowedChars(model,{'type','line'});
-    fsList = GuidelinesUtils.ppList(failedList);
+    fsList1 =  find_system(model,'FindAll','on', 'Regexp', 'on','blocktype','SubSystem',... 
+        'Name', '\W');
+    fsList2 = find_system(model,'FindAll','on', 'Regexp', 'on','blocktype','SubSystem',... 
+        'Name', '^<\w+>$');
+    fsList = GuidelinesUtils.ppList(setdiff(fsList1, fsList2));
        
     [noSpecialCharacters, numFail] = ...
         GuidelinesUtils.process_find_system_results(fsList,title, ...
@@ -64,11 +63,10 @@ function [results, passed] = jc_0221(model)
     end
         
     %the main guideline
-    title = 'jc_0221: Usable characters for signal line names';
+    title = 'hyl_0302: Usable characters for block names';
     results{end+1} = HtmlItem(title, ...
         {noSpecialCharacters, ...
         shouldNotStartWithNumber, ...
         list3, list4}, color, color);
 end
-
 
