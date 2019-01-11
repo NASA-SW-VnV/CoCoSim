@@ -25,7 +25,9 @@ classdef GuidelinesUtils
             else
                 for i=1:length(fsList)
                     name = get_param(fsList(i), 'Name');
-                    failList{i} =  HtmlItem(name,{},'red', '', varargin{:});
+                    parent = get_param(fsList(i), 'Parent');
+                    path = fullfile(parent, name);
+                    failList{i} =  HtmlItem(path,{},'red', '', varargin{:});
                 end
             end
             if isempty(failList)
@@ -36,26 +38,27 @@ classdef GuidelinesUtils
             end
         end
         
-        function allowedCharList = allowedChars_lineType(model)
-            % 
-            fsList1 =  find_system(model, 'Regexp', 'on','FindAll','on',...
-                'type','line', 'Name', '\W');
-            fsList2 = find_system(model, 'Regexp', 'on','FindAll','on',...
-                'type','line', 'Name', '^<\w+>$');
-            allowedCharList = setdiff(fsList1, fsList2);
-        end
-        
-        function allowedCharList = allowedChars(model,typeList)
-            % typeList is a list of 2 cells needed to define block/line
-            % type
-            fsList1 =  find_system(model, 'Regexp', 'on','FindAll','on',...
-                typeList{1},typeList{2}, 'Name', '\W');
-            fsList2 = find_system(model, 'Regexp', 'on','FindAll','on',...
-                'type','line', 'Name', '^<\w+>$');
+        function allowedCharList = allowedChars(model,options)
+            fsString = 'find_system(model, ''Regexp'', ''on''';
+            for i=1:length(options)
+                fsString = sprintf('%s, ''%s''',fsString, options{i});
+            end
+            fsString = sprintf('%s, ''Name'', ''\\W'');',fsString);
+            fsList1 =  eval(fsString);
+%             fsList1 =  find_system(model, 'Regexp', 'on','FindAll','on',...
+%                 typeList{1},typeList{2}, 'Name', '\W');
+            fsString = 'find_system(model, ''Regexp'', ''on''';
+            for i=1:length(options)
+                fsString = sprintf('%s, ''%s''',fsString, options{i});
+            end
+            fsString = sprintf('%s, ''Name'', ''^<\\w+>$'');',fsString);
+            fsList2 =  eval(fsString);
+%             fsList2 = find_system(model, 'Regexp', 'on','FindAll','on',...
+%                 'type','line', 'Name', '^<\w+>$');
             allowedCharList = setdiff(fsList1, fsList2);
         end        
         
-        function newList = ppList(list)
+        function newList = ppSignalNames(list)
             % get names from handles
             Names = arrayfun(@(x) get_param(x, 'Name'), list, 'UniformOutput',...
                 false);
@@ -64,7 +67,7 @@ classdef GuidelinesUtils
             %add parent
             newList = arrayfun(@(x) ...
                 sprintf('%s in %s', ...
-                HtmlItem.cleanTitle(get_param(x, 'Name')), ...
+                HtmlItem.cleanSignalName(get_param(x, 'Name')), ...
                 HtmlItem.addOpenCmd(get_param(x, 'Parent'))), ...
                 list, 'UniformOutput', false);
         end

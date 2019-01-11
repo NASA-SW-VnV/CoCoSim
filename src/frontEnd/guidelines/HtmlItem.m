@@ -13,22 +13,22 @@ classdef HtmlItem < handle
     
     methods
         function obj = HtmlItem(title, subtitles, text_color, icon_color,...
-                isBlkPath, cleanTitle)
+                isBlkPath, cleanSignalName)
             if nargin <= 4 || isempty(isBlkPath)
                 isBlkPath = false;
             end
             if nargin <= 5
-                cleanTitle = true;
+                cleanSignalName = false;
             end
             obj.title = title;
-            if cleanTitle
-                obj.title = HtmlItem.cleanTitle(obj.title);
+            if cleanSignalName
+                obj.title = HtmlItem.cleanSignalName(obj.title);
             end
             if isBlkPath
-                name = get_param(title, 'Name');
-                parent = get_param(title, 'Parent');
-                obj.title = sprintf('%s in <a href="matlab:open_and_hilite_hyperlink (''%s'',''error'')">%s</a>', name, title, parent);
-                %obj.title = HtmlItem.addOpenCmd(obj.title);
+                %name = get_param(title, 'Name');
+                %parent = get_param(title, 'Parent');
+                %obj.title = sprintf('%s in <a href="matlab:open_and_hilite_hyperlink (''%s'',''error'')">%s</a>', name, title, parent);
+                obj.title = HtmlItem.addOpenCmd(obj.title);
             end
             if nargin < 2
                 obj.subtitles = {};
@@ -89,11 +89,11 @@ classdef HtmlItem < handle
                     iconCode = sprintf('<i class="material-icons green-text"><h%d>check_circle<h%d></i>', level, level);
                 end
             end
-            if isempty(obj.subtitles)
+%             if isempty(obj.subtitles)
                 dropDownCode = '';
-            else
-                dropDownCode = sprintf('<i class="material-icons black-text"><h%d>arrow_drop_down<h%d></i>', level, level);
-            end
+%             else
+%                 dropDownCode = sprintf('<i class="material-icons black-text"><h%d>arrow_drop_down<h%d></i>', level, level);
+%             end
             header =  sprintf('<div class="collapsible-header">%s<div class="%s-text text-darken-2"><h%d>%s</h%d></div>%s</div>\n', ...
                     iconCode, Textcolor,level, obj.title, level, dropDownCode);
             if isempty(obj.subtitles)
@@ -117,12 +117,14 @@ classdef HtmlItem < handle
         end
     end
     methods(Static)
-        function title = cleanTitle(title)
+        function title = cleanSignalName(title)
             title = strrep(title, '<', '&lt;');
             title = strrep(title, '>', '&gt;');
         end
         function htmlCmd = addOpenCmd(blk)
-            htmlCmd = sprintf('<a href="matlab:open_and_hilite_hyperlink (''%s'',''error'')">%s</a>', blk, blk);
+            htmlCmd = sprintf('<a href="matlab:open_and_hilite_hyperlink (''%s'',''error'')">%s</a>', ...
+                regexprep(blk, '\n', ' '),...
+                HtmlItem.cleanSignalName(blk));
         end
     end
 end
