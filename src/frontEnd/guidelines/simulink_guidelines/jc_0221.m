@@ -1,4 +1,4 @@
-function [results, passed] = jc_0221(model)
+function [results, passed, priority] = jc_0221(model)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -8,7 +8,7 @@ function [results, passed] = jc_0221(model)
     % ORION GN&C MATLAB/Simulink Standards
     % jc_0221: Usable characters for signal line names
     % h_0040: Usable characters for Simulink Bus Names
-
+    priority = 2;
     results = {};
     passed = 1;
     totalFail = 0;

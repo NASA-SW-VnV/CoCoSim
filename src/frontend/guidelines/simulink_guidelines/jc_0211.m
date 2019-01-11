@@ -1,4 +1,4 @@
-function [results, passed] = jc_0211(model)
+function [results, passed, priority] = jc_0211(model)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -8,6 +8,7 @@ function [results, passed] = jc_0211(model)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % ORION GN&C MATLAB/Simulink Standards
     % jc_0211: Usable characters for Inport block and Outport block
+    priority = 2;
     results = {};
     passed = 1;
     totalFail = 0;
@@ -45,6 +46,7 @@ function [results, passed] = jc_0211(model)
         true, false);
     totalFail = totalFail + numFail;    
 
+    % cannot have more than one consecutive underscore
     title = 'cannot have more than one consecutive underscore';
     fsList = find_system(model,'Regexp', 'on','blocktype',...
         'port','Name','__');

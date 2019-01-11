@@ -1,4 +1,4 @@
-function [results, passed] = na_0005(model)
+function [results, passed, priority] = na_0005(model)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -7,7 +7,7 @@ function [results, passed] = na_0005(model)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % ORION GN&C MATLAB/Simulink Standards
     % na_0005: Port block name visibility in Simulink model
-
+    priority = 2;
     results = {};
     title = 'na_0005: Port block name visibility in Simulink model';
     portBlocks = find_system(model,'Regexp', 'on','blocktype','port', ...

@@ -1,4 +1,4 @@
-function [results, passed] = hyl_0305(model)
+function [results, passed, priority] = hyl_0305(model)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -6,8 +6,8 @@ function [results, passed] = hyl_0305(model)
     % Author: Khanh Trinh <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % ORION GN&C MATLAB/Simulink Standards
-    % hyl_0305: Usable characters for block names
-
+    % hyl_0305: Block names shall not be made unique by using case.
+    priority = 2;
     results = {};
     passed = 1;
     totalFail = 0;
@@ -41,7 +41,7 @@ function [results, passed] = hyl_0305(model)
     end
         
     %the main guideline
-    title = 'hyl_0305: Usable characters for block names';
+    title = 'hyl_0305: Block names shall not be made unique by using case.';
     results{end+1} = HtmlItem(title, ...
         uniqueUsingCase, color, color);
 end
