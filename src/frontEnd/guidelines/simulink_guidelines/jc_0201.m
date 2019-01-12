@@ -1,4 +1,4 @@
-function [results, passed, priority] = jc_0221(model)
+function [results, passed, priority] = jc_0201(model)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -6,74 +6,72 @@ function [results, passed, priority] = jc_0221(model)
     % Author: Khanh Trinh <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % ORION GN&C MATLAB/Simulink Standards
-    % jc_0221: Usable characters for signal line names
-    % h_0040: Usable characters for Simulink Bus Names
+    % jc_0201: Usable characters in subsystem names
     priority = 2;
     results = {};
     passed = 1;
     totalFail = 0;
     
     % Should not start with a number
-    fsList = GuidelinesUtils.ppSignalNames(find_system(model, 'Regexp', 'on', 'FindAll','on',...
-        'type','line', 'Name', '^[\d]'));
-    title = 'Should not start with a number or underscore';
+    title = 'should not start with a number';
+    fsList = find_system(model, 'Regexp', 'on',...
+        'blocktype','SubSystem', 'Name', '^[\d_]');
     [shouldNotStartWithNumber, numFail] = ...
         GuidelinesUtils.process_find_system_results(fsList,title,...
-        false);
+        true);
     totalFail = totalFail + numFail;
     
     % Should not have blank spaces
-    title = 'should not have blank spaces';
-    fsList = GuidelinesUtils.ppSignalNames(find_system(model,'Regexp', 'on','FindAll','on',...
-        'type','line', 'Name','\s'));
+    title = 'should not have blank spaces';    
+    fsList = find_system(model, 'Regexp', 'on',...
+        'blocktype','SubSystem', 'Name', '\s');    
     [no_space_in_name, numFail] = ...
         GuidelinesUtils.process_find_system_results(fsList,title,...
-        false);
-    totalFail = totalFail + numFail;    
+        true);
+    totalFail = totalFail + numFail;     
     
     % carriage returns are not allowed
-    title = 'carriage returns are not allowed';
-    fsList = GuidelinesUtils.ppSignalNames(find_system(model,'Regexp', 'on','FindAll','on',...
-        'type','line', 'Name','\n'));
+    title = 'carriage returns are not allowed';  
+    fsList = find_system(model, 'Regexp', 'on',...
+        'blocktype','SubSystem', 'Name', '\n');  
     [no_carriage_return_in_name, numFail] = ...
         GuidelinesUtils.process_find_system_results(fsList,title,...
-        false);
-    totalFail = totalFail + numFail;    
-        
-    % Find all lines that has non alphabetic character, number or underscore
-    title = 'Allowed Characters are [a-zA-Z_0-9]';
-    failedList = GuidelinesUtils.allowedChars(model,{'FindAll','on','type','line'});
-    fsList = GuidelinesUtils.ppSignalNames(failedList);       
-    [noSpecialCharacters, numFail] = ...
-        GuidelinesUtils.process_find_system_results(fsList,title, ...
-        false);
+        true);
     totalFail = totalFail + numFail;    
     
+    % Find all lines that has non alphabetic caracter, number or underscore
+    title = 'Allowed Characters are [a-zA-Z_0-9]';
+    failedList = GuidelinesUtils.allowedChars(model,{});      
+    [noSpecialCharacters, numFail] = ...
+        GuidelinesUtils.process_find_system_results(failedList,title, ...
+        true);
+    totalFail = totalFail + numFail;           
+    
     % cannot have more than one consecutive underscore
-    fsList = GuidelinesUtils.ppSignalNames(find_system(model, 'Regexp', 'on','FindAll','on',...
-        'type','line', 'Name', '__'));
-    title = 'cannot have more than one consecutive underscore';
+    title = 'cannot have more than one consecutive underscore';    
+    fsList = find_system(model, 'Regexp', 'on',...
+        'blocktype','SubSystem', 'Name', '__');
     [consecutive_underscore_in_name, numFail] = ...
         GuidelinesUtils.process_find_system_results(fsList,title,...
-        false);
+        true);
     totalFail = totalFail + numFail;
     
     % cannot start with an underscore
     title = 'cannot start with an underscore';
-    fsList = GuidelinesUtils.ppSignalNames(find_system(model,'Regexp', 'on', 'FindAll','on',...
-        'type','line', 'Name','^_'));
+    fsList = find_system(model,'Regexp', 'on',...
+        'blocktype','SubSystem', 'Name','^_');
     [starts_with_underscore_in_name, numFail] = ...
         GuidelinesUtils.process_find_system_results(fsList,title,...
-        false);
+        true);
     totalFail = totalFail + numFail;    
     
     % cannot end with an underscore
-    fsList = GuidelinesUtils.ppSignalNames(find_system(model, 'Regexp', 'on','FindAll','on',...
-        'type','line', 'Name', '_$'));
     title = 'cannot end with an underscore';
+    fsList = find_system(model,'Regexp', 'on',...
+        'blocktype','SubSystem', 'Name','_$');
     [ends_with_underscore_in_name, numFail] = ...
         GuidelinesUtils.process_find_system_results(fsList,title,...
-        false);
+        true);
     totalFail = totalFail + numFail;
     
     if totalFail > 0
@@ -84,7 +82,7 @@ function [results, passed, priority] = jc_0221(model)
     end
         
     %the main guideline
-    title = 'jc_0221: Usable characters for signal line names';
+    title = 'jc_0201: Usable characters in subsystem names';
     results{end+1} = HtmlItem(title, ...
         {
         shouldNotStartWithNumber, ...
@@ -95,5 +93,4 @@ function [results, passed, priority] = jc_0221(model)
         starts_with_underscore_in_name, ...
         ends_with_underscore_in_name}, color, color);
 end
-
 

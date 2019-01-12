@@ -1,4 +1,4 @@
-function [results, passed] = jc_0081(model)
+function [results, passed, priority] = jc_0081(model)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -7,6 +7,7 @@ function [results, passed] = jc_0081(model)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % ORION GN&C MATLAB/Simulink Standards
     % jc_0081: Icon display for Port block
+    priority = 3;
     title = 'jc_0081: Icon display for Port block';
     results = {};
     % For IconDisplay there are 3 options:

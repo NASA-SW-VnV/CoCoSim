@@ -1,4 +1,4 @@
-function [results, passed, priority] = bn_0002(model)
+function [results, passed, priority] = bn_0001(model)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -6,7 +6,7 @@ function [results, passed, priority] = bn_0002(model)
     % Author: Khanh Trinh <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % ORION GN&C MATLAB/Simulink Standards
-    % bn_0002: Signal name length limit
+    % bn_0001: Sussystem name length limit
     % 32 characters is the maximum limit
     priority = 2;
     results = {};
@@ -15,20 +15,23 @@ function [results, passed, priority] = bn_0002(model)
     
     title = 'maximum limit of 32 characters';
     
-    signalList = find_system(model, 'Regexp', 'on','FindAll','on',...
-        'type','line');
+    SussystemList = find_system(model, 'Regexp', 'on',...
+        'blocktype','SubSystem');
     
-    % get names from handles
-    Names = arrayfun(@(x) get_param(x, 'Name'), signalList, 'UniformOutput',...
-        false);
-    lengths = cellfun(@(x) length(x), Names);
+%     % TODO:  do we need to check for uniqueness
+%     uniqueSussystemList = unique(SussystemList);
+%     if length(uniqueSussystemList) < length(uniqueSussystemList)
+%         
+%     end
+
+    lengths = cellfun(@(x) length(x), SussystemList);
     % remove names less than
-    list = signalList(lengths > 32);
+    failedList = SussystemList(lengths > 32);
     %add parent
-    failedList = GuidelinesUtils.ppSignalNames(list);
+    %failedList = GuidelinesUtils.ppSussystemNames(list);
     [max_limit_32_chars_in_name, numFail] = ...
         GuidelinesUtils.process_find_system_results(failedList,title,...
-        false); 
+        true); 
     totalFail = totalFail + numFail;
     
     if totalFail > 0
@@ -38,7 +41,7 @@ function [results, passed, priority] = bn_0002(model)
         color = 'green';
     end
 
-    title = 'bn_0002: Signal name length limit';
+    title = 'bn_0001: Sussystem name length limit';
     results{end+1} = HtmlItem(title, ...
         {max_limit_32_chars_in_name}, ...
         color, color);    
