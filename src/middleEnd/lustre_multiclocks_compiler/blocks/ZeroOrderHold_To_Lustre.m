@@ -11,7 +11,7 @@ classdef ZeroOrderHold_To_Lustre < Block_To_Lustre
     
     methods
         
-        function  write_code(obj, parent, blk, xml_trace, main_sampleTime, varargin)
+        function  write_code(obj, parent, blk, xml_trace, ~, ~, main_sampleTime, varargin)
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             obj.addVariable(outputs_dt);
             [inputs] = SLX2LusUtils.getBlockInputsNames(parent, blk);
@@ -32,8 +32,8 @@ classdef ZeroOrderHold_To_Lustre < Block_To_Lustre
             obj.setCode( codes );
         end
         %%
-        function options = getUnsupportedOptions(obj,~, blk, ~, backend, varargin)
-            if BackendType.isKIND2(backend)
+        function options = getUnsupportedOptions(obj,~, blk, lus_backend, varargin)
+            if LusBackendType.isKIND2(lus_backend)
                 obj.addUnsupported_options(...
                     sprintf('multi-clocks in block "%s" is currently not supported by KIND2.', HtmlItem.addOpenCmd(blk.Origin_path)));
             end

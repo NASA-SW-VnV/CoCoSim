@@ -16,6 +16,18 @@ if ~ isfield(CoCoSimPreferences,'lustreCompiler')
     modified = true;
 end
 
+% check if the lustreCompiler is defined
+if ~ isfield(CoCoSimPreferences,'lustreBackend')
+    CoCoSimPreferences.lustreBackend = LusBackendType.KIND2;
+    modified = true;
+end
+
+% check if DED checks are defined
+if ~ isfield(CoCoSimPreferences, 'dedChecks')
+    CoCoSimPreferences.dedChecks = {CoCoBackendType.DED_DIVBYZER,CoCoBackendType.DED_INTOVERFLOW ,...
+        CoCoBackendType.DED_OUTOFBOUND, CoCoBackendType.DED_OUTMINMAX };
+    modified = true;
+end
 % save if CoCoSimPreferences is modified
 if modified
     PreferencesMenu.saveCoCoSimPreferences(CoCoSimPreferences);

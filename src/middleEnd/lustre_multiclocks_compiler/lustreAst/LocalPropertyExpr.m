@@ -73,7 +73,7 @@ classdef LocalPropertyExpr < LustreExpr
         
         %%
         function code = print(obj, backend)
-            if BackendType.isPRELUDE(backend)
+            if LusBackendType.isPRELUDE(backend)
                 code = obj.print_prelude();
             else
                 %TODO: check if KIND2 syntax is OK for the other backends.

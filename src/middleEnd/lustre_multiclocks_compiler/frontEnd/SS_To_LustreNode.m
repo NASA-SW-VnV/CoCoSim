@@ -13,7 +13,7 @@ classdef SS_To_LustreNode
     methods(Static)
         function [ main_node, isContractBlk, external_nodes, external_libraries ] = ...
                 subsystem2node(parent_ir,  ss_ir,  main_sampleTime, ...
-                is_main_node, backend, xml_trace)
+                is_main_node, lus_backend, coco_backend, xml_trace)
             %BLOCK_TO_LUSTRE create a lustre node for every Simulink subsystem within
             %subsys_struc.
             %INPUTS:
@@ -47,8 +47,8 @@ classdef SS_To_LustreNode
             end
             %%
             
-            if isContractBlk && ~BackendType.isKIND2(backend)
-                %generate contracts only for KIND2 backend
+            if isContractBlk && ~LusBackendType.isKIND2(lus_backend)
+                %generate contracts only for KIND2 lus_backend
                 return;
             end
             
@@ -71,7 +71,7 @@ classdef SS_To_LustreNode
             
             [body, variables, external_nodes, external_libraries] = ...
                 SS_To_LustreNode.write_body(ss_ir, main_sampleTime, ...
-                backend, xml_trace);
+                lus_backend, coco_backend, xml_trace);
             if is_main_node
                 if ~ismember(SLX2LusUtils.timeStepStr(), ...
                         cellfun(@(x) {x.getId()}, node_outputs_withoutDT_cell, 'UniformOutput', 1))
@@ -196,7 +196,7 @@ classdef SS_To_LustreNode
         
         %% Go over SS Content
         function [body, variables, external_nodes, external_libraries] =...
-                write_body(subsys, main_sampleTime, backend, xml_trace)
+                write_body(subsys, main_sampleTime, lus_backend, coco_backend, xml_trace)
             variables = {};
             body = {};
             external_nodes = {};
@@ -216,7 +216,7 @@ classdef SS_To_LustreNode
                     continue;
                 end
                 try
-                    b.write_code(subsys, blk, xml_trace, main_sampleTime, backend);
+                    b.write_code(subsys, blk, xml_trace, lus_backend, coco_backend, main_sampleTime);
                 catch me
                     display_msg(sprintf('Translation to Lustre of block %s has failed.', HtmlItem.addOpenCmd(blk.Origin_path)),...
                         MsgType.ERROR, 'write_body', '');

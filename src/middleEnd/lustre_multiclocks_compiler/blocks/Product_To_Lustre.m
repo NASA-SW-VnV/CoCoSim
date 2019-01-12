@@ -18,13 +18,13 @@ classdef Product_To_Lustre < Block_To_Lustre
     
     methods
         
-        function  write_code(obj, parent, blk, xml_trace, ~, backend, varargin)
+        function  write_code(obj, parent, blk, xml_trace, lus_backend, varargin)
             
             OutputDataTypeStr = blk.CompiledPortDataTypes.Outport{1};
             isSumBlock = false;
             [codes, outputs_dt, additionalVars] = ...
                 Sum_To_Lustre.getSumProductCodes(obj, parent, blk, ...
-                OutputDataTypeStr,isSumBlock, OutputDataTypeStr, xml_trace, backend);
+                OutputDataTypeStr,isSumBlock, OutputDataTypeStr, xml_trace, lus_backend);
             
             obj.setCode( codes );
             obj.addVariable(outputs_dt);
@@ -33,13 +33,13 @@ classdef Product_To_Lustre < Block_To_Lustre
         
         
         %%
-        function options = getUnsupportedOptions(obj, parent, blk, ~, backend, varargin)
+        function options = getUnsupportedOptions(obj, parent, blk, lus_backend, varargin)
             % add your unsuported options list here
             if (strcmp(blk.Multiplication, 'Matrix(*)')...
                     && contains(blk.Inputs, '/') )
                 for i=1:numel(blk.Inputs)
                     if isequal(blk.Inputs(i), '/')
-                        if BackendType.isKIND2(backend)
+                        if LusBackendType.isKIND2(lus_backend)
                             if blk.CompiledPortWidths.Inport(i) > 49
                                 obj.addUnsupported_options(...
                                     sprintf('Option Matrix(*) with division is not supported in block %s in inport %d. Only less than 8x8 Matrix inversion is supported.', ...

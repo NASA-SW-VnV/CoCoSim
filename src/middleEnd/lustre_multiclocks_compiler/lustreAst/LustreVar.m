@@ -87,7 +87,7 @@ classdef LustreVar < LustreAst
         end
         
         function code = print_lustrec(obj, backend)
-            if BackendType.isKIND2(backend) ...
+            if LusBackendType.isKIND2(backend) ...
                     && isequal(obj.type, 'bool clock')
                 dt = 'bool';
             else
@@ -98,16 +98,16 @@ classdef LustreVar < LustreAst
         end
         
         function code = print_kind2(obj)
-            code = obj.print_lustrec(BackendType.KIND2);
+            code = obj.print_lustrec(LusBackendType.KIND2);
         end
         function code = print_zustre(obj)
-            code = obj.print_lustrec(BackendType.ZUSTRE);
+            code = obj.print_lustrec(LusBackendType.ZUSTRE);
         end
         function code = print_jkind(obj)
-            code = obj.print_lustrec(BackendType.JKIND);
+            code = obj.print_lustrec(LusBackendType.JKIND);
         end
         function code = print_prelude(obj)
-            code = obj.print_lustrec(BackendType.PRELUDE);
+            code = obj.print_lustrec(LusBackendType.PRELUDE);
         end
     end
     methods(Static)

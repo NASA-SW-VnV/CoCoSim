@@ -220,8 +220,8 @@ classdef LustDTLib
             node = '';
         end
         
-        function [node, external_nodes, opens, abstractedNodes] = get_int_to_real(backend, varargin)
-            if BackendType.isKIND2(backend)
+        function [node, external_nodes, opens, abstractedNodes] = get_int_to_real(lus_backend, varargin)
+            if LusBackendType.isKIND2(lus_backend)
                 opens = {};
                 abstractedNodes = {};
                 external_nodes = {};
@@ -240,8 +240,8 @@ classdef LustDTLib
             end
         end
         
-        function [node, external_nodes, opens, abstractedNodes] = get_real_to_int(backend, varargin)
-            if BackendType.isKIND2(backend)
+        function [node, external_nodes, opens, abstractedNodes] = get_real_to_int(lus_backend, varargin)
+            if LusBackendType.isKIND2(lus_backend)
                 opens = {};
                 abstractedNodes = {};
                 external_nodes = {'LustDTLib__Floor', 'LustDTLib__Ceiling'};
@@ -263,8 +263,8 @@ classdef LustDTLib
             end
         end
         
-        function [node, external_nodes, opens, abstractedNodes] = get__Floor(backend, varargin)
-            if BackendType.isKIND2(backend)
+        function [node, external_nodes, opens, abstractedNodes] = get__Floor(lus_backend, varargin)
+            if LusBackendType.isKIND2(lus_backend)
                 abstractedNodes = {};
                 opens = {};
                 external_nodes = {};
@@ -285,8 +285,8 @@ classdef LustDTLib
         end
         % this one for "Rounding" Simulink block, it is different from Floor by
         % returning a real instead of int.
-        function [node, external_nodes, opens, abstractedNodes] = get__floor(backend, varargin)
-            if BackendType.isKIND2(backend)
+        function [node, external_nodes, opens, abstractedNodes] = get__floor(lus_backend, varargin)
+            if LusBackendType.isKIND2(lus_backend)
                 abstractedNodes = {};
                 opens = {};
                 external_nodes = {};
@@ -324,8 +324,8 @@ classdef LustDTLib
         end
         
 
-        function [node, external_nodes, opens, abstractedNodes] = get__Ceiling(backend, varargin)
-            if BackendType.isKIND2(backend)
+        function [node, external_nodes, opens, abstractedNodes] = get__Ceiling(lus_backend, varargin)
+            if LusBackendType.isKIND2(lus_backend)
                 opens = {};
                 abstractedNodes = {};
                 external_nodes = {'LustDTLib__Floor'};
@@ -348,8 +348,8 @@ classdef LustDTLib
         end
         % this one for "Rounding" block, it is different from Ceiling by
         % returning a real instead of int.
-        function [node, external_nodes, opens, abstractedNodes] = get__ceil(backend, varargin)
-            if BackendType.isKIND2(backend)
+        function [node, external_nodes, opens, abstractedNodes] = get__ceil(lus_backend, varargin)
+            if LusBackendType.isKIND2(lus_backend)
                 opens = {};
                 abstractedNodes = {};
                 external_nodes = {'LustDTLib__Ceiling'};
@@ -392,8 +392,8 @@ classdef LustDTLib
         % If a tie occurs, rounds positive numbers toward positive infinity 
         % and rounds negative numbers toward negative infinity. 
         % Equivalent to the Fixed-Point Designer round function.
-        function [node, external_nodes, opens, abstractedNodes] = get__Round(backend, varargin)
-            if BackendType.isKIND2(backend)
+        function [node, external_nodes, opens, abstractedNodes] = get__Round(lus_backend, varargin)
+            if LusBackendType.isKIND2(lus_backend)
                 opens = {};
                 abstractedNodes = {};
                 external_nodes = {'LustDTLib__Floor', 'LustDTLib__Ceiling'};
@@ -421,8 +421,8 @@ classdef LustDTLib
         end
         % this one for "Rounding" block, it is different from Round by
         % returning a real instead of int.
-        function [node, external_nodes, opens, abstractedNodes] = get__round(backend, varargin)
-            if BackendType.isKIND2(backend)
+        function [node, external_nodes, opens, abstractedNodes] = get__round(lus_backend, varargin)
+            if LusBackendType.isKIND2(lus_backend)
                 opens = {};
                 abstractedNodes = {};
                 external_nodes = {'LustMathLib_abs_real', 'LustDTLib_Round'};

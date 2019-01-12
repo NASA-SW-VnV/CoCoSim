@@ -12,7 +12,7 @@ classdef FromWorkspace_To_Lustre < Block_To_Lustre
     
     methods
         
-        function  write_code(obj, parent, blk, xml_trace, ~, backend, varargin)
+        function  write_code(obj, parent, blk, xml_trace, lus_backend, varargin)
   
             model_name = strsplit(blk.Origin_path, '/');
             model_name = model_name{1};
@@ -125,7 +125,7 @@ classdef FromWorkspace_To_Lustre < Block_To_Lustre
                     [codeAst, vars] = ...
                         Sigbuilderblock_To_Lustre.interpTimeSeries(...
                         outputs{i},time_array, data_array, ...
-                        blkParams,i,interpolate, simTime,backend);
+                        blkParams,i,interpolate, simTime,lus_backend);
                  
                     codeAst_all = [codeAst_all codeAst];
                     vars_all = [vars_all vars];

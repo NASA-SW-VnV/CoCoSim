@@ -12,7 +12,7 @@ classdef SF_To_LustreNode
     
     methods(Static)
         function [main_node, external_nodes, external_libraries ] = ...
-                chart2node(parent,  chart,  main_sampleTime, backend, xml_trace)
+                chart2node(parent,  chart,  main_sampleTime, lus_backend, xml_trace)
             %the main function
             % initialize outputs
             main_node = {};

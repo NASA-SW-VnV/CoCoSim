@@ -105,7 +105,7 @@ classdef EveryExpr < LustreExpr
         
         %%
         function code = print(obj, backend)
-            if BackendType.isKIND2(backend)
+            if LusBackendType.isKIND2(backend)
                 code = obj.print_kind2(backend);
             else
                 %TODO: check if LUSTREC syntax is OK for the other backends.
@@ -129,13 +129,13 @@ classdef EveryExpr < LustreExpr
                 args_str);
         end
         function code = print_zustre(obj)
-            code = obj.print_lustrec(BackendType.ZUSTRE);
+            code = obj.print_lustrec(LusBackendType.ZUSTRE);
         end
         function code = print_jkind(obj)
-            code = obj.print_lustrec(BackendType.JKIND);
+            code = obj.print_lustrec(LusBackendType.JKIND);
         end
         function code = print_prelude(obj)
-            code = obj.print_lustrec(BackendType.PRELUDE);
+            code = obj.print_lustrec(LusBackendType.PRELUDE);
         end
     end
     

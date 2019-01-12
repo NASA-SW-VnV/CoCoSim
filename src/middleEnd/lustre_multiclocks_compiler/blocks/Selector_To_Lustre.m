@@ -20,8 +20,8 @@ classdef Selector_To_Lustre < Block_To_Lustre
     
     methods
         
-        function  write_code(obj, parent, blk, xml_trace, varargin)
-            
+        function  write_code(obj, parent, blk, xml_trace, ~, coco_backend, varargin)
+            global CoCoSimPreferences;
             % share code with Assignment_To_Lustre
             isSelector = 1;
             % getBlockInputsOutputs
@@ -51,6 +51,48 @@ classdef Selector_To_Lustre < Block_To_Lustre
                 
             end
             
+            %% If the lus_backend is Design Error Detection (DED).
+            if isPortIndex && CoCoBackendType.isDED(coco_backend)
+                blk_name = SLX2LusUtils.node_name_format(blk);
+                
+                if ismember(CoCoBackendType.DED_OUTOFBOUND, ...
+                        CoCoSimPreferences.dedChecks)
+                    % Add properties related to Out of bound array access.
+                    % Ignore the check if it is not related to the block in
+                    % question.
+                    
+                    % example:
+                    % detect which input plays the index port.
+                    U_dim = in_matrix_dimension{1}.dims;
+                    for i=1:numel(blk.IndexOptionArray)
+                        if contains(blk.IndexOptionArray{i}, '(port)')
+                            indexPort = inputs{i+1};
+                            d = U_dim(i);%the width of second inport
+                            % calculate Bound dimension
+                            widthMin = IntExpr(1);
+                            widthMax = IntExpr(d);
+                            % set the property
+                            lines = cell(numel(indexPort), 1);
+                            for j=1:numel(indexPort)
+                                % widthMin <= index and index <= widthMax
+                                lines{j} = BinaryExpr(BinaryExpr.AND, ...
+                                    BinaryExpr(BinaryExpr.LTE, widthMin, indexPort{j}), ...
+                                    BinaryExpr(BinaryExpr.LTE, indexPort{j}, widthMax));
+                            end
+                            propID = sprintf('%s_OUTOFBOUND',blk_name);
+                            codes{end+1} = LocalPropertyExpr(propID, ...
+                                BinaryExpr.BinaryMultiArgs(BinaryExpr.AND, ...
+                                lines));
+                            % add traceability:
+                            parent_name = SLX2LusUtils.node_name_format(parent);
+                            xml_trace.add_Property(blk.Origin_path, ...
+                                parent_name, propID, 1, ...
+                                CoCoBackendType.DED_OUTOFBOUND);
+                        end
+                    end
+                end
+            end
+            %%
             obj.setCode( codes );
             obj.addVariable(outputs_dt);
         end

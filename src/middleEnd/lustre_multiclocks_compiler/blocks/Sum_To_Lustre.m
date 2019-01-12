@@ -18,7 +18,7 @@ classdef Sum_To_Lustre < Block_To_Lustre
     
     methods
         
-        function  write_code(obj, parent, blk, xml_trace, ~, backend, varargin)
+        function  write_code(obj, parent, blk, xml_trace, lus_backend, varargin)
             
             OutputDataTypeStr = blk.CompiledPortDataTypes.Outport{1};
             AccumDataTypeStr = blk.AccumDataTypeStr;
@@ -32,7 +32,7 @@ classdef Sum_To_Lustre < Block_To_Lustre
             isSumBlock = true;
             [codes, outputs_dt, additionalVars] = ...
                 Sum_To_Lustre.getSumProductCodes(obj, parent, blk, ...
-                OutputDataTypeStr,isSumBlock,AccumDataTypeStr, xml_trace, backend);
+                OutputDataTypeStr,isSumBlock,AccumDataTypeStr, xml_trace, lus_backend);
             
             obj.setCode( codes );
             obj.addVariable(outputs_dt);
@@ -61,7 +61,7 @@ classdef Sum_To_Lustre < Block_To_Lustre
     methods(Static)
         function [codes, outputs_dt, AdditionalVars] = getSumProductCodes(...
                 obj, parent, blk, OutputDataTypeStr,isSumBlock, ...
-                AccumDataTypeStr, xml_trace, backend)
+                AccumDataTypeStr, xml_trace, lus_backend)
             AdditionalVars = {};
             codes = {};
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
@@ -91,7 +91,7 @@ classdef Sum_To_Lustre < Block_To_Lustre
                             HtmlItem.addOpenCmd(blk.Origin_path)), ...
                             MsgType.ERROR, 'Product_To_Lustre', '');
                         return;
-                    elseif n > 4 && ~BackendType.isKIND2(backend)
+                    elseif n > 4 && ~LusBackendType.isKIND2(lus_backend)
                          display_msg(...
                             sprintf('Option Matrix(*) with division (inverse) is not supported for Matrix dimension > 4 in block %s', ...
                             HtmlItem.addOpenCmd(blk.Origin_path)), ...

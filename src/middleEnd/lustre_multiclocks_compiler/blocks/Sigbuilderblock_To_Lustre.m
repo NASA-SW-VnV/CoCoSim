@@ -10,7 +10,7 @@ classdef Sigbuilderblock_To_Lustre < Block_To_Lustre
     end
     
     methods
-        function  write_code(obj, parent, blk, xml_trace, ~, backend, varargin)
+        function  write_code(obj, parent, blk, xml_trace, lus_backend, varargin)
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             obj.addVariable(outputs_dt);
             [time,data,~] = signalbuilder(blk.Origin_path);
@@ -33,7 +33,7 @@ classdef Sigbuilderblock_To_Lustre < Block_To_Lustre
 %                 obj.setCode(codeAst);
 %             end
             [codeAst, vars, external_lib] = getSigBuilderCode(obj, outputs,...
-                time, data,SampleTime,blkParams,backend);
+                time, data,SampleTime,blkParams,lus_backend);
             if ~isempty(external_lib)
                 obj.addExternal_libraries(external_lib);
             end            
@@ -52,7 +52,7 @@ classdef Sigbuilderblock_To_Lustre < Block_To_Lustre
         end
         %%
         function [codeAst_all, vars_all, external_lib] = getSigBuilderCode(...
-                obj,outputs,time,data,SampleTime,blkParams,backend)
+                obj,outputs,time,data,SampleTime,blkParams,lus_backend)
             % time is nx1 cell if there is more than 1 signal, time is
             % array of 1xm where m is the number of time index in the time
             % series
@@ -78,7 +78,7 @@ classdef Sigbuilderblock_To_Lustre < Block_To_Lustre
                 [codeAst, vars] = ...
                     Sigbuilderblock_To_Lustre.interpTimeSeries(...
                     outputs{signal_index},time_array, data_array, ...
-                    blkParams,signal_index,interpolation, curTime,backend);
+                    blkParams,signal_index,interpolation, curTime,lus_backend);
                 codeAst_all = [codeAst_all codeAst];
                 vars_all = [vars_all vars];
             end
@@ -92,7 +92,7 @@ classdef Sigbuilderblock_To_Lustre < Block_To_Lustre
             blkParams.blk_name = SLX2LusUtils.node_name_format(blk);
         end
         function [codeAst, vars] = interpTimeSeries(output,time_array, ...
-                data_array, blkParams,signal_index,interpolate,curTime,backend)
+                data_array, blkParams,signal_index,interpolate,curTime,lus_backend)
             % This function write code to interpolate a piecewise linear
             % time data series.  Time and data must be 1xm array where m is
             % number of data points in the time series.
@@ -122,10 +122,10 @@ classdef Sigbuilderblock_To_Lustre < Block_To_Lustre
                     epsilon = eps(time_array(i+1));
                     lowerCond = BinaryExpr(BinaryExpr.GTE, ...
                         curTime, ...
-                        astTime{i}, [], BackendType.isLUSTREC(backend), epsilon);
+                        astTime{i}, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
                     upperCond = BinaryExpr(BinaryExpr.LT, ...
                         curTime, ...
-                        astTime{i+1}, [], BackendType.isLUSTREC(backend), epsilon);
+                        astTime{i+1}, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
                     
                     conds{end+1} = BinaryExpr(BinaryExpr.AND, lowerCond, upperCond);
                     if interpolate

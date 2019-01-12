@@ -1,6 +1,6 @@
 classdef Template_To_Lustre < Block_To_Lustre
-    % This is a template for the user to follow for developping a block to
-    % Lustre.
+    % This is a template for the user to follow for developping a specific
+    % block to Lustre.
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -13,7 +13,7 @@ classdef Template_To_Lustre < Block_To_Lustre
     
     methods
         
-        function  write_code(obj, parent, blk, xml_trace, varargin)
+        function  write_code(obj, parent, blk, xml_trace, lus_backend, coco_backend, main_sampletime, varargin)
             %% Step 1: Get the block outputs names, If a block is called X
             % and has one outport with width 3 and datatype double,
             % then outputs = {'X_1', 'X_2', 'X_3'}
@@ -90,15 +90,182 @@ classdef Template_To_Lustre < Block_To_Lustre
             end
             
             %% Step 4: start filling the definition of each output
-            codes = cell (1, numel ( outputs ) );
+            nb_outputs = numel ( outputs );
+            codes = cell (1, nb_outputs);
             
             % Go over outputs
-            for j=1:numel(outputs)
+            for j=1:nb_outputs
+                % example:
+                % out_1 = in1_1 / in2_1;
+                % out_2 = in1_2 / in2_2;
+                % ....
+                % out_n = in1_n / in2_n;
                 codes{j} = LustreEq(outputs{j},...
-                    BinaryExpr(BinaryExpr.MULTIPLY,...
+                    BinaryExpr(BinaryExpr.DIVIDE,...
                     inputs{1}{j}, inputs{2}{j}));
             end
-            % join the lines and set the block code.
+            
+            %% Step 5: If the backend is Design Error Detection (DED).
+            % If the backend is DED, copy this template and adapt it to the
+            % block in question
+            if CoCoBackendType.isDED(coco_backend)
+                global  CoCoSimPreferences;% remember to move this line to top-level statement
+                blk_name = SLX2LusUtils.node_name_format(blk);
+                
+                if ismember(CoCoBackendType.DED_DIVBYZER, ...
+                        CoCoSimPreferences.dedChecks)
+                    % Add properties related to Division by zero, if the
+                    % block has no division, ignore this check.
+                    
+                    % example:
+                    % choose the correct zero: Int or Real
+                    inport_dt = blk.CompiledPortDataTypes.Inport(2);
+                    lus_dt = SLX2LusUtils.get_lustre_dt(inport_dt);
+                    if isequal(lus_dt, 'int')
+                        zero = IntExpr(0);
+                    else
+                        zero = RealExpr(0);
+                    end
+                    prop1 = {};
+                    for i=1:numel(inputs{2})
+                        % set the property
+                        % denominator <> 0.0;
+                        prop1{i} = BinaryExpr(BinaryExpr.NEQ, inputs{2}{i}, zero);
+                    end
+                    propID = sprintf('%s_DIVBYZERO',blk_name);
+                    codes{end+1} = LocalPropertyExpr(propID, ...
+                        BinaryExpr.BinaryMultiArgs(BinaryExpr.AND, prop1));
+                    % add traceability:
+                    parent_name = SLX2LusUtils.node_name_format(parent);
+                    xml_trace.add_Property(blk.Origin_path, ...
+                        parent_name, propID, 1, ...
+                        CoCoBackendType.DED_DIVBYZER);
+                end
+                if ismember(CoCoBackendType.DED_INTOVERFLOW, ...
+                        CoCoSimPreferences.dedChecks)
+                    % Add properties related to Integer Overflow. Ignore
+                    % the check if it is not related to the block in
+                    % question.
+                    % example:
+                    
+                    % detect the right output datatype : int8, int16,
+                    % int32...
+                    lus_dt = SLX2LusUtils.get_lustre_dt(outputDataType);
+                    if isequal(lus_dt, 'int')
+                        % calculate intMin intMax
+                        intMin = IntExpr(intmin(outputDataType));
+                        intMax = IntExpr(intmax(outputDataType));
+                        % set the property
+                        prop2 = {};
+                        for j=1:nb_outputs
+                            % Lustre int is a BigInt: detecting integer overflow
+                            % can be easily be expressed as:
+                            % intMin <= out and out <= intMax
+                            prop2{j} = BinaryExpr(BinaryExpr.AND, ...
+                                BinaryExpr(BinaryExpr.LTE, intMin, outputs{j}), ...
+                                BinaryExpr(BinaryExpr.LTE, outputs{j}, intMax));
+                        end
+                        propID = sprintf('%s_INTOVERFLOW',blk_name);
+                        codes{end+1} = LocalPropertyExpr(propID, ...
+                            BinaryExpr.BinaryMultiArgs(BinaryExpr.AND, prop2));
+                        % add traceability:
+                        parent_name = SLX2LusUtils.node_name_format(parent);
+                        xml_trace.add_Property(blk.Origin_path, ...
+                            parent_name, propID, 1, ...
+                            CoCoBackendType.DED_INTOVERFLOW);
+                    end
+                end
+                if ismember(CoCoBackendType.DED_OUTOFBOUND, ...
+                        CoCoSimPreferences.dedChecks)
+                    % Add properties related to Out of bound array access.
+                    % Ignore the check if it is not related to the block in
+                    % question.
+                    
+                    % example:
+                    % detect which input plays the index port.
+                    indexPort = inputs{2};
+                    w = widths(2);%the width of second inport
+                    % calculate Bound dimension
+                    widthMin = IntExpr(1);
+                    widthMax = IntExpr(w);
+                    % set the property
+                    prop2 = {};
+                    for j=1:numel(indexPort)
+                        propID = sprintf('%s_OUTOFBOUND_%d',blk_name, j);
+                        % widthMin <= index and index <= widthMax
+                        prop2{j} = BinaryExpr(BinaryExpr.AND, ...
+                            BinaryExpr(BinaryExpr.LTE, widthMin, indexPort{j}), ...
+                            BinaryExpr(BinaryExpr.LTE, indexPort{j}, widthMax));
+                    end
+                    propID = sprintf('%s_OUTOFBOUND',blk_name);
+                    codes{end+1} = LocalPropertyExpr(propID, ...
+                        BinaryExpr.BinaryMultiArgs(BinaryExpr.AND, prop2));
+                    % add traceability:
+                    parent_name = SLX2LusUtils.node_name_format(parent);
+                    xml_trace.add_Property(blk.Origin_path, ...
+                        parent_name, propID, 1, ...
+                        CoCoBackendType.DED_OUTOFBOUND);
+                end
+                if ismember(CoCoBackendType.DED_OUTMINMAX, ...
+                        CoCoSimPreferences.dedChecks)
+                    % Add properties related to minimum and maximum values check.
+                    % Ignore the check if it is not related to the block in
+                    % question.
+                    [outMin, ~, status] = ...
+                        Constant_To_Lustre.getValueFromParameter(parent,...
+                        blk, blk.OutMin);
+                    if status
+                        outMin = [];
+                    end
+                    [outMax, ~, status] = ...
+                        Constant_To_Lustre.getValueFromParameter(parent,...
+                        blk, blk.OutMax);
+                    if status
+                        outMax = [];
+                    end
+                    % adapt outMin and outMax to the dimension of output
+                    if ~isempty(outMin) && numel(outMin) < nb_outputs
+                        outMin = arrayfun(@(x) outMin(1), (1:nb_outputs));
+                    end
+                    if ~isempty(outMax) && numel(outMax) < nb_outputs
+                        outMax = arrayfun(@(x) outMax(1), (1:nb_outputs));
+                    end
+                    
+                    lus_dt = SLX2LusUtils.get_lustre_dt(outputDataType);
+                    prop4 = {};
+                    for j=1:nb_outputs
+                        if isequal(lus_dt, 'int')
+                            if ~isempty(outMin), lusMin = IntExpr(outMin(j));end
+                            if ~isempty(outMax), lusMax = IntExpr(outMax(j));end
+                        else
+                            if ~isempty(outMin), lusMin = RealExpr(outMin(j));end
+                            if ~isempty(outMax), lusMax = RealExpr(outMax(j));end
+                        end
+                        if isempty(outMin) && isempty(outMax)
+                            continue;
+                        elseif isempty(outMin)
+                            prop4{j} = BinaryExpr(BinaryExpr.LTE, outputs{j},...
+                                lusMax);
+                        elseif isempty(outMax)
+                            prop4{j} = BinaryExpr(BinaryExpr.LTE, lusMin, ...
+                                outputs{j});
+                        else
+                            prop4{j} = BinaryExpr(BinaryExpr.AND, ...
+                                BinaryExpr(BinaryExpr.LTE, lusMin, outputs{j}), ...
+                                BinaryExpr(BinaryExpr.LTE, outputs{j}, lusMax));
+                        end
+                    end
+                    propID = sprintf('%s_OUTMINMAX',blk_name);
+                    codes{end+1} = LocalPropertyExpr(propID, ...
+                        BinaryExpr.BinaryMultiArgs(BinaryExpr.AND, prop4));
+                    % add traceability:
+                    parent_name = SLX2LusUtils.node_name_format(parent);
+                    xml_trace.add_Property(blk.Origin_path, ...
+                        parent_name, propID, 1, ...
+                        CoCoBackendType.DED_OUTMINMAX);
+                end
+            end
+            %% Step 6: set the block code.
             obj.setCode( codes );
             
         end

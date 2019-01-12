@@ -12,7 +12,7 @@ classdef RandomNumber_To_Lustre < Block_To_Lustre
     
     methods
         
-        function  write_code(obj, parent, blk, xml_trace, ~, backend, varargin)
+        function  write_code(obj, parent, blk, xml_trace, lus_backend, varargin)
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             obj.addVariable(outputs_dt);
             [mean, ~, status] = ...
@@ -36,10 +36,10 @@ classdef RandomNumber_To_Lustre < Block_To_Lustre
             nbSteps = 100;
             r = a + (b-a).*rand(nbSteps,1);
             blk_name = SLX2LusUtils.node_name_format(blk);
-            obj.addExtenal_node(RandomNumber_To_Lustre.randomNode(blk_name, r, backend));
+            obj.addExtenal_node(RandomNumber_To_Lustre.randomNode(blk_name, r, lus_backend));
             
             codes = {};
-            if BackendType.isKIND2(backend)
+            if LusBackendType.isKIND2(lus_backend)
                 codes{1} = LustreEq(outputs{1}, ...
                     NodeCallExpr(blk_name, BooleanExpr('true')));
             else
@@ -74,17 +74,17 @@ classdef RandomNumber_To_Lustre < Block_To_Lustre
             options = obj.unsupported_options;
         end
         %%
-        function is_Abstracted = isAbstracted(~, backend, varargin)
-            is_Abstracted = BackendType.isKIND2(backend);
+        function is_Abstracted = isAbstracted(~, lus_backend, varargin)
+            is_Abstracted = LusBackendType.isKIND2(lus_backend);
         end
     end
     methods(Static)
-        function node = randomNode(blk_name, r, backend)
+        function node = randomNode(blk_name, r, lus_backend)
             node = LustreNode();
             node.setName(blk_name);
             node.setInputs(LustreVar('b', 'bool'));
             node.setOutputs(LustreVar('r', 'real'));
-            if BackendType.isKIND2(backend)
+            if LusBackendType.isKIND2(lus_backend)
                 contractElts{1} = ContractGuaranteeExpr('', ...
                     BinaryExpr(BinaryExpr.AND, ...
                     BinaryExpr(BinaryExpr.LTE, RealExpr(min(r)), VarIdExpr('r')), ...

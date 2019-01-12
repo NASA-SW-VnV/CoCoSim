@@ -1,4 +1,4 @@
-function [ ] = toLustreVerify(model_full_path,  const_files, backend, varargin)
+function [ ] = toLustreVerify(model_full_path,  const_files, lus_backend, varargin)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Copyright (c) 2017 United States Government as represented by the
 % Administrator of the National Aeronautics and Space Administration.
@@ -9,17 +9,17 @@ global KIND2 Z3;
 if nargin < 2 || isempty(const_files)
     const_files = {};
 end
-if nargin < 3 || isempty(backend)
-    backend = BackendType.KIND2;
+if nargin < 3 || isempty(lus_backend)
+    lus_backend = LusBackendType.KIND2;
 end
 
 % Get start time
-t_start = now;
+t_start = tic;
 %% run ToLustre
 [nom_lustre_file, xml_trace, status, unsupportedOptions, ...
-    abstractedBlocks, pp_model_full_path] = ...
+    ~, pp_model_full_path] = ...
     ToLustre(model_full_path, const_files,...
-    backend, varargin);
+    lus_backend, varargin);
 
 if status || ~isempty(unsupportedOptions)
     return;
@@ -48,7 +48,7 @@ Assertions_list = [Assertions_list; ProofObjective_list];
 contractBlocks_list = find_system(model, ...
     'LookUnderMasks', 'all',  'MaskType', 'ContractBlock');
 
-if BackendType.isKIND2(backend)
+if LusBackendType.isKIND2(lus_backend)
     if ~isempty(Assertions_list) && ~isempty(contractBlocks_list)
         display_msg('Having both Assertion/Proof blocks and contracts are not supported in KIND2.', MsgType.ERROR, 'toLustreVerify', '');
         return;
@@ -105,7 +105,6 @@ end
 
 %% Generate final report.
 
-t_end = now;
-t_compute = t_end - t_start;
-display_msg(['Total verification time: ' datestr(t_compute, 'HH:MM:SS.FFF')], Constants.RESULT, 'Time', '');
+t_finish = toc(t_start);
+display_msg(sprintf('Total verification time: %f seconds', t_finish), Constants.RESULT, 'Time', '');
 end

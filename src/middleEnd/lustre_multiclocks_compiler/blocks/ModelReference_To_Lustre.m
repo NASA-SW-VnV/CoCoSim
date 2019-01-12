@@ -13,9 +13,9 @@ classdef ModelReference_To_Lustre < Block_To_Lustre
     
     methods
         
-        function  write_code(obj, parent, blk, xml_trace, main_sampleTime, varargin)
+        function  write_code(obj, parent, blk, xml_trace, lus_backend, coco_backend, main_sampleTime, varargin)
             ssObj = SubSystem_To_Lustre();
-            ssObj.write_code( parent, blk, xml_trace, main_sampleTime, varargin);
+            ssObj.write_code( parent, blk, xml_trace, lus_backend, coco_backend, main_sampleTime, varargin);
             obj.addVariable(ssObj.getVariables());
             obj.addExternal_libraries(ssObj.getExternalLibraries());
             obj.addExtenal_node(ssObj.getExternalNodes());

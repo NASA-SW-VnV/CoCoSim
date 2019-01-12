@@ -1,4 +1,4 @@
-classdef BackendType < handle
+classdef LusBackendType < handle
     %Backend Types
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
@@ -7,6 +7,7 @@ classdef BackendType < handle
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     properties (Constant)
+        % Lustre backends
         LUSTREC = 'LUSTREC';
         KIND2 = 'KIND2';
         ZUSTRE = 'ZUSTRE';
@@ -16,19 +17,19 @@ classdef BackendType < handle
     
     methods(Static)
         function res = isLUSTREC(b)
-            res = isequal(b, BackendType.LUSTREC);
+            res = isequal(b, LusBackendType.LUSTREC);
         end
         function res = isKIND2(b)
-            res = isequal(b, BackendType.KIND2);
+            res = isequal(b, LusBackendType.KIND2);
         end
         function res = isZUSTRE(b)
-            res = isequal(b, BackendType.ZUSTRE);
+            res = isequal(b, LusBackendType.ZUSTRE);
         end
         function res = isJKIND(b)
-            res = isequal(b, BackendType.JKIND);
+            res = isequal(b, LusBackendType.JKIND);
         end
         function res = isPRELUDE(b)
-            res = isequal(b, BackendType.PRELUDE);
+            res = isequal(b, LusBackendType.PRELUDE);
         end
     end
 end

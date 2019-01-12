@@ -83,7 +83,7 @@ classdef LustreProgram < LustreAst
         function code = print_lustrec(obj, backend)
             lines = {};
             %opens
-            if (BackendType.isKIND2(backend) || BackendType.isJKIND(backend))
+            if (LusBackendType.isKIND2(backend) || LusBackendType.isJKIND(backend))
                 lines = [lines; ...
                     cellfun(@(x) sprintf('include "%s.lus"\n', x), obj.opens, ...
                     'UniformOutput', false)];
@@ -100,13 +100,13 @@ classdef LustreProgram < LustreAst
             
             
             % contracts and nodes
-            if BackendType.isKIND2(backend)
+            if LusBackendType.isKIND2(backend)
                 nodesList = [obj.nodes, obj.contracts];
             else
                 nodesList = obj.nodes;
             end
             
-            if BackendType.isKIND2(backend)
+            if LusBackendType.isKIND2(backend)
                 call_map = containers.Map('KeyType', 'char', ...
                     'ValueType', 'any');
                 for i=1:numel(nodesList)
@@ -139,16 +139,16 @@ classdef LustreProgram < LustreAst
         end
         
         function code = print_kind2(obj)
-            code = obj.print_lustrec(BackendType.KIND2);
+            code = obj.print_lustrec(LusBackendType.KIND2);
         end
         function code = print_zustre(obj)
-            code = obj.print_lustrec(BackendType.ZUSTRE);
+            code = obj.print_lustrec(LusBackendType.ZUSTRE);
         end
         function code = print_jkind(obj)
-            code = obj.print_lustrec(BackendType.JKIND);
+            code = obj.print_lustrec(LusBackendType.JKIND);
         end
         function code = print_prelude(obj)
-            code = obj.print_lustrec(BackendType.PRELUDE);
+            code = obj.print_lustrec(LusBackendType.PRELUDE);
         end
         
         function [lines, alreadyPrinted] = printWithOrder(obj, ...

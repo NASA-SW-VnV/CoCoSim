@@ -1045,46 +1045,46 @@ classdef LustMathLib
         
         
         %% Matrix inversion
-        function [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_2x2(backend, varargin)
+        function [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_2x2(lus_backend, varargin)
             % support 2x2 matrix inversion            
             n = 2;            
-            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.get_inverse_code(backend,n);            
+            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.get_inverse_code(lus_backend,n);            
         end
         
-        function [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_3x3(backend,varargin)
+        function [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_3x3(lus_backend,varargin)
             % support 3x3 matrix inversion 
             % 3x3 matrix inverse formulations:
             % http://mathworld.wolfram.com/MatrixInverse.html
             n = 3;            
-            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.get_inverse_code(backend,n);            
+            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.get_inverse_code(lus_backend,n);            
         end
         
-        function [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_4x4(backend,varargin)
+        function [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_4x4(lus_backend,varargin)
             % support 4x4 matrix inversion
             % http://semath.info/src/inverse-cofactor-ex4.html
             n = 4;
-            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.get_inverse_code(backend,n); 
+            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.get_inverse_code(lus_backend,n); 
         end
         
-        function [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_5x5(backend,varargin)
+        function [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_5x5(lus_backend,varargin)
             % only KIND2 contract for 5x5 matrix inversion
             n = 5;
-            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.get_inverse_code(backend,n); 
+            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.get_inverse_code(lus_backend,n); 
         end        
 
-        function [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_6x6(backend,varargin)
+        function [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_6x6(lus_backend,varargin)
             % only KIND2 contract for 6x6 matrix inversion
             n = 6;
-            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.get_inverse_code(backend,n); 
+            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.get_inverse_code(lus_backend,n); 
         end 
         
-        function [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_7x7(backend,varargin)
+        function [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_7x7(lus_backend,varargin)
             % only KIND2 contract for 7x7 matrix inversion
             n = 7;
-            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.get_inverse_code(backend,n); 
+            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.get_inverse_code(lus_backend,n); 
         end 
         
-        function [node, external_nodes_i, opens, abstractedNodes] = get_inverse_code(backend,n)
+        function [node, external_nodes_i, opens, abstractedNodes] = get_inverse_code(lus_backend,n)
             % support 2x2 matrix inversion
             % support 3x3 matrix inversion
             % support 4x4 matrix inversion
@@ -1123,7 +1123,7 @@ classdef LustMathLib
                     outputs{counter} = LustreVar(ai{i,j},'real');
                 end
             end
-            if BackendType.isKIND2(backend)
+            if LusBackendType.isKIND2(lus_backend)
                 contractBody = LustMathLib.getContractBody_nxn_inverstion(n,inline_a,inline_ai);
                 contract = LustreContract();
                 contract.setBody(contractBody);
@@ -1132,7 +1132,7 @@ classdef LustMathLib
             % inversion and contract
             if  n > 4
                 node.setIsImported(true);
-            elseif n==4 && BackendType.isKIND2(backend)
+            elseif n==4 && LusBackendType.isKIND2(lus_backend)
                 node.setIsImported(true);
             else
                 Lustre_inversion = 0;

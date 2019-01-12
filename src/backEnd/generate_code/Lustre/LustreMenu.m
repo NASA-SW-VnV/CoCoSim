@@ -15,13 +15,13 @@ end
 function schema = getKind(varargin)
 schema = sl_action_schema;
 schema.label = 'Kind2';
-schema.callback =  @(x) LusCompilerCallback(BackendType.KIND2, x);
+schema.callback =  @(x) LusCompilerCallback(LusBackendType.KIND2, x);
 end
 
 function schema = getLustrec(varargin)
 schema = sl_action_schema;
 schema.label = 'LustreC';
-schema.callback =  @(x) LusCompilerCallback(BackendType.LUSTREC, x);
+schema.callback =  @(x) LusCompilerCallback(LusBackendType.LUSTREC, x);
 end
 
 function LusCompilerCallback(bckend, ~)

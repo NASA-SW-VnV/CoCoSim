@@ -179,7 +179,7 @@ classdef LustreContract < LustreAst
         
         %%
         function code = print(obj, backend)
-            if BackendType.isKIND2(backend)
+            if LusBackendType.isKIND2(backend)
                 code = obj.print_kind2(backend);
             else
                 code = '';

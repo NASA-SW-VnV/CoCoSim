@@ -1,5 +1,5 @@
 function [nom_lustre_file, xml_trace, status, unsupportedOptions, abstractedBlocks, pp_model_full_path]= ...
-        ToLustre(model_path, const_files, backend, varargin)
+        ToLustre(model_path, const_files, lus_backend, coco_backend, varargin)
     %lustre_multiclocks_compiler translate Simulink models to Lustre. It is based on
     %article :
     %INPUTS:
@@ -16,12 +16,17 @@ function [nom_lustre_file, xml_trace, status, unsupportedOptions, abstractedBloc
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     %% global variables
-    global TOLUSTRE_ENUMS_MAP KIND2 Z3 LUSTREC CHECK_SF_ACTIONS ERROR_MSG;
+    global TOLUSTRE_ENUMS_MAP KIND2 Z3 LUSTREC CHECK_SF_ACTIONS ERROR_MSG ...
+        DED_PROP_MAP CoCoSimPreferences;
     ERROR_MSG = {};
     if isempty(LUSTREC) || isempty(KIND2)
         tools_config;
     end
     TOLUSTRE_ENUMS_MAP = containers.Map('KeyType', 'char', 'ValueType', 'any');
+    % This map takes as keys the Properties ID and as value the type of check
+    % and the path to the block under check.
+    DED_PROP_MAP = containers.Map('KeyType', 'char', 'ValueType', 'any');
+    CoCoSimPreferences = load_coco_preferences();
     %% Get start time
     t_start = tic;
     
@@ -30,11 +35,14 @@ function [nom_lustre_file, xml_trace, status, unsupportedOptions, abstractedBloc
         display_help_message();
         return;
     end
-    if ~exist('const_files', 'var') || isempty(const_files)
+    if nargin < 2 || isempty(const_files)
         const_files = {};
     end
-    if ~exist('backend', 'var') || isempty(backend)
-        backend = BackendType.LUSTREC;
+    if nargin < 3 || isempty(lus_backend)
+        lus_backend = LusBackendType.LUSTREC;
+    end
+    if nargin < 4 || isempty(coco_backend)
+        coco_backend = CoCoBackendType.VALIDATION;
     end
     try
         forceGeneration = evalin('base', 'cocosim_force');
@@ -107,7 +115,7 @@ function [nom_lustre_file, xml_trace, status, unsupportedOptions, abstractedBloc
     
     try
         [unsupportedOptions, status, pp_model_full_path, ir_struct, output_dir, abstractedBlocks]= ...
-            ToLustreUnsupportedBlocks(model_path, const_files, backend, varargin{:});
+            ToLustreUnsupportedBlocks(model_path, const_files, lus_backend, varargin{:});
         
         if status || ~isempty(unsupportedOptions)
             return;
@@ -119,8 +127,8 @@ function [nom_lustre_file, xml_trace, status, unsupportedOptions, abstractedBloc
     end
     [~, file_name, ~] = fileparts(pp_model_full_path);
     %% Definition of the generated output files names
-    nom_lustre_file = fullfile(output_dir, strcat(file_name,'.', backend, '.lus'));
-    mat_file = fullfile(output_dir, strcat(file_name,'.', backend, '.mat'));
+    nom_lustre_file = fullfile(output_dir, strcat(file_name,'.', lus_backend, '.lus'));
+    mat_file = fullfile(output_dir, strcat(file_name,'.', lus_backend, '.mat'));
     
     %% Create Meta informations
     create_file_meta_info(nom_lustre_file);
@@ -142,18 +150,13 @@ function [nom_lustre_file, xml_trace, status, unsupportedOptions, abstractedBloc
     main_sampleTime = model_struct.CompiledSampleTime;
     is_main_node = 1;
     [nodes_ast, contracts_ast, external_libraries, status] = recursiveGeneration(...
-        model_struct, model_struct, main_sampleTime, is_main_node, backend, xml_trace);
+        model_struct, model_struct, main_sampleTime, is_main_node, lus_backend, coco_backend, xml_trace);
     if status
         return;
     end
-    [external_lib_code, open_list, abstractedNodes] = getExternalLibrariesNodes(external_libraries, backend);
+    [external_lib_code, open_list, abstractedNodes] = getExternalLibrariesNodes(external_libraries, lus_backend);
     abstractedBlocks = [abstractedBlocks, abstractedNodes];
-    if ~isempty(abstractedBlocks)
-        display_msg('The following Blocks/Nodes are abstracted:', ...
-            MsgType.WARNING, 'ToLustreUnsupportedBlocks', '');
-        display_msg(MatlabUtils.strjoin(abstractedBlocks, '\n'), ...
-            MsgType.WARNING, 'ToLustreUnsupportedBlocks', '');
-    end
+    
     %TODO: change it to AST
     if ~isempty(external_lib_code)
         nodes_ast = [external_lib_code, nodes_ast];
@@ -171,7 +174,7 @@ function [nom_lustre_file, xml_trace, status, unsupportedOptions, abstractedBloc
         program = program.simplify();
     end
     % copy Kind2 libraries
-    if BackendType.isKIND2(backend)
+    if LusBackendType.isKIND2(lus_backend)
         if ismember('lustrec_math', open_list)
             lib_path = fullfile(fileparts(mfilename('fullpath')),...
                 'lib', 'lustrec_math.lus');
@@ -190,7 +193,7 @@ function [nom_lustre_file, xml_trace, status, unsupportedOptions, abstractedBloc
         display_msg(msg, MsgType.ERROR, 'lustre_multiclocks_compiler', '');
     end
     try
-        Lustrecode = program.print(backend);
+        Lustrecode = program.print(lus_backend);
         fprintf(fid, '%s', Lustrecode);
         fclose(fid);
         display_msg(Lustrecode, MsgType.DEBUG, 'lustre_multiclocks_compiler', '');
@@ -212,10 +215,12 @@ function [nom_lustre_file, xml_trace, status, unsupportedOptions, abstractedBloc
     
     %% check lustre syntax
     if isempty(ERROR_MSG)
-        if BackendType.isKIND2(backend)
+        if LusBackendType.isKIND2(lus_backend)
             [syntax_status, output] = Kind2Utils2.checkSyntaxError(nom_lustre_file, KIND2, Z3);
-        elseif BackendType.isLUSTREC(backend)
+        elseif LusBackendType.isLUSTREC(lus_backend)
             [~, syntax_status, output] = LustrecUtils.generate_lusi(nom_lustre_file, LUSTREC );
+        else
+            syntax_status = 0;
         end
         if syntax_status
             display_msg('Simulink To Lustre Syntax check has failed. The parsing error is the following:', MsgType.ERROR, 'TOLUSTRE', '');
@@ -237,6 +242,22 @@ function [nom_lustre_file, xml_trace, status, unsupportedOptions, abstractedBloc
         end
         status = 1;
     end
+    %% REPORT ABSTRACTED BLOCKS
+    if ~isempty(abstractedBlocks)
+        if mode_display
+            html_path = fullfile(output_dir, strcat(file_name, '_abstracted_blocks.html'));
+            htmlList = cellfun(@(x) HtmlItem(x, {}, 'black', 'cyan', [], false),abstractedBlocks, 'UniformOutput', false);
+            MenuUtils.createHtmlListUsingHTMLITEM('The following Blocks/Nodes are abstracted:',...
+                htmlList, html_path);
+            msg = sprintf('Abstracted blocks report is in : %s', html_path);
+            display_msg(msg, MsgType.RESULT, 'ToLustre', '');
+        else
+            display_msg('The following Blocks/Nodes are abstracted:', ...
+                MsgType.WARNING, 'ToLustreUnsupportedBlocks', '');
+            display_msg(MatlabUtils.strjoin(abstractedBlocks, '\n'), ...
+                MsgType.WARNING, 'ToLustreUnsupportedBlocks', '');
+        end
+    end
     %% display report files
     t_finish = toc(t_start);
     
@@ -249,7 +270,9 @@ function [nom_lustre_file, xml_trace, status, unsupportedOptions, abstractedBloc
 end
 
 %%
-function [nodes_ast, contracts_ast, external_libraries, error_status] = recursiveGeneration(parent, blk, main_sampleTime, is_main_node, backend, xml_trace)
+function [nodes_ast, contracts_ast, external_libraries, error_status] = ...
+        recursiveGeneration(parent, blk, main_sampleTime, is_main_node,...
+        lus_backend, coco_backend, xml_trace)
     nodes_ast = {};
     contracts_ast = {};
     external_libraries = {};
@@ -259,7 +282,9 @@ function [nodes_ast, contracts_ast, external_libraries, error_status] = recursiv
         field_names = fieldnames(blk.Content);
         for i=1:numel(field_names)
             
-            [nodes_code_i, contracts_ast_i, external_libraries_i, error_status_i] = recursiveGeneration(blk, blk.Content.(field_names{i}), main_sampleTime, 0, backend, xml_trace);
+            [nodes_code_i, contracts_ast_i, external_libraries_i, error_status_i] = ...
+                recursiveGeneration(blk, blk.Content.(field_names{i}),...
+                main_sampleTime, 0, lus_backend, coco_backend, xml_trace);
             if ~isempty(nodes_code_i)
                 nodes_ast = [ nodes_ast, nodes_code_i];
             end
@@ -274,7 +299,9 @@ function [nodes_ast, contracts_ast, external_libraries, error_status] = recursiv
             return;
         end
         try
-            [main_node, is_contract, external_nodes, external_libraries_i] = SS_To_LustreNode.subsystem2node(parent, blk, main_sampleTime, is_main_node, backend, xml_trace);
+            [main_node, is_contract, external_nodes, external_libraries_i] ...
+                = SS_To_LustreNode.subsystem2node(parent, blk, main_sampleTime, ...
+                is_main_node, lus_backend, coco_backend, xml_trace);
         catch me
             display_msg(sprintf('Translation to Lustre of block %s has failed.', HtmlItem.addOpenCmd(blk.Origin_path)),...
                 MsgType.ERROR, 'write_body', '');
@@ -304,11 +331,12 @@ function [nodes_ast, contracts_ast, external_libraries, error_status] = recursiv
             if TOLUSTRE_SF_COMPILER == 1
                 % OLD compiler
                 [main_node, ~, external_nodes, external_libraries_i] = ...
-                    SS_To_LustreNode.subsystem2node(parent, blk, main_sampleTime, is_main_node, backend, xml_trace);
+                    SS_To_LustreNode.subsystem2node(parent, blk, main_sampleTime, ...
+                    is_main_node, lus_backend, coco_backend, xml_trace);
             else
                 % new compiler
                 [main_node, external_nodes, external_libraries_i ] = ...
-                    SF_To_LustreNode.chart2node(parent,  blk,  main_sampleTime, backend, xml_trace);
+                    SF_To_LustreNode.chart2node(parent,  blk,  main_sampleTime, lus_backend, xml_trace);
             end
         catch me
             display_msg(sprintf('Translation to Lustre of block %s has failed.', blk.Origin_path),...
@@ -334,7 +362,7 @@ function display_help_message()
     msg = ' -----------------------------------------------------  \n';
     msg = [msg '  CoCoSim: Automated Analysis Framework for Simulink/Stateflow\n'];
     msg = [msg '   \n Usage:\n'];
-    msg = [msg '    >> ToLustre(MODEL_PATH, {MAT_CONSTANTS_FILES}, backend, options)\n'];
+    msg = [msg '    >> ToLustre(MODEL_PATH, {MAT_CONSTANTS_FILES}, lus_backend, options)\n'];
     msg = [msg '\n'];
     msg = [msg '      MODEL_PATH: a string containing the full/relative path to the model\n'];
     msg = [msg '        e.g. cocoSim(''test/properties/safe_1.mdl'')\n'];

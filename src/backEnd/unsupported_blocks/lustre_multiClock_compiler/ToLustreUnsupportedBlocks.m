@@ -4,7 +4,7 @@ function [unsupportedOptions, ...
         ir_struct, ...
         output_dir, ...
         abstractedBlocks] =...
-        ToLustreUnsupportedBlocks(model_path, const_files, backend, varargin)
+        ToLustreUnsupportedBlocks(model_path, const_files, lus_backend, varargin)
     %ToLustreUnsupportedBlocks detects unsupported options/blocks in Simulink model.
     %INPUTS:
     %   MODEL_PATH: The full path of the Simulink model.
@@ -39,8 +39,8 @@ function [unsupportedOptions, ...
             skip_unsupportedblocks = 1;
         end
     end
-    if ~exist('backend', 'var') || isempty(backend)
-        backend = BackendType.LUSTREC;
+    if ~exist('lus_backend', 'var') || isempty(lus_backend)
+        lus_backend = LusBackendType.LUSTREC;
     end
     
     
@@ -122,7 +122,7 @@ function [unsupportedOptions, ...
             'blue');
     end
     unsupportedOptionsMap = containers.Map('KeyType', 'char', 'ValueType', 'any');
-    [unsupportedOptionsMap, abstractedBlocks] = recursiveGeneration(main_block, main_block, main_sampleTime, backend, unsupportedOptionsMap);
+    [unsupportedOptionsMap, abstractedBlocks] = recursiveGeneration(main_block, main_block, main_sampleTime, lus_backend, unsupportedOptionsMap);
     keys = unsupportedOptionsMap.keys();
     for i=1:numel(keys)
         k = keys{i};
@@ -169,21 +169,21 @@ function [unsupportedOptions, ...
 end
 
 %%
-function [unsupportedOptionsMap, abstractedBlocks]= recursiveGeneration(parent, blk, main_sampleTime, backend, unsupportedOptionsMap)
-    [unsupportedOptionsMap, abstractedBlocks] = blockUnsupportedOptions(parent, blk, main_sampleTime, backend, unsupportedOptionsMap);
+function [unsupportedOptionsMap, abstractedBlocks]= recursiveGeneration(parent, blk, main_sampleTime, lus_backend, unsupportedOptionsMap)
+    [unsupportedOptionsMap, abstractedBlocks] = blockUnsupportedOptions(parent, blk, main_sampleTime, lus_backend, unsupportedOptionsMap);
     if isfield(blk, 'Content')
         field_names = fieldnames(blk.Content);
         field_names = ...
             field_names(...
             cellfun(@(x) isfield(blk.Content.(x),'BlockType'), field_names));
         for i=1:numel(field_names)
-            [unsupportedOptionsMap, abstractedBlocks_i] = recursiveGeneration(blk, blk.Content.(field_names{i}), main_sampleTime, backend, unsupportedOptionsMap);
+            [unsupportedOptionsMap, abstractedBlocks_i] = recursiveGeneration(blk, blk.Content.(field_names{i}), main_sampleTime, lus_backend, unsupportedOptionsMap);
             abstractedBlocks = [abstractedBlocks , abstractedBlocks_i];
         end
     end
 end
 
-function  [unsupportedOptionsMap, abstractedBlocks]  = blockUnsupportedOptions( parent, blk,  main_sampleTime, backend, unsupportedOptionsMap)
+function  [unsupportedOptionsMap, abstractedBlocks]  = blockUnsupportedOptions( parent, blk,  main_sampleTime, lus_backend, unsupportedOptionsMap)
     %blockUnsupportedOptions get unsupported options of a bock.
     %INPUTS:
     %   blk: The internal representation of the subsystem.
@@ -210,7 +210,7 @@ function  [unsupportedOptionsMap, abstractedBlocks]  = blockUnsupportedOptions( 
         end
         return;
     end
-    unsupportedOptions_i = b.getUnsupportedOptions(parent, blk,  main_sampleTime, backend);
+    unsupportedOptions_i = b.getUnsupportedOptions(parent, blk,  main_sampleTime, lus_backend);
     if ~isempty(unsupportedOptions_i)
         htmlMsg = cellfun(@(x) HtmlItem(x, {}, 'black', [], [], false),unsupportedOptions_i, 'UniformOutput', false);
         if isKey(unsupportedOptionsMap, blkType)
@@ -219,7 +219,7 @@ function  [unsupportedOptionsMap, abstractedBlocks]  = blockUnsupportedOptions( 
             unsupportedOptionsMap(blkType) = htmlMsg;
         end
     end
-    is_abstracted = b.isAbstracted(backend, parent, blk, main_sampleTime);
+    is_abstracted = b.isAbstracted(lus_backend, parent, blk, main_sampleTime);
     if is_abstracted
         msg = sprintf('Block "%s" with Type "%s".', ...
             HtmlItem.addOpenCmd(blk.Origin_path), blkType);

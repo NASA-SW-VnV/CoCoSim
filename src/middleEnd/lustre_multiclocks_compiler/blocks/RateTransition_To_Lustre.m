@@ -11,7 +11,7 @@ classdef RateTransition_To_Lustre < Block_To_Lustre
     
     methods
         
-        function  write_code(obj, parent, blk, xml_trace, main_sampleTime, backend, varargin)
+        function  write_code(obj, parent, blk, xml_trace, lus_backend, coco_backend, main_sampleTime, varargin)
             [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             obj.addVariable(outputs_dt);
             [inputs] = SLX2LusUtils.getBlockInputsNames(parent, blk);
@@ -81,8 +81,8 @@ classdef RateTransition_To_Lustre < Block_To_Lustre
                                    init_cond{i}, ...
                                    UnaryExpr(UnaryExpr.PRE, inputs{i})),...
                         false);
-                    if BackendType.isKIND2(backend) ...
-                            || BackendType.isJKIND(backend)
+                    if LusBackendType.isKIND2(lus_backend) ...
+                            || LusBackendType.isJKIND(lus_backend)
                         false_clock = UnaryExpr(UnaryExpr.NOT, VarIdExpr(clockName));
                     else
                         false_clock = NodeCallExpr('false', VarIdExpr(clockName));
@@ -110,7 +110,7 @@ classdef RateTransition_To_Lustre < Block_To_Lustre
             obj.setCode( codes );
         end
         %%
-        function options = getUnsupportedOptions(obj, ~, blk, ~, backend, varargin)
+        function options = getUnsupportedOptions(obj, ~, blk, lus_backend, varargin)
             %% calculated by rateTransition_ir_pp
             InportCompiledSampleTime = blk.InportCompiledSampleTime;
             OutportCompiledSampleTime = blk.OutportCompiledSampleTime;
@@ -118,7 +118,7 @@ classdef RateTransition_To_Lustre < Block_To_Lustre
             outTs = OutportCompiledSampleTime(1);
             inTsOffset = InportCompiledSampleTime(2);
             outTsOffset = OutportCompiledSampleTime(2);            
-            if BackendType.isKIND2(backend)
+            if LusBackendType.isKIND2(lus_backend)
                 obj.addUnsupported_options(...
                     sprintf('multi-clocks in block "%s" is currently not supported by KIND2.', HtmlItem.addOpenCmd(blk.Origin_path)));
             else

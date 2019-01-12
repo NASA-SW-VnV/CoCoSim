@@ -45,9 +45,11 @@ classdef Block_To_Lustre < handle
     methods (Abstract)
         %these functions should be implemented by all classes inherit from
         %this class
-        write_code(obj, parent, blk, xml_trace, main_sampleTime, backend, varargin)
-        getUnsupportedOptions(obj, parent, blk, main_sampleTime, backend, varargin)
-        isAbstracted(obj, backend, parent, blk, main_sampleTime, varargin)
+        write_code(obj, parent, blk, xml_trace,...
+            lus_backend, coco_backend, main_sampleTime, varargin)
+        getUnsupportedOptions(obj, parent, blk, ...
+            lus_backend, coco_backend, main_sampleTime, varargin)
+        isAbstracted(obj, lus_backend, parent, blk, main_sampleTime, varargin)
     end
     methods
         function addVariable(obj, varname, ...
