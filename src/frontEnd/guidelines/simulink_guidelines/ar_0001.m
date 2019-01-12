@@ -12,7 +12,7 @@ function [results, passed, priority] = ar_0001(model)
     passed = 1;
     totalFail = 0;
     
-    [filepath,name,ext] = fileparts(which(model));
+    [~,name,ext] = fileparts(which(model));
     
     %% NAME %%
     % name no leading digits
@@ -137,7 +137,7 @@ function [results, passed, priority] = ar_0001(model)
     end
         
     %the main guideline
-    title = 'ar_0001: Fileexts.';
+    title = 'ar_0001: Filenames.';
     results{end+1} = HtmlItem(title, ...
         {leading_number_in_name,...
         no_space_in_name,...

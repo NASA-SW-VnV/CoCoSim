@@ -1,4 +1,4 @@
-function [results, passed, priority] = hyl_0302(model)
+function [results, passed, priority] = jc_0201(model)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -6,7 +6,7 @@ function [results, passed, priority] = hyl_0302(model)
     % Author: Khanh Trinh <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % ORION GN&C MATLAB/Simulink Standards
-    % hyl_0302: Usable characters for block names
+    % jc_0201: Usable characters in subsystem names
     priority = 2;
     results = {};
     passed = 1;
@@ -15,7 +15,7 @@ function [results, passed, priority] = hyl_0302(model)
     % Should not start with a number
     title = 'should not start with a number';
     fsList = find_system(model, 'Regexp', 'on',...
-        'Name', '^[\d_]');
+        'blocktype','SubSystem', 'Name', '^[\d_]');
     [shouldNotStartWithNumber, numFail] = ...
         GuidelinesUtils.process_find_system_results(fsList,title,...
         true);
@@ -24,7 +24,7 @@ function [results, passed, priority] = hyl_0302(model)
     % Should not have blank spaces
     title = 'should not have blank spaces';    
     fsList = find_system(model, 'Regexp', 'on',...
-        'Name', '\s');    
+        'blocktype','SubSystem', 'Name', '\s');    
     [no_space_in_name, numFail] = ...
         GuidelinesUtils.process_find_system_results(fsList,title,...
         true);
@@ -33,7 +33,7 @@ function [results, passed, priority] = hyl_0302(model)
     % carriage returns are not allowed
     title = 'carriage returns are not allowed';  
     fsList = find_system(model, 'Regexp', 'on',...
-        'Name', '\n');  
+        'blocktype','SubSystem', 'Name', '\n');  
     [no_carriage_return_in_name, numFail] = ...
         GuidelinesUtils.process_find_system_results(fsList,title,...
         true);
@@ -50,7 +50,7 @@ function [results, passed, priority] = hyl_0302(model)
     % cannot have more than one consecutive underscore
     title = 'cannot have more than one consecutive underscore';    
     fsList = find_system(model, 'Regexp', 'on',...
-        'Name', '__');
+        'blocktype','SubSystem', 'Name', '__');
     [consecutive_underscore_in_name, numFail] = ...
         GuidelinesUtils.process_find_system_results(fsList,title,...
         true);
@@ -59,7 +59,7 @@ function [results, passed, priority] = hyl_0302(model)
     % cannot start with an underscore
     title = 'cannot start with an underscore';
     fsList = find_system(model,'Regexp', 'on',...
-        'Name','^_');
+        'blocktype','SubSystem', 'Name','^_');
     [starts_with_underscore_in_name, numFail] = ...
         GuidelinesUtils.process_find_system_results(fsList,title,...
         true);
@@ -68,7 +68,7 @@ function [results, passed, priority] = hyl_0302(model)
     % cannot end with an underscore
     title = 'cannot end with an underscore';
     fsList = find_system(model,'Regexp', 'on',...
-        'Name','_$');
+        'blocktype','SubSystem', 'Name','_$');
     [ends_with_underscore_in_name, numFail] = ...
         GuidelinesUtils.process_find_system_results(fsList,title,...
         true);
@@ -82,7 +82,7 @@ function [results, passed, priority] = hyl_0302(model)
     end
         
     %the main guideline
-    title = 'hyl_0302: Usable characters for block names';
+    title = 'jc_0201: Usable characters in subsystem names';
     results{end+1} = HtmlItem(title, ...
         {
         shouldNotStartWithNumber, ...
