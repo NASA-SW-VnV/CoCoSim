@@ -144,7 +144,8 @@ function [nom_lustre_file, xml_trace, status, unsupportedOptions, abstractedBloc
     
     %% Lustre generation
     display_msg('Lustre generation', Constants.INFO, 'lustre_multiclocks_compiler', '');
-    
+    % add enumeration from Stateflow and from IR
+    add_IR_Enum(ir_struct);
     global model_struct
     model_struct = ir_struct.(IRUtils.name_format(file_name));
     main_sampleTime = model_struct.CompiledSampleTime;
@@ -162,6 +163,7 @@ function [nom_lustre_file, xml_trace, status, unsupportedOptions, abstractedBloc
         nodes_ast = [external_lib_code, nodes_ast];
     end
     %% create LustreProgram
+    
     keys = TOLUSTRE_ENUMS_MAP.keys();
     enumsAst = cell(numel(keys), 1);
     for i=1:numel(keys)
@@ -385,3 +387,27 @@ function create_file_meta_info(lustre_file)
     fclose(fid);
 end
 
+%% add enumeration from IR
+function add_IR_Enum(ir)
+    global TOLUSTRE_ENUMS_MAP;
+    if isfield(ir, 'meta') && isfield(ir.meta, 'Declarations') ...
+            && isfield(ir.meta.Declarations, 'Enumerations')
+        enums = ir.meta.Declarations.Enumerations;
+        for i=1:numel(enums)
+            % put the type name in LOWER case: Lustrec limitation
+            name = lower(enums{i}.Name);
+            if isKey(TOLUSTRE_ENUMS_MAP, name)
+                continue;
+            end
+            members = enums{i}.Members;
+            % add defaultValue in first.
+            Names = cellfun(@(x) x.Name, members, 'UniformOutput', false);
+            Names = Names(~strcmp(Names, enums{i}.DefaultValue));
+            % put member in UPPER case: Lustrec limitation
+            names_in_order = [{enums{i}.DefaultValue}; Names];
+            names_ast = cellfun(@(x) EnumValueExpr(x), names_in_order, ...
+                'UniformOutput', false);
+            TOLUSTRE_ENUMS_MAP(name) = names_ast;
+        end
+    end
+end

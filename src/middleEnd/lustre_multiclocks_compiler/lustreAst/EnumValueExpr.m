@@ -1,5 +1,5 @@
-classdef EnumTypeExpr < LustreExpr
-    %EnumTypeExpr: e.g. type Direction = enum {North, South, East, West};
+classdef EnumValueExpr < LustreExpr
+    %EnumValueExpr: a member of Enumeration type. e.g. Monday in Days
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -8,49 +8,25 @@ classdef EnumTypeExpr < LustreExpr
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     properties
         enum_name;
-        enum_args;
     end
     
     methods
-        function obj = EnumTypeExpr(enum_name, enum_args)
+        function obj = EnumValueExpr(enum_name)
             if iscell(enum_name)
                 obj.enum_name = enum_name{1};
             else
                 obj.enum_name = enum_name;
             end
-            if ~iscell(enum_args)
-                obj.enum_args{1} = enum_args;
-            else
-                obj.enum_args = enum_args;
-            end
-            % transform args from String to EnumValueExpr
-            for i=1:numel(obj.enum_args)
-                if ischar(obj.enum_args{i})
-                    obj.enum_args{i} = EnumValueExpr(obj.enum_args{i});
-                end
-            end
         end
-        
-        function enum_args = getEnumArgs(obj)
-            enum_args = obj.enum_args;
-        end
-        function  setEnumArgs(obj, enum_args)
-            if ~iscell(enum_args)
-                obj.enum_args{1} = enum_args;
-            else
-                obj.enum_args = enum_args;
-            end
-        end
-        
         function new_obj = deepCopy(obj)
-            new_obj = EnumTypeExpr(obj.enum_name, obj.enum_args);
+            new_obj = EnumValueExpr(obj.enum_name);
         end
         %% simplify expression
         function new_obj = simplify(obj)
             new_obj = obj;
         end
         %% nbOccurance
-        function nb_occ = nbOccuranceVar(obj, var)
+        function nb_occ = nbOccuranceVar(varargin)
             nb_occ = 0;
         end
         %% substituteVars 
@@ -87,9 +63,13 @@ classdef EnumTypeExpr < LustreExpr
             code = obj.print_lustrec(backend);
         end
         
-        function code = print_lustrec(obj, backend)
-            args_str = NodeCallExpr.getArgsStr(obj.enum_args, backend);
-            code = sprintf('type %s = enum {%s};\n', obj.enum_name, args_str);
+        function code = print_lustrec(obj, ~)
+            % it should start with upper case
+            if numel(obj.enum_name) > 1
+                code = sprintf('%s%s', upper(obj.enum_name(1)), obj.enum_name(2:end));
+            else
+                code = upper(obj.enum_name);
+            end
         end
         
         function code = print_kind2(obj)

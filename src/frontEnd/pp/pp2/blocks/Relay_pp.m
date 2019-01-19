@@ -22,13 +22,26 @@ if not(isempty(Relay_list))
         OffSwitchValue = get_param(Relay_list{i},'OffSwitchValue' );
         OnOutputValue = get_param(Relay_list{i},'OnOutputValue' );
         OffOutputValue = get_param(Relay_list{i},'OffOutputValue' );
-        
+        %check for Enumeration
+        outputDT = get_param(Relay_list{i},'OutDataTypeStr' );
+        isEnum = false;
+        if MatlabUtils.startsWith(outputDT, 'Enum:')
+            isEnum = true;
+            InitialOutput = OffOutputValue;
+        end
+        % replace
         replace_one_block(Relay_list{i},'pp_lib/relay');
         set_param(Relay_list{i}, 'LinkStatus', 'inactive');
         set_param(strcat(Relay_list{i},'/OnSwitchValue'),'Value', OnSwitchValue);
         set_param(strcat(Relay_list{i},'/OffSwitchValue'),'Value', OffSwitchValue);
         set_param(strcat(Relay_list{i},'/OnOutputValue'),'Value', OnOutputValue);
         set_param(strcat(Relay_list{i},'/OffOutputValue'),'Value', OffOutputValue);
+        if isEnum
+            try
+                set_param(strcat(Relay_list{i},'/Unit Delay'),'InitialCondition', InitialOutput);
+            catch
+            end
+        end
         catch
             status = 1;
             errors_msg{end + 1} = sprintf('Relay pre-process has failed for block %s', Relay_list{i});

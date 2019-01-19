@@ -771,8 +771,11 @@ classdef SLX2LusUtils < handle
         end
         %% Change Simulink DataTypes to Lustre DataTypes. Initial default
         %value is also given as a string.
-        function [ Lustre_type, zero, one, isBus ] = get_lustre_dt( slx_dt)
+        function [ Lustre_type, zero, one, isBus, isEnum] = ...
+                get_lustre_dt( slx_dt)
+            global TOLUSTRE_ENUMS_MAP;
             isBus = false;
+            isEnum = false;
             if strcmp(slx_dt, 'real') || strcmp(slx_dt, 'int') || strcmp(slx_dt, 'bool')
                 Lustre_type = slx_dt;
             else
@@ -784,18 +787,16 @@ classdef SLX2LusUtils < handle
                     Lustre_type = 'real';
                 else
                     % considering enumaration as int
-                    m = evalin('base', sprintf('enumeration(''%s'')',char(slx_dt)));
-                    if isempty(m)
+                    if isKey(TOLUSTRE_ENUMS_MAP, lower(slx_dt))
+                        isEnum = true;
+                        Lustre_type = lower(slx_dt);
+                    else 
                         isBus = SLXUtils.isSimulinkBus(char(slx_dt));
-                        
                         if isBus
                             Lustre_type = SLX2LusUtils.getLustreTypesFromBusObject(char(slx_dt));
                         else
                             Lustre_type = 'real';
                         end
-                    else
-                        % considering enumaration as int
-                        Lustre_type = 'int';
                     end
                     
                 end
@@ -804,7 +805,12 @@ classdef SLX2LusUtils < handle
                 zero = {};
                 one = {};
                 for i=1:numel(Lustre_type)
-                    if strcmp(Lustre_type{i}, 'bool')
+                    if isEnum
+                        members = TOLUSTRE_ENUMS_MAP(Lustre_type{i});
+                        % DefaultValue of Enum is the first element
+                        zero{i} = members{1};
+                        one{i} = members{1};
+                    elseif strcmp(Lustre_type{i}, 'bool')
                         zero{i} = BooleanExpr('false');
                         one{i} = BooleanExpr('true') ;
                     elseif strcmp(Lustre_type{i}, 'int')
@@ -816,7 +822,11 @@ classdef SLX2LusUtils < handle
                     end
                 end
             else
-                if strcmp(Lustre_type, 'bool')
+                if isEnum
+                    members = TOLUSTRE_ENUMS_MAP(Lustre_type);
+                    zero = members{1};
+                    one = members{1};
+                elseif strcmp(Lustre_type, 'bool')
                     zero = BooleanExpr('false');
                     one = BooleanExpr('true');
                 elseif strcmp(Lustre_type, 'int')
@@ -924,10 +934,13 @@ classdef SLX2LusUtils < handle
         
         %% change numerical value to Lustre Expr string based on DataType dt.
         function lustreExp = num2LusExp(v, lus_dt, slx_dt)
+            global TOLUSTRE_ENUMS_MAP;
             if nargin < 3
                 slx_dt = lus_dt;
             end
-            if strcmp(lus_dt, 'real')
+            if isKey(TOLUSTRE_ENUMS_MAP, lus_dt)
+                lustreExp = EnumValueExpr(char(v));
+            elseif strcmp(lus_dt, 'real')
                 lustreExp = RealExpr(v);
             elseif strcmp(lus_dt, 'int')
                 if numel(slx_dt) > 3 ...

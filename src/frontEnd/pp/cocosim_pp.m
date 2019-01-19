@@ -139,7 +139,14 @@ for i=1:numel(ordered_pp_functions)
     fh = str2func(func_name);
     try
         display_msg(['runing ' func2str(fh)], MsgType.INFO, 'PP', '');
-        fh(new_model_base);
+        if nargout(fh) == 2
+            [~, errors_msg] = fh(new_model_base);
+            for j=1:numel(errors_msg)
+                display_msg(errors_msg{j}, MsgType.ERROR, func2str(fh), '');
+            end
+        else
+            fh(new_model_base);
+        end
         if bdIsDirty(new_model_base) && use_backup
             % check if the model still compiles and the executed pp did not
             % break it.
