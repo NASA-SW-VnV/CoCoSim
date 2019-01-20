@@ -173,7 +173,9 @@ classdef SF_To_LustreNode
             % add Stateflow Enumerations to ToLustre set of enumerations.
             keys = SF_STATES_ENUMS_MAP.keys();
             for i=1:numel(keys)
-                TOLUSTRE_ENUMS_MAP(keys{i}) = SF_STATES_ENUMS_MAP(keys{i});
+                TOLUSTRE_ENUMS_MAP(keys{i}) = ...
+                    cellfun(@(x) EnumValueExpr(x), SF_STATES_ENUMS_MAP(keys{i}), ...
+                    'UniformOutput', false);
             end
         end
         %%

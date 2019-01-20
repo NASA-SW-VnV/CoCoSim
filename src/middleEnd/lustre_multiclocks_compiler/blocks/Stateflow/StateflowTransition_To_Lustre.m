@@ -629,11 +629,11 @@ classdef StateflowTransition_To_Lustre
                         sprintf('set state %s as active', child.Name));
                     if isempty(trans_cond)
                         body{end + 1} = LustreEq(VarIdExpr(idParentName), ...
-                            VarIdExpr(idParentStateEnum));
+                            idParentStateEnum);
                         outputs{end + 1} = LustreVar(idParentName, idParentEnumType);
                     else
                         body{end+1} = LustreEq(VarIdExpr(idParentName), ...
-                            IteExpr(trans_cond, VarIdExpr(idParentStateEnum), ...
+                            IteExpr(trans_cond, idParentStateEnum, ...
                             VarIdExpr(idParentName)));
                         outputs{end + 1} = LustreVar(idParentName, idParentEnumType);
                         inputs{end+1} = LustreVar(idParentName, idParentEnumType);
@@ -706,11 +706,11 @@ classdef StateflowTransition_To_Lustre
                         sprintf('set state %s as inactive', dest_parent.Name));
                     if isempty(trans_cond)
                         body{end + 1} = LustreEq(VarIdExpr(idState), ...
-                            VarIdExpr(idStateInactiveEnum));
+                            idStateInactiveEnum);
                         outputs{end + 1} = LustreVar(idState, idStateEnumType);
                     else
                         body{end+1} = LustreEq(VarIdExpr(idState), ...
-                            IteExpr(trans_cond, VarIdExpr(idStateInactiveEnum), ...
+                            IteExpr(trans_cond, idStateInactiveEnum, ...
                             VarIdExpr(idState)));
                         outputs{end + 1} = LustreVar(idState, idStateEnumType);
                         inputs{end+1} = LustreVar(idState, idStateEnumType);

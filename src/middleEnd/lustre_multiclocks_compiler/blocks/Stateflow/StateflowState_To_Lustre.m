@@ -241,7 +241,7 @@ classdef StateflowState_To_Lustre
                 [stateEnumType, childName] = ...
                     StateflowState_To_Lustre.addStateEnum(state_parent, state);
                 body{1} = LustreComment('set state as active');
-                body{2} = LustreEq(VarIdExpr(idParentName), VarIdExpr(childName));
+                body{2} = LustreEq(VarIdExpr(idParentName), childName);
                 outputs{1} = LustreVar(idParentName, stateEnumType);
                 
                 %isInner variable that tells if the transition that cause this
@@ -396,7 +396,7 @@ classdef StateflowState_To_Lustre
             % idParentName = if (not isInner) then 0 else idParentName;
             body{end + 1} = LustreEq(VarIdExpr(idParentName), ...
                 IteExpr(UnaryExpr(UnaryExpr.NOT, isInner), ...
-                VarIdExpr(parentInactive), VarIdExpr(idParentName)));
+                parentInactive, VarIdExpr(idParentName)));
             outputs{end + 1} = LustreVar(idParentName, parentEnumType);
             inputs{end + 1} = LustreVar(idParentName, parentEnumType);
             % add isInner input
@@ -408,7 +408,7 @@ classdef StateflowState_To_Lustre
                     body{end+1} = LustreEq(VarIdExpr(idStateName), ...
                         VarIdExpr('_HistoryJunction'));
                 else
-                    body{end+1} = LustreEq(VarIdExpr(idStateName), VarIdExpr(stateInactive));
+                    body{end+1} = LustreEq(VarIdExpr(idStateName), stateInactive);
                     outputs{end+1} = LustreVar(idStateName, stateEnumType);
                 end
             end
@@ -553,7 +553,7 @@ classdef StateflowState_To_Lustre
                     node_name = ...
                         StateflowState_To_Lustre.getStateDefaultTransNodeName(state);
                     cond = BinaryExpr(BinaryExpr.EQ, ...
-                        idStateVar, VarIdExpr(stateInactiveEnum));
+                        idStateVar, stateInactiveEnum);
                     if isKey(SF_STATES_NODESAST_MAP, node_name)
                         actionNodeAst = SF_STATES_NODESAST_MAP(node_name);
                         [call, oututs_Ids] = actionNodeAst.nodeCall();
@@ -603,7 +603,7 @@ classdef StateflowState_To_Lustre
                             StateflowState_To_Lustre.addStateEnum(...
                             state, childName);
                         cond = BinaryExpr(BinaryExpr.EQ, ...
-                            idStateVar, VarIdExpr(childEnum));
+                            idStateVar, childEnum);
                         concurrent_actions{end+1} = LustreEq(oututs_Ids, ...
                             IteExpr(cond, call, TupleExpr(oututs_Ids)));
                         outputs = [outputs, actionNodeAst.getOutputs()];
@@ -622,7 +622,7 @@ classdef StateflowState_To_Lustre
                         StateflowState_To_Lustre.addStateEnum(state, [], ...
                         true, false, false);
                     concurrent_actions{end+1} = LustreEq(idStateVar,...
-                        VarIdExpr(stateInnerTransEnum));
+                        stateInnerTransEnum);
                     inputs{end+1} = LustreVar(idStateVar, stateEnumType);
                     outputs{end+1} = LustreVar(idStateVar, stateEnumType);
                 end
@@ -746,7 +746,7 @@ classdef StateflowState_To_Lustre
                     nodeAst = SF_STATES_NODESAST_MAP(entry_act_node_name);
                     [call, oututs_Ids] = nodeAst.nodeCall(true, BooleanExpr(false));
                     cond = BinaryExpr(BinaryExpr.EQ,...
-                        idStateVar, VarIdExpr(idStateInactiveEnum));
+                        idStateVar, idStateInactiveEnum);
                     children_actions{end+1} = LustreEq(oututs_Ids, ...
                         IteExpr(cond, call, TupleExpr(oututs_Ids)));
                     outputs = [outputs, nodeAst.getOutputs()];
@@ -760,7 +760,7 @@ classdef StateflowState_To_Lustre
                         StateflowState_To_Lustre.isInnerStr()));
                 end
                 cond_prefix = BinaryExpr(BinaryExpr.NEQ,...
-                    idStateVar, VarIdExpr(idStateInactiveEnum));
+                    idStateVar, idStateInactiveEnum);
                 %cond_prefix = {};
             end
             
@@ -779,7 +779,7 @@ classdef StateflowState_To_Lustre
                     [~, childEnum] = ...
                         StateflowState_To_Lustre.addStateEnum(state, child);
                     cond = BinaryExpr(BinaryExpr.EQ, ...
-                        idStateVar, VarIdExpr(childEnum));
+                        idStateVar, childEnum);
                     if ~isempty(cond_prefix) && ~isChart
                         cond = ...
                             BinaryExpr(BinaryExpr.AND, cond, cond_prefix);
@@ -1157,7 +1157,7 @@ classdef StateflowState_To_Lustre
             idName = strcat(state_name, ...
                 StateflowState_To_Lustre.getStateEnumSuffix());
         end
-        function [stateEnumType, childName] = ...
+        function [stateEnumType, childAst] = ...
                 addStateEnum(state, child, isInner, isJunction, inactive)
             global SF_STATES_ENUMS_MAP;
             stateEnumType = StateflowState_To_Lustre.getStateEnumType(state);
@@ -1182,6 +1182,7 @@ classdef StateflowState_To_Lustre
                 SF_STATES_ENUMS_MAP(stateEnumType) = [...
                     SF_STATES_ENUMS_MAP(stateEnumType), childName];
             end
+            childAst = EnumValueExpr(childName);
         end
         %% Substates objects
         function subStates = getSubStatesObjects(state)
