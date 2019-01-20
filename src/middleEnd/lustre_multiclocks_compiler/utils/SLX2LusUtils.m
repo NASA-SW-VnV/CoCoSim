@@ -787,6 +787,9 @@ classdef SLX2LusUtils < handle
                     Lustre_type = 'real';
                 else
                     % considering enumaration as int
+                    if strncmp(slx_dt, 'Enum:', 4)
+                        slx_dt = regexprep(slx_dt, 'Enum:\s*', '');
+                    end
                     if isKey(TOLUSTRE_ENUMS_MAP, lower(slx_dt))
                         isEnum = true;
                         Lustre_type = lower(slx_dt);
@@ -988,7 +991,8 @@ classdef SLX2LusUtils < handle
             end
         end
         function [external_lib, conv_format] = dataType_conversion(inport_dt, outport_dt, RndMeth, SaturateOnIntegerOverflow)
-            lus_in_dt = SLX2LusUtils.get_lustre_dt( inport_dt);
+            [lus_in_dt, ~, ~, ~, InIsEnum] = SLX2LusUtils.get_lustre_dt( inport_dt);
+            [lus_out_dt, ~, ~, ~, OutIsEnum] = SLX2LusUtils.get_lustre_dt( outport_dt);
             if nargin < 3 || isempty(RndMeth)
                 if strcmp(lus_in_dt, 'int')
                     RndMeth = 'int_to_real';
@@ -1007,6 +1011,18 @@ classdef SLX2LusUtils < handle
             end
             if nargin < 4 || isempty(SaturateOnIntegerOverflow)
                 SaturateOnIntegerOverflow = 'off';
+            end
+            if InIsEnum
+                [external_lib, conv_format1] = SLX2LusUtils.dataType_conversion('int', outport_dt, RndMeth, SaturateOnIntegerOverflow);
+                conv_format = SLX2LusUtils.setArgInConvFormat(conv_format1,...
+                    NodeCallExpr(sprintf('%s_to_int', char(lus_in_dt)), {}));
+                return;
+            end
+            if OutIsEnum
+                [external_lib, conv_format1] = SLX2LusUtils.dataType_conversion(inport_dt, 'int', RndMeth, SaturateOnIntegerOverflow);
+                conv_format = NodeCallExpr(...
+                    sprintf('int_to_%s', char(lus_out_dt)), conv_format1);
+                return;
             end
             external_lib = {};
             conv_format = {};

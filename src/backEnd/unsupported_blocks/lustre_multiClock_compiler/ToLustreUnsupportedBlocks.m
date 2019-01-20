@@ -4,7 +4,7 @@ function [unsupportedOptions, ...
         ir_struct, ...
         output_dir, ...
         abstractedBlocks] =...
-        ToLustreUnsupportedBlocks(model_path, const_files, lus_backend, varargin)
+        ToLustreUnsupportedBlocks(model_path, const_files, lus_backend, coco_backend, varargin)
     %ToLustreUnsupportedBlocks detects unsupported options/blocks in Simulink model.
     %INPUTS:
     %   MODEL_PATH: The full path of the Simulink model.
@@ -42,7 +42,9 @@ function [unsupportedOptions, ...
     if ~exist('lus_backend', 'var') || isempty(lus_backend)
         lus_backend = LusBackendType.LUSTREC;
     end
-    
+    if ~exist('coco_backend', 'var') || isempty(coco_backend)
+        coco_backend = CoCoBackendType.COMPATIBILITY;
+    end
     
     %% initialize result
     unsupportedOptions = {};
@@ -101,7 +103,8 @@ function [unsupportedOptions, ...
     global ir_handle_struct_map;
     [ir_struct, ir_handle_struct_map] = internalRep_pp(ir_struct, 1, output_dir);
     
-    
+    % add enumeration from Stateflow and from IR
+    add_IR_Enum(ir_struct);
     
     %% Unsupported blocks detection
     if skip_unsupportedblocks
@@ -122,7 +125,8 @@ function [unsupportedOptions, ...
             'blue');
     end
     unsupportedOptionsMap = containers.Map('KeyType', 'char', 'ValueType', 'any');
-    [unsupportedOptionsMap, abstractedBlocks] = recursiveGeneration(main_block, main_block, main_sampleTime, lus_backend, unsupportedOptionsMap);
+    [unsupportedOptionsMap, abstractedBlocks] = ...
+        recursiveGeneration(main_block, main_block, main_sampleTime, lus_backend, coco_backend, unsupportedOptionsMap);
     keys = unsupportedOptionsMap.keys();
     for i=1:numel(keys)
         k = keys{i};
@@ -169,21 +173,22 @@ function [unsupportedOptions, ...
 end
 
 %%
-function [unsupportedOptionsMap, abstractedBlocks]= recursiveGeneration(parent, blk, main_sampleTime, lus_backend, unsupportedOptionsMap)
-    [unsupportedOptionsMap, abstractedBlocks] = blockUnsupportedOptions(parent, blk, main_sampleTime, lus_backend, unsupportedOptionsMap);
+function [unsupportedOptionsMap, abstractedBlocks]= ...
+        recursiveGeneration(parent, blk, main_sampleTime, lus_backend, coco_backend, unsupportedOptionsMap)
+    [unsupportedOptionsMap, abstractedBlocks] = blockUnsupportedOptions(parent, blk, main_sampleTime, lus_backend, coco_backend, unsupportedOptionsMap);
     if isfield(blk, 'Content')
         field_names = fieldnames(blk.Content);
         field_names = ...
             field_names(...
             cellfun(@(x) isfield(blk.Content.(x),'BlockType'), field_names));
         for i=1:numel(field_names)
-            [unsupportedOptionsMap, abstractedBlocks_i] = recursiveGeneration(blk, blk.Content.(field_names{i}), main_sampleTime, lus_backend, unsupportedOptionsMap);
+            [unsupportedOptionsMap, abstractedBlocks_i] = recursiveGeneration(blk, blk.Content.(field_names{i}), main_sampleTime, lus_backend, coco_backend, unsupportedOptionsMap);
             abstractedBlocks = [abstractedBlocks , abstractedBlocks_i];
         end
     end
 end
 
-function  [unsupportedOptionsMap, abstractedBlocks]  = blockUnsupportedOptions( parent, blk,  main_sampleTime, lus_backend, unsupportedOptionsMap)
+function  [unsupportedOptionsMap, abstractedBlocks]  = blockUnsupportedOptions( parent, blk,  main_sampleTime, lus_backend, coco_backend, unsupportedOptionsMap)
     %blockUnsupportedOptions get unsupported options of a bock.
     %INPUTS:
     %   blk: The internal representation of the subsystem.
@@ -210,7 +215,8 @@ function  [unsupportedOptionsMap, abstractedBlocks]  = blockUnsupportedOptions( 
         end
         return;
     end
-    unsupportedOptions_i = b.getUnsupportedOptions(parent, blk,  main_sampleTime, lus_backend);
+    unsupportedOptions_i = b.getUnsupportedOptions(parent, blk, lus_backend,...
+        coco_backend, main_sampleTime);
     if ~isempty(unsupportedOptions_i)
         htmlMsg = cellfun(@(x) HtmlItem(x, {}, 'black', [], [], false),unsupportedOptions_i, 'UniformOutput', false);
         if isKey(unsupportedOptionsMap, blkType)
@@ -227,3 +233,68 @@ function  [unsupportedOptionsMap, abstractedBlocks]  = blockUnsupportedOptions( 
     end
 end
 
+
+%% add enumeration from IR
+function add_IR_Enum(ir)
+    global TOLUSTRE_ENUMS_MAP TOLUSTRE_ENUMS_CONV_NODES;
+    if isfield(ir, 'meta') && isfield(ir.meta, 'Declarations') ...
+            && isfield(ir.meta.Declarations, 'Enumerations')
+        enums = ir.meta.Declarations.Enumerations;
+        for i=1:numel(enums)
+            % put the type name in LOWER case: Lustrec limitation
+            name = lower(enums{i}.Name);
+            if isKey(TOLUSTRE_ENUMS_MAP, name)
+                continue;
+            end
+            members = enums{i}.Members;
+            % add defaultValue in first.
+            Names = cellfun(@(x) x.Name, members, 'UniformOutput', false);
+            Names = Names(~strcmp(Names, enums{i}.DefaultValue));
+            % put member in UPPER case: Lustrec limitation
+            names_in_order = [{enums{i}.DefaultValue}; Names];
+            names_ast = cellfun(@(x) EnumValueExpr(x), names_in_order, ...
+                'UniformOutput', false);
+            TOLUSTRE_ENUMS_MAP(name) = names_ast;
+            TOLUSTRE_ENUMS_CONV_NODES{end+1} = get_Enum2Int_conv_node(name, members);
+            TOLUSTRE_ENUMS_CONV_NODES{end+1} = get_Int2Enum_conv_node(name, members);
+        end
+    end
+end
+function node = get_Enum2Int_conv_node(name, members)
+    conds = cell(numel(members), 1);
+    thens = cell(numel(members) + 1, 1);
+    for i=1:numel(members)
+        conds{i} = BinaryExpr(BinaryExpr.EQ, VarIdExpr('x'), ...
+            EnumValueExpr(members{i}.Name));
+        thens{i} = IntExpr(members{i}.Value);
+    end
+    thens{end} = IntExpr(0);
+    bodyElts{1} = LustreEq(...
+        VarIdExpr('y'), ...
+        IteExpr.nestedIteExpr(conds, thens));
+    node = LustreNode();
+    node.setName(strcat(name, '_to_int'));
+    node.setInputs(LustreVar('x', name));
+    node.setOutputs(LustreVar('y', 'int'));
+    node.setBodyEqs(bodyElts);
+    node.setIsMain(false);
+end
+function node = get_Int2Enum_conv_node(name, members)
+    conds = cell(numel(members)-1, 1);
+    thens = cell(numel(members), 1);
+    for i=1:numel(members)-1
+        conds{i} = BinaryExpr(BinaryExpr.EQ, VarIdExpr('x'), ...
+            IntExpr(members{i}.Value));
+        thens{i} = EnumValueExpr(members{i}.Name);
+    end
+    thens{end} = EnumValueExpr(members{end}.Name);
+    bodyElts{1} = LustreEq(...
+        VarIdExpr('y'), ...
+        IteExpr.nestedIteExpr(conds, thens));
+    node = LustreNode();
+    node.setName(strcat('int_to_', name));
+    node.setInputs(LustreVar('x', 'int'));
+    node.setOutputs(LustreVar('y', name));
+    node.setBodyEqs(bodyElts);
+    node.setIsMain(false);
+end

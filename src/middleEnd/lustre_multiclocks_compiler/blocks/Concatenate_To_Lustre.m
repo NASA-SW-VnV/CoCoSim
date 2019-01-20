@@ -140,7 +140,7 @@ classdef Concatenate_To_Lustre < Block_To_Lustre
                 %its accumulator data type
                 if ~strcmp(inport_dt, outputDataType)
                     [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, outputDataType);
-                    if ~isempty(external_lib)
+                    if ~isempty(conv_format)
                         obj.addExternal_libraries(external_lib);
                         inputs{i} = cellfun(@(x) ...
                             SLX2LusUtils.setArgInConvFormat(conv_format,x),...

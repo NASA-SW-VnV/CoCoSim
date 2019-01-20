@@ -482,7 +482,7 @@ classdef Assignment_To_Lustre < Block_To_Lustre
                 %its accumulator data type
                 if ~strcmp(inport_dt, outputDataType) && i <= inputIdToConvertToInt
                     [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, outputDataType);
-                    if ~isempty(external_lib)
+                    if ~isempty(conv_format)
                         obj.addExternal_libraries(external_lib);
                         inputs{i} = cellfun(@(x) ...
                             SLX2LusUtils.setArgInConvFormat(conv_format,x),...
@@ -491,7 +491,7 @@ classdef Assignment_To_Lustre < Block_To_Lustre
                 elseif i > inputIdToConvertToInt && ~strcmp(lusInport_dt, 'int')
                     % convert index values to int for Lustre code
                     [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, 'int');
-                    if ~isempty(external_lib)
+                    if ~isempty(conv_format)
                         obj.addExternal_libraries(external_lib);
                         inputs{i} = cellfun(@(x) ...
                             SLX2LusUtils.setArgInConvFormat(conv_format,x),...

@@ -21,7 +21,7 @@ classdef Assertion_To_Lustre < Block_To_Lustre
             
             if ~strcmp(inport_lus_dt, 'bool')
                 [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_lus_dt, 'bool');
-                if ~isempty(external_lib)
+                if ~isempty(conv_format)
                     obj.addExternal_libraries(external_lib);
                     inputs{1} = cellfun(@(x) ...
                         SLX2LusUtils.setArgInConvFormat(conv_format,x),...

@@ -35,7 +35,7 @@ classdef CombinatorialLogic_To_Lustre < Block_To_Lustre
                 % "conv_format", a library or the name of casting node
                 % will be stored in "external_lib".
                 [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, 'int');
-                if ~isempty(external_lib)
+                if ~isempty(conv_format)
                     % always add the "external_lib" to the object
                     % external libraries, (so it can be declared in the
                     % overall lustre code).

@@ -64,29 +64,16 @@ classdef Selector_To_Lustre < Block_To_Lustre
                     % example:
                     % detect which input plays the index port.
                     U_dim = in_matrix_dimension{1}.dims;
+                    parent_name = SLX2LusUtils.node_name_format(parent);
                     for i=1:numel(blk.IndexOptionArray)
                         if contains(blk.IndexOptionArray{i}, '(port)')
-                            indexPort = inputs{i+1};
-                            d = U_dim(i);%the width of second inport
-                            % calculate Bound dimension
-                            widthMin = IntExpr(1);
-                            widthMax = IntExpr(d);
-                            % set the property
-                            lines = cell(numel(indexPort), 1);
-                            for j=1:numel(indexPort)
-                                % widthMin <= index and index <= widthMax
-                                lines{j} = BinaryExpr(BinaryExpr.AND, ...
-                                    BinaryExpr(BinaryExpr.LTE, widthMin, indexPort{j}), ...
-                                    BinaryExpr(BinaryExpr.LTE, indexPort{j}, widthMax));
-                            end
-                            propID = sprintf('%s_OUTOFBOUND',blk_name);
-                            codes{end+1} = LocalPropertyExpr(propID, ...
-                                BinaryExpr.BinaryMultiArgs(BinaryExpr.AND, ...
-                                lines));
+                            prop = DEDUtils.OutOfBoundCheck(inputs{i+1}, U_dim(i));
+                            propID = sprintf('%s_OUTOFBOUND_%d',...
+                                blk_name, i);
+                            codes{end+1} = LocalPropertyExpr(propID, prop);
                             % add traceability:
-                            parent_name = SLX2LusUtils.node_name_format(parent);
                             xml_trace.add_Property(blk.Origin_path, ...
-                                parent_name, propID, 1, ...
+                                parent_name, propID, i, ...
                                 CoCoBackendType.DED_OUTOFBOUND);
                         end
                     end

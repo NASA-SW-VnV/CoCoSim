@@ -80,7 +80,9 @@ classdef Block_To_Lustre < handle
             end
         end
         function addExternal_libraries(obj, lib)
-            if iscell(lib)
+            if isempty(lib)
+                return;
+            elseif iscell(lib)
                 obj.external_libraries = [obj.external_libraries, lib];
             elseif ~ischar(lib) && numel(lib) > 1
                 for i=1:numel(lib)
@@ -151,7 +153,7 @@ classdef Block_To_Lustre < handle
         function b = ignored(blk)
             % add blocks that will be ignored because they are supported
             % somehow implicitly or not important for Code generation and Verification.
-            blksIgnored = {'Inport', 'Terminator', 'Scope', 'Display', ...
+            blksIgnored = {'Terminator', 'Scope', 'Display', ...
                 'EnablePort','ActionPort', 'ResetPort', 'TriggerPort', ...
                 'ToWorkspace', 'DataTypeDuplicate', ...
                 'Data Type Propagation'};

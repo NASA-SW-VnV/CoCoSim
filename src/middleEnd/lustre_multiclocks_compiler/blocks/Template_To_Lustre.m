@@ -76,7 +76,7 @@ classdef Template_To_Lustre < Block_To_Lustre
                     % "conv_format", a library or the name of casting node
                     % will be stored in "external_lib".
                     [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, outputDataType, RndMeth, SaturateOnIntegerOverflow);
-                    if ~isempty(external_lib)
+                    if ~isempty(conv_format)
                         % always add the "external_lib" to the object
                         % external libraries, (so it can be declared in the
                         % overall lustre code).
@@ -180,26 +180,10 @@ classdef Template_To_Lustre < Block_To_Lustre
                     % Add properties related to Out of bound array access.
                     % Ignore the check if it is not related to the block in
                     % question.
-                    
                     % example:
-                    % detect which input plays the index port.
-                    indexPort = inputs{2};
-                    w = widths(2);%the width of second inport
-                    % calculate Bound dimension
-                    widthMin = IntExpr(1);
-                    widthMax = IntExpr(w);
-                    % set the property
-                    prop2 = {};
-                    for j=1:numel(indexPort)
-                        propID = sprintf('%s_OUTOFBOUND_%d',blk_name, j);
-                        % widthMin <= index and index <= widthMax
-                        prop2{j} = BinaryExpr(BinaryExpr.AND, ...
-                            BinaryExpr(BinaryExpr.LTE, widthMin, indexPort{j}), ...
-                            BinaryExpr(BinaryExpr.LTE, indexPort{j}, widthMax));
-                    end
                     propID = sprintf('%s_OUTOFBOUND',blk_name);
-                    codes{end+1} = LocalPropertyExpr(propID, ...
-                        BinaryExpr.BinaryMultiArgs(BinaryExpr.AND, prop2));
+                    prop = DEDUtils.OutOfBoundCheck(inputs{2}, widths(2));
+                    codes{end+1} = LocalPropertyExpr(propID, prop);
                     % add traceability:
                     parent_name = SLX2LusUtils.node_name_format(parent);
                     xml_trace.add_Property(blk.Origin_path, ...
@@ -211,58 +195,17 @@ classdef Template_To_Lustre < Block_To_Lustre
                     % Add properties related to minimum and maximum values check.
                     % Ignore the check if it is not related to the block in
                     % question.
-                    [outMin, ~, status] = ...
-                        Constant_To_Lustre.getValueFromParameter(parent,...
-                        blk, blk.OutMin);
-                    if status
-                        outMin = [];
-                    end
-                    [outMax, ~, status] = ...
-                        Constant_To_Lustre.getValueFromParameter(parent,...
-                        blk, blk.OutMax);
-                    if status
-                        outMax = [];
-                    end
-                    % adapt outMin and outMax to the dimension of output
-                    if ~isempty(outMin) && numel(outMin) < nb_outputs
-                        outMin = arrayfun(@(x) outMin(1), (1:nb_outputs));
-                    end
-                    if ~isempty(outMax) && numel(outMax) < nb_outputs
-                        outMax = arrayfun(@(x) outMax(1), (1:nb_outputs));
-                    end
-                    
                     lus_dt = SLX2LusUtils.get_lustre_dt(outputDataType);
-                    prop4 = {};
-                    for j=1:nb_outputs
-                        if isequal(lus_dt, 'int')
-                            if ~isempty(outMin), lusMin = IntExpr(outMin(j));end
-                            if ~isempty(outMax), lusMax = IntExpr(outMax(j));end
-                        else
-                            if ~isempty(outMin), lusMin = RealExpr(outMin(j));end
-                            if ~isempty(outMax), lusMax = RealExpr(outMax(j));end
-                        end
-                        if isempty(outMin) && isempty(outMax)
-                            continue;
-                        elseif isempty(outMin)
-                            prop4{j} = BinaryExpr(BinaryExpr.LTE, outputs{j},...
-                                lusMax);
-                        elseif isempty(outMax)
-                            prop4{j} = BinaryExpr(BinaryExpr.LTE, lusMin, ...
-                                outputs{j});
-                        else
-                            prop4{j} = BinaryExpr(BinaryExpr.AND, ...
-                                BinaryExpr(BinaryExpr.LTE, lusMin, outputs{j}), ...
-                                BinaryExpr(BinaryExpr.LTE, outputs{j}, lusMax));
-                        end
+                    prop = DEDUtils.OutMinMaxCheck(parent, blk, outputs, lus_dt);
+                    if ~isempty(prop)
+                        propID = sprintf('%s_OUTMINMAX',blk_name);
+                        codes{end+1} = LocalPropertyExpr(propID, prop);
+                        % add traceability:
+                        parent_name = SLX2LusUtils.node_name_format(parent);
+                        xml_trace.add_Property(blk.Origin_path, ...
+                            parent_name, propID, 1, ...
+                            CoCoBackendType.DED_OUTMINMAX);
                     end
-                    propID = sprintf('%s_OUTMINMAX',blk_name);
-                    codes{end+1} = LocalPropertyExpr(propID, ...
-                        BinaryExpr.BinaryMultiArgs(BinaryExpr.AND, prop4));
-                    % add traceability:
-                    parent_name = SLX2LusUtils.node_name_format(parent);
-                    xml_trace.add_Property(blk.Origin_path, ...
-                        parent_name, propID, 1, ...
-                        CoCoBackendType.DED_OUTMINMAX);
                 end
             end
             %% Step 6: set the block code.

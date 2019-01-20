@@ -233,7 +233,7 @@ classdef Exp2Lus < handle
                                         inputs, data_map, '', isStateFlow);
                                     [external_lib, conv_format] = ...
                                         SLX2LusUtils.dataType_conversion(param_dt, tree_ID);
-                                    if ~isempty(external_lib)
+                                    if ~isempty(conv_format)
                                         obj.addExternal_libraries(external_lib);
                                         isConversion = true;
                                     else

@@ -16,13 +16,15 @@ function [nom_lustre_file, xml_trace, status, unsupportedOptions, abstractedBloc
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     %% global variables
-    global TOLUSTRE_ENUMS_MAP KIND2 Z3 LUSTREC CHECK_SF_ACTIONS ERROR_MSG ...
+    global TOLUSTRE_ENUMS_MAP TOLUSTRE_ENUMS_CONV_NODES ...
+        KIND2 Z3 LUSTREC CHECK_SF_ACTIONS ERROR_MSG ...
         DED_PROP_MAP CoCoSimPreferences;
     ERROR_MSG = {};
     if isempty(LUSTREC) || isempty(KIND2)
         tools_config;
     end
     TOLUSTRE_ENUMS_MAP = containers.Map('KeyType', 'char', 'ValueType', 'any');
+    TOLUSTRE_ENUMS_CONV_NODES = {};
     % This map takes as keys the Properties ID and as value the type of check
     % and the path to the block under check.
     DED_PROP_MAP = containers.Map('KeyType', 'char', 'ValueType', 'any');
@@ -114,8 +116,10 @@ function [nom_lustre_file, xml_trace, status, unsupportedOptions, abstractedBloc
     
     
     try
-        [unsupportedOptions, status, pp_model_full_path, ir_struct, output_dir, abstractedBlocks]= ...
-            ToLustreUnsupportedBlocks(model_path, const_files, lus_backend, varargin{:});
+        [unsupportedOptions, status, pp_model_full_path, ir_struct, ...
+            output_dir, abstractedBlocks]= ...
+            ToLustreUnsupportedBlocks(model_path, const_files, lus_backend, ...
+            coco_backend, varargin{:});
         
         if status || ~isempty(unsupportedOptions)
             return;
@@ -144,8 +148,8 @@ function [nom_lustre_file, xml_trace, status, unsupportedOptions, abstractedBloc
     
     %% Lustre generation
     display_msg('Lustre generation', Constants.INFO, 'lustre_multiclocks_compiler', '');
-    % add enumeration from Stateflow and from IR
-    add_IR_Enum(ir_struct);
+    % add enumeration nodes
+    % Lustre code
     global model_struct
     model_struct = ir_struct.(IRUtils.name_format(file_name));
     main_sampleTime = model_struct.CompiledSampleTime;
@@ -168,6 +172,9 @@ function [nom_lustre_file, xml_trace, status, unsupportedOptions, abstractedBloc
     enumsAst = cell(numel(keys), 1);
     for i=1:numel(keys)
         enumsAst{i} = EnumTypeExpr(keys{i}, TOLUSTRE_ENUMS_MAP(keys{i}));
+    end
+    if ~isempty(TOLUSTRE_ENUMS_CONV_NODES)
+        nodes_ast = [TOLUSTRE_ENUMS_CONV_NODES, nodes_ast];
     end
     nodes_ast = MatlabUtils.removeEmpty(nodes_ast);
     contracts_ast = MatlabUtils.removeEmpty(contracts_ast);
@@ -387,27 +394,3 @@ function create_file_meta_info(lustre_file)
     fclose(fid);
 end
 
-%% add enumeration from IR
-function add_IR_Enum(ir)
-    global TOLUSTRE_ENUMS_MAP;
-    if isfield(ir, 'meta') && isfield(ir.meta, 'Declarations') ...
-            && isfield(ir.meta.Declarations, 'Enumerations')
-        enums = ir.meta.Declarations.Enumerations;
-        for i=1:numel(enums)
-            % put the type name in LOWER case: Lustrec limitation
-            name = lower(enums{i}.Name);
-            if isKey(TOLUSTRE_ENUMS_MAP, name)
-                continue;
-            end
-            members = enums{i}.Members;
-            % add defaultValue in first.
-            Names = cellfun(@(x) x.Name, members, 'UniformOutput', false);
-            Names = Names(~strcmp(Names, enums{i}.DefaultValue));
-            % put member in UPPER case: Lustrec limitation
-            names_in_order = [{enums{i}.DefaultValue}; Names];
-            names_ast = cellfun(@(x) EnumValueExpr(x), names_in_order, ...
-                'UniformOutput', false);
-            TOLUSTRE_ENUMS_MAP(name) = names_ast;
-        end
-    end
-end

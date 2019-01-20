@@ -1292,7 +1292,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                 
                 if ~strcmp(lusInport_dt, 'real')
                     [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, 'real', RndMeth);
-                    if ~isempty(external_lib)
+                    if ~isempty(conv_format)
                         %obj.addExternal_libraries(external_lib);
                         inputs{i} = cellfun(@(x) ...
                             SLX2LusUtils.setArgInConvFormat(conv_format,x),...

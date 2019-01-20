@@ -77,7 +77,7 @@ classdef Sum_To_Lustre < Block_To_Lustre
                 initCode = one;
             end
             [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(AccumDataTypeStr, OutputDataTypeStr, blk.RndMeth, blk.SaturateOnIntegerOverflow);
-            if ~isempty(external_lib)
+            if ~isempty(conv_format)
                 obj.addExternal_libraries(external_lib);
             end
             exp = blk.Inputs;
@@ -178,7 +178,7 @@ classdef Sum_To_Lustre < Block_To_Lustre
                 %its accumulator data type
                 if ~strcmp(inport_dt, AccumDataTypeStr)
                     [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, AccumDataTypeStr, RndMeth, SaturateOnIntegerOverflow);
-                    if ~isempty(external_lib)
+                    if ~isempty(conv_format)
                         obj.addExternal_libraries(external_lib);
                         inputs{i} = cellfun(@(x) ...
                             SLX2LusUtils.setArgInConvFormat(conv_format,x),...

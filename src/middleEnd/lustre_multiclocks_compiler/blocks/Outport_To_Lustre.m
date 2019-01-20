@@ -30,7 +30,7 @@ classdef Outport_To_Lustre < Block_To_Lustre
                     0, lus_outputDataType);
                 inputs = arrayfun(@(x) {zero}, (1:numel(outputs)));
             end
-            %% 
+            %%
             codes = cell(1, numel(outputs));
             for i=1:numel(outputs)
                 %codes{i} = sprintf('%s = %s;\n\t', outputs{i}, inputs{i});
@@ -40,7 +40,25 @@ classdef Outport_To_Lustre < Block_To_Lustre
             obj.setCode( codes);
         end
         
-        function options = getUnsupportedOptions(obj, varargin)
+        function options = getUnsupportedOptions(obj, parent, blk, ...
+                lus_backend, coco_backend, varargin)
+            % Outport in first level should not be of type enumeration in 
+            % case of Validation backend with Lustrec.
+            if CoCoBackendType.isVALIDATION(coco_backend) ...
+                    && LusBackendType.isLUSTREC(lus_backend) ...
+                    && isequal(parent.BlockType, 'block_diagram')
+                if isempty(blk.CompiledPortDataTypes)
+                    isEnum = false;
+                else
+                    [~, ~, ~, ~, isEnum] = ...
+                        SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Inport{1});
+                end
+                if isEnum
+                    obj.addUnsupported_options(sprintf('Outport %s with Enumeration Type %s is not supported in root level for Validation with Lustrec.', ...
+                        HtmlItem.addOpenCmd(blk.Origin_path),...
+                        blk.CompiledPortDataTypes.Inport{1}));
+                end
+            end
             options = obj.unsupported_options;
         end
         %%

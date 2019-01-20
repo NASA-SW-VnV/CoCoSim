@@ -25,7 +25,7 @@ classdef Abs_To_Lustre < Block_To_Lustre
                 RndMeth = blk.RndMeth;
                 SaturateOnIntegerOverflow = blk.SaturateOnIntegerOverflow;
                 [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, outputDataType, RndMeth, SaturateOnIntegerOverflow);
-                if ~isempty(external_lib)
+                if ~isempty(conv_format)
                     obj.addExternal_libraries(external_lib);
                 end
             else

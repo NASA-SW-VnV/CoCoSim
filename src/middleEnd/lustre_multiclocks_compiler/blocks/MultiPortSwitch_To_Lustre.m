@@ -82,7 +82,7 @@ classdef MultiPortSwitch_To_Lustre < Block_To_Lustre
                 %its accumulator data type
                 if ~strcmp(inport_dt, outputDataType) && i~=1
                     [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, outputDataType, RndMeth, SaturateOnIntegerOverflow);
-                    if ~isempty(external_lib)
+                    if ~isempty(conv_format)
                         obj.addExternal_libraries(external_lib);
                         inputs{i} = cellfun(@(x) ...
                             SLX2LusUtils.setArgInConvFormat(conv_format,x),...
@@ -90,7 +90,7 @@ classdef MultiPortSwitch_To_Lustre < Block_To_Lustre
                     end
                 elseif i==1 && ~strcmp(inLusDT, 'int')
                     [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, 'int');
-                    if ~isempty(external_lib)
+                    if ~isempty(conv_format)
                         obj.addExternal_libraries(external_lib);
                         inputs{i} = cellfun(@(x)...
                             SLX2LusUtils.setArgInConvFormat(conv_format,x),...
