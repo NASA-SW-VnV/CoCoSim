@@ -14,13 +14,14 @@ end
 
 function schema = getKind(varargin)
 schema = sl_action_schema;
-schema.label = 'Kind2';
-schema.callback =  @(x) LusCompilerCallback(LusBackendType.KIND2, x);
+schema.label = 'For Verification';
+CoCoSimPreferences = load_coco_preferences();
+schema.callback =  @(x) LusCompilerCallback(CoCoSimPreferences.lustreBackend, x);
 end
 
 function schema = getLustrec(varargin)
 schema = sl_action_schema;
-schema.label = 'LustreC';
+schema.label = 'For C code generation';
 schema.callback =  @(x) LusCompilerCallback(LusBackendType.LUSTREC, x);
 end
 
