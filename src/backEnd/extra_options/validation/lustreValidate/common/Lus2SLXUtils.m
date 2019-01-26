@@ -1092,7 +1092,7 @@ classdef Lus2SLXUtils
                         expIdx = portNumber - 1; % remove If condition
                         if iscell(elseExp)
                             condition = elseExp{expIdx};
-                        elseif contains(elseExp, ',')
+                        elseif MatlabUtils.contains(elseExp, ',')
                             elseExp = split(elseExp, ',');
                             condition = elseExp{expIdx};
                         else

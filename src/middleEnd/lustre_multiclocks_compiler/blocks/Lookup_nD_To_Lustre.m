@@ -942,7 +942,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                         end
                     elseif isequal(blk.TableDataTypeStr, 'double') ...
                             || isequal(blk.TableDataTypeStr, 'single') ...
-                            || contains(blk.TableDataTypeStr, 'int') 
+                            || MatlabUtils.contains(blk.TableDataTypeStr, 'int') 
                         blkParams.Table = eval(sprintf('%s([%s])',blk.TableDataTypeStr, mat2str(T)));
                     else
                         blkParams.Table = T;
@@ -985,7 +985,7 @@ classdef Lookup_nD_To_Lustre < Block_To_Lustre
                             blkParams.BreakpointsForDimension{i} = eval(sprintf('%s([%s])',compiledDataTypesInporti, mat2str(T)));
                         elseif isequal(dt, 'double') ...
                                 || isequal(dt, 'single') ...
-                                || contains(dt, 'int') 
+                                || MatlabUtils.contains(dt, 'int') 
                             blkParams.BreakpointsForDimension{i} = eval(sprintf('%s([%s])',dt, mat2str(T)));
                         end
                     end

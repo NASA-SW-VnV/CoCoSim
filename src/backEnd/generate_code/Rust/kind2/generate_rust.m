@@ -25,7 +25,7 @@ end
 command = sprintf('%s --compile true --z3_bin %s --output_dir %s --check_implem false %s', KIND2, Z3, output_dir, lus_full_path);
 display_msg(['KIND2_COMMAND ' command], MsgType.INFO, 'generate_rust', '');
 [~, rust_output] = system(command);
-if ~contains(rust_output, 'Success')
+if ~MatlabUtils.contains(rust_output, 'Success')
     display_msg('Error Generating Rust code', MsgType.ERROR, 'Rust Generation', '');
     display_msg(rust_output, MsgType.ERROR, 'Rust Generation', '');
 else

@@ -27,6 +27,7 @@ end
 function LusCompilerCallback(bckend, ~)
 try
     mdl_full_path = MenuUtils.get_file_name(gcs);
+    MenuUtils.add_pp_warning(mdl_full_path);
     CoCoSimPreferences = load_coco_preferences();
     if CoCoSimPreferences.lustreCompiler == 1
         ToLustre(mdl_full_path, [], bckend);

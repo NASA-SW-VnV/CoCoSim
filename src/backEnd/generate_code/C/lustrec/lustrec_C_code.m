@@ -8,6 +8,7 @@
 function lustrec_C_code(lus_full_path, output_dir, node_name)
 
 [lus_path, fname, ~] = fileparts(lus_full_path);
+fname = MatlabUtils.fileBase(fname);
 if nargin < 2
     output_dir = fullfile(lus_path, strcat(fname, '_lustrec_C_code'));
 end
@@ -30,7 +31,7 @@ if status
 end
 
 
-command = sprintf('%s %s -I "%s" -d "%s" -node %s "%s"', LUSTREC, LUSTREC_OPTS, LUCTREC_INCLUDE_DIR, output_dir, lus_full_path, node_name);
+command = sprintf('%s %s -I "%s" -d "%s" -node %s "%s"', LUSTREC, LUSTREC_OPTS, LUCTREC_INCLUDE_DIR, output_dir,node_name,  lus_full_path);
 [~, lustrec_output] = system(command);
 if ~contains(lustrec_output, '.. done')
     display_msg('Error Generating C code', Constants.ERROR, 'C Generation', '');

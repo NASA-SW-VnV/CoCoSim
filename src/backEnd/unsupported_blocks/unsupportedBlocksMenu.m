@@ -21,6 +21,7 @@ if CoCoSimPreferences.lustreCompiler ~= 1
         sprintf('Check Compatibiity is only supported by the NASA Lustre compiler.\n Go to Tools -> Preferences -> Lustre Compiler -> NASA Compiler'), 'CoCoSim');
 else
     try
+        MenuUtils.add_pp_warning(model_full_path);
         ToLustreUnsupportedBlocks(model_full_path);
     catch me
         display_msg(me.getReport(), MsgType.DEBUG, '', '');

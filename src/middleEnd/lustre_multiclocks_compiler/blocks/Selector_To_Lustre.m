@@ -66,7 +66,7 @@ classdef Selector_To_Lustre < Block_To_Lustre
                     U_dim = in_matrix_dimension{1}.dims;
                     parent_name = SLX2LusUtils.node_name_format(parent);
                     for i=1:numel(blk.IndexOptionArray)
-                        if contains(blk.IndexOptionArray{i}, '(port)')
+                        if MatlabUtils.contains(blk.IndexOptionArray{i}, '(port)')
                             prop = DEDUtils.OutOfBoundCheck(inputs{i+1}, U_dim(i));
                             propID = sprintf('%s_OUTOFBOUND_%d',...
                                 blk_name, i);
@@ -151,7 +151,7 @@ classdef Selector_To_Lustre < Block_To_Lustre
                 
                 % pass to Lustre ind
                 for i=1:numel(ind)
-                    if ~contains(blk.IndexOptionArray{i}, '(port)')
+                    if ~MatlabUtils.contains(blk.IndexOptionArray{i}, '(port)')
                         for j=1:numel(ind{i})
                             v_name =  VarIdExpr(...
                                 sprintf('%s_ind_dim_%d_%d',...

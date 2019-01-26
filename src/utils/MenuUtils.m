@@ -28,6 +28,12 @@ classdef MenuUtils
             fpath = get_param(fname,'FileName');
         end
         
+        %% add PP warning
+        function add_pp_warning(model_path)
+            if PPUtils.isAlreadyPP(model_path)
+                warndlg('You are calling CoCoSim on the pre-processed model. Do not forget to make your modifications in the original model.');
+            end
+        end
         %% Create html page with title and items list.
         function html_path = createHtmlList(title, items_list, html_path)
             htmlList = cellfun(@(x) HtmlItem(x, {}, 'black', [], [], false),...

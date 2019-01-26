@@ -30,7 +30,7 @@ end
 [~, slx_file_name, ~] = fileparts(model_full_path);
 
 if  ~exist('node_name', 'var')|| isempty(node_name)
-    node_name = lus_file_name;
+    node_name = MatlabUtils.fileBase(lus_file_name);
 end
 if  ~exist('nb_steps', 'var')|| isempty(nb_steps)
     nb_steps = 100;
@@ -240,7 +240,7 @@ while (numel(verification_files) > 0 ) && (nb_test < nb_radnom_test) && (coverag
         end
         cd(binary_dir);
         txt  = fileread('outputs_values');
-        if contains(txt, '''OK'': ''0''')
+        if MatlabUtils.contains(txt, '''OK'': ''0''')
             verification_files{i} = '';
             good_test = true;
         end
@@ -289,7 +289,7 @@ while (file_idx <= numel(verification_files))  && (numel(T) < MAX_nb_test) && (c
         end
         cd(binary_dir);
         txt  = fileread(outputs_fname);
-        if contains(txt, '''OK'': ''0''')
+        if MatlabUtils.contains(txt, '''OK'': ''0''')
             verification_files{i} = '';
             if i <= file_idx
                 file_idx = file_idx - 1;

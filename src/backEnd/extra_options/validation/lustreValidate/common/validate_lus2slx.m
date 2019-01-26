@@ -10,7 +10,7 @@ function [valid, ...
 %testing or equivalence checking.
 [lus_dir, lus_fname, ~] = fileparts(lus_file_path);
 if nargin < 2 || isempty(main_node)
-    main_node = BUtils.adapt_block_name(lus_fname);
+    main_node = BUtils.adapt_block_name(MatlabUtils.fileBase(lus_fname));
 end
 if ~exist('tests_method', 'var')
     tests_method = 1;

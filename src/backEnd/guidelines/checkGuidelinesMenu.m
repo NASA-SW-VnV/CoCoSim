@@ -15,5 +15,6 @@ end
 
 function checkGuidelinesCallback(callbackInfo)
     model_full_path = MenuUtils.get_file_name(gcs);    
+    MenuUtils.add_pp_warning(model_full_path);
     check_guidelines(model_full_path);
 end

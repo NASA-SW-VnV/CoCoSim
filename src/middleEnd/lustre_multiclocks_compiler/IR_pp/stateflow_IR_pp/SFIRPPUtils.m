@@ -84,7 +84,7 @@ classdef SFIRPPUtils
                 d = data(strcmp(data_names,left_operand));
                 data_found = 0;
                 if isempty(d)
-                    if contains(action, '[')
+                    if MatlabUtils.contains(action, '[')
                         vec = regexp(action,'\[','split');
                         d = data(strcmp(data_names,vec{1}));
                         if ~isempty(d)
@@ -175,14 +175,14 @@ classdef SFIRPPUtils
                     action_updated = [left_operand, ' = ' right_expression];
                 otherwise
                     right_expression = '';
-                    if contains(action_updated,'++')
+                    if MatlabUtils.contains(action_updated,'++')
                         right_expression = strcat(operands{1},' + 1');
-                    elseif contains(action_updated,'--')
+                    elseif MatlabUtils.contains(action_updated,'--')
                         right_expression = strcat(operands{1},' - 1');
                     else
                         if ~isempty(ind) && numel(action_updated)>=ind(1)+1
                             right_expression =action_updated(ind(1)+1:end);
-                            if contains(right_expression,'==')
+                            if MatlabUtils.contains(right_expression,'==')
                                 expression = '={2}';
                                 replace = '=';
                                 right_expression = regexprep(right_expression,expression,replace);
@@ -202,7 +202,7 @@ classdef SFIRPPUtils
             d = data(strcmp(data_names,left_operand));
             data_found = 0;
             if isempty(d)
-                if contains(action, '[')
+                if MatlabUtils.contains(action, '[')
                     vec = regexp(action,'\[','split');
                     d = data(strcmp(data_names,vec{1}));
                     if ~isempty(d)
@@ -223,7 +223,7 @@ classdef SFIRPPUtils
             end
             operator ='(\(|\)|\s|+|-|*|/|[!]?=|<>|&|<[=]?|>[=]?|\||,|^|$)';
             if strcmp(datatype,'real')
-                if (contains(action_updated,'++') || contains(action_updated,'--')) && isempty(strfind(operands{2},'.'))
+                if (MatlabUtils.contains(action_updated,'++') || MatlabUtils.contains(action_updated,'--')) && isempty(strfind(operands{2},'.'))
                     % fix x+1 or x-1 to x+1.0, x-1.0
                     expression = '(\<|[=+{2}\-{2}]\s*)(\d+)';
                     replace = '$1$2.0';
@@ -323,7 +323,7 @@ classdef SFIRPPUtils
                 end
                 action_updated = [left_operand, '__', num2str(index), ' = ' right_expression ';'];
             else
-                if ~isempty(left_operand) && contains(action, '=')
+                if ~isempty(left_operand) && MatlabUtils.contains(action, '=')
                     action_updated = [left_operand, ' = ' right_expression];
                     
                 else

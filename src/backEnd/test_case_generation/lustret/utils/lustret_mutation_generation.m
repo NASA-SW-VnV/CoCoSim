@@ -8,6 +8,7 @@ end
 err = 0;
 generation_start = tic;
 [file_parent, file_name, ~] = fileparts(lus_full_path);
+node_name = MatlabUtils.fileBase(file_name);
 output_dir = fullfile(file_parent, strcat(file_name,'_mutants'));
 if ~exist(output_dir, 'dir')
     mkdir(output_dir);
@@ -33,7 +34,7 @@ end
 
 
 
-command = sprintf('%s -I %s -nb-mutants %d -node %s -d %s %s',LUSTRET, LUCTREC_INCLUDE_DIR, nb_mutants_max, file_name, output_dir, lus_full_path);
+command = sprintf('%s -I %s -nb-mutants %d -node %s -d %s %s',LUSTRET, LUCTREC_INCLUDE_DIR, nb_mutants_max, node_name, output_dir, lus_full_path);
 msg = sprintf('LUSTRET_COMMAND : %s\n',command);
 display_msg(msg, MsgType.INFO, 'lustret_mutation_generation', '');
 display_msg('Please Kill me (Ctrl+C) if I am taking long time',...

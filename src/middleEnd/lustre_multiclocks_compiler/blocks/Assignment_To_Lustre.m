@@ -294,7 +294,7 @@ classdef Assignment_To_Lustre < Block_To_Lustre
             % pass to Lustre ind
             codes = {};
             for i=1:numel(ind)
-                if ~contains(blk.IndexOptionArray{i}, '(port)')
+                if ~MatlabUtils.contains(blk.IndexOptionArray{i}, '(port)')
                     for j=1:numel(ind{i})
                         v_name =  VarIdExpr(...
                             sprintf('%s_ind_dim_%d_%d',...

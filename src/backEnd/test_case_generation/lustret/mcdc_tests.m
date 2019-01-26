@@ -32,7 +32,7 @@ try
     [lus_full_path, xml_trace, ~, ~, ~, pp_model_full_path] = ...
         ToLustre(model_full_path);
     [output_dir, lus_file_name, ~] = fileparts(lus_full_path);
-    [~, main_node, ~] = fileparts(lus_file_name);%remove .LUSTREC/.KIND2 from name.
+    main_node = MatlabUtils.fileBase(lus_file_name);%remove .LUSTREC/.KIND2 from name.
     [~, slx_file_name, ~] = fileparts(pp_model_full_path);
 catch ME
     display_msg(['Compilation failed for model ' slx_file_name], ...

@@ -175,7 +175,7 @@ classdef Delay_To_Lustre < Block_To_Lustre
                 delayLength = DelayLengthUpperLimit;
                 isDelayVariable = 1;
                 delayDataType = blk.CompiledPortDataTypes.Inport{2};
-                if ~contains(delayDataType, 'int')
+                if ~MatlabUtils.contains(delayDataType, 'int')
                     delayLengthDT = 'uint32';
                     [external_lib, conv_format] = ...
                         SLX2LusUtils.dataType_conversion(delayDataType, delayLengthDT);

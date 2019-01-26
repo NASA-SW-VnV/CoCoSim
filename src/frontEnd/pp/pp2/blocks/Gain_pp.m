@@ -32,7 +32,7 @@ if not(isempty(Gain_list))
             end
             CompiledPortDataTypes = SLXUtils.getCompiledParam(Gain_list{i}, 'CompiledPortDataTypes');
             if isequal(CompiledPortDataTypes.Inport{1}, 'boolean') ...
-                    && ~contains(CompiledPortDataTypes.Outport{1}, 'fix')
+                    && ~MatlabUtils.contains(CompiledPortDataTypes.Outport{1}, 'fix')
                 outputDataType = CompiledPortDataTypes.Outport{1};
             else
                 outputDataType = get_param(Gain_list{i}, 'OutDataTypeStr');

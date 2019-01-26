@@ -39,7 +39,13 @@ classdef MatlabUtils
                 end
             end
         end
-        
+        % for fileNames such as "test.LUSTREC.lus" it should returns "test"
+        function fname = fileBase(path)
+            [~, fname, ~ ] = fileparts(path);
+            if MatlabUtils.contains(fname, '.')
+                [~, fname, ~ ] = MatlabUtils.fileBase(fname);
+            end
+        end
         %%
         function st = gcd(T)
             st = max(T);
@@ -117,7 +123,19 @@ classdef MatlabUtils
                 end
             end
         end
-        
+        %%
+        function res = contains(str, pattern)
+            try
+                %use Matlab startsWith for Matlab versions > 2016
+                res = contains(s, pattern);
+            catch
+                try
+                    res = ~isempty(strfind(str, pattern));
+                catch E
+                    throw(E);
+                end
+            end
+        end
         %% delete files using regular expressions:
         %e.g. rm *_PP.slx
         function reg_delete(basedir, reg_exp)
@@ -231,6 +249,14 @@ classdef MatlabUtils
             end
         end
         
+        
+        %% This function for developers
+        % open all files that contains a String
+        function openAllFilesContainingString(folder, str)
+            [~, A] = system(sprintf('find %s | xargs grep "%s" -sl', folder, str), '-echo');
+            AA = strsplit(A, '\n');
+            for i=1:numel(AA), try open(AA{i}), catch, end, end
+        end
     end
     
 end

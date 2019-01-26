@@ -63,7 +63,7 @@ classdef PP_Utils
         function ordered_fcts_map = extract_fcts(ordered_fcts_map, map, lowest_priority)
             for i=1:numel(map)
                 [library_path, fname,ext] = fileparts(map{i});
-                if contains(fname, '*')
+                if MatlabUtils.contains(fname, '*')
                     files_struct = what(library_path);
                     if ~isempty(files_struct)
                         library_path = files_struct.path;
@@ -104,7 +104,7 @@ classdef PP_Utils
                 v_list = pp_order_map(key);
                 for i=1:numel(v_list)
                     [library_path, fname,ext] = fileparts(v_list{i});
-                    if contains(fname, '*')
+                    if MatlabUtils.contains(fname, '*')
                         files_struct = what(library_path);
                         if ~isempty(files_struct)
                             library_path = files_struct.path;

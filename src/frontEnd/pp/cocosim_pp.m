@@ -56,7 +56,7 @@ end
 already_pp = false;
 load_system(model_path);
 
-if SLXUtils.isAlreadyPP(model_path)
+if PPUtils.isAlreadyPP(model_path)
     already_pp = true;
     new_model_base = model;
     new_file_path = model_path;

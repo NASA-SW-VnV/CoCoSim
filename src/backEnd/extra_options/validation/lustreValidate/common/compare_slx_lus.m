@@ -40,7 +40,7 @@ elseif show_models && ~isempty(model_full_path)
 end
 [lus_dir, lus_fname, ~] = fileparts(lus_file_path);
 if ~exist('main_node_name', 'var') || isempty(main_node_name)
-    main_node_name = lus_fname;
+    main_node_name = MatlabUtils.fileBase(lus_fname);
 end
 if ~exist('output_dir', 'var') || isempty(output_dir)
     output_dir = lus_dir;

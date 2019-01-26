@@ -22,7 +22,9 @@ end
 
 function RandomCallback(callbackInfo)
 try
-    random_test_gui('model_full_path',MenuUtils.get_file_name(gcs));
+    model_full_path = MenuUtils.get_file_name(gcs);
+    MenuUtils.add_pp_warning(model_full_path);
+    random_test_gui('model_full_path',model_full_path);
 catch ME
     display_msg('Generation Failed', MsgType.ERROR, 'TestCaseGenMenu', '');
     display_msg(ME.message, MsgType.ERROR, 'TestCaseGenMenu', '');
@@ -39,7 +41,9 @@ end
 
 function MutationCallback(callbackInfo)
 try
-    mutation_test_gui('model_full_path',MenuUtils.get_file_name(gcs));
+    model_full_path = MenuUtils.get_file_name(gcs);
+    MenuUtils.add_pp_warning(model_full_path);
+    mutation_test_gui('model_full_path',model_full_path);
 catch ME
     display_msg('Generation Failed', MsgType.ERROR, 'TestCaseGenMenu', '');
     display_msg(ME.message, MsgType.ERROR, 'TestCaseGenMenu', '');
@@ -56,7 +60,9 @@ end
 
 function MCDCCallback(callbackInfo)
 try
-    mcdc_test_gui('model_full_path',MenuUtils.get_file_name(gcs));
+    model_full_path = MenuUtils.get_file_name(gcs);
+    MenuUtils.add_pp_warning(model_full_path);
+    mcdc_test_gui('model_full_path',model_full_path);
 catch ME
     display_msg('Generation Failed', MsgType.ERROR, 'TestCaseGenMenu', '');
     display_msg(ME.message, MsgType.ERROR, 'TestCaseGenMenu', '');

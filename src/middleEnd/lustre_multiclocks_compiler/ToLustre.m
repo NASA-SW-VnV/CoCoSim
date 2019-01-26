@@ -41,7 +41,7 @@ function [nom_lustre_file, xml_trace, status, unsupportedOptions, abstractedBloc
         const_files = {};
     end
     if nargin < 3 || isempty(lus_backend)
-        lus_backend = LusBackendType.LUSTREC;
+        lus_backend = CoCoSimPreferences.lustreBackend;
     end
     if nargin < 4 || isempty(coco_backend)
         coco_backend = CoCoBackendType.VALIDATION;

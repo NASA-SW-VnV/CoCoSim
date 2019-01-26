@@ -18,10 +18,11 @@ clear;
 model_full_path = MenuUtils.get_file_name(gcs);
 [ CoCoSimPreferences ] = loadCoCoSimPreferences();
 warning('off')
+MenuUtils.add_pp_warning(model_full_path);
 if CoCoSimPreferences.lustreCompiler ==1
     toLustreVerify(model_full_path, [], CoCoSimPreferences.lustreBackend);
     
-elseif CoCoSimPreferences.lustreCompiler
+else
     if LusBackendType.isKIND2(CoCoSimPreferences.lustreBackend)
         assignin('base', 'SOLVER', 'K');
     elseif LusBackendType.isJKIND(CoCoSimPreferences.lustreBackend)

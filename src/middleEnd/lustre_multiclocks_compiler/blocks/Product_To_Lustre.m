@@ -36,7 +36,7 @@ classdef Product_To_Lustre < Block_To_Lustre
         function options = getUnsupportedOptions(obj, parent, blk, lus_backend, varargin)
             % add your unsuported options list here
             if (strcmp(blk.Multiplication, 'Matrix(*)')...
-                    && contains(blk.Inputs, '/') )
+                    && MatlabUtils.contains(blk.Inputs, '/') )
                 for i=1:numel(blk.Inputs)
                     if isequal(blk.Inputs(i), '/')
                         if LusBackendType.isKIND2(lus_backend)

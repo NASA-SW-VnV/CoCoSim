@@ -51,9 +51,9 @@ function states = adapt_states(states)
     for i=1:numel(states)
         statePath = states{i}.Path;
         if isfield(states{i}, 'LabelString')...
-                && ( contains(states{i}.LabelString, ':') ...
-                || contains(states{i}.LabelString, ';')  ...%the case of one action without (en:|entry:) prefix
-                || contains(states{i}.LabelString, '='))
+                && ( MatlabUtils.contains(states{i}.LabelString, ':') ...
+                || MatlabUtils.contains(states{i}.LabelString, ';')  ...%the case of one action without (en:|entry:) prefix
+                || MatlabUtils.contains(states{i}.LabelString, '='))
             display_msg(...
                 sprintf('We need your confirmation on state actions of the State\n %s:', ...
                 statePath),...
@@ -67,7 +67,7 @@ function states = adapt_states(states)
             for j=1:numel(states_fields)
                 f = states_fields{j};
                 if isfield(states{i}.Actions, f) ...
-                        && contains(states{i}.LabelString, states_keywords{j})
+                        && MatlabUtils.contains(states{i}.LabelString, states_keywords{j})
                     if isempty(states{i}.Actions.(f))
                         action = 'not defined';
                     else
@@ -89,7 +89,7 @@ function states = adapt_states(states)
                 for j=1:numel(states_fields)
                     f = states_fields{j};
                     if isfield(states{i}.Actions, f) ...
-                            && contains(states{i}.LabelString, states_keywords{j})
+                            && MatlabUtils.contains(states{i}.LabelString, states_keywords{j})
                         prompt = sprintf('Provide the correct %s action (hit enter if not required):', f);
                         str = input(prompt,'s');
                         if ~isempty(str)
