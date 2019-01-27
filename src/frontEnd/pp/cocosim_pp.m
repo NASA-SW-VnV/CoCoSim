@@ -34,13 +34,13 @@ end
 use_backup = 0 ;
 for i=1:numel(varargin)
 %     disp(varargin{i})
-    if strcmp(varargin{i}, 'nodisplay')
+    if strcmp(varargin{i}, ToLustreOptions.NODISPLAY)
         nodisplay = 1;
-    elseif strcmp(varargin{i}, 'verif')
+    elseif strcmp(varargin{i}, ToLustreOptions.GEN_PP_VERIF)
         cocosim_pp_gen_verif = 1;
-    elseif strcmp(varargin{i}, 'skip_pp')
+    elseif strcmp(varargin{i}, ToLustreOptions.SKIP_PP)
         skip_pp = 1;
-    elseif strcmp(varargin{i}, 'use_backup')
+    elseif strcmp(varargin{i}, ToLustreOptions.SKIP_DEFECTED_PP)
         % use backup model, if a pp function failed, skip it.
         use_backup = 1;
     end

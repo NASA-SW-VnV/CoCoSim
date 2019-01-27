@@ -6,7 +6,17 @@ classdef MatlabUtils
     methods (Static = true)
         
         %% concatenate 1-D vectors
-        function r = concat(v1, v2)
+        function r = concat(varargin)
+            if numel(varargin) == 1
+                r = varargin{1};
+                return;
+            elseif numel(varargin) > 2
+                v1 = varargin{1};
+                v2 = MatlabUtils.concat(varargin{2:end});
+            elseif numel(varargin) == 2
+                v1 = varargin{1};
+                v2 = varargin{2};
+            end
             [n1, ~] = size(v1);
             [n2, ~] = size(v2);
             if n1 == 1

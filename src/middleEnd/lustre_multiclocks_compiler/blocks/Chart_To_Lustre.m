@@ -135,34 +135,34 @@ classdef Chart_To_Lustre < Block_To_Lustre
                     HtmlItem.addOpenCmd(blk.Origin_path)));
             end
             %% Check data dimenstion
-            InportsWidth = blk.CompiledPortWidths.Inport;
-            for i=1:numel(InportsWidth)
-                if InportsWidth(i) > 1
-                    obj.addUnsupported_options(...
-                        sprintf(['Inport number %d in block %s is not a '...
-                        'scalar. Only scalar inputs are supported in Stateflow chart.'],....
-                        i, HtmlItem.addOpenCmd(blk.Origin_path)));
-                end
-            end
-            OutportsWidth = blk.CompiledPortWidths.Outport;
-            for i=1:numel(OutportsWidth)
-                if OutportsWidth(i) > 1
-                    obj.addUnsupported_options(...
-                        sprintf(['Outport number %d in block %s is not a '...
-                        'scalar. Only scalar outputs are supported in Stateflow chart.'],....
-                        i, HtmlItem.addOpenCmd(blk.Origin_path)));
-                end
-            end
-            data = SFContent.Data;
-            for i=1:numel(data)
-                ArraySize = str2num(data{i}.ArraySize);
-                if ~isempty(ArraySize) && ArraySize > 1
-                    obj.addUnsupported_options(...
-                        sprintf(['Data "%s" in chart %s is not a '...
-                        'scalar. Only scalar data are supported in Stateflow chart.'],....
-                        data{i}.Name, HtmlItem.addOpenCmd(blk.Origin_path)));
-                end
-            end
+%             InportsWidth = blk.CompiledPortWidths.Inport;
+%             for i=1:numel(InportsWidth)
+%                 if InportsWidth(i) > 1
+%                     obj.addUnsupported_options(...
+%                         sprintf(['Inport number %d in block %s is not a '...
+%                         'scalar. Only scalar inputs are supported in Stateflow chart.'],....
+%                         i, HtmlItem.addOpenCmd(blk.Origin_path)));
+%                 end
+%             end
+%             OutportsWidth = blk.CompiledPortWidths.Outport;
+%             for i=1:numel(OutportsWidth)
+%                 if OutportsWidth(i) > 1
+%                     obj.addUnsupported_options(...
+%                         sprintf(['Outport number %d in block %s is not a '...
+%                         'scalar. Only scalar outputs are supported in Stateflow chart.'],....
+%                         i, HtmlItem.addOpenCmd(blk.Origin_path)));
+%                 end
+%             end
+%             data = SFContent.Data;
+%             for i=1:numel(data)
+%                 ArraySize = str2num(data{i}.CompiledSize);
+%                 if ~isempty(ArraySize) && ArraySize > 1
+%                     obj.addUnsupported_options(...
+%                         sprintf(['Data "%s" in chart %s is not a '...
+%                         'scalar. Only scalar data are supported in Stateflow chart.'],....
+%                         data{i}.Name, HtmlItem.addOpenCmd(blk.Origin_path)));
+%                 end
+%             end
             %% get all events types and check for function call.
             events = SFContent.Events;
             for i=1:numel(events)

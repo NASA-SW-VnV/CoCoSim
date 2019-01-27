@@ -36,6 +36,7 @@ classdef SF_To_LustreNode
             for i=1:numel(dataAndEvents)
                 SF_DATA_MAP(dataAndEvents{i}.Name) = dataAndEvents{i};
             end
+            SF_DATA_MAP = SF_To_LustreNode.addArrayData(SF_DATA_MAP, dataAndEvents);
             states = SF_To_LustreNode.orderObjects(content.States);
             for i=1:numel(states)
                 SF_STATES_PATH_MAP(states{i}.Path) = states{i};
@@ -182,7 +183,7 @@ classdef SF_To_LustreNode
         %% Get unique short name
         function unique_name = getUniqueName(object, id)
             global SF_STATES_PATH_MAP SF_JUNCTIONS_PATH_MAP;
-            if ischar(object) 
+            if ischar(object)
                 name = object;
                 if nargin == 1
                     if isKey(SF_STATES_PATH_MAP, name)
@@ -234,9 +235,62 @@ classdef SF_To_LustreNode
                 data{i}.Datatype = 'Event';
                 data{i}.CompiledType = 'boolean';
                 data{i}.InitialValue = 'false';
-                data{i}.ArraySize = '-1';
+                data{i}.ArraySize = '1';
+                data{i}.CompiledSize = '1';
             end
         end
-        
+        function vars = getDataVars(d_list)
+            vars = {};
+            for i=1:numel(d_list)
+                names = SF_To_LustreNode.getDataName(d_list{i});
+                lusDt = d_list{i}.LusDatatype;
+                vars = MatlabUtils.concat(vars, ...
+                    cellfun(@(x) LustreVar(x, lusDt), ...
+                    names, 'UniformOutput', false));
+            end
+        end
+        function names = getDataName(d)
+            if isfield(d, 'CompiledSize')
+                CompiledSize = str2num(d.CompiledSize);
+            elseif isfield(d, 'ArraySize')
+                CompiledSize = str2num(d.ArraySize);
+            else
+                CompiledSize = 1;
+            end
+            CompiledSize = prod(CompiledSize);
+            if CompiledSize == 1 || CompiledSize == -1
+                names = {d.Name};
+            else
+                for i=1:CompiledSize
+                    names{i} = sprintf('%s__ID%.0f_Index%d', d.Name, d.Id, i);
+                end
+            end
+        end
+        function SF_DATA_MAP = addArrayData(SF_DATA_MAP, d_list)
+            for i=1:numel(d_list)
+                names = SF_To_LustreNode.getDataName(d_list{i});
+                if numel(names) > 1
+                    for j=1:numel(names)
+                        d = d_list{i};
+                        d.Name = names{j};
+                        d.ArraySize = '1';
+                        d.CompiledSize = '1';
+                        try
+                            [v, ~, ~] = ...
+                                SLXUtils.evalParam(gcs, [], [], d.InitialValue);
+                        catch
+                            v = 0;
+                        end
+                        if numel(v) >= j
+                            v = v(j);
+                        else
+                            v = v(1);
+                        end
+                        d.InitialValue = num2str(v);
+                        SF_DATA_MAP(names{j}) = d;
+                    end
+                end
+            end
+        end
     end
 end

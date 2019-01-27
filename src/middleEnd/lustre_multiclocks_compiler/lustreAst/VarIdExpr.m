@@ -116,6 +116,9 @@ classdef VarIdExpr < LustreExpr
     end
     methods(Static)
         function r = ismemberVar(v, vars)
+            if isa(v, 'VarIdExpr') || isa(v, 'LustreVar')
+                v = v.getId();
+            end
             Ids = cellfun(@(x) x.getId(), ...
                 vars, 'UniformOutput', false);
             r = ismember(v, Ids);

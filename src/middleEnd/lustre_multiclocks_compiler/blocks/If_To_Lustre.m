@@ -118,7 +118,13 @@ classdef If_To_Lustre < Block_To_Lustre
             [exp, status] = ...
                 Exp2Lus.expToLustre(obj, cond, parent, blk, inputs_cell, ...
                 data_map, expected_dt);
-            
+            if iscell(exp) 
+                if numel(exp) == 1
+                    exp = exp{1};
+                elseif numel(exp) > 1
+                    exp = BinaryExpr.BinaryMultiArgs(BinaryExpr.AND, exp);
+                end
+            end
             if status
                 display_msg(sprintf('Block %s is not supported', HtmlItem.addOpenCmd(blk.Origin_path)), ...
                     MsgType.ERROR, 'If_To_Lustre.formatConditionToLustre', '');

@@ -41,7 +41,7 @@ classdef Fcn_To_Lustre < Block_To_Lustre
             end
             
            
-            obj.setCode(LustreEq(outputs{1}, lusCode));
+            obj.setCode(LustreEq(outputs{1}, lusCode{1}));
             obj.addVariable(outputs_dt);
             
         end

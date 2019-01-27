@@ -255,17 +255,21 @@ classdef StateflowState_To_Lustre
                     try
                         [lus_action, outputs_i, inputs_i, external_libraries_i] = ...
                             getPseudoLusAction(actions{i}, data_map);
-                        if isa(lus_action, 'LustreEq')
-                            body{end+1} = LustreEq(lus_action.getLhs(), ...
-                                IteExpr(UnaryExpr(UnaryExpr.NOT, isInner), ...
-                                lus_action.getRhs(), lus_action.getLhs()));
-                            outputs = [outputs, outputs_i];
-                            inputs = [inputs, inputs_i, outputs_i];
-                            external_libraries = [external_libraries, external_libraries_i];
-                        elseif ~isempty(lus_action)
-                            display_msg(sprintf(...
-                                'Action "%s" in state %s should be an assignement (e.g. outputs = f(inputs))',...
-                                actions{i}, state.Origin_path), MsgType.ERROR, 'write_entry_action', '');
+                        outputs = [outputs, outputs_i];
+                        inputs = [inputs, inputs_i, outputs_i];
+                        external_libraries = [external_libraries, external_libraries_i];
+                        for j=1:numel(lus_action)
+                            if isa(lus_action{j}, 'LustreEq')
+                                body{end+1} = LustreEq(lus_action{j}.getLhs(), ...
+                                    IteExpr(UnaryExpr(UnaryExpr.NOT, isInner), ...
+                                    lus_action{j}.getRhs(), lus_action{j}.getLhs()));
+                                
+                            elseif ~isempty(lus_action{j})
+                                display_msg(sprintf(...
+                                    'Action "%s" in state %s should be an assignement (e.g. outputs = f(inputs))',...
+                                    actions{i}, state.Origin_path), MsgType.ERROR, 'write_entry_action', '');
+                                break;
+                            end
                         end
                     catch me
                         if strcmp(me.identifier, 'COCOSIM:STATEFLOW')
@@ -355,17 +359,21 @@ classdef StateflowState_To_Lustre
                 try
                     [lus_action, outputs_i, inputs_i, external_libraries_i] = ...
                         getPseudoLusAction(actions{i}, data_map);
-                    if isa(lus_action, 'LustreEq')
-                        body{end+1} = LustreEq(lus_action.getLhs(), ...
-                            IteExpr(UnaryExpr(UnaryExpr.NOT, isInner), ...
-                            lus_action.getRhs(), lus_action.getLhs()));
-                        outputs = [outputs, outputs_i];
-                        inputs = [inputs, inputs_i, outputs_i];
-                        external_libraries = [external_libraries, external_libraries_i];
-                    elseif ~isempty(lus_action) 
-                        display_msg(sprintf(...
-                            'Action "%s" in state %s should be an assignement (e.g. outputs = f(inputs))',...
-                            actions{i}, state.Origin_path), MsgType.ERROR, 'write_exit_action', '');
+                    outputs = [outputs, outputs_i];
+                    inputs = [inputs, inputs_i, outputs_i];
+                    external_libraries = [external_libraries, external_libraries_i];
+                    for j=1:numel(lus_action)
+                        if isa(lus_action{j}, 'LustreEq')
+                            body{end+1} = LustreEq(lus_action{j}.getLhs(), ...
+                                IteExpr(UnaryExpr(UnaryExpr.NOT, isInner), ...
+                                lus_action{j}.getRhs(), lus_action{j}.getLhs()));
+                            
+                        elseif ~isempty(lus_action{j})
+                            display_msg(sprintf(...
+                                'Action "%s" in state %s should be an assignement (e.g. outputs = f(inputs))',...
+                                actions{i}, state.Origin_path), MsgType.ERROR, 'write_exit_action', '');
+                            break;
+                        end
                     end
                 catch me
                     if strcmp(me.identifier, 'COCOSIM:STATEFLOW')
@@ -454,8 +462,9 @@ classdef StateflowState_To_Lustre
             
             for i=1:nb_actions
                 try
-                    [body{end+1}, outputs_i, inputs_i, external_libraries_i] = ...
+                    [actions_i, outputs_i, inputs_i, external_libraries_i] = ...
                         getPseudoLusAction(actions{i}, data_map);
+                    body = [body, actions_i];
                     outputs = [outputs, outputs_i];
                     inputs = [inputs, inputs_i];
                     external_libraries = [external_libraries, external_libraries_i];
@@ -831,14 +840,12 @@ classdef StateflowState_To_Lustre
                 dataAndEvents, 'UniformOutput', false);
             inputsData = SF_To_LustreNode.orderObjects(...
                 dataAndEvents(strcmp(Scopes, 'Input')), 'Port');
-            inputs = cellfun(@(x) LustreVar(x.Name, x.LusDatatype), ...
-                inputsData, 'UniformOutput', false);
+            inputs = SF_To_LustreNode.getDataVars(inputsData);
             
             %create outputs
             outputsData = SF_To_LustreNode.orderObjects(...
                 dataAndEvents(strcmp(Scopes, 'Output')), 'Port');
-            outputs = cellfun(@(x) LustreVar(x.Name, x.LusDatatype), ...
-                outputsData, 'UniformOutput', false);
+            outputs = SF_To_LustreNode.getDataVars(outputsData);
             
             %get chart node AST
             if isempty(inputEvents)
@@ -869,68 +876,76 @@ classdef StateflowState_To_Lustre
                 if isequal(d.Scope, 'Input')
                     continue;
                 end
-                d_name = d.Name;
-                if ~ismember(d_name, nodeCall_outputs_Names) ...
-                        &&  ~ismember(d_name, nodeCall_inputs_Names)
-                    % not used
-                    continue;
-                end
-                [v, ~, status] = ...
-                    Constant_To_Lustre.getValueFromParameter(parent, blk, d.InitialValue);
-                if status
-                    display_msg(sprintf('InitialOutput %s in Chart %s not found neither in Matlab workspace or in Model workspace',...
-                        d.InitialValue, chart.Origin_path), ...
-                        MsgType.ERROR, 'Outport_To_Lustre', '');
-                    v = 0;
-                end
-                if isequal(d.Scope, 'Parameter')
-                    if isstruct(v) && isfield(v,'Value')
-                        v = v.Value;
-                    elseif isa(v, 'Simulink.Parameter')
-                        v = v.Value;
+                d_names = SF_To_LustreNode.getDataName(d);
+                for j=1:numel(d_names)
+                    d_name = d_names{j};
+                    if ~ismember(d_name, nodeCall_outputs_Names) ...
+                            &&  ~ismember(d_name, nodeCall_inputs_Names)
+                        % not used
+                        continue;
                     end
-                end
-                IC_Var = SLX2LusUtils.num2LusExp(v, d.LusDatatype);
-                
-                if ~isequal(d.Scope, 'Output')
-                    variables{end+1,1} = LustreVar(d_name, d.LusDatatype);
-                end
-                if isequal(d.Scope, 'Output')
-                    d_firstName = strcat(d_name, '__1');
-                    if ismember(d_name, nodeCall_inputs_Names)
-                        body{end+1} = LustreEq(...
-                            VarIdExpr(d_firstName), ...
-                            BinaryExpr(BinaryExpr.ARROW, IC_Var, ...
-                            UnaryExpr(UnaryExpr.PRE, VarIdExpr(d_name))));
-                        variables{end+1,1} = LustreVar(d_firstName, d.LusDatatype);
-                        nodeCall_inputs_Ids = ...
-                            StateflowState_To_Lustre.changeVar(...
-                            nodeCall_inputs_Ids, d_name, d_firstName);
+                    [v, ~, status] = ...
+                        Constant_To_Lustre.getValueFromParameter(parent, blk, d.InitialValue);
+                    if status
+                        display_msg(sprintf('InitialOutput %s in Chart %s not found neither in Matlab workspace or in Model workspace',...
+                            d.InitialValue, chart.Origin_path), ...
+                            MsgType.ERROR, 'Outport_To_Lustre', '');
+                        v = 0;
                     end
-                elseif isequal(d.Scope, 'Local') 
-                    d_lastName = strcat(d_name, '__2');
-                    if ismember(d_name, nodeCall_outputs_Names)
-                        body{end+1} = LustreEq(...
-                            VarIdExpr(d_name), ...
-                            BinaryExpr(BinaryExpr.ARROW, IC_Var, ...
-                            UnaryExpr(UnaryExpr.PRE, VarIdExpr(d_lastName))));
-                        variables{end+1,1} = LustreVar(d_lastName, d.LusDatatype);
-                        nodeCall_outputs_Ids = ...
-                            StateflowState_To_Lustre.changeVar(...
-                            nodeCall_outputs_Ids, d_name, d_lastName);
+                    if isequal(d.Scope, 'Parameter')
+                        if isstruct(v) && isfield(v,'Value')
+                            v = v.Value;
+                        elseif isa(v, 'Simulink.Parameter')
+                            v = v.Value;
+                        end
+                    end
+                    if numel(v) >= j
+                        v = v(j);
                     else
-                        %local variable that was not modified in the chart
+                        v = v(1);
+                    end
+                    IC_Var = SLX2LusUtils.num2LusExp(v, d.LusDatatype);
+                    
+                    if ~isequal(d.Scope, 'Output')
+                        variables{end+1} = LustreVar(d_name, d.LusDatatype);
+                    end
+                    if isequal(d.Scope, 'Output')
+                        d_firstName = strcat(d_name, '__1');
+                        if ismember(d_name, nodeCall_inputs_Names)
+                            body{end+1} = LustreEq(...
+                                VarIdExpr(d_firstName), ...
+                                BinaryExpr(BinaryExpr.ARROW, IC_Var, ...
+                                UnaryExpr(UnaryExpr.PRE, VarIdExpr(d_name))));
+                            variables{end+1} = LustreVar(d_firstName, d.LusDatatype);
+                            nodeCall_inputs_Ids = ...
+                                StateflowState_To_Lustre.changeVar(...
+                                nodeCall_inputs_Ids, d_name, d_firstName);
+                        end
+                    elseif isequal(d.Scope, 'Local')
+                        d_lastName = strcat(d_name, '__2');
+                        if ismember(d_name, nodeCall_outputs_Names)
+                            body{end+1} = LustreEq(...
+                                VarIdExpr(d_name), ...
+                                BinaryExpr(BinaryExpr.ARROW, IC_Var, ...
+                                UnaryExpr(UnaryExpr.PRE, VarIdExpr(d_lastName))));
+                            variables{end+1} = LustreVar(d_lastName, d.LusDatatype);
+                            nodeCall_outputs_Ids = ...
+                                StateflowState_To_Lustre.changeVar(...
+                                nodeCall_outputs_Ids, d_name, d_lastName);
+                        else
+                            %local variable that was not modified in the chart
+                            body{end+1} = LustreEq(VarIdExpr(d_name), IC_Var);
+                        end
+                    elseif isequal(d.Scope, 'Constant')
+                        body{end+1} = LustreEq(VarIdExpr(d_name), IC_Var);
+                    elseif isequal(d.Scope, 'Parameter')
                         body{end+1} = LustreEq(VarIdExpr(d_name), IC_Var);
                     end
-                elseif isequal(d.Scope, 'Constant')
-                    body{end+1} = LustreEq(VarIdExpr(d_name), IC_Var);  
-                elseif isequal(d.Scope, 'Parameter')
-                    body{end+1} = LustreEq(VarIdExpr(d_name), IC_Var);  
                 end
             end
             
             %state IDs
-            allVars = [variables; outputs; inputs];
+            allVars = MatlabUtils.concat(variables, outputs, inputs);
             nodeCall_inputs_Names = cellfun(@(x) x.getId(), ...
                 nodeCall_inputs_Ids, 'UniformOutput', false);
             for i=1:numel(nodeCall_inputs_Names)
@@ -946,14 +961,14 @@ classdef StateflowState_To_Lustre
                             strrep(v_name, ...
                             StateflowState_To_Lustre.getStateIDSuffix(), ...
                             '_INACTIVE')));
-                        variables{end+1,1} = LustreVar(v_name, v_type);
+                        variables{end+1} = LustreVar(v_name, v_type);
                         if ismember(v_name, nodeCall_outputs_Names)
                             v_lastName = strcat(v_name, '__2');
                             body{end+1} = LustreEq(...
                                 VarIdExpr(v_name), ...
                                 BinaryExpr(BinaryExpr.ARROW, v_inactive, ...
                                 UnaryExpr(UnaryExpr.PRE, VarIdExpr(v_lastName))));
-                            variables{end+1,1} = LustreVar(v_lastName, v_type);
+                            variables{end+1} = LustreVar(v_lastName, v_type);
                             nodeCall_outputs_Ids = ...
                                 StateflowState_To_Lustre.changeVar(...
                                 nodeCall_outputs_Ids, v_name, v_lastName);
@@ -971,7 +986,7 @@ classdef StateflowState_To_Lustre
             %update outputs names
             nodeCall_outputs_Names = cellfun(@(x) x.getId(), ...
                 nodeCall_outputs_Ids, 'UniformOutput', false);
-            allVars = [variables; outputs; inputs];
+            allVars = MatlabUtils.concat(variables, outputs, inputs);
             for i=1:numel(nodeCall_outputs_Names)
                 v_name = nodeCall_outputs_Names{i};
                 if ~VarIdExpr.ismemberVar(v_name, allVars)
@@ -997,22 +1012,30 @@ classdef StateflowState_To_Lustre
             body{end+1} = LustreComment('Set unused outputs');
             for i=1:numel(outputsData)
                 d = outputsData{i};
-                d_name = d.Name;
-                if ismember(d_name, nodeCall_outputs_Names) 
-                    % it's used
-                    continue;
+                d_names = SF_To_LustreNode.getDataName(d);
+                for j=1:numel(d_names)
+                    d_name = d_names{j};
+                    if ismember(d_name, nodeCall_outputs_Names)
+                        % it's used
+                        continue;
+                    end
+                    [v, ~, status] = ...
+                        Constant_To_Lustre.getValueFromParameter(parent, blk, d.InitialValue);
+                    if status
+                        display_msg(...
+                            sprintf('InitialOutput %s in Chart %s not found neither in Matlab workspace or in Model workspace',...
+                            d.InitialValue, chart.Origin_path), ...
+                            MsgType.ERROR, 'Outport_To_Lustre', '');
+                        v = 0;
+                    end
+                    if numel(v) >= j
+                        v = v(j);
+                    else
+                        v = v(1);
+                    end
+                    IC_Var = SLX2LusUtils.num2LusExp(v, d.LusDatatype);
+                    body{end+1} = LustreEq(VarIdExpr(d_name), IC_Var);
                 end
-                [v, ~, status] = ...
-                    Constant_To_Lustre.getValueFromParameter(parent, blk, d.InitialValue);
-                if status
-                    display_msg(...
-                        sprintf('InitialOutput %s in Chart %s not found neither in Matlab workspace or in Model workspace',...
-                        d.InitialValue, chart.Origin_path), ...
-                        MsgType.ERROR, 'Outport_To_Lustre', '');
-                    v = 0;
-                end
-                IC_Var = SLX2LusUtils.num2LusExp(v, d.LusDatatype);
-                body{end+1} = LustreEq(VarIdExpr(d_name), IC_Var);
             end
             
         end

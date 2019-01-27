@@ -336,6 +336,7 @@ classdef LustreNode < LustreAst
        function new_obj = contractNode_substituteVars(obj)
             new_obj = obj.deepCopy();
             new_localVars = new_obj.localVars;
+            outputs = new_obj.getOutputs();
             % include ConcurrentAssignments as normal Eqts
             new_bodyEqs = {};
             for i=1:numel(new_obj.bodyEqs)
@@ -357,7 +358,8 @@ classdef LustreNode < LustreAst
             for i=1:numel(new_bodyEqs)
                 % e.g. y = f(x); 
                 if isa(new_bodyEqs{i}, 'LustreEq')...
-                        && isa(new_bodyEqs{i}.getLhs(), 'VarIdExpr')
+                        && isa(new_bodyEqs{i}.getLhs(), 'VarIdExpr')...
+                        && VarIdExpr.ismemberVar(new_bodyEqs{i}.getLhs(), new_localVars)
                     var = new_bodyEqs{i}.getLhs();
                     rhs = new_bodyEqs{i}.getRhs();
                     new_var = ParenthesesExpr(rhs.deepCopy());

@@ -64,13 +64,13 @@ function [nom_lustre_file, xml_trace, status, unsupportedOptions, abstractedBloc
         cocosim_optim = 1;
     end
     for i=1:numel(varargin)
-        if strcmp(varargin{i}, 'nodisplay')
+        if strcmp(varargin{i}, ToLustreOptions.NODISPLAY)
             mode_display = 0;
-        elseif strcmp(varargin{i}, 'forceCodeGen')
+        elseif strcmp(varargin{i}, ToLustreOptions.FORCE_CODE_GEN)
             forceGeneration = 1;
-        elseif strcmp(varargin{i}, 'skip_sf_actions_check')
+        elseif strcmp(varargin{i}, ToLustreOptions.SKIP_SF_ACTIONS_CHECK)
             CHECK_SF_ACTIONS = 0;
-        elseif strcmp(varargin{i}, 'skip_optim')
+        elseif strcmp(varargin{i}, ToLustreOptions.SKIP_CODE_OPTIMIZATION)
             cocosim_optim = 0;
         end
     end
@@ -121,7 +121,7 @@ function [nom_lustre_file, xml_trace, status, unsupportedOptions, abstractedBloc
             ToLustreUnsupportedBlocks(model_path, const_files, lus_backend, ...
             coco_backend, varargin{:});
         
-        if status || ~isempty(unsupportedOptions)
+        if ~forceGeneration && (status || ~isempty(unsupportedOptions))
             return;
         end
     catch me

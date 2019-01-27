@@ -33,9 +33,9 @@ function [unsupportedOptions, ...
         skip_unsupportedblocks = 0;
     end
     for i=1:numel(varargin)
-        if strcmp(varargin{i}, 'nodisplay')
+        if strcmp(varargin{i}, ToLustreOptions.NODISPLAY)
             mode_display = 0;
-        elseif strcmp(varargin{i}, 'skip_unsupportedblocks')
+        elseif strcmp(varargin{i}, ToLustreOptions.SKIP_COMPATIBILITY)
             skip_unsupportedblocks = 1;
         end
     end
@@ -74,7 +74,7 @@ function [unsupportedOptions, ...
     
     %% Pre-process model
     display_msg('Pre-processing', MsgType.INFO, 'ToLustreUnsupportedBlocks', '');
-    varargin{end+1} = 'use_backup';
+    varargin{end+1} = ToLustreOptions.SKIP_DEFECTED_PP;
     [new_file_name, status] = cocosim_pp(model_full_path , varargin{:});
     if status
         return;

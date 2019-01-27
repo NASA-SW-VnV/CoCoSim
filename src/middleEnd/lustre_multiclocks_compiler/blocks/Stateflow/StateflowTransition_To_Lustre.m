@@ -205,8 +205,9 @@ classdef StateflowTransition_To_Lustre
             inputs = {};
             nb_actions = numel(actions);
             for i=1:nb_actions
-                [body{end+1}, outputs_i, inputs_i, external_libraries_i] = ...
+                [actions_i, outputs_i, inputs_i, external_libraries_i] = ...
                     getPseudoLusAction(actions{i}, data_map);
+                body = [body, actions_i];
                 outputs = [outputs, outputs_i];
                 inputs = [inputs, inputs_i];
                 external_libraries = [external_libraries, external_libraries_i];
@@ -264,12 +265,28 @@ classdef StateflowTransition_To_Lustre
             external_libraries = {};
             % Transition is marked for evaluation.
             % Does the transition have a condition?
-            [trans_cond, outputs_i, inputs_i, ~] = ...
+            [trans_cond, outputs_i, inputs_i, external_libraries] = ...
                 getPseudoLusAction(t.Condition, data_map, true);
+            if iscell(trans_cond)
+                if numel(trans_cond) == 1
+                    trans_cond = trans_cond{1};
+                elseif numel(trans_cond) > 1
+                    trans_cond = BinaryExpr.BinaryMultiArgs(BinaryExpr.AND, ...
+                        trans_cond);
+                end
+            end
             outputs = [outputs, outputs_i];
             inputs = [inputs, inputs_i];
             [event, outputs_i, inputs_i, ~] = ...
                 getPseudoLusAction(t.Event,data_map, true);
+            if iscell(event)
+                if numel(event) == 1
+                    event = event{1};
+                elseif numel(event) > 1
+                    event = BinaryExpr.BinaryMultiArgs(BinaryExpr.AND, ...
+                        event);
+                end
+            end
             outputs = [outputs, outputs_i];
             inputs = [inputs, inputs_i];  
             if ~isempty(trans_cond) && ~isempty(event)
