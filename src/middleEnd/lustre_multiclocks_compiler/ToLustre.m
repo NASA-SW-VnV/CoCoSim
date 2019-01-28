@@ -156,7 +156,13 @@ function [nom_lustre_file, xml_trace, status, unsupportedOptions, abstractedBloc
     is_main_node = 1;
     [nodes_ast, contracts_ast, external_libraries, status] = recursiveGeneration(...
         model_struct, model_struct, main_sampleTime, is_main_node, lus_backend, coco_backend, xml_trace);
-    if status
+    if ~forceGeneration && status
+        html_path = fullfile(output_dir, strcat(file_name, '_error_messages.html'));
+        HtmlItem.displayErrorMessages(html_path, ERROR_MSG, mode_display);
+        if mode_display
+            msg = sprintf('ERRORS report is in : %s', html_path);
+            display_msg(msg, MsgType.ERROR, 'ToLustre', '');
+        end
         return;
     end
     [external_lib_code, open_list, abstractedNodes] = getExternalLibrariesNodes(external_libraries, lus_backend);
@@ -239,32 +245,21 @@ function [nom_lustre_file, xml_trace, status, unsupportedOptions, abstractedBloc
             display_msg('Simulink To Lustre Syntax check passed successfully.', MsgType.RESULT, 'TOLUSTRE', '');
         end
     else
+        html_path = fullfile(output_dir, strcat(file_name, '_error_messages.html'));
+        HtmlItem.displayErrorMessages(html_path, ERROR_MSG, mode_display);
         if mode_display
-            html_path = fullfile(output_dir, strcat(file_name, '_error_messages.html'));
-            htmlList = cellfun(@(x) HtmlItem(x, {}, 'black', 'red', [], false),ERROR_MSG, 'UniformOutput', false);
-            MenuUtils.createHtmlListUsingHTMLITEM('ERRORS LIST', htmlList, html_path);
             msg = sprintf('ERRORS report is in : %s', html_path);
             display_msg(msg, MsgType.ERROR, 'ToLustre', '');
-        else
-            display_msg('ERRORS SUMMARY:', MsgType.INFO, 'ToLustre', '');
-            display_msg(MatlabUtils.strjoin(ERROR_MSG, '\n'), MsgType.ERROR, 'ToLustre', '');
         end
         status = 1;
     end
     %% REPORT ABSTRACTED BLOCKS
     if ~isempty(abstractedBlocks)
+        html_path = fullfile(output_dir, strcat(file_name, '_abstracted_blocks.html'));
+        HtmlItem.displayWarningMessages(html_path, 'The following Blocks/Nodes are abstracted:', abstractedBlocks, mode_display);
         if mode_display
-            html_path = fullfile(output_dir, strcat(file_name, '_abstracted_blocks.html'));
-            htmlList = cellfun(@(x) HtmlItem(x, {}, 'black', 'cyan', [], false),abstractedBlocks, 'UniformOutput', false);
-            MenuUtils.createHtmlListUsingHTMLITEM('The following Blocks/Nodes are abstracted:',...
-                htmlList, html_path);
             msg = sprintf('Abstracted blocks report is in : %s', html_path);
             display_msg(msg, MsgType.RESULT, 'ToLustre', '');
-        else
-            display_msg('The following Blocks/Nodes are abstracted:', ...
-                MsgType.WARNING, 'ToLustreUnsupportedBlocks', '');
-            display_msg(MatlabUtils.strjoin(abstractedBlocks, '\n'), ...
-                MsgType.WARNING, 'ToLustreUnsupportedBlocks', '');
         end
     end
     %% display report files

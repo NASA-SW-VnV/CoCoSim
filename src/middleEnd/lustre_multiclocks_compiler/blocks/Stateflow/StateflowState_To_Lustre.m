@@ -254,7 +254,7 @@ classdef StateflowState_To_Lustre
                 for i=1:nb_actions
                     try
                         [lus_action, outputs_i, inputs_i, external_libraries_i] = ...
-                            getPseudoLusAction(actions{i}, data_map);
+                            getPseudoLusAction(actions{i}, data_map, false, state.Path);
                         outputs = [outputs, outputs_i];
                         inputs = [inputs, inputs_i, outputs_i];
                         external_libraries = [external_libraries, external_libraries_i];
@@ -358,7 +358,7 @@ classdef StateflowState_To_Lustre
             for i=1:nb_actions
                 try
                     [lus_action, outputs_i, inputs_i, external_libraries_i] = ...
-                        getPseudoLusAction(actions{i}, data_map);
+                        getPseudoLusAction(actions{i}, data_map, false, state.Path);
                     outputs = [outputs, outputs_i];
                     inputs = [inputs, inputs_i, outputs_i];
                     external_libraries = [external_libraries, external_libraries_i];
@@ -463,7 +463,7 @@ classdef StateflowState_To_Lustre
             for i=1:nb_actions
                 try
                     [actions_i, outputs_i, inputs_i, external_libraries_i] = ...
-                        getPseudoLusAction(actions{i}, data_map);
+                        getPseudoLusAction(actions{i}, data_map, false, state.Path);
                     body = [body, actions_i];
                     outputs = [outputs, outputs_i];
                     inputs = [inputs, inputs_i];

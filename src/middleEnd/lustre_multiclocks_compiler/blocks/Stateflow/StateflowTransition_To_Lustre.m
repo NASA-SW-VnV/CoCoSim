@@ -170,20 +170,20 @@ classdef StateflowTransition_To_Lustre
             if isKey(SF_STATES_NODESAST_MAP, t_act_node_name)
                 %already handled in StateflowState_To_Lustre
             else
-                [main_node, external_nodes, external_libraries ] = ...
-                    StateflowTransition_To_Lustre.write_Action_Node(action, data_map, t_act_node_name);
-                if ~isempty(main_node)
-                    if isDefaultTrans
-                        suffix = 'Default Transition';
-                    else
-                        suffix = '';
-                    end
-                    comment = LustreComment(...
-                        sprintf('Transition from %s %s to %s ExecutionOrder %d %s',...
+                if isDefaultTrans
+                    suffix = 'Default Transition';
+                else
+                    suffix = '';
+                end
+                transitionPath = sprintf('Transition from %s %s to %s ExecutionOrder %d %s',...
                         source_state.Origin_path,...
                         suffix, ...
                         T.Destination.Origin_path, ...
-                        T.ExecutionOrder, type), true);
+                        T.ExecutionOrder, type);
+                [main_node, external_nodes, external_libraries ] = ...
+                    StateflowTransition_To_Lustre.write_Action_Node(action, data_map, t_act_node_name, transitionPath);
+                if ~isempty(main_node)
+                    comment = LustreComment(transitionPath, true);
                     main_node.setMetaInfo(comment);
                 end
             end
@@ -191,7 +191,7 @@ classdef StateflowTransition_To_Lustre
         end
         
         function  [main_node, external_nodes, external_libraries ] = ...
-                write_Action_Node(action, data_map, t_act_node_name)
+                write_Action_Node(action, data_map, t_act_node_name, transitionPath)
             global SF_STATES_NODESAST_MAP;
             main_node = {};
             external_nodes = {};
@@ -206,7 +206,7 @@ classdef StateflowTransition_To_Lustre
             nb_actions = numel(actions);
             for i=1:nb_actions
                 [actions_i, outputs_i, inputs_i, external_libraries_i] = ...
-                    getPseudoLusAction(actions{i}, data_map);
+                    getPseudoLusAction(actions{i}, data_map, false, transitionPath);
                 body = [body, actions_i];
                 outputs = [outputs, outputs_i];
                 inputs = [inputs, inputs_i];
@@ -266,7 +266,7 @@ classdef StateflowTransition_To_Lustre
             % Transition is marked for evaluation.
             % Does the transition have a condition?
             [trans_cond, outputs_i, inputs_i, external_libraries] = ...
-                getPseudoLusAction(t.Condition, data_map, true);
+                getPseudoLusAction(t.Condition, data_map, true, parentPath);
             if iscell(trans_cond)
                 if numel(trans_cond) == 1
                     trans_cond = trans_cond{1};
@@ -278,7 +278,7 @@ classdef StateflowTransition_To_Lustre
             outputs = [outputs, outputs_i];
             inputs = [inputs, inputs_i];
             [event, outputs_i, inputs_i, ~] = ...
-                getPseudoLusAction(t.Event,data_map, true);
+                getPseudoLusAction(t.Event,data_map, true, parentPath);
             if iscell(event)
                 if numel(event) == 1
                     event = event{1};

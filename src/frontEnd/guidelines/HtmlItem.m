@@ -89,16 +89,16 @@ classdef HtmlItem < handle
                     iconCode = sprintf('<i class="material-icons green-text"><h%d>check_circle<h%d></i>', level, level);
                 end
             end
-%             if isempty(obj.subtitles)
-                dropDownCode = '';
-%             else
-%                 dropDownCode = sprintf('<i class="material-icons black-text"><h%d>arrow_drop_down<h%d></i>', level, level);
-%             end
+            %             if isempty(obj.subtitles)
+            dropDownCode = '';
+            %             else
+            %                 dropDownCode = sprintf('<i class="material-icons black-text"><h%d>arrow_drop_down<h%d></i>', level, level);
+            %             end
             header =  sprintf('<div class="collapsible-header">%s<div class="%s-text text-darken-2"><h%d>%s</h%d></div>%s</div>\n', ...
-                    iconCode, Textcolor,level, obj.title, level, dropDownCode);
+                iconCode, Textcolor,level, obj.title, level, dropDownCode);
             if isempty(obj.subtitles)
                 res = sprintf('<li>\n%s\n</li>', header);
-            else                
+            else
                 res = sprintf('<li>\n%s\n<div class="collapsible-body">\n<div class="row">\n<div class="col s12 m12">\n<ul class="collapsible" >\n', ...
                     header);
                 for i=1:numel(obj.subtitles)
@@ -125,6 +125,21 @@ classdef HtmlItem < handle
             htmlCmd = sprintf('<a href="matlab:open_and_hilite_hyperlink (''%s'',''error'')">%s</a>', ...
                 regexprep(blk, '\n', ' '),...
                 HtmlItem.cleanSignalName(blk));
+        end
+        function displayErrorMessages(html_path, msg_list, mode_display)
+            HtmlItem.displayMessages(html_path,'ERRORS LIST', msg_list, 'red', mode_display);
+        end
+        function displayWarningMessages(html_path, title, msg_list, mode_display)
+            HtmlItem.displayMessages(html_path,title, msg_list, 'cyan', mode_display);
+        end
+        function displayMessages(html_path,title, msg_list, msgColor, mode_display)
+            if mode_display
+                htmlList = cellfun(@(x) HtmlItem(x, {}, 'black', msgColor, [], false),msg_list, 'UniformOutput', false);
+                MenuUtils.createHtmlListUsingHTMLITEM(title, htmlList, html_path);
+            else
+                display_msg(title, MsgType.INFO, 'ToLustre', '');
+                display_msg(MatlabUtils.strjoin(msg_list, '\n'), MsgType.ERROR, 'ToLustre', '');
+            end
         end
     end
 end
