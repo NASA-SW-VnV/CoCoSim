@@ -13,7 +13,7 @@ classdef Exp2Lus < handle
     
     methods (Static = true)
         function [lusCode, status] = expToLustre(BlkObj, exp, parent, blk, inputs, data_map, expected_dt, isStateFlow)
-            
+            global SF_GRAPHICALFUNCTIONS_MAP SF_STATES_NODESAST_MAP;
             if ~exist('isStateFlow', 'var')
                 isStateFlow = false;
             end
@@ -25,7 +25,7 @@ classdef Exp2Lus < handle
                 end
             end
             status = 0;
-            lusCode = '';
+            lusCode = {};
             if isempty(exp)
                 return;
             end
@@ -49,7 +49,24 @@ classdef Exp2Lus < handle
                 return;
             end
             try
+                
                 lusCode = Exp2Lus.tree2code(BlkObj, tree, parent, blk, inputs, data_map, expected_dt, isStateFlow);
+                % transform Stateflow Function call with no outputs to an equation
+                if isStateFlow && ~isempty(tree)
+                    if iscell(tree) && numel(tree) == 1
+                        tree = tree{1};
+                    end
+                    if isfield(tree, 'type') && ...
+                            isequal(tree.type, 'fun_indexing') &&...
+                            isKey(SF_GRAPHICALFUNCTIONS_MAP, tree.ID)
+                        func = SF_GRAPHICALFUNCTIONS_MAP(tree.ID);
+                        sfNodename = SF_To_LustreNode.getUniqueName(func);
+                        actionNodeAst = SF_STATES_NODESAST_MAP(sfNodename);
+                        [~, oututs_Ids] = actionNodeAst.nodeCall();
+                        lusCode{1} = LustreEq(oututs_Ids,...
+                            lusCode{1});
+                    end
+                end
             catch me
                 status = 1;
                 
@@ -208,7 +225,7 @@ classdef Exp2Lus < handle
                                 (1:numel(elts)), 'UniformOutput', false);
                         end
                         for i=1:numel(elts)
-                            args{i} = ...
+                            args(i) = ...
                                 Exp2Lus.tree2code(obj, elts(i), ...
                                 parent, blk, inputs, data_map, left_dt{i},...
                                 isStateFlow);
@@ -664,7 +681,7 @@ classdef Exp2Lus < handle
                 else
                     args = cell(numel(parameters), 1);
                     for i=1:numel(parameters)
-                        args{i} = ...
+                        args(i) = ...
                             Exp2Lus.tree2code(obj, parameters{i}, ...
                             parent, blk, inputs, data_map, params_dt,...
                             isStateFlow);
@@ -692,34 +709,60 @@ classdef Exp2Lus < handle
         end
         function code = SFGraphFunction(obj, tree, parent, ...
                 blk, inputs, data_map, expected_dt, isStateFlow)
+            global SF_GRAPHICALFUNCTIONS_MAP SF_STATES_NODESAST_MAP;
             func = SF_GRAPHICALFUNCTIONS_MAP(tree.ID);
-            params_dt =  {};
-            for i=1:numel(func.Data)
-                d = func.Data{i};
-                if isequal(d.Scope, 'Input')
-                    params_dt{end+1} = d.LusDatatype;
-                end
+            
+            if isa(tree.parameters, 'struct')
+                parameters = arrayfun(@(x) x, tree.parameters, 'UniformOutput', false);
+            else
+                parameters = tree.parameters;
             end
-            if numel(params_dt) ~= numel(tree.parameters)
+            sfNodename = SF_To_LustreNode.getUniqueName(func);
+            actionNodeAst = SF_STATES_NODESAST_MAP(sfNodename);
+            node_inputs = actionNodeAst.getInputs();
+            if isempty(parameters)
+                [call, ~] = actionNodeAst.nodeCall();
+                code = call;
+            elseif numel(node_inputs) == numel(parameters)
+                params_dt =  {};
+                for i=1:numel(node_inputs)
+                    d = node_inputs{i};
+                    params_dt{end+1} = d.getDT();
+                end
+                args = cell(numel(parameters), 1);
+                for i=1:numel(parameters)
+                    args(i) = ...
+                        Exp2Lus.tree2code(obj, parameters{i}, ...
+                        parent, blk, node_inputs, data_map, params_dt{i},...
+                        isStateFlow);
+                end
+                code = NodeCallExpr(sfNodename, args);
+            else
                 ME = MException('COCOSIM:TREE2CODE', ...
                     'Function "%s" expected %d parameters but got %d',...
-                    tree.ID, numel(params_dt), numel(tree.parameters));
+                    tree.ID, numel(node_inputs), numel(tree.parameters));
                 throw(ME);
             end
-            args = cell(numel(tree.parameters), 1);
-            for i=1:numel(tree.parameters)
-                args{i} = ...
-                    Exp2Lus.tree2code(obj, tree.parameters{i}, ...
-                    parent, blk, inputs, data_map, params_dt{i},...
-                    isStateFlow);
-            end
-            sf_name = SF_To_LustreNode.getUniqueName(func);
-            code = NodeCallExpr(sf_name, args);
+            
+            
+                
+            
         end
         
         %%
         function code = convertDT(obj, code, input_dt, output_dt)
-            if isempty(input_dt) || isempty(output_dt) || isequal(input_dt, output_dt)
+            if isempty(input_dt) || isempty(output_dt) ||...
+                (iscell(input_dt) && numel(input_dt) > 1) || ...
+                (iscell(output_dt) && numel(output_dt) > 1)
+                return;
+            end
+            if iscell(input_dt) 
+                input_dt = input_dt{1};
+            end
+            if iscell(output_dt) 
+                output_dt = output_dt{1};
+            end
+            if isequal(input_dt, output_dt)
                 return;
             end
             conv = strcat(input_dt, '_to_', output_dt);
@@ -821,19 +864,20 @@ classdef Exp2Lus < handle
         end
         
         function dt = OtherFuncDT(tree, inputs, data_map, expected_dt, isStateFlow)
-            global SF_GRAPHICALFUNCTIONS_MAP;
+            global SF_GRAPHICALFUNCTIONS_MAP SF_STATES_NODESAST_MAP;
             dt = expected_dt;
             
             if isStateFlow && data_map.isKey(tree.ID)
                 dt = data_map(tree.ID).LusDatatype;
             elseif isStateFlow && SF_GRAPHICALFUNCTIONS_MAP.isKey(tree.ID)
                 func = SF_GRAPHICALFUNCTIONS_MAP(tree.ID);
-                dt =  {};
-                for i=1:numel(func.Data)
-                    d = func.Data{i};
-                    if isequal(d.Scope, 'Output')
-                        dt{end+1} = d.LusDatatype;
-                    end
+                sfNodename = SF_To_LustreNode.getUniqueName(func);
+                nodeAst = SF_STATES_NODESAST_MAP(sfNodename);
+                outputs = nodeAst.getOutputs();
+                dt =  cell(numel(outputs), 1);
+                for i=1:numel(outputs)
+                    d = outputs{i};
+                    dt{i} = d.getDT();
                 end
             elseif ~isStateFlow && isequal(tree.ID, 'u')
                 %"u" refers to an input in IF, Switch and Fcn

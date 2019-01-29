@@ -29,8 +29,12 @@ status = 0;
 
 % Compile model
 try
-    [lus_full_path, xml_trace, ~, ~, ~, pp_model_full_path] = ...
+    [lus_full_path, xml_trace, is_unsupported, ~, ~, pp_model_full_path] = ...
         ToLustre(model_full_path);
+    if is_unsupported
+        display_msg('Model is not supported', MsgType.ERROR, 'validation', '');
+        return;
+    end
     [output_dir, lus_file_name, ~] = fileparts(lus_full_path);
     main_node = MatlabUtils.fileBase(lus_file_name);%remove .LUSTREC/.KIND2 from name.
     [~, slx_file_name, ~] = fileparts(pp_model_full_path);

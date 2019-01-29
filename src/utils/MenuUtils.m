@@ -78,7 +78,7 @@ classdef MenuUtils
             fid = fopen(html_path, 'w+');
             if ~strcmp(html_text, '')
                 fprintf(fid, html_text);
-                open(html_path);
+                web(html_path, '-new');
             end
             fclose(fid);
         end

@@ -27,6 +27,15 @@ classdef LustreVar < LustreAst
             end
         end
         
+        %%
+        function id = getId(obj)
+            id = obj.name;
+        end
+        function dt = getDT(obj)
+            dt = obj.type;
+        end
+        
+        
         function new_obj = deepCopy(obj)
             new_obj = LustreVar(obj.name, obj.type);
         end
@@ -64,13 +73,6 @@ classdef LustreVar < LustreAst
             vId = VarIdExpr(obj.name);
             [new_vId, outputs_map] = vId.pseudoCode2Lustre(outputs_map, isLeft);
             new_obj = LustreVar(new_vId, obj.type);
-        end
-        %%
-        function id = getId(obj)
-            id = obj.name;
-        end
-        function dt = getDT(obj)
-            dt = obj.type;
         end
         
         %% This function is used by KIND2 LustreProgram.print()
@@ -124,6 +126,11 @@ classdef LustreVar < LustreAst
             Ids = cellfun(@(x) x.getId(), ...
                 vars, 'UniformOutput', false);
             U = vars(~strcmp(Ids, v));
+        end
+        
+        function U = setDiff(s1, s2)
+            I = ~VarIdExpr.ismemberVar(s1, s2);
+            U = s1(I);
         end
     end
 end

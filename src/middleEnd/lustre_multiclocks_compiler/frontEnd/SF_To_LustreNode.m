@@ -49,14 +49,12 @@ classdef SF_To_LustreNode
             if isfield(content, 'GraphicalFunctions')
                 SFFunctions = content.GraphicalFunctions;
                 for i=1:numel(SFFunctions)
-                    SF_GRAPHICALFUNCTIONS_MAP(SFFunctions{i}.Name) = SFFunctions{i};
-                    sf_name = SF_To_LustreNode.getUniqueName(SFFunctions{i});
-                    if isKey(SF_STATES_NODESAST_MAP, sf_name)
-                        %already handled
-                        continue;
-                    else
+                    sfunc = SFFunctions{i};
+                    sf_name = SF_To_LustreNode.getUniqueName(sfunc);
+                    if ~isKey(SF_STATES_NODESAST_MAP, sf_name)
                         [node_i, external_nodes_i, external_libraries_i ] = ...
-                            StateflowGraphicalFunction_To_Lustre.write_code(SFFunctions{i});
+                            StateflowGraphicalFunction_To_Lustre.write_code(...
+                            sfunc, SF_DATA_MAP);
                         if iscell(node_i)
                             external_nodes = [external_nodes, node_i];
                         else
@@ -65,6 +63,7 @@ classdef SF_To_LustreNode
                         external_nodes = [external_nodes, external_nodes_i];
                         external_libraries = [external_libraries, external_libraries_i];
                     end
+                    SF_GRAPHICALFUNCTIONS_MAP(SFFunctions{i}.Name) = sfunc;
                 end
             end
             

@@ -19,10 +19,13 @@ classdef SFIRPPUtils
         end
         
         function action_Array = split_actions(actions)
+            
             if ~isempty(actions) && iscell(actions)
                 actions = actions(~strcmp(actions, ''));
                 actions = MatlabUtils.strjoin(actions, '\n');
             end
+            % clean actions from comments 
+            actions = regexprep(actions, '/\*.+\*/', '');
             delim = '(;|\n)';
             action_Array = regexp(actions, delim, 'split');
             action_Array = cellfun(@(x) regexprep(x, '\s+', ''), ...

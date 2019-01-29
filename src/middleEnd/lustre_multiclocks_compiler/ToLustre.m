@@ -229,29 +229,32 @@ function [nom_lustre_file, xml_trace, status, unsupportedOptions, abstractedBloc
     ToLustre_datenum_map(model_path) = nom_lustre_file;
     
     %% check lustre syntax
-    if isempty(ERROR_MSG)
+    if LusBackendType.isKIND2(lus_backend) || LusBackendType.isLUSTREC(lus_backend)
         if LusBackendType.isKIND2(lus_backend)
             [syntax_status, output] = Kind2Utils2.checkSyntaxError(nom_lustre_file, KIND2, Z3);
         elseif LusBackendType.isLUSTREC(lus_backend)
             [~, syntax_status, output] = LustrecUtils.generate_lusi(nom_lustre_file, LUSTREC );
         else
             syntax_status = 0;
+            output = '';
         end
-        if syntax_status
+        if syntax_status && ~isempty(output)
             display_msg('Simulink To Lustre Syntax check has failed. The parsing error is the following:', MsgType.ERROR, 'TOLUSTRE', '');
             display_msg(output, MsgType.ERROR, 'TOLUSTRE', '');
             status = syntax_status;
         else
             display_msg('Simulink To Lustre Syntax check passed successfully.', MsgType.RESULT, 'TOLUSTRE', '');
         end
-    else
+        status = syntax_status;
+    end
+    if ~isempty(ERROR_MSG)
         html_path = fullfile(output_dir, strcat(file_name, '_error_messages.html'));
         HtmlItem.displayErrorMessages(html_path, ERROR_MSG, mode_display);
         if mode_display
             msg = sprintf('ERRORS report is in : %s', html_path);
             display_msg(msg, MsgType.ERROR, 'ToLustre', '');
         end
-        status = 1;
+        
     end
     %% REPORT ABSTRACTED BLOCKS
     if ~isempty(abstractedBlocks)

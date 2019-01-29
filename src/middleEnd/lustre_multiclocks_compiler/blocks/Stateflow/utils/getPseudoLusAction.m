@@ -1,9 +1,10 @@
 function [lus_action, outputs, inputs, external_libraries] = ...
         getPseudoLusAction(action, data_map, isCondition, action_parentPath, ignoreOutInputs)
+    
     if nargin < 3
         isCondition = false;
     end
-    if nargin < 4
+    if nargin < 5
         ignoreOutInputs = false;
     end
     outputs = {};
@@ -25,14 +26,10 @@ function [lus_action, outputs, inputs, external_libraries] = ...
         return;
     end
     for act_idx=1:numel(lus_action)
-        if isa(lus_action{act_idx}, 'NodeCallExpr')
-            %TODO Stateflow functions without explicit outputs.
-            %Switch it to LustreEq
-            
-        end
         if ~isCondition && ~isa(lus_action{act_idx}, 'LustreEq')
             ME = MException('COCOSIM:STATEFLOW', ...
-                'Action "%s" should be an assignement (e.g. outputs = f(inputs))', action);
+                'Action "%s" in "%s" should be an assignement (e.g. outputs = f(inputs))', ...
+                action, action_parentPath);
             throw(ME);
         end
         %ignoreOutInputs flag is used by unitTests.

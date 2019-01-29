@@ -13,8 +13,8 @@ classdef StateflowGraphicalFunction_To_Lustre
     methods(Static)
         
         function  [main_node, external_nodes, external_libraries ] = ...
-                write_code(sfunc)
-            global SF_JUNCTIONS_PATH_MAP;
+                write_code(sfunc, chart_data)
+            global SF_JUNCTIONS_PATH_MAP SF_STATES_NODESAST_MAP;
             external_nodes = {};
             external_libraries = {};
             % add junctions
@@ -22,16 +22,16 @@ classdef StateflowGraphicalFunction_To_Lustre
             for i=1:numel(junctions)
                 SF_JUNCTIONS_PATH_MAP(junctions{i}.Path) = junctions{i};
             end
-            data_map = containers.Map('KeyType', 'char', 'ValueType', 'any');
-            inputs = {};
-            outputs = {};
+            data_map = chart_data;
+            func_inputs = {};
+            func_outputs = {};
             for i=1:numel(sfunc.Data)
                 x = sfunc.Data{i};
                 data_map(sfunc.Data{i}.Name) = x;
                 if isequal(x.Scope, 'Input')
-                    inputs{end+1} = LustreVar(x.Name, x.LusDatatype);
+                    func_inputs{end+1} = LustreVar(x.Name, x.LusDatatype);
                 elseif isequal(x.Scope, 'Output')
-                    outputs{end+1} = LustreVar(x.Name, x.LusDatatype);
+                    func_outputs{end+1} = LustreVar(x.Name, x.LusDatatype);
                 end
             end
             % Go over Junctions Outertransitions: condition/Transition Actions
@@ -74,27 +74,30 @@ classdef StateflowGraphicalFunction_To_Lustre
                 isDefaultTrans, ...
                 node_name, comment);
             external_libraries = [external_libraries, external_libraries_i];
-            main_node.setInputs(inputs);
-            % check if number of outputs is the same
-            if numel(outputs) ~= numel(main_node.getOutputs())
-                display_msg(...
-                    sprintf(['Stateflow Function %s has %d outputs.'...
-                    ' But %d variable has been changed in Condition Actions inside the Function.'], ...
-                    sfunc.Path, numel(outputs), numel(main_node.getOutputs())), ...
-                    MsgType.ERROR, 'StateflowGraphicalFunction_To_Lustre', '');
+            %Stateflow function may use chart Data as global data and modify it.
+            computed_inputs = main_node.getInputs();
+            computed_outputs = main_node.getOutputs();
+            if isempty(func_inputs)
+                func_inputs = computed_inputs;
             end
+            main_node.setInputs(func_inputs);
+            
+            if numel(computed_outputs) <= numel(func_outputs)
+                main_node.setOutputs(func_outputs);
+            else
+                if ~isempty(func_outputs)
+                    display_msg(...
+                        sprintf(['Stateflow Function %s has %d outputs.'...
+                        ' But %d variable has been changed in Condition Actions inside the Function.'], ...
+                        sfunc.Path, numel(func_outputs), numel(computed_outputs)), ...
+                        MsgType.ERROR, 'StateflowGraphicalFunction_To_Lustre', '');
+                end
+            end
+            SF_STATES_NODESAST_MAP(node_name) = main_node;
         end
         
-        function options = getUnsupportedOptions(sfunc, varargin)
+        function options = getUnsupportedOptions(~, varargin)
             options = {};
-            data = sfunc.Data;
-            isOutput = cellfun(@(x) strcmp(x.Scope, 'Output'), data);
-            outputs = data(isOutput);
-            if isempty(outputs)
-                options{end+1} = sprintf(['Stateflow Function %s has no outputs.'...
-                    ' CoCoSim does not support SFunctions with no outputs or that use chart data directly.'], ...
-                    sfunc.Path);
-            end
             
         end
         %%

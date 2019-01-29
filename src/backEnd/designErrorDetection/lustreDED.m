@@ -23,12 +23,12 @@ function [ ] = lustreDED(model_full_path,  const_files, lus_backend, varargin)
     % Get start time
     t_start = tic;
     %% run ToLustre
-    [nom_lustre_file, xml_trace, status, unsupportedOptions, ...
+    [nom_lustre_file, xml_trace, status, ~, ...
         ~, pp_model_full_path] = ...
         ToLustre(model_full_path, const_files,...
         lus_backend, coco_backend, varargin);
     
-    if status || ~isempty(unsupportedOptions)
+    if status
         return;
     end
     

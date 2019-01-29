@@ -27,9 +27,9 @@ end
 function LusCompilerCallback(callbackInfo)
 model_full_path = MenuUtils.get_file_name(gcs);
 MenuUtils.add_pp_warning(model_full_path);
-[lus_full_path, ~, status, unsupportedOptions] = ...
+[lus_full_path, ~, status, ~] = ...
     ToLustre(model_full_path, [], LusBackendType.LUSTREC);
-if status || ~isempty(unsupportedOptions)
+if status 
     return;
 end
 output_dir = fullfile(fileparts(lus_full_path), 'C');

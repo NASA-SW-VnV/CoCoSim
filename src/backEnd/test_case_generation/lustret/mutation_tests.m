@@ -39,8 +39,12 @@ end
 addpath(model_path);
 load_system(model_full_path);
 %% Compile model
-[lus_full_path, xml_trace, ~, ~, ~, pp_model_full_path] = ...
+[lus_full_path, xml_trace, is_unsupported, ~, ~, pp_model_full_path] = ...
     ToLustre(model_full_path, [], 'KIND2');
+if is_unsupported
+    display_msg('Model is not supported', MsgType.ERROR, 'validation', '');
+    return;
+end
 [output_dir, lus_file_name, ~] = fileparts(lus_full_path);
 node_name = MatlabUtils.fileBase(lus_file_name);%remove .LUSTREC/.KIND2 from name.
 [ T, ~, status ] = lustret_test_mutation( pp_model_full_path, ...
