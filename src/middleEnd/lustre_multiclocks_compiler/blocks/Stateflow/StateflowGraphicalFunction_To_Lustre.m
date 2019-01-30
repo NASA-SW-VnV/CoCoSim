@@ -74,29 +74,62 @@ classdef StateflowGraphicalFunction_To_Lustre
                 isDefaultTrans, ...
                 node_name, comment);
             external_libraries = [external_libraries, external_libraries_i];
+            if isempty(main_node)
+                return;
+            end
             %Stateflow function may use chart Data as global data and modify it.
             computed_inputs = main_node.getInputs();
             computed_outputs = main_node.getOutputs();
-            if isempty(func_inputs)
-                func_inputs = computed_inputs;
-            end
-            main_node.setInputs(func_inputs);
-            
-            if numel(computed_outputs) <= numel(func_outputs)
+            if ~isempty(func_outputs)
                 main_node.setOutputs(func_outputs);
-            else
-                if ~isempty(func_outputs)
+                if numel(func_outputs) ~= numel(computed_outputs)
                     display_msg(...
                         sprintf(['Stateflow Function %s has %d outputs.'...
                         ' But %d variable has been changed in Condition Actions inside the Function.'], ...
-                        sfunc.Path, numel(func_outputs), numel(computed_outputs)), ...
+                        sfunc.Origin_path, numel(func_outputs), numel(computed_outputs)), ...
                         MsgType.ERROR, 'StateflowGraphicalFunction_To_Lustre', '');
                 end
+            elseif isempty(computed_outputs)
+                % no body has been generated
+                return;
             end
+            if ~isempty(func_inputs)
+                main_node.setInputs(func_inputs);
+                if numel(func_inputs) < numel(computed_inputs)
+                    bodyEqs = main_node.getBodyEqs();
+                    for i=1:numel(computed_inputs)
+                        if VarIdExpr.ismemberVar(computed_inputs{i}, func_inputs)
+                            continue;
+                        end
+                        if VarIdExpr.ismemberVar(computed_inputs{i}, func_outputs)
+                            % substitute first occurance of the variable by zero
+                            var = VarIdExpr(computed_inputs{i}.getId());
+                            var_dt = computed_inputs{i}.getDT();
+                            for j=1:numel(bodyEqs)
+                                if isa(bodyEqs{j}, 'LustreEq')
+                                    lhs = bodyEqs{j}.getLhs();
+                                    rhs = bodyEqs{j}.getRhs();
+                                    nb_occ = rhs.nbOccuranceVar(var);
+                                    if nb_occ > 0
+                                        newVar = SLX2LusUtils.num2LusExp(0, var_dt);
+                                        new_rhs = rhs.substituteVars( var, newVar);
+                                        bodyEqs{j} = LustreEq(lhs, new_rhs);
+                                        break;
+                                    end
+                                end
+                            end
+                        end
+                    end
+                    main_node.setBodyEqs(bodyEqs);
+                end
+            end
+            
+            
             SF_STATES_NODESAST_MAP(node_name) = main_node;
             SF_GRAPHICALFUNCTIONS_MAP(sfunc.Name) = sfunc;
+            
+            
         end
-        
         function options = getUnsupportedOptions(~, varargin)
             options = {};
             
@@ -105,6 +138,7 @@ classdef StateflowGraphicalFunction_To_Lustre
         function is_Abstracted = isAbstracted(varargin)
             is_Abstracted = false;
         end
+        
     end
     
 end

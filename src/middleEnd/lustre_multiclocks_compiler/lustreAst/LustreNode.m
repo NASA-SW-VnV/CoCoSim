@@ -109,6 +109,11 @@ classdef LustreNode < LustreAst
         function addBodyEqs(obj, eq)
             obj.bodyEqs{end+1} = eq;
         end
+        
+        function r = getBodyEqs(obj)
+            r = obj.bodyEqs;
+        end
+            
         function setIsMain(obj, isMain)
             obj.isMain = isMain;
         end

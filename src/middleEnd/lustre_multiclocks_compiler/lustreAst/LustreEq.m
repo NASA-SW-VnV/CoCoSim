@@ -107,13 +107,13 @@ classdef LustreEq < LustreAst
         
         
         function code = print_lustrec(obj, backend)
-            try
+%             try
             lhs_str = obj.lhs.print(backend);
             rhs_str = obj.rhs.print(backend);
             code = sprintf('%s = %s;', lhs_str, rhs_str);
-            catch me
-                me
-            end
+%             catch me
+%                 me
+%             end
         end
         
         function code = print_kind2(obj)
