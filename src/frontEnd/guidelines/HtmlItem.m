@@ -80,15 +80,15 @@ classdef HtmlItem < handle
             else
                 Textcolor = obj.text_color;
             end
-            if isempty(obj.icon_color)
-                iconCode = '';
-            else
-                if isequal(obj.icon_color, 'red')
+
+            if isequal(obj.icon_color, 'red')
                     iconCode = sprintf('<i class="material-icons red-text"><h%d>do_not_disturb_on<h%d></i>', level, level);
-                else
-                    iconCode = sprintf('<i class="material-icons green-text"><h%d>check_circle<h%d></i>', level, level);
-                end
-            end
+            elseif isequal(obj.icon_color, 'green')
+                iconCode = sprintf('<i class="material-icons green-text"><h%d>check_circle<h%d></i>', level, level);
+            else
+                iconCode = '';
+            end            
+
             %             if isempty(obj.subtitles)
             dropDownCode = '';
             %             else
