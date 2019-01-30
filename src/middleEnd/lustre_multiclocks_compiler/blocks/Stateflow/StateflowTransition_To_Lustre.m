@@ -121,6 +121,9 @@ classdef StateflowTransition_To_Lustre
                 StateflowTransition_To_Lustre.transitions_code(T, data_map, ...
                 isDefaultTrans, parentPath, {}, {}, {}, {}, {});
             
+            if isempty(outputs)
+                return;
+            end
             
             % creat node
             transitionNode = LustreNode();
@@ -212,11 +215,15 @@ classdef StateflowTransition_To_Lustre
                 inputs = [inputs, inputs_i];
                 external_libraries = [external_libraries, external_libraries_i];
             end
+            
+            outputs = LustreVar.uniqueVars(outputs);
+            inputs = LustreVar.uniqueVars(inputs);
+            if isempty(outputs)
+                return;
+            end
             main_node = LustreNode();
             main_node.setName(t_act_node_name);
             main_node.setBodyEqs(body);
-            outputs = LustreVar.uniqueVars(outputs);
-            inputs = LustreVar.uniqueVars(inputs);
             if isempty(inputs)
                 inputs{1} = ...
                     LustreVar(SF_To_LustreNode.virtualVarStr(), 'bool');
@@ -306,6 +313,15 @@ classdef StateflowTransition_To_Lustre
             % the truth value of the condition.
             if ~isempty(trans_cond)
                 condName = StateflowTransition_To_Lustre.getCondActionName(t);
+                if VarIdExpr.ismemberVar(condName, variables)
+                    i = 1;
+                    new_condName = strcat(condName, num2str(i));
+                    while(VarIdExpr.ismemberVar(new_condName, variables))
+                        i = i + 1;
+                        new_condName = strcat(condName, num2str(i));
+                    end
+                    condName = new_condName;
+                end
                 body{end+1} = LustreEq(VarIdExpr(condName), trans_cond);
                 trans_cond = VarIdExpr(condName);
                 variables{end+1} = LustreVar(condName, 'bool');

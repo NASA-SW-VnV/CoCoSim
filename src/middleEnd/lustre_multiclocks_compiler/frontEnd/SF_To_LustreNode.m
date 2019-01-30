@@ -50,8 +50,7 @@ classdef SF_To_LustreNode
                 SFFunctions = content.GraphicalFunctions;
                 for i=1:numel(SFFunctions)
                     sfunc = SFFunctions{i};
-                    sf_name = SF_To_LustreNode.getUniqueName(sfunc);
-                    if ~isKey(SF_STATES_NODESAST_MAP, sf_name)
+                    try
                         [node_i, external_nodes_i, external_libraries_i ] = ...
                             StateflowGraphicalFunction_To_Lustre.write_code(...
                             sfunc, SF_DATA_MAP);
@@ -62,11 +61,51 @@ classdef SF_To_LustreNode
                         end
                         external_nodes = [external_nodes, external_nodes_i];
                         external_libraries = [external_libraries, external_libraries_i];
+                    catch me
+                        if strcmp(me.identifier, 'COCOSIM:STATEFLOW')
+                            display_msg(me.message, MsgType.ERROR, 'SF_To_LustreNode', '');
+                        else
+                            display_msg(me.getReport(), MsgType.DEBUG, 'SF_To_LustreNode', '');
+                        end
+                        display_msg(sprintf('Translation of Stateflow Function %s failed', ...
+                            sfunc.Origin_path),...
+                            MsgType.ERROR, 'SF_To_LustreNode', '');
                     end
-                    SF_GRAPHICALFUNCTIONS_MAP(SFFunctions{i}.Name) = sfunc;
+                    
                 end
             end
             
+            % Go over Truthtables
+            if isfield(content, 'TruthTables')
+                truthTables = content.TruthTables;
+                for i=1:numel(truthTables)
+                    table = truthTables{i};
+                    try
+                        [node_i, external_nodes_i, external_libraries_i ] = ...
+                            StateflowTruthTable_To_Lustre.write_code(...
+                            table, SF_DATA_MAP, content);
+                        if iscell(node_i)
+                            external_nodes = [external_nodes, node_i];
+                        else
+                            external_nodes{end+1} = node_i;
+                        end
+                        external_nodes = [external_nodes, external_nodes_i];
+                        external_libraries = [external_libraries, external_libraries_i];
+                    catch me
+                        
+                        if strcmp(me.identifier, 'COCOSIM:STATEFLOW')
+                            display_msg(me.message, MsgType.ERROR,...
+                                'SF_To_LustreNode', '');
+                        else
+                            display_msg(me.getReport(), MsgType.DEBUG, ...
+                                'SF_To_LustreNode', '');
+                        end
+                        display_msg(sprintf('Translation of TruthTable %s failed', ...
+                            table.Path),...
+                            MsgType.ERROR, 'SF_To_LustreNode', '');
+                    end
+                end
+            end
             % Go over Junctions Outertransitions: condition/Transition Actions
             for i=1:numel(junctions)
                 try

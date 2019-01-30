@@ -14,7 +14,7 @@ classdef StateflowGraphicalFunction_To_Lustre
         
         function  [main_node, external_nodes, external_libraries ] = ...
                 write_code(sfunc, chart_data)
-            global SF_JUNCTIONS_PATH_MAP SF_STATES_NODESAST_MAP;
+            global SF_GRAPHICALFUNCTIONS_MAP SF_JUNCTIONS_PATH_MAP SF_STATES_NODESAST_MAP;
             external_nodes = {};
             external_libraries = {};
             % add junctions
@@ -94,6 +94,7 @@ classdef StateflowGraphicalFunction_To_Lustre
                 end
             end
             SF_STATES_NODESAST_MAP(node_name) = main_node;
+            SF_GRAPHICALFUNCTIONS_MAP(sfunc.Name) = sfunc;
         end
         
         function options = getUnsupportedOptions(~, varargin)

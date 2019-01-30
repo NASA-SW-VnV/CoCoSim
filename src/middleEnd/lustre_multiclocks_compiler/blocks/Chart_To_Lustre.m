@@ -76,10 +76,10 @@ classdef Chart_To_Lustre < Block_To_Lustre
                     HtmlItem.addOpenCmd(blk.Origin_path)));
             end
             
-            %Type of state machine to create. Default is Classic, 
-            %which provides the full set of semantics for MATLAB charts 
-            %and C charts. You can also create Mealy and Moore charts, 
-            %which use a subset of Stateflow chart semantics 
+            %Type of state machine to create. Default is Classic,
+            %which provides the full set of semantics for MATLAB charts
+            %and C charts. You can also create Mealy and Moore charts,
+            %which use a subset of Stateflow chart semantics
             if isequal(SFContent.StateMachineType, 'Moore')
                 obj.addUnsupported_options(...
                     sprintf(['State MachineType "Moore" for chart %s is not supported. You need to use different State MachineType.'...
@@ -87,7 +87,7 @@ classdef Chart_To_Lustre < Block_To_Lustre
                     HtmlItem.addOpenCmd(blk.Origin_path)));
             end
             
-            %Activation method of this chart. Can be 'INHERITED' (default), 
+            %Activation method of this chart. Can be 'INHERITED' (default),
             %'DISCRETE', or 'CONTINUOUS'.
             if isequal(SFContent.ChartUpdate, 'CONTINUOUS')
                 obj.addUnsupported_options(...
@@ -96,9 +96,9 @@ classdef Chart_To_Lustre < Block_To_Lustre
                     HtmlItem.addOpenCmd(blk.Origin_path)));
             end
             
-            %If set to true (default = false), 
-            %this chart's state configuration is initialized at time zero 
-            %instead of at the first input event. 
+            %If set to true (default = false),
+            %this chart's state configuration is initialized at time zero
+            %instead of at the first input event.
             if SFContent.ExecuteAtInitialization && ~isempty(triggerInputs)
                 obj.addUnsupported_options(...
                     sprintf(['Execute (enter) Chart At Initialization for chart %s is not supported. You need to deactivate it.'...
@@ -107,7 +107,7 @@ classdef Chart_To_Lustre < Block_To_Lustre
             end
             
             %Applies the initial value of outputs every time a chart wakes up, not only at time 0
-            if SFContent.InitializeOutput 
+            if SFContent.InitializeOutput
                 obj.addUnsupported_options(...
                     sprintf(['Applies the initial value of outputs every time a chart wakes up, for chart %s is not supported. You need to deactivate it.'...
                     '\nYou can change the property by Right-click in an empty area of the chart and select Properties.'],....
@@ -115,7 +115,7 @@ classdef Chart_To_Lustre < Block_To_Lustre
             end
             
             %If set to true (default = false), enables super step semantics for the chart
-            if SFContent.EnableNonTerminalStates 
+            if SFContent.EnableNonTerminalStates
                 obj.addUnsupported_options(...
                     sprintf(['Super Step semantics for the chart %s is not supported. You need to deactivate it.'...
                     '\nYou can change the property by Right-click in an empty area of the chart and select Properties.'],....
@@ -129,40 +129,7 @@ classdef Chart_To_Lustre < Block_To_Lustre
                     sprintf('Simulink Functions in chart %s are not supported. Work in progress!' ,....
                     HtmlItem.addOpenCmd(blk.Origin_path)));
             end
-            if ~isempty(SFContent.TruthTables)
-                obj.addUnsupported_options(...
-                    sprintf('Stateflow TruthTables in chart %s are not supported. Work in progress!' ,....
-                    HtmlItem.addOpenCmd(blk.Origin_path)));
-            end
-            %% Check data dimenstion
-%             InportsWidth = blk.CompiledPortWidths.Inport;
-%             for i=1:numel(InportsWidth)
-%                 if InportsWidth(i) > 1
-%                     obj.addUnsupported_options(...
-%                         sprintf(['Inport number %d in block %s is not a '...
-%                         'scalar. Only scalar inputs are supported in Stateflow chart.'],....
-%                         i, HtmlItem.addOpenCmd(blk.Origin_path)));
-%                 end
-%             end
-%             OutportsWidth = blk.CompiledPortWidths.Outport;
-%             for i=1:numel(OutportsWidth)
-%                 if OutportsWidth(i) > 1
-%                     obj.addUnsupported_options(...
-%                         sprintf(['Outport number %d in block %s is not a '...
-%                         'scalar. Only scalar outputs are supported in Stateflow chart.'],....
-%                         i, HtmlItem.addOpenCmd(blk.Origin_path)));
-%                 end
-%             end
-%             data = SFContent.Data;
-%             for i=1:numel(data)
-%                 ArraySize = str2num(data{i}.CompiledSize);
-%                 if ~isempty(ArraySize) && ArraySize > 1
-%                     obj.addUnsupported_options(...
-%                         sprintf(['Data "%s" in chart %s is not a '...
-%                         'scalar. Only scalar data are supported in Stateflow chart.'],....
-%                         data{i}.Name, HtmlItem.addOpenCmd(blk.Origin_path)));
-%                 end
-%             end
+            
             %% get all events types and check for function call.
             events = SFContent.Events;
             for i=1:numel(events)
@@ -192,12 +159,41 @@ classdef Chart_To_Lustre < Block_To_Lustre
             end
             %% get all graphical functions unsupported Options
             graphicalFunctions = SFContent.GraphicalFunctions;
+            gfunctionsNames =  {};
             for i=1:numel(graphicalFunctions)
+                if ismember(graphicalFunctions{i}.Name, gfunctionsNames)
+                    obj.addUnsupported_options(...
+                        sprintf(['Chart %s has more than one Stateflow function with the same name "%s".'...
+                        ' Please use unique names for all Stateflow Functions.'],....
+                        HtmlItem.addOpenCmd(blk.Origin_path), ...
+                        graphicalFunctions{i}.Name));
+                else
+                    gfunctionsNames{end+1} = graphicalFunctions{i}.Name;
+                end
                 obj.addUnsupported_options(...
                     StateflowGraphicalFunction_To_Lustre.getUnsupportedOptions(graphicalFunctions{i}, blk));
             end
-            options = obj.unsupported_options;
             
+            %% get all TruthTables unsupported Optionse
+            truthTables = SFContent.TruthTables;
+            truthTablesNames =  {};
+            for i=1:numel(truthTables)
+                if ismember(truthTables{i}.Name, truthTablesNames)
+                    obj.addUnsupported_options(...
+                        sprintf(['Chart %s has more than one TruthTable with the same name "%s".'...
+                        ' Please use unique names for all Stateflow Functions.'],....
+                        HtmlItem.addOpenCmd(blk.Origin_path), ...
+                        truthTables{i}.Name));
+                else
+                    truthTablesNames{end+1} = truthTables{i}.Name;
+                end
+                obj.addUnsupported_options(...
+                    StateflowTruthTable_To_Lustre.getUnsupportedOptions(truthTables{i}, blk));
+            end
+            
+            
+            %% return options
+            options = obj.unsupported_options;
         end
         %%
         function is_Abstracted = isAbstracted(varargin)

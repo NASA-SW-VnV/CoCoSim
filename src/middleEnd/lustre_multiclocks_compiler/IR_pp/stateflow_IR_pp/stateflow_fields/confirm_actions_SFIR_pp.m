@@ -13,35 +13,38 @@ function [ new_ir, status ] = confirm_actions_SFIR_pp( new_ir )
         return;
     end
     
-    new_ir.States = adapt_states(new_ir.States);
-    
-    for i=1:numel(new_ir.States)
-        statePath = new_ir.States{i}.Path;
-        % default transition
-        new_ir.States{i}.Composition.DefaultTransitions= ...
-            adapt_transitions(new_ir.States{i}.Composition.DefaultTransitions, statePath, 'Default');
+    if isfield(new_ir, 'States')
+        new_ir.States = adapt_states(new_ir.States);
         
-        %OuterTransitions
-        new_ir.States{i}.OuterTransitions = ...
-            adapt_transitions(new_ir.States{i}.OuterTransitions, statePath, 'Outer');
-        
-        %InnerTransitions
-        new_ir.States{i}.InnerTransitions= ...
-            adapt_transitions(new_ir.States{i}.InnerTransitions, statePath, 'Inner');
-        
+        for i=1:numel(new_ir.States)
+            statePath = new_ir.States{i}.Path;
+            % default transition
+            new_ir.States{i}.Composition.DefaultTransitions= ...
+                adapt_transitions(new_ir.States{i}.Composition.DefaultTransitions, statePath, 'Default');
+            
+            %OuterTransitions
+            new_ir.States{i}.OuterTransitions = ...
+                adapt_transitions(new_ir.States{i}.OuterTransitions, statePath, 'Outer');
+            
+            %InnerTransitions
+            new_ir.States{i}.InnerTransitions= ...
+                adapt_transitions(new_ir.States{i}.InnerTransitions, statePath, 'Inner');
+            
+        end
     end
-    
-    
-    for i=1:numel(new_ir.Junctions)
-        junctionPath = new_ir.Junctions{i}.Path;
-        new_ir.Junctions{i}.OuterTransitions = ...
-            adapt_transitions(new_ir.Junctions{i}.OuterTransitions, junctionPath, 'Default');
+    if isfield(new_ir, 'Junctions')
+        for i=1:numel(new_ir.Junctions)
+            junctionPath = new_ir.Junctions{i}.Path;
+            new_ir.Junctions{i}.OuterTransitions = ...
+                adapt_transitions(new_ir.Junctions{i}.OuterTransitions, junctionPath, 'Default');
+        end
     end
     %
-    for i=1:numel(new_ir.GraphicalFunctions)
-        new_ir.GraphicalFunctions{i} = confirm_actions_SFIR_pp( new_ir.GraphicalFunctions{i} );
+    if isfield(new_ir, 'GraphicalFunctions')
+        for i=1:numel(new_ir.GraphicalFunctions)
+            new_ir.GraphicalFunctions{i} = confirm_actions_SFIR_pp( new_ir.GraphicalFunctions{i} );
+        end
     end
-    
 end
 function states = adapt_states(states)
     states_keywords = {'en', 'du', 'ex'};

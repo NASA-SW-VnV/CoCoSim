@@ -11,11 +11,11 @@ function [new_ir, status] = stateflow_IR_pp(old_ir, print_in_file, output_dir)
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 status = 0;
-if nargin < 2 || isempty(output_dir)
+if nargin < 3 || isempty(output_dir)
     output_dir = pwd;
 end
 MatlabUtils.mkdir(output_dir);
-if nargin < 3 || isempty(print_in_file)
+if nargin < 2 || isempty(print_in_file)
     print_in_file = 0;
 end
 

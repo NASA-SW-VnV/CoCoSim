@@ -420,6 +420,9 @@ classdef Exp2Lus < handle
                                 op = BinaryExpr.OR;
                             end
                             code{1} = BinaryExpr.BinaryMultiArgs(op, x);
+                        case {'disp', 'sprintf', 'fprintf'}
+                            %ignore these printing functions
+                            code = {};
                             
                         otherwise
                             code = Exp2Lus.parseOtherFunc(obj, tree, ...
@@ -751,9 +754,10 @@ classdef Exp2Lus < handle
         
         %%
         function code = convertDT(obj, code, input_dt, output_dt)
-            if isempty(input_dt) || isempty(output_dt) ||...
-                (iscell(input_dt) && numel(input_dt) > 1) || ...
-                (iscell(output_dt) && numel(output_dt) > 1)
+            if isempty(code) || ...
+                    isempty(input_dt) || isempty(output_dt) ||...
+                    (iscell(input_dt) && numel(input_dt) > 1) || ...
+                    (iscell(output_dt) && numel(output_dt) > 1)
                 return;
             end
             if iscell(input_dt) 

@@ -8,18 +8,25 @@ function [ new_ir, status ] = DT_SFIR_PP( new_ir )
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     status = 0;
-    for i=1:numel(new_ir.Data)
-        [ Lustre_type, zero ] = SLX2LusUtils.get_lustre_dt( new_ir.Data{i}.CompiledType);
-        new_ir.Data{i}.LusDatatype = Lustre_type;
-        if isequal(new_ir.Data{i}.Scope, 'Parameter')
-            new_ir.Data{i}.InitialValue = new_ir.Data{i}.Name;
-        elseif strcmp(new_ir.Data{i}.InitialValue, '')
-            new_ir.Data{i}.InitialValue = num2str(zero.getValue());
+    if isfield(new_ir, 'Data')
+        for i=1:numel(new_ir.Data)
+            [ Lustre_type, zero ] = SLX2LusUtils.get_lustre_dt( new_ir.Data{i}.CompiledType);
+            new_ir.Data{i}.LusDatatype = Lustre_type;
+            if isequal(new_ir.Data{i}.Scope, 'Parameter')
+                new_ir.Data{i}.InitialValue = new_ir.Data{i}.Name;
+            elseif strcmp(new_ir.Data{i}.InitialValue, '')
+                new_ir.Data{i}.InitialValue = num2str(zero.getValue());
+            end
         end
     end
     if isfield(new_ir, 'GraphicalFunctions')
         for i=1:numel(new_ir.GraphicalFunctions)
             new_ir.GraphicalFunctions{i} = DT_SFIR_PP( new_ir.GraphicalFunctions{i} );
+        end
+    end
+    if isfield(new_ir, 'TruthTables')
+        for i=1:numel(new_ir.TruthTables)
+            new_ir.TruthTables{i} = DT_SFIR_PP( new_ir.TruthTables{i} );
         end
     end
 end
