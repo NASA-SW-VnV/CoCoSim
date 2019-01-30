@@ -31,7 +31,7 @@ function [results, passed, priority] = bn_0001(model)
     %failedList = GuidelinesUtils.ppSussystemNames(list);
     [max_limit_32_chars_in_name, numFail] = ...
         GuidelinesUtils.process_find_system_results(failedList,title,...
-        true); 
+        true);
     totalFail = totalFail + numFail;
     
     if totalFail > 0
@@ -40,12 +40,15 @@ function [results, passed, priority] = bn_0001(model)
     else
         color = 'green';
     end
-
-    title = 'bn_0001: Sussystem name length limit';
+    
+    title = 'bn_0001: Sussystem name length limit';    
+    description_text = ...
+        '32 characters is the maximum limit for subsystem name length';
+    description = HtmlItem(description_text, {}, 'black', 'black');
     results{end+1} = HtmlItem(title, ...
-        {max_limit_32_chars_in_name}, ...
-        color, color);    
-
+        {description, max_limit_32_chars_in_name}, ...
+        color, color);
+    
 end
 
 

@@ -17,7 +17,11 @@ function [results, passed, priority] = hyl_0305(model)
     blockList = find_system(model);
     % get names from handles
     Names = get_param(blockList, 'Name');
-    uniqueUsingCase = {};
+    description_text = ...
+        'Block names shall not be made unique by using case';
+    description = HtmlItem(description_text, {}, 'black', 'black');      
+    
+    uniqueUsingCase = {description};
     for i=1:numel(Names)
         if isempty(Names{i})
             continue;
@@ -31,8 +35,6 @@ function [results, passed, priority] = hyl_0305(model)
         end
     end
 
-           
-    
     if totalFail > 0
         passed = 0;
         color = 'red';
@@ -41,7 +43,7 @@ function [results, passed, priority] = hyl_0305(model)
     end
         
     %the main guideline
-    title = 'hyl_0305: Block names shall not be made unique by using case.';
+    title = 'hyl_0305: Block name uniqueness';   
     results{end+1} = HtmlItem(title, ...
         uniqueUsingCase, color, color);
 end

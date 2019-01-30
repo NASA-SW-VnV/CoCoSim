@@ -30,8 +30,11 @@ function [results, passed, priority] = hyl_0307(model)
     end
         
     %the main guideline
-    title = 'hyl_0307:  No "subsystem" in block name';
+    title = 'hyl_0307:  Use of subsystem name';
+    description_text = ...
+        'No block shall have "subsystem" in the name';
+    description = HtmlItem(description_text, {}, 'black', 'black');    
     results{end+1} = HtmlItem(title, ...
-        {noSubsystemInName}, color, color);
+        {description, noSubsystemInName}, color, color);
 end
 
