@@ -8,19 +8,37 @@ function [results, passed, priority] = db_0142(model)
     % ORION GN&C MATLAB/Simulink Standards
     % db_0142: Position of block names
     priority = 2;
-    title = 'db_0142: Position of block names';
-    description_text = ...
-        'If shown,the name of each block should be placed below the block';
     results = {};
+    passed = 1;
+    totalFail = 0;
+    
     % For IconDisplay there are 3 options:
     %      'Signal name' | {'Port number'} | 'Port number and signal name'
     % only 'Port number' number is correct
-    portBlocks = find_system(model,'Regexp', 'on',...
+    item_title = 'NamePlacement should not be set to "alternate"';
+    failedBlocks = find_system(model,'Regexp', 'on',...
         'NamePlacement','alternate');
-    passed = isempty(portBlocks);
-    [results{1}, ~] = ...
-        GuidelinesUtils.process_find_system_results(portBlocks,title,...
-        description_text, true);
+    [namePlacement_alternate, numFail] = ...
+        GuidelinesUtils.process_find_system_results(failedBlocks,item_title,...
+        true);
+    
+    totalFail = totalFail + numFail;
+    
+    if totalFail > 0
+        passed = 0;
+        color = 'red';
+    else
+        color = 'green';
+    end      
+  
+    title = 'db_0142: Position of block names';
+    description_text = ...
+        'If shown,the name of each block should be placed below the block';    
+    description = HtmlItem(description_text, {}, 'black', 'black');
+    results{end+1} = HtmlItem(title, ...
+        {description, namePlacement_alternate}, ...
+        color, color);     
+    
 end
 
 
