@@ -4,7 +4,7 @@ classdef GuidelinesUtils
     
     methods(Static)
         function [results, numFail] = process_find_system_results(fsList,...
-                title, varargin)
+                title, description_text, varargin)
             % flist: list of failed HTML item with hyperlink
             % title: description of current guideline
             % varargin is used to pass isBlkPath, clearTitle to HtmlItem
@@ -16,6 +16,8 @@ classdef GuidelinesUtils
             % will be added as collapsible list.
             % if there is no failure the title and any subtitles will be
             % green
+            
+            description = HtmlItem(description_text, {}, 'black', 'black');
             numFail = numel(fsList);
             failList = cell(1,length(fsList));
             if iscell(fsList)
@@ -30,12 +32,22 @@ classdef GuidelinesUtils
                     failList{i} =  HtmlItem(path,{},'red', '', varargin{:});
                 end
             end
+            
+%             if isempty(failList)
+%                 results = HtmlItem(strcat(title, ': PASS'),...
+%                     {description,failList},'green', 'green');
+%             else
+%                 results = HtmlItem(title, {description,failList},'red','red');
+%             end
+
+
             if isempty(failList)
                 results = HtmlItem(strcat(title, ': PASS'),...
                     failList,'green', 'green');
             else
                 results = HtmlItem(title, failList,'red','red');
             end
+
         end
         
         function allowedCharList = allowedChars(model,options)

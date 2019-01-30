@@ -9,6 +9,8 @@ function [results, passed, priority] = db_0142(model)
     % db_0142: Position of block names
     priority = 2;
     title = 'db_0142: Position of block names';
+    description_text = ...
+        'If shown,the name of each block should be placed below the block';
     results = {};
     % For IconDisplay there are 3 options:
     %      'Signal name' | {'Port number'} | 'Port number and signal name'
@@ -18,7 +20,7 @@ function [results, passed, priority] = db_0142(model)
     passed = isempty(portBlocks);
     [results{1}, ~] = ...
         GuidelinesUtils.process_find_system_results(portBlocks,title,...
-        true);
+        description_text, true);
 end
 
 

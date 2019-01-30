@@ -9,6 +9,8 @@ function [results, passed, priority] = jc_0081(model)
     % jc_0081: Icon display for Port block
     priority = 3;
     title = 'jc_0081: Icon display for Port block';
+    description_text = ...
+        'The "Icon display? setting should be set to "Port number? for Inport and Outport blocks';    
     results = {};
     % For IconDisplay there are 3 options:
     %      'Signal name' | {'Port number'} | 'Port number and signal name'
@@ -17,7 +19,7 @@ function [results, passed, priority] = jc_0081(model)
     passed = isempty(portBlocks);
     [results{1}, ~] = ...
         GuidelinesUtils.process_find_system_results(portBlocks,title,...
-        true, true);
+        description_text,true, true);
 end
 
 
