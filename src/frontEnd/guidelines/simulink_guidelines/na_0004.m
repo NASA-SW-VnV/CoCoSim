@@ -12,8 +12,6 @@ function [results, passed, priority] = na_0004(model)
     results = {};
     passed = 1;
     totalFail = 0;
-    
-    %object_params = get_param(gcs, 'ObjectParameters');
 
     % View Options
     item_title = 'View Options: Model Browser set to unchecked';
@@ -78,6 +76,34 @@ function [results, passed, priority] = na_0004(model)
     
     % Block Display Options
     
+%     
+%     item_title = ...
+%         'Block Display Options: Background Color set to white';
+%     BackgroundColor = get_param(model, 'BackgroundColor');
+%     if strcmp(BackgroundColor,'off')
+%         fsList = {};
+%     else
+%         fsList = {model};
+%     end
+%     [BackgroundColor, numFail] = ...
+%         GuidelinesUtils.process_find_system_results(fsList,item_title,...
+%         true);
+%     totalFail = totalFail + numFail;       
+%     
+%     
+%     item_title = ...
+%         'Block Display Options: Background Color set to white';
+%     ForegroundColor = get_param(model, 'ForegroundColor');
+%     if strcmp(ForegroundColor,'off')
+%         fsList = {};
+%     else
+%         fsList = {model};
+%     end
+%     [ForegroundColor, numFail] = ...
+%         GuidelinesUtils.process_find_system_results(fsList,item_title,...
+%         true);
+%     totalFail = totalFail + numFail;        
+    
     item_title = ...
         'Block Display Options: Execution Context Indicator set to unchecked';
     ExecutionContextIndicator = get_param(model, 'ExecutionContextIcon');
@@ -103,8 +129,46 @@ function [results, passed, priority] = na_0004(model)
         GuidelinesUtils.process_find_system_results(fsList,item_title,...
         true);
     totalFail = totalFail + numFail;      
-        
       
+    item_title = ...
+        'Block Display Options: Show Linearization Annotations set to checked';
+    ShowLinearizationAnnotations = get_param(model, 'ShowLinearizationAnnotations');
+    if strcmp(ShowLinearizationAnnotations,'on')
+        fsList = {};
+    else
+        fsList = {model};
+    end
+    [ShowLinearizationAnnotationsItem, numFail] = ...
+        GuidelinesUtils.process_find_system_results(fsList,item_title,...
+        true);
+    totalFail = totalFail + numFail; 
+      
+    item_title = ...
+        'Block Display Options: Show Model Reference Block IO set to unchecked';
+    ShowModelReferenceBlockIO = get_param(model, 'ShowModelReferenceBlockIO');
+    if strcmp(ShowModelReferenceBlockIO,'off')
+        fsList = {};
+    else
+        fsList = {model};
+    end
+    [ShowModelReferenceBlockIOItem, numFail] = ...
+        GuidelinesUtils.process_find_system_results(fsList,item_title,...
+        true);
+    totalFail = totalFail + numFail; 
+
+    item_title = ...
+        'Block Display Options: Show Model Reference Block Version set to unchecked';
+    ShowModelReferenceBlockVersion = get_param(model, 'ShowModelReferenceBlockIO');
+    if strcmp(ShowModelReferenceBlockVersion,'off')
+        fsList = {};
+    else
+        fsList = {model};
+    end
+    [ShowModelReferenceBlockVersionItem, numFail] = ...
+        GuidelinesUtils.process_find_system_results(fsList,item_title,...
+        true);
+    totalFail = totalFail + numFail; 
+        
     item_title = ...
         'Block Display Options: Sample Time Colors set to off';
     SampleTimeColors = get_param(model, 'SampleTimeColors');
@@ -119,7 +183,7 @@ function [results, passed, priority] = na_0004(model)
     totalFail = totalFail + numFail;         
     
     item_title = ...
-        'Block Display Options: Sample Time Colors set to unchecked';
+        'Block Display Options: Sorted Order set to unchecked';
     SortedOrder = get_param(model, 'SortedOrder');
     if strcmp(SortedOrder,'off')
         fsList = {};
@@ -131,8 +195,101 @@ function [results, passed, priority] = na_0004(model)
         true);
     totalFail = totalFail + numFail;     
     
+    % Signal Display Options
     
+    item_title = ...
+        'Signal Display Options: Show Port Data Types set to unchecked';
+    ShowPortDataTypes = get_param(model, 'ShowPortDataTypes');
+    if strcmp(ShowPortDataTypes,'off')
+        fsList = {};
+    else
+        fsList = {model};
+    end
+    [ShowPortDataTypesItem, numFail] = ...
+        GuidelinesUtils.process_find_system_results(fsList,item_title,...
+        true);
+    totalFail = totalFail + numFail;       
     
+    item_title = ...
+        'Signal Display Options: Show Line Dimensions set to unchecked';
+    ShowLineDimensions = get_param(model, 'ShowLineDimensions');
+    if strcmp(ShowLineDimensions,'off')
+        fsList = {};
+    else
+        fsList = {model};
+    end
+    [ShowLineDimensionsItem, numFail] = ...
+        GuidelinesUtils.process_find_system_results(fsList,item_title,...
+        true);
+    totalFail = totalFail + numFail;     
+        
+    item_title = ...
+        'Signal Display Options: Show Storage Class set to unchecked';
+    ShowStorageClass = get_param(model, 'ShowLineDimensions');
+    if strcmp(ShowStorageClass,'off')
+        fsList = {};
+    else
+        fsList = {model};
+    end
+    [ShowStorageClassItem, numFail] = ...
+        GuidelinesUtils.process_find_system_results(fsList,item_title,...
+        true);
+    totalFail = totalFail + numFail;        
+    
+    item_title = ...
+        'Signal Display Options: Show Test Point Icons set to checked';
+    ShowTestPointIcons = get_param(model, 'ShowTestPointIcons');
+    if strcmp(ShowTestPointIcons,'on')
+        fsList = {};
+    else
+        fsList = {model};
+    end
+    [ShowTestPointIconsItem, numFail] = ...
+        GuidelinesUtils.process_find_system_results(fsList,item_title,...
+        true);
+    totalFail = totalFail + numFail;     
+        
+    item_title = ...
+        'Signal Display Options: Show Viewer Icons set to checked';
+    ShowViewerIcons = get_param(model, 'ShowViewerIcons');
+    if strcmp(ShowViewerIcons,'on')
+        fsList = {};
+    else
+        fsList = {model};
+    end
+    [ShowViewerIconsItem, numFail] = ...
+        GuidelinesUtils.process_find_system_results(fsList,item_title,...
+        true);
+    totalFail = totalFail + numFail;         
+
+    item_title = ...
+        'Signal Display Options: Wide Non-scalar Lines set to checked';
+    WideLines = get_param(model, 'WideLines');
+    if strcmp(WideLines,'on')
+        fsList = {};
+    else
+        fsList = {model};
+    end
+    [WideLinesItem, numFail] = ...
+        GuidelinesUtils.process_find_system_results(fsList,item_title,...
+        true);
+    totalFail = totalFail + numFail;       
+    
+    % Simulation
+    
+    item_title = ...
+        'Simulation: Simulation Mode set normal';
+    SimulationMode = get_param(model, 'SimulationMode');
+    if strcmp(SimulationMode,'normal')
+        fsList = {};
+    else
+        fsList = {model};
+    end
+    [SimulationModeItem, numFail] = ...
+        GuidelinesUtils.process_find_system_results(fsList,item_title,...
+        true);
+    totalFail = totalFail + numFail;     
+        
     %%%%
     if totalFail > 0
         passed = 0;
@@ -156,8 +313,18 @@ function [results, passed, priority] = na_0004(model)
         ZoomFactorItem,...
         ExecutionContextIndicatorItem,...
         LibraryLinkDisplayItem,...
+        ShowLinearizationAnnotationsItem,...
+        ShowModelReferenceBlockIOItem,...
+        ShowModelReferenceBlockVersionItem,...
         SampleTimeColorsItem,...
-        SortedOrderItem}, ...
+        SortedOrderItem,...
+        ShowPortDataTypesItem,...
+        ShowLineDimensionsItem,...
+        ShowStorageClassItem,...
+        ShowTestPointIconsItem,...
+        ShowViewerIconsItem,...
+        WideLinesItem,...
+        SimulationModeItem}, ...
         color, color);
 
 end
