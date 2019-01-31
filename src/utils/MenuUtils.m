@@ -22,6 +22,20 @@ classdef MenuUtils
             cd(oldDir);
         end
         
+        function output = addTryCatch(callbackInfo)
+            funcHandle = callbackInfo.userdata;
+            try
+                output = funcHandle(callbackInfo);
+            catch ME
+                MenuUtils.handleExceptionMessage(ME, '');
+            end
+        end
+        
+        function handleExceptionMessage(e, source)
+            %TODO add log file
+            display_msg(e.getReport(), Constants.DEBUG, source,'');
+            display_msg('Something went wrong while runing CoCoSim.', Constants.ERROR, source,'');
+        end
         %% get file name from the current opened Simulink model.
         function [fpath, fname] = get_file_name(gcs)
             fname = bdroot(gcs);

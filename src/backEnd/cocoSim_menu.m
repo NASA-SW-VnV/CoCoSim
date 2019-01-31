@@ -26,8 +26,9 @@ menue_items{end + 1} = fullfile(backEnd_root, 'generate_code','generateCodeMenu.
 menue_items{end + 1} = fullfile(backEnd_root, 'extra_options','extraOptionsMenu.m');
 menue_items{end + 1} = fullfile(backEnd_root, 'preferences','preferences_menu.m');
 
-schema.childrenFcns = cellfun(@MenuUtils.funPath2Handle, menue_items,...
-                    'UniformOutput', false);
+callbacks = cellfun(@MenuUtils.funPath2Handle, menue_items,...
+    'UniformOutput', false);
+schema.childrenFcns = cellfun(@(x) {@MenuUtils.addTryCatch, x}, callbacks, 'UniformOutput', false);
 
 end
 

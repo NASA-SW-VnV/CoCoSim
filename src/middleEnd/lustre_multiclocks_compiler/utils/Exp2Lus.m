@@ -645,15 +645,17 @@ classdef Exp2Lus < handle
                         Exp2Lus.tree2code(obj, tree.parameters, ...
                         parent, blk, inputs, data_map, params_dt,...
                         isStateFlow);
-                    n = numel(namesAst);
-                    conds = cell(n-1, 1);
-                    thens = cell(n, 1);
-                    for i=1:n-1
-                        conds{i} = BinaryExpr(BinaryExpr.EQ, arg, IntExpr(i));
-                        thens{i} = namesAst{i};
+                    for ardIdx=1:numel(arg)
+                        n = numel(namesAst);
+                        conds = cell(n-1, 1);
+                        thens = cell(n, 1);
+                        for i=1:n-1
+                            conds{i} = BinaryExpr(BinaryExpr.EQ, arg{ardIdx}, IntExpr(i));
+                            thens{i} = namesAst{i};
+                        end
+                        thens{n} = namesAst{n};
+                        code{ardIdx} = ParenthesesExpr(IteExpr.nestedIteExpr(conds, thens));
                     end
-                    thens{n} = namesAst{n};
-                    code = ParenthesesExpr(IteExpr.nestedIteExpr(conds, thens));
                 end
             else
                 %multi-dimension access

@@ -267,6 +267,13 @@ classdef MatlabUtils
             AA = strsplit(A, '\n');
             for i=1:numel(AA), try open(AA{i}), catch, end, end
         end
+        
+        function terminate(modelName)
+            if nargin < 1 || isempty(modelName)
+                modelName = gcs;
+            end
+            evalin('base', sprintf('%s([], [], [], ''term'')', modelName));
+        end
     end
     
 end

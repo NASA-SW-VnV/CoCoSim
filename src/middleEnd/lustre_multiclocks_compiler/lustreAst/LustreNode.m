@@ -381,7 +381,8 @@ classdef LustreNode < LustreAst
                     nb_occ_perEq = cellfun(@(x) x.nbOccuranceVar(var), new_bodyEqs, 'UniformOutput', true);
                     % skip var if it is never used or used more than once. 
                     % For code readability and CEX debugging.
-                    if sum(nb_occ_perEq) ~= 1
+                    nb_occ = sum(nb_occ_perEq);
+                    if nb_occ > 1
                         continue;
                     end
                     

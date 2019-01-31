@@ -24,7 +24,7 @@ else
         MenuUtils.add_pp_warning(model_full_path);
         ToLustreUnsupportedBlocks(model_full_path);
     catch me
-        display_msg(me.getReport(), MsgType.DEBUG, '', '');
+        MenuUtils.handleExceptionMessage(me, 'Check Compatibility');
     end
 end
 end

@@ -63,6 +63,13 @@ classdef BinaryExpr < LustreExpr
             else
                 obj.epsilon = epsilon;
             end
+            % check the object is a valid Lustre AST.
+            if ~isa(obj.left, 'LustreExpr') || ~isa(obj.right, 'LustreExpr')
+                ME = MException('COCOSIM:LUSTREAST', ...
+                    'BinaryExpr ERROR: Expected parameters of type LustreExpr. Left operand of class "%s" and Right operand of class "%s".',...
+                    class(obj.left), class(obj.right));
+                throw(ME);
+            end
         end
         
         function setPar(obj, withPar)

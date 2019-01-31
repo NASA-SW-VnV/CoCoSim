@@ -13,8 +13,12 @@ function schema = dedMenu(~)
 end
 
 function dedCallback(~)
-    [ CoCoSimPreferences ] = loadCoCoSimPreferences();
-    model_full_path = MenuUtils.get_file_name(gcs);    
-    MenuUtils.add_pp_warning(model_full_path);
-    lustreDED(model_full_path, [], CoCoSimPreferences.lustreBackend);
+    try
+        [ CoCoSimPreferences ] = loadCoCoSimPreferences();
+        model_full_path = MenuUtils.get_file_name(gcs);
+        MenuUtils.add_pp_warning(model_full_path);
+        lustreDED(model_full_path, [], CoCoSimPreferences.lustreBackend);
+    catch me
+        MenuUtils.handleExceptionMessage(me, 'Design Error Detection');
+    end
 end

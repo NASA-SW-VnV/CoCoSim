@@ -45,7 +45,11 @@ classdef ContractModeExpr < LustreExpr
         
         %% nbOccurance
         function nb_occ = nbOccuranceVar(obj, var)
-            nb_occ = obj.requires.nbOccuranceVar(var) + obj.ensures.nbOccuranceVar(var);
+            occ_requires = cellfun(@(x) x.nbOccuranceVar(var), obj.requires, ...
+                'UniformOutput', true);
+            occ_ensures = cellfun(@(x) x.nbOccuranceVar(var), obj.ensures, ...
+                'UniformOutput', true);
+            nb_occ = sum(occ_requires) + sum(occ_ensures);
         end
         %% substituteVars 
         function new_obj = substituteVars(obj, oldVar, newVar)

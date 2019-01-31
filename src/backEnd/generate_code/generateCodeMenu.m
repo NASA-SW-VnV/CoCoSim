@@ -9,6 +9,7 @@ menu_items{1} = fullfile(gen_root, 'C', 'CMenu.m');
 menu_items{2} = fullfile(gen_root, 'Lustre', 'LustreMenu.m');
 menu_items{3} = fullfile(gen_root, 'Rust', 'RustMenu.m');
 
-schema.childrenFcns = cellfun(@MenuUtils.funPath2Handle, menu_items,...
+callbacks = cellfun(@MenuUtils.funPath2Handle, menu_items,...
     'UniformOutput', false);
+schema.childrenFcns = cellfun(@(x) {@MenuUtils.addTryCatch, x}, callbacks, 'UniformOutput', false);
 end
