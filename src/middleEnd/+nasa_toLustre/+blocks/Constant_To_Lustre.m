@@ -14,10 +14,10 @@ classdef Constant_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         function  write_code(obj, parent, blk, xml_trace, varargin)
             L = nasa_toLustre.ToLustreImport.L;
             import(L{:})
-            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+            [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             obj.addVariable(outputs_dt);
             slx_dt = blk.CompiledPortDataTypes.Outport{1};
-            lus_outputDataType = SLX2LusUtils.get_lustre_dt(slx_dt);
+            lus_outputDataType =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(slx_dt);
             [Value, ~, status] = ...
                 Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Value);
             if status
@@ -35,7 +35,7 @@ classdef Constant_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             width = numel(Value);
             values_AST = cell(1, width);
             for i=1:width
-                values_AST{i} = SLX2LusUtils.num2LusExp(Value(i),...
+                values_AST{i} =nasa_toLustre.utils.SLX2LusUtils.num2LusExp(Value(i),...
                     lus_outputDataType, slx_dt);
             end
             

@@ -33,7 +33,7 @@ classdef ContractModeBlock_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             inputs = cell(1, nb_inputs);
                        
             for i=1:nb_inputs
-                inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
+                inputs{i} =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk, i);
 
                 % Get the input datatype
                 inport_dt = blk.CompiledPortDataTypes.Inport(i);
@@ -42,7 +42,7 @@ classdef ContractModeBlock_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     % this function return if a casting is needed
                     % "conv_format", a library or the name of casting node
                     % will be stored in "external_lib".
-                    [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, 'boolean');
+                    [external_lib, conv_format] =nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(inport_dt, 'boolean');
                     if ~isempty(conv_format)
                         % always add the "external_lib" to the object
                         % external libraries, (so it can be declared in the
@@ -51,13 +51,13 @@ classdef ContractModeBlock_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                         % cast the input to the conversion format. In our
                         % example conv_format = 'int_to_real(%s)'. 
                         inputs{i} = cellfun(@(x) ...
-                            SLX2LusUtils.setArgInConvFormat(conv_format,x),...
+                           nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(conv_format,x),...
                             inputs{i}, 'un', 0);
                     end
                 end
             end
             
-            blk_name = SLX2LusUtils.node_name_format(blk);
+            blk_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);
             code = ContractModeExpr(blk_name, inputs{1}, inputs{2});
             obj.setCode( code );
             

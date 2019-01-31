@@ -15,17 +15,17 @@ classdef RelationalOperator_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         function  write_code(obj, parent, blk, xml_trace, varargin)
             L = nasa_toLustre.ToLustreImport.L;
             import(L{:})
-            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+            [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             
             
             widths = blk.CompiledPortWidths.Inport;
             max_width = max(widths);
             outputDataType = blk.CompiledPortDataTypes.Outport{1};
-            [lus_outputDT, zero, one] = SLX2LusUtils.get_lustre_dt(...
+            [lus_outputDT, zero, one] =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(...
                 outputDataType);
-            lus_in1_dt = SLX2LusUtils.get_lustre_dt(...
+            lus_in1_dt =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(...
                 blk.CompiledPortDataTypes.Inport(1));
-            lus_in2_dt = SLX2LusUtils.get_lustre_dt(...
+            lus_in2_dt =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(...
                 blk.CompiledPortDataTypes.Inport(2));
             thewantedDataType = 'int';
             if strcmp(lus_in1_dt, 'real') || strcmp(lus_in2_dt, 'real')
@@ -33,19 +33,19 @@ classdef RelationalOperator_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             end
             inputs = cell(1, numel(widths));
             for i=1:numel(widths)
-                inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
+                inputs{i} =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk, i);
                 if numel(inputs{i}) < max_width
                     inputs{i} = arrayfun(@(x) {inputs{i}{1}}, (1:max_width));
                 end
-                inport_dt = SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Inport(i));
+                inport_dt =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Inport(i));
                 %converts the input data type(s) to
                 %its accumulator data type
                 if ~strcmp(inport_dt, thewantedDataType)
-                    [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, thewantedDataType);
+                    [external_lib, conv_format] =nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(inport_dt, thewantedDataType);
                     if ~isempty(conv_format)
                         obj.addExternal_libraries(external_lib);
                         inputs{i} = cellfun(@(x) ...
-                            SLX2LusUtils.setArgInConvFormat(conv_format,x),...
+                           nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(conv_format,x),...
                             inputs{i}, 'un', 0);
                     end
                 end

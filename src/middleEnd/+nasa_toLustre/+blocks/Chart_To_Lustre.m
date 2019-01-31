@@ -28,19 +28,19 @@ classdef Chart_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 node_name = get_full_name( blk, true );
             else
                 % the new compiler
-                node_name = SLX2LusUtils.node_name_format(blk);
+                node_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);
             end
             
-            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
-            [inputs] = SLX2LusUtils.getBlockInputsNames(parent, blk);
-            [triggerInputs] = SLX2LusUtils.getSubsystemTriggerInputsNames(parent, blk);
+            [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+            [inputs] =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk);
+            [triggerInputs] =nasa_toLustre.utils.SLX2LusUtils.getSubsystemTriggerInputsNames(parent, blk);
             codes = {};
             if ~isempty(triggerInputs)
                 cond = cell(1, blk.CompiledPortWidths.Trigger);
                 for i=1:blk.CompiledPortWidths.Trigger
                     TriggerType = blk.StateflowContent.Events{i}.Trigger;
-                    [lusTriggerportDataType, zero] = SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Trigger{1});
-                    [triggerCode, status] = SLX2LusUtils.getResetCode(...
+                    [lusTriggerportDataType, zero] =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Trigger{1});
+                    [triggerCode, status] =nasa_toLustre.utils.SLX2LusUtils.getResetCode(...
                         TriggerType, lusTriggerportDataType, triggerInputs{i} , zero);
                     if status
                         display_msg(sprintf('This External reset type [%s] is not supported in block %s.', ...
@@ -69,7 +69,7 @@ classdef Chart_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         function options = getUnsupportedOptions(obj,parent, blk, varargin)
             L = nasa_toLustre.ToLustreImport.L;
             import(L{:})
-            [triggerInputs] = SLX2LusUtils.getSubsystemTriggerInputsNames(parent, blk);
+            [triggerInputs] =nasa_toLustre.utils.SLX2LusUtils.getSubsystemTriggerInputsNames(parent, blk);
             SFContent = blk.StateflowContent;
             %% Check chart properties
             %Action language for programming the chart. Can be C or MATLAB.

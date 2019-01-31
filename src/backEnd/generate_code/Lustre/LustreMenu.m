@@ -31,7 +31,7 @@ try
     MenuUtils.add_pp_warning(mdl_full_path);
     CoCoSimPreferences = load_coco_preferences();
     if CoCoSimPreferences.lustreCompiler == 1
-        ToLustre(mdl_full_path, [], bckend);
+        nasa_toLustre.ToLustre(mdl_full_path, [], bckend);
     elseif CoCoSimPreferences.lustreCompiler == 2
         cocoSpecCompiler(mdl_full_path);
     else

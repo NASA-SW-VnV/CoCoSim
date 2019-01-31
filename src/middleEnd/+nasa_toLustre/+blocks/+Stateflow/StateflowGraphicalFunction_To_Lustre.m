@@ -113,7 +113,7 @@ classdef StateflowGraphicalFunction_To_Lustre
                                     rhs = bodyEqs{j}.getRhs();
                                     nb_occ = rhs.nbOccuranceVar(var);
                                     if nb_occ > 0
-                                        newVar = SLX2LusUtils.num2LusExp(0, var_dt);
+                                        newVar =nasa_toLustre.utils.SLX2LusUtils.num2LusExp(0, var_dt);
                                         new_rhs = rhs.substituteVars( var, newVar);
                                         bodyEqs{j} = LustreEq(lhs, new_rhs);
                                         break;

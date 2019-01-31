@@ -13,16 +13,16 @@ classdef HtmlItem < handle
     
     methods
         function obj = HtmlItem(title, subtitles, text_color, icon_color,...
-                isBlkPath, cleanSignalName)
+                isBlkPath, removeHtmlKeywords)
             if nargin <= 4 || isempty(isBlkPath)
                 isBlkPath = false;
             end
             if nargin <= 5
-                cleanSignalName = false;
+                removeHtmlKeywords = false;
             end
-            obj.title = title;
-            if cleanSignalName
-                obj.title = HtmlItem.cleanSignalName(obj.title);
+            obj.title = regexprep(title, '\n', '<br>');
+            if removeHtmlKeywords
+                obj.title = HtmlItem.removeHtmlKeywords(obj.title);
             end
             if isBlkPath
                 %name = get_param(title, 'Name');
@@ -117,15 +117,28 @@ classdef HtmlItem < handle
         end
     end
     methods(Static)
-        function title = cleanSignalName(title)
+        function title = removeHtmlKeywords(title)
             title = strrep(title, '<', '&lt;');
             title = strrep(title, '>', '&gt;');
         end
-        function htmlCmd = addOpenCmd(blk)
+        
+        %%
+        function htmlCmd = addOpenCmd(blk, shortName)
+            if nargin < 2
+                shortName = HtmlItem.removeHtmlKeywords(blk);
+            end
             htmlCmd = sprintf('<a href="matlab:open_and_hilite_hyperlink (''%s'',''error'')">%s</a>', ...
-                regexprep(blk, '\n', ' '),...
-                HtmlItem.cleanSignalName(blk));
+                regexprep(blk, '\n', ' '),shortName);
         end
+        function htmlCmd = addOpenFileCmd(blk, shortName)
+            if nargin < 2
+                shortName = HtmlItem.removeHtmlKeywords(blk);
+            end
+            htmlCmd = sprintf('<a href="matlab:open (''%s'')">%s</a>', ...
+                regexprep(blk, '\n', ' '), shortName);
+        end
+        
+        %%
         function displayErrorMessages(html_path, msg_list, mode_display)
             HtmlItem.displayMessages(html_path,'ERRORS LIST', msg_list, 'red', mode_display);
         end
@@ -134,7 +147,7 @@ classdef HtmlItem < handle
         end
         function displayMessages(html_path,title, msg_list, msgColor, mode_display)
             if mode_display
-                htmlList = cellfun(@(x) HtmlItem(x, {}, 'black', msgColor, [], false),msg_list, 'UniformOutput', false);
+                htmlList = cellfun(@(x) HtmlItem(x, {}, 'black', msgColor),msg_list, 'UniformOutput', false);
                 MenuUtils.createHtmlListUsingHTMLITEM(title, htmlList, html_path);
             else
                 display_msg(title, MsgType.INFO, 'ToLustre', '');

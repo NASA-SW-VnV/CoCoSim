@@ -27,7 +27,7 @@ classdef Merge_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             is_supported = true;
             pre_blksConds = cell(1, nb_input);
             for i=1:nb_input
-                pre_blk = SLX2LusUtils.getpreBlock(parent, blk, i);
+                pre_blk =nasa_toLustre.utils.SLX2LusUtils.getpreBlock(parent, blk, i);
                 if isempty(pre_blk) 
                     is_supported = false;
                     break;
@@ -46,7 +46,7 @@ classdef Merge_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 return;
             end
             %% Step 1: Get the block outputs names, 
-            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+            [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             
             %% Step 2: add outputs_dt to the list of variables to be declared
             % in the var section of the node.
@@ -62,7 +62,7 @@ classdef Merge_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             % Go over inputs, numel(widths) is the number of inputs. 
             
             for i=1:nb_input
-                inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
+                inputs{i} =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk, i);
                 
                 
                 % Get the input datatype
@@ -74,7 +74,7 @@ classdef Merge_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     % this function return if a casting is needed
                     % "conv_format", a library or the name of casting node
                     % will be stored in "external_lib".
-                    [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, outputDataType);
+                    [external_lib, conv_format] =nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(inport_dt, outputDataType);
                     if ~isempty(conv_format)
                         % always add the "external_lib" to the object
                         % external libraries, (so it can be declared in the
@@ -83,12 +83,12 @@ classdef Merge_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                         % cast the input to the conversion format. In our
                         % example conv_format = 'int_to_real(%s)'. 
                         inputs{i} = cellfun(@(x) ...
-                            SLX2LusUtils.setArgInConvFormat(conv_format,x),...
+                           nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(conv_format,x),...
                             inputs{i}, 'un', 0);
                     end
                 end
             end
-            InitialOutput_cell = SLX2LusUtils.getInitialOutput(parent, blk,...
+            InitialOutput_cell =nasa_toLustre.utils.SLX2LusUtils.getInitialOutput(parent, blk,...
                 blk.InitialOutput, outputDataType, numel(outputs));
             %% Step 4: start filling the definition of each output
             codes = cell(1, numel(outputs));
@@ -121,7 +121,7 @@ classdef Merge_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             widths = blk.CompiledPortWidths.Inport;
             is_supported = true;
             for i=1:numel(widths)
-                pre_blk = SLX2LusUtils.getpreBlock(parent, blk, i);
+                pre_blk =nasa_toLustre.utils.SLX2LusUtils.getpreBlock(parent, blk, i);
                 if isempty(pre_blk) 
                     is_supported = false;
                     break;

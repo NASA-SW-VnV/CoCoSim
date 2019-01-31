@@ -67,11 +67,11 @@ classdef Sum_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             import(L{:})
             AdditionalVars = {};
             codes = {};
-            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+            [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             widths = blk.CompiledPortWidths.Inport;
             inputs = Sum_To_Lustre.createBlkInputs(obj, parent, blk, widths, AccumDataTypeStr, isSumBlock);
             
-            [LusOutputDataTypeStr, zero, one] = SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Outport(1));
+            [LusOutputDataTypeStr, zero, one] =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Outport(1));
             if (isSumBlock)
                 operator_character = '+';
                 initCode = zero;
@@ -79,7 +79,7 @@ classdef Sum_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 operator_character = '*';
                 initCode = one;
             end
-            [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(AccumDataTypeStr, OutputDataTypeStr, blk.RndMeth, blk.SaturateOnIntegerOverflow);
+            [external_lib, conv_format] =nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(AccumDataTypeStr, OutputDataTypeStr, blk.RndMeth, blk.SaturateOnIntegerOverflow);
             if ~isempty(conv_format)
                 obj.addExternal_libraries(external_lib);
             end
@@ -138,7 +138,7 @@ classdef Sum_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     % If it is integer division, we need to call the
                     % appropriate division methode. We assume Lustre
                     % division is the Euclidean division for integers.
-                    [LusInputDataTypeStr, ~, ~] = SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Inport{1});
+                    [LusInputDataTypeStr, ~, ~] =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Inport{1});
                     if strcmp(LusOutputDataTypeStr, 'int') ...
                             && strcmp(LusInputDataTypeStr, 'int') ...
                             && MatlabUtils.contains(exp, '/')
@@ -172,7 +172,7 @@ classdef Sum_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             SaturateOnIntegerOverflow = blk.SaturateOnIntegerOverflow;
             inputs = cell(1, numel(widths));
             for i=1:numel(widths)
-                inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
+                inputs{i} =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk, i);
                 if numel(inputs{i}) < max_width
                     if ~(~isSumBlock && strcmp(blk.Multiplication, 'Matrix(*)'))
                         inputs{i} = arrayfun(@(x) {inputs{i}{1}}, (1:max_width));
@@ -182,11 +182,11 @@ classdef Sum_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 %converts the input data type(s) to
                 %its accumulator data type
                 if ~strcmp(inport_dt, AccumDataTypeStr)
-                    [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, AccumDataTypeStr, RndMeth, SaturateOnIntegerOverflow);
+                    [external_lib, conv_format] =nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(inport_dt, AccumDataTypeStr, RndMeth, SaturateOnIntegerOverflow);
                     if ~isempty(conv_format)
                         obj.addExternal_libraries(external_lib);
                         inputs{i} = cellfun(@(x) ...
-                            SLX2LusUtils.setArgInConvFormat(conv_format,x),...
+                           nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(conv_format,x),...
                             inputs{i}, 'un', 0);
                     end
                 end
@@ -210,7 +210,7 @@ classdef Sum_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     end
                 end
                 if ~isempty(conv_format)
-                    code = SLX2LusUtils.setArgInConvFormat(conv_format, code);
+                    code =nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(conv_format, code);
                 end
                 codes{i} = LustreEq(outputs{i}, code);
             end
@@ -225,7 +225,7 @@ classdef Sum_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 codes = cell(1, numel(outputs));
                 for i=1:numel(outputs)
                     if ~isempty(conv_format)
-                        code = SLX2LusUtils.setArgInConvFormat(conv_format,...
+                        code =nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(conv_format,...
                             inputs{1}{i});
                     else
                         code = inputs{1}{i};
@@ -243,7 +243,7 @@ classdef Sum_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                         code, inputs{1}{j}, false);
                 end
                 if ~isempty(conv_format)
-                    code = SLX2LusUtils.setArgInConvFormat(conv_format,code);
+                    code =nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(conv_format,code);
                 end
                 codes{1} = LustreEq(outputs{1}, code);
                 
@@ -297,7 +297,7 @@ classdef Sum_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     end
                     
                     if ~isempty(conv_format)
-                        code = SLX2LusUtils.setArgInConvFormat(conv_format,code);
+                        code =nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(conv_format,code);
                     end
                     codes{i} = LustreEq(outputs{i}, code);
                 end

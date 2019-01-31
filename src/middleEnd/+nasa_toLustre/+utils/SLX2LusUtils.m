@@ -1,4 +1,4 @@
-classdef SLX2LusUtils < handle
+classdef SLX2LusUtils 
     %LUS2UTILS contains all functions that helps in the translation from
     %Simulink to Lustre.
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -777,13 +777,14 @@ classdef SLX2LusUtils < handle
         end
         %% Change Simulink DataTypes to Lustre DataTypes. Initial default
         %value is also given as a string.
-        function [ Lustre_type, zero, one, isBus, isEnum] = ...
+        function [ Lustre_type, zero, one, isBus, isEnum, hasEnum] = ...
                 get_lustre_dt( slx_dt)
             L = nasa_toLustre.ToLustreImport.L;
             import(L{:})
             global TOLUSTRE_ENUMS_MAP;
             isBus = false;
             isEnum = false;
+            hasEnum = false;
             if strcmp(slx_dt, 'real') || strcmp(slx_dt, 'int') || strcmp(slx_dt, 'bool')
                 Lustre_type = slx_dt;
             else
@@ -800,6 +801,7 @@ classdef SLX2LusUtils < handle
                     end
                     if isKey(TOLUSTRE_ENUMS_MAP, lower(slx_dt))
                         isEnum = true;
+                        hasEnum = true;
                         Lustre_type = lower(slx_dt);
                     else 
                         isBus = SLXUtils.isSimulinkBus(char(slx_dt));
@@ -816,11 +818,12 @@ classdef SLX2LusUtils < handle
                 zero = {};
                 one = {};
                 for i=1:numel(Lustre_type)
-                    if isEnum
+                    if isKey(TOLUSTRE_ENUMS_MAP, Lustre_type{i})
                         members = TOLUSTRE_ENUMS_MAP(Lustre_type{i});
                         % DefaultValue of Enum is the first element
                         zero{i} = members{1};
                         one{i} = members{1};
+                        hasEnum = true;
                     elseif strcmp(Lustre_type{i}, 'bool')
                         zero{i} = BooleanExpr('false');
                         one{i} = BooleanExpr('true') ;
@@ -833,10 +836,11 @@ classdef SLX2LusUtils < handle
                     end
                 end
             else
-                if isEnum
+                if isKey(TOLUSTRE_ENUMS_MAP, Lustre_type)
                     members = TOLUSTRE_ENUMS_MAP(Lustre_type);
                     zero = members{1};
                     one = members{1};
+                    hasEnum = true;
                 elseif strcmp(Lustre_type, 'bool')
                     zero = BooleanExpr('false');
                     one = BooleanExpr('true');
@@ -910,6 +914,7 @@ classdef SLX2LusUtils < handle
         % the function returns a list of LustreExp objects: IntExpr,
         % RealExpr or BooleanExpr
         function InitialOutput_cell = getInitialOutput(parent, blk, InitialOutput, slx_dt, max_width)
+            import nasa_toLustre.blocks.Constant_To_Lustre
             [lus_outputDataType] = nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(slx_dt);
             if strcmp(InitialOutput, '[]')
                 InitialOutput = '0';

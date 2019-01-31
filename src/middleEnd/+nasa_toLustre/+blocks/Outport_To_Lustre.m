@@ -14,9 +14,9 @@ classdef Outport_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         function  write_code(obj, parent, blk, varargin)
             L = nasa_toLustre.ToLustreImport.L;
             import(L{:})
-            [outputs, ~] = SLX2LusUtils.getBlockOutputsNames(parent, blk);
-            [inputs] = SLX2LusUtils.getBlockInputsNames(parent, blk);
-            isInsideContract = SLX2LusUtils.isContractBlk(parent);
+            [outputs, ~] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk);
+            [inputs] =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk);
+            isInsideContract =nasa_toLustre.utils.SLX2LusUtils.isContractBlk(parent);
             if isInsideContract
                 % ignore output "valid" in contract
                 return;
@@ -26,9 +26,9 @@ classdef Outport_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 if isempty(blk.CompiledPortDataTypes)
                     lus_outputDataType = 'real';
                 else
-                    lus_outputDataType = SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Inport{1});
+                    lus_outputDataType =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Inport{1});
                 end
-                zero = SLX2LusUtils.num2LusExp(...
+                zero =nasa_toLustre.utils.SLX2LusUtils.num2LusExp(...
                     0, lus_outputDataType);
                 inputs = arrayfun(@(x) {zero}, (1:numel(outputs)));
             end
@@ -52,13 +52,13 @@ classdef Outport_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     && LusBackendType.isLUSTREC(lus_backend) ...
                     && isequal(parent.BlockType, 'block_diagram')
                 if isempty(blk.CompiledPortDataTypes)
-                    isEnum = false;
+                    hasEnum = false;
                 else
-                    [~, ~, ~, ~, isEnum] = ...
-                        SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Inport{1});
+                    [~, ~, ~, ~, ~, hasEnum] = ...
+                       nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Inport{1});
                 end
-                if isEnum
-                    obj.addUnsupported_options(sprintf('Outport %s with Enumeration Type %s is not supported in root level for Validation with Lustrec.', ...
+                if hasEnum
+                    obj.addUnsupported_options(sprintf('Outport %s with Type %s has/is Enumeration type is not supported in root level for Validation with Lustrec.', ...
                         HtmlItem.addOpenCmd(blk.Origin_path),...
                         blk.CompiledPortDataTypes.Inport{1}));
                 end

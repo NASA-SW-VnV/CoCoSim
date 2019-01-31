@@ -24,7 +24,7 @@ classdef FromWorkspace_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 interpolate = 0;
             end
             
-            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+            [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             outputDataType = blk.CompiledPortDataTypes.Outport{1};                        
             VariableName = blk.VariableName;
             [variable, ~, status] = ...
@@ -35,7 +35,7 @@ classdef FromWorkspace_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     MsgType.ERROR, 'Constant_To_Lustr', '');
                 return;
             end
-            [outLusDT, zero, ~] = SLX2LusUtils.get_lustre_dt(outputDataType);
+            [outLusDT, zero, ~] =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(outputDataType);
                                                 
             if isnumeric(variable)
                 % for matrix
@@ -60,7 +60,7 @@ classdef FromWorkspace_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 return;
             end
 
-            blk_name = SLX2LusUtils.node_name_format(blk);
+            blk_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);
             codeAst_all = {};
             vars_all = {};   
             simTime = VarIdExpr(SLX2LusUtils.timeStepStr());    % modify to do cyclic repetition?

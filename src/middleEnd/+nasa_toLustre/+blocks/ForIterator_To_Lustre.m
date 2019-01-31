@@ -15,10 +15,10 @@ classdef ForIterator_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         function  write_code(obj, parent, blk, xml_trace, varargin)
             L = nasa_toLustre.ToLustreImport.L;
             import(L{:})
-            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+            [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             obj.addVariable(outputs_dt);
             % join the lines and set the block code.
-            obj.setCode( LustreEq(outputs{1}, SLX2LusUtils.iterationVariable()));
+            obj.setCode( LustreEq(outputs{1},nasa_toLustre.utils.SLX2LusUtils.iterationVariable()));
         end
         %%
         function options = getUnsupportedOptions(obj, parent, blk, varargin)

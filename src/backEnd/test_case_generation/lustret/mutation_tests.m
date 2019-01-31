@@ -40,7 +40,7 @@ addpath(model_path);
 load_system(model_full_path);
 %% Compile model
 [lus_full_path, xml_trace, is_unsupported, ~, ~, pp_model_full_path] = ...
-    ToLustre(model_full_path, [], 'KIND2');
+    nasa_toLustre.ToLustre(model_full_path, [], 'KIND2');
 if is_unsupported
     display_msg('Model is not supported', MsgType.ERROR, 'validation', '');
     return;

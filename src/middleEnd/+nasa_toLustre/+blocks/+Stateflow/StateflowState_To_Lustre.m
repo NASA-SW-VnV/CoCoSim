@@ -145,7 +145,7 @@ classdef StateflowState_To_Lustre
            
             %create the node
             node_name = ...
-                SLX2LusUtils.node_name_format(blk);
+               nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);
             main_node = LustreNode();
             main_node.setName(node_name);
             comment = LustreComment(sprintf('Chart Node: %s', chart.Origin_path),...
@@ -928,7 +928,7 @@ classdef StateflowState_To_Lustre
                     else
                         v = v(1);
                     end
-                    IC_Var = SLX2LusUtils.num2LusExp(v, d.LusDatatype);
+                    IC_Var =nasa_toLustre.utils.SLX2LusUtils.num2LusExp(v, d.LusDatatype);
                     
                     if ~isequal(d.Scope, 'Output')
                         variables{end+1} = LustreVar(d_name, d.LusDatatype);
@@ -1057,7 +1057,7 @@ classdef StateflowState_To_Lustre
                     else
                         v = v(1);
                     end
-                    IC_Var = SLX2LusUtils.num2LusExp(v, d.LusDatatype);
+                    IC_Var =nasa_toLustre.utils.SLX2LusUtils.num2LusExp(v, d.LusDatatype);
                     body{end+1} = LustreEq(VarIdExpr(d_name), IC_Var);
                 end
             end

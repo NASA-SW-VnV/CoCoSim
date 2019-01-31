@@ -17,21 +17,21 @@ classdef Assertion_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             if isfield(blk, 'Enabled') && isequal(blk.Enabled, 'off')
                 return;
             end
-            inputs{1} = SLX2LusUtils.getBlockInputsNames(parent, blk, 1);
+            inputs{1} =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk, 1);
             inport_dt = blk.CompiledPortDataTypes.Inport{1};
-            inport_lus_dt = SLX2LusUtils.get_lustre_dt(inport_dt);
+            inport_lus_dt =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(inport_dt);
             
             if ~strcmp(inport_lus_dt, 'bool')
-                [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_lus_dt, 'bool');
+                [external_lib, conv_format] =nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(inport_lus_dt, 'bool');
                 if ~isempty(conv_format)
                     obj.addExternal_libraries(external_lib);
                     inputs{1} = cellfun(@(x) ...
-                        SLX2LusUtils.setArgInConvFormat(conv_format,x),...
+                       nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(conv_format,x),...
                         inputs{1}, 'un', 0);
                 end
             end
-            blk_name = SLX2LusUtils.node_name_format(blk);
-            parent_name = SLX2LusUtils.node_name_format(parent);
+            blk_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);
+            parent_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(parent);
             obj.addCode(LocalPropertyExpr( blk_name, ...
                 BinaryExpr.BinaryMultiArgs(BinaryExpr.AND, inputs{1})));
             xml_trace.add_Property(blk.Origin_path, parent_name, blk_name, 1, ...

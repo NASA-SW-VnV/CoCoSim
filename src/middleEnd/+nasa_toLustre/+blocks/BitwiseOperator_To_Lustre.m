@@ -18,7 +18,7 @@ classdef BitwiseOperator_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             L = nasa_toLustre.ToLustreImport.L;
             import(L{:})
             %% Step 1: Get the block outputs names
-            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+            [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             
             %% Step 2: add outputs_dt to the list of variables to be declared
             % in the var section of the node.
@@ -36,7 +36,7 @@ classdef BitwiseOperator_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             % Go over inputs, numel(widths) is the number of inputs.
             for i=1:numInputs
                 % fill the names of the ith input.
-                inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
+                inputs{i} =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk, i);
                 % if an input has a width lesser than the max_width, we
                 % need to make it equal to the max_width.
                 if numel(inputs{i}) < max_width

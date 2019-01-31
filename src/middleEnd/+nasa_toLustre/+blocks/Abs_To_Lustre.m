@@ -15,18 +15,18 @@ classdef Abs_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         function  write_code(obj, parent, blk, xml_trace, varargin)
             L = nasa_toLustre.ToLustreImport.L;
             import(L{:})
-            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+            [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             obj.addVariable(outputs_dt);
             outputDataType = blk.CompiledPortDataTypes.Outport{1};
             
-            inputs{1} = SLX2LusUtils.getBlockInputsNames(parent, blk, 1);
+            inputs{1} =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk, 1);
             inport_dt = blk.CompiledPortDataTypes.Inport{1};
             %converts the input data type(s) to
             %its accumulator data type
             if ~strcmp(inport_dt, outputDataType)
                 RndMeth = blk.RndMeth;
                 SaturateOnIntegerOverflow = blk.SaturateOnIntegerOverflow;
-                [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, outputDataType, RndMeth, SaturateOnIntegerOverflow);
+                [external_lib, conv_format] =nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(inport_dt, outputDataType, RndMeth, SaturateOnIntegerOverflow);
                 if ~isempty(conv_format)
                     obj.addExternal_libraries(external_lib);
                 end
@@ -34,7 +34,7 @@ classdef Abs_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 conv_format = {};
             end
             
-            [~, zero] = SLX2LusUtils.get_lustre_dt(outputDataType);
+            [~, zero] =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(outputDataType);
             
             
             if MatlabUtils.startsWith(inport_dt, 'int')
@@ -61,7 +61,7 @@ classdef Abs_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 thens{n+1} = UnaryExpr(UnaryExpr.NEG, ...
                     inputs{1}{j});
                 code = ...
-                    SLX2LusUtils.setArgInConvFormat(...
+                   nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(...
                     conv_format,...
                     IteExpr.nestedIteExpr(conds, thens));
                 codes{j} = LustreEq(outputs{j}, code);

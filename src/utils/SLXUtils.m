@@ -374,7 +374,7 @@ classdef SLXUtils
         end
         function Values = get_random_values(time, nb_steps, min, max, dim, dt)
             [isBus, bus] = SLXUtils.isSimulinkBus(dt);
-            lus_dt = SLX2LusUtils.get_lustre_dt(dt);
+            lus_dt =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(dt);
             if isBus
                 Values = SLXUtils.construct_random_bus_values(bus, time, nb_steps, min, max, dim);
             elseif strcmp(lus_dt,'bool')

@@ -28,7 +28,7 @@ classdef SS_To_LustreNode
             external_nodes = {};
             main_node = {};
             external_libraries = {};
-            isContractBlk = SLX2LusUtils.isContractBlk(ss_ir);
+            isContractBlk =nasa_toLustre.utils.SLX2LusUtils.isContractBlk(ss_ir);
             if ~exist('is_main_node', 'var')
                 is_main_node = 0;
             end
@@ -63,7 +63,7 @@ classdef SS_To_LustreNode
             isEnableAndTrigger = 0;
             [node_name, node_inputs, node_outputs,...
                 node_inputs_withoutDT_cell, node_outputs_withoutDT_cell] = ...
-                SLX2LusUtils.extractNodeHeader(parent_ir, ss_ir, is_main_node,...
+               nasa_toLustre.utils.SLX2LusUtils.extractNodeHeader(parent_ir, ss_ir, is_main_node,...
                 isEnableORAction, isEnableAndTrigger, isContractBlk, ...
                 main_sampleTime, xml_trace);
             
@@ -93,7 +93,7 @@ classdef SS_To_LustreNode
                     UnaryExpr(UnaryExpr.PRE, VarIdExpr(SLX2LusUtils.nbStepStr())), ...
                     IntExpr('1'))));
                 %body = [sprintf('%s = 0.0 -> pre %s + %.15f;\n\t', ...
-                %   SLX2LusUtils.timeStepStr(), SLX2LusUtils.timeStepStr(), main_sampleTime(1)), body];
+                %  nasa_toLustre.utils.SLX2LusUtils.timeStepStr(),nasa_toLustre.utils.SLX2LusUtils.timeStepStr(), main_sampleTime(1)), body];
                 %define all clocks if needed
                 clocks = ss_ir.AllCompiledSampleTimes;
                 if numel(clocks) > 1
@@ -106,7 +106,7 @@ classdef SS_To_LustreNode
                         st_n = T(1)/main_sampleTime(1);
                         ph_n = T(2)/main_sampleTime(1);
                         if ~SLX2LusUtils.isIgnoredSampleTime(st_n, ph_n)
-                            clk_name = SLX2LusUtils.clockName(st_n, ph_n);
+                            clk_name =nasa_toLustre.utils.SLX2LusUtils.clockName(st_n, ph_n);
                             clk_args{1} =  VarIdExpr(sprintf('%.0f',st_n));
                             clk_args{2} =  VarIdExpr(sprintf('%.0f',ph_n));
                             body{end+1} = LustreEq(...
@@ -152,7 +152,7 @@ classdef SS_To_LustreNode
             % variable
             [hasVerificationSubsystem, hasNoOutputs, vsBlk] = SubSystem_To_Lustre.hasVerificationSubsystem(ss_ir);
             if hasVerificationSubsystem && hasNoOutputs
-                vs_name = SLX2LusUtils.node_name_format(vsBlk);
+                vs_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(vsBlk);
                 variables{end+1} = LustreVar(strcat(vs_name, '_virtual'), 'bool');
             end
             % Adding lustre comments tracking the original path
@@ -261,7 +261,7 @@ classdef SS_To_LustreNode
                         continue;
                     end
                     %get actual size after inlining.
-                    [names, ~] = SLX2LusUtils.getBlockOutputsNames(...
+                    [names, ~] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(...
                         parent_ir, srcBlk, x.SrcPort);
                     for i=1:numel(names)
                         inputs_src_str{end+1} = sprintf('%.5f_%d', x.SrcBlock, x.SrcPort);
@@ -271,7 +271,7 @@ classdef SS_To_LustreNode
             outputs_src_str = {};
             for i=1:numel(ss_ir.CompiledPortWidths.Outport)
                 %get actual size after inlining.
-                [names, ~] = SLX2LusUtils.getBlockOutputsNames(...
+                [names, ~] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(...
                     parent_ir, ss_ir, i-1);
                 for j=1:numel(names)
                     outputs_src_str{end+1} = sprintf('%.5f_%d', ss_ir.Handle, i-1);
@@ -301,7 +301,7 @@ classdef SS_To_LustreNode
                     if ~isempty(I)
                         % we may have inputs from the same blk.
                         %get actual size after inlining.
-                        [names, ~] = SLX2LusUtils.getBlockOutputsNames(...
+                        [names, ~] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(...
                             parent_ir, srcBlk, SrcPort);
                         I = I(1:numel(names));
                         contract_inputs = [contract_inputs,...
@@ -317,7 +317,7 @@ classdef SS_To_LustreNode
                     % case of Action inputs are ignored for the moment.
                 end
                 [~, contract_inputs] = ...
-                    SLX2LusUtils.getTimeClocksInputs(ss_ir, main_sampleTime, {}, contract_inputs);
+                   nasa_toLustre.utils.SLX2LusUtils.getTimeClocksInputs(ss_ir, main_sampleTime, {}, contract_inputs);
                 imported_contracts{end+1} = ContractImportExpr(...
                     ss_ir.ContractNodeNames{i}, contract_inputs, contract_outputs);
             end
@@ -346,13 +346,13 @@ classdef SS_To_LustreNode
             ShowIterationPort = isequal(ForBlk.ShowIterationPort, 'on');
             if ShowIterationPort
                 iteration_dt = ForBlk.IterationVariableDataType;
-                iteration_dt = SLX2LusUtils.get_lustre_dt(iteration_dt);
+                iteration_dt =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(iteration_dt);
             else
                 iteration_dt = 'int';
             end
             
             additionalInputs{end+1} = LustreVar(...
-                SLX2LusUtils.iterationVariable(),  iteration_dt);
+               nasa_toLustre.utils.SLX2LusUtils.iterationVariable(),  iteration_dt);
             IndexMode = ForBlk.IndexMode;
             if isequal(IndexMode, 'Zero-based')
                 iterationValue = 0;
@@ -424,7 +424,7 @@ classdef SS_To_LustreNode
                 for i=1:numel(node_outputs)
                     var_name = node_outputs{i}.getId();
                     var_dt = node_outputs{i}.getDT();
-                    [~, zero] = SLX2LusUtils.get_lustre_dt(var_dt);
+                    [~, zero] =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(var_dt);
                     iterator_body{i} = LustreEq(VarIdExpr(var_name), zero);
                 end
                 iterator_node.setBodyEqs(iterator_body);
@@ -438,7 +438,7 @@ classdef SS_To_LustreNode
                 var_name = additionalInputs_with_memory{i}.getId();
                 orig_name = strrep(var_name, '_pre_', '');
                 var_dt = additionalInputs_with_memory{i}.getDT();
-                [~, zero] = SLX2LusUtils.get_lustre_dt(var_dt);
+                [~, zero] =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(var_dt);
                 if isHeld
                     iterator_body{end+1} = LustreEq(VarIdExpr(var_name), ...
                         BinaryExpr(BinaryExpr.ARROW, ...

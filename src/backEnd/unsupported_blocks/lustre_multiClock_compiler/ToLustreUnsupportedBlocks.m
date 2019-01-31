@@ -124,7 +124,7 @@ function [unsupportedOptions, ...
             main_sampleTime(1), main_sampleTime(2));
         unsupportedOptions{1} = ...
             HtmlItem('Model', ...
-            HtmlItem(msg, {}, 'black', [], [], false),...
+            HtmlItem(msg, {}, 'black'),...
             'blue');
     end
     unsupportedOptionsMap = containers.Map('KeyType', 'char', 'ValueType', 'any');
@@ -209,7 +209,7 @@ function  [unsupportedOptionsMap, abstractedBlocks]  = blockUnsupportedOptions( 
         if ~isIgnored
             msg = sprintf('Block "%s" with Type "%s" is not supported', ...
                 HtmlItem.addOpenCmd(blk.Origin_path), blkType);
-            htmlMsg = HtmlItem(msg, {}, 'black', [], [], false);
+            htmlMsg = HtmlItem(msg, {}, 'black');
             if isKey(unsupportedOptionsMap, blkType)
                 unsupportedOptionsMap(blkType) = [unsupportedOptionsMap(blkType), {htmlMsg}];
             else
@@ -221,7 +221,7 @@ function  [unsupportedOptionsMap, abstractedBlocks]  = blockUnsupportedOptions( 
     unsupportedOptions_i = b.getUnsupportedOptions(parent, blk, lus_backend,...
         coco_backend, main_sampleTime);
     if ~isempty(unsupportedOptions_i)
-        htmlMsg = cellfun(@(x) HtmlItem(x, {}, 'black', [], [], false),unsupportedOptions_i, 'UniformOutput', false);
+        htmlMsg = cellfun(@(x) HtmlItem(x, {}, 'black'),unsupportedOptions_i, 'UniformOutput', false);
         if isKey(unsupportedOptionsMap, blkType)
             unsupportedOptionsMap(blkType) = [unsupportedOptionsMap(blkType), htmlMsg];
         else
@@ -255,7 +255,8 @@ function add_IR_Enum(ir)
             Names = Names(~strcmp(Names, enums{i}.DefaultValue));
             % put member in UPPER case: Lustrec limitation
             names_in_order = [{enums{i}.DefaultValue}; Names];
-            names_ast = cellfun(@(x) EnumValueExpr(x), names_in_order, ...
+            names_ast = cellfun(@(x) ...
+                nasa_toLustre.lustreAst.EnumValueExpr(x), names_in_order, ...
                 'UniformOutput', false);
             TOLUSTRE_ENUMS_MAP(name) = names_ast;
             TOLUSTRE_ENUMS_CONV_NODES{end+1} = get_Enum2Int_conv_node(name, members);
@@ -264,6 +265,7 @@ function add_IR_Enum(ir)
     end
 end
 function node = get_Enum2Int_conv_node(name, members)
+    import nasa_toLustre.lustreAst.*
     conds = cell(numel(members), 1);
     thens = cell(numel(members) + 1, 1);
     for i=1:numel(members)
@@ -283,6 +285,7 @@ function node = get_Enum2Int_conv_node(name, members)
     node.setIsMain(false);
 end
 function node = get_Int2Enum_conv_node(name, members)
+    import nasa_toLustre.lustreAst.*
     conds = cell(numel(members)-1, 1);
     thens = cell(numel(members), 1);
     for i=1:numel(members)-1

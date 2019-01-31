@@ -18,27 +18,27 @@ classdef Gain_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             import(L{:})
             %This function support scalar Gain. Matrix/Vector gains
             %are supported by Gain_pp in the pre-processing step.
-            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+            [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             obj.addVariable(outputs_dt);
             outputDataType = blk.CompiledPortDataTypes.Outport{1};
             
-            inputs{1} = SLX2LusUtils.getBlockInputsNames(parent, blk, 1);
+            inputs{1} =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk, 1);
             inport_dt = blk.CompiledPortDataTypes.Inport{1};
-            lusInDT = SLX2LusUtils.get_lustre_dt(inport_dt);
+            lusInDT =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(inport_dt);
             %converts the input data type(s) to
             %its output data type
             if ~strcmp(lusInDT, 'bool') && ~strcmp(inport_dt, outputDataType)
                 RndMeth = blk.RndMeth;
                 SaturateOnIntegerOverflow = blk.SaturateOnIntegerOverflow;
-                [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, outputDataType, RndMeth, SaturateOnIntegerOverflow);
+                [external_lib, conv_format] =nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(inport_dt, outputDataType, RndMeth, SaturateOnIntegerOverflow);
                 if ~isempty(conv_format)
                     obj.addExternal_libraries(external_lib);
                     inputs{1} = cellfun(@(x) ...
-                        SLX2LusUtils.setArgInConvFormat(conv_format,x),...
+                       nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(conv_format,x),...
                         inputs{1}, 'un', 0);
                 end
             end
-            [lusOutDT, zero] = SLX2LusUtils.get_lustre_dt(outputDataType);
+            [lusOutDT, zero] =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(outputDataType);
             
             [gain, ~, status] = ...
                 Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Gain);

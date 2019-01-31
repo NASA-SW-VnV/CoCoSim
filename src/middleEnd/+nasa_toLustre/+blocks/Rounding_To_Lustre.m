@@ -15,14 +15,14 @@ classdef Rounding_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         function  write_code(obj, parent, blk, xml_trace, varargin)
             L = nasa_toLustre.ToLustreImport.L;
             import(L{:})
-            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+            [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             
             
             widths = blk.CompiledPortWidths.Inport;
             RndMeth = blk.Operator;
             inputs = cell(1, numel(widths));
             for i=1:numel(widths)
-                inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
+                inputs{i} =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk, i);
             end
             % we use _ before the node name. round => _round
             RndMeth = sprintf('_%s', RndMeth);

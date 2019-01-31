@@ -15,13 +15,13 @@ classdef MultiPortSwitch_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         function  write_code(obj, parent, blk, xml_trace, varargin)
             L = nasa_toLustre.ToLustreImport.L;
             import(L{:})
-            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+            [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             obj.addVariable(outputs_dt);
             [inputs] = getBlockInputsNames_convInType2AccType(obj, parent, blk);
             
             [numInputs, ~, ~] = ...
                 Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Inputs);
-            blk_name = SLX2LusUtils.node_name_format(blk);
+            blk_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);
             
             portIndex = VarIdExpr(sprintf('%s_portIndex',blk_name));
             obj.addVariable(LustreVar(portIndex, 'int'));
@@ -75,28 +75,28 @@ classdef MultiPortSwitch_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             SaturateOnIntegerOverflow = blk.SaturateOnIntegerOverflow;
             inputs = cell(1, nbInputs);
             for i=1:nbInputs
-                inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
+                inputs{i} =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk, i);
                 if numel(inputs{i}) < max_width
                     inputs{i} = arrayfun(@(x) {inputs{i}{1}}, (1:max_width));
                 end
                 inport_dt = blk.CompiledPortDataTypes.Inport(i);
-                [inLusDT] = SLX2LusUtils.get_lustre_dt(inport_dt);
+                [inLusDT] =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(inport_dt);
                 %converts the input data type(s) to
                 %its accumulator data type
                 if ~strcmp(inport_dt, outputDataType) && i~=1
-                    [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, outputDataType, RndMeth, SaturateOnIntegerOverflow);
+                    [external_lib, conv_format] =nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(inport_dt, outputDataType, RndMeth, SaturateOnIntegerOverflow);
                     if ~isempty(conv_format)
                         obj.addExternal_libraries(external_lib);
                         inputs{i} = cellfun(@(x) ...
-                            SLX2LusUtils.setArgInConvFormat(conv_format,x),...
+                           nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(conv_format,x),...
                             inputs{i}, 'un', 0);
                     end
                 elseif i==1 && ~strcmp(inLusDT, 'int')
-                    [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, 'int');
+                    [external_lib, conv_format] =nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(inport_dt, 'int');
                     if ~isempty(conv_format)
                         obj.addExternal_libraries(external_lib);
                         inputs{i} = cellfun(@(x)...
-                            SLX2LusUtils.setArgInConvFormat(conv_format,x),...
+                           nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(conv_format,x),...
                             inputs{i}, 'un', 0);
                     end
                 end

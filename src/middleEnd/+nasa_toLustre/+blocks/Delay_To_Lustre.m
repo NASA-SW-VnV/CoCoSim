@@ -102,7 +102,7 @@ classdef Delay_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             external_libraries = {};
             lustre_code = {};
             delay_node_code = {};
-            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+            [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
 
             variables = outputs_dt;
             
@@ -112,7 +112,7 @@ classdef Delay_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             nb_inports = numel(widths);
             inputs = cell(1, nb_inports);
             for i=1:nb_inports
-                inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
+                inputs{i} =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk, i);
             end
             
             % cast first input if needed to outputDataType
@@ -158,7 +158,7 @@ classdef Delay_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 end
                 x0DataType =  inportDataType;
                 for i=1:numel(ICValue)
-                    inputs{x0Port}{i} = SLX2LusUtils.num2LusExp(...
+                    inputs{x0Port}{i} =nasa_toLustre.utils.SLX2LusUtils.num2LusExp(...
                         ICValue(i), lus_inportDataType_cell{i});
                 end
                 
@@ -184,11 +184,11 @@ classdef Delay_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 if ~MatlabUtils.contains(delayDataType, 'int')
                     delayLengthDT = 'uint32';
                     [external_lib, conv_format] = ...
-                        SLX2LusUtils.dataType_conversion(delayDataType, delayLengthDT);
+                       nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(delayDataType, delayLengthDT);
                     if ~isempty(conv_format)
                         external_libraries = [external_libraries, external_lib];
                         inputs{2} = cellfun(@(x) ...
-                            SLX2LusUtils.setArgInConvFormat(conv_format,x),...
+                           nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(conv_format,x),...
                             inputs{2}, 'un', 0);
                     end
                 end
@@ -196,7 +196,7 @@ classdef Delay_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             end
             x0 =  inputs{end};
             u = inputs{1};
-            blk_name = SLX2LusUtils.node_name_format(blk);
+            blk_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);
             reset_var = '';
             isReset = ~strcmp(ExternalReset, 'None');
             codes = {};
@@ -216,10 +216,10 @@ classdef Delay_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 end
                 %construct reset condition
                 resetportDataType = blk.CompiledPortDataTypes.Inport{resetPort};
-                [resetDT, zero] = SLX2LusUtils.get_lustre_dt(resetportDataType);
+                [resetDT, zero] =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(resetportDataType);
                 resetValue = inputs{resetPort};
                 
-                [resetCode, status] = SLX2LusUtils.getResetCode( ...
+                [resetCode, status] =nasa_toLustre.utils.SLX2LusUtils.getResetCode( ...
                     ExternalReset,resetDT, resetValue , zero);
                 if status
                     display_msg(sprintf('This External reset type [%s] is not supported in block %s.', ...
@@ -246,14 +246,14 @@ classdef Delay_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 
                 %construct enabled condition
                 enableportDataType = blk.CompiledPortDataTypes.Inport{enablePort};
-                [~, zero] = SLX2LusUtils.get_lustre_dt(enableportDataType);
+                [~, zero] =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(enableportDataType);
                 enableCondition = BinaryExpr(BinaryExpr.GT, ...
                     inputs{enablePort}{1}, zero);
                 %sprintf('(%s > %s)', inputs{enablePort}{1}, zero);
                 % construct additional variables
                 for i=1:numel(u)
                     varName = sprintf('%s_%s', u{i}.getId(), blk_name);
-                    dt = SLX2LusUtils.get_lustre_dt(inportDataType);
+                    dt =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(inportDataType);
                     lhs = VarIdExpr(varName);
                     variables{end + 1} = LustreVar(varName, dt);
                     codes{end + 1} = LustreEq(lhs, ...
@@ -336,7 +336,7 @@ classdef Delay_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             L = nasa_toLustre.ToLustreImport.L;
             import(L{:})
             %node header
-            [ u_DT, zero ] = SLX2LusUtils.get_lustre_dt( u_DT);
+            [ u_DT, zero ] =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt( u_DT);
             node_inputs{1} = LustreVar('u', u_DT);
             node_inputs{2} = LustreVar('x0', u_DT);
             if isDelayVariable

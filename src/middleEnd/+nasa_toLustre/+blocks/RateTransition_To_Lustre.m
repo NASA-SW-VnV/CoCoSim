@@ -14,9 +14,9 @@ classdef RateTransition_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         function  write_code(obj, parent, blk, xml_trace, lus_backend, coco_backend, main_sampleTime, varargin)
             L = nasa_toLustre.ToLustreImport.L;
             import(L{:})
-            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+            [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             obj.addVariable(outputs_dt);
-            [inputs] = SLX2LusUtils.getBlockInputsNames(parent, blk);
+            [inputs] =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk);
             outputDataType = blk.CompiledPortDataTypes.Outport{1};
             %% calculated by rateTransition_ir_pp
             InportCompiledSampleTime = blk.InportCompiledSampleTime;
@@ -63,15 +63,15 @@ classdef RateTransition_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             codes = cell(1, numel(outputs));
             
             if strcmp(type, 'ZOH')
-                clockName = SLX2LusUtils.clockName(outTs/main_sampleTime(1), outTsOffset/main_sampleTime(1));
+                clockName =nasa_toLustre.utils.SLX2LusUtils.clockName(outTs/main_sampleTime(1), outTsOffset/main_sampleTime(1));
                 for i=1:numel(outputs)
                     %sprintf('%s = %s when %s;\n\t', outputs{i}, inputs{i}, clockName);
                     codes{i} = LustreEq(outputs{i}, ...
                         BinaryExpr(BinaryExpr.WHEN, inputs{i}, VarIdExpr(clockName)));
                 end
             elseif strcmp(type, '1/z')
-                clockName = SLX2LusUtils.clockName(inTs/main_sampleTime(1), inTsOffset/main_sampleTime(1));
-                init_cond = SLX2LusUtils.getInitialOutput(parent, blk,...
+                clockName =nasa_toLustre.utils.SLX2LusUtils.clockName(inTs/main_sampleTime(1), inTsOffset/main_sampleTime(1));
+                init_cond =nasa_toLustre.utils.SLX2LusUtils.getInitialOutput(parent, blk,...
                     blk.InitialCondition, outputDataType, numel(outputs));
                 for i=1:numel(outputs)
                     %codes{i} = sprintf('%s = merge %s\n\t (true -> (%s -> pre %s))\n\t (false -> (%s -> pre %s) when false(%s));\n\t', ...

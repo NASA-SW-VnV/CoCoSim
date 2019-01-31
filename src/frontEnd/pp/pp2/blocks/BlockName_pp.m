@@ -21,10 +21,10 @@ function [status, errors_msg] = BlockName_pp(model)
                 path = fullfile(get_param(block_handles{i}, 'Parent'), get_param(block_handles{i}, 'Name'));
                 display_msg(path, Constants.INFO, 'rename_numerical_prefix', '');
                 name = get_param(block_handles{i},'Name');
-                %remove / before calling SLX2LusUtils.name_format
+                %remove / before callingnasa_toLustre.utils.SLX2LusUtils.name_format
                 new_name = strrep(name, '/', '_');
                 set_param(block_handles{i},'Name',...
-                    SLX2LusUtils.name_format(new_name));
+                    nasa_toLustre.utils.SLX2LusUtils.name_format(new_name));
             catch me
                 display_msg(me.getReport(), MsgType.DEBUG, 'PP', '');
                 status = 1;

@@ -14,7 +14,7 @@ classdef From_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         function  write_code(obj, parent, blk, xml_trace, varargin)
             L = nasa_toLustre.ToLustreImport.L;
             import(L{:})
-            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+            [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             goToPath = find_system(parent.Origin_path,'SearchDepth',1,...
                 'LookUnderMasks', 'all', 'BlockType','Goto','GotoTag',blk.GotoTag);
             if ~isempty(goToPath)
@@ -25,7 +25,7 @@ classdef From_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 return;
             end
             gotoBlk = get_struct(parent, GotoHandle);
-            [goto_outputs, ~] = SLX2LusUtils.getBlockOutputsNames(parent, gotoBlk);
+            [goto_outputs, ~] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, gotoBlk);
             codes = cell(1, numel(outputs));
             for j=1:numel(outputs)
                 codes{j} = LustreEq( outputs{j}, goto_outputs{j});

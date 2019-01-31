@@ -14,7 +14,7 @@ classdef Sqrt_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         function  write_code(obj, parent, blk, xml_trace, varargin)
             L = nasa_toLustre.ToLustreImport.L;
             import(L{:})
-            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+            [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             
             if ~strcmp(blk.OutMax, '[]') || ~strcmp(blk.OutMin, '[]')
                 display_msg(sprintf('The minimum/maximum value is not support in block %s',...
@@ -35,7 +35,7 @@ classdef Sqrt_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             SaturateOnIntegerOverflow = blk.SaturateOnIntegerOverflow;
             inputs = cell(1, numel(widths));
             for i=1:numel(widths)
-                inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
+                inputs{i} =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk, i);
                 if numel(inputs{i}) < max_width
                     inputs{i} = arrayfun(@(x) {inputs{i}{1}}, (1:max_width));
                 end
@@ -43,16 +43,16 @@ classdef Sqrt_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 %converts the input data type(s) to
                 %its accumulator data type
                 if ~strcmp(inport_dt, 'double')
-                    [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, 'double', RndMeth, SaturateOnIntegerOverflow);
+                    [external_lib, conv_format] =nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(inport_dt, 'double', RndMeth, SaturateOnIntegerOverflow);
                     if ~isempty(conv_format)
                         obj.addExternal_libraries(external_lib);
                         inputs{i} = cellfun(@(x) ...
-                            SLX2LusUtils.setArgInConvFormat(conv_format,x),...
+                           nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(conv_format,x),...
                             inputs{i}, 'un', 0);
                     end
                 end
             end
-            [outLusDT, zero, one] = SLX2LusUtils.get_lustre_dt(outputDataType);
+            [outLusDT, zero, one] =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(outputDataType);
             
             codes = cell(1, numel(inputs{1}));
             for j=1:numel(inputs{1})
@@ -76,10 +76,10 @@ classdef Sqrt_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 end
                
                  if ~strcmp(outLusDT, 'real')
-                    [external_lib, conv_format] = SLX2LusUtils.dataType_conversion('real', outputDataType);
+                    [external_lib, conv_format] =nasa_toLustre.utils.SLX2LusUtils.dataType_conversion('real', outputDataType);
                     if ~isempty(conv_format)
                         obj.addExternal_libraries(external_lib);
-                        code = SLX2LusUtils.setArgInConvFormat(conv_format, code);
+                        code =nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(conv_format, code);
                     end
                 end
                 codes{j} = LustreEq( outputs{j}, code);

@@ -16,7 +16,7 @@ classdef CombinatorialLogic_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             L = nasa_toLustre.ToLustreImport.L;
             import(L{:})
             %% Step 1: Get the block outputs names,
-            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+            [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             
             %% Step 2: add outputs_dt to the list of variables to be declared
             % in the var section of the node.
@@ -25,10 +25,10 @@ classdef CombinatorialLogic_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             %% Step 3: construct the inputs names,
             
             % save the information of the outport dataType,
-            outputLusDT = SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Outport{1});
+            outputLusDT =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Outport{1});
             inport_dt = blk.CompiledPortDataTypes.Inport(1);
-            lusInport_dt = SLX2LusUtils.get_lustre_dt(inport_dt);
-            inputs{1} = SLX2LusUtils.getBlockInputsNames(parent, blk, 1);
+            lusInport_dt =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(inport_dt);
+            inputs{1} =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk, 1);
             
             % change booleans to int, so we can calculate the row index
             % equation.
@@ -36,7 +36,7 @@ classdef CombinatorialLogic_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 % this function return if a casting is needed
                 % "conv_format", a library or the name of casting node
                 % will be stored in "external_lib".
-                [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, 'int');
+                [external_lib, conv_format] =nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(inport_dt, 'int');
                 if ~isempty(conv_format)
                     % always add the "external_lib" to the object
                     % external libraries, (so it can be declared in the
@@ -45,7 +45,7 @@ classdef CombinatorialLogic_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     % cast the input to the conversion format. In our
                     % example conv_format = 'int_to_real(%s)'.
                     inputs{1} = cellfun(@(x) ...
-                        SLX2LusUtils.setArgInConvFormat(conv_format,x), ...
+                       nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(conv_format,x), ...
                         inputs{1}, 'un', 0);
                 end
             end
@@ -55,7 +55,7 @@ classdef CombinatorialLogic_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             codes = cell(1, numel(outputs) + 1 );
             % define row index
             %row index = 1 + u(m)*2^0 + u(m-1)*2^1 + ... + u(1)*2^(m-1)
-            blk_name = SLX2LusUtils.node_name_format(blk);
+            blk_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);
             row_index_varName = sprintf('row_index_%s', blk_name);
             obj.addVariable( LustreVar(row_index_varName, 'int'));
             

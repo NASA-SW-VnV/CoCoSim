@@ -30,7 +30,7 @@ status = 0;
 % Compile model
 try
     [lus_full_path, xml_trace, is_unsupported, ~, ~, pp_model_full_path] = ...
-        ToLustre(model_full_path);
+        nasa_toLustre.ToLustre(model_full_path);
     if is_unsupported
         display_msg('Model is not supported', MsgType.ERROR, 'validation', '');
         return;

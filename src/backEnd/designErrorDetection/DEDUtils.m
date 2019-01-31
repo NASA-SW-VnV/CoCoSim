@@ -28,6 +28,8 @@ classdef DEDUtils
             end
         end
         function prop = OutMinMaxCheck(parent, blk, outputs, lus_dt)
+            import nasa_toLustre.blocks.Constant_To_Lustre
+            import nasa_toLustre.lustreAst.BinaryExpr
             prop = {};
             if isequal(blk.OutMin, '[]') && isequal(blk.OutMax, '[]')
                 % no need for the assertion.
@@ -63,10 +65,10 @@ classdef DEDUtils
             prop_parts = {};
             for j=1:nb_outputs
                 if ~isempty(outMin)
-                    lusMin = SLX2LusUtils.num2LusExp(outMin(j), lus_dt);
+                    lusMin =nasa_toLustre.utils.SLX2LusUtils.num2LusExp(outMin(j), lus_dt);
                 end
                 if ~isempty(outMax)
-                    lusMax = SLX2LusUtils.num2LusExp(outMax(j), lus_dt);
+                    lusMax =nasa_toLustre.utils.SLX2LusUtils.num2LusExp(outMax(j), lus_dt);
                 end
                 if isempty(outMin)
                     prop_parts{j} = BinaryExpr(BinaryExpr.LTE, outputs{j},...

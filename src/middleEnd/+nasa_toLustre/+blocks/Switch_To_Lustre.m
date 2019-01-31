@@ -16,7 +16,7 @@ classdef Switch_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             L = nasa_toLustre.ToLustreImport.L;
             import(L{:})
             
-            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+            [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             
             
             if strcmp(blk.AllowDiffInputSizes, 'on')
@@ -41,7 +41,7 @@ classdef Switch_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             threshold_ast = {};
             inputs = cell(1, numel(widths));
             for i=1:numel(widths)
-                inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
+                inputs{i} =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk, i);
                 if numel(inputs{i}) < max_width
                     inputs{i} = arrayfun(@(x) {inputs{i}{1}}, (1:max_width));
                 end
@@ -50,15 +50,15 @@ classdef Switch_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 %its accumulator data type
                 if ~strcmp(inport_dt, outputDataType) && i~=2
                     [external_lib, conv_format] = ...
-                        SLX2LusUtils.dataType_conversion(inport_dt, outputDataType, RndMeth, SaturateOnIntegerOverflow);
+                       nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(inport_dt, outputDataType, RndMeth, SaturateOnIntegerOverflow);
                     if ~isempty(conv_format)
                         obj.addExternal_libraries(external_lib);
                         inputs{i} = cellfun(@(x) ...
-                            SLX2LusUtils.setArgInConvFormat(conv_format,x), ...
+                           nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(conv_format,x), ...
                             inputs{i}, 'un', 0);
                     end
                 elseif i==2
-                    [lus_inportDataType, ~] = SLX2LusUtils.get_lustre_dt(inport_dt);
+                    [lus_inportDataType, ~] =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(inport_dt);
                     if strcmp(blk.Criteria, 'u2 ~= 0')
                         if strcmp(lus_inportDataType, 'real')
                             threshold_str_temp = RealExpr('0.0');

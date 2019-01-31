@@ -19,9 +19,9 @@ classdef Inport_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             import(L{:})
             %% We add assumptions on the inport values interval if it is
             % mentioned by the user in OutMin/OutMax in Inport dialog box.
-            [outputs, ~] = SLX2LusUtils.getBlockOutputsNames(parent, blk);
+            [outputs, ~] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk);
             outputDataType = blk.CompiledPortDataTypes.Outport{1};
-            lus_dt = SLX2LusUtils.get_lustre_dt(outputDataType);
+            lus_dt =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(outputDataType);
             
             prop = DEDUtils.OutMinMaxCheck(parent, blk, outputs, lus_dt);
             if ~isempty(prop)
@@ -43,7 +43,7 @@ classdef Inport_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     isEnum = false;
                 else
                     [~, ~, ~, ~, isEnum] = ...
-                        SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Outport{1});
+                       nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Outport{1});
                 end
                 if isEnum
                     obj.addUnsupported_options(sprintf('Inport %s with Enumeration Type %s is not supported in root level for Validation with Lustrec.', ...

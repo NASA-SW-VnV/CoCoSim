@@ -18,9 +18,9 @@ classdef BusCreator_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             L = nasa_toLustre.ToLustreImport.L;
             import(L{:})
             [outputs, outputs_dt] = ...
-                SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+               nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             obj.addVariable(outputs_dt);
-            [inputs] = SLX2LusUtils.getBlockInputsNames(parent, blk);
+            [inputs] =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk);
             codes = cell(1, numel(outputs));
             % everything is inlined
             for i=1:numel(outputs)

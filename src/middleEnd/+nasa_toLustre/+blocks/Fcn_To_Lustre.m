@@ -18,12 +18,12 @@ classdef Fcn_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             import(L{:})
             if isempty(xml_trace)
                 %comming from getUnsupportedOptions
-                [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk);
+                [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk);
             else
-                [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+                [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             end
             
-            inputs{1} = SLX2LusUtils.getBlockInputsNames(parent, blk, 1);
+            inputs{1} =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk, 1);
             
             inputs_dt{1} = arrayfun(@(x) 'real', (1:numel(inputs{1})), ...
                 'UniformOutput', false);

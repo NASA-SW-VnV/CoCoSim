@@ -113,7 +113,7 @@ classdef Assignment_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             % share code with Selector_To_Lustre
             isSelector = 0;
             % getBlockInputsOutputs
-            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+            [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             % for the example above (assignment_mixed_port_u_expanded.slx): 
             % outputs = {{'Assignment_1'}    {'Assignment_2'}    {'Assignment_3'}    {'Assignment_4'}    {'Assignment_5'}  {'Assignment_6'}}
             % outputs_dt = {'Assignment_1: real;', 'Assignment_2: real;',
@@ -284,7 +284,7 @@ classdef Assignment_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             import(L{:})
             %% function get code for noPortInput
             % initialization
-            blk_name = SLX2LusUtils.node_name_format(blk);
+            blk_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);
             indexDataType = 'int';    
             
             if numOutDims>7
@@ -487,27 +487,27 @@ classdef Assignment_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             %max_width = widths(1);
             outputDataType = blk.CompiledPortDataTypes.Outport{1};
             for i=1:numel(widths)
-                inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
+                inputs{i} =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk, i);
                 inport_dt = blk.CompiledPortDataTypes.Inport(i);
-                [lusInport_dt, ~] = SLX2LusUtils.get_lustre_dt(inport_dt);
+                [lusInport_dt, ~] =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(inport_dt);
                 
                 %converts the input data type(s) to
                 %its accumulator data type
                 if ~strcmp(inport_dt, outputDataType) && i <= inputIdToConvertToInt
-                    [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, outputDataType);
+                    [external_lib, conv_format] =nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(inport_dt, outputDataType);
                     if ~isempty(conv_format)
                         obj.addExternal_libraries(external_lib);
                         inputs{i} = cellfun(@(x) ...
-                            SLX2LusUtils.setArgInConvFormat(conv_format,x),...
+                           nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(conv_format,x),...
                             inputs{i}, 'un', 0);
                     end
                 elseif i > inputIdToConvertToInt && ~strcmp(lusInport_dt, 'int')
                     % convert index values to int for Lustre code
-                    [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, 'int');
+                    [external_lib, conv_format] =nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(inport_dt, 'int');
                     if ~isempty(conv_format)
                         obj.addExternal_libraries(external_lib);
                         inputs{i} = cellfun(@(x) ...
-                            SLX2LusUtils.setArgInConvFormat(conv_format,x),...
+                           nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(conv_format,x),...
                             inputs{i}, 'un', 0);
                     end
                 end

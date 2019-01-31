@@ -300,7 +300,7 @@ classdef Exp2Lus < handle
                                     {'int8', 'int16', 'int32', ...
                                     'uint8', 'uint16', 'uint32', ...
                                     'double', 'single', 'boolean'})
-                                tree_dt = SLX2LusUtils.get_lustre_dt(tree_ID);
+                                tree_dt =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(tree_ID);
                                 param = tree.parameters(1);
                                 if isequal(param.type, 'constant')
                                     v = eval(tree.text);
@@ -318,7 +318,7 @@ classdef Exp2Lus < handle
                                     param_dt = nasa_toLustre.utils.Exp2Lus.treeDT(param, ...
                                         inputs, data_map, '', isStateFlow);
                                     [external_lib, conv_format] = ...
-                                        SLX2LusUtils.dataType_conversion(param_dt, tree_ID);
+                                       nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(param_dt, tree_ID);
                                     if ~isempty(conv_format)
                                         obj.addExternal_libraries(external_lib);
                                         isConversion = true;
@@ -333,7 +333,7 @@ classdef Exp2Lus < handle
                                 parent, blk, inputs, data_map, tree_dt, ...
                                 isStateFlow);
                             if isConversion
-                                code = arrayfun(@(i) SLX2LusUtils.setArgInConvFormat(conv_format,x{i}), ...
+                                code = arrayfun(@(i)nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(conv_format,x{i}), ...
                                     (1:numel(x)), 'UniformOutput', false);
                             else
                                 code = arrayfun(@(i) NodeCallExpr(fun_name, x{i}), ...

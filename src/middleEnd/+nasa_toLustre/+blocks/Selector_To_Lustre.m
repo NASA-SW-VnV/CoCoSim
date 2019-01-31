@@ -27,7 +27,7 @@ classdef Selector_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             % share code with Assignment_To_Lustre
             isSelector = 1;
             % getBlockInputsOutputs
-            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+            [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             
             [inputs] = ...
                 Assignment_To_Lustre.getBlockInputsNames_convInType2AccType(obj, parent, blk,isSelector);            
@@ -55,7 +55,7 @@ classdef Selector_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             
             %% If the lus_backend is Design Error Detection (DED).
             if isPortIndex && CoCoBackendType.isDED(coco_backend)
-                blk_name = SLX2LusUtils.node_name_format(blk);
+                blk_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);
                 
                 if ismember(CoCoBackendType.DED_OUTOFBOUND, ...
                         CoCoSimPreferences.dedChecks)
@@ -66,7 +66,7 @@ classdef Selector_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     % example:
                     % detect which input plays the index port.
                     U_dim = in_matrix_dimension{1}.dims;
-                    parent_name = SLX2LusUtils.node_name_format(parent);
+                    parent_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(parent);
                     for i=1:numel(blk.IndexOptionArray)
                         if MatlabUtils.contains(blk.IndexOptionArray{i}, '(port)')
                             prop = DEDUtils.OutOfBoundCheck(inputs{i+1}, U_dim(i));
@@ -148,7 +148,7 @@ classdef Selector_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 indexDataType = 'int';
                 U_index = cell(1, numel(outputs));
                 addVars = {};
-                blk_name = SLX2LusUtils.node_name_format(blk);
+                blk_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);
                 for i=1:numel(outputs)
                     U_index{i} = VarIdExpr(...
                         sprintf('%s_U_index_%d',blk_name,i));

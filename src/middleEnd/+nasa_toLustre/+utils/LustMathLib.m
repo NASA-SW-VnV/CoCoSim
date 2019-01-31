@@ -980,6 +980,7 @@ classdef LustMathLib
         
         %% fmod, rem, mod
         function [node, external_nodes_i, opens, abstractedNodes] = get_fmod(varargin)
+            %TODO create fmod node for Kind2: z = (real((int x) * 1000 mod (int y) * 1000)/1000.0 ??
             opens = {'lustrec_math'};
             abstractedNodes = {'fmod'};
             external_nodes_i = {};

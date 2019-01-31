@@ -9,7 +9,7 @@ classdef LusValidateUtils
         %%
         %Adapte Simulink blocks name to Lustre names
         function str_out = name_format(str)
-            str_out = SLX2LusUtils.name_format(str);
+            str_out =nasa_toLustre.utils.SLX2LusUtils.name_format(str);
         end
 
         %% Generate random vectors

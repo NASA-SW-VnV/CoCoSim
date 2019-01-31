@@ -83,7 +83,7 @@ classdef Product_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             codes = {};
             %AdditionalVars = {};
             productOutputs = {};
-            tmp_prefix = SLX2LusUtils.node_name_format(blk);
+            tmp_prefix =nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);
             [new_inputs, invertCodes, AdditionalVars] = Product_To_Lustre.invertInputs(obj, exp, inputs, blk, LusOutputDataTypeStr);
             codes = [codes, invertCodes];
             for i=1:numel(in_matrix_dimension)-1
@@ -172,7 +172,7 @@ classdef Product_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     end
                     productOutIndex = sub2ind([m,l],i,j);
                     if ~isempty(conv_format) && ~isempty(output_m)
-                        code = SLX2LusUtils.setArgInConvFormat(conv_format, code);
+                        code =nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(conv_format, code);
                     end
                     codes{codeIndex} = LustreEq(product_out{productOutIndex}, code) ;
                 end

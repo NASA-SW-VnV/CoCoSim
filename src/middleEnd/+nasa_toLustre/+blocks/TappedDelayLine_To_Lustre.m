@@ -18,7 +18,7 @@ classdef TappedDelayLine_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             L = nasa_toLustre.ToLustreImport.L;
             import(L{:})
             %% Step 1: Get the block outputs names,
-            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+            [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             
             %% Step 2: add outputs_dt to the list of variables to be declared
             % in the var section of the node.
@@ -28,7 +28,7 @@ classdef TappedDelayLine_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             
             % save the information of the outport dataType,
             outputDataType = blk.CompiledPortDataTypes.Outport{1};
-            inputs{1} = SLX2LusUtils.getBlockInputsNames(parent, blk, 1);
+            inputs{1} =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk, 1);
             
             %% Step 4: start filling the definition of each output
             
@@ -40,7 +40,7 @@ classdef TappedDelayLine_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             else
                 n_vinit = numel(outputs);
             end
-            vinit = SLX2LusUtils.getInitialOutput(parent, blk,...
+            vinit =nasa_toLustre.utils.SLX2LusUtils.getInitialOutput(parent, blk,...
                 blk.vinit, outputDataType, n_vinit);
             
             

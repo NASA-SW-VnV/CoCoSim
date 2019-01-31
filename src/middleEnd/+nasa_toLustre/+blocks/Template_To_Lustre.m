@@ -21,7 +21,7 @@ classdef Template_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             % and has one outport with width 3 and datatype double,
             % then outputs = {'X_1', 'X_2', 'X_3'}
             % and outputs_dt = {'X_1:real;', 'X_2:real;', 'X_3:real;'}
-            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+            [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             %% Step 2: add outputs_dt to the list of variables to be declared
             % in the var section of the node.
             obj.addVariable(outputs_dt);
@@ -53,7 +53,7 @@ classdef Template_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 % fill the names of the ith input.
                 % inputs{1} = {'In1_1', 'In1_2', 'In1_3'}
                 % and inputs{2} = {'In2_1'}
-                inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
+                inputs{i} =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk, i);
                 
                 % if an input has a width lesser than the max_width, we
                 % need to make it equal to the max_width. This is the case
@@ -78,7 +78,7 @@ classdef Template_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     % this function return if a casting is needed
                     % "conv_format", a library or the name of casting node
                     % will be stored in "external_lib".
-                    [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, outputDataType, RndMeth, SaturateOnIntegerOverflow);
+                    [external_lib, conv_format] =nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(inport_dt, outputDataType, RndMeth, SaturateOnIntegerOverflow);
                     if ~isempty(conv_format)
                         % always add the "external_lib" to the object
                         % external libraries, (so it can be declared in the
@@ -87,7 +87,7 @@ classdef Template_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                         % cast the input to the conversion format. In our
                         % example conv_format = 'int_to_real(%s)'.
                         inputs{i} = cellfun(@(x) ...
-                            SLX2LusUtils.setArgInConvFormat(conv_format,x), inputs{i}, 'un', 0);
+                           nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(conv_format,x), inputs{i}, 'un', 0);
                     end
                 end
             end
@@ -113,7 +113,7 @@ classdef Template_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             % block in question
             if CoCoBackendType.isDED(coco_backend)
                 global  CoCoSimPreferences;% remember to move this line to top-level statement
-                blk_name = SLX2LusUtils.node_name_format(blk);
+                blk_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);
                 
                 if ismember(CoCoBackendType.DED_DIVBYZER, ...
                         CoCoSimPreferences.dedChecks)
@@ -123,7 +123,7 @@ classdef Template_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     % example:
                     % choose the correct zero: Int or Real
                     inport_dt = blk.CompiledPortDataTypes.Inport(2);
-                    lus_dt = SLX2LusUtils.get_lustre_dt(inport_dt);
+                    lus_dt =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(inport_dt);
                     if isequal(lus_dt, 'int')
                         zero = IntExpr(0);
                     else
@@ -139,7 +139,7 @@ classdef Template_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     codes{end+1} = LocalPropertyExpr(propID, ...
                         BinaryExpr.BinaryMultiArgs(BinaryExpr.AND, prop1));
                     % add traceability:
-                    parent_name = SLX2LusUtils.node_name_format(parent);
+                    parent_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(parent);
                     xml_trace.add_Property(blk.Origin_path, ...
                         parent_name, propID, 1, ...
                         CoCoBackendType.DED_DIVBYZER);
@@ -153,7 +153,7 @@ classdef Template_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     
                     % detect the right output datatype : int8, int16,
                     % int32...
-                    lus_dt = SLX2LusUtils.get_lustre_dt(outputDataType);
+                    lus_dt =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(outputDataType);
                     if isequal(lus_dt, 'int')
                         % calculate intMin intMax
                         intMin = IntExpr(intmin(outputDataType));
@@ -172,7 +172,7 @@ classdef Template_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                         codes{end+1} = LocalPropertyExpr(propID, ...
                             BinaryExpr.BinaryMultiArgs(BinaryExpr.AND, prop2));
                         % add traceability:
-                        parent_name = SLX2LusUtils.node_name_format(parent);
+                        parent_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(parent);
                         xml_trace.add_Property(blk.Origin_path, ...
                             parent_name, propID, 1, ...
                             CoCoBackendType.DED_INTOVERFLOW);
@@ -188,7 +188,7 @@ classdef Template_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     prop = DEDUtils.OutOfBoundCheck(inputs{2}, widths(2));
                     codes{end+1} = LocalPropertyExpr(propID, prop);
                     % add traceability:
-                    parent_name = SLX2LusUtils.node_name_format(parent);
+                    parent_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(parent);
                     xml_trace.add_Property(blk.Origin_path, ...
                         parent_name, propID, 1, ...
                         CoCoBackendType.DED_OUTOFBOUND);
@@ -198,13 +198,13 @@ classdef Template_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     % Add properties related to minimum and maximum values check.
                     % Ignore the check if it is not related to the block in
                     % question.
-                    lus_dt = SLX2LusUtils.get_lustre_dt(outputDataType);
+                    lus_dt =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(outputDataType);
                     prop = DEDUtils.OutMinMaxCheck(parent, blk, outputs, lus_dt);
                     if ~isempty(prop)
                         propID = sprintf('%s_OUTMINMAX',blk_name);
                         codes{end+1} = LocalPropertyExpr(propID, prop);
                         % add traceability:
-                        parent_name = SLX2LusUtils.node_name_format(parent);
+                        parent_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(parent);
                         xml_trace.add_Property(blk.Origin_path, ...
                             parent_name, propID, 1, ...
                             CoCoBackendType.DED_OUTMINMAX);

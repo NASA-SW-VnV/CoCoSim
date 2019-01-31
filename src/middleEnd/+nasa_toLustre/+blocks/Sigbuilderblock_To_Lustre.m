@@ -13,7 +13,7 @@ classdef Sigbuilderblock_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         function  write_code(obj, parent, blk, xml_trace, lus_backend, varargin)
             L = nasa_toLustre.ToLustreImport.L;
             import(L{:})
-            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+            [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             obj.addVariable(outputs_dt);
             [time,data,~] = signalbuilder(blk.Origin_path);
             blkParams = Sigbuilderblock_To_Lustre.readBlkParams(blk);
@@ -22,7 +22,7 @@ classdef Sigbuilderblock_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             model_name = model_name{1};
             SampleTime = SLXUtils.getModelCompiledSampleTime(model_name);            
             
-            %blk_name = SLX2LusUtils.node_name_format(blk);
+            %blk_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);
 %             if numel(outputs) > 1
 %                 codes = cell(1, numel(outputs));
 %                 for i=1:numel(outputs)
@@ -94,7 +94,7 @@ classdef Sigbuilderblock_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             import nasa_toLustre.utils.SLX2LusUtils
             blkParams = struct;
             blkParams.OutputAfterFinalValue = blk.Content.FromWs.OutputAfterFinalValue;
-            blkParams.blk_name = SLX2LusUtils.node_name_format(blk);
+            blkParams.blk_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);
         end
         function [codeAst, vars] = interpTimeSeries(output,time_array, ...
                 data_array, blkParams,signal_index,interpolate,curTime,lus_backend)

@@ -14,11 +14,11 @@ classdef SubSystem_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         function  write_code(obj, parent, blk, xml_trace, lus_backend, coco_backend, main_sampleTime, varargin)
             L = nasa_toLustre.ToLustreImport.L;
             import(L{:})
-            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
-            [inputs] = SLX2LusUtils.getBlockInputsNames(parent, blk);
-            node_name = SLX2LusUtils.node_name_format(blk);
+            [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+            [inputs] =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk);
+            node_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);
             codes = {};
-            isInsideContract = SLX2LusUtils.isContractBlk(parent);
+            isInsideContract =nasa_toLustre.utils.SLX2LusUtils.isContractBlk(parent);
             maskType = '';
             if isInsideContract && isfield(blk, 'MaskType')
                 maskType = blk.MaskType;
@@ -39,7 +39,7 @@ classdef SubSystem_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 SubSystem_To_Lustre.hasEnablePort(blk);
             [isTriggered, TriggerShowOutputPortIsOn, TriggerType, TriggerDT] = ...
                 SubSystem_To_Lustre.hasTriggerPort(blk);
-            blk_name = SLX2LusUtils.node_name_format(blk);
+            blk_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);
             [isActionSS, ~] = SubSystem_To_Lustre.hasActionPort(blk);
             [isForIteraorSS, ~] = SubSystem_To_Lustre.hasForIterator(blk);
             if isEnabledSubsystem || isTriggered || isActionSS
@@ -57,7 +57,7 @@ classdef SubSystem_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             %% add time input and clocks
             inputs{end + 1} = VarIdExpr(SLX2LusUtils.timeStepStr());
             inputs{end + 1} = VarIdExpr(SLX2LusUtils.nbStepStr());
-            clocks_list = SLX2LusUtils.getRTClocksSTR(blk, main_sampleTime);
+            clocks_list =nasa_toLustre.utils.SLX2LusUtils.getRTClocksSTR(blk, main_sampleTime);
             if ~isempty(clocks_list)
                 clocks_var = cell(1, numel(clocks_list));
                 for i=1:numel(clocks_list)
@@ -93,8 +93,8 @@ classdef SubSystem_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         function options = getUnsupportedOptions(obj, parent, blk, varargin)
             L = nasa_toLustre.ToLustreImport.L;
             import(L{:})
-            isInsideContract = SLX2LusUtils.isContractBlk(parent);
-            [outputs, ~] = SLX2LusUtils.getBlockOutputsNames(parent, blk);
+            isInsideContract =nasa_toLustre.utils.SLX2LusUtils.isContractBlk(parent);
+            [outputs, ~] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk);
             if isInsideContract && numel(outputs) > 1
                 obj.addUnsupported_options(...
                     sprintf('Subsystem %s has more than one outputs. All Subsystems inside Contract should have one output.', ...
@@ -133,22 +133,22 @@ classdef SubSystem_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     NodeCallExpr(node_name, inputs));
                 xml_trace.add_Property(...
                     blk.Origin_path, ...
-                    SLX2LusUtils.node_name_format(parent), node_name, 1, 'guarantee')
+                   nasa_toLustre.utils.SLX2LusUtils.node_name_format(parent), node_name, 1, 'guarantee')
             elseif isequal(maskType, 'ContractAssumeBlock')
                 code = ContractAssumeExpr(node_name, ...
                     NodeCallExpr(node_name, inputs));
                 xml_trace.add_Property(...
                     blk.Origin_path, ...
-                    SLX2LusUtils.node_name_format(parent), node_name, 1, 'assume')
+                   nasa_toLustre.utils.SLX2LusUtils.node_name_format(parent), node_name, 1, 'assume')
             else
                 if isequal(maskType, 'ContractEnsureBlock')
                     xml_trace.add_Property(...
                         blk.Origin_path, ...
-                        SLX2LusUtils.node_name_format(parent), node_name, 1, 'ensure')
+                       nasa_toLustre.utils.SLX2LusUtils.node_name_format(parent), node_name, 1, 'ensure')
                 elseif isequal(maskType, 'ContractRequireBlock')
                     xml_trace.add_Property(...
                         blk.Origin_path, ...
-                        SLX2LusUtils.node_name_format(parent), node_name, 1, 'require')
+                       nasa_toLustre.utils.SLX2LusUtils.node_name_format(parent), node_name, 1, 'require')
                 end
                 code = LustreEq(outputs, ...
                     NodeCallExpr(node_name, inputs));
@@ -266,7 +266,7 @@ classdef SubSystem_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         %%
         function ExecutionCondName = getExecutionCondName(blk)
             import nasa_toLustre.utils.SLX2LusUtils
-            blk_name = SLX2LusUtils.node_name_format(blk);
+            blk_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);
             ExecutionCondName = sprintf('ExecutionCond_of_%s', blk_name);
         end
         function [codes, node_name, inputs, ExecutionCondVar] = ...
@@ -284,7 +284,7 @@ classdef SubSystem_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             ExecutionCondName = SubSystem_To_Lustre.getExecutionCondName(blk);
             
             if isTriggered && isEnabledSubsystem
-                blk_name = SLX2LusUtils.node_name_format(blk);
+                blk_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);
                 EnableCondName = sprintf('EnableCond_of_%s', blk_name);
                 TriggerCondName = sprintf('TriggerCond_of_%s', blk_name);
                 ExecutionCondVar = {LustreVar(ExecutionCondName, 'bool'), ...
@@ -295,9 +295,9 @@ classdef SubSystem_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             end
             if isActionSS
                 % The case of Action subsystems
-                [srcBlk, srcPort] = SLX2LusUtils.getpreBlock(parent, blk, 'ifaction');
+                [srcBlk, srcPort] =nasa_toLustre.utils.SLX2LusUtils.getpreBlock(parent, blk, 'ifaction');
                 if ~isempty(srcBlk)
-                    [IfBlkOutputs, ~] = SLX2LusUtils.getBlockOutputsNames(parent, srcBlk);
+                    [IfBlkOutputs, ~] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, srcBlk);
 
                     %codes{end + 1} = sprintf('%s = %s;\n\t'...
                     %   ,ExecutionCondName,  IfBlkOutputs{srcPort});
@@ -310,13 +310,13 @@ classdef SubSystem_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 % the case of enabled/triggered subsystems
                 
                 if EnableShowOutputPortIsOn
-                    [Enableinputs] = SLX2LusUtils.getSubsystemEnableInputsNames(parent, blk);
+                    [Enableinputs] =nasa_toLustre.utils.SLX2LusUtils.getSubsystemEnableInputsNames(parent, blk);
                     inputs = [inputs, Enableinputs];
                 end
                 if TriggerShowOutputPortIsOn
-                    lusIncomingSignalDataType = SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Trigger{1});
-                    [lusTriggerportDataType] = SLX2LusUtils.get_lustre_dt(TriggerBlockDT);
-                    [triggerInputs] = SLX2LusUtils.getSubsystemTriggerInputsNames(parent, blk);
+                    lusIncomingSignalDataType =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Trigger{1});
+                    [lusTriggerportDataType] =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(TriggerBlockDT);
+                    [triggerInputs] =nasa_toLustre.utils.SLX2LusUtils.getSubsystemTriggerInputsNames(parent, blk);
                     TriggerinputsExp = cell(1, blk.CompiledPortWidths.Trigger);
                     if isTriggered && isEnabledSubsystem
                         Triggercond = VarIdExpr(TriggerCondName);
@@ -335,8 +335,8 @@ classdef SubSystem_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 EnableCond = {};
                 if isEnabledSubsystem
                     enableportDataType = blk.CompiledPortDataTypes.Enable{1};
-                    [lusEnableportDataType, zero] = SLX2LusUtils.get_lustre_dt(enableportDataType);
-                    enableInputs = SLX2LusUtils.getSubsystemEnableInputsNames(parent, blk);
+                    [lusEnableportDataType, zero] =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(enableportDataType);
+                    enableInputs =nasa_toLustre.utils.SLX2LusUtils.getSubsystemEnableInputsNames(parent, blk);
                     cond = cell(1, blk.CompiledPortWidths.Enable);
                     for i=1:blk.CompiledPortWidths.Enable
                         if strcmp(lusEnableportDataType, 'bool')
@@ -352,11 +352,11 @@ classdef SubSystem_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 triggerCond = {};
                 if isTriggered
                     triggerportDataType = blk.CompiledPortDataTypes.Trigger{1};
-                    [lusTriggerportDataType, zero] = SLX2LusUtils.get_lustre_dt(triggerportDataType);
-                    [triggerInputs] = SLX2LusUtils.getSubsystemTriggerInputsNames(parent, blk);
+                    [lusTriggerportDataType, zero] =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(triggerportDataType);
+                    [triggerInputs] =nasa_toLustre.utils.SLX2LusUtils.getSubsystemTriggerInputsNames(parent, blk);
                     cond = cell(1, blk.CompiledPortWidths.Trigger);
                     for i=1:blk.CompiledPortWidths.Trigger
-                        [triggerCode, status] = SLX2LusUtils.getResetCode(...
+                        [triggerCode, status] =nasa_toLustre.utils.SLX2LusUtils.getResetCode(...
                             TriggerType, lusTriggerportDataType, triggerInputs{i} , zero);
                         if status
                             display_msg(sprintf('This External reset type [%s] is not supported in block %s.', ...
@@ -418,11 +418,11 @@ classdef SubSystem_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             ResetCondName = sprintf('ResetCond_of_%s', blk_name);
             ResetCondVar = LustreVar(ResetCondName, 'bool');
             resetportDataType = blk.CompiledPortDataTypes.Reset{1};
-            [lusResetportDataType, zero] = SLX2LusUtils.get_lustre_dt(resetportDataType);
-            resetInputs = SLX2LusUtils.getSubsystemResetInputsNames(parent, blk);
+            [lusResetportDataType, zero] =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(resetportDataType);
+            resetInputs =nasa_toLustre.utils.SLX2LusUtils.getSubsystemResetInputsNames(parent, blk);
             cond = cell(1, blk.CompiledPortWidths.Reset);
             for i=1:blk.CompiledPortWidths.Reset
-                [resetCode, status] = SLX2LusUtils.getResetCode(...
+                [resetCode, status] =nasa_toLustre.utils.SLX2LusUtils.getResetCode(...
                     ResetType, lusResetportDataType, resetInputs{i} , zero);
                 if status
                     display_msg(sprintf('This External reset type [%s] is not supported in block %s.', ...
@@ -489,7 +489,7 @@ classdef SubSystem_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                             two,...
                             zero)) ;
             else
-                risingCond = SLX2LusUtils.getResetCode(...
+                risingCond =nasa_toLustre.utils.SLX2LusUtils.getResetCode(...
                     'rising', IncomingSignalDT, triggerInput, IncomingSignalzero );
 %                 TriggerinputExp = sprintf(...
 %                     '%s -> if %s then (if (%s) then 1%s else -1%s) else 0%s'...

@@ -15,13 +15,13 @@ classdef Signum_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         function  write_code(obj, parent, blk, xml_trace, varargin)
             L = nasa_toLustre.ToLustreImport.L;
             import(L{:})
-            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+            [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             obj.addVariable(outputs_dt);
             inputs = {};
             %             outputDataType = blk.CompiledPortDataTypes.Outport{1};
-            %             [LusOutputDT,     ~] = SLX2LusUtils.get_lustre_dt(outputDataType);
-            [lusInport_dt, zero, one] = SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Inport(1));
-            inputs{1} = SLX2LusUtils.getBlockInputsNames(parent, blk, 1);
+            %             [LusOutputDT,     ~] =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(outputDataType);
+            [lusInport_dt, zero, one] =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Inport(1));
+            inputs{1} =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk, 1);
             
             
             

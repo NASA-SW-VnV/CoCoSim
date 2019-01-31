@@ -14,15 +14,15 @@ classdef ZeroOrderHold_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         function  write_code(obj, parent, blk, xml_trace, ~, ~, main_sampleTime, varargin)
             L = nasa_toLustre.ToLustreImport.L;
             import(L{:})
-            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+            [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             obj.addVariable(outputs_dt);
-            [inputs] = SLX2LusUtils.getBlockInputsNames(parent, blk);
+            [inputs] =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk);
             % calculated by rateTransition_ir_pp
             OutportCompiledSampleTime = blk.OutportCompiledSampleTime;
             outTs = OutportCompiledSampleTime(1);
             outTsOffset = OutportCompiledSampleTime(2);
                         
-            clockName = SLX2LusUtils.clockName(outTs/main_sampleTime(1), outTsOffset/main_sampleTime(1));
+            clockName =nasa_toLustre.utils.SLX2LusUtils.clockName(outTs/main_sampleTime(1), outTsOffset/main_sampleTime(1));
             codes = cell(1, numel(outputs));
             for i=1:numel(outputs)
                 codes{i} = LustreEq(outputs{i}, ...

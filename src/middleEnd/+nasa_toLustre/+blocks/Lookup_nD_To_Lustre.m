@@ -126,12 +126,12 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             import(L{:})
             % initialize
             indexDataType = 'int';
-            blk_name = SLX2LusUtils.node_name_format(blk);
+            blk_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);
             ext_node_name = sprintf('%s_ext_node',blk_name);   
             external_lib = {'LustMathLib_abs_real'};
             
             % get block outputs
-            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+            [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             
             % get block inputs
             [inputs,lusInport_dt,~,~,  external_lib_i] = ...
@@ -234,11 +234,11 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             main_vars = outputs_dt;
             % if outputDataType is not real, we need to cast outputs
             outputDataType = blk.CompiledPortDataTypes.Outport{1};
-            lus_out_type = SLX2LusUtils.get_lustre_dt(outputDataType);
+            lus_out_type =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(outputDataType);
             if ~strcmp(lus_out_type,'real')
                 RndMeth = blk.RndMeth;
                 SaturateOnIntegerOverflow = blk.SaturateOnIntegerOverflow;
-                [external_lib_i, output_conv_format] = SLX2LusUtils.dataType_conversion('real', ...
+                [external_lib_i, output_conv_format] =nasa_toLustre.utils.SLX2LusUtils.dataType_conversion('real', ...
                     lus_out_type, RndMeth, SaturateOnIntegerOverflow);
                 if ~isempty(external_lib_i)
                     external_lib(end+1) = external_lib_i;
@@ -870,7 +870,7 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     codes{outIdx} = LustreEq(outputs{outIdx}, ...
                         NodeCallExpr(ext_node_name, nodeCall_inputs));
                 else
-                    code = SLX2LusUtils.setArgInConvFormat(output_conv_format, ...
+                    code =nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(output_conv_format, ...
                         NodeCallExpr(ext_node_name, nodeCall_inputs));
                     codes{outIdx} = LustreEq(outputs{outIdx}, code);                    
                 end
@@ -1309,20 +1309,20 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             max_width = max(widths);
             external_lib = '';
             for i=1:numel(widths)
-                inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
+                inputs{i} =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk, i);
                 if ~isLookupTableDynamic && numel(inputs{i}) < max_width
                     inputs{i} = arrayfun(@(x) {inputs{i}{1}}, (1:max_width));
                 end
                 inport_dt = blk.CompiledPortDataTypes.Inport(i);
-                [lusInport_dt, zero, one] = SLX2LusUtils.get_lustre_dt(inport_dt);
+                [lusInport_dt, zero, one] =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(inport_dt);
                 %converts the input data type(s) to real
                 
                 if ~strcmp(lusInport_dt, 'real')
-                    [external_lib, conv_format] = SLX2LusUtils.dataType_conversion(inport_dt, 'real', RndMeth);
+                    [external_lib, conv_format] =nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(inport_dt, 'real', RndMeth);
                     if ~isempty(conv_format)
                         %obj.addExternal_libraries(external_lib);
                         inputs{i} = cellfun(@(x) ...
-                            SLX2LusUtils.setArgInConvFormat(conv_format,x),...
+                           nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(conv_format,x),...
                             inputs{i}, 'un', 0);
                     end
                 end

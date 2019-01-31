@@ -16,7 +16,7 @@ classdef If_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         function  write_code(obj, parent, blk, xml_trace, varargin)
             L = nasa_toLustre.ToLustreImport.L;
             import(L{:})
-            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+            [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             obj.addVariable(outputs_dt);
             
             [inputs, inports_dt] = If_To_Lustre.getInputs(parent, blk);
@@ -61,8 +61,8 @@ classdef If_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             inputs = cell(1, numel(widths));
             inports_dt = cell(1, numel(widths));
             for i=1:numel(widths)
-                inputs{i} = SLX2LusUtils.getBlockInputsNames(parent, blk, i);
-                dt = SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Inport(i));
+                inputs{i} =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk, i);
+                dt =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Inport(i));
                 inports_dt{i} = arrayfun(@(x) dt, (1:numel(inputs{i})), ...
                     'UniformOutput', false);
             end

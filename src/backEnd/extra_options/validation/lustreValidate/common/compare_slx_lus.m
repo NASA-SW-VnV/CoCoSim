@@ -230,7 +230,7 @@ elseif (tests_method == 4) %4- Prove LUS1 <=> LUS2.
     display_msg(msg, MsgType.DEBUG, 'validation', '');
     
     [coco_lus_fpath, xml_trace, is_unsupported, ~, ~, ~] = ...
-        ToLustre(emf_model_path);
+        nasa_toLustre.ToLustre(emf_model_path);
     if is_unsupported
         display_msg(sprintf('Translation of "%s" failed.', emf_model_path), MsgType.ERROR, 'validation', '');
         return;

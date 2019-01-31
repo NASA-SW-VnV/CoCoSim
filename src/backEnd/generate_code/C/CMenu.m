@@ -28,7 +28,7 @@ function LusCompilerCallback(callbackInfo)
 model_full_path = MenuUtils.get_file_name(gcs);
 MenuUtils.add_pp_warning(model_full_path);
 [lus_full_path, ~, status, ~] = ...
-    ToLustre(model_full_path, [], LusBackendType.LUSTREC);
+    nasa_toLustre.ToLustre(model_full_path, [], LusBackendType.LUSTREC);
 if status 
     return;
 end

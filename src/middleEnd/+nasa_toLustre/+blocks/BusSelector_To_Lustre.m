@@ -16,9 +16,9 @@ classdef BusSelector_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         function  write_code(obj, parent, blk, xml_trace, varargin)
             L = nasa_toLustre.ToLustreImport.L;
             import(L{:})
-            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+            [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             obj.addVariable(outputs_dt);
-            [inputs] = SLX2LusUtils.getBlockInputsNames(parent, blk);
+            [inputs] =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk);
             try
                 [SignalsInputsMap, OutputSignals] = obj.getSignalMap( blk, inputs);
             catch me
@@ -50,7 +50,7 @@ classdef BusSelector_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         function options = getUnsupportedOptions(obj, parent, blk, varargin)
             L = nasa_toLustre.ToLustreImport.L;
             import(L{:})
-            [inputs] = SLX2LusUtils.getBlockInputsNames(parent, blk);
+            [inputs] =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk);
             try
                 [SignalsInputsMap, OutputSignals] = obj.getSignalMap( blk, inputs);
                 for i=1:numel(OutputSignals)
@@ -98,7 +98,7 @@ classdef BusSelector_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 end
                 if isBus
                     % case of bus object
-                    inport_cell_dimension = SLX2LusUtils.getDimensionsFromBusObject(InportDT);
+                    inport_cell_dimension =nasa_toLustre.utils.SLX2LusUtils.getDimensionsFromBusObject(InportDT);
                 elseif isequal(InportDT, 'double') ...
                         || isequal(InportDT, 'single')...
                         || MatlabUtils.startsWith(InportDT, 'int')...

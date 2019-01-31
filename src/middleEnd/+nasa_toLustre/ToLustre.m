@@ -1,4 +1,4 @@
-function [nom_lustre_file, xml_trace, status, unsupportedOptions, abstractedBlocks, pp_model_full_path]= ...
+function [lustre_file_path, xml_trace, status, unsupportedOptions, abstractedBlocks, pp_model_full_path]= ...
         ToLustre(model_path, const_files, lus_backend, coco_backend, varargin)
     %lustre_multiclocks_compiler translate Simulink models to Lustre. It is based on
     %article :
@@ -77,7 +77,7 @@ function [nom_lustre_file, xml_trace, status, unsupportedOptions, abstractedBloc
         end
     end
     %% initialize outputs
-    nom_lustre_file = '';
+    lustre_file_path = '';
     xml_trace = [];
     status = 0;
     unsupportedOptions = {};
@@ -96,13 +96,13 @@ function [nom_lustre_file, xml_trace, status, unsupportedOptions, abstractedBloc
         ToLustre_datenum_map = containers.Map('KeyType', 'char', 'ValueType', 'char');
     end
     if ~forceGeneration && isKey(ToLustre_datenum_map, model_path)
-        nom_lustre_file = ToLustre_datenum_map(model_path);
-        if BUtils.isLastModified(model_path, nom_lustre_file)
-            mat_file = regexprep(nom_lustre_file, '.lus$', '.mat');
+        lustre_file_path = ToLustre_datenum_map(model_path);
+        if BUtils.isLastModified(model_path, lustre_file_path)
+            mat_file = regexprep(lustre_file_path, '.lus$', '.mat');
             if exist(mat_file, 'file')
                 M = load(mat_file);
                 if exist(M.pp_model_full_path, 'file') ...
-                        && BUtils.isLastModified(M.pp_model_full_path, nom_lustre_file)
+                        && BUtils.isLastModified(M.pp_model_full_path, lustre_file_path)
                     xml_trace = M.xml_trace;
                     status = M.status;
                     unsupportedOptions = M.unsupportedOptions;
@@ -133,11 +133,12 @@ function [nom_lustre_file, xml_trace, status, unsupportedOptions, abstractedBloc
     end
     [~, file_name, ~] = fileparts(pp_model_full_path);
     %% Definition of the generated output files names
-    nom_lustre_file = fullfile(output_dir, strcat(file_name,'.', lus_backend, '.lus'));
+    lustre_file_base = strcat(file_name,'.', lus_backend, '.lus');
+    lustre_file_path = fullfile(output_dir, lustre_file_base);
     mat_file = fullfile(output_dir, strcat(file_name,'.', lus_backend, '.mat'));
     
     %% Create Meta informations
-    create_file_meta_info(nom_lustre_file);
+    create_file_meta_info(lustre_file_path);
     
     %% Create traceability informations in XML format
     display_msg('Start tracebility', MsgType.INFO, 'lustre_multiclocks_compiler', '');
@@ -204,9 +205,9 @@ function [nom_lustre_file, xml_trace, status, unsupportedOptions, abstractedBloc
         end
     end
     %% writing code
-    fid = fopen(nom_lustre_file, 'a');
+    fid = fopen(lustre_file_path, 'a');
     if fid==-1
-        msg = sprintf('Opening file "%s" is not possible', nom_lustre_file);
+        msg = sprintf('Opening file "%s" is not possible', lustre_file_path);
         display_msg(msg, MsgType.ERROR, 'lustre_multiclocks_compiler', '');
     end
     try
@@ -228,20 +229,21 @@ function [nom_lustre_file, xml_trace, status, unsupportedOptions, abstractedBloc
     
     %% save results in mat file.
     save(mat_file, 'xml_trace', 'status', 'unsupportedOptions', 'abstractedBlocks', 'pp_model_full_path');
-    ToLustre_datenum_map(model_path) = nom_lustre_file;
+    ToLustre_datenum_map(model_path) = lustre_file_path;
     
     %% check lustre syntax
     if LusBackendType.isKIND2(lus_backend) || LusBackendType.isLUSTREC(lus_backend)
         if LusBackendType.isKIND2(lus_backend)
-            [syntax_status, output] = Kind2Utils2.checkSyntaxError(nom_lustre_file, KIND2, Z3);
+            [syntax_status, output] = Kind2Utils2.checkSyntaxError(lustre_file_path, KIND2, Z3);
         elseif LusBackendType.isLUSTREC(lus_backend)
-            [~, syntax_status, output] = LustrecUtils.generate_lusi(nom_lustre_file, LUSTREC );
+            [~, syntax_status, output] = LustrecUtils.generate_lusi(lustre_file_path, LUSTREC );
         else
             syntax_status = 0;
             output = '';
         end
         if syntax_status && ~isempty(output)
             display_msg('Simulink To Lustre Syntax check has failed. The parsing error is the following:', MsgType.ERROR, 'TOLUSTRE', '');
+            output = regexprep(output, lustre_file_path, HtmlItem.addOpenFileCmd(lustre_file_path, lustre_file_base)); 
             display_msg(output, MsgType.ERROR, 'TOLUSTRE', '');
             status = syntax_status;
         else
@@ -270,7 +272,7 @@ function [nom_lustre_file, xml_trace, status, unsupportedOptions, abstractedBloc
     %% display report files
     t_finish = toc(t_start);
     
-    msg = sprintf('Lustre File generated:%s', nom_lustre_file);
+    msg = sprintf('Lustre File generated:%s', lustre_file_path);
     display_msg(msg, MsgType.RESULT, 'lustre_multiclocks_compiler', '');
     msg = sprintf('Lustre generation finished in %f seconds', t_finish);
     display_msg(msg, MsgType.RESULT, 'lustre_multiclocks_compiler', '');

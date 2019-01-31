@@ -15,7 +15,7 @@ classdef RandomNumber_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         function  write_code(obj, parent, blk, xml_trace, lus_backend, varargin)
             L = nasa_toLustre.ToLustreImport.L;
             import(L{:})
-            [outputs, outputs_dt] = SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+            [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             obj.addVariable(outputs_dt);
             [mean, ~, status] = ...
                 Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Mean);
@@ -37,7 +37,7 @@ classdef RandomNumber_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             b = mean + 2.57*sqrt(variance);
             nbSteps = 100;
             r = a + (b-a).*rand(nbSteps,1);
-            blk_name = SLX2LusUtils.node_name_format(blk);
+            blk_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);
             obj.addExtenal_node(RandomNumber_To_Lustre.randomNode(blk_name, r, lus_backend));
             
             codes = {};

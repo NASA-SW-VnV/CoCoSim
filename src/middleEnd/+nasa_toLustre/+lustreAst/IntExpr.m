@@ -32,9 +32,10 @@ classdef IntExpr < nasa_toLustre.lustreAst.LustreExpr
         end
         %% simplify expression
         function new_obj = simplify(obj)
+            import nasa_toLustre.lustreAst.*
             if isnumeric(obj.value) && obj.value < 0
                 % -1 => -(1)
-                new_obj = nasa_toLustre.lustreAst.UnaryExpr(UnaryExpr.NEG, IntExpr(-obj.value));
+                new_obj = UnaryExpr(UnaryExpr.NEG, IntExpr(-obj.value));
             else
                 new_obj = obj;
             end
