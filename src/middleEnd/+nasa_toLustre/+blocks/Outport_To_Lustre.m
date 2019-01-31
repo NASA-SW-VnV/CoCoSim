@@ -1,0 +1,75 @@
+classdef Outport_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
+    %Outport_To_Lustre translates the Outport block
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Copyright (c) 2017 United States Government as represented by the
+    % Administrator of the National Aeronautics and Space Administration.
+    % All Rights Reserved.
+    % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    properties
+    end
+    
+    methods
+        
+        function  write_code(obj, parent, blk, varargin)
+            L = nasa_toLustre.ToLustreImport.L;
+            import(L{:})
+            [outputs, ~] = SLX2LusUtils.getBlockOutputsNames(parent, blk);
+            [inputs] = SLX2LusUtils.getBlockInputsNames(parent, blk);
+            isInsideContract = SLX2LusUtils.isContractBlk(parent);
+            if isInsideContract
+                % ignore output "valid" in contract
+                return;
+            end
+            %% the case of non connected outport block.
+            if isempty(inputs)
+                if isempty(blk.CompiledPortDataTypes)
+                    lus_outputDataType = 'real';
+                else
+                    lus_outputDataType = SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Inport{1});
+                end
+                zero = SLX2LusUtils.num2LusExp(...
+                    0, lus_outputDataType);
+                inputs = arrayfun(@(x) {zero}, (1:numel(outputs)));
+            end
+            %%
+            codes = cell(1, numel(outputs));
+            for i=1:numel(outputs)
+                %codes{i} = sprintf('%s = %s;\n\t', outputs{i}, inputs{i});
+                codes{i} = LustreEq(outputs{i}, inputs{i});
+            end
+            
+            obj.setCode( codes);
+        end
+        
+        function options = getUnsupportedOptions(obj, parent, blk, ...
+                lus_backend, coco_backend, varargin)
+            L = nasa_toLustre.ToLustreImport.L;
+            import(L{:})
+            % Outport in first level should not be of type enumeration in 
+            % case of Validation backend with Lustrec.
+            if CoCoBackendType.isVALIDATION(coco_backend) ...
+                    && LusBackendType.isLUSTREC(lus_backend) ...
+                    && isequal(parent.BlockType, 'block_diagram')
+                if isempty(blk.CompiledPortDataTypes)
+                    isEnum = false;
+                else
+                    [~, ~, ~, ~, isEnum] = ...
+                        SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Inport{1});
+                end
+                if isEnum
+                    obj.addUnsupported_options(sprintf('Outport %s with Enumeration Type %s is not supported in root level for Validation with Lustrec.', ...
+                        HtmlItem.addOpenCmd(blk.Origin_path),...
+                        blk.CompiledPortDataTypes.Inport{1}));
+                end
+            end
+            options = obj.unsupported_options;
+        end
+        %%
+        function is_Abstracted = isAbstracted(varargin)
+            is_Abstracted = false;
+        end
+    end
+    
+end
+

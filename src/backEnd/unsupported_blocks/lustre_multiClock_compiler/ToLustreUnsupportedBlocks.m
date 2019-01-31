@@ -5,6 +5,7 @@ function [unsupportedOptions, ...
         output_dir, ...
         abstractedBlocks] =...
         ToLustreUnsupportedBlocks(model_path, const_files, lus_backend, coco_backend, varargin)
+    
     %ToLustreUnsupportedBlocks detects unsupported options/blocks in Simulink model.
     %INPUTS:
     %   MODEL_PATH: The full path of the Simulink model.
@@ -17,7 +18,9 @@ function [unsupportedOptions, ...
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    
+    import nasa_toLustre.*
+    import nasa_toLustre.utils.*
+    import nasa_toLustre.IR_pp.internalRep_pp
     %% inputs treatment
     
     narginchk(1, inf);

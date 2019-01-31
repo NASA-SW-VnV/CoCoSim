@@ -17,6 +17,7 @@ function [new_file_path, status] = cocosim_pp(model_path, varargin)
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+import nasa_toLustre.utils.ToLustreOptions
 global cocosim_pp_gen_verif  cocosim_pp_gen_verif_dir;
 
 nodisplay = 0;
