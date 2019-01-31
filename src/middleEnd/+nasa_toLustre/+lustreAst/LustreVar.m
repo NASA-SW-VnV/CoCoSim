@@ -1,4 +1,4 @@
-classdef LustreVar < LustreAst
+classdef LustreVar < nasa_toLustre.lustreAst.LustreExpr
     %LustreVar
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
@@ -13,7 +13,7 @@ classdef LustreVar < LustreAst
     
     methods
         function obj = LustreVar(name, type)
-            if isa(name, 'VarIdExpr')
+            if isa(name, 'nasa_toLustre.lustreAst.VarIdExpr')
                 obj.name = name.getId();
             elseif iscell(name) && numel(name) == 1
                 obj.name = name{1};
@@ -37,7 +37,7 @@ classdef LustreVar < LustreAst
         
         
         function new_obj = deepCopy(obj)
-            new_obj = LustreVar(obj.name, obj.type);
+            new_obj = nasa_toLustre.lustreAst.LustreVar(obj.name, obj.type);
         end
         
         %% simplify expression
@@ -70,9 +70,9 @@ classdef LustreVar < LustreAst
         % this function is used in Stateflow compiler to change from imperative
         % code to Lustre
         function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft)
-            vId = VarIdExpr(obj.name);
+            vId = nasa_toLustre.lustreAst.VarIdExpr(obj.name);
             [new_vId, outputs_map] = vId.pseudoCode2Lustre(outputs_map, isLeft);
-            new_obj = LustreVar(new_vId, obj.type);
+            new_obj = nasa_toLustre.lustreAst.LustreVar(new_vId, obj.type);
         end
         
         %% This function is used by KIND2 LustreProgram.print()
@@ -120,7 +120,7 @@ classdef LustreVar < LustreAst
             U = vars(I);
         end
         function U = removeVar(vars, v)
-            if isa(v, 'VarIdExpr') || isa(v, 'LustreVar')
+            if isa(v, 'nasa_toLustre.lustreAst.VarIdExpr') || isa(v, 'nasa_toLustre.lustreAst.LustreVar')
                 v = v.getId();
             end
             Ids = cellfun(@(x) x.getId(), ...
@@ -129,7 +129,7 @@ classdef LustreVar < LustreAst
         end
         
         function U = setDiff(s1, s2)
-            I = ~VarIdExpr.ismemberVar(s1, s2);
+            I = ~nasa_toLustre.lustreAst.VarIdExpr.ismemberVar(s1, s2);
             U = s1(I);
         end
     end

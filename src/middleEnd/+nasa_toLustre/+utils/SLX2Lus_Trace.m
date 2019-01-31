@@ -212,7 +212,7 @@ classdef SLX2Lus_Trace < handle
                 catch
                     xRoot = [];
                 end
-            elseif isa(xml_trace_var, 'SLX2Lus_Trace')
+            elseif isa(xml_trace_var, 'nasa_toLustre.utils.SLX2Lus_Trace')
                 xRoot = xml_trace_var.traceRootNode;
             elseif isa(xml_trace_var, 'org.apache.xerces.dom.ElementNSImpl')
                 xRoot = xml_trace_var;
@@ -222,9 +222,9 @@ classdef SLX2Lus_Trace < handle
         end
         function node_name = get_lustre_node_from_Simulink_block_name(trace_root,Simulink_block_name)
             node_name = '';
-            xRoot = SLX2Lus_Trace.getxRoot(trace_root);
+            xRoot = nasa_toLustre.utils.SLX2Lus_Trace.getxRoot(trace_root);
             if isempty(xRoot)
-                display_msg('UNKNOWN Variable type trace_root in SLX2Lus_Trace.get_lustre_node_from_Simulink_block_name',...
+                display_msg('UNKNOWN Variable type trace_root in nasa_toLustre.utils.SLX2Lus_Trace.get_lustre_node_from_Simulink_block_name',...
                     MsgType.DEBUG, 'SLX2Lus_Trace', '');
                 return;
             end
@@ -243,9 +243,9 @@ classdef SLX2Lus_Trace < handle
         function simulink_block_name = get_Simulink_block_from_lustre_node_name(...
                 trace_root, lustre_node_name, Sim_file_name, new_model_name)
             simulink_block_name = '';
-            xRoot = SLX2Lus_Trace.getxRoot(trace_root);
+            xRoot = nasa_toLustre.utils.SLX2Lus_Trace.getxRoot(trace_root);
             if isempty(xRoot)
-                display_msg('UNKNOWN Variable type trace_root in SLX2Lus_Trace.get_Simulink_block_from_lustre_node_name',...
+                display_msg('UNKNOWN Variable type trace_root in nasa_toLustre.utils.SLX2Lus_Trace.get_Simulink_block_from_lustre_node_name',...
                     MsgType.DEBUG, 'SLX2Lus_Trace', '');
                 return;
             end
@@ -266,9 +266,9 @@ classdef SLX2Lus_Trace < handle
         function variables_names = get_tracable_variables(xml_trace, node_name)
             
             variables_names = {};
-            xRoot = SLX2Lus_Trace.getxRoot(xml_trace);
+            xRoot = nasa_toLustre.utils.SLX2Lus_Trace.getxRoot(xml_trace);
             if isempty(xRoot)
-                display_msg('UNKNOWN Variable type trace_root in SLX2Lus_Trace.get_tracable_variables',...
+                display_msg('UNKNOWN Variable type trace_root in nasa_toLustre.utils.SLX2Lus_Trace.get_tracable_variables',...
                     MsgType.DEBUG, 'SLX2Lus_Trace', '');
                 return;
             end
@@ -303,9 +303,9 @@ classdef SLX2Lus_Trace < handle
             block_name = '';
             index = [];
             width = [];
-            xRoot = SLX2Lus_Trace.getxRoot(xml_trace);
+            xRoot = nasa_toLustre.utils.SLX2Lus_Trace.getxRoot(xml_trace);
             if isempty(xRoot)
-                display_msg('UNKNOWN Variable type trace_root in SLX2Lus_Trace.get_SlxBlockName_from_LusVar_UsingXML',...
+                display_msg('UNKNOWN Variable type trace_root in nasa_toLustre.utils.SLX2Lus_Trace.get_SlxBlockName_from_LusVar_UsingXML',...
                     MsgType.DEBUG, 'SLX2Lus_Trace', '');
                 return;
             end

@@ -21,12 +21,12 @@ classdef AssertExpr < nasa_toLustre.lustreAst.LustreExpr
         end
         
         function new_obj = deepCopy(obj)
-            new_obj = AssertExpr(obj.exp.deepCopy());
+            new_obj = nasa_toLustre.lustreAst.AssertExpr(obj.exp.deepCopy());
         end
         
         %% simplify expression
         function new_obj = simplify(obj)
-            new_obj = AssertExpr(obj.exp.simplify());
+            new_obj = nasa_toLustre.lustreAst.AssertExpr(obj.exp.simplify());
         end
         %% nbOcc
         function nb_occ = nbOccuranceVar(obj, var)
@@ -34,7 +34,7 @@ classdef AssertExpr < nasa_toLustre.lustreAst.LustreExpr
         end
         %% substituteVars
         function new_obj = substituteVars(obj, oldVar, newVar)
-            new_obj = AssertExpr(...
+            new_obj = nasa_toLustre.lustreAst.AssertExpr(...
                 obj.exp.substituteVars(oldVar, newVar));
         end
         %% This functions are used for ForIterator block
@@ -43,7 +43,7 @@ classdef AssertExpr < nasa_toLustre.lustreAst.LustreExpr
             varIds = {};
         end
         function new_obj = changeArrowExp(obj, cond)
-            new_obj = AssertExpr(obj.exp.changeArrowExp(cond));
+            new_obj = nasa_toLustre.lustreAst.AssertExpr(obj.exp.changeArrowExp(cond));
         end
         
         %% This function is used by Stateflow function SF_To_LustreNode.getPseudoLusAction
@@ -54,7 +54,7 @@ classdef AssertExpr < nasa_toLustre.lustreAst.LustreExpr
         % code to Lustre
         function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft)
             [new_exp, outputs_map] = obj.exp.pseudoCode2Lustre(outputs_map, isLeft);
-            new_obj = AssertExpr(new_exp);
+            new_obj = nasa_toLustre.lustreAst.AssertExpr(new_exp);
         end
         %% This function is used by KIND2 LustreProgram.print()
         function nodesCalled = getNodesCalled(obj)

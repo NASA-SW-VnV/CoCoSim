@@ -19,7 +19,7 @@ classdef Fcn_Exp_Parser
         function [tree, status, unsupportedExp] = parse(exp)
             exp = regexprep(exp, '\s*', '');
             try
-                [tree, status, unsupportedExp] = Fcn_Exp_Parser.parseE(exp);
+                [tree, status, unsupportedExp] = nasa_toLustre.utils.Fcn_Exp_Parser.parseE(exp);
             catch me
                 if strcmp(me.identifier, 'COCOSIM:Fcn_Exp_Parser')
                     display_msg(me.message, MsgType.ERROR, 'Fcn_Exp_Parser', '');
@@ -33,7 +33,7 @@ classdef Fcn_Exp_Parser
         %%
         function [tree, status, expr] = parseE(e)
             status = 0;
-            [tree, expr] = Fcn_Exp_Parser.parseEA(e);
+            [tree, expr] = nasa_toLustre.utils.Fcn_Exp_Parser.parseEA(e);
             if ~isempty(expr)
                 status = 1;
             end
@@ -42,10 +42,10 @@ classdef Fcn_Exp_Parser
         %%
         function [tree, expr, isAssignement] = parseEA(expr)
             isAssignement = 0;
-            [sym1, expr] = Fcn_Exp_Parser.parseEN(expr);
+            [sym1, expr] = nasa_toLustre.utils.Fcn_Exp_Parser.parseEN(expr);
             
             %x++
-            [match, expr] = Fcn_Exp_Parser.parsePlusPlus(expr);
+            [match, expr] = nasa_toLustre.utils.Fcn_Exp_Parser.parsePlusPlus(expr);
             if ~isempty(match)
                 %the case of x++
                 tree = {'=', sym1, {'Plus',sym1, '1.0'}};
@@ -54,7 +54,7 @@ classdef Fcn_Exp_Parser
             end
             
             %x--
-            [match, expr] = Fcn_Exp_Parser.parseMinusMinus(expr);
+            [match, expr] = nasa_toLustre.utils.Fcn_Exp_Parser.parseMinusMinus(expr);
             if ~isempty(match)
                 %the case of x--
                 tree = {'=', sym1, {'Minus',sym1, '1.0'}};
@@ -63,9 +63,9 @@ classdef Fcn_Exp_Parser
             end
             
             %sym1 + sym2
-            [match, expr] = Fcn_Exp_Parser.parsePlus(expr);
+            [match, expr] = nasa_toLustre.utils.Fcn_Exp_Parser.parsePlus(expr);
             if ~isempty(match)
-                [sym2, expr1, isEQ] = Fcn_Exp_Parser.parseEA(expr);
+                [sym2, expr1, isEQ] = nasa_toLustre.utils.Fcn_Exp_Parser.parseEA(expr);
                 if isEQ
                     ME = MException('COCOSIM:Fcn_Exp_Parser', ...
                         'PARSER ERROR: Assignement is not supported inside an expression in "%s"', ...
@@ -82,9 +82,9 @@ classdef Fcn_Exp_Parser
             end
             
             %sym1 - sym2
-            [match, expr] = Fcn_Exp_Parser.parseMinus(expr);
+            [match, expr] = nasa_toLustre.utils.Fcn_Exp_Parser.parseMinus(expr);
             if ~isempty(match)
-                [sym2, expr1, isEQ] = Fcn_Exp_Parser.parseEA(expr);
+                [sym2, expr1, isEQ] = nasa_toLustre.utils.Fcn_Exp_Parser.parseEA(expr);
                 if isEQ
                     ME = MException('COCOSIM:Fcn_Exp_Parser', ...
                         'PARSER ERROR: Assignement is not supported inside an expression in "%s"', ...
@@ -101,9 +101,9 @@ classdef Fcn_Exp_Parser
             end
             
             % > < <= >=, == !=, && ||
-            [match, expr] = Fcn_Exp_Parser.parseRO(expr);
+            [match, expr] = nasa_toLustre.utils.Fcn_Exp_Parser.parseRO(expr);
             if ~isempty(match)
-                [sym2, expr1, isEQ] = Fcn_Exp_Parser.parseEA(expr);
+                [sym2, expr1, isEQ] = nasa_toLustre.utils.Fcn_Exp_Parser.parseEA(expr);
                 if isEQ
                     ME = MException('COCOSIM:Fcn_Exp_Parser', ...
                         'PARSER ERROR: Assignement is not supported inside an expression in "%s"', ...
@@ -116,9 +116,9 @@ classdef Fcn_Exp_Parser
             end
             
             % sym1 = sym2
-            [match, expr] = Fcn_Exp_Parser.parseEQ(expr);
+            [match, expr] = nasa_toLustre.utils.Fcn_Exp_Parser.parseEQ(expr);
             if ~isempty(match)
-                [sym2, expr1, isEQ] = Fcn_Exp_Parser.parseEA(expr);
+                [sym2, expr1, isEQ] = nasa_toLustre.utils.Fcn_Exp_Parser.parseEA(expr);
                 if isEQ
                     ME = MException('COCOSIM:Fcn_Exp_Parser', ...
                         'PARSER ERROR: Assignement is not supported inside an expression in "%s"', ...
@@ -136,31 +136,31 @@ classdef Fcn_Exp_Parser
         end
         %% !
         function [tree, expr] = parseEN(expr)
-            [match, expr] = Fcn_Exp_Parser.parseNot(expr);
+            [match, expr] = nasa_toLustre.utils.Fcn_Exp_Parser.parseNot(expr);
             if ~isempty(match)
-                [sym, expr] = Fcn_Exp_Parser.parseEN(expr);
+                [sym, expr] = nasa_toLustre.utils.Fcn_Exp_Parser.parseEN(expr);
                 tree = {'Not',sym};
             else
-                [tree, expr] = Fcn_Exp_Parser.parseUnaryMinus(expr);
+                [tree, expr] = nasa_toLustre.utils.Fcn_Exp_Parser.parseUnaryMinus(expr);
             end
         end
         
         function [tree, expr] = parseUnaryMinus(expr)
-            [match, expr] = Fcn_Exp_Parser.parseMinus(expr);
+            [match, expr] = nasa_toLustre.utils.Fcn_Exp_Parser.parseMinus(expr);
             if ~isempty(match)
-                [sym, expr] = Fcn_Exp_Parser.parseSE(expr);
+                [sym, expr] = nasa_toLustre.utils.Fcn_Exp_Parser.parseSE(expr);
                 sym1 = {'UnaryMinus',sym};
-                [tree, expr] = Fcn_Exp_Parser.parseEM2(expr, sym1);
+                [tree, expr] = nasa_toLustre.utils.Fcn_Exp_Parser.parseEM2(expr, sym1);
                 
             else
-                [tree, expr] = Fcn_Exp_Parser.parseEM(expr);
+                [tree, expr] = nasa_toLustre.utils.Fcn_Exp_Parser.parseEM(expr);
             end
         end
         %% *, /, ^
         function [tree, expr] = parseEM2(expr, sym1)
-            [match, expr] = Fcn_Exp_Parser.parseMult(expr);
+            [match, expr] = nasa_toLustre.utils.Fcn_Exp_Parser.parseMult(expr);
             if ~isempty(match)
-                [sym2, expr1, isEQ] = Fcn_Exp_Parser.parseEA(expr);
+                [sym2, expr1, isEQ] = nasa_toLustre.utils.Fcn_Exp_Parser.parseEA(expr);
                 if isEQ
                     ME = MException('COCOSIM:Fcn_Exp_Parser', ...
                         'PARSER ERROR: Assignement is not supported inside an expression in "%s"', ...
@@ -170,9 +170,9 @@ classdef Fcn_Exp_Parser
                 expr = expr1;
                 tree = {'Mult',sym1,sym2};
             else
-                [match, expr] = Fcn_Exp_Parser.parseDiv(expr);
+                [match, expr] = nasa_toLustre.utils.Fcn_Exp_Parser.parseDiv(expr);
                 if ~isempty(match)
-                    [sym2, expr1, isEQ] = Fcn_Exp_Parser.parseEA(expr);
+                    [sym2, expr1, isEQ] = nasa_toLustre.utils.Fcn_Exp_Parser.parseEA(expr);
                     if isEQ
                         ME = MException('COCOSIM:Fcn_Exp_Parser', ...
                             'PARSER ERROR: Assignement is not supported inside an expression in "%s"', ...
@@ -187,10 +187,10 @@ classdef Fcn_Exp_Parser
             end
         end
         function [tree, expr] = parseEM(expr)
-            [sym1, expr] = Fcn_Exp_Parser.parseEP(expr);
-            [match, expr] = Fcn_Exp_Parser.parseMult(expr);
+            [sym1, expr] = nasa_toLustre.utils.Fcn_Exp_Parser.parseEP(expr);
+            [match, expr] = nasa_toLustre.utils.Fcn_Exp_Parser.parseMult(expr);
             if ~isempty(match)
-                [sym2, expr1, isEQ] = Fcn_Exp_Parser.parseEA(expr);
+                [sym2, expr1, isEQ] = nasa_toLustre.utils.Fcn_Exp_Parser.parseEA(expr);
                 if isEQ
                     ME = MException('COCOSIM:Fcn_Exp_Parser', ...
                         'PARSER ERROR: Assignement is not supported inside an expression in "%s"', ...
@@ -200,9 +200,9 @@ classdef Fcn_Exp_Parser
                 expr = expr1;
                 tree = {'Mult',sym1,sym2};
             else
-                [match, expr] = Fcn_Exp_Parser.parseDiv(expr);
+                [match, expr] = nasa_toLustre.utils.Fcn_Exp_Parser.parseDiv(expr);
                 if ~isempty(match)
-                    [sym2, expr1, isEQ] = Fcn_Exp_Parser.parseEA(expr);
+                    [sym2, expr1, isEQ] = nasa_toLustre.utils.Fcn_Exp_Parser.parseEA(expr);
                     if isEQ
                         ME = MException('COCOSIM:Fcn_Exp_Parser', ...
                             'PARSER ERROR: Assignement is not supported inside an expression in "%s"', ...
@@ -218,10 +218,10 @@ classdef Fcn_Exp_Parser
         end
         
         function [tree, expr] = parseEP(expr)
-            [sym1, expr] = Fcn_Exp_Parser.parseSE(expr);
-            [match, expr] = Fcn_Exp_Parser.parsePow(expr);
+            [sym1, expr] = nasa_toLustre.utils.Fcn_Exp_Parser.parseSE(expr);
+            [match, expr] = nasa_toLustre.utils.Fcn_Exp_Parser.parsePow(expr);
             if ~isempty(match)
-                [sym2, expr] = Fcn_Exp_Parser.parseEP(expr);
+                [sym2, expr] = nasa_toLustre.utils.Fcn_Exp_Parser.parseEP(expr);
                 tree = {'Pow',sym1,sym2};
             else
                 tree = sym1;
@@ -231,35 +231,35 @@ classdef Fcn_Exp_Parser
         %% Number, Function call, ()
         function [tree, expr] = parseSE(expr)
             % e.g. 90
-            [sym, expr] = Fcn_Exp_Parser.parseNum(expr);
+            [sym, expr] = nasa_toLustre.utils.Fcn_Exp_Parser.parseNum(expr);
             if ~isempty(sym)
                 tree = sym;
                 return;
             end
             
             % e.g. f(x)
-            [sym, expr] = Fcn_Exp_Parser.parseFunc(expr);
+            [sym, expr] = nasa_toLustre.utils.Fcn_Exp_Parser.parseFunc(expr);
             if ~isempty(sym)
                 tree = sym;
                 return;
             end
             
             % e.g. u[1]
-            [sym, expr] = Fcn_Exp_Parser.parseArray(expr);
+            [sym, expr] = nasa_toLustre.utils.Fcn_Exp_Parser.parseArray(expr);
             if ~isempty(sym)
                 tree = sym;
                 return;
             end
             
             % e.g. x
-            [sym, expr] = Fcn_Exp_Parser.parseVar(expr);
+            [sym, expr] = nasa_toLustre.utils.Fcn_Exp_Parser.parseVar(expr);
             if ~isempty(sym)
                 tree = sym;
                 return;
             end
             
             % e.g. (expr)
-            [tree, expr] = Fcn_Exp_Parser.parsePar(expr);
+            [tree, expr] = nasa_toLustre.utils.Fcn_Exp_Parser.parsePar(expr);
                 
         end
         
@@ -271,7 +271,7 @@ classdef Fcn_Exp_Parser
         function [tree, expr] = parsePar(expr)
             if startsWith(expr, '(')
                 expr = regexprep(expr, '^\(', '');
-                [sym, expr1, isEQ] = Fcn_Exp_Parser.parseEA(expr);
+                [sym, expr1, isEQ] = nasa_toLustre.utils.Fcn_Exp_Parser.parseEA(expr);
                 if isEQ
                     ME = MException('COCOSIM:Fcn_Exp_Parser', ...
                         'PARSER ERROR: Assignement is not supported inside an expression in "%s"', ...
@@ -306,7 +306,7 @@ classdef Fcn_Exp_Parser
                 funcname = regexp(expr, '^[A-Za-z0-9]+', 'match', 'once');
                 expr = regexprep(expr, regex,'');
                 tree = {'Func', funcname};
-                [tree, expr] = Fcn_Exp_Parser.parseArgs(tree, expr, '(', ')');
+                [tree, expr] = nasa_toLustre.utils.Fcn_Exp_Parser.parseArgs(tree, expr, '(', ')');
             else
                 tree = '';
             end
@@ -319,7 +319,7 @@ classdef Fcn_Exp_Parser
                 varname = regexp(expr, '^[A-Za-z0-9]+', 'match', 'once');
                 expr = regexprep(expr, regex,'');
                 tree = {'Array', varname};
-                [tree, expr] = Fcn_Exp_Parser.parseArgs(tree, expr, '[', ']');
+                [tree, expr] = nasa_toLustre.utils.Fcn_Exp_Parser.parseArgs(tree, expr, '[', ']');
             else
                 tree = '';
             end
@@ -351,7 +351,7 @@ classdef Fcn_Exp_Parser
                 end
             end
             for i=1:numel(args)
-                [argi, ~, isEQ] = Fcn_Exp_Parser.parseEA(args{i});
+                [argi, ~, isEQ] = nasa_toLustre.utils.Fcn_Exp_Parser.parseEA(args{i});
                 if isEQ
                     ME = MException('COCOSIM:Fcn_Exp_Parser', ...
                         'PARSER ERROR: Assignement is not supported inside an expression in "%s"', ...

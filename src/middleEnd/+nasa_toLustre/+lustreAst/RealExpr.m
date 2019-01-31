@@ -28,7 +28,7 @@ classdef RealExpr < nasa_toLustre.lustreAst.LustreExpr
         end
         %%
         function new_obj = deepCopy(obj)
-            new_obj = RealExpr(obj.value);
+            new_obj = nasa_toLustre.lustreAst.RealExpr(obj.value);
         end
         %% simplify expression
         function new_obj = simplify(obj)

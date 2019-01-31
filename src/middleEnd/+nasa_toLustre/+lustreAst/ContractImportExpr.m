@@ -30,14 +30,14 @@ classdef ContractImportExpr < nasa_toLustre.lustreAst.LustreExpr
         function new_obj = deepCopy(obj)
             new_inputs = cellfun(@(x) x.deepCopy(), obj.inputs, 'UniformOutput', 0);
             new_outputs = cellfun(@(x) x.deepCopy(), obj.outputs, 'UniformOutput', 0);
-            new_obj = ContractImportExpr(obj.name, ...
+            new_obj = nasa_toLustre.lustreAst.ContractImportExpr(obj.name, ...
                 new_inputs, new_outputs);
         end
         %% simplify expression
         function new_obj = simplify(obj)
             new_inputs = cellfun(@(x) x.simplify(), obj.inputs, 'UniformOutput', 0);
             new_outputs = cellfun(@(x) x.simplify(), obj.outputs, 'UniformOutput', 0);
-            new_obj = ContractImportExpr(obj.name, ...
+            new_obj = nasa_toLustre.lustreAst.ContractImportExpr(obj.name, ...
                 new_inputs, new_outputs);
         end
         
@@ -50,7 +50,7 @@ classdef ContractImportExpr < nasa_toLustre.lustreAst.LustreExpr
         function new_obj = substituteVars(obj, oldVar, newVar)
             new_inputs = cellfun(@(x) x.substituteVars(oldVar, newVar), obj.inputs, 'UniformOutput', 0);
             new_outputs = cellfun(@(x) x.substituteVars(oldVar, newVar), obj.outputs, 'UniformOutput', 0);
-            new_obj = ContractImportExpr(obj.name, ...
+            new_obj = nasa_toLustre.lustreAst.ContractImportExpr(obj.name, ...
                 new_inputs, new_outputs);
         end
         %% This functions are used for ForIterator block
@@ -79,7 +79,7 @@ classdef ContractImportExpr < nasa_toLustre.lustreAst.LustreExpr
         % code to Lustre
         function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft)
             new_outputs = cellfun(@(x) x.pseudoCode2Lustre(outputs_map, false), obj.outputs, 'UniformOutput', 0);
-            new_obj = ContractImportExpr(obj.name, ...
+            new_obj = nasa_toLustre.lustreAst.ContractImportExpr(obj.name, ...
                 obj.inputs, new_outputs);
         end
         
@@ -98,8 +98,8 @@ classdef ContractImportExpr < nasa_toLustre.lustreAst.LustreExpr
             code = '';
         end
         function code = print_kind2(obj, backend)
-            inputs_str = NodeCallExpr.getArgsStr(obj.inputs, backend);
-            outputs_str = NodeCallExpr.getArgsStr(obj.outputs, backend);
+            inputs_str = nasa_toLustre.lustreAst.NodeCallExpr.getArgsStr(obj.inputs, backend);
+            outputs_str = nasa_toLustre.lustreAst.NodeCallExpr.getArgsStr(obj.outputs, backend);
             code = sprintf('import %s(%s) returns (%s);', ...
                 obj.name, inputs_str, outputs_str );
         end

@@ -32,7 +32,7 @@ classdef ContractModeExpr < nasa_toLustre.lustreAst.LustreExpr
                 'UniformOutput', 0);
             new_ensures = cellfun(@(x) x.deepCopy(), obj.ensures, ...
                 'UniformOutput', 0);
-            new_obj = ContractModeExpr(obj.name, new_requires, new_ensures);
+            new_obj = nasa_toLustre.lustreAst.ContractModeExpr(obj.name, new_requires, new_ensures);
         end
         %% simplify expression
         function new_obj = simplify(obj)
@@ -40,7 +40,7 @@ classdef ContractModeExpr < nasa_toLustre.lustreAst.LustreExpr
                 'UniformOutput', 0);
             new_ensures = cellfun(@(x) x.simplify(), obj.ensures, ...
                 'UniformOutput', 0);
-            new_obj = ContractModeExpr(obj.name, new_requires, new_ensures);
+            new_obj = nasa_toLustre.lustreAst.ContractModeExpr(obj.name, new_requires, new_ensures);
         end
         
         %% nbOccurance
@@ -57,7 +57,7 @@ classdef ContractModeExpr < nasa_toLustre.lustreAst.LustreExpr
                 'UniformOutput', 0);
             new_ensures = cellfun(@(x) x.substituteVars(oldVar, newVar), obj.ensures, ...
                 'UniformOutput', 0);
-            new_obj = ContractModeExpr(obj.name, new_requires, new_ensures);
+            new_obj = nasa_toLustre.lustreAst.ContractModeExpr(obj.name, new_requires, new_ensures);
         end
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
@@ -89,7 +89,7 @@ classdef ContractModeExpr < nasa_toLustre.lustreAst.LustreExpr
             new_ensures = cellfun(@(x) x.pseudoCode2Lustre(outputs_map, false),...
                 obj.ensures, ...
                 'UniformOutput', 0);
-            new_obj = ContractModeExpr(obj.name, new_requires, new_ensures);
+            new_obj = nasa_toLustre.lustreAst.ContractModeExpr(obj.name, new_requires, new_ensures);
         end
         
         

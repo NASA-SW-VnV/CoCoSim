@@ -69,10 +69,10 @@ classdef SLX2LusUtils < handle
         function node_name = node_name_format(subsys_struct)
             if isempty(strfind(subsys_struct.Path, filesep))
                 % main node: should be the same as filename
-                node_name = SLX2LusUtils.name_format(subsys_struct.Name);
+                node_name = nasa_toLustre.utils.SLX2LusUtils.name_format(subsys_struct.Name);
             else
                 handle_str = strrep(sprintf('%.3f', subsys_struct.Handle), '.', '_');
-                node_name = sprintf('%s_%s',SLX2LusUtils.name_format(subsys_struct.Name),handle_str );
+                node_name = sprintf('%s_%s',nasa_toLustre.utils.SLX2LusUtils.name_format(subsys_struct.Name),handle_str );
             end
         end
         
@@ -82,59 +82,61 @@ classdef SLX2LusUtils < handle
                 extractNodeHeader(parent_ir, blk, is_main_node, ...
                 isEnableORAction, isEnableAndTrigger, isContractBlk, ...
                 main_sampleTime, xml_trace)
+            L = nasa_toLustre.ToLustreImport.L;
+            import(L{:})
             % this function is used to get the Lustre node inputs and
             % outputs.
             
             
             % creating node header
-            node_name = SLX2LusUtils.node_name_format(blk);
+            node_name = nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);
             
             
             % contract handling
             if isContractBlk
                 [ node_inputs_cell, node_outputs_cell,...
                     node_inputs_withoutDT_cell, node_outputs_withoutDT_cell ] = ...
-                    SLX2LusUtils.extractContractHeader(parent_ir, blk, main_sampleTime, xml_trace);
+                    nasa_toLustre.utils.SLX2LusUtils.extractContractHeader(parent_ir, blk, main_sampleTime, xml_trace);
                 return;
             end
              % create traceability
             xml_trace.create_Node_Element(blk.Origin_path, node_name,...
-                SLX2LusUtils.isContractBlk(blk)); % not using isContractBlk 
-            %variable because it may be 0 if the functions is called from SLX2LusUtils.extractContractHeader
+                nasa_toLustre.utils.SLX2LusUtils.isContractBlk(blk)); % not using isContractBlk 
+            %variable because it may be 0 if the functions is called from nasa_toLustre.utils.SLX2LusUtils.extractContractHeader
             
             
             %creating inputs
             xml_trace.create_Inputs_Element();
             [node_inputs_cell, node_inputs_withoutDT_cell] = ...
-                SLX2LusUtils.extract_node_InOutputs_withDT(blk, 'Inport', xml_trace);
+                nasa_toLustre.utils.SLX2LusUtils.extract_node_InOutputs_withDT(blk, 'Inport', xml_trace);
             
             % add the execution condition if it is a conditionally executed
             % SS
             if isEnableORAction
                 node_inputs_cell{end + 1} = LustreVar(...
-                    SLX2LusUtils.isEnabledStr() , 'bool');
+                    nasa_toLustre.utils.SLX2LusUtils.isEnabledStr() , 'bool');
                 % we don't include them in node_inputs_withoutDT_cell, see
                 % condExecSS_To_LusAutomaton
                 %node_inputs_withoutDT_cell{end + 1} = VarIdExpr(...
-                %    SLX2LusUtils.isEnabledStr());
+                %    nasa_toLustre.utils.SLX2LusUtils.isEnabledStr());
             elseif isEnableAndTrigger
                 node_inputs_cell{end + 1} = LustreVar(...
-                    SLX2LusUtils.isEnabledStr() , 'bool');
+                    nasa_toLustre.utils.SLX2LusUtils.isEnabledStr() , 'bool');
                 % we don't include them in node_inputs_withoutDT_cell, see
                 % condExecSS_To_LusAutomaton
                 %node_inputs_withoutDT_cell{end + 1} = VarIdExpr(...
-                %    SLX2LusUtils.isEnabledStr());
+                %    nasa_toLustre.utils.SLX2LusUtils.isEnabledStr());
                 node_inputs_cell{end + 1} = LustreVar(...
-                    SLX2LusUtils.isTriggeredStr() , 'bool');
+                    nasa_toLustre.utils.SLX2LusUtils.isTriggeredStr() , 'bool');
                 % we don't include them in node_inputs_withoutDT_cell, see
                 % condExecSS_To_LusAutomaton
                 %node_inputs_withoutDT_cell{end + 1} = VarIdExpr(...
-                %    SLX2LusUtils.isTriggeredStr());
+                %    nasa_toLustre.utils.SLX2LusUtils.isTriggeredStr());
             end
             %add simulation time input and clocks
             if ~is_main_node
                 [node_inputs_cell, node_inputs_withoutDT_cell] = ...
-                SLX2LusUtils.getTimeClocksInputs(blk, main_sampleTime, node_inputs_cell, node_inputs_withoutDT_cell);
+                nasa_toLustre.utils.SLX2LusUtils.getTimeClocksInputs(blk, main_sampleTime, node_inputs_cell, node_inputs_withoutDT_cell);
             end
             % if the node has no inputs, add virtual input for Lustrec.
             if isempty(node_inputs_cell)
@@ -145,12 +147,12 @@ classdef SLX2LusUtils < handle
             % creating outputs
             xml_trace.create_Outputs_Element();
             [node_outputs_cell, node_outputs_withoutDT_cell] =...
-                SLX2LusUtils.extract_node_InOutputs_withDT(blk, 'Outport', xml_trace);
+                nasa_toLustre.utils.SLX2LusUtils.extract_node_InOutputs_withDT(blk, 'Outport', xml_trace);
             
             if is_main_node && isempty(node_outputs_cell)
                 node_outputs_cell{end+1} = LustreVar(...
-                    SLX2LusUtils.timeStepStr(), 'real');
-                node_outputs_withoutDT_cell{end+1} = VarIdExpr(SLX2LusUtils.timeStepStr());
+                    nasa_toLustre.utils.SLX2LusUtils.timeStepStr(), 'real');
+                node_outputs_withoutDT_cell{end+1} = VarIdExpr(nasa_toLustre.utils.SLX2LusUtils.timeStepStr());
             end
         end
         
@@ -168,7 +170,7 @@ classdef SLX2LusUtils < handle
                 fields(...
                 cellfun(@(x) strcmp(subsys.Content.(x).BlockType,type), fields));
             
-            isInsideContract = SLX2LusUtils.isContractBlk(subsys);
+            isInsideContract = nasa_toLustre.utils.SLX2LusUtils.isContractBlk(subsys);
             % sort the blocks by order of their ports
             ports = cellfun(@(x) str2num(subsys.Content.(x).Port), Portsfields);
             [~, I] = sort(ports);
@@ -177,7 +179,7 @@ classdef SLX2LusUtils < handle
             names_withNoDT = {};
             for i=1:numel(Portsfields)
                 block = subsys.Content.(Portsfields{i});
-                [names_withNoDT_i, names_i] = SLX2LusUtils.getBlockOutputsNames(subsys, block);
+                [names_withNoDT_i, names_i] = nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(subsys, block);
                 names = [names, names_i];
                 names_withNoDT = [names_withNoDT, names_withNoDT_i];
                 % traceability
@@ -195,7 +197,7 @@ classdef SLX2LusUtils < handle
                     cellfun(@(x) strcmp(subsys.Content.(x).BlockType,'EnablePort'), fields));
                 if ~isempty(enablePortsFields) ...
                         && strcmp(subsys.Content.(enablePortsFields{1}).ShowOutputPort, 'on')
-                    [names_withNoDT_i, names_i] = SLX2LusUtils.getBlockOutputsNames(subsys, subsys.Content.(enablePortsFields{1}));
+                    [names_withNoDT_i, names_i] = nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(subsys, subsys.Content.(enablePortsFields{1}));
                     names = [names, names_i];
                     names_withNoDT = [names_withNoDT, names_withNoDT_i];
                     % traceability
@@ -213,7 +215,7 @@ classdef SLX2LusUtils < handle
                     cellfun(@(x) strcmp(subsys.Content.(x).BlockType,'TriggerPort'), fields));
                 if ~isempty(triggerPortsFields) ...
                         && strcmp(subsys.Content.(triggerPortsFields{1}).ShowOutputPort, 'on')
-                    [names_withNoDT_i, names_i] = SLX2LusUtils.getBlockOutputsNames(subsys, subsys.Content.(triggerPortsFields{1}));
+                    [names_withNoDT_i, names_i] = nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(subsys, subsys.Content.(triggerPortsFields{1}));
                     names = [names, names_i];
                     names_withNoDT = [names_withNoDT, names_withNoDT_i];
                     % traceability
@@ -230,16 +232,18 @@ classdef SLX2LusUtils < handle
         end
         function [node_inputs_cell, node_inputs_withoutDT_cell] = ...
                 getTimeClocksInputs(blk, main_sampleTime, node_inputs_cell, node_inputs_withoutDT_cell)
+            import nasa_toLustre.lustreAst.LustreVar 
+            import nasa_toLustre.lustreAst.VarIdExpr
             node_inputs_cell{end + 1} = LustreVar(...
-                SLX2LusUtils.timeStepStr(), 'real');
+                nasa_toLustre.utils.SLX2LusUtils.timeStepStr(), 'real');
             node_inputs_withoutDT_cell{end+1} = ...
-                VarIdExpr(SLX2LusUtils.timeStepStr());
+                VarIdExpr(nasa_toLustre.utils.SLX2LusUtils.timeStepStr());
             node_inputs_cell{end + 1} = LustreVar(...
-                SLX2LusUtils.nbStepStr(), 'int');
+                nasa_toLustre.utils.SLX2LusUtils.nbStepStr(), 'int');
             node_inputs_withoutDT_cell{end+1} = ...
-                VarIdExpr(SLX2LusUtils.nbStepStr());
+                VarIdExpr(nasa_toLustre.utils.SLX2LusUtils.nbStepStr());
             % add clocks
-            clocks_list = SLX2LusUtils.getRTClocksSTR(blk, main_sampleTime);
+            clocks_list = nasa_toLustre.utils.SLX2LusUtils.getRTClocksSTR(blk, main_sampleTime);
             if ~isempty(clocks_list)
                 for i=1:numel(clocks_list)
                     node_inputs_cell{end + 1} = LustreVar(...
@@ -272,7 +276,7 @@ classdef SLX2LusUtils < handle
                 isContractBlk = 0;
                 [~, contract_inputs, contract_outputs, ...
                     contract_inputs_withoutDT, contract_outputs_withoutDT ] = ...
-                    SLX2LusUtils.extractNodeHeader(parent_ir, contract, is_main_node, ...
+                    nasa_toLustre.utils.SLX2LusUtils.extractNodeHeader(parent_ir, contract, is_main_node, ...
                     isEnableORAction, isEnableAndTrigger, isContractBlk, main_sampleTime, xml_trace);
                 %change
                 % get Associated SS
@@ -315,7 +319,7 @@ classdef SLX2LusUtils < handle
                         end
                         % input
                         %get actual size after inlining.
-                        [names, ~] = SLX2LusUtils.getBlockOutputsNames(...
+                        [names, ~] = nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(...
                             parent_ir, srcBlk, SrcPort);
                         for i=1:numel(names)
                             node_inputs{end + 1} = contract_inputs{curr_idx};
@@ -325,7 +329,7 @@ classdef SLX2LusUtils < handle
                         end
                     else
                         % output
-                        [names, ~] = SLX2LusUtils.getBlockOutputsNames(...
+                        [names, ~] = nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(...
                             parent_ir, associatedBlk, SrcPort);
                         for i=1:numel(names)
                             node_outputs{end + 1} = contract_inputs{curr_idx};
@@ -444,6 +448,8 @@ classdef SLX2LusUtils < handle
             end
             
             function [names, names_dt] = blockOutputs(portNumber)
+                L = nasa_toLustre.ToLustreImport.L;
+                import(L{:})
                 names = {};
                 names_dt = {};
                 if strcmp(type, 'Inports')
@@ -460,13 +466,13 @@ classdef SLX2LusUtils < handle
                             
                             if isBus
                                 lus_dt =...
-                                    SLX2LusUtils.getLustreTypesFromBusObject(blk.BusObject);
+                                    nasa_toLustre.utils.SLX2LusUtils.getLustreTypesFromBusObject(blk.BusObject);
                                 isBus = false;
                             else
-                                lus_dt = SLX2LusUtils.getpreBlockLusDT(parent, blk, portNumber);
+                                lus_dt = nasa_toLustre.utils.SLX2LusUtils.getpreBlockLusDT(parent, blk, portNumber);
                             end
                         else
-                            lus_dt = SLX2LusUtils.getpreBlockLusDT(parent, blk, portNumber);
+                            lus_dt = nasa_toLustre.utils.SLX2LusUtils.getpreBlockLusDT(parent, blk, portNumber);
                             isBus = false;
                         end
                     elseif isequal(blk.BlockType, 'SubSystem') 
@@ -485,14 +491,14 @@ classdef SLX2LusUtils < handle
                         % get their ports number
                         ports = cellfun(@(x) str2num(blk.Content.(x).Port), Portsfields);
                         outportBlk = blk.Content.(Portsfields{ports == portNumber});
-                        lus_dt = SLX2LusUtils.getpreBlockLusDT( blk, outportBlk, 1);
+                        lus_dt = nasa_toLustre.utils.SLX2LusUtils.getpreBlockLusDT( blk, outportBlk, 1);
                         isBus = false;
                     else
                         try
                             pH = get_param(blk.Origin_path, 'PortHandles');
                             SignalHierarchy = get_param(pH.Outport(portNumber), ...
                                 'SignalHierarchy');
-                            [lus_dt] = SLX2LusUtils.SignalHierarchyLusDT(...
+                            [lus_dt] = nasa_toLustre.utils.SLX2LusUtils.SignalHierarchyLusDT(...
                                 blk, SignalHierarchy); 
                             isBus = false;
                         catch me
@@ -503,7 +509,7 @@ classdef SLX2LusUtils < handle
                         
                     end
                 else
-                    [lus_dt, ~, ~, isBus] = SLX2LusUtils.get_lustre_dt(slx_dt);
+                    [lus_dt, ~, ~, isBus] = nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(slx_dt);
                 end
                 % The width should start from the port width regarding all
                 % subsystem outputs
@@ -512,22 +518,22 @@ classdef SLX2LusUtils < handle
                     if isBus
                         for k=1:numel(lus_dt)
                             names{end+1} = VarIdExpr(...
-                                SLX2LusUtils.name_format(strcat(blk.Name, '_', num2str(idx), '_BusElem', num2str(k))));
+                                nasa_toLustre.utils.SLX2LusUtils.name_format(strcat(blk.Name, '_', num2str(idx), '_BusElem', num2str(k))));
                             names_dt{end+1} = LustreVar(names{end} , lus_dt{k});
                         end
                     elseif iscell(lus_dt) && numel(lus_dt) == width(portNumber)
                         names{end+1} = VarIdExpr(...
-                            SLX2LusUtils.name_format(strcat(blk.Name, '_', num2str(idx))));
+                            nasa_toLustre.utils.SLX2LusUtils.name_format(strcat(blk.Name, '_', num2str(idx))));
                         names_dt{end+1} = LustreVar(names{end}, char(lus_dt{i}));
                     else
                         names{end+1} = VarIdExpr(...
-                            SLX2LusUtils.name_format(strcat(blk.Name, '_', num2str(idx))));
+                            nasa_toLustre.utils.SLX2LusUtils.name_format(strcat(blk.Name, '_', num2str(idx))));
                         names_dt{end+1} = LustreVar(names{end}, char(lus_dt));
                     end
                     idx = idx + 1;
                 end
             end
-            isInsideContract = SLX2LusUtils.isContractBlk(parent);
+            isInsideContract = nasa_toLustre.utils.SLX2LusUtils.isContractBlk(parent);
             IsNotInSimulink = false;
             if nargin >= 3 && ~isempty(srcPort)...
                     && ~strcmp(blk.CompiledPortDataTypes.Outport{srcPort + 1}, 'auto')
@@ -580,7 +586,7 @@ classdef SLX2LusUtils < handle
                     else
                         for i=1:numel(SignalHierarchy.Children)
                             [lus_dt_i] = ...
-                                SLX2LusUtils.SignalHierarchyLusDT(blk, SignalHierarchy.Children(i));
+                                nasa_toLustre.utils.SLX2LusUtils.SignalHierarchyLusDT(blk, SignalHierarchy.Children(i));
                             if iscell(lus_dt_i)
                                 lus_dt = [lus_dt, lus_dt_i];
                             else
@@ -593,7 +599,7 @@ classdef SLX2LusUtils < handle
                 isBus = SLXUtils.isSimulinkBus(SignalName);
                 if isBus
                     lus_dt =...
-                        SLX2LusUtils.getLustreTypesFromBusObject(SignalName);
+                        nasa_toLustre.utils.SLX2LusUtils.getLustreTypesFromBusObject(SignalName);
                 else
                     p = find_system(bdroot(blk.Origin_path),...
                         'FindAll', 'on', ...
@@ -610,14 +616,14 @@ classdef SLX2LusUtils < handle
                         end
                     end
                     if BusCreatorFound
-                        lus_dt = SLX2LusUtils.getBusCreatorLusDT(...
+                        lus_dt = nasa_toLustre.utils.SLX2LusUtils.getBusCreatorLusDT(...
                             get_param(p_parentObj.Parent, 'Object'), ...
                             p_parentObj, ...
                             get_param(p(i), 'PortNumber'));
                     elseif numel(p) >= 1
                         compiledDT = SLXUtils.getCompiledParam(p(1), 'CompiledPortDataType');
                         [lus_dt, ~, ~, ~] = ...
-                            SLX2LusUtils.get_lustre_dt(compiledDT);
+                            nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(compiledDT);
                         CompiledPortWidth = SLXUtils.getCompiledParam(p(1), 'CompiledPortWidth');
                         if iscell(lus_dt) && numel(lus_dt) < CompiledPortWidth
                             lus_dt = arrayfun(@(x) lus_dt{1}, (1:CompiledPortWidth), ...
@@ -656,18 +662,18 @@ classdef SLX2LusUtils < handle
                 if isempty(src)
                     continue;
                 end
-                n_i = SLX2LusUtils.getBlockOutputsNames(parent, src, srcPort);
+                n_i = nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, src, srcPort);
                 inputs = [inputs, n_i];
             end
         end
         function [inputs] = getSubsystemEnableInputsNames(parent, blk)
-            [inputs] = SLX2LusUtils.getSpecialInputsNames(parent, blk, 'enable');
+            [inputs] = nasa_toLustre.utils.SLX2LusUtils.getSpecialInputsNames(parent, blk, 'enable');
         end
         function [inputs] = getSubsystemTriggerInputsNames(parent, blk)
-            [inputs] = SLX2LusUtils.getSpecialInputsNames(parent, blk, 'trigger');
+            [inputs] = nasa_toLustre.utils.SLX2LusUtils.getSpecialInputsNames(parent, blk, 'trigger');
         end
         function [inputs] = getSubsystemResetInputsNames(parent, blk)
-            [inputs] = SLX2LusUtils.getSpecialInputsNames(parent, blk, 'Reset');
+            [inputs] = nasa_toLustre.utils.SLX2LusUtils.getSpecialInputsNames(parent, blk, 'Reset');
         end
         function [inputs] = getSpecialInputsNames(parent, blk, type)
             srcPorts = blk.PortConnectivity(...
@@ -680,7 +686,7 @@ classdef SLX2LusUtils < handle
                 if isempty(src)
                     continue;
                 end
-                n_i = SLX2LusUtils.getBlockOutputsNames(parent, src, srcPort);
+                n_i = nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, src, srcPort);
                 inputs = [inputs, n_i];
             end
         end
@@ -720,7 +726,7 @@ classdef SLX2LusUtils < handle
                     parent = model_struct;
                 end
             end
-            [srcBlk, blkOutportPort] = SLX2LusUtils.getpreBlock(parent, blk, portNumber);
+            [srcBlk, blkOutportPort] = nasa_toLustre.utils.SLX2LusUtils.getpreBlock(parent, blk, portNumber);
             
             if isempty(srcBlk)
                 lus_dt = {'real'};
@@ -729,11 +735,11 @@ classdef SLX2LusUtils < handle
                 return;
             end
             if strcmp(srcBlk.CompiledPortDataTypes.Outport{blkOutportPort}, 'auto')
-                lus_dt = SLX2LusUtils.getBusCreatorLusDT(parent, srcBlk, blkOutportPort);
+                lus_dt = nasa_toLustre.utils.SLX2LusUtils.getBusCreatorLusDT(parent, srcBlk, blkOutportPort);
             else
                 width = srcBlk.CompiledPortWidths.Outport;
                 slx_dt = srcBlk.CompiledPortDataTypes.Outport{blkOutportPort};
-                lus_dt_tmp = SLX2LusUtils.get_lustre_dt(slx_dt);
+                lus_dt_tmp = nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(slx_dt);
                 if iscell(lus_dt_tmp)
                     lus_dt = [lus_dt, lus_dt_tmp];
                 else
@@ -750,9 +756,9 @@ classdef SLX2LusUtils < handle
                     slx_dt = srcBlk.CompiledPortDataTypes.Inport{port};
                     if strcmp(slx_dt, 'auto')
                         lus_dt = [lus_dt, ...
-                            SLX2LusUtils.getpreBlockLusDT(parent, srcBlk, port)];
+                            nasa_toLustre.utils.SLX2LusUtils.getpreBlockLusDT(parent, srcBlk, port)];
                     else
-                        lus_dt_tmp = SLX2LusUtils.get_lustre_dt(slx_dt);
+                        lus_dt_tmp = nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(slx_dt);
                         if iscell(lus_dt_tmp)
                             lus_dt = [lus_dt, lus_dt_tmp];
                         else
@@ -765,7 +771,7 @@ classdef SLX2LusUtils < handle
                 pH = get_param(srcBlk.Origin_path, 'PortHandles');
                 SignalHierarchy = get_param(pH.Outport(portNumber), ...
                     'SignalHierarchy');
-                [lus_dt] = SLX2LusUtils.SignalHierarchyLusDT(...
+                [lus_dt] = nasa_toLustre.utils.SLX2LusUtils.SignalHierarchyLusDT(...
                     srcBlk,  SignalHierarchy);
             end
         end
@@ -773,6 +779,8 @@ classdef SLX2LusUtils < handle
         %value is also given as a string.
         function [ Lustre_type, zero, one, isBus, isEnum] = ...
                 get_lustre_dt( slx_dt)
+            L = nasa_toLustre.ToLustreImport.L;
+            import(L{:})
             global TOLUSTRE_ENUMS_MAP;
             isBus = false;
             isEnum = false;
@@ -796,7 +804,7 @@ classdef SLX2LusUtils < handle
                     else 
                         isBus = SLXUtils.isSimulinkBus(char(slx_dt));
                         if isBus
-                            Lustre_type = SLX2LusUtils.getLustreTypesFromBusObject(char(slx_dt));
+                            Lustre_type = nasa_toLustre.utils.SLX2LusUtils.getLustreTypesFromBusObject(char(slx_dt));
                         else
                             Lustre_type = 'real';
                         end
@@ -859,7 +867,7 @@ classdef SLX2LusUtils < handle
                 if strncmp(dt, 'Bus:', 4)
                     dt = regexprep(dt, 'Bus:\s*', '');
                 end
-                lusDT = SLX2LusUtils.get_lustre_dt( dt);
+                lusDT = nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt( dt);
                 for w=1:width
                     if iscell(lusDT)
                         lustreTypes = [lustreTypes, lusDT];
@@ -887,7 +895,7 @@ classdef SLX2LusUtils < handle
                 if isBus
                     dt = regexprep(dt, 'Bus:\s*', '');
                     in_matrix_dimension = [in_matrix_dimension,...
-                        SLX2LusUtils.getDimensionsFromBusObject(dt)];
+                        nasa_toLustre.utils.SLX2LusUtils.getDimensionsFromBusObject(dt)];
                 else
                     dimensions = elems(i).Dimensions;
                     idx = numel(in_matrix_dimension) +1;
@@ -902,7 +910,7 @@ classdef SLX2LusUtils < handle
         % the function returns a list of LustreExp objects: IntExpr,
         % RealExpr or BooleanExpr
         function InitialOutput_cell = getInitialOutput(parent, blk, InitialOutput, slx_dt, max_width)
-            [lus_outputDataType] = SLX2LusUtils.get_lustre_dt(slx_dt);
+            [lus_outputDataType] = nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(slx_dt);
             if strcmp(InitialOutput, '[]')
                 InitialOutput = '0';
             end
@@ -926,7 +934,7 @@ classdef SLX2LusUtils < handle
             %
             InitialOutput_cell = cell(1, numel(InitialOutputValue));
             for i=1:numel(InitialOutputValue)
-                InitialOutput_cell{i} = SLX2LusUtils.num2LusExp(...
+                InitialOutput_cell{i} = nasa_toLustre.utils.SLX2LusUtils.num2LusExp(...
                     InitialOutputValue(i), lus_outputDataType{i}, InitialOutputType);
             end
             if numel(InitialOutput_cell) < max_width
@@ -937,6 +945,8 @@ classdef SLX2LusUtils < handle
         
         %% change numerical value to Lustre Expr string based on DataType dt.
         function lustreExp = num2LusExp(v, lus_dt, slx_dt)
+            L = nasa_toLustre.ToLustreImport.L;
+            import(L{:})
             global TOLUSTRE_ENUMS_MAP;
             if nargin < 3
                 slx_dt = lus_dt;
@@ -971,7 +981,8 @@ classdef SLX2LusUtils < handle
         function new_callObj = setArgInConvFormat(callObj, arg)
             % this function goes with dataType_conversion funciton to set 
             % the missing argument in conv_format.
-            
+            L = nasa_toLustre.ToLustreImport.L;
+            import(L{:})
             if isempty(callObj)
                 new_callObj = arg;
                 return;
@@ -987,12 +998,14 @@ classdef SLX2LusUtils < handle
                 new_callObj.setArgs(arg);
             elseif isa(new_args, 'NodeCallExpr')
                 new_callObj.setArgs(...
-                    SLX2LusUtils.setArgInConvFormat(new_args, arg));
+                    nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(new_args, arg));
             end
         end
         function [external_lib, conv_format] = dataType_conversion(inport_dt, outport_dt, RndMeth, SaturateOnIntegerOverflow)
-            [lus_in_dt, ~, ~, ~, InIsEnum] = SLX2LusUtils.get_lustre_dt( inport_dt);
-            [lus_out_dt, ~, ~, ~, OutIsEnum] = SLX2LusUtils.get_lustre_dt( outport_dt);
+            L = nasa_toLustre.ToLustreImport.L;
+            import(L{:})
+            [lus_in_dt, ~, ~, ~, InIsEnum] = nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt( inport_dt);
+            [lus_out_dt, ~, ~, ~, OutIsEnum] = nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt( outport_dt);
             if nargin < 3 || isempty(RndMeth)
                 if strcmp(lus_in_dt, 'int')
                     RndMeth = 'int_to_real';
@@ -1013,13 +1026,13 @@ classdef SLX2LusUtils < handle
                 SaturateOnIntegerOverflow = 'off';
             end
             if InIsEnum
-                [external_lib, conv_format1] = SLX2LusUtils.dataType_conversion('int', outport_dt, RndMeth, SaturateOnIntegerOverflow);
-                conv_format = SLX2LusUtils.setArgInConvFormat(conv_format1,...
+                [external_lib, conv_format1] = nasa_toLustre.utils.SLX2LusUtils.dataType_conversion('int', outport_dt, RndMeth, SaturateOnIntegerOverflow);
+                conv_format = nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(conv_format1,...
                     NodeCallExpr(sprintf('%s_to_int', char(lus_in_dt)), {}));
                 return;
             end
             if OutIsEnum
-                [external_lib, conv_format1] = SLX2LusUtils.dataType_conversion(inport_dt, 'int', RndMeth, SaturateOnIntegerOverflow);
+                [external_lib, conv_format1] = nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(inport_dt, 'int', RndMeth, SaturateOnIntegerOverflow);
                 conv_format = NodeCallExpr(...
                     sprintf('int_to_%s', char(lus_out_dt)), conv_format1);
                 return;
@@ -1110,6 +1123,8 @@ classdef SLX2LusUtils < handle
         end
         function [resetCode, status] = getResetCode(...
                 resetType, resetDT, resetInput, zero )
+            L = nasa_toLustre.ToLustreImport.L;
+            import(L{:})
             status = 0;
             if strcmp(resetDT, 'bool')
                 b = resetInput;
@@ -1234,8 +1249,8 @@ classdef SLX2LusUtils < handle
                     end
                     st_n = T(1)/main_sampleTime(1);
                     ph_n = T(2)/main_sampleTime(1);
-                    if ~SLX2LusUtils.isIgnoredSampleTime(st_n, ph_n)
-                        clocks_list{end+1} = SLX2LusUtils.clockName(st_n, ph_n);
+                    if ~nasa_toLustre.utils.SLX2LusUtils.isIgnoredSampleTime(st_n, ph_n)
+                        clocks_list{end+1} = nasa_toLustre.utils.SLX2LusUtils.clockName(st_n, ph_n);
                     end
                 end
             end

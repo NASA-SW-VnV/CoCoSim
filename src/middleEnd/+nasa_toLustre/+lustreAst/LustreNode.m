@@ -1,4 +1,4 @@
-classdef LustreNode < LustreAst
+classdef LustreNode < nasa_toLustre.lustreAst.LustreAst
     %LustreNode
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
@@ -31,16 +31,19 @@ classdef LustreNode < LustreAst
                 obj.bodyEqs = {};
                 obj.isMain = false;
             else
-                obj.metaInfo = metaInfo;
-                obj.name = name;
+                obj.setMetaInfo(metaInfo);
+                obj.setName(name);
                 obj.setInputs(inputs);
                 obj.setOutputs(outputs);
                 obj.setLocalContract(localContract);
                 obj.setLocalVars(localVars);
                 obj.setBodyEqs(bodyEqs);
-                obj.isMain = isMain;
+                obj.setIsMain(isMain);
             end
             obj.isImported = false;
+            
+            
+            
         end
         
         %%
@@ -49,6 +52,13 @@ classdef LustreNode < LustreAst
         end
         function setName(obj, name)
             obj.name = name;
+            % check the object is a valid Lustre AST.
+            if ~ischar(name)
+                ME = MException('COCOSIM:LUSTREAST', ...
+                    'LustreNode ERROR: Expected parameter name of type char got "%s".',...
+                    class(name));
+                throw(ME);
+            end
         end
         function name = getName(obj)
             name = obj.name;
@@ -62,6 +72,15 @@ classdef LustreNode < LustreAst
             else
                 obj.inputs = inputs;
             end
+            inputsClass = unique(...
+                cellfun(@(x) class(x), obj.inputs, 'UniformOutput', 0));
+            if ~isempty(obj.inputs) && ~(numel(inputsClass) == 1 ...
+                    && isequal(inputsClass{1}, 'nasa_toLustre.lustreAst.LustreVar'))
+                ME = MException('COCOSIM:LUSTREAST', ...
+                    'LustreNode ERROR: Expected inputs of type LustreVar got types "%s".',...
+                    MatlabUtils.strjoin(inputsClass, ', '));
+                throw(ME);
+            end
         end
         function outputs = getOutputs(obj)
             outputs = obj.outputs;
@@ -71,6 +90,15 @@ classdef LustreNode < LustreAst
                 obj.outputs{1} = outputs;
             else
                 obj.outputs = outputs;
+            end
+            outputsClass = unique(...
+                cellfun(@(x) class(x), obj.outputs, 'UniformOutput', 0));
+            if ~isempty(obj.outputs) && ~(numel(outputsClass) == 1 ...
+                    && isequal(outputsClass{1}, 'nasa_toLustre.lustreAst.LustreVar'))
+                ME = MException('COCOSIM:LUSTREAST', ...
+                    'LustreNode ERROR: Expected outputs of type LustreVar got types "%s".',...
+                    MatlabUtils.strjoin(outputsClass, ', '));
+                throw(ME);
             end
         end
         
@@ -131,7 +159,7 @@ classdef LustreNode < LustreAst
             end
             new_localVars = cellfun(@(x) x.deepCopy(), obj.localVars, 'UniformOutput', 0);
             new_bodyEqs = cellfun(@(x) x.deepCopy(), obj.bodyEqs, 'UniformOutput', 0);
-            new_obj = LustreNode(obj.metaInfo, obj.name,...
+            new_obj = nasa_toLustre.lustreAst.LustreNode(obj.metaInfo, obj.name,...
                 new_inputs, ...
                 new_outputs, new_localContract, new_localVars, new_bodyEqs, ...
                 obj.isMain);
@@ -143,7 +171,7 @@ classdef LustreNode < LustreAst
         end
         %
         function new_obj = substituteVars(obj)
-            new_obj = LustreNode.contractNode_substituteVars(obj);
+            new_obj = nasa_toLustre.lustreAst.LustreNode.contractNode_substituteVars(obj);
         end
         %
         function new_obj = simplify(obj)
@@ -163,7 +191,7 @@ classdef LustreNode < LustreAst
                 [new_bodyEqs{i}, vId] = obj.bodyEqs{i}.changePre2Var();
                 varIds = [varIds, vId];
             end
-            new_obj = LustreNode(obj.metaInfo, obj.name, obj.inputs, ...
+            new_obj = nasa_toLustre.lustreAst.LustreNode(obj.metaInfo, obj.name, obj.inputs, ...
                 obj.outputs, obj.localContract, obj.localVars, new_bodyEqs, ...
                 obj.isMain);
         end
@@ -171,7 +199,7 @@ classdef LustreNode < LustreAst
         function new_obj = changeArrowExp(obj, cond)
             new_bodyEqs = cellfun(@(x) x.changeArrowExp(cond), obj.bodyEqs, 'UniformOutput', 0);
             
-            new_obj = LustreNode(obj.metaInfo, obj.name,...
+            new_obj = nasa_toLustre.lustreAst.LustreNode(obj.metaInfo, obj.name,...
                 obj.inputs, ...
                 obj.outputs, obj.localContract, obj.localVars, new_bodyEqs, ...
                 obj.isMain);
@@ -182,9 +210,9 @@ classdef LustreNode < LustreAst
             if ~exist('isInner', 'var')
                 isInner = false;
             end
-            inputs_Ids = cellfun(@(x) VarIdExpr(x.getId()), ...
+            inputs_Ids = cellfun(@(x) nasa_toLustre.lustreAst.VarIdExpr(x.getId()), ...
                 obj.inputs, 'UniformOutput', false);
-            oututs_Ids = cellfun(@(x) VarIdExpr(x.getId()), ...
+            oututs_Ids = cellfun(@(x) nasa_toLustre.lustreAst.VarIdExpr(x.getId()), ...
                 obj.outputs, 'UniformOutput', false);
             
             for i=1:numel(inputs_Ids)
@@ -193,13 +221,14 @@ classdef LustreNode < LustreAst
                     inputs_Ids{i} = InnerValue;
                 elseif isequal(inputs_Ids{i}.getId(), ...
                         SF_To_LustreNode.virtualVarStr())
-                    inputs_Ids{i} = BooleanExpr(true);
+                    inputs_Ids{i} = nasa_toLustre.lustreAst.BooleanExpr(true);
                 end
             end
             
-            call = NodeCallExpr(obj.name, inputs_Ids);
+            call = nasa_toLustre.lustreAst.NodeCallExpr(obj.name, inputs_Ids);
         end
         function [new_obj, varIds] = pseudoCode2Lustre(obj)
+            import nasa_toLustre.lustreAst.*
             varIds = {};
             outputs_map = containers.Map('KeyType', 'char', 'ValueType', 'int32');
             
@@ -295,8 +324,8 @@ classdef LustreNode < LustreAst
             lines{end + 1} = sprintf('node %s %s(%s)\nreturns(%s);\n', ...
                 isImported_str, ...
                 obj.name, ...
-                LustreAst.listVarsWithDT(obj.inputs, backend), ...
-                LustreAst.listVarsWithDT(obj.outputs, backend));
+                nasa_toLustre.lustreAst.LustreAst.listVarsWithDT(obj.inputs, backend), ...
+                nasa_toLustre.lustreAst.LustreAst.listVarsWithDT(obj.outputs, backend));
             if ~isempty(obj.localContract)
                 lines{end + 1} = obj.localContract.print(backend);
             end
@@ -308,7 +337,7 @@ classdef LustreNode < LustreAst
             
             if ~isempty(obj.localVars)
                 lines{end + 1} = sprintf('var %s\n', ...
-                    LustreAst.listVarsWithDT(obj.localVars, backend));
+                    nasa_toLustre.lustreAst.LustreAst.listVarsWithDT(obj.localVars, backend));
             end
             lines{end+1} = sprintf('let\n');
             % local Eqs
@@ -340,6 +369,7 @@ classdef LustreNode < LustreAst
     end
     methods(Static)
        function new_obj = contractNode_substituteVars(obj)
+           import nasa_toLustre.lustreAst.*
             new_obj = obj.deepCopy();
             new_localVars = new_obj.localVars;
             outputs = new_obj.getOutputs();
@@ -355,10 +385,10 @@ classdef LustreNode < LustreAst
             end
             %ignore simplification if there is automaton
             eqsClass = cellfun(@(x) class(x), new_bodyEqs, 'UniformOutput', false);
-            if ismember('LustreAutomaton', eqsClass)
+            if ismember('nasa_toLustre.lustreAst.LustreAutomaton', eqsClass)
                 return;
             end
-            EveryEqs = new_bodyEqs(strcmp(eqsClass,'EveryExpr'));
+            EveryEqs = new_bodyEqs(strcmp(eqsClass,'nasa_toLustre.lustreAst.EveryExpr'));
             EveryConds = cellfun(@(x) x.cond, EveryEqs, 'UniformOutput', false);
             % go over Assignments
             for i=1:numel(new_bodyEqs)
@@ -404,7 +434,7 @@ classdef LustreNode < LustreAst
             end
             % remove dummyExpr
             eqsClass = cellfun(@(x) class(x), new_bodyEqs, 'UniformOutput', false);
-            new_bodyEqs = new_bodyEqs(~strcmp(eqsClass, 'DummyExpr'));
+            new_bodyEqs = new_bodyEqs(~strcmp(eqsClass, 'nasa_toLustre.lustreAst.DummyExpr'));
             new_obj.setBodyEqs(new_bodyEqs);
             new_obj.setLocalVars(new_localVars);
         end 

@@ -11,7 +11,7 @@ function [new_ir, status] = stateflow_IR_pp(old_ir, print_in_file, output_dir)
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 import nasa_toLustre.IR_pp.stateflow_IR_pp.stateflow_fields.* 
-impt nasa_toLustre.IR_pp.stateflow_IR_pp.*
+import nasa_toLustre.IR_pp.stateflow_IR_pp.*
 status = 0;
 if nargin < 3 || isempty(output_dir)
     output_dir = pwd;

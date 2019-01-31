@@ -32,7 +32,7 @@ classdef TupleExpr < nasa_toLustre.lustreAst.LustreExpr
         
         function new_obj = deepCopy(obj)
             new_args = cellfun(@(x) x.deepCopy(), obj.args, 'UniformOutput', 0);
-            new_obj = TupleExpr(new_args);
+            new_obj = nasa_toLustre.lustreAst.TupleExpr(new_args);
         end
         
         %% simplify expression
@@ -42,7 +42,7 @@ classdef TupleExpr < nasa_toLustre.lustreAst.LustreExpr
             if numel(new_args) == 1
                 new_obj = new_args{1};
             else
-                new_obj = TupleExpr(new_args);
+                new_obj = nasa_toLustre.lustreAst.TupleExpr(new_args);
             end
         end
         %% nbOccuranceVar
@@ -53,7 +53,7 @@ classdef TupleExpr < nasa_toLustre.lustreAst.LustreExpr
         %% substituteVars
         function new_obj = substituteVars(obj, var, newVar)
             new_args = cellfun(@(x) x.substituteVars(var, newVar), obj.args, 'UniformOutput', 0);
-            new_obj = TupleExpr(new_args);
+            new_obj = nasa_toLustre.lustreAst.TupleExpr(new_args);
         end
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
@@ -64,13 +64,13 @@ classdef TupleExpr < nasa_toLustre.lustreAst.LustreExpr
                 varIds = [varIds, varIds_i];
             end
             
-            new_obj = TupleExpr(new_args);
+            new_obj = nasa_toLustre.lustreAst.TupleExpr(new_args);
             
         end
         function new_obj = changeArrowExp(obj, cond)
             new_args = cellfun(@(x) x.changeArrowExp(cond), obj.args, 'UniformOutput', 0);
             
-            new_obj = TupleExpr(new_args);
+            new_obj = nasa_toLustre.lustreAst.TupleExpr(new_args);
         end
         %% This function is used by Stateflow function SF_To_LustreNode.getPseudoLusAction
         function varIds = GetVarIds(obj)
@@ -88,7 +88,7 @@ classdef TupleExpr < nasa_toLustre.lustreAst.LustreExpr
                 [new_args{i}, outputs_map] = ...
                     obj.args{i}.pseudoCode2Lustre(outputs_map, isLeft);
             end
-            new_obj = TupleExpr(new_args);
+            new_obj = nasa_toLustre.lustreAst.TupleExpr(new_args);
         end
         %% This function is used by KIND2 LustreProgram.print()
         function nodesCalled = getNodesCalled(obj)
@@ -110,7 +110,7 @@ classdef TupleExpr < nasa_toLustre.lustreAst.LustreExpr
         
         function code = print_lustrec(obj, backend)
             code = sprintf('(%s)', ...
-                NodeCallExpr.getArgsStr(obj.args, backend));
+                nasa_toLustre.lustreAst.NodeCallExpr.getArgsStr(obj.args, backend));
         end
         
         function code = print_kind2(obj)

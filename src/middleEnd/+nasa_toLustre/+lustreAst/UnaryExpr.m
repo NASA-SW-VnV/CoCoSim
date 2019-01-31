@@ -44,7 +44,7 @@ classdef UnaryExpr < nasa_toLustre.lustreAst.LustreExpr
         
         %% simplify expression
         function new_obj = simplify(obj)
-            import nasa_toLustre.lustreAst.UnaryExpr
+            import nasa_toLustre.lustreAst.*
             new_expr = obj.expr.simplify();
             if isa(new_expr, 'UnaryExpr') ...
                     && isequal(new_expr.op, obj.op) ...
@@ -61,13 +61,12 @@ classdef UnaryExpr < nasa_toLustre.lustreAst.LustreExpr
         end
         %% substituteVars
         function new_obj = substituteVars(obj, var, newVar)
-            import nasa_toLustre.lustreAst.UnaryExpr
             new_expr = obj.expr.substituteVars(var, newVar);
-            new_obj = UnaryExpr(obj.op, new_expr, obj.withPar);
+            new_obj = nasa_toLustre.lustreAst.UnaryExpr(obj.op, new_expr, obj.withPar);
         end
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
-            import nasa_toLustre.lustreAst.UnaryExpr
+            import nasa_toLustre.lustreAst.*
             v = obj.expr;
             if isequal(obj.op, UnaryExpr.PRE) && isa(v, 'VarIdExpr')
                 varIds{1} = v;
@@ -78,9 +77,8 @@ classdef UnaryExpr < nasa_toLustre.lustreAst.LustreExpr
             end
         end
         function new_obj = changeArrowExp(obj, cond)
-            import nasa_toLustre.lustreAst.UnaryExpr
             new_expr = obj.expr.changeArrowExp(cond);
-            new_obj = UnaryExpr(obj.op, new_expr, obj.withPar);
+            new_obj = nasa_toLustre.lustreAst.UnaryExpr(obj.op, new_expr, obj.withPar);
         end
         %% This function is used by Stateflow function SF_To_LustreNode.getPseudoLusAction
         function varIds = GetVarIds(obj)
@@ -89,10 +87,9 @@ classdef UnaryExpr < nasa_toLustre.lustreAst.LustreExpr
         % This function is used in Stateflow compiler to change from imperative
         % code to Lustre
         function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft)
-            import nasa_toLustre.lustreAst.UnaryExpr
             %UnaryExpr is always on the right of an Equation
             [new_expr, ~] = obj.expr.pseudoCode2Lustre(outputs_map, false);
-            new_obj = UnaryExpr(obj.op,...
+            new_obj = nasa_toLustre.lustreAst.UnaryExpr(obj.op,...
                 new_expr,...
                 obj.withPar);
         end

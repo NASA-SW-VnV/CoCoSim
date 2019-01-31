@@ -196,7 +196,7 @@ function  [unsupportedOptionsMap, abstractedBlocks]  = blockUnsupportedOptions( 
     %INPUTS:
     %   blk: The internal representation of the subsystem.
     %   main_clock   : The model sample time.
-    [b, status, type, masktype, sfblockType, isIgnored] = getWriteType(blk);
+    [b, status, type, masktype, sfblockType, isIgnored] = nasa_toLustre.utils.getWriteType(blk);
     if ~isempty(sfblockType)
         blkType = sfblockType;
     elseif ~isempty(masktype)

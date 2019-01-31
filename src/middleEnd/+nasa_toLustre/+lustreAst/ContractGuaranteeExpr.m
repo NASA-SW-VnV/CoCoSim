@@ -23,13 +23,13 @@ classdef ContractGuaranteeExpr < nasa_toLustre.lustreAst.LustreExpr
         
         %% deepcopy
         function new_obj = deepCopy(obj)
-            new_obj = ContractGuaranteeExpr(obj.id, ...
+            new_obj = nasa_toLustre.lustreAst.ContractGuaranteeExpr(obj.id, ...
                 obj.exp.deepCopy());
         end
         
         %% simplify expression
         function new_obj = simplify(obj)
-            new_obj = ContractGuaranteeExpr(obj.id, ...
+            new_obj = nasa_toLustre.lustreAst.ContractGuaranteeExpr(obj.id, ...
                 obj.exp.simplify());
         end
         %% nbOcc
@@ -38,7 +38,7 @@ classdef ContractGuaranteeExpr < nasa_toLustre.lustreAst.LustreExpr
         end
         %% substituteVars 
         function new_obj = substituteVars(obj, oldVar, newVar)
-            new_obj = ContractGuaranteeExpr(obj.id, ...
+            new_obj = nasa_toLustre.lustreAst.ContractGuaranteeExpr(obj.id, ...
                 obj.exp.substituteVars(oldVar, newVar));
         end
         %% This functions are used for ForIterator block
@@ -63,7 +63,7 @@ classdef ContractGuaranteeExpr < nasa_toLustre.lustreAst.LustreExpr
         % code to Lustre
         function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft)
             [new_exp, outputs_map] = obj.exp.pseudoCode2Lustre(outputs_map, isLeft);
-            new_obj = ContractGuaranteeExpr(obj.id, new_exp);
+            new_obj = nasa_toLustre.lustreAst.ContractGuaranteeExpr(obj.id, new_exp);
         end
         
         

@@ -36,7 +36,7 @@ classdef BooleanExpr < nasa_toLustre.lustreAst.LustreExpr
         end
         %%
         function new_obj = deepCopy(obj)
-            new_obj = BooleanExpr(obj.value);
+            new_obj = nasa_toLustre.lustreAst.BooleanExpr(obj.value);
         end
         %% simplify expression
         function new_obj = simplify(obj)

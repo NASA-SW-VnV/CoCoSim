@@ -23,12 +23,12 @@ classdef MergeExpr < nasa_toLustre.lustreAst.LustreExpr
         
         function new_obj = deepCopy(obj)
             new_exprs = cellfun(@(x) x.deepCopy(), obj.exprs, 'UniformOutput', 0);
-            new_obj = MergeExpr(obj.clock, new_exprs);
+            new_obj = nasa_toLustre.lustreAst.MergeExpr(obj.clock, new_exprs);
         end
         %% simplify expression
         function new_obj = simplify(obj)
             new_exprs = cellfun(@(x) x.simplify(), obj.exprs, 'UniformOutput', 0);
-            new_obj = MergeExpr(obj.clock, new_exprs);
+            new_obj = nasa_toLustre.lustreAst.MergeExpr(obj.clock, new_exprs);
         end
         %% nbOccuranceVar
         function nb_occ = nbOccuranceVar(obj, var)
@@ -38,7 +38,7 @@ classdef MergeExpr < nasa_toLustre.lustreAst.LustreExpr
         %% substituteVars
         function new_obj = substituteVars(obj, oldVar, newVar)
             new_exprs = cellfun(@(x) x.substituteVars(oldVar, newVar), obj.exprs, 'UniformOutput', 0);
-            new_obj = MergeExpr(obj.clock, new_exprs);
+            new_obj = nasa_toLustre.lustreAst.MergeExpr(obj.clock, new_exprs);
         end
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
@@ -48,12 +48,11 @@ classdef MergeExpr < nasa_toLustre.lustreAst.LustreExpr
                 [new_exprs{i}, varIds_i] = obj.exprs{i}.changePre2Var();
                 varIds = [varIds, varIds_i];
             end
-            new_obj = MergeExpr(obj.clock, new_exprs);
+            new_obj = nasa_toLustre.lustreAst.MergeExpr(obj.clock, new_exprs);
         end
         function new_obj = changeArrowExp(obj, cond)
             new_exprs = cellfun(@(x) x.changeArrowExp(cond), obj.exprs, 'UniformOutput', 0);
-            
-            new_obj = MergeExpr(obj.clock, new_exprs);
+            new_obj = nasa_toLustre.lustreAst.MergeExpr(obj.clock, new_exprs);
         end
         %% This function is used by Stateflow function SF_To_LustreNode.getPseudoLusAction
         function varIds = GetVarIds(obj)
@@ -68,7 +67,7 @@ classdef MergeExpr < nasa_toLustre.lustreAst.LustreExpr
         function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft)
             new_exprs = cellfun(@(x) x.pseudoCode2Lustre(outputs_map, false),...
                 obj.exprs, 'UniformOutput', 0);
-            new_obj = MergeExpr(obj.clock, new_exprs);
+            new_obj = nasa_toLustre.lustreAst.MergeExpr(obj.clock, new_exprs);
         end
         %% This function is used by KIND2 LustreProgram.print()
         function nodesCalled = getNodesCalled(obj)

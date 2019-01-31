@@ -1,4 +1,4 @@
-classdef LustreContract < LustreAst
+classdef LustreContract < nasa_toLustre.lustreAst.LustreAst
     %LustreContract
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
@@ -113,7 +113,7 @@ classdef LustreContract < LustreAst
             new_localEqs = cellfun(@(x) x.deepCopy(), obj.bodyEqs, ...
                 'UniformOutput', 0);
             
-            new_obj = LustreContract(obj.metaInfo, obj.name,...
+            new_obj = nasa_toLustre.lustreAst.LustreContract(obj.metaInfo, obj.name,...
                 new_inputs, ...
                 new_outputs, new_localVars, new_localEqs, ...
                 obj.islocalContract);
@@ -135,7 +135,7 @@ classdef LustreContract < LustreAst
         
          %% substituteVars 
         function new_obj = substituteVars(obj)
-            new_obj = LustreNode.contractNode_substituteVars(obj);
+            new_obj = nasa_toLustre.lustreAst.LustreNode.contractNode_substituteVars(obj);
         end
         
         %% This functions are used for ForIterator block
@@ -153,7 +153,7 @@ classdef LustreContract < LustreAst
             if obj.islocalContract
                 %Only import contracts are supported for the moment.
                 for i=1:numel(obj.bodyEqs)
-                    if isa(obj.bodyEqs{i}, 'ContractImportExpr')
+                    if isa(obj.bodyEqs{i}, 'nasa_toLustre.lustreAst.ContractImportExpr')
                         [obj.bodyEqs{i}, outputs_map] = ...
                             obj.bodyEqs{i}.pseudoCode2Lustre(outputs_map);
                     end
@@ -228,6 +228,7 @@ classdef LustreContract < LustreAst
         
         %% utils
         function lines = getLustreEq(obj, lines, backend)
+            import nasa_toLustre.lustreAst.*
             for i=1:numel(obj.bodyEqs)
                 eq = obj.bodyEqs{i};
                 if ~isa(eq, 'LustreEq')

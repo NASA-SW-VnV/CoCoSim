@@ -224,7 +224,7 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     && blkParams.NumberOfTableDimensions <= 3
                 contractBody = Lookup_nD_To_Lustre.getContractBody(blkParams,inputs,outputs);
                 contract = LustreContract();
-                contract.setBody(contractBody);
+                contract.setBodyEqs(contractBody);
                 extNode.setLocalContract(contract);
                 if blkParams.NumberOfTableDimensions == 3
                     %complicated to prove

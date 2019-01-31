@@ -26,7 +26,7 @@ classdef LustreAutomaton < nasa_toLustre.lustreAst.LustreExpr
             for i=1:numel(obj.states)
                 new_states{i} = obj.states{i}.deepCopy();
             end
-            new_obj = LustreAutomaton(obj.name,...
+            new_obj = nasa_toLustre.lustreAst.LustreAutomaton(obj.name,...
                 new_states);
         end
         %% simplify expression
@@ -35,7 +35,7 @@ classdef LustreAutomaton < nasa_toLustre.lustreAst.LustreExpr
             for i=1:numel(obj.states)
                 new_states{i} = obj.states{i}.simplify();
             end
-            new_obj = LustreAutomaton(obj.name,...
+            new_obj = nasa_toLustre.lustreAst.LustreAutomaton(obj.name,...
                 new_states);
         end
         %% nbOccuranceVar ignored in Automaton
@@ -57,7 +57,7 @@ classdef LustreAutomaton < nasa_toLustre.lustreAst.LustreExpr
             for i=1:numel(obj.states)
                 new_states{i} = obj.states{i}.changeArrowExp(cond);
             end
-            new_obj = LustreAutomaton(obj.name,...
+            new_obj = nasa_toLustre.lustreAst.LustreAutomaton(obj.name,...
                 new_states);
         end
         

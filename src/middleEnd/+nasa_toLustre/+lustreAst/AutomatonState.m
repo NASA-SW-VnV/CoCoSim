@@ -48,7 +48,7 @@ classdef AutomatonState < nasa_toLustre.lustreAst.LustreExpr
             
             new_body = cellfun(@(x) x.deepCopy(), obj.body, 'UniformOutput', 0);
             
-            new_obj = AutomatonState(obj.name, new_local_vars, ...
+            new_obj = nasa_toLustre.lustreAst.AutomatonState(obj.name, new_local_vars, ...
                 new_strongTrans, new_weakTrans, new_body);
         end
         %% This functions are used for ForIterator block
@@ -89,7 +89,7 @@ classdef AutomatonState < nasa_toLustre.lustreAst.LustreExpr
             
             new_body = cellfun(@(x) x.simplify(), obj.body, 'UniformOutput', 0);
             
-            new_obj = AutomatonState(obj.name, new_local_vars, ...
+            new_obj = nasa_toLustre.lustreAst.AutomatonState(obj.name, new_local_vars, ...
                 new_strongTrans, new_weakTrans, new_body);
         end
          %% nbOccuranceVar ignored in Automaton

@@ -1,4 +1,4 @@
-classdef LustreProgram < LustreAst
+classdef LustreProgram < nasa_toLustre.lustreAst.LustreAst
     %LustreProgram
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
@@ -44,7 +44,7 @@ classdef LustreProgram < LustreAst
                 'UniformOutput', 0);
             new_contracts = cellfun(@(x) x.deepCopy(), obj.contracts,...
                 'UniformOutput', 0);
-            new_obj = LustreProgram(obj.opens, new_types, new_nodes, new_contracts);
+            new_obj = nasa_toLustre.lustreAst.LustreProgram(obj.opens, new_types, new_nodes, new_contracts);
         end
         
         function new_obj = simplify(obj)
@@ -52,7 +52,7 @@ classdef LustreProgram < LustreAst
                 'UniformOutput', 0);
             new_contracts = cellfun(@(x) x.simplify(), obj.contracts,...
                 'UniformOutput', 0);
-            new_obj = LustreProgram(obj.opens, obj.types, new_nodes, new_contracts);
+            new_obj = nasa_toLustre.lustreAst.LustreProgram(obj.opens, obj.types, new_nodes, new_contracts);
         end
         
         %% This functions are used for ForIterator block

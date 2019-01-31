@@ -1,4 +1,4 @@
-classdef LustreExpr < LustreAst
+classdef LustreExpr < nasa_toLustre.lustreAst.LustreAst
     %LustreExpr
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the

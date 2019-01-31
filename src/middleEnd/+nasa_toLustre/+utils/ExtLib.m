@@ -24,6 +24,7 @@ classdef ExtLib
         
         %% Clocks
         function [node, external_nodes_i, opens, abstractedNodes] = get__make_clock(varargin)
+            import nasa_toLustre.lustreAst.*
             opens = {};
             abstractedNodes = {};
             external_nodes_i = {};

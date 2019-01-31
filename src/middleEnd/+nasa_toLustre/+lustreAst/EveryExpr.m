@@ -25,20 +25,20 @@ classdef EveryExpr < nasa_toLustre.lustreAst.LustreExpr
         
         function new_obj = deepCopy(obj)
             new_args = cellfun(@(x) x.deepCopy(), obj.nodeArgs, 'UniformOutput', 0);
-            new_obj = EveryExpr(obj.nodeName, ...
+            new_obj = nasa_toLustre.lustreAst.EveryExpr(obj.nodeName, ...
                 new_args, obj.cond.deepCopy());
         end
         %% simplify expression
         function new_obj = simplify(obj)
             new_args = cellfun(@(x) x.simplify(), obj.nodeArgs, 'UniformOutput', 0);
-            new_obj = EveryExpr(obj.nodeName, ...
+            new_obj = nasa_toLustre.lustreAst.EveryExpr(obj.nodeName, ...
                 new_args, obj.cond.simplify());
         end
         
         %% substituteVars 
         function new_obj = substituteVars(obj, oldVar, newVar)
             new_args = cellfun(@(x) x.substituteVars(oldVar, newVar), obj.nodeArgs, 'UniformOutput', 0);
-            new_obj = EveryExpr(obj.nodeName, ...
+            new_obj = nasa_toLustre.lustreAst.EveryExpr(obj.nodeName, ...
                 new_args, obj.cond);
         end
         %% nbOccurance
@@ -56,13 +56,13 @@ classdef EveryExpr < nasa_toLustre.lustreAst.LustreExpr
             end
             [condE, varId] = obj.cond.changePre2Var();
             varIds = [varIds, varId];
-            new_obj = EveryExpr(obj.nodeName, ...
+            new_obj = nasa_toLustre.lustreAst.EveryExpr(obj.nodeName, ...
                 new_exprs, condE);
         end
         function new_obj = changeArrowExp(obj, cond)
             new_args = cellfun(@(x) x.changeArrowExp(cond), obj.nodeArgs, 'UniformOutput', 0);
             
-            new_obj = EveryExpr(obj.nodeName, ...
+            new_obj = nasa_toLustre.lustreAst.EveryExpr(obj.nodeName, ...
                 new_args, obj.cond.changeArrowExp(cond));
         end
         %% This function is used by Stateflow function SF_To_LustreNode.getPseudoLusAction
@@ -80,7 +80,7 @@ classdef EveryExpr < nasa_toLustre.lustreAst.LustreExpr
         function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft)
             new_args = cellfun(@(x) x.pseudoCode2Lustre(outputs_map, false),...
                 obj.nodeArgs, 'UniformOutput', 0);
-            new_obj = EveryExpr(obj.nodeName, ...
+            new_obj = nasa_toLustre.lustreAst.EveryExpr(obj.nodeName, ...
                 new_args, obj.cond);
         end
         %% This function is used by KIND2 LustreProgram.print()
@@ -114,7 +114,7 @@ classdef EveryExpr < nasa_toLustre.lustreAst.LustreExpr
         end
         
         function code = print_lustrec(obj, backend)
-            args_str = NodeCallExpr.getArgsStr(obj.nodeArgs, backend);
+            args_str = nasa_toLustre.lustreAst.NodeCallExpr.getArgsStr(obj.nodeArgs, backend);
             code = sprintf('(%s(%s) every %s)', ...
                 obj.nodeName, ...
                 args_str,...
@@ -122,7 +122,7 @@ classdef EveryExpr < nasa_toLustre.lustreAst.LustreExpr
         end
         
         function code = print_kind2(obj, backend)
-            args_str = NodeCallExpr.getArgsStr(obj.nodeArgs, backend);
+            args_str = nasa_toLustre.lustreAst.NodeCallExpr.getArgsStr(obj.nodeArgs, backend);
             code = sprintf('(restart %s every %s)(%s)', ...
                 obj.nodeName, ...
                 obj.cond.print(backend),...

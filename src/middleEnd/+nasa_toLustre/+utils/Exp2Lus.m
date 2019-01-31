@@ -14,6 +14,8 @@ classdef Exp2Lus < handle
     methods (Static = true)
         function [lusCode, status] = expToLustre(BlkObj, exp, parent, blk, inputs, data_map, expected_dt, isStateFlow)
             global SF_GRAPHICALFUNCTIONS_MAP SF_STATES_NODESAST_MAP;
+            L = nasa_toLustre.ToLustreImport.L;
+            import(L{:})
             if ~exist('isStateFlow', 'var')
                 isStateFlow = false;
             end
@@ -44,13 +46,13 @@ classdef Exp2Lus < handle
                 status = 1;
                 display_msg(sprintf('ParseError for expression "%s" in block %s', ...
                     orig_exp, blk.Origin_path), ...
-                    MsgType.ERROR, 'Exp2Lus.expToLustre', '');
-                display_msg(me.getReport(), MsgType.DEBUG, 'Exp2Lus.expToLustre', '');
+                    MsgType.ERROR, 'nasa_toLustre.utils.Exp2Lus.expToLustre', '');
+                display_msg(me.getReport(), MsgType.DEBUG, 'nasa_toLustre.utils.Exp2Lus.expToLustre', '');
                 return;
             end
             try
                 
-                lusCode = Exp2Lus.tree2code(BlkObj, tree, parent, blk, inputs, data_map, expected_dt, isStateFlow);
+                lusCode = nasa_toLustre.utils.Exp2Lus.tree2code(BlkObj, tree, parent, blk, inputs, data_map, expected_dt, isStateFlow);
                 % transform Stateflow Function call with no outputs to an equation
                 if isStateFlow && ~isempty(tree)
                     if iscell(tree) && numel(tree) == 1
@@ -71,13 +73,13 @@ classdef Exp2Lus < handle
                 status = 1;
                 
                 if strcmp(me.identifier, 'COCOSIM:TREE2CODE')
-                    display_msg(me.message, MsgType.ERROR, 'Exp2Lus.expToLustre', '')
+                    display_msg(me.message, MsgType.ERROR, 'nasa_toLustre.utils.Exp2Lus.expToLustre', '')
                     display_msg(sprintf('ParseError for expression "%s" in block %s', ...
                         orig_exp, blk.Origin_path), ...
-                        MsgType.ERROR, 'Exp2Lus.expToLustre', '');
+                        MsgType.ERROR, 'nasa_toLustre.utils.Exp2Lus.expToLustre', '');
                     return;
                 else
-                    display_msg(me.getReport(), MsgType.DEBUG, 'Exp2Lus.expToLustre', '');
+                    display_msg(me.getReport(), MsgType.DEBUG, 'nasa_toLustre.utils.Exp2Lus.expToLustre', '');
                 end
             end
             
@@ -86,6 +88,8 @@ classdef Exp2Lus < handle
             %this function is extended to be used by If-Block,
             %SwitchCase and Fcn blocks. Also it is used by Stateflow
             %actions
+            L = nasa_toLustre.ToLustreImport.L;
+            import(L{:})
             if nargin < 8
                 isStateFlow = false;
             end
@@ -99,24 +103,24 @@ classdef Exp2Lus < handle
             end
             tree_type = tree.type;
             if isequal(tree_type, 'ID')
-                code = Exp2Lus.ID2code(obj, tree.name, parent, blk, inputs, ...
+                code = nasa_toLustre.utils.Exp2Lus.ID2code(obj, tree.name, parent, blk, inputs, ...
                     data_map, expected_dt, isStateFlow);
                 return;
             end
             if isequal(tree_type, 'constant')
-                code = Exp2Lus.constant2code(tree.value, expected_dt);
+                code = nasa_toLustre.utils.Exp2Lus.constant2code(tree.value, expected_dt);
                 return;
             end
-            tree_dt = Exp2Lus.treeDT(tree, inputs, data_map, expected_dt, isStateFlow);
+            tree_dt = nasa_toLustre.utils.Exp2Lus.treeDT(tree, inputs, data_map, expected_dt, isStateFlow);
             switch tree_type
                 case {'plus_minus', 'mtimes', 'times', 'mrdivide', 'rdivide'...
                         'relopGL', 'relopEQ_NE', ...
                         'relopAND', 'relopelAND', 'relopOR', 'relopelOR'}
                     operands_dt = tree_dt;
                     if ismember(tree_type, {'relopGL', 'relopEQ_NE'})
-                        left_dt = Exp2Lus.treeDT(tree.leftExp, inputs, data_map, expected_dt, isStateFlow);
-                        right_dt = Exp2Lus.treeDT(tree.rightExp, inputs, data_map, expected_dt, isStateFlow);
-                        operands_dt = Exp2Lus.upperDT(left_dt, right_dt, expected_dt);
+                        left_dt = nasa_toLustre.utils.Exp2Lus.treeDT(tree.leftExp, inputs, data_map, expected_dt, isStateFlow);
+                        right_dt = nasa_toLustre.utils.Exp2Lus.treeDT(tree.rightExp, inputs, data_map, expected_dt, isStateFlow);
+                        operands_dt = nasa_toLustre.utils.Exp2Lus.upperDT(left_dt, right_dt, expected_dt);
                     end
                     if isequal(tree_type, 'plus_minus')
                         op = tree.operator;
@@ -145,9 +149,9 @@ classdef Exp2Lus < handle
                         op = BinaryExpr.OR;
                         
                     end
-                    left = Exp2Lus.tree2code(obj, tree.leftExp, parent,...
+                    left = nasa_toLustre.utils.Exp2Lus.tree2code(obj, tree.leftExp, parent,...
                         blk, inputs, data_map, operands_dt, isStateFlow);
-                    right = Exp2Lus.tree2code(obj, tree.rightExp, parent,...
+                    right = nasa_toLustre.utils.Exp2Lus.tree2code(obj, tree.rightExp, parent,...
                         blk, inputs, data_map, operands_dt, isStateFlow);
                     if numel(left) == 1 && numel(right) == 1
                         code{1} = BinaryExpr(op, left{1}, right{1}, false);
@@ -180,23 +184,23 @@ classdef Exp2Lus < handle
                     else
                         op = tree.operator;
                     end
-                    right = Exp2Lus.tree2code(obj, tree.rightExp, parent,...
+                    right = nasa_toLustre.utils.Exp2Lus.tree2code(obj, tree.rightExp, parent,...
                         blk, inputs, data_map, tree_dt, isStateFlow);
                     code = arrayfun(@(i) UnaryExpr(op, right{i}, false), ...
                         (1:numel(right)), 'UniformOutput', false);
                     
                 case 'parenthesedExpression'
                     tree_dt = expected_dt;
-                    exp = Exp2Lus.tree2code(obj, tree.expression, parent,...
+                    exp = nasa_toLustre.utils.Exp2Lus.tree2code(obj, tree.expression, parent,...
                         blk, inputs, data_map, tree_dt, isStateFlow);
                     code = arrayfun(@(i) ParenthesesExpr(exp{i}), ...
                         (1:numel(exp)), 'UniformOutput', false);
                 case {'mpower', 'power'}
                     tree_dt = 'real';
                     obj.addExternal_libraries('LustMathLib_lustrec_math');
-                    left = Exp2Lus.tree2code(obj, tree.leftExp, parent, blk, ...
+                    left = nasa_toLustre.utils.Exp2Lus.tree2code(obj, tree.leftExp, parent, blk, ...
                         inputs, data_map, tree_dt, isStateFlow);
-                    right= Exp2Lus.tree2code(obj, tree.rightExp, parent, blk,...
+                    right= nasa_toLustre.utils.Exp2Lus.tree2code(obj, tree.rightExp, parent, blk,...
                         inputs, data_map, tree_dt, isStateFlow);
                     if numel(left) > 1 && isequal(tree_type, 'mpower')
                         ME = MException('COCOSIM:TREE2CODE', ...
@@ -212,7 +216,7 @@ classdef Exp2Lus < handle
                                         
                 case 'assignment'
                     tree_dt = expected_dt;%no need for casting type.
-                    assignment_dt = Exp2Lus.treeDT(tree, inputs, data_map,...
+                    assignment_dt = nasa_toLustre.utils.Exp2Lus.treeDT(tree, inputs, data_map,...
                         expected_dt, isStateFlow);
                     if isequal(tree.leftExp.type, 'matrix')
                         elts = tree.leftExp.rows{1};
@@ -226,7 +230,7 @@ classdef Exp2Lus < handle
                         end
                         for i=1:numel(elts)
                             args(i) = ...
-                                Exp2Lus.tree2code(obj, elts(i), ...
+                                nasa_toLustre.utils.Exp2Lus.tree2code(obj, elts(i), ...
                                 parent, blk, inputs, data_map, left_dt{i},...
                                 isStateFlow);
                         end
@@ -239,11 +243,11 @@ classdef Exp2Lus < handle
                                 tree.text);
                             throw(ME);
                         end
-                        left = Exp2Lus.tree2code(obj, tree.leftExp, ...
+                        left = nasa_toLustre.utils.Exp2Lus.tree2code(obj, tree.leftExp, ...
                             parent, blk, inputs, data_map, assignment_dt,...
                             isStateFlow);
                     end
-                    right = Exp2Lus.tree2code(obj, tree.rightExp, parent, blk,...
+                    right = nasa_toLustre.utils.Exp2Lus.tree2code(obj, tree.rightExp, parent, blk,...
                         inputs, data_map, assignment_dt, isStateFlow);
                     if numel(left) ~= numel(right)
                         ME = MException('COCOSIM:TREE2CODE', ...
@@ -270,7 +274,7 @@ classdef Exp2Lus < handle
                                 'double', 'single', 'boolean'}
                             conv_format = {};
                             isConversion = false;
-                            tree_dt = Exp2Lus.treeDT(tree, inputs, data_map, expected_dt, isStateFlow);
+                            tree_dt = nasa_toLustre.utils.Exp2Lus.treeDT(tree, inputs, data_map, expected_dt, isStateFlow);
                             if isequal(tree_ID, 'abs') ...
                                     || isequal(tree_ID, 'sgn')
                                 fun_name = strcat(tree_ID, '_', tree_dt);
@@ -311,7 +315,7 @@ classdef Exp2Lus < handle
                                     end
                                     return;
                                 else
-                                    param_dt = Exp2Lus.treeDT(param, ...
+                                    param_dt = nasa_toLustre.utils.Exp2Lus.treeDT(param, ...
                                         inputs, data_map, '', isStateFlow);
                                     [external_lib, conv_format] = ...
                                         SLX2LusUtils.dataType_conversion(param_dt, tree_ID);
@@ -325,7 +329,7 @@ classdef Exp2Lus < handle
                             else
                                 fun_name = tree_ID;
                             end
-                            x = Exp2Lus.tree2code(obj, tree.parameters(1),...
+                            x = nasa_toLustre.utils.Exp2Lus.tree2code(obj, tree.parameters(1),...
                                 parent, blk, inputs, data_map, tree_dt, ...
                                 isStateFlow);
                             if isConversion
@@ -337,7 +341,7 @@ classdef Exp2Lus < handle
                             end
                             %function with two arguments
                         case {'rem', 'atan2', 'power'}
-                            tree_dt = Exp2Lus.treeDT(tree, inputs, data_map, expected_dt, isStateFlow);
+                            tree_dt = nasa_toLustre.utils.Exp2Lus.treeDT(tree, inputs, data_map, expected_dt, isStateFlow);
                             if isequal(tree_ID, 'atan2') ...
                                     || isequal(tree_ID, 'power')
                                 obj.addExternal_libraries('LustMathLib_lustrec_math');
@@ -358,9 +362,9 @@ classdef Exp2Lus < handle
                             else
                                 fun_name = tree_ID;
                             end
-                            left = Exp2Lus.tree2code(obj, tree.parameters(1), ...
+                            left = nasa_toLustre.utils.Exp2Lus.tree2code(obj, tree.parameters(1), ...
                                 parent, blk, inputs, data_map, tree_dt, isStateFlow);
-                            right = Exp2Lus.tree2code(obj, tree.parameters(2), ...
+                            right = nasa_toLustre.utils.Exp2Lus.tree2code(obj, tree.parameters(2), ...
                                 parent, blk, inputs, data_map, tree_dt, isStateFlow);
                             if numel(left) ~= numel(right)
                                 if numel(right) == 1
@@ -383,10 +387,10 @@ classdef Exp2Lus < handle
                             
                             tree_dt = 'real';
                             obj.addExternal_libraries('LustMathLib_lustrec_math');
-                            arg1 = Exp2Lus.tree2code(obj, tree.parameters(1), ...
+                            arg1 = nasa_toLustre.utils.Exp2Lus.tree2code(obj, tree.parameters(1), ...
                                 parent, blk, inputs, data_map, tree_dt, isStateFlow);
                             
-                            arg2 = Exp2Lus.tree2code(obj, tree.parameters(2),...
+                            arg2 = nasa_toLustre.utils.Exp2Lus.tree2code(obj, tree.parameters(2),...
                                 parent, blk, inputs, data_map, tree_dt, isStateFlow);
                             
                             arg1 = arrayfun(@(i) BinaryExpr(BinaryExpr.MULTIPLY, arg1{i}, arg1{i}), ...
@@ -411,7 +415,7 @@ classdef Exp2Lus < handle
                             code = arrayfun(@(i) NodeCallExpr('sqrt', {arg1{i},arg2{i}}), ...
                                 (1:numel(arg1)), 'UniformOutput', false);
                         case {'all', 'any'}
-                            x = Exp2Lus.tree2code(obj, tree.parameters(1),...
+                            x = nasa_toLustre.utils.Exp2Lus.tree2code(obj, tree.parameters(1),...
                                 parent, blk, inputs, data_map, 'bool', ...
                                 isStateFlow);
                             if isequal(tree_ID, 'all')
@@ -425,7 +429,7 @@ classdef Exp2Lus < handle
                             code = {};
                             
                         otherwise
-                            code = Exp2Lus.parseOtherFunc(obj, tree, ...
+                            code = nasa_toLustre.utils.Exp2Lus.parseOtherFunc(obj, tree, ...
                                 parent, blk, inputs, data_map, ...
                                 expected_dt, isStateFlow);
                     end
@@ -442,12 +446,13 @@ classdef Exp2Lus < handle
                     throw(ME);
             end
             % convert tree DT to what is expected.
-            code = Exp2Lus.convertDT(obj, code, tree_dt, expected_dt);
+            code = nasa_toLustre.utils.Exp2Lus.convertDT(obj, code, tree_dt, expected_dt);
         end
         
         
         %%
         function code = constant2code(v, expected_dt)
+            import nasa_toLustre.lustreAst.*
             if strcmp(expected_dt, 'real') || isempty(expected_dt)
                 code{1} = RealExpr(str2double(v));
             elseif strcmp(expected_dt, 'bool')
@@ -460,6 +465,8 @@ classdef Exp2Lus < handle
         
         %%
         function code = ID2code(obj, id, parent, blk, inputs, data_map, expected_dt, isStateFlow)
+            L = nasa_toLustre.ToLustreImport.L;
+            import(L{:})
             % the case of final term in a tree
             if ~isStateFlow && ~isempty(regexp(id, 'u\d+', 'match'))
                 input_idx = regexp(id, 'u(\d+)', 'tokens', 'once');
@@ -482,11 +489,11 @@ classdef Exp2Lus < handle
                     dt = d;
                 end
                 if ~isStateFlow
-                    code = Exp2Lus.convertDT(obj, VarIdExpr(id), dt, expected_dt);
+                    code = nasa_toLustre.utils.Exp2Lus.convertDT(obj, VarIdExpr(id), dt, expected_dt);
                 else
                     names = SF_To_LustreNode.getDataName(d);
                     for i=1:numel(names)
-                        code{i} = Exp2Lus.convertDT(obj, ...
+                        code{i} = nasa_toLustre.utils.Exp2Lus.convertDT(obj, ...
                             VarIdExpr(names{i}), dt, expected_dt);
                     end
                     
@@ -524,14 +531,16 @@ classdef Exp2Lus < handle
         %% Functions, Array Access, SF Functions
         function code = parseOtherFunc(obj, tree, parent, blk, inputs, data_map, expected_dt, isStateFlow)
             global SF_GRAPHICALFUNCTIONS_MAP;
+            L = nasa_toLustre.ToLustreImport.L;
+            import(L{:})
             if isStateFlow && data_map.isKey(tree.ID)
                 %Array Access
-                code = Exp2Lus.SFArrayAccess(obj, tree, parent, blk, ...
+                code = nasa_toLustre.utils.Exp2Lus.SFArrayAccess(obj, tree, parent, blk, ...
                     inputs, data_map, expected_dt, isStateFlow);
                 
             elseif isStateFlow && SF_GRAPHICALFUNCTIONS_MAP.isKey(tree.ID)
                 %Stateflow Function
-                code = Exp2Lus.SFGraphFunction(obj, tree, parent, blk, ...
+                code = nasa_toLustre.utils.Exp2Lus.SFGraphFunction(obj, tree, parent, blk, ...
                     inputs, data_map, expected_dt, isStateFlow);
                 
             elseif ~isStateFlow && isequal(tree.ID, 'u')
@@ -597,6 +606,8 @@ classdef Exp2Lus < handle
         end
         function code = SFArrayAccess(obj, tree, parent, blk, inputs, data_map, expected_dt, isStateFlow)
             %Array access
+            L = nasa_toLustre.ToLustreImport.L;
+            import(L{:})
             d = data_map(tree.ID);
             if isfield(d, 'CompiledSize')
                 CompiledSize = str2num(d.CompiledSize);
@@ -618,7 +629,7 @@ classdef Exp2Lus < handle
                 throw(ME);
             end
             params_dt = 'int';
-            namesAst = Exp2Lus.ID2code(obj, tree.ID, parent, blk, inputs, ...
+            namesAst = nasa_toLustre.utils.Exp2Lus.ID2code(obj, tree.ID, parent, blk, inputs, ...
                 data_map, expected_dt, isStateFlow);
                     
             if numel(tree.parameters) == 1
@@ -642,7 +653,7 @@ classdef Exp2Lus < handle
                     end
                 else
                     arg = ...
-                        Exp2Lus.tree2code(obj, tree.parameters, ...
+                        nasa_toLustre.utils.Exp2Lus.tree2code(obj, tree.parameters, ...
                         parent, blk, inputs, data_map, params_dt,...
                         isStateFlow);
                     for ardIdx=1:numel(arg)
@@ -687,7 +698,7 @@ classdef Exp2Lus < handle
                     args = cell(numel(parameters), 1);
                     for i=1:numel(parameters)
                         args(i) = ...
-                            Exp2Lus.tree2code(obj, parameters{i}, ...
+                            nasa_toLustre.utils.Exp2Lus.tree2code(obj, parameters{i}, ...
                             parent, blk, inputs, data_map, params_dt,...
                             isStateFlow);
                     end
@@ -714,6 +725,8 @@ classdef Exp2Lus < handle
         end
         function code = SFGraphFunction(obj, tree, parent, ...
                 blk, inputs, data_map, expected_dt, isStateFlow)
+            L = nasa_toLustre.ToLustreImport.L;
+            import(L{:})
             global SF_GRAPHICALFUNCTIONS_MAP SF_STATES_NODESAST_MAP;
             func = SF_GRAPHICALFUNCTIONS_MAP(tree.ID);
             
@@ -737,7 +750,7 @@ classdef Exp2Lus < handle
                 args = cell(numel(parameters), 1);
                 for i=1:numel(parameters)
                     args(i) = ...
-                        Exp2Lus.tree2code(obj, parameters{i}, ...
+                        nasa_toLustre.utils.Exp2Lus.tree2code(obj, parameters{i}, ...
                         parent, blk, node_inputs, data_map, params_dt{i},...
                         isStateFlow);
                 end
@@ -756,6 +769,7 @@ classdef Exp2Lus < handle
         
         %%
         function code = convertDT(obj, code, input_dt, output_dt)
+            
             if isempty(code) || ...
                     isempty(input_dt) || isempty(output_dt) ||...
                     (iscell(input_dt) && numel(input_dt) > 1) || ...
@@ -773,7 +787,7 @@ classdef Exp2Lus < handle
             end
             conv = strcat(input_dt, '_to_', output_dt);
             obj.addExternal_libraries(strcat('LustDTLib_', conv));
-            code = {NodeCallExpr(conv, code)};
+            code = {nasa_toLustre.lustreAst.NodeCallExpr(conv, code)};
         end
         function dt = upperDT(left_dt, right_dt, expected_dt)
             if isempty(left_dt) && isempty(right_dt) 
@@ -798,6 +812,7 @@ classdef Exp2Lus < handle
         end
         
         function dt = treeDT(tree, inputs, data_map, expected_dt, isStateFlow)
+            
             %this function is extended to be used by If-Block,
             %SwitchCase and Fcn blocks. Also it is used by Stateflow
             %actions
@@ -807,7 +822,7 @@ classdef Exp2Lus < handle
             end
             tree_type = tree.type;
             if isequal(tree_type, 'ID')
-                dt = Exp2Lus.ID2DT(tree.name, inputs, data_map, isStateFlow);
+                dt = nasa_toLustre.utils.Exp2Lus.ID2DT(tree.name, inputs, data_map, isStateFlow);
                 return;
             end
             if isequal(tree_type, 'constant')
@@ -824,34 +839,34 @@ classdef Exp2Lus < handle
                         'relopGL', 'relopEQ_NE'}
                     dt = 'bool';
                 case {'plus_minus', 'mtimes', 'times', 'mrdivide', 'rdivide'}
-                    left_dt = Exp2Lus.treeDT(tree.leftExp, inputs, data_map, expected_dt, isStateFlow);
-                    right_dt = Exp2Lus.treeDT(tree.rightExp, inputs, data_map, expected_dt, isStateFlow);
-                    dt = Exp2Lus.upperDT(left_dt, right_dt, expected_dt);
+                    left_dt = nasa_toLustre.utils.Exp2Lus.treeDT(tree.leftExp, inputs, data_map, expected_dt, isStateFlow);
+                    right_dt = nasa_toLustre.utils.Exp2Lus.treeDT(tree.rightExp, inputs, data_map, expected_dt, isStateFlow);
+                    dt = nasa_toLustre.utils.Exp2Lus.upperDT(left_dt, right_dt, expected_dt);
                     
                 case 'unaryExpression'
                     if isequal(tree.operator, '~') || isequal(tree.operator, '!')
                         dt = 'bool';
                     else
-                        dt = Exp2Lus.treeDT(tree.rightExp, inputs, data_map, expected_dt, isStateFlow);
+                        dt = nasa_toLustre.utils.Exp2Lus.treeDT(tree.rightExp, inputs, data_map, expected_dt, isStateFlow);
                     end
                 case 'parenthesedExpression'
-                    dt = Exp2Lus.treeDT(tree.expression, inputs, data_map, expected_dt, isStateFlow);
+                    dt = nasa_toLustre.utils.Exp2Lus.treeDT(tree.expression, inputs, data_map, expected_dt, isStateFlow);
                     
                 case {'mpower', 'power'}
                     dt = 'real';
                     
                 case 'assignment'
-                    dt = Exp2Lus.treeDT(tree.leftExp, inputs, data_map, expected_dt, isStateFlow);
+                    dt = nasa_toLustre.utils.Exp2Lus.treeDT(tree.leftExp, inputs, data_map, expected_dt, isStateFlow);
                     
                 case 'fun_indexing'
                     tree_ID = tree.ID;
                     switch tree_ID
                         case {'abs', 'sgn'}
-                            dt = Exp2Lus.treeDT(tree.parameters(1), inputs, data_map, expected_dt, isStateFlow);
+                            dt = nasa_toLustre.utils.Exp2Lus.treeDT(tree.parameters(1), inputs, data_map, expected_dt, isStateFlow);
                         case 'rem'
-                            param1 = Exp2Lus.treeDT(tree.parameters(1), inputs, data_map, expected_dt, isStateFlow);
-                            param2 = Exp2Lus.treeDT(tree.parameters(2), inputs, data_map, expected_dt, isStateFlow);
-                            dt = Exp2Lus.upperDT(param1, param2, expected_dt);
+                            param1 = nasa_toLustre.utils.Exp2Lus.treeDT(tree.parameters(1), inputs, data_map, expected_dt, isStateFlow);
+                            param2 = nasa_toLustre.utils.Exp2Lus.treeDT(tree.parameters(2), inputs, data_map, expected_dt, isStateFlow);
+                            dt = nasa_toLustre.utils.Exp2Lus.upperDT(param1, param2, expected_dt);
                         case {'sqrt', 'exp', 'log', 'log10',...
                                 'sin','cos','tan',...
                                 'asin','acos','atan','atan2', 'power', ...
@@ -861,7 +876,7 @@ classdef Exp2Lus < handle
                         case {'all', 'any'}
                             dt = 'bool';
                         otherwise
-                            dt = Exp2Lus.OtherFuncDT(tree, inputs, data_map, expected_dt, isStateFlow);
+                            dt = nasa_toLustre.utils.Exp2Lus.OtherFuncDT(tree, inputs, data_map, expected_dt, isStateFlow);
                     end
                 otherwise
                     dt = expected_dt;
@@ -891,7 +906,7 @@ classdef Exp2Lus < handle
                 if isequal(tree.parameters(1).type, 'constant')
                     %the case of u(1), u(2) ...
                     input_idx = str2double(tree.parameters(1).value);
-                    dt = Exp2Lus.getVarDT(data_map, ...
+                    dt = nasa_toLustre.utils.Exp2Lus.getVarDT(data_map, ...
                         inputs{1}{input_idx}.getId());
                     return;
                 end
@@ -901,7 +916,7 @@ classdef Exp2Lus < handle
                 input_number = str2double(regexp(tree.ID, 'u(\d+)', 'tokens', 'once'));
                 if isequal(tree.parameters(1).type, 'constant')
                     arrayIndex = str2double(tree.parameters(1).value);
-                    dt = Exp2Lus.getVarDT(data_map, ...
+                    dt = nasa_toLustre.utils.Exp2Lus.getVarDT(data_map, ...
                         inputs{input_number}{arrayIndex}.getId());
                     return;
                 end
@@ -916,11 +931,11 @@ classdef Exp2Lus < handle
                 
             elseif ~isStateFlow && strcmp(id, 'u')
                 %the case of u with no index
-                dt = Exp2Lus.getVarDT(data_map, inputs{1}{1}.getId());
+                dt = nasa_toLustre.utils.Exp2Lus.getVarDT(data_map, inputs{1}{1}.getId());
                 
             elseif ~isStateFlow && ~isempty(regexp(id, 'u\d+', 'match'))
                 input_idx = regexp(id, 'u(\d+)', 'tokens', 'once');
-                dt = Exp2Lus.getVarDT(data_map, ...
+                dt = nasa_toLustre.utils.Exp2Lus.getVarDT(data_map, ...
                     inputs{str2double(input_idx)}{1}.getId());
                 
             elseif isKey(data_map, id)

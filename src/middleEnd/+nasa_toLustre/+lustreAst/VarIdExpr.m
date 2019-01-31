@@ -12,14 +12,24 @@ classdef VarIdExpr < nasa_toLustre.lustreAst.LustreExpr
     
     methods
         function obj = VarIdExpr(id)
-            import nasa_toLustre.lustreAst.TupleExpr
             if iscell(id) && numel(id) == 1
                 obj.id = id{1};
             elseif iscell(id)
-                obj.id = TupleExpr(id);
-            else
+                ME = MException('COCOSIM:LUSTREAST', ...
+                    'VarIdExpr ERROR: Expected an Id of class char got a cell array of %d elements.',...
+                    numel(obj.id));
+                throw(ME);
+            elseif isa(id, 'nasa_toLustre.lustreAst.LustreVar')
+                obj.id = id.getId();
+            elseif ischar(id)
                 obj.id = id;
+            else
+                ME = MException('COCOSIM:LUSTREAST', ...
+                    'VarIdExpr ERROR: Expected an Id of class char got an object of class "%s".',...
+                    class(obj.id));
+                throw(ME);
             end
+            
         end
         function id = getId(obj)
             id = obj.id;
@@ -95,11 +105,9 @@ classdef VarIdExpr < nasa_toLustre.lustreAst.LustreExpr
         end
         
         function code = print_lustrec(obj, backend)
+            code = '';
             if ischar(obj.id)
                 code = obj.id;
-            elseif isa(obj.id, 'LustreExpr')
-                %Should not happen.
-                code = obj.id.print(backend);
             end
         end
         

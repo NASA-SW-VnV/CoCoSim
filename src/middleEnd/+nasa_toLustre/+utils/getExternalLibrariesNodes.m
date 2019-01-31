@@ -11,6 +11,8 @@ end
 function [ lustre_nodes, open_list, abstractedNodes ] = recursive_call( external_libraries, already_handled, lus_backend )
 %GETEXTERNALLIBRARIESNODES returns the lustre nodes and libraries to be add
 %to the head of lustre code.
+import nasa_toLustre.utils.*
+import nasa_toLustre.lustreAst.RawLustreCode
 lustre_nodes = {};
 open_list = {};
 abstractedNodes = {};

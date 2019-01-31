@@ -38,10 +38,11 @@ classdef NodeCallExpr < nasa_toLustre.lustreAst.LustreExpr
         %%
         function new_obj = deepCopy(obj)
             new_args = cellfun(@(x) x.deepCopy(), obj.args, 'UniformOutput', 0);
-            new_obj = NodeCallExpr(obj.nodeName, new_args);
+            new_obj = nasa_toLustre.lustreAst.NodeCallExpr(obj.nodeName, new_args);
         end
         %% simplify expression
         function new_obj = simplify(obj)
+            import nasa_toLustre.lustreAst.*
             new_args = cellfun(@(x) x.simplify(), obj.args, 'UniformOutput', 0);
             % remove parentheses from arguments.
             for i=1:numel(new_args)
@@ -62,7 +63,7 @@ classdef NodeCallExpr < nasa_toLustre.lustreAst.LustreExpr
         %% substituteVars
         function new_obj = substituteVars(obj, var, newVar)
             new_args = cellfun(@(x) x.substituteVars(var, newVar), obj.args, 'UniformOutput', 0);
-            new_obj = NodeCallExpr(obj.nodeName, new_args);
+            new_obj = nasa_toLustre.lustreAst.NodeCallExpr(obj.nodeName, new_args);
         end
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
@@ -72,13 +73,13 @@ classdef NodeCallExpr < nasa_toLustre.lustreAst.LustreExpr
                 [new_args{i}, varIds_i] = obj.args{i}.changePre2Var();
                 varIds = [varIds, varIds_i];
             end
-            new_obj = NodeCallExpr(obj.nodeName, new_args);
+            new_obj = nasa_toLustre.lustreAst.NodeCallExpr(obj.nodeName, new_args);
         end
         
         function new_obj = changeArrowExp(obj, cond)
             new_args = cellfun(@(x) x.changeArrowExp(cond), obj.args, 'UniformOutput', 0);
             
-            new_obj = NodeCallExpr(obj.nodeName, new_args);
+            new_obj = nasa_toLustre.lustreAst.NodeCallExpr(obj.nodeName, new_args);
         end
         
         %% This function is used by Stateflow function SF_To_LustreNode.getPseudoLusAction
@@ -94,7 +95,7 @@ classdef NodeCallExpr < nasa_toLustre.lustreAst.LustreExpr
         function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft)
             new_args = cellfun(@(x) x.pseudoCode2Lustre(outputs_map, false),...
                 obj.args, 'UniformOutput', 0);
-            new_obj = NodeCallExpr(obj.nodeName, new_args);
+            new_obj = nasa_toLustre.lustreAst.NodeCallExpr(obj.nodeName, new_args);
         end
         %% This function is used by KIND2 LustreProgram.print()
         function nodesCalled = getNodesCalled(obj)
@@ -119,7 +120,7 @@ classdef NodeCallExpr < nasa_toLustre.lustreAst.LustreExpr
         function code = print_lustrec(obj, backend)
             code = sprintf('%s(%s)', ...
                 obj.nodeName, ...
-                NodeCallExpr.getArgsStr(obj.args, backend));
+               nasa_toLustre.lustreAst.NodeCallExpr.getArgsStr(obj.args, backend));
         end
         
         function code = print_kind2(obj)

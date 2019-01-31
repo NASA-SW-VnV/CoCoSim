@@ -24,15 +24,15 @@ classdef ParenthesesExpr < nasa_toLustre.lustreAst.LustreExpr
         
         function new_obj = deepCopy(obj)
             new_expr = obj.expr.deepCopy();
-            new_obj = ParenthesesExpr(new_expr);
+            new_obj = nasa_toLustre.lustreAst.ParenthesesExpr(new_expr);
         end
         %% simplify expression
         function new_obj = simplify(obj)
             new_expr = obj.expr.simplify();
-            if isa(new_expr, 'ParenthesesExpr')
-                new_obj = ParenthesesExpr(new_expr.getExp());
+            if isa(new_expr, 'nasa_toLustre.lustreAst.ParenthesesExpr')
+                new_obj = nasa_toLustre.lustreAst.ParenthesesExpr(new_expr.getExp());
             else
-                new_obj = ParenthesesExpr(new_expr);
+                new_obj = nasa_toLustre.lustreAst.ParenthesesExpr(new_expr);
             end
         end
         %% nbOccuranceVar
@@ -43,16 +43,16 @@ classdef ParenthesesExpr < nasa_toLustre.lustreAst.LustreExpr
         %% substituteVars
         function new_obj = substituteVars(obj, var, newVar)
             new_expr = obj.expr.substituteVars(var, newVar);
-            new_obj = ParenthesesExpr(new_expr);
+            new_obj = nasa_toLustre.lustreAst.ParenthesesExpr(new_expr);
         end
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
             [new_expr, varIds] = obj.expr.changePre2Var();
-            new_obj = ParenthesesExpr(new_expr);
+            new_obj = nasa_toLustre.lustreAst.ParenthesesExpr(new_expr);
         end
         function new_obj = changeArrowExp(obj, cond)
             new_expr = obj.expr.changeArrowExp(cond);
-            new_obj = ParenthesesExpr(new_expr);
+            new_obj = nasa_toLustre.lustreAst.ParenthesesExpr(new_expr);
         end
         %% This function is used by Stateflow function SF_To_LustreNode.getPseudoLusAction
         function varIds = GetVarIds(obj)
@@ -62,7 +62,7 @@ classdef ParenthesesExpr < nasa_toLustre.lustreAst.LustreExpr
         % code to Lustre
         function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft)
             [new_exp, outputs_map] = obj.expr.pseudoCode2Lustre(outputs_map, isLeft);
-            new_obj = ParenthesesExpr(new_exp);
+            new_obj = nasa_toLustre.lustreAst.ParenthesesExpr(new_exp);
         end
         %% This function is used by KIND2 LustreProgram.print()
         function nodesCalled = getNodesCalled(obj)

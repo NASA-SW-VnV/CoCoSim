@@ -15,6 +15,7 @@ classdef LustMathLib
         
         %% Min Max
         function [node, external_nodes_i, opens, abstractedNodes] = getMinMax(minOrMAx, dt)
+            import nasa_toLustre.lustreAst.*
             opens = {};
             abstractedNodes = {};
             external_nodes_i = {};
@@ -41,19 +42,19 @@ classdef LustMathLib
             node.setIsMain(false);
         end
         function [node, external_nodes_i, opens, abstractedNodes] = get__min_int(varargin)
-            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.getMinMax('min', 'int');
+            [node, external_nodes_i, opens, abstractedNodes] = nasa_toLustre.utils.LustMathLib.getMinMax('min', 'int');
         end
         
         function [node, external_nodes_i, opens, abstractedNodes] = get__min_real(varargin)
-            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.getMinMax('min', 'real');
+            [node, external_nodes_i, opens, abstractedNodes] = nasa_toLustre.utils.LustMathLib.getMinMax('min', 'real');
         end
         
         function [node, external_nodes_i, opens, abstractedNodes] = get__max_int(varargin)
-            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.getMinMax('max', 'int');
+            [node, external_nodes_i, opens, abstractedNodes] = nasa_toLustre.utils.LustMathLib.getMinMax('max', 'int');
         end
         
         function [node, external_nodes_i, opens, abstractedNodes] = get__max_real(varargin)
-            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.getMinMax('max', 'real');
+            [node, external_nodes_i, opens, abstractedNodes] = nasa_toLustre.utils.LustMathLib.getMinMax('max', 'real');
         end
         
         %%
@@ -73,6 +74,7 @@ classdef LustMathLib
         
         %% fabs, abs
         function [node, external_nodes_i, opens, abstractedNodes] = get__fabs(varargin)
+            import nasa_toLustre.lustreAst.*
             opens = {};
             abstractedNodes = {};
             external_nodes_i = {};
@@ -93,6 +95,7 @@ classdef LustMathLib
         end
         
         function [node, external_nodes_i, opens, abstractedNodes] = get_abs_int(varargin)
+            import nasa_toLustre.lustreAst.*
             opens = {};
             abstractedNodes = {};
             external_nodes_i = {};
@@ -112,6 +115,7 @@ classdef LustMathLib
         end
         
         function [node, external_nodes_i, opens, abstractedNodes] = get_abs_real(varargin)
+            import nasa_toLustre.lustreAst.*
             opens = {};
             abstractedNodes = {};
             external_nodes_i = {};
@@ -132,6 +136,7 @@ classdef LustMathLib
         
         %% sign
         function [node, external_nodes_i, opens, abstractedNodes] = get_sign_int(varargin)
+            import nasa_toLustre.lustreAst.*
             opens = {};
             abstractedNodes = {};
             external_nodes_i = {};
@@ -151,6 +156,7 @@ classdef LustMathLib
         end
         
         function [node, external_nodes_i, opens, abstractedNodes] = get_sign_real(varargin)
+            import nasa_toLustre.lustreAst.*
             opens = {};
             abstractedNodes = {};
             external_nodes_i = {};
@@ -170,6 +176,7 @@ classdef LustMathLib
         end
         %% Bitwise operators
         function [node, external_nodes, opens, abstractedNodes] = getBitwiseSigned(op, n)
+            import nasa_toLustre.lustreAst.*
             opens = {};
             abstractedNodes = {};
             extNode = sprintf('int_to_int%d',n);
@@ -215,6 +222,7 @@ classdef LustMathLib
         
         %AND
         function [node, external_nodes, opens, abstractedNodes] = getANDBitwiseUnsigned(n)
+            import nasa_toLustre.lustreAst.*
             opens = {};
             abstractedNodes = {};
             external_nodes = {};
@@ -261,6 +269,7 @@ classdef LustMathLib
         end 
         %NAND
         function [node, external_nodes, opens, abstractedNodes] = getNANDBitwiseUnsigned(n)
+            import nasa_toLustre.lustreAst.*
             opens = {};
             abstractedNodes = {};
             notNode = sprintf('_NOT_Bitwise_Unsigned_%d', n);
@@ -287,6 +296,7 @@ classdef LustMathLib
         end
         %NOR
         function [node, external_nodes, opens, abstractedNodes] = getNORBitwiseUnsigned(n)
+            import nasa_toLustre.lustreAst.*
             opens = {};
             abstractedNodes = {};
             notNode = sprintf('_NOT_Bitwise_Unsigned_%d', n);
@@ -313,6 +323,7 @@ classdef LustMathLib
         end
         %OR
         function [node, external_nodes, opens, abstractedNodes] = getORBitwiseUnsigned(n)
+            import nasa_toLustre.lustreAst.*
             opens = {};
             abstractedNodes = {};
             external_nodes = {};
@@ -372,6 +383,7 @@ classdef LustMathLib
         end
         %XOR
         function [node, external_nodes, opens, abstractedNodes] = getXORBitwiseUnsigned(n)
+            import nasa_toLustre.lustreAst.*
             opens = {};
             abstractedNodes = {};
             external_nodes = {};
@@ -421,6 +433,7 @@ classdef LustMathLib
         
         
         function [node, external_nodes, opens, abstractedNodes] = getNOTBitwiseUnsigned(n)
+            import nasa_toLustre.lustreAst.*
             opens = {};
             abstractedNodes = {};
             external_nodes = {};
@@ -441,6 +454,7 @@ classdef LustMathLib
             node.setIsMain(false);
         end
         function [node, external_nodes, opens, abstractedNodes] = getNOTBitwiseSigned()
+            import nasa_toLustre.lustreAst.*
             opens = {};
             abstractedNodes = {};
             external_nodes = {};
@@ -464,114 +478,114 @@ classdef LustMathLib
         
         %AND
         function [node, external_nodes_i, opens, abstractedNodes] = get__AND_Bitwise_Unsigned_8(varargin)
-            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.getANDBitwiseUnsigned(8);
+            [node, external_nodes_i, opens, abstractedNodes] = nasa_toLustre.utils.LustMathLib.getANDBitwiseUnsigned(8);
         end
         function [node, external_nodes_i, opens, abstractedNodes] = get__AND_Bitwise_Unsigned_16(varargin)
-            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.getANDBitwiseUnsigned(16);
+            [node, external_nodes_i, opens, abstractedNodes] = nasa_toLustre.utils.LustMathLib.getANDBitwiseUnsigned(16);
         end
         function [node, external_nodes_i, opens, abstractedNodes] = get__AND_Bitwise_Unsigned_32(varargin)
-            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.getANDBitwiseUnsigned(32);
+            [node, external_nodes_i, opens, abstractedNodes] = nasa_toLustre.utils.LustMathLib.getANDBitwiseUnsigned(32);
         end
         function [node, external_nodes_i, opens, abstractedNodes] = get__AND_Bitwise_Signed_8(varargin)
-            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.getBitwiseSigned('AND', 8);
+            [node, external_nodes_i, opens, abstractedNodes] = nasa_toLustre.utils.LustMathLib.getBitwiseSigned('AND', 8);
         end
         function [node, external_nodes_i, opens, abstractedNodes] = get__AND_Bitwise_Signed_16(varargin)
-            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.getBitwiseSigned('AND', 16);
+            [node, external_nodes_i, opens, abstractedNodes] = nasa_toLustre.utils.LustMathLib.getBitwiseSigned('AND', 16);
         end
         function [node, external_nodes_i, opens, abstractedNodes] = get__AND_Bitwise_Signed_32(varargin)
-            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.getBitwiseSigned('AND', 32);
+            [node, external_nodes_i, opens, abstractedNodes] = nasa_toLustre.utils.LustMathLib.getBitwiseSigned('AND', 32);
         end
         %NAND
         function [node, external_nodes_i, opens, abstractedNodes] = get__NAND_Bitwise_Unsigned_8(varargin)
-            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.getNANDBitwiseUnsigned(8);
+            [node, external_nodes_i, opens, abstractedNodes] = nasa_toLustre.utils.LustMathLib.getNANDBitwiseUnsigned(8);
         end
         function [node, external_nodes_i, opens, abstractedNodes] = get__NAND_Bitwise_Unsigned_16(varargin)
-            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.getNANDBitwiseUnsigned(16);
+            [node, external_nodes_i, opens, abstractedNodes] = nasa_toLustre.utils.LustMathLib.getNANDBitwiseUnsigned(16);
         end
         function [node, external_nodes_i, opens, abstractedNodes] = get__NAND_Bitwise_Unsigned_32(varargin)
-            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.getNANDBitwiseUnsigned(32);
+            [node, external_nodes_i, opens, abstractedNodes] = nasa_toLustre.utils.LustMathLib.getNANDBitwiseUnsigned(32);
         end
         function [node, external_nodes_i, opens, abstractedNodes] = get__NAND_Bitwise_Signed_8(varargin)
-            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.getBitwiseSigned('NAND', 8);
+            [node, external_nodes_i, opens, abstractedNodes] = nasa_toLustre.utils.LustMathLib.getBitwiseSigned('NAND', 8);
         end
         function [node, external_nodes_i, opens, abstractedNodes] = get__NAND_Bitwise_Signed_16(varargin)
-            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.getBitwiseSigned('NAND', 16);
+            [node, external_nodes_i, opens, abstractedNodes] = nasa_toLustre.utils.LustMathLib.getBitwiseSigned('NAND', 16);
         end
         function [node, external_nodes_i, opens, abstractedNodes] = get__NAND_Bitwise_Signed_32(varargin)
-            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.getBitwiseSigned('NAND', 32);
+            [node, external_nodes_i, opens, abstractedNodes] = nasa_toLustre.utils.LustMathLib.getBitwiseSigned('NAND', 32);
         end
        
         %OR
         function [node, external_nodes_i, opens, abstractedNodes] = get__OR_Bitwise_Unsigned_8(varargin)
-            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.getORBitwiseUnsigned(8);
+            [node, external_nodes_i, opens, abstractedNodes] = nasa_toLustre.utils.LustMathLib.getORBitwiseUnsigned(8);
         end
         function [node, external_nodes_i, opens, abstractedNodes] = get__OR_Bitwise_Unsigned_16(varargin)
-            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.getORBitwiseUnsigned(16);
+            [node, external_nodes_i, opens, abstractedNodes] = nasa_toLustre.utils.LustMathLib.getORBitwiseUnsigned(16);
         end
         function [node, external_nodes_i, opens, abstractedNodes] = get__OR_Bitwise_Unsigned_32(varargin)
-            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.getORBitwiseUnsigned(32);
+            [node, external_nodes_i, opens, abstractedNodes] = nasa_toLustre.utils.LustMathLib.getORBitwiseUnsigned(32);
         end
         function [node, external_nodes_i, opens, abstractedNodes] = get__OR_Bitwise_Signed_8(varargin)
-            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.getBitwiseSigned('OR', 8);
+            [node, external_nodes_i, opens, abstractedNodes] = nasa_toLustre.utils.LustMathLib.getBitwiseSigned('OR', 8);
         end
         function [node, external_nodes_i, opens, abstractedNodes] = get__OR_Bitwise_Signed_16(varargin)
-            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.getBitwiseSigned('OR', 16);
+            [node, external_nodes_i, opens, abstractedNodes] = nasa_toLustre.utils.LustMathLib.getBitwiseSigned('OR', 16);
         end
         function [node, external_nodes_i, opens, abstractedNodes] = get__OR_Bitwise_Signed_32(varargin)
-            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.getBitwiseSigned('OR', 32);
+            [node, external_nodes_i, opens, abstractedNodes] = nasa_toLustre.utils.LustMathLib.getBitwiseSigned('OR', 32);
         end
         %NOR
         function [node, external_nodes_i, opens, abstractedNodes] = get__NOR_Bitwise_Unsigned_8(varargin)
-            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.getNORBitwiseUnsigned(8);
+            [node, external_nodes_i, opens, abstractedNodes] = nasa_toLustre.utils.LustMathLib.getNORBitwiseUnsigned(8);
         end
         function [node, external_nodes_i, opens, abstractedNodes] = get__NOR_Bitwise_Unsigned_16(varargin)
-            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.getNORBitwiseUnsigned(16);
+            [node, external_nodes_i, opens, abstractedNodes] = nasa_toLustre.utils.LustMathLib.getNORBitwiseUnsigned(16);
         end
         function [node, external_nodes_i, opens, abstractedNodes] = get__NOR_Bitwise_Unsigned_32(varargin)
-            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.getNORBitwiseUnsigned(32);
+            [node, external_nodes_i, opens, abstractedNodes] = nasa_toLustre.utils.LustMathLib.getNORBitwiseUnsigned(32);
         end
         function [node, external_nodes_i, opens, abstractedNodes] = get__NOR_Bitwise_Signed_8(varargin)
-            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.getBitwiseSigned('NOR', 8);
+            [node, external_nodes_i, opens, abstractedNodes] = nasa_toLustre.utils.LustMathLib.getBitwiseSigned('NOR', 8);
         end
         function [node, external_nodes_i, opens, abstractedNodes] = get__NOR_Bitwise_Signed_16(varargin)
-            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.getBitwiseSigned('NOR', 16);
+            [node, external_nodes_i, opens, abstractedNodes] = nasa_toLustre.utils.LustMathLib.getBitwiseSigned('NOR', 16);
         end
         function [node, external_nodes_i, opens, abstractedNodes] = get__NOR_Bitwise_Signed_32(varargin)
-            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.getBitwiseSigned('NOR', 32);
+            [node, external_nodes_i, opens, abstractedNodes] = nasa_toLustre.utils.LustMathLib.getBitwiseSigned('NOR', 32);
         end
        
         %XOR
         function [node, external_nodes_i, opens, abstractedNodes] = get__XOR_Bitwise_Unsigned_8(varargin)
-            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.getXORBitwiseUnsigned(8);
+            [node, external_nodes_i, opens, abstractedNodes] = nasa_toLustre.utils.LustMathLib.getXORBitwiseUnsigned(8);
         end
         function [node, external_nodes_i, opens, abstractedNodes] = get__XOR_Bitwise_Unsigned_16(varargin)
-            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.getXORBitwiseUnsigned(16);
+            [node, external_nodes_i, opens, abstractedNodes] = nasa_toLustre.utils.LustMathLib.getXORBitwiseUnsigned(16);
         end
         function [node, external_nodes_i, opens, abstractedNodes] = get__XOR_Bitwise_Unsigned_32(varargin)
-            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.getXORBitwiseUnsigned(32);
+            [node, external_nodes_i, opens, abstractedNodes] = nasa_toLustre.utils.LustMathLib.getXORBitwiseUnsigned(32);
         end
         function [node, external_nodes_i, opens, abstractedNodes] = get__XOR_Bitwise_Signed_8(varargin)
-            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.getBitwiseSigned('XOR', 8);
+            [node, external_nodes_i, opens, abstractedNodes] = nasa_toLustre.utils.LustMathLib.getBitwiseSigned('XOR', 8);
         end
         function [node, external_nodes_i, opens, abstractedNodes] = get__XOR_Bitwise_Signed_16(varargin)
-            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.getBitwiseSigned('XOR', 16);
+            [node, external_nodes_i, opens, abstractedNodes] = nasa_toLustre.utils.LustMathLib.getBitwiseSigned('XOR', 16);
         end
         function [node, external_nodes_i, opens, abstractedNodes] = get__XOR_Bitwise_Signed_32(varargin)
-            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.getBitwiseSigned('XOR', 32);
+            [node, external_nodes_i, opens, abstractedNodes] = nasa_toLustre.utils.LustMathLib.getBitwiseSigned('XOR', 32);
         end
         
         %NOT
         function [node, external_nodes_i, opens, abstractedNodes] = get__NOT_Bitwise_Signed(varargin)
-            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.getNOTBitwiseSigned();
+            [node, external_nodes_i, opens, abstractedNodes] = nasa_toLustre.utils.LustMathLib.getNOTBitwiseSigned();
         end
         function [node, external_nodes_i, opens, abstractedNodes] = get__NOT_Bitwise_Unsigned_8(varargin)
-            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.getNOTBitwiseUnsigned(8);
+            [node, external_nodes_i, opens, abstractedNodes] = nasa_toLustre.utils.LustMathLib.getNOTBitwiseUnsigned(8);
         end
         function [node, external_nodes_i, opens, abstractedNodes] = get__NOT_Bitwise_Unsigned_16(varargin)
-            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.getNOTBitwiseUnsigned(16);
+            [node, external_nodes_i, opens, abstractedNodes] = nasa_toLustre.utils.LustMathLib.getNOTBitwiseUnsigned(16);
         end
         function [node, external_nodes_i, opens, abstractedNodes] = get__NOT_Bitwise_Unsigned_32(varargin)
-            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.getNOTBitwiseUnsigned(32);
+            [node, external_nodes_i, opens, abstractedNodes] = nasa_toLustre.utils.LustMathLib.getNOTBitwiseUnsigned(32);
         end
         %% Integer division
         
@@ -579,6 +593,7 @@ classdef LustMathLib
         % euclidean division for integers.
         
         function [node, external_nodes_i, opens, abstractedNodes] = get_int_div_Ceiling(varargin)
+            import nasa_toLustre.lustreAst.*
             opens = {};
             abstractedNodes = {};
             external_nodes_i = {strcat('LustMathLib_', 'abs_int')};
@@ -695,6 +710,7 @@ classdef LustMathLib
         end
         %Floor: Rounds positive and negative numbers toward negative infinity.
         function [node, external_nodes_i, opens, abstractedNodes] = get_int_div_Floor(varargin)
+            import nasa_toLustre.lustreAst.*
             opens = {};
             abstractedNodes = {};
             external_nodes_i = {strcat('LustMathLib_', 'abs_int')};
@@ -811,6 +827,7 @@ classdef LustMathLib
             node.setIsMain(false);
         end
         function [node, external_nodes_i, opens, abstractedNodes] = get_int_div_Nearest(varargin)
+            import nasa_toLustre.lustreAst.*
             opens = {};
             abstractedNodes = {};
             external_nodes_i = {'LustMathLib_int_div_Ceiling'};
@@ -905,6 +922,7 @@ classdef LustMathLib
         end
         
         function [node, external_nodes_i, opens, abstractedNodes] = get_int_div_Zero(varargin)
+            import nasa_toLustre.lustreAst.*
             opens = {};
             abstractedNodes = {};
             external_nodes_i = {strcat('LustMathLib_', 'abs_int')};
@@ -968,6 +986,7 @@ classdef LustMathLib
             node = '';
         end
         function [node, external_nodes_i, opens, abstractedNodes] = get_rem_int_int(varargin)
+            import nasa_toLustre.lustreAst.*
             opens = {};
             abstractedNodes = {};
             external_nodes_i = {strcat('LustMathLib_', 'abs_int')};
@@ -1005,6 +1024,7 @@ classdef LustMathLib
             node.setIsMain(false);
         end
         function [node, external_nodes_i, opens, abstractedNodes] = get_mod_int_int(varargin)
+            import nasa_toLustre.lustreAst.*
             opens = {};
             abstractedNodes = {};
             external_nodes_i = {strcat('LustMathLib_', 'abs_int')};
@@ -1048,7 +1068,7 @@ classdef LustMathLib
         function [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_2x2(lus_backend, varargin)
             % support 2x2 matrix inversion            
             n = 2;            
-            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.get_inverse_code(lus_backend,n);            
+            [node, external_nodes_i, opens, abstractedNodes] = nasa_toLustre.utils.LustMathLib.get_inverse_code(lus_backend,n);            
         end
         
         function [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_3x3(lus_backend,varargin)
@@ -1056,32 +1076,32 @@ classdef LustMathLib
             % 3x3 matrix inverse formulations:
             % http://mathworld.wolfram.com/MatrixInverse.html
             n = 3;            
-            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.get_inverse_code(lus_backend,n);            
+            [node, external_nodes_i, opens, abstractedNodes] = nasa_toLustre.utils.LustMathLib.get_inverse_code(lus_backend,n);            
         end
         
         function [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_4x4(lus_backend,varargin)
             % support 4x4 matrix inversion
             % http://semath.info/src/inverse-cofactor-ex4.html
             n = 4;
-            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.get_inverse_code(lus_backend,n); 
+            [node, external_nodes_i, opens, abstractedNodes] = nasa_toLustre.utils.LustMathLib.get_inverse_code(lus_backend,n); 
         end
         
         function [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_5x5(lus_backend,varargin)
             % only KIND2 contract for 5x5 matrix inversion
             n = 5;
-            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.get_inverse_code(lus_backend,n); 
+            [node, external_nodes_i, opens, abstractedNodes] = nasa_toLustre.utils.LustMathLib.get_inverse_code(lus_backend,n); 
         end        
 
         function [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_6x6(lus_backend,varargin)
             % only KIND2 contract for 6x6 matrix inversion
             n = 6;
-            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.get_inverse_code(lus_backend,n); 
+            [node, external_nodes_i, opens, abstractedNodes] = nasa_toLustre.utils.LustMathLib.get_inverse_code(lus_backend,n); 
         end 
         
         function [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_7x7(lus_backend,varargin)
             % only KIND2 contract for 7x7 matrix inversion
             n = 7;
-            [node, external_nodes_i, opens, abstractedNodes] = LustMathLib.get_inverse_code(lus_backend,n); 
+            [node, external_nodes_i, opens, abstractedNodes] = nasa_toLustre.utils.LustMathLib.get_inverse_code(lus_backend,n); 
         end 
         
         function [node, external_nodes_i, opens, abstractedNodes] = get_inverse_code(lus_backend,n)
@@ -1089,6 +1109,7 @@ classdef LustMathLib
             % support 3x3 matrix inversion
             % support 4x4 matrix inversion
             % contract for 2x2 to 7x7 matrix inversion
+            import nasa_toLustre.lustreAst.*
             opens = {};
             abstractedNodes = {};
             external_nodes_i ={};
@@ -1124,9 +1145,9 @@ classdef LustMathLib
                 end
             end
             if LusBackendType.isKIND2(lus_backend)
-                contractBody = LustMathLib.getContractBody_nxn_inverstion(n,inline_a,inline_ai);
+                contractBody = nasa_toLustre.utils.LustMathLib.getContractBody_nxn_inverstion(n,inline_a,inline_ai);
                 contract = LustreContract();
-                contract.setBody(contractBody);
+                contract.setBodyEqs(contractBody);
                 node.setLocalContract(contract);
             end
             % inversion and contract
@@ -1152,7 +1173,7 @@ classdef LustMathLib
                         end
                     end
                     
-                    body = LustMathLib.get_Det_Adjugate_Code(n,det,a,adj);
+                    body = nasa_toLustre.utils.LustMathLib.get_Det_Adjugate_Code(n,det,a,adj);
                     
                     % define inverse
                     for i=1:n
@@ -1176,6 +1197,7 @@ classdef LustMathLib
         end
         
         function body = get_Det_Adjugate_Code(n,det,a,adj)
+            import nasa_toLustre.lustreAst.*
             body = {};
             body{1} = AssertExpr(BinaryExpr(BinaryExpr.NEQ, ...
                 det, RealExpr('0.0')));
@@ -1530,6 +1552,7 @@ classdef LustMathLib
         end
         
         function contractBody = getContractBody_nxn_inverstion(n,inputs,outputs)
+            import nasa_toLustre.lustreAst.*
             % guarantee code     A*A_inv = I
             % A*A_inv(ij) = 1.0 if i==j, = 0.0 if i!=j
             contractBody = cell(1, n*n);

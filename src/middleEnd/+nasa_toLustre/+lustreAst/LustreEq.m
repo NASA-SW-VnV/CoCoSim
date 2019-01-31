@@ -1,4 +1,4 @@
-classdef LustreEq < LustreAst
+classdef LustreEq < nasa_toLustre.lustreAst.LustreExpr
     %LustreEq
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
@@ -14,20 +14,20 @@ classdef LustreEq < LustreAst
     methods
         function obj = LustreEq(lhs, rhs)
             if ischar(rhs)
-                obj.rhs = VarIdExpr(rhs);
+                obj.rhs = nasa_toLustre.lustreAst.VarIdExpr(rhs);
             elseif iscell(rhs) && numel(rhs) == 1
                 obj.rhs = rhs{1};
             elseif iscell(rhs)
-                obj.rhs = TupleExpr(rhs);
+                obj.rhs = nasa_toLustre.lustreAst.TupleExpr(rhs);
             else
                 obj.rhs = rhs;
             end
             if ischar(lhs)
-                obj.lhs = VarIdExpr(lhs);
+                obj.lhs = nasa_toLustre.lustreAst.VarIdExpr(lhs);
             elseif iscell(lhs) && numel(lhs) == 1
                 obj.lhs = lhs{1};
             elseif iscell(lhs)
-                obj.lhs = TupleExpr(lhs);
+                obj.lhs = nasa_toLustre.lustreAst.TupleExpr(lhs);
             else
                 obj.lhs = lhs;
             end
@@ -42,14 +42,14 @@ classdef LustreEq < LustreAst
         function new_obj = deepCopy(obj)
             new_lhs = obj.lhs.deepCopy();
             new_rhs = obj.rhs.deepCopy();
-            new_obj = LustreEq(new_lhs, new_rhs);
+            new_obj = nasa_toLustre.lustreAst.LustreEq(new_lhs, new_rhs);
         end
         
         %% simplify expression
         function new_obj = simplify(obj)
             new_lhs = obj.lhs.simplify();
             new_rhs = obj.rhs.simplify();
-            new_obj = LustreEq(new_lhs, new_rhs);
+            new_obj = nasa_toLustre.lustreAst.LustreEq(new_lhs, new_rhs);
         end
         
         %% nbOcc
@@ -60,7 +60,7 @@ classdef LustreEq < LustreAst
         function new_obj = substituteVars(obj, oldVar, newVar)
             new_lhs = obj.lhs.substituteVars(oldVar, newVar);
             new_rhs = obj.rhs.substituteVars(oldVar, newVar);
-            new_obj = LustreEq(new_lhs, new_rhs);
+            new_obj = nasa_toLustre.lustreAst.LustreEq(new_lhs, new_rhs);
         end
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
@@ -71,12 +71,12 @@ classdef LustreEq < LustreAst
             [new_rhs, VarIdrhs] = obj.rhs.changePre2Var();
             varIds = [varIds, VarIdrhs];
             
-            new_obj = LustreEq(new_lhs, new_rhs);
+            new_obj = nasa_toLustre.lustreAst.LustreEq(new_lhs, new_rhs);
         end
         
         function new_obj = changeArrowExp(obj, cond)
             new_rhs = obj.rhs.changeArrowExp(cond);
-            new_obj = LustreEq(obj.lhs, new_rhs);
+            new_obj = nasa_toLustre.lustreAst.LustreEq(obj.lhs, new_rhs);
         end
         
         %% Stateflow function
@@ -87,7 +87,7 @@ classdef LustreEq < LustreAst
         function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft)
             new_rhs = obj.rhs.pseudoCode2Lustre(outputs_map, false);
             [new_lhs, outputs_map] = obj.lhs.pseudoCode2Lustre(outputs_map, true);
-            new_obj = LustreEq(new_lhs, new_rhs);
+            new_obj = nasa_toLustre.lustreAst.LustreEq(new_lhs, new_rhs);
         end
         %% This function is used by KIND2 LustreProgram.print()
         function nodesCalled = getNodesCalled(obj)

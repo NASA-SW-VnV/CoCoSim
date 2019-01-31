@@ -14,8 +14,8 @@ function [nom_lustre_file, xml_trace, status, unsupportedOptions, abstractedBloc
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    import nasa_toLustre.*
-    import nasa_toLustre.utils.*
+    L = nasa_toLustre.ToLustreImport.L;
+    import(L{:})
     
     %% global variables
     global TOLUSTRE_ENUMS_MAP TOLUSTRE_ENUMS_CONV_NODES ...
@@ -282,6 +282,8 @@ end
 function [nodes_ast, contracts_ast, external_libraries, error_status] = ...
         recursiveGeneration(parent, blk, main_sampleTime, is_main_node,...
         lus_backend, coco_backend, xml_trace)
+    import nasa_toLustre.frontEnd.SS_To_LustreNode
+    import nasa_toLustre.frontEnd.SF_To_LustreNode
     nodes_ast = {};
     contracts_ast = {};
     external_libraries = {};
@@ -303,7 +305,7 @@ function [nodes_ast, contracts_ast, external_libraries, error_status] = ...
             external_libraries = [external_libraries, external_libraries_i];
             error_status = error_status_i || error_status;
         end
-        [b, status] = getWriteType(blk);
+        [b, status] = nasa_toLustre.utils.getWriteType(blk);
         if status || ~b.isContentNeedToBeTranslated()
             return;
         end

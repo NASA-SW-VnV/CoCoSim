@@ -26,7 +26,7 @@ classdef EnumTypeExpr < nasa_toLustre.lustreAst.LustreExpr
             % transform args from String to EnumValueExpr
             for i=1:numel(obj.enum_args)
                 if ischar(obj.enum_args{i})
-                    obj.enum_args{i} = EnumValueExpr(obj.enum_args{i});
+                    obj.enum_args{i} = nasa_toLustre.lustreAst.EnumValueExpr(obj.enum_args{i});
                 end
             end
         end
@@ -43,7 +43,7 @@ classdef EnumTypeExpr < nasa_toLustre.lustreAst.LustreExpr
         end
         
         function new_obj = deepCopy(obj)
-            new_obj = EnumTypeExpr(obj.enum_name, obj.enum_args);
+            new_obj = nasa_toLustre.lustreAst.EnumTypeExpr(obj.enum_name, obj.enum_args);
         end
         %% simplify expression
         function new_obj = simplify(obj)
@@ -88,7 +88,7 @@ classdef EnumTypeExpr < nasa_toLustre.lustreAst.LustreExpr
         end
         
         function code = print_lustrec(obj, backend)
-            args_str = NodeCallExpr.getArgsStr(obj.enum_args, backend);
+            args_str = nasa_toLustre.lustreAst.NodeCallExpr.getArgsStr(obj.enum_args, backend);
             code = sprintf('type %s = enum {%s};\n', obj.enum_name, args_str);
         end
         

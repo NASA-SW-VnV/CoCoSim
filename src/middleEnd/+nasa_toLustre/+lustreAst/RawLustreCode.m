@@ -1,4 +1,4 @@
-classdef RawLustreCode < LustreAst
+classdef RawLustreCode < nasa_toLustre.lustreAst.LustreAst
     %RawLustreCode
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
@@ -23,7 +23,7 @@ classdef RawLustreCode < LustreAst
         end
         
         function new_obj = deepCopy(obj)
-            new_obj = RawLustreCode(obj.code, obj.name);
+            new_obj = nasa_toLustre.lustreAst.RawLustreCode(obj.code, obj.name);
         end
         
         %% simplify expression

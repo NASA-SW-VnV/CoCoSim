@@ -96,7 +96,7 @@ classdef RandomNumber_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     BinaryExpr(BinaryExpr.LTE, RealExpr(min(r)), VarIdExpr('r')), ...
                     BinaryExpr(BinaryExpr.LTE, VarIdExpr('r'), RealExpr(max(r)))));
                 contract = LustreContract();
-                contract.setBody(contractElts);
+                contract.setBodyEqs(contractElts);
                 node.setLocalContract(contract);
                 node.setIsImported(true);
             else

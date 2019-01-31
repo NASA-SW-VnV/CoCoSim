@@ -22,7 +22,7 @@ classdef LustreComment < nasa_toLustre.lustreAst.LustreExpr
         end
         
         function new_obj = deepCopy(obj)
-            new_obj = LustreComment(obj.text,...
+            new_obj = nasa_toLustre.lustreAst.LustreComment(obj.text,...
                 obj.isMultiLine);
         end
         

@@ -19,7 +19,7 @@ classdef EnumValueExpr < nasa_toLustre.lustreAst.LustreExpr
             end
         end
         function new_obj = deepCopy(obj)
-            new_obj = EnumValueExpr(obj.enum_name);
+            new_obj = nasa_toLustre.lustreAst.EnumValueExpr(obj.enum_name);
         end
         %% simplify expression
         function new_obj = simplify(obj)

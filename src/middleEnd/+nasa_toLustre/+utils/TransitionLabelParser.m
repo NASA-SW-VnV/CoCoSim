@@ -31,7 +31,7 @@ function [E, expr2] = parseEvent(expr1)
     % e.g. Set | Resume
     if ~MatlabUtils.contains(expr1, '[') && ~MatlabUtils.contains(expr1, '{') && ~MatlabUtils.contains(expr1, '/')
         % e.g. Set | Resume
-        [~, ~, expr2] = Fcn_Exp_Parser.parse(expr1);
+        [~, ~, expr2] = nasa_toLustre.utils.Fcn_Exp_Parser.parse(expr1);
         if numel(expr2) < numel(expr1)
             E = expr1(1:numel(expr1) - numel(expr2));
         else
@@ -41,7 +41,7 @@ function [E, expr2] = parseEvent(expr1)
     end
     
     % an event can be "after(5, tick)"
-    [sym, expr2] = Fcn_Exp_Parser.parseFunc(expr1);
+    [sym, expr2] = nasa_toLustre.utils.Fcn_Exp_Parser.parseFunc(expr1);
     if ~isempty(sym)
         if numel(expr2) < numel(expr1)
             E = expr1(1:numel(expr1) - numel(expr2));
@@ -51,7 +51,7 @@ function [E, expr2] = parseEvent(expr1)
         return;
     end
     % an event can be "E"
-    [sym, expr2] = Fcn_Exp_Parser.parseVar(expr1);
+    [sym, expr2] = nasa_toLustre.utils.Fcn_Exp_Parser.parseVar(expr1);
     if ~isempty(sym)
         if numel(expr2) < numel(expr1)
             E = expr1(1:numel(expr1) - numel(expr2));
@@ -63,7 +63,7 @@ function [E, expr2] = parseEvent(expr1)
     
     
     % an event can be "(E | F)"
-    [sym, expr2] = Fcn_Exp_Parser.parsePar(expr1);
+    [sym, expr2] = nasa_toLustre.utils.Fcn_Exp_Parser.parsePar(expr1);
     if ~isempty(sym)
         if numel(expr2) < numel(expr1)
             E = expr1(1:numel(expr1) - numel(expr2));

@@ -8,6 +8,7 @@ function [ new_ir, status ] = transitionLabel_SFIR_pp( new_ir )
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    import nasa_toLustre.IR_pp.stateflow_IR_pp.stateflow_fields.transitionLabel_SFIR_pp
     status = false;
     if isfield(new_ir, 'States')
         for i=1:numel(new_ir.States)
@@ -70,7 +71,8 @@ end
 function [transitions, status] = adapt_transitions(transitions)
     status = 0;
     for i=1:numel(transitions)
-        [transitionObject, status_i, unsupportedExp] = TransitionLabelParser(transitions{i}.LabelString);
+        [transitionObject, status_i, unsupportedExp] = ...
+            nasa_toLustre.utils.TransitionLabelParser(transitions{i}.LabelString);
         if status_i
             display_msg(sprintf('ParseError  character unsupported  %s \n in LabelString %s', ...
                 unsupportedExp, transitions{i}.LabelString), ...
