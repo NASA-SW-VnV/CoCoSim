@@ -34,8 +34,8 @@ classdef Exp2Lus < handle
             %pre-process exp
             orig_exp = exp;
             exp = strrep(orig_exp, '!=', '~=');
-            %exp = strrep(exp, '[', '(');%not good for [x, y] = f(in1..);
-            %exp = strrep(exp, ']', ')');
+            % adapt C access array u[1] to Matlab syntax u(1)
+            exp = regexprep(exp, '(\w)\[([^\[\]])+\]', '$1($2)');
             %get exp IR
             try
                 em2json =  cocosim.matlab2IR.EM2JSON;

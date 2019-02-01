@@ -49,7 +49,7 @@ classdef Block_To_Lustre < handle
             lus_backend, coco_backend, main_sampleTime, varargin)
         getUnsupportedOptions(obj, parent, blk, ...
             lus_backend, coco_backend, main_sampleTime, varargin)
-        isAbstracted(obj, lus_backend, parent, blk, main_sampleTime, varargin)
+        isAbstracted(obj, parent, blk, lus_backend, coco_backend, main_sampleTime, varargin)
     end
     methods
         function addVariable(obj, varname, ...

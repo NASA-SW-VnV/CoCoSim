@@ -228,7 +228,7 @@ function  [unsupportedOptionsMap, abstractedBlocks]  = blockUnsupportedOptions( 
             unsupportedOptionsMap(blkType) = htmlMsg;
         end
     end
-    is_abstracted = b.isAbstracted(lus_backend, parent, blk, main_sampleTime);
+    is_abstracted = b.isAbstracted(parent, blk, lus_backend, coco_backend, main_sampleTime);
     if is_abstracted
         msg = sprintf('Block "%s" with Type "%s".', ...
             HtmlItem.addOpenCmd(blk.Origin_path), blkType);

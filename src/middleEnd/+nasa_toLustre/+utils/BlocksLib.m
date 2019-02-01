@@ -6,7 +6,7 @@ classdef BlocksLib
     
     methods(Static)
         
-        function [node, external_nodes_i, opens, abstractedNodes] = template(varargin)
+        function [node, external_nodes_i, opens, abstractedNodes] = template(lus_backend)
             opens = {};
             abstractedNodes = {};
             external_nodes_i = {};

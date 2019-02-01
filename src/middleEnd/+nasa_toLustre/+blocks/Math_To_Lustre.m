@@ -185,7 +185,7 @@ classdef Math_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         end
         
         %%
-        function is_Abstracted = isAbstracted(~, ~, ~, blk, varargin)
+        function is_Abstracted = isAbstracted(obj, ~, blk, varargin)
             operator = blk.Operator;
             is_Abstracted = ~ (...
                 strcmp(operator, 'transpose') ...

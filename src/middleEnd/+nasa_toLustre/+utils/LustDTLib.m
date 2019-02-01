@@ -218,9 +218,12 @@ classdef LustDTLib
         end
         
         %%
-        function [node, external_nodes_i, opens, abstractedNodes] = get_conv(varargin)
+        function [node, external_nodes_i, opens, abstractedNodes] = get_conv(lus_backend)
             opens = {'conv'};
-            abstractedNodes = {'lustrec DataType conversion Library'};
+            abstractedNodes = {};
+            if ~LusBackendType.isLUSTREC(lus_backend)
+                abstractedNodes = {'DataType conversion Library'};
+            end
             external_nodes_i = {};
             node = '';
         end

@@ -6,7 +6,7 @@ classdef LustMathLib
     
     methods(Static)
         
-        function [node, external_nodes_i, opens, abstractedNodes] = template(varargin)
+        function [node, external_nodes_i, opens, abstractedNodes] = template(lus_backend)
             opens = {};
             abstractedNodes = {};
             external_nodes_i = {};
@@ -58,16 +58,22 @@ classdef LustMathLib
         end
         
         %%
-        function [node, external_nodes_i, opens, abstractedNodes] = get_lustrec_math(varargin)
+        function [node, external_nodes_i, opens, abstractedNodes] = get_lustrec_math(lus_backend)
             opens = {'lustrec_math'};
-            abstractedNodes = {'lustrec_math library'};
+            abstractedNodes = {};
+            if ~LusBackendType.isLUSTREC(lus_backend)
+                abstractedNodes = {'lustrec_math library'};
+            end
             external_nodes_i = {};
             node = '';
         end
         
-        function [node, external_nodes_i, opens, abstractedNodes] = get_simulink_math_fcn(varargin)
+        function [node, external_nodes_i, opens, abstractedNodes] = get_simulink_math_fcn(lus_backend)
             opens = {'simulink_math_fcn'};
-            abstractedNodes = {'simulink_math_fcn library'};
+            abstractedNodes = {};
+            if ~LusBackendType.isLUSTREC(lus_backend)
+                abstractedNodes = {'simulink_math_fcn library'};
+            end
             external_nodes_i = {};
             node = '';
         end
@@ -979,10 +985,13 @@ classdef LustMathLib
         end
         
         %% fmod, rem, mod
-        function [node, external_nodes_i, opens, abstractedNodes] = get_fmod(varargin)
+        function [node, external_nodes_i, opens, abstractedNodes] = get_fmod(lus_backend)
             %TODO create fmod node for Kind2: z = (real((int x) * 1000 mod (int y) * 1000)/1000.0 ??
             opens = {'lustrec_math'};
-            abstractedNodes = {'fmod'};
+            abstractedNodes = {};
+            if ~LusBackendType.isLUSTREC(lus_backend)
+                abstractedNodes = {'fmod'};
+            end
             external_nodes_i = {};
             node = '';
         end
@@ -1154,6 +1163,7 @@ classdef LustMathLib
             % inversion and contract
             if  n > 4
                 node.setIsImported(true);
+                abstractedNodes = {sprintf('Inverse Matrix of dimension %d', n)};
             elseif n==4 && LusBackendType.isKIND2(lus_backend)
                 node.setIsImported(true);
             else

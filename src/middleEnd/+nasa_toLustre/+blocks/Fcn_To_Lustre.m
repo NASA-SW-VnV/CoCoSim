@@ -58,8 +58,8 @@ classdef Fcn_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             options = obj.unsupported_options;
         end
         %%
-        function is_Abstracted = isAbstracted(obj, varargin)
-            is_Abstracted = ~isempty(obj.getExternalLibraries);
+        function is_Abstracted = isAbstracted(varargin)
+            is_Abstracted = false;
         end
     end
     methods(Static)

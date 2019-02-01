@@ -4,6 +4,8 @@ Ktrinh: Assignment,
         DataTypeConversion 
         DataTypeDuplicate (ignored),
         Demux,
+        Discrete Derivative (check pp in article)
+        Derivative
         DiscretePulseGenerator, 
         DiscreteTransferFcn (pp),
         DiscreteStateSpace (pp),
@@ -93,9 +95,8 @@ Hamza:  Abs,
 
    
 Not supported yet:
-    Discrete Derivative (check pp in article)
+    
     Rate Limiter
-    Derivative (discretize it by DiscreteDerivative in pp or pre-process it with DiscreteDerivative)
     InitialCondition
     UniformRandomNumber ( see RandomNumber)
 

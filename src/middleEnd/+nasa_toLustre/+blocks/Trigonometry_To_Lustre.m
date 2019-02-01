@@ -91,7 +91,7 @@ classdef Trigonometry_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             options = obj.unsupported_options;
         end
         %%
-        function is_Abstracted = isAbstracted(~, lus_backend, varargin)
+        function is_Abstracted = isAbstracted(obj, ~, ~, lus_backend, varargin)
             is_Abstracted = LusBackendType.isKIND2(lus_backend);
         end
     end
