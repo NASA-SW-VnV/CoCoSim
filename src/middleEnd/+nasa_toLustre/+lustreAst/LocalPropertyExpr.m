@@ -39,7 +39,10 @@ classdef LocalPropertyExpr < nasa_toLustre.lustreAst.LustreExpr
         function new_obj = substituteVars(obj, oldVar, newVar)
             new_obj = nasa_toLustre.lustreAst.LocalPropertyExpr(obj.id, obj.exp.substituteVars(oldVar, newVar));
         end
-        
+        %% This function is used in substitute vars in LustreNode
+        function all_obj = getAllLustreExpr(obj)
+            all_obj = [{obj.exp}; obj.exp.getAllLustreExpr()];
+        end
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
             new_obj = obj;

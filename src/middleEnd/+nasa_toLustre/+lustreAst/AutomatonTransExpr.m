@@ -55,6 +55,10 @@ classdef AutomatonTransExpr < nasa_toLustre.lustreAst.LustreExpr
         function new_obj = substituteVars(obj, varargin)
             new_obj = obj;
         end
+        
+        function all_obj = getAllLustreExpr(obj)
+            all_obj = [{obj.condition}; obj.condition.getAllLustreExpr()];
+        end
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
             new_obj = obj;

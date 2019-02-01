@@ -51,6 +51,12 @@ classdef ConcurrentAssignments < nasa_toLustre.lustreAst.LustreExpr
             new_assignments = cellfun(@(x) x.substituteVars(oldVar, newVar), obj.assignments, 'UniformOutput', 0);
             new_obj = nasa_toLustre.lustreAst.ConcurrentAssignments(new_assignments);
         end
+        function all_obj = getAllLustreExpr(obj)
+            all_obj = {};
+            for i=1:numel(obj.assignments)
+                all_obj = [all_obj; {obj.assignments{i}}; obj.assignments{i}.getAllLustreExpr()];
+            end
+        end
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
             varIds = {};

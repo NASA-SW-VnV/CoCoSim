@@ -14,6 +14,7 @@ classdef LustreExpr < nasa_toLustre.lustreAst.LustreAst
         changePre2Var(obj)
         simplify(obj)
         nbOccuranceVar(obj)
+        getAllLustreExpr(obj)
         print(obj, backend)
         print_lustrec(obj)
         print_kind2(obj)

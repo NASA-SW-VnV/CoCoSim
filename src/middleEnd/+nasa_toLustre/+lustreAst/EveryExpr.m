@@ -23,6 +23,15 @@ classdef EveryExpr < nasa_toLustre.lustreAst.LustreExpr
             obj.cond = cond;
         end
         
+        function nodeName = getNodeName(obj)
+            nodeName = obj.nodeName;
+        end
+        function nodeArgs = getNodeArgs(obj)
+            nodeArgs = obj.nodeArgs;
+        end
+        function cond = getCond(obj)
+            cond = obj.cond;
+        end
         function new_obj = deepCopy(obj)
             new_args = cellfun(@(x) x.deepCopy(), obj.nodeArgs, 'UniformOutput', 0);
             new_obj = nasa_toLustre.lustreAst.EveryExpr(obj.nodeName, ...
@@ -40,6 +49,13 @@ classdef EveryExpr < nasa_toLustre.lustreAst.LustreExpr
             new_args = cellfun(@(x) x.substituteVars(oldVar, newVar), obj.nodeArgs, 'UniformOutput', 0);
             new_obj = nasa_toLustre.lustreAst.EveryExpr(obj.nodeName, ...
                 new_args, obj.cond);
+        end
+        %% This function is used in substitute vars in LustreNode
+        function all_obj = getAllLustreExpr(obj)
+            all_obj = [{obj.cond}; obj.cond.getAllLustreExpr()];
+            for i=1:numel(obj.nodeArgs)
+                all_obj = [all_obj; {obj.nodeArgs{i}}; obj.nodeArgs{i}.getAllLustreExpr()];
+            end
         end
         %% nbOccurance
         function nb_occ = nbOccuranceVar(obj, var)

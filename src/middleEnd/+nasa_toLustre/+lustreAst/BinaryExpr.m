@@ -92,6 +92,11 @@ classdef BinaryExpr < nasa_toLustre.lustreAst.LustreExpr
                 obj.right.substituteVars( oldVar, newVar), ...
                 obj.withPar, obj.addEpsilon, obj.epsilon);
         end
+        
+        function all_obj = getAllLustreExpr(obj)
+            all_obj = [{obj.left}; obj.left.getAllLustreExpr();...
+                {obj.right}; obj.right.getAllLustreExpr()];
+        end
          %% simplify expression
         function new_obj = simplify(obj)
             import nasa_toLustre.lustreAst.*

@@ -41,6 +41,9 @@ classdef ContractAssumeExpr < nasa_toLustre.lustreAst.LustreExpr
             new_obj = nasa_toLustre.lustreAst.ContractAssumeExpr(obj.id, ...
                 obj.exp.substituteVars(oldVar, newVar));
         end
+        function all_obj = getAllLustreExpr(obj)
+            all_obj = [{obj.exp}; obj.exp.getAllLustreExpr()];
+        end
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
             new_obj = obj;

@@ -40,6 +40,13 @@ classdef MergeExpr < nasa_toLustre.lustreAst.LustreExpr
             new_exprs = cellfun(@(x) x.substituteVars(oldVar, newVar), obj.exprs, 'UniformOutput', 0);
             new_obj = nasa_toLustre.lustreAst.MergeExpr(obj.clock, new_exprs);
         end
+        %% This function is used in substitute vars in LustreNode
+        function all_obj = getAllLustreExpr(obj)
+            all_obj = {obj.clock};
+            for i=1:numel(obj.exprs)
+                all_obj = [all_obj; {obj.exprs{i}}; obj.exprs{i}.getAllLustreExpr()];
+            end
+        end
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
             varIds = {};

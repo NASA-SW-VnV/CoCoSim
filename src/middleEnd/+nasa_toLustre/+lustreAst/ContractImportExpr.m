@@ -53,6 +53,15 @@ classdef ContractImportExpr < nasa_toLustre.lustreAst.LustreExpr
             new_obj = nasa_toLustre.lustreAst.ContractImportExpr(obj.name, ...
                 new_inputs, new_outputs);
         end
+        function all_obj = getAllLustreExpr(obj)
+            all_obj = {};
+            for i=1:numel(obj.inputs)
+                all_obj = [all_obj; {obj.inputs{i}}; obj.inputs{i}.getAllLustreExpr()];
+            end
+            for i=1:numel(obj.outputs)
+                all_obj = [all_obj; {obj.outputs{i}}; obj.outputs{i}.getAllLustreExpr()];
+            end
+        end
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
             new_obj = obj;

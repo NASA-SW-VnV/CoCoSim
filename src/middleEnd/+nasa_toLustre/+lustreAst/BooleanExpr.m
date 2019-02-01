@@ -52,6 +52,9 @@ classdef BooleanExpr < nasa_toLustre.lustreAst.LustreExpr
             new_obj = obj;
         end
         
+        function all_obj = getAllLustreExpr(obj)
+            all_obj = {};
+        end
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
             new_obj = obj;

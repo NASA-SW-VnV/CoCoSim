@@ -74,6 +74,7 @@ classdef LustreProgram < nasa_toLustre.lustreAst.LustreAst
         function nb_occ = nbOccuranceVar(varargin)
             nb_occ = 0;
         end
+        
         %%
         function code = print(obj, backend)
             %TODO: check if LUSTREC syntax is OK for the other backends.

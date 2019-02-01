@@ -59,6 +59,16 @@ classdef ContractModeExpr < nasa_toLustre.lustreAst.LustreExpr
                 'UniformOutput', 0);
             new_obj = nasa_toLustre.lustreAst.ContractModeExpr(obj.name, new_requires, new_ensures);
         end
+        %% This function is used in substitute vars in LustreNode
+        function all_obj = getAllLustreExpr(obj)
+            all_obj = {};
+            for i=1:numel(obj.requires)
+                all_obj = [all_obj; {obj.requires{i}}; obj.requires{i}.getAllLustreExpr()];
+            end
+            for i=1:numel(obj.ensures)
+                all_obj = [all_obj; {obj.ensures{i}}; obj.ensures{i}.getAllLustreExpr()];
+            end
+        end
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
             new_obj = obj;

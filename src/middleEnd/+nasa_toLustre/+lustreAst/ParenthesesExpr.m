@@ -45,6 +45,10 @@ classdef ParenthesesExpr < nasa_toLustre.lustreAst.LustreExpr
             new_expr = obj.expr.substituteVars(var, newVar);
             new_obj = nasa_toLustre.lustreAst.ParenthesesExpr(new_expr);
         end
+        %% This function is used in substitute vars in LustreNode
+        function all_obj = getAllLustreExpr(obj)
+            all_obj = [{obj.expr}; obj.expr.getAllLustreExpr()];
+        end
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
             [new_expr, varIds] = obj.expr.changePre2Var();

@@ -74,7 +74,13 @@ classdef IteExpr < nasa_toLustre.lustreAst.LustreExpr
                 obj.ElseExpr.substituteVars(oldVar, newVar),...
                 obj.OneLine);
         end
-        
+        %% This function is used in substitute vars in LustreNode
+        function all_obj = getAllLustreExpr(obj)
+            all_obj = [...
+                {obj.condition}; obj.condition.getAllLustreExpr();...
+                {obj.thenExpr}; obj.thenExpr.getAllLustreExpr();...
+                {obj.ElseExpr}; obj.ElseExpr.getAllLustreExpr()];
+        end
         
         %% nbOccurance
         function nb_occ = nbOccuranceVar(obj, var)

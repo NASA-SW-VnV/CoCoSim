@@ -165,6 +165,12 @@ classdef LustreNode < nasa_toLustre.lustreAst.LustreAst
                 obj.isMain);
         end
         %% simplify expression
+        function all_obj = getAllLustreExpr(obj)
+            all_obj = {};
+            for i=1:numel(obj.bodyEqs)
+                all_obj = [all_obj; {obj.bodyEqs{i}}; obj.bodyEqs{i}.getAllLustreExpr()];
+            end
+        end
         function nb_occ = nbOccuranceVar(obj, var)
             nb_occ_perEq = cellfun(@(x) x.nbOccuranceVar(var), obj.bodyEqs, 'UniformOutput', true);
             nb_occ = sum(nb_occ_perEq);
@@ -384,12 +390,16 @@ classdef LustreNode < nasa_toLustre.lustreAst.LustreAst
                 end
             end
             %ignore simplification if there is automaton
-            eqsClass = cellfun(@(x) class(x), new_bodyEqs, 'UniformOutput', false);
-            if ismember('nasa_toLustre.lustreAst.LustreAutomaton', eqsClass)
+            all_obj = obj.getAllLustreExpr();
+            all_objClass = cellfun(@(x) class(x), all_obj, 'UniformOutput', false);
+            if ismember('nasa_toLustre.lustreAst.LustreAutomaton', all_objClass)
                 return;
             end
-            EveryEqs = new_bodyEqs(strcmp(eqsClass,'nasa_toLustre.lustreAst.EveryExpr'));
-            EveryConds = cellfun(@(x) x.cond, EveryEqs, 'UniformOutput', false);
+            %get EveryExpr Conditions
+            EveryExprObjects = all_obj(strcmp(all_objClass, 'nasa_toLustre.lustreAst.EveryExpr'));
+            EveryConds = cellfun(@(x) x.getCond(), EveryExprObjects, 'UniformOutput', false);
+            
+            
             % go over Assignments
             for i=1:numel(new_bodyEqs)
                 % e.g. y = f(x); 

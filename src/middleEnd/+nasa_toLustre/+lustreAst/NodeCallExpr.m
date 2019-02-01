@@ -65,6 +65,13 @@ classdef NodeCallExpr < nasa_toLustre.lustreAst.LustreExpr
             new_args = cellfun(@(x) x.substituteVars(var, newVar), obj.args, 'UniformOutput', 0);
             new_obj = nasa_toLustre.lustreAst.NodeCallExpr(obj.nodeName, new_args);
         end
+        %% This function is used in substitute vars in LustreNode
+        function all_obj = getAllLustreExpr(obj)
+            all_obj = {};
+            for i=1:numel(obj.args)
+                all_obj = [all_obj; {obj.args{i}}; obj.args{i}.getAllLustreExpr()];
+            end
+        end
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
             varIds = {};

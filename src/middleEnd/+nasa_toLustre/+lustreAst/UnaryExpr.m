@@ -64,6 +64,11 @@ classdef UnaryExpr < nasa_toLustre.lustreAst.LustreExpr
             new_expr = obj.expr.substituteVars(var, newVar);
             new_obj = nasa_toLustre.lustreAst.UnaryExpr(obj.op, new_expr, obj.withPar);
         end
+        %% This function is used in substitute vars in LustreNode
+        function all_obj = getAllLustreExpr(obj)
+            all_obj = [{obj.expr}; obj.expr.getAllLustreExpr()];
+        end
+        
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
             import nasa_toLustre.lustreAst.*

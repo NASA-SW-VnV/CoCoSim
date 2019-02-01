@@ -100,6 +100,21 @@ classdef AutomatonState < nasa_toLustre.lustreAst.LustreExpr
         function new_obj = substituteVars(obj, varargin)
             new_obj = obj;
         end
+        function all_obj = getAllLustreExpr(obj)
+            all_obj = {};
+            for i=1:numel(obj.local_vars)
+                all_obj = [all_obj; {obj.local_vars{i}}; obj.local_vars{i}.getAllLustreExpr()];
+            end
+            for i=1:numel(obj.strongTrans)
+                all_obj = [all_obj; {obj.strongTrans{i}}; obj.strongTrans{i}.getAllLustreExpr()];
+            end
+            for i=1:numel(obj.weakTrans)
+                all_obj = [all_obj; {obj.weakTrans{i}}; obj.weakTrans{i}.getAllLustreExpr()];
+            end
+            for i=1:numel(obj.body)
+                all_obj = [all_obj; {obj.body{i}}; obj.body{i}.getAllLustreExpr()];
+            end
+        end
         %%
         function code = print(obj, backend)
             %TODO: check if lustrec syntax is OK for jkind and prelude.

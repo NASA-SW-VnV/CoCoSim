@@ -38,6 +38,10 @@ classdef RawLustreCode < nasa_toLustre.lustreAst.LustreAst
         function new_obj = substituteVars(obj, varargin)
             new_obj = obj;
         end
+        %% This function is used in substitute vars in LustreNode
+        function all_obj = getAllLustreExpr(obj)
+            all_obj = {};
+        end
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
             new_obj = obj;

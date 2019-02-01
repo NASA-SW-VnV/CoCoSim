@@ -98,6 +98,10 @@ classdef VarIdExpr < nasa_toLustre.lustreAst.LustreExpr
             nodesCalled = {};
         end
         
+        %% This function is used in substitute vars in LustreNode
+        function all_obj = getAllLustreExpr(obj)
+            all_obj = {};
+        end
         %%
         function code = print(obj, backend)
             %TODO: check if LUSTREC syntax is OK for the other backends.
