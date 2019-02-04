@@ -206,7 +206,7 @@ end
 
 
 
-function code = parseOtherFunc(obj, tree, parent, blk, inputs, data_map, expected_dt, isStateFlow)
+function code = parseOtherFunc(obj, tree, parent, blk, data_map, inputs, expected_dt, isStateFlow)
     global SF_GRAPHICALFUNCTIONS_MAP;
     L = nasa_toLustre.ToLustreImport.L;
     import(L{:})

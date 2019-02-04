@@ -33,8 +33,7 @@ classdef Fcn_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             expected_dt = 'real';
             
             [lusCode, status] = ...
-                Exp2Lus.expToLustre(obj, blk.Expr, parent, blk, inputs, ...
-                data_map, expected_dt);
+                MExpToLusAST.translate(obj, blk.Expr, parent, blk, data_map, inputs, expected_dt, true, false);
             
             if status
                 display_msg(sprintf('Block %s is not supported', HtmlItem.addOpenCmd(blk.Origin_path)), ...

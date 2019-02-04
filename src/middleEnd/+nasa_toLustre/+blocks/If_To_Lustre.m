@@ -128,8 +128,7 @@ classdef If_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             %display_msg(cond, MsgType.DEBUG, 'If_To_Lustre', '');
             expected_dt = 'bool';
             [exp, status] = ...
-                Exp2Lus.expToLustre(obj, cond, parent, blk, inputs_cell, ...
-                data_map, expected_dt);
+                MExpToLusAST.translate(obj, cond, parent, blk,data_map, inputs_cell, expected_dt, true, false);
             if iscell(exp) 
                 if numel(exp) == 1
                     exp = exp{1};

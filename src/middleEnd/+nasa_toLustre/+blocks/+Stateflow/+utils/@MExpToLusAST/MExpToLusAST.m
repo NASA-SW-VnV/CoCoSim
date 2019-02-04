@@ -4,11 +4,22 @@ classdef MExpToLusAST
     properties
     end
     methods(Static)
-        function [lusCode, status] = translate(BlkObj, parent, blk, exp, data_map, inputs, expected_dt, isSimulink, isStateFlow)
+        function [lusCode, status] = translate(BlkObj, exp, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow)
             import nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST
             global SF_GRAPHICALFUNCTIONS_MAP SF_STATES_NODESAST_MAP;
             L = nasa_toLustre.ToLustreImport.L;
             import(L{:})
+            
+            narginchk(2, 9);
+            if isempty(BlkObj), BlkObj = nasa_toLustre.blocks.DummyBlock_To_Lustre; end
+            if nargin < 3, parent = []; end
+            if nargin < 4, blk = []; end
+            if nargin < 5, data_map = containers.Map; end
+            if nargin < 6, inputs = {}; end
+            if nargin < 7, expected_dt = ''; end
+            if nargin < 8, isSimulink = false; end
+            if nargin < 9, isStateFlow = false; end
+            
             if ~exist('isStateFlow', 'var')
                 isStateFlow = false;
             end
@@ -79,9 +90,11 @@ classdef MExpToLusAST
         [code, exp_dt] = expression_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow)
         [code, exp_dt] = constant_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow)
         [code, exp_dt] = ID_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow)
-        [code, exp_dt] = parseOtherFunc(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow)
-        [code, exp_dt] = SFArrayAccess(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow)
-        [code, exp_dt] = SFGraphFunction(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow)
+        [code, exp_dt] = assignment_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow)
+        [code, exp_dt] = binaryExpression_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow)
+        [code, exp_dt] = fun_indexing_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow)
+        [code, exp_dt] = parenthesedExpression_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow)
+        [code, exp_dt] = unaryExpression_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow)
     end
     
     methods(Static)
