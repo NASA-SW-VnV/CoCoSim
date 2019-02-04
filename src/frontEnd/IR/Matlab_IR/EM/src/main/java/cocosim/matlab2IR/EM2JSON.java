@@ -710,7 +710,7 @@ public class EM2JSON {
 			StringBuilder buf = new StringBuilder();
 			buf.append("{");
 			buf.append("\n");
-			buf.append(Quotes("type")+":"+Quotes("else_block"));
+			buf.append(Quotes("type")+":"+Quotes("otherwise_block"));
 			buf.append(",\n");
 			buf.append(Quotes("statements")+":["+getJSON(ctx.body()));
 			buf.append("\n]");

@@ -5,6 +5,13 @@ classdef MatlabUtils
     
     methods (Static = true)
         
+         %% Matlab IR
+        function tree = getExpTree(exp)
+            em2json =  cocosim.matlab2IR.EM2JSON;
+            IR_string = em2json.StringToIR(exp);
+            IR = json_decode(char(IR_string));
+            tree = IR.statements(1);
+        end
         %% concatenate 1-D vectors
         function r = concat(varargin)
             if numel(varargin) == 1
@@ -140,6 +147,7 @@ classdef MatlabUtils
                 res = contains(s, pattern);
             catch
                 try
+                    % do not change it
                     res = ~isempty(strfind(str, pattern));
                 catch E
                     throw(E);
@@ -161,6 +169,8 @@ classdef MatlabUtils
                 delete(files_path{i});
             end
         end
+        
+       
         %% Concat cell array with a specific delimator
         function joinedStr = strjoin(str, delimiter)
             if nargin < 1 || nargin > 2
@@ -277,6 +287,8 @@ classdef MatlabUtils
             end
             evalin('base', sprintf('%s([], [], [], ''term'')', modelName));
         end
+        
+        
     end
     
 end

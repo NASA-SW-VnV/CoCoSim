@@ -1,0 +1,111 @@
+classdef MExpToLusAST
+    %MEXPTOLUSAST transform a Matlab expression to Lustre AST
+    
+    properties
+    end
+    methods(Static)
+        function [lusCode, status] = translate(BlkObj, parent, blk, exp, data_map, inputs, expected_dt, isSimulink, isStateFlow)
+            import nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST
+            global SF_GRAPHICALFUNCTIONS_MAP SF_STATES_NODESAST_MAP;
+            L = nasa_toLustre.ToLustreImport.L;
+            import(L{:})
+            if ~exist('isStateFlow', 'var')
+                isStateFlow = false;
+            end
+            if isempty(blk)
+                if isStateFlow
+                    blk.Origin_path = 'Stateflow chart';
+                else
+                    blk.Origin_path = '';
+                end
+            end
+            status = 0;
+            lusCode = {};
+            if isempty(exp)
+                return;
+            end
+            %pre-process exp
+            orig_exp = exp;
+            exp = strrep(orig_exp, '!=', '~=');
+            % adapt C access array u[1] to Matlab syntax u(1)
+            exp = regexprep(exp, '(\w)\[([^\[\]])+\]', '$1($2)');
+            %get exp IR
+            try
+                tree = MatlabUtils.getExpTree(exp);
+            catch me
+                status = 1;
+                display_msg(sprintf('ParseError for expression "%s" in block %s', ...
+                    orig_exp, blk.Origin_path), ...
+                    MsgType.ERROR, 'MExpToLusAST.translate', '');
+                display_msg(me.getReport(), MsgType.DEBUG, 'MExpToLusAST.translate', '');
+                return;
+            end
+            try
+                
+                lusCode = MExpToLusAST.expression_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow);
+                % transform Stateflow Function call with no outputs to an equation
+                if isStateFlow && ~isempty(tree)
+                    if iscell(tree) && numel(tree) == 1
+                        tree = tree{1};
+                    end
+                    if isfield(tree, 'type') && ...
+                            isequal(tree.type, 'fun_indexing') &&...
+                            isKey(SF_GRAPHICALFUNCTIONS_MAP, tree.ID)
+                        func = SF_GRAPHICALFUNCTIONS_MAP(tree.ID);
+                        sfNodename = SF_To_LustreNode.getUniqueName(func);
+                        actionNodeAst = SF_STATES_NODESAST_MAP(sfNodename);
+                        [~, oututs_Ids] = actionNodeAst.nodeCall();
+                        lusCode{1} = LustreEq(oututs_Ids,...
+                            lusCode{1});
+                    end
+                end
+            catch me
+                status = 1;
+                
+                if strcmp(me.identifier, 'COCOSIM:TREE2CODE')
+                    display_msg(me.message, MsgType.ERROR, 'MExpToLusAST.translate', '')
+                    display_msg(sprintf('ParseError for expression "%s" in block %s', ...
+                        orig_exp, blk.Origin_path), ...
+                        MsgType.ERROR, 'MExpToLusAST.translate', '');
+                    return;
+                else
+                    display_msg(me.getReport(), MsgType.DEBUG, 'MExpToLusAST.translate', '');
+                end
+            end
+            
+        end
+    end
+    methods(Static)
+        [code, exp_dt] = expression_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow)
+        [code, exp_dt] = constant_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow)
+        [code, exp_dt] = ID_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow)
+        [code, exp_dt] = parseOtherFunc(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow)
+        [code, exp_dt] = SFArrayAccess(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow)
+        [code, exp_dt] = SFGraphFunction(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow)
+    end
+    
+    methods(Static)
+        % Utils
+        
+        function [left, right] = inlineOperands(left, right, tree)
+            if isempty(left) && isempty(right)
+                return;
+            end
+            if numel(right) == 1 && numel(left) > 1
+                right = arrayfun(@(x) right{1}, ...
+                    (1:numel(left)), 'UniformOutput', false);
+            elseif numel(left) == 1 && numel(right) > 1
+                left = arrayfun(@(x) left{1}, ...
+                    (1:numel(right)), 'UniformOutput', false);
+            elseif numel(left) ~= numel(right)
+                ME = MException('COCOSIM:TREE2CODE', ...
+                    'Expression "%s" has incompatible dimensions. First parameter width is %d where the second parameter width is %d',...
+                    tree.text, numel(left), numel(right));
+                throw(ME);
+            end
+            
+        end
+        
+    end
+end
+
