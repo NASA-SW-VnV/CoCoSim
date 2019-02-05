@@ -2,7 +2,11 @@ function [code, dt] = ID_To_Lustre(~, tree, parent, blk, data_map, inputs, expec
     L = nasa_toLustre.ToLustreImport.L;
     import(L{:})
     import nasa_toLustre.blocks.Stateflow.utils.*
-    id = tree.name;
+    if ischar(tree)
+        id = tree;
+    else
+        id = tree.name;
+    end
     dt = MExpToLusDT.ID_DT(tree, data_map, inputs, isSimulink, isStateFlow);
     if strcmp(id, 'true') || strcmp(id, 'false')
         code{1} = BooleanExpr(id);

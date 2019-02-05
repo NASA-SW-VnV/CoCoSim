@@ -5,12 +5,14 @@ classdef MExpToLusDT
     end
     
     methods(Static)
+        % use alphabetic order
         dt = assignment_DT(tree, data_map, inputs, isSimulink, isStateFlow)
         dt = binaryExpression_DT(tree, data_map, inputs, isSimulink, isStateFlow)
         dt = constant_DT(tree, data_map, inputs, isSimulink, isStateFlow)
         dt = expression_DT(tree, data_map, inputs, isSimulink, isStateFlow)
         dt = fun_indexing_DT(tree, data_map, inputs, isSimulink, isStateFlow)
         dt = ID_DT(tree, data_map, inputs, isSimulink, isStateFlow)
+        dt = matrix_DT(tree, data_map, inputs, isSimulink, isStateFlow)
         dt = parenthesedExpression_DT(tree, data_map, inputs, isSimulink, isStateFlow)
         dt = unaryExpression_DT(tree, data_map, inputs, isSimulink, isStateFlow)
     end
@@ -34,25 +36,27 @@ classdef MExpToLusDT
         end
         
         function code = convertDT(obj, code, input_dt, output_dt)
-            
+            import nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST
             if isempty(code) || ...
-                    isempty(input_dt) || isempty(output_dt) ||...
-                    (iscell(input_dt) && numel(input_dt) > 1) || ...
-                    (iscell(output_dt) && numel(output_dt) > 1)
+                    isempty(input_dt) || isempty(output_dt) 
                 return;
             end
-            if iscell(input_dt)
-                input_dt = input_dt{1};
+            if ischar(input_dt)
+                input_dt = {input_dt};
             end
-            if iscell(output_dt)
-                output_dt = output_dt{1};
+            if ischar(output_dt)
+                output_dt = {output_dt};
             end
-            if isequal(input_dt, output_dt)
-                return;
+            [code, input_dt] = MExpToLusAST.inlineOperands(code, input_dt);
+            [output_dt, input_dt] = MExpToLusAST.inlineOperands(output_dt, input_dt);
+            for i=1:numel(code)
+                if isequal(input_dt{i}, output_dt{i})
+                    return;
+                end
+                conv = strcat(input_dt{i}, '_to_', output_dt{i});
+                obj.addExternal_libraries(strcat('LustDTLib_', conv));
+                code{i} = nasa_toLustre.lustreAst.NodeCallExpr(conv, {code{i}});
             end
-            conv = strcat(input_dt, '_to_', output_dt);
-            obj.addExternal_libraries(strcat('LustDTLib_', conv));
-            code = {nasa_toLustre.lustreAst.NodeCallExpr(conv, code)};
         end
         
         function dt = upperDT(left_dt, right_dt)

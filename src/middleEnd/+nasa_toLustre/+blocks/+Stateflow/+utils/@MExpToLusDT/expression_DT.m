@@ -13,6 +13,12 @@ function dt = expression_DT(tree, data_map, inputs, isSimulink, isStateFlow)
     if isempty(tree)
         return;
     end
+    if iscell(tree) && numel(tree) == 1
+        tree = tree{1};
+    end
+    if ~isfield(tree, 'type')
+        return;
+    end
     tree_type = tree.type;
     switch tree_type
         case {'relopAND', 'relopelAND',...

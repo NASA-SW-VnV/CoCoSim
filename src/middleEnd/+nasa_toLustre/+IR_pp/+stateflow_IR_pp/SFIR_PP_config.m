@@ -38,7 +38,7 @@ sfIR_pp_order_map(0) = {fullfile(lib_path,'SFunction_SFIR_PP.m')};
 sfIR_pp_order_map(1) = {fullfile(lib_path,'transitionSource_SFIR_pp.m')};
 sfIR_pp_order_map(2) = {fullfile(lib_path,'transitionLabel_SFIR_pp.m')};
 sfIR_pp_order_map(3) = {fullfile(lib_path,'confirm_actions_SFIR_pp.m')};
-sfIR_pp_order_map(4) = {fullfile(lib_path,'*.m')12};
+sfIR_pp_order_map(4) = {fullfile(lib_path,'*.m')};
 
 
 

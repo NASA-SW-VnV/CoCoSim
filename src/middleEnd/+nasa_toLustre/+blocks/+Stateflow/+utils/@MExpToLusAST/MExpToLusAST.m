@@ -87,13 +87,16 @@ classdef MExpToLusAST
         end
     end
     methods(Static)
-        [code, exp_dt] = expression_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow)
-        [code, exp_dt] = constant_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow)
-        [code, exp_dt] = ID_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow)
+        % use alphabetic order.
         [code, exp_dt] = assignment_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow)
         [code, exp_dt] = binaryExpression_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow)
+        [code, exp_dt] = constant_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow)
+        [code, exp_dt] = expression_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow)
         [code, exp_dt] = fun_indexing_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow)
+        [code, exp_dt] = ID_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow)
+        [code, exp_dt] = matrix_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow)
         [code, exp_dt] = parenthesedExpression_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow)
+        [code, exp_dt] = sfArrayAccess(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow)
         [code, exp_dt] = unaryExpression_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow)
     end
     
@@ -111,6 +114,9 @@ classdef MExpToLusAST
                 left = arrayfun(@(x) left{1}, ...
                     (1:numel(right)), 'UniformOutput', false);
             elseif numel(left) ~= numel(right)
+                if nargin < 3 || isempty(tree)
+                    return;
+                end
                 ME = MException('COCOSIM:TREE2CODE', ...
                     'Expression "%s" has incompatible dimensions. First parameter width is %d where the second parameter width is %d',...
                     tree.text, numel(left), numel(right));

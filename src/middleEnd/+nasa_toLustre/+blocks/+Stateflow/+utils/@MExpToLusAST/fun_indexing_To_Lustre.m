@@ -13,11 +13,9 @@ function [code, exp_dt] = fun_indexing_To_Lustre(BlkObj, tree, parent, blk,...
                 'sin','tan', 'sinh', 'trunc'}
             fun_name = tree_ID;
             BlkObj.addExternal_libraries('LustMathLib_lustrec_math');
-            [param, param_dt] = MExpToLusAST.expression_To_Lustre(BlkObj, tree.parameters(1),...
+            [param, ~] = MExpToLusAST.expression_To_Lustre(BlkObj, tree.parameters(1),...
                 parent, blk, data_map, inputs, 'real', ...
                 isSimulink, isStateFlow);
-            % make sure parameter is converted to real
-            param = MExpToLusDT.convertDT(BlkObj, param, param_dt, 'real');
             code = arrayfun(@(i) NodeCallExpr(fun_name, param{i}), ...
                 (1:numel(param)), 'UniformOutput', false);
             exp_dt = 'real';
@@ -31,16 +29,13 @@ function [code, exp_dt] = fun_indexing_To_Lustre(BlkObj, tree, parent, blk,...
             else
                 fun_name = tree_ID;
             end
-            [param1, param1_dt] = MExpToLusAST.expression_To_Lustre(BlkObj, tree.parameters(1),...
+            [param1, ~] = MExpToLusAST.expression_To_Lustre(BlkObj, tree.parameters(1),...
                 parent, blk, data_map, inputs, 'real', ...
                 isSimulink, isStateFlow);
-            [param2, param2_dt] = MExpToLusAST.expression_To_Lustre(BlkObj, tree.parameters(2),...
+            [param2, ~] = MExpToLusAST.expression_To_Lustre(BlkObj, tree.parameters(2),...
                 parent, blk, data_map, inputs, 'real', ...
                 isSimulink, isStateFlow);
             
-            % make sure parameter is converted to real
-            param1 = MExpToLusDT.convertDT(BlkObj, param1, param1_dt, 'real');
-            param2 = MExpToLusDT.convertDT(BlkObj, param2, param2_dt, 'real');
             
             % inline operands
             [param1, param2] = MExpToLusAST.inlineOperands(param1, param2, tree);
@@ -61,11 +56,9 @@ function [code, exp_dt] = fun_indexing_To_Lustre(BlkObj, tree, parent, blk,...
             lib_name = strcat('LustMathLib_', fun_name);
             BlkObj.addExternal_libraries(lib_name);
             
-            [param, param_dt] = MExpToLusAST.expression_To_Lustre(BlkObj, tree.parameters(1),...
+            [param, ~] = MExpToLusAST.expression_To_Lustre(BlkObj, tree.parameters(1),...
                 parent, blk, data_map, inputs, expected_param_dt, ...
                 isSimulink, isStateFlow);
-            % make sure parameter is converted to real
-            param = MExpToLusDT.convertDT(BlkObj, param, param_dt, expected_param_dt);
             code = arrayfun(@(i) NodeCallExpr(fun_name, param{i}), ...
                 (1:numel(param)), 'UniformOutput', false);
             exp_dt = expected_param_dt;
@@ -81,11 +74,9 @@ function [code, exp_dt] = fun_indexing_To_Lustre(BlkObj, tree, parent, blk,...
             end
             BlkObj.addExternal_libraries(lib_name);
             
-            [param, param_dt] = MExpToLusAST.expression_To_Lustre(BlkObj, tree.parameters(1),...
+            [param, ~] = MExpToLusAST.expression_To_Lustre(BlkObj, tree.parameters(1),...
                 parent, blk, data_map, inputs, expected_param_dt, ...
                 isSimulink, isStateFlow);
-            % make sure parameter is converted to real
-            param = MExpToLusDT.convertDT(BlkObj, param, param_dt, expected_param_dt);
             code = arrayfun(@(i) NodeCallExpr(fun_name, param{i}), ...
                 (1:numel(param)), 'UniformOutput', false);
             exp_dt = 'real';
@@ -156,15 +147,12 @@ function [code, exp_dt] = fun_indexing_To_Lustre(BlkObj, tree, parent, blk,...
         case 'hypot'
             exp_dt = 'real';
             BlkObj.addExternal_libraries('LustMathLib_lustrec_math');
-            [param1, param1_dt] = MExpToLusAST.expression_To_Lustre(BlkObj, tree.parameters(1),...
+            [param1, ~] = MExpToLusAST.expression_To_Lustre(BlkObj, tree.parameters(1),...
                 parent, blk, data_map, inputs, 'real', ...
                 isSimulink, isStateFlow);
-            [param2, param2_dt] = MExpToLusAST.expression_To_Lustre(BlkObj, tree.parameters(2),...
+            [param2, ~] = MExpToLusAST.expression_To_Lustre(BlkObj, tree.parameters(2),...
                 parent, blk, data_map, inputs, 'real', ...
                 isSimulink, isStateFlow);
-            % make sure parameter is converted to real
-            param1 = MExpToLusDT.convertDT(BlkObj, param1, param1_dt, 'real');
-            param2 = MExpToLusDT.convertDT(BlkObj, param2, param2_dt, 'real');
             
             % sqrt(x*x, y*y)
             param1 = arrayfun(@(i) BinaryExpr(BinaryExpr.MULTIPLY, param1{i}, param1{i}), ...
@@ -199,27 +187,27 @@ function [code, exp_dt] = fun_indexing_To_Lustre(BlkObj, tree, parent, blk,...
         otherwise
             code = parseOtherFunc(BlkObj, tree, ...
                 parent, blk, data_map, inputs, ...
-                expected_dt, isStateFlow);
+                expected_dt, isSimulink, isStateFlow);
     end
     
 end
 
 
 
-function code = parseOtherFunc(obj, tree, parent, blk, data_map, inputs, expected_dt, isStateFlow)
+function code = parseOtherFunc(obj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow)
     global SF_GRAPHICALFUNCTIONS_MAP;
     L = nasa_toLustre.ToLustreImport.L;
     import(L{:})
     import nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST
     if isStateFlow && data_map.isKey(tree.ID)
         %Array Access
-        code = SFArrayAccess(obj, tree, parent, blk, ...
-            inputs, data_map, expected_dt, isStateFlow);
+        code = MExpToLusAST.sfArrayAccess(obj, tree, parent, blk, ...
+            data_map, inputs,  expected_dt, isSimulink, isStateFlow);
         
     elseif isStateFlow && SF_GRAPHICALFUNCTIONS_MAP.isKey(tree.ID)
         %Stateflow Function
         code = SFGraphFunction(obj, tree, parent, blk, ...
-            inputs, data_map, expected_dt, isStateFlow);
+            data_map, inputs, expected_dt, isSimulink, isStateFlow);
         
     elseif ~isStateFlow && isequal(tree.ID, 'u')
         %"u" refers to an input in IF, Switch and Fcn
@@ -284,130 +272,11 @@ function code = parseOtherFunc(obj, tree, parent, blk, data_map, inputs, expecte
 end
 
 
-function code = SFArrayAccess(obj, tree, parent, blk, inputs, data_map, expected_dt, isStateFlow)
-    %Array access
-    L = nasa_toLustre.ToLustreImport.L;
-    import(L{:})
-    import nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST
-    d = data_map(tree.ID);
-    if isfield(d, 'CompiledSize')
-        CompiledSize = str2num(d.CompiledSize);
-    elseif isfield(d, 'ArraySize')
-        CompiledSize = str2num(d.ArraySize);
-    else
-        CompiledSize = -1;
-    end
-    if CompiledSize == -1
-        ME = MException('COCOSIM:TREE2CODE', ...
-            'Data "%s" has unknown ArraySize',...
-            tree.ID);
-        throw(ME);
-    end
-    if numel(CompiledSize) < numel(tree.parameters)
-        ME = MException('COCOSIM:TREE2CODE', ...
-            'Data Access "%s" expected %d parameters but got %d',...
-            tree.text, numel(CompiledSize), numel(tree.parameters));
-        throw(ME);
-    end
-    params_dt = 'int';
-    namesAst = MExpToLusAST.ID_To_Lustre(obj, tree.ID, parent, blk, inputs, ...
-        data_map, expected_dt, isStateFlow);
-    
-    if numel(tree.parameters) == 1
-        %Vector Access
-        if iscell(tree.parameters)
-            param = tree.parameters{1};
-        else
-            param = tree.parameters;
-        end
-        param_type = param.type;
-        if isequal(param_type, 'constant')
-            value = str2num(param.value);
-            
-            if iscell(namesAst) && numel(namesAst) >= value
-                code = namesAst{value};
-            else
-                ME = MException('COCOSIM:TREE2CODE', ...
-                    'ParseError of "%s"',...
-                    tree.text);
-                throw(ME);
-            end
-        else
-            arg = ...
-                MExpToLusAST.expression_To_Lustre(obj, tree.parameters, ...
-                parent, blk, inputs, data_map, params_dt,...
-                isStateFlow);
-            for ardIdx=1:numel(arg)
-                n = numel(namesAst);
-                conds = cell(n-1, 1);
-                thens = cell(n, 1);
-                for i=1:n-1
-                    conds{i} = BinaryExpr(BinaryExpr.EQ, arg{ardIdx}, IntExpr(i));
-                    thens{i} = namesAst{i};
-                end
-                thens{n} = namesAst{n};
-                code{ardIdx} = ParenthesesExpr(IteExpr.nestedIteExpr(conds, thens));
-            end
-        end
-    else
-        %multi-dimension access
-        if isa(tree.parameters, 'struct')
-            parameters = arrayfun(@(x) x, tree.parameters, 'UniformOutput', false);
-            params_type = arrayfun(@(x) x.type, tree.parameters, 'UniformOutput', false);
-        else
-            parameters = tree.parameters;
-            params_type = cellfun(@(x) x.type, tree.parameters, 'UniformOutput', false);
-        end
-        isConstant = all(strcmp(params_type, 'constant'));
-        if isConstant
-            %[n,m,l] = size(M)
-            %idx = i + (j-1) * n + (k-1) * n * m
-            idx = str2num(parameters{1}.value);
-            for i=2:numel(parameters)
-                v = str2num(parameters{i}.value);
-                idx = idx + (v - 1) * prod(CompiledSize(1:i-1));
-            end
-            if iscell(namesAst) && numel(namesAst) >= idx
-                code = namesAst{idx};
-            else
-                ME = MException('COCOSIM:TREE2CODE', ...
-                    'ParseError of "%s"',...
-                    tree.text);
-                throw(ME);
-            end
-        else
-            args = cell(numel(parameters), 1);
-            for i=1:numel(parameters)
-                args(i) = ...
-                    MExpToLusAST.expression_To_Lustre(obj, parameters{i}, ...
-                    parent, blk, inputs, data_map, params_dt,...
-                    isStateFlow);
-            end
-            idx = args{1};
-            for i=2:numel(parameters)
-                v = args{i};
-                idx = BinaryExpr(BinaryExpr.PLUS,...
-                    idx,...
-                    BinaryExpr(BinaryExpr.MULTIPLY,...
-                    BinaryExpr(BinaryExpr.MINUS, v, IntExpr(1)),...
-                    IntExpr(prod(CompiledSize(1:i-1)))));
-            end
-            n = numel(namesAst);
-            conds = cell(n-1, 1);
-            thens = cell(n, 1);
-            for i=1:n-1
-                conds{i} = BinaryExpr(BinaryExpr.EQ, idx, IntExpr(i));
-                thens{i} = namesAst{i};
-            end
-            thens{n} = namesAst{n};
-            code = ParenthesesExpr(IteExpr.nestedIteExpr(conds, thens));
-        end
-    end
-end
+
 
 
 function code = SFGraphFunction(obj, tree, parent, ...
-        blk, inputs, data_map, expected_dt, isStateFlow)
+        blk, data_map, inputs, expected_dt, isSimulink, isStateFlow)
     L = nasa_toLustre.ToLustreImport.L;
     import(L{:})
     import nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST
@@ -433,9 +302,9 @@ function code = SFGraphFunction(obj, tree, parent, ...
         end
         args = cell(numel(parameters), 1);
         for i=1:numel(parameters)
-            args(i) = ...
+            [args(i), ~] = ...
                 MExpToLusAST.expression_To_Lustre(obj, parameters{i}, ...
-                parent, blk, node_inputs, data_map, params_dt{i},...
+                parent, blk, data_map, node_inputs, params_dt{i}, isSimulink,...
                 isStateFlow);
         end
         code = NodeCallExpr(sfNodename, args);
@@ -445,8 +314,5 @@ function code = SFGraphFunction(obj, tree, parent, ...
             tree.ID, numel(node_inputs), numel(tree.parameters));
         throw(ME);
     end
-    
-    
-    
     
 end

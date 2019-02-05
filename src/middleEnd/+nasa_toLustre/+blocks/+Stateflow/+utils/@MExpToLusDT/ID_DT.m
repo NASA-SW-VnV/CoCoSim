@@ -1,6 +1,10 @@
 function dt = ID_DT(tree, data_map, inputs, isSimulink, varargin)
     import nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT
-    id = tree.name;
+    if ischar(tree)
+        id = tree;
+    else
+        id = tree.name;
+    end
     % the case of final term in a tree
     if strcmp(id, 'true') || strcmp(id, 'false')
         dt = 'bool';

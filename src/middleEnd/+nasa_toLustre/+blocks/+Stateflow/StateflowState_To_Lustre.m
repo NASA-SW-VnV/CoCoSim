@@ -232,7 +232,7 @@ classdef StateflowState_To_Lustre
             L = nasa_toLustre.ToLustreImport.L;
             import(L{:})
             global SF_STATES_NODESAST_MAP SF_STATES_PATH_MAP;
-            import nasa_toLustre.blocks.Stateflow.utils.getPseudoLusAction
+            import nasa_toLustre.blocks.Stateflow.utils.*
             external_libraries = {};
             main_node = {};
             body = {};
@@ -273,19 +273,8 @@ classdef StateflowState_To_Lustre
                         outputs = [outputs, outputs_i];
                         inputs = [inputs, inputs_i, outputs_i];
                         external_libraries = [external_libraries, external_libraries_i];
-                        for j=1:numel(lus_action)
-                            if isa(lus_action{j}, 'LustreEq')
-                                body{end+1} = LustreEq(lus_action{j}.getLhs(), ...
-                                    IteExpr(UnaryExpr(UnaryExpr.NOT, isInner), ...
-                                    lus_action{j}.getRhs(), lus_action{j}.getLhs()));
-                                
-                            elseif ~isempty(lus_action{j})
-                                display_msg(sprintf(...
-                                    'Action "%s" in state %s should be an assignement (e.g. outputs = f(inputs))',...
-                                    actions{i}, state.Origin_path), MsgType.ERROR, 'write_entry_action', '');
-                                break;
-                            end
-                        end
+                        new_assignements = SF2LusUtils.addInnerCond(lus_action, isInner, actions{i}, state);
+                        body = MatlabUtils.concat(body, new_assignements);
                     catch me
                         if strcmp(me.identifier, 'COCOSIM:STATEFLOW')
                             display_msg(me.message, MsgType.ERROR, 'write_entry_action', '');
@@ -331,7 +320,7 @@ classdef StateflowState_To_Lustre
                 write_exit_action(state, data_map)
             L = nasa_toLustre.ToLustreImport.L;
             import(L{:})
-            import nasa_toLustre.blocks.Stateflow.utils.getPseudoLusAction
+            import nasa_toLustre.blocks.Stateflow.utils.*
             global SF_STATES_NODESAST_MAP SF_STATES_PATH_MAP;
             external_libraries = {};
             main_node = {};
@@ -380,19 +369,8 @@ classdef StateflowState_To_Lustre
                     outputs = [outputs, outputs_i];
                     inputs = [inputs, inputs_i, outputs_i];
                     external_libraries = [external_libraries, external_libraries_i];
-                    for j=1:numel(lus_action)
-                        if isa(lus_action{j}, 'LustreEq')
-                            body{end+1} = LustreEq(lus_action{j}.getLhs(), ...
-                                IteExpr(UnaryExpr(UnaryExpr.NOT, isInner), ...
-                                lus_action{j}.getRhs(), lus_action{j}.getLhs()));
-                            
-                        elseif ~isempty(lus_action{j})
-                            display_msg(sprintf(...
-                                'Action "%s" in state %s should be an assignement (e.g. outputs = f(inputs))',...
-                                actions{i}, state.Origin_path), MsgType.ERROR, 'write_exit_action', '');
-                            break;
-                        end
-                    end
+                    new_assignements = SF2LusUtils.addInnerCond(lus_action, isInner, actions{i}, state);
+                    body = MatlabUtils.concat(body, new_assignements);
                 catch me
                     if strcmp(me.identifier, 'COCOSIM:STATEFLOW')
                         display_msg(me.message, MsgType.ERROR, 'write_exit_action', '');

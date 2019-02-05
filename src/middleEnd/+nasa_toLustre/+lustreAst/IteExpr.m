@@ -36,7 +36,18 @@ classdef IteExpr < nasa_toLustre.lustreAst.LustreExpr
                 obj.OneLine = false;
             end
         end
+        %% getters
+        function c = getCondition(obj)
+            c = obj.condition;
+        end
+        function c = getThenExpr(obj)
+            c = obj.thenExpr;
+        end
+        function c = getElseExpr(obj)
+            c = obj.ElseExpr;
+        end
         
+        %%
         function new_obj = deepCopy(obj)
             new_obj = nasa_toLustre.lustreAst.IteExpr(...
                 obj.condition.deepCopy(),...
@@ -197,6 +208,26 @@ classdef IteExpr < nasa_toLustre.lustreAst.LustreExpr
                     nasa_toLustre.lustreAst.IteExpr.nestedIteExpr( conds(2:end), thens(2:end)) ...
                     );
             end
+        end
+        
+        function [conds, thens] = getCondsThens(exp)
+            import nasa_toLustre.lustreAst.*
+            conds = {};
+            thens = {};
+            if isa(exp, 'ParenthesesExpr')
+                exp = exp.getExp();
+            end
+            if ~isa(exp, 'IteExpr')
+                thens{1} = exp;
+                return;
+            end
+            
+            conds{1} = exp.getCondition();
+            thens{1} = exp.getThenExpr();
+            elseExp = exp.getElseExpr();
+            [conds_i, thens_i] = IteExpr.getCondsThens(elseExp);
+            conds = MatlabUtils.concat(conds, conds_i);
+            thens = MatlabUtils.concat(thens, thens_i);
         end
     end
 end

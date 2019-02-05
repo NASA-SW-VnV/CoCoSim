@@ -71,17 +71,14 @@ classdef MenuUtils
             
             % this css file is modified from the original. Dont use the
             % minified version materialize.min.css
+            materialize_path = fullfile(cocoSim_path, 'libs', 'materialize');
             css_source = fullfile(cocoSim_path, 'libs', 'materialize' , 'css' , 'materialize.css');
             js_source = fullfile(cocoSim_path, 'libs', 'materialize' , 'js' , 'materialize.min.js');
-            if exist(css_source, 'file')
-                copyfile(css_source, output_dir);
+            if exist(materialize_path, 'dir')
+                copyfile(materialize_path, output_dir);
             else
                 css_online = 'href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css"';
                 html_text = strrep(html_text, 'href="materialize.css"', css_online);
-            end
-            if exist(js_source, 'file')
-                copyfile(js_source, output_dir);
-            else
                 js_online = 'src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"';
                 html_text = strrep(html_text, 'src="materialize.css"', js_online);
             end
