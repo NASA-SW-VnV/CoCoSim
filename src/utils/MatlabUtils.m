@@ -5,7 +5,7 @@ classdef MatlabUtils
     
     methods (Static = true)
         
-         %% Matlab IR
+        %% Matlab IR
         function tree = getExpTree(exp)
             em2json =  cocosim.matlab2IR.EM2JSON;
             IR_string = em2json.StringToIR(exp);
@@ -170,7 +170,7 @@ classdef MatlabUtils
             end
         end
         
-       
+        
         %% Concat cell array with a specific delimator
         function joinedStr = strjoin(str, delimiter)
             if nargin < 1 || nargin > 2
@@ -288,6 +288,30 @@ classdef MatlabUtils
             evalin('base', sprintf('%s([], [], [], ''term'')', modelName));
         end
         
+        function count = getNbLines(file)
+            try
+                fid = fopen(file);
+                count = 0;
+                while true
+                    if ~ischar( fgetl(fid) ); break; end
+                    count = count + 1;
+                end
+                fclose(fid);
+                fprintf('lines in file %s is %d\n', file, count);
+            catch
+                count = -1;
+            end
+        end
+        function F = allMatlabFilesExceeds(folder, n)
+            mfiles = dir(fullfile(folder,'**', '*.m'));
+            if isfield(mfiles, 'folder')
+                files_path = arrayfun(@(x) [x.folder '/' x.name], mfiles, 'UniformOutput', 0);
+            else
+                files_path = {mfiles.name};
+            end
+            count = cellfun(@(x) MatlabUtils.getNbLines(x), files_path, 'UniformOutput', true);
+            F = files_path(count > n);
+        end
         
     end
     

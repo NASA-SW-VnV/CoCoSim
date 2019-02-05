@@ -62,7 +62,7 @@ classdef SLX2Lus_Trace < handle
             %JSON
             fid= fopen(obj.json_file_path, 'w+');
             if fid~=-1
-                json_model = json_encode(obj.json_struct); %faire en sorte qu'il y ait des sauts de ligne dans la réécriture de la fonction json_encode
+                json_model = json_encode(obj.json_struct); 
                 json_model = strrep(json_model,'\/','/');
                 fprintf(fid, '%s\n', json_model);
             end
@@ -204,148 +204,10 @@ classdef SLX2Lus_Trace < handle
     end
     
     methods(Static)
-        function xRoot = getxRoot(xml_trace_var)
-            if ischar(xml_trace_var) && exist(xml_trace_var, 'file')
-                try
-                    DOMNODE = xmlread(xml_trace_var);
-                    xRoot = DOMNODE.getDocumentElement;
-                catch
-                    xRoot = [];
-                end
-            elseif isa(xml_trace_var, 'nasa_toLustre.utils.SLX2Lus_Trace')
-                xRoot = xml_trace_var.traceRootNode;
-            elseif isa(xml_trace_var, 'org.apache.xerces.dom.ElementNSImpl')
-                xRoot = xml_trace_var;
-            else 
-                xRoot = [];
-            end
-        end
-        function node_name = get_lustre_node_from_Simulink_block_name(trace_root,Simulink_block_name)
-            node_name = '';
-            xRoot = nasa_toLustre.utils.SLX2Lus_Trace.getxRoot(trace_root);
-            if isempty(xRoot)
-                display_msg('UNKNOWN Variable type trace_root in nasa_toLustre.utils.SLX2Lus_Trace.get_lustre_node_from_Simulink_block_name',...
-                    MsgType.DEBUG, 'SLX2Lus_Trace', '');
-                return;
-            end
-            xml_nodes = xRoot.getElementsByTagName('Node');
-            
-            for idx_node=0:xml_nodes.getLength-1
-                block_name = xml_nodes.item(idx_node).getAttribute('OriginPath');
-                if strcmp(block_name, Simulink_block_name)
-                    node_name = char(xml_nodes.item(idx_node).getAttribute('NodeName'));
-                    break;
-                end
-                
-            end
-        end
-        
-        function simulink_block_name = get_Simulink_block_from_lustre_node_name(...
-                trace_root, lustre_node_name, Sim_file_name, new_model_name)
-            simulink_block_name = '';
-            xRoot = nasa_toLustre.utils.SLX2Lus_Trace.getxRoot(trace_root);
-            if isempty(xRoot)
-                display_msg('UNKNOWN Variable type trace_root in nasa_toLustre.utils.SLX2Lus_Trace.get_Simulink_block_from_lustre_node_name',...
-                    MsgType.DEBUG, 'SLX2Lus_Trace', '');
-                return;
-            end
-            xml_nodes = xRoot.getElementsByTagName('Node');
-            for idx_node=0:xml_nodes.getLength-1
-                lustre_name = xml_nodes.item(idx_node).getAttribute('NodeName');
-                if strcmp(lustre_name,lustre_node_name)
-                    simulink_block_name = char(xml_nodes.item(idx_node).getAttribute('OriginPath'));
-                    if nargin == 4
-                        simulink_block_name = regexprep(simulink_block_name,strcat('^',Sim_file_name,'/(\w)'),strcat(new_model_name,'/$1'));
-                    end
-                    break;
-                end
-                
-            end
-        end
-        % get variables +inputs + outputs names of a node
-        function variables_names = get_tracable_variables(xml_trace, node_name)
-            
-            variables_names = {};
-            xRoot = nasa_toLustre.utils.SLX2Lus_Trace.getxRoot(xml_trace);
-            if isempty(xRoot)
-                display_msg('UNKNOWN Variable type trace_root in nasa_toLustre.utils.SLX2Lus_Trace.get_tracable_variables',...
-                    MsgType.DEBUG, 'SLX2Lus_Trace', '');
-                return;
-            end
-            nodes = xRoot.getElementsByTagName('Node');
-            for idx_node=0:nodes.getLength-1
-                block_name_node = nodes.item(idx_node).getAttribute('NodeName');
-                if strcmp(block_name_node, node_name)
-                    inputs = nodes.item(idx_node).getElementsByTagName('Inport');
-                    for idx_input=0:inputs.getLength-1
-                        input = inputs.item(idx_input);
-                        variables_names{end + 1} = ...
-                            char(input.getAttribute('VariableName'));
-                    end
-                    outputs = nodes.item(idx_node).getElementsByTagName('Outport');
-                    for idx_output=0:outputs.getLength-1
-                        output = outputs.item(idx_output);
-                        variables_names{end + 1} = ...
-                            char(output.getAttribute('VariableName'));
-                    end
-                    variables = nodes.item(idx_node).getElementsByTagName('Variable');
-                    for idx_var=0:variables.getLength-1
-                        var = variables.item(idx_var);
-                        variables_names{end + 1} = ...
-                            char(var.getAttribute('VariableName'));
-                    end
-                end
-            end
-        end
-        
-        function [block_name, index, width] = get_SlxBlockName_from_LusVar_UsingXML(xml_trace, node_name, var_name)
-            
-            block_name = '';
-            index = [];
-            width = [];
-            xRoot = nasa_toLustre.utils.SLX2Lus_Trace.getxRoot(xml_trace);
-            if isempty(xRoot)
-                display_msg('UNKNOWN Variable type trace_root in nasa_toLustre.utils.SLX2Lus_Trace.get_SlxBlockName_from_LusVar_UsingXML',...
-                    MsgType.DEBUG, 'SLX2Lus_Trace', '');
-                return;
-            end
-            nodes = xRoot.getElementsByTagName('Node');
-            for idx_node=0:nodes.getLength-1
-                block_name_node = nodes.item(idx_node).getAttribute('NodeName');
-                if strcmp(block_name_node, node_name)
-                    inputs = nodes.item(idx_node).getElementsByTagName('Inport');
-                    for idx_input=0:inputs.getLength-1
-                        input = inputs.item(idx_input);
-                        if strcmp(input.getAttribute('VariableName'), var_name)
-                            block_name = char(input.getElementsByTagName('OriginPath').item(0).getTextContent());
-                            index = str2num(input.getElementsByTagName('Index').item(0).getTextContent());
-                            width = str2num(input.getElementsByTagName('Width').item(0).getTextContent());
-                            return;
-                        end
-                    end
-                    outputs = nodes.item(idx_node).getElementsByTagName('Outport');
-                    for idx_output=0:outputs.getLength-1
-                        output = outputs.item(idx_output);
-                        if strcmp(output.getAttribute('VariableName'), var_name)
-                            block_name = char(output.getElementsByTagName('OriginPath').item(0).getTextContent());
-                            index = str2num(output.getElementsByTagName('Index').item(0).getTextContent());
-                            width = str2num(output.getElementsByTagName('Width').item(0).getTextContent());
-                            return;
-                        end
-                    end
-                    vars = nodes.item(idx_node).getElementsByTagName('Variable');
-                    for idx_var=0:vars.getLength-1
-                        var = vars.item(idx_var);
-                        v_name_i = var.getAttribute('VariableName');
-                        if strcmp(v_name_i, var_name)
-                            block_name = char(var.getElementsByTagName('OriginPath').item(0).getTextContent());
-                            index = str2num(var.getElementsByTagName('Index').item(0).getTextContent());
-                            width = str2num(var.getElementsByTagName('Width').item(0).getTextContent());
-                            return;
-                        end
-                    end
-                end
-            end
-        end
+        xRoot = getxRoot(xml_trace_var)
+        node_name = get_lustre_node_from_Simulink_block_name(trace_root,Simulink_block_name)
+        simulink_block_name = get_Simulink_block_from_lustre_node_name(trace_root, lustre_node_name, Sim_file_name, new_model_name)
+        variables_names = get_tracable_variables(xml_trace, node_name)
+        [block_name, index, width] = get_SlxBlockName_from_LusVar_UsingXML(xml_trace, node_name, var_name)
     end
 end
