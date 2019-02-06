@@ -284,8 +284,7 @@ end
 function [nodes_ast, contracts_ast, external_libraries, error_status] = ...
         recursiveGeneration(parent, blk, main_sampleTime, is_main_node,...
         lus_backend, coco_backend, xml_trace)
-    import nasa_toLustre.frontEnd.SS_To_LustreNode
-    import nasa_toLustre.frontEnd.SF_To_LustreNode
+    import nasa_toLustre.frontEnd.*
     nodes_ast = {};
     contracts_ast = {};
     external_libraries = {};
@@ -333,40 +332,66 @@ function [nodes_ast, contracts_ast, external_libraries, error_status] = ...
         elseif ~isempty(main_node)
             nodes_ast{end + 1} = main_node;
         end
-    elseif isfield(blk, 'SFBlockType') && isequal(blk.SFBlockType, 'Chart')
-        
-        try
+    elseif isfield(blk, 'SFBlockType')
+        if isequal(blk.SFBlockType, 'Chart')
+            
             try
-                TOLUSTRE_SF_COMPILER = evalin('base', 'TOLUSTRE_SF_COMPILER');
-            catch
-                TOLUSTRE_SF_COMPILER =2;
+                try
+                    TOLUSTRE_SF_COMPILER = evalin('base', 'TOLUSTRE_SF_COMPILER');
+                catch
+                    TOLUSTRE_SF_COMPILER =2;
+                end
+                if TOLUSTRE_SF_COMPILER == 1
+                    % OLD compiler
+                    [main_node, ~, external_nodes, external_libraries_i] = ...
+                        SS_To_LustreNode.subsystem2node(parent, blk, main_sampleTime, ...
+                        is_main_node, lus_backend, coco_backend, xml_trace);
+                else
+                    % new compiler
+                    [main_node, external_nodes, external_libraries_i ] = ...
+                        SF_To_LustreNode.chart2node(parent,  blk,  main_sampleTime, lus_backend, xml_trace);
+                end
+            catch me
+                display_msg(sprintf('Translation to Lustre of block %s has failed.', blk.Origin_path),...
+                    MsgType.ERROR, 'write_body', '');
+                display_msg(me.getReport(), MsgType.DEBUG, 'write_body', '');
+                error_status = true;
+                return;
             end
-            if TOLUSTRE_SF_COMPILER == 1
-                % OLD compiler
-                [main_node, ~, external_nodes, external_libraries_i] = ...
-                    SS_To_LustreNode.subsystem2node(parent, blk, main_sampleTime, ...
-                    is_main_node, lus_backend, coco_backend, xml_trace);
+            
+            external_libraries = [external_libraries, external_libraries_i];
+            if iscell(external_nodes)
+                nodes_ast = [ nodes_ast, external_nodes];
             else
-                % new compiler
-                [main_node, external_nodes, external_libraries_i ] = ...
-                    SF_To_LustreNode.chart2node(parent,  blk,  main_sampleTime, lus_backend, xml_trace);
+                nodes_ast{end + 1} = external_nodes;
             end
-        catch me
-            display_msg(sprintf('Translation to Lustre of block %s has failed.', blk.Origin_path),...
-                MsgType.ERROR, 'write_body', '');
-            display_msg(me.getReport(), MsgType.DEBUG, 'write_body', '');
-            error_status = true;
-            return;
+            if ~isempty(main_node)
+                nodes_ast{end + 1} = main_node;
+            end
+            
+            
+        elseif isequal(blk.SFBlockType, 'MATLAB Function')
+            try
+                [main_node, external_nodes, external_libraries_i ] = ...
+                        MF_To_LustreNode.mfunction2node(parent,  blk,  xml_trace, lus_backend, coco_backend, main_sampleTime);
+            catch me
+                display_msg(sprintf('Translation to Lustre of block %s has failed.', blk.Origin_path),...
+                    MsgType.ERROR, 'write_body', '');
+                display_msg(me.getReport(), MsgType.DEBUG, 'write_body', '');
+                error_status = true;
+                return;
+            end
+            external_libraries = [external_libraries, external_libraries_i];
+            if iscell(external_nodes)
+                nodes_ast = [ nodes_ast, external_nodes];
+            else
+                nodes_ast{end + 1} = external_nodes;
+            end
+            if ~isempty(main_node)
+                nodes_ast{end + 1} = main_node;
+            end
         end
-        external_libraries = [external_libraries, external_libraries_i];
-        if iscell(external_nodes)
-            nodes_ast = [ nodes_ast, external_nodes];
-        else
-            nodes_ast{end + 1} = external_nodes;
-        end
-        if ~isempty(main_node)
-            nodes_ast{end + 1} = main_node;
-        end
+        
     end
 end
 

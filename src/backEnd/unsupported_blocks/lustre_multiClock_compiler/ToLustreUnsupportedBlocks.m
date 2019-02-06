@@ -17,15 +17,16 @@ function [unsupportedOptions, ...
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
+    global TOLUSTRE_ENUMS_MAP
     import nasa_toLustre.*
     import nasa_toLustre.utils.*
     import nasa_toLustre.IR_pp.internalRep_pp
     %% inputs treatment
     
     narginchk(1, inf);
-    
-    
+    if isempty(TOLUSTRE_ENUMS_MAP)
+        TOLUSTRE_ENUMS_MAP = containers.Map('KeyType', 'char', 'ValueType', 'any');
+    end
     if ~exist('const_files', 'var') || isempty(const_files)
         const_files = {};
     end

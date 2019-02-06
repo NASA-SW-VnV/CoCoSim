@@ -782,6 +782,9 @@ classdef SLX2LusUtils
             L = nasa_toLustre.ToLustreImport.L;
             import(L{:})
             global TOLUSTRE_ENUMS_MAP;
+            if isempty(TOLUSTRE_ENUMS_MAP)
+                TOLUSTRE_ENUMS_MAP = containers.Map;
+            end
             isBus = false;
             isEnum = false;
             hasEnum = false;
