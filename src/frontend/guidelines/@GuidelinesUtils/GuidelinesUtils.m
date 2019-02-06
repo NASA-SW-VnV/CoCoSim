@@ -1,4 +1,4 @@
-classdef Guidelines_utils
+classdef GuidelinesUtils
     % utilities functions for checking model against supported guidelines
     
     methods(Static)
