@@ -201,7 +201,7 @@ function code = parseOtherFunc(obj, tree, parent, blk, data_map, inputs, expecte
     import nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST
     if isStateFlow && data_map.isKey(tree.ID)
         %Array Access
-        code = MExpToLusAST.sfArrayAccess(obj, tree, parent, blk, ...
+        code = sfArrayAccess(obj, tree, parent, blk, ...
             data_map, inputs,  expected_dt, isSimulink, isStateFlow);
         
     elseif isStateFlow && SF_GRAPHICALFUNCTIONS_MAP.isKey(tree.ID)

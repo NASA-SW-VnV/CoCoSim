@@ -96,7 +96,6 @@ classdef MExpToLusAST
         [code, exp_dt] = ID_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow)
         [code, exp_dt] = matrix_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow)
         [code, exp_dt] = parenthesedExpression_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow)
-        [code, exp_dt] = sfArrayAccess(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow)
         [code, exp_dt] = unaryExpression_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow)
     end
     
