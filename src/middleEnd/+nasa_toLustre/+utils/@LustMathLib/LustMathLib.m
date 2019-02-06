@@ -6,7 +6,6 @@ classdef LustMathLib
     
     methods(Static)
         %% Min Max
-        [node, external_nodes_i, opens, abstractedNodes] = getMinMax(minOrMAx, dt)
         [node, external_nodes_i, opens, abstractedNodes] = get__min_int(varargin)
         [node, external_nodes_i, opens, abstractedNodes] = get__min_real(varargin)
         [node, external_nodes_i, opens, abstractedNodes] = get__max_int(varargin)
@@ -22,14 +21,6 @@ classdef LustMathLib
         [node, external_nodes_i, opens, abstractedNodes] = get_sign_int(varargin)
         [node, external_nodes_i, opens, abstractedNodes] = get_sign_real(varargin)
         %% Bitwise operators
-        [node, external_nodes, opens, abstractedNodes] = getBitwiseSigned(op, n)
-        [node, external_nodes, opens, abstractedNodes] = getANDBitwiseUnsigned(n)
-        [node, external_nodes, opens, abstractedNodes] = getNANDBitwiseUnsigned(n)
-        [node, external_nodes, opens, abstractedNodes] = getNORBitwiseUnsigned(n)
-        [node, external_nodes, opens, abstractedNodes] = getORBitwiseUnsigned(n)
-        [node, external_nodes, opens, abstractedNodes] = getXORBitwiseUnsigned(n)
-        [node, external_nodes, opens, abstractedNodes] = getNOTBitwiseUnsigned(n)
-        [node, external_nodes, opens, abstractedNodes] = getNOTBitwiseSigned()
         [node, external_nodes_i, opens, abstractedNodes] = get__AND_Bitwise_Unsigned_8(varargin)
         [node, external_nodes_i, opens, abstractedNodes] = get__AND_Bitwise_Unsigned_16(varargin)
         [node, external_nodes_i, opens, abstractedNodes] = get__AND_Bitwise_Unsigned_32(varargin)
@@ -82,9 +73,6 @@ classdef LustMathLib
         [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_5x5(lus_backend,varargin)
         [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_6x6(lus_backend,varargin)
         [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_7x7(lus_backend,varargin)
-        [node, external_nodes_i, opens, abstractedNodes] = get_inverse_code(lus_backend,n)
-        body = get_Det_Adjugate_Code(n,det,a,adj)
-        contractBody = getContractBody_nxn_inverstion(n,inputs,outputs)
     end
     
 end

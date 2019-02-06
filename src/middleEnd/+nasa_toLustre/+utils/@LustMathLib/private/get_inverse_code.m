@@ -39,7 +39,7 @@ function [node, external_nodes_i, opens, abstractedNodes] = get_inverse_code(lus
         end
     end
     if LusBackendType.isKIND2(lus_backend)
-        contractBody = nasa_toLustre.utils.LustMathLib.getContractBody_nxn_inverstion(n,inline_a,inline_ai);
+        contractBody = getContractBody_nxn_inverstion(n,inline_a,inline_ai);
         contract = LustreContract();
         contract.setBodyEqs(contractBody);
         node.setLocalContract(contract);
@@ -68,7 +68,7 @@ function [node, external_nodes_i, opens, abstractedNodes] = get_inverse_code(lus
                 end
             end
             
-            body = nasa_toLustre.utils.LustMathLib.get_Det_Adjugate_Code(n,det,a,adj);
+            body = get_Det_Adjugate_Code(n,det,a,adj);
             
             % define inverse
             for i=1:n
