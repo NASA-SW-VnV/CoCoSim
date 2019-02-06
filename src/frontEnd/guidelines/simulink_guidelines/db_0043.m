@@ -12,13 +12,6 @@ function [results, passed, priority] = db_0043(model)
     results = {};
     passed = 1;
     totalFail = 0;
-    
-%     DefaultBlockFontName = get_param(model, 'DefaultBlockFontName');
-%     DefaultLineFontName = get_param(model, 'DefaultLineFontName');
-%     DefaultBlockFontSize = get_param(model, 'DefaultBlockFontSize');
-%     DefaultLineFontSize = get_param(model, 'DefaultLineFontSize');    
-%     
-%     allowableFontName = ['Aerial','Helvetica'];
 
     Objects = find_system(model);    
 

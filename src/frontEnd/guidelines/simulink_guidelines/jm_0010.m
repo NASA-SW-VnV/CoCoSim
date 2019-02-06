@@ -11,11 +11,6 @@ function [results, passed, priority] = jm_0010(model)
     results = {};
     passed = 1;
     totalFail = 0;
-    
-    % portHandles = get_param('guideLines2/In1', 'PortHandles')
-    % line = get_param(portHandles.Outport, 'line')
-    % lineName = get_param(line, 'Name')
-    % MatlabUtils.startsWith('Haha_In1', 'Hahazxv')
 
     item_title = 'Inport must match corresponding signal or bus name';
     failedList = {};
