@@ -6,312 +6,49 @@ classdef MatlabUtils
     methods (Static = true)
         
         %% Matlab IR
-        function tree = getExpTree(exp)
-            em2json =  cocosim.matlab2IR.EM2JSON;
-            IR_string = em2json.StringToIR(exp);
-            IR = json_decode(char(IR_string));
-            tree = IR.statements(1);
-        end
+        tree = getExpTree(exp)
         %% concatenate 1-D vectors
-        function r = concat(varargin)
-            if numel(varargin) == 1
-                r = varargin{1};
-                return;
-            elseif numel(varargin) > 2
-                v1 = varargin{1};
-                v2 = MatlabUtils.concat(varargin{2:end});
-            elseif numel(varargin) == 2
-                v1 = varargin{1};
-                v2 = varargin{2};
-            end
-            [n1, ~] = size(v1);
-            [n2, ~] = size(v2);
-            if n1 == 1
-                if n2 == 1
-                    r = [v1, v2];
-                else
-                    r = [v1, v2'];
-                end
-            else
-                if n2 == 1
-                    r = [v1; v2'];
-                else
-                    r = [v1; v2];
-                end
-            end
-        end
+        r = concat(varargin)
         %%
-        function out = naming(nomsim)
-            [a, ~]=regexp (nomsim, '/', 'split');
-            out = strcat(a{numel(a)-1},'_',a{end});
-        end
-        
+        out = naming(nomsim)        
         %%
-        function mkdir(path)
-            tokens = regexp(path, filesep, 'split');
-            for i=2:numel(tokens)
-                d = MatlabUtils.strjoin(tokens(1:i), filesep);
-                if ~exist(d, 'dir')
-                    mkdir(d);
-                end
-            end
-        end
+        mkdir(path)
         % for fileNames such as "test.LUSTREC.lus" it should returns "test"
-        function fname = fileBase(path)
-            [~, fname, ~ ] = fileparts(path);
-            if MatlabUtils.contains(fname, '.')
-                [~, fname, ~ ] = MatlabUtils.fileBase(fname);
-            end
-        end
+        fname = fileBase(path)
         %%
-        function st = gcd(T)
-            st = max(T);
-            for i=1:numel(T)
-                st = gcd(st*10000,T(i)*10000)/10000;
-            end
-        end
+        st = gcd(T)
         %%
-        function  diff1in2  = setdiff_struct( struct2, struct1, fieldname )
-            %return the elements in struct2 that are not in struct1
-            if isempty(struct2)
-                diff1in2 = [];
-            elseif isempty(struct1)
-                diff1in2 = struct2;
-            else
-                AA = struct2(~cellfun(@isempty,{struct2.(fieldname)}));
-                BB = struct1(~cellfun(@isempty,{struct1.(fieldname)}));
-                A = {AA.(fieldname)} ;
-                B = {BB.(fieldname)} ;
-                [~,ia] = setdiff(A,B) ;
-                diff1in2 = struct2(ia) ;
-            end
-        end
-        function res = structUnique(struct2, fieldname)
-            
-            res = struct2;
-            if isempty(struct2)
-                return;
-            end
-            if iscell(struct2)
-                A = cellfun(@(x) {x.(fieldname)},struct2);
-            else
-                AA = struct2(~cellfun(@isempty,{struct2.(fieldname)}));
-                A = {AA.(fieldname)};
-            end
-            [~,ia] = unique(A) ;
-            res = struct2(ia) ;
-        end
-        
+        diff1in2  = setdiff_struct( struct2, struct1, fieldname )
+        res = structUnique(struct2, fieldname)        
         %% removeEmpty
-        function l = removeEmpty(l)
-            l = l(cellfun(@(x) ~isempty(x), l));
-        end
+        l = removeEmpty(l)
         %%
-        function tf = startsWith(s, pattern)
-            try
-                %use Matlab startsWith for Matlab versions > 2015
-                tf = startsWithw(s, pattern);
-            catch
-                try
-                    res = regexp(s, strcat('^', pattern), 'match', 'once');
-                    if ischar(res)
-                        res = {res};
-                    end
-                    tf = cellfun(@(x) ~isempty(x), res);
-                catch E
-                    throw(E);
-                end
-            end
-        end
+        tf = startsWith(s, pattern)
         %%
-        function tf = endsWith(s, pattern)
-            try
-                %use Matlab startsWith for Matlab versions > 2015
-                tf = endsWith(s, pattern);
-            catch
-                try
-                    res = regexp(s, strcat(pattern, '$'), 'match', 'once');
-                    if ischar(res)
-                        res = {res};
-                    end
-                    tf = cellfun(@(x) ~isempty(x), res);
-                catch E
-                    throw(E);
-                end
-            end
-        end
+        tf = endsWith(s, pattern)
         %%
-        function res = contains(str, pattern)
-            try
-                %use Matlab startsWith for Matlab versions > 2016
-                res = contains(s, pattern);
-            catch
-                try
-                    % do not change it
-                    res = ~isempty(strfind(str, pattern));
-                catch E
-                    throw(E);
-                end
-            end
-        end
+        res = contains(str, pattern)
         %% delete files using regular expressions:
         %e.g. rm *_PP.slx
-        function reg_delete(basedir, reg_exp)
-            all_files = dir(fullfile(basedir,'**', reg_exp));
-            if isfield(all_files, 'folder')
-                files_path = arrayfun(@(x) [x.folder '/' x.name], all_files, 'UniformOutput', 0);
-            elseif isfield(all_files, 'name')
-                files_path = {all_files.name};
-            else
-                files_path = {};
-            end
-            for i=1:numel(files_path)
-                delete(files_path{i});
-            end
-        end
-        
-        
+        reg_delete(basedir, reg_exp)
+       
         %% Concat cell array with a specific delimator
-        function joinedStr = strjoin(str, delimiter)
-            if nargin < 1 || nargin > 2
-                narginchk(1, 2);
-            end
-            
-            strIsCellstr = iscellstr(str);
-            
-            % Check input arguments.
-            if ~strIsCellstr
-                error(message('MATLAB:strjoin:InvalidCellType'));
-            end
-            
-            numStrs = numel(str);
-            
-            if nargin < 2
-                delimiter = {' '};
-            elseif ischar(delimiter)
-                delimiter = {MatlabUtils.strescape(delimiter)};
-            elseif iscellstr(delimiter) || isstring(delimiter)
-                numDelims = numel(delimiter);
-                if numDelims ~= 1 && numDelims ~= numStrs-1
-                    error(message('MATLAB:strjoin:WrongNumberOfDelimiterElements'));
-                elseif strIsCellstr && isstring(delimiter)
-                    delimiter = cellstr(delimiter);
-                end
-                delimiter = reshape(delimiter, numDelims, 1);
-            else
-                error(message('MATLAB:strjoin:InvalidDelimiterType'));
-            end
-            
-            str = reshape(str, numStrs, 1);
-            
-            if numStrs == 0
-                joinedStr = '';
-            else
-                joinedCell = cell(2, numStrs);
-                joinedCell(1, :) = str;
-                joinedCell(2, 1:numStrs-1) = delimiter;
-                
-                joinedStr = [joinedCell{:}];
-            end
-        end
-        function str = strescape(str)
-            %STRESCAPE  Escape control character sequences in a string.
-            %   STRESCAPE(STR) converts the escape sequences in a string to the values
-            %   they represent.
-            %
-            %   Example:
-            %
-            %       strescape('Hello World\n')
-            %
-            %   See also SPRINTF.
-            
-            %   Copyright 2012-2015 The MathWorks, Inc.
-            
-            if iscell(str)
-                str = cellfun(@(c)strescape(c), str, 'UniformOutput', false);
-            else
-                idx = 1;
-                % Note that only [1:end-1] of the string is checked,
-                % since unescaped trailing backslashes are ignored.
-                while idx < length(str)
-                    if str(idx) == '\'
-                        str(idx) = [];  % Remove the '\' escape character itself.
-                        str(idx) = MatlabUtils.escapeChar(str(idx));
-                    end
-                    idx = idx + 1;
-                end
-            end
-            
-        end
+        joinedStr = strjoin(str, delimiter)
+        str = strescape(str)
         %--------------------------------------------------------------------------
-        function c = escapeChar(c)
-            switch c
-                case '0'  % Null.
-                    c = char(0);
-                case 'a'  % Alarm.
-                    c = char(7);
-                case 'b'  % Backspace.
-                    c = char(8);
-                case 'f'  % Form feed.
-                    c = char(12);
-                case 'n'  % New line.
-                    c = char(10);
-                case 'r'  % Carriage return.
-                    c = char(13);
-                case 't'  % Horizontal tab.
-                    c = char(9);
-                case 'v'  % Vertical tab.
-                    c = char(11);
-                case '\'  % Backslash.
-                    c = '\';
-                otherwise
-                    warning(message('MATLAB:strescape:InvalidEscapeSequence', c, c));
-            end
-        end
-        
-        
+        c = escapeChar(c)
         %% This function for developers
         % open all files that contains a String
-        function whoUse(folder, str)
-            system(sprintf('find %s | xargs grep "%s" -sl', folder, str), '-echo');
-        end
-        function openAllFilesContainingString(folder, str)
-            [~, A] = system(sprintf('find %s | xargs grep "%s" -sl', folder, str), '-echo');
-            AA = strsplit(A, '\n');
-            for i=1:numel(AA), try open(AA{i}), catch, end, end
-        end
+        whoUse(folder, str)
+
+        openAllFilesContainingString(folder, str)
         
-        function terminate(modelName)
-            if nargin < 1 || isempty(modelName)
-                modelName = gcs;
-            end
-            evalin('base', sprintf('%s([], [], [], ''term'')', modelName));
-        end
+        terminate(modelName)
         
-        function count = getNbLines(file)
-            try
-                fid = fopen(file);
-                count = 0;
-                while true
-                    if ~ischar( fgetl(fid) ); break; end
-                    count = count + 1;
-                end
-                fclose(fid);
-                fprintf('lines in file %s is %d\n', file, count);
-            catch
-                count = -1;
-            end
-        end
-        function F = allMatlabFilesExceeds(folder, n)
-            mfiles = dir(fullfile(folder,'**', '*.m'));
-            if isfield(mfiles, 'folder')
-                files_path = arrayfun(@(x) [x.folder '/' x.name], mfiles, 'UniformOutput', 0);
-            else
-                files_path = {mfiles.name};
-            end
-            count = cellfun(@(x) MatlabUtils.getNbLines(x), files_path, 'UniformOutput', true);
-            F = files_path(count > n);
-        end
+        count = getNbLines(file)
+
+        F = allMatlabFilesExceeds(folder, n)
+
         
     end
     
