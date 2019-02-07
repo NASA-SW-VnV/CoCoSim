@@ -1,0 +1,184 @@
+
+function [x2, y2] = process_branch(nodes, new_model_name, node_block_path, blk_exprs, var, node_name, x2, y2, xml_trace)
+    if y2 < 30000; y2 = y2 + 150; else, x2 = x2 + 500; y2 = 100; end;
+
+    ID = BUtils.adapt_block_name(var{1});
+    branch_block_path = fullfile(node_block_path, ID);
+    add_block('built-in/Subsystem', branch_block_path,...
+        'Position',[(x2+200) y2 (x2+250) (y2+50)]);
+    %    'TreatAsAtomicUnit', 'on', ...
+
+
+    x3 = 50;
+    y3 = 50;
+
+    %% Outputs
+    blk_outputs = blk_exprs.(var{1}).outputs;
+    [x3, y3] = Lus2SLXUtils.process_outputs(branch_block_path, blk_outputs, ID, x3, y3);
+
+    %% Inputs
+    blk_inputs = blk_exprs.(var{1}).inputs;
+    [x3, y3] = Lus2SLXUtils.process_inputs(branch_block_path, blk_inputs, ID, x3, y3);
+
+    %% link outputs from outside
+    outputs = blk_exprs.(var{1}).outputs;
+    [x2, y4] =Lus2SLXUtils.link_subsys_outputs( node_block_path, branch_block_path, outputs, var, node_name, x2, y2);
+
+
+    %% link inputs from outside
+    inputs = blk_exprs.(var{1}).inputs;
+    [x2, y5] = Lus2SLXUtils.link_subsys_inputs( node_block_path, branch_block_path, inputs, var, node_name, x2, y2);
+
+    y2 = max(y4, y5);
+
+    %% add IF block with IF expressions
+    IF_path = strcat(branch_block_path,'/',ID,'_IF');
+    branches = blk_exprs.(var{1}).branches;
+    branches_names = {};
+    i = 1;
+    for b=fieldnames(branches)'
+        branches_names{i} = branches.(b{1}).guard_value;
+        i = i+1;
+    end
+    % fields expressed as Numbers in Json are translated to xNumber (12 -> x12)
+    % I try here to delete the x in this case.
+    % branches_names_adapted = regexprep(branches_names, '^x(\d+[\.]?\d*)$', '$1');
+
+    %adapt IF expression to the form u==exp.
+    [n, m] = size(branches_names);
+    prefix = cell(n,m);
+    prefix(:,:) = {'u1 == '};
+    ifexp = cellfun(@(x,y) [x  y], prefix, branches_names,'un',0);
+    ifexp = regexprep(ifexp, 'u1 == true', 'u1');
+    ifexp = regexprep(ifexp, 'u1 == false', '~u1');
+    IfExpression = ifexp{1};
+    if numel(ifexp) > 1
+        ElseIfExpressions = strjoin(ifexp(2:end), ', ');
+    else
+        ElseIfExpressions = '';
+    end
+
+    y3 = y3 + 150;
+    add_block('simulink/Ports & Subsystems/If',...
+        IF_path,...
+        'IfExpression', IfExpression, ...
+        'ElseIfExpressions', ElseIfExpressions, ...
+        'ShowElse', 'off', ...
+        'Position',[(x3+100) y3 (x3+150) (y3+50)]);
+
+    %% add Guard input
+    guard_path = strcat(branch_block_path,'/',ID,'_guard');
+    guard = blk_exprs.(var{1}).guard.value;
+    guard_type = blk_exprs.(var{1}).guard.type;
+    guard_adapted = BUtils.adapt_block_name(guard, ID);
+    if strcmp(guard_type, 'constant')
+        add_block('simulink/Commonly Used Blocks/Constant',...
+            guard_path,...
+            'Value', guard,...
+            'Position',[x3 y3 (x3+50) (y3+50)]);
+        %     set_param(guard_path, 'OutDataTypeStr','Inherit: Inherit via back propagation');
+        dt = blk_exprs.(var{1}).guard.datatype;
+        if strcmp(dt, 'bool')
+            set_param(guard_path, 'OutDataTypeStr', 'boolean');
+        elseif strcmp(dt, 'int')
+            set_param(guard_path, 'OutDataTypeStr', 'int32');
+        elseif strcmp(dt, 'real')
+            set_param(guard_path, 'OutDataTypeStr', 'double');
+        else
+            set_param(guard_path, 'OutDataTypeStr', dt);
+        end
+    else
+        add_block('simulink/Signal Routing/From',...
+            guard_path,...
+            'GotoTag',guard_adapted,...
+            'TagVisibility', 'local', ...
+            'Position',[x3 y3 (x3+50) (y3+50)]);
+    end
+    %% link guard to IF block
+    DstBlkH = get_param(IF_path,'PortHandles');
+    SrcBlkH = get_param(guard_path,'PortHandles');
+    add_line(branch_block_path, SrcBlkH.Outport(1), DstBlkH.Inport(1), 'autorouting', 'on');
+    y3 = y3 + 150;
+    x3 = x3 + 300;
+    %% branches
+    idx = 1;
+    for b=fieldnames(branches)'
+        branch_ID = strcat(ID,'_branch_',branches.(b{1}).guard_value);
+        branch_path = strcat(branch_block_path,'/',branch_ID);
+        add_block('simulink/Ports & Subsystems/If Action Subsystem',...
+            branch_path,...
+            'Position',[(x3+100) y3 (x3+150) (y3+50)]);
+        delete_line(branch_path, 'In1/1', 'Out1/1');
+        delete_block(strcat(branch_path,'/In1'));
+        delete_block(strcat(branch_path,'/Out1'));
+
+        % link IF with Action subsystem
+        DstBlkH = get_param(branch_path,'PortHandles');
+        SrcBlkH = get_param(IF_path,'PortHandles');
+        add_line(branch_block_path, SrcBlkH.Outport(idx), DstBlkH.Ifaction(1), 'autorouting', 'on');
+
+        % link Sction subsys inputs
+        % Outputs
+        x4 = 50;
+        y4 = 50;
+        blk_outputs = blk_exprs.(var{1}).outputs;
+        [x4, y4] = Lus2SLXUtils.process_outputs(branch_path, blk_outputs, branch_ID, x4, y4, true);
+
+        % Inputs
+        blk_inputs = branches.(b{1}).inputs;
+        [x4, y4] = Lus2SLXUtils.process_inputs(branch_path, blk_inputs, branch_ID, x4, y4);
+        [x3, y3] = Lus2SLXUtils.link_subsys_inputs( branch_block_path, branch_path, blk_inputs, b, ID, x3, y3);
+
+
+        % instructions
+        branch_exprs = branches.(b{1}).instrs;
+        [x4, y4] = Lus2SLXUtils.instrs_process(nodes, new_model_name, branch_path, branch_exprs, branch_ID, x4, y4, xml_trace);
+
+        %
+        idx = idx + 1;
+        y3 = y3 + 150;
+    end
+
+    %% Merge outputs
+    outputs = blk_exprs.(var{1}).outputs;
+    for i=1:numel(outputs)
+        output = outputs(i);
+        output_adapted = BUtils.adapt_block_name(output, ID);
+        merge_path = strcat(branch_block_path,'/',output_adapted,'_merge');
+        output_path = strcat(branch_block_path,'/',output_adapted,'_merged');
+        nb_merge = numel(fieldnames(branches));
+        add_block('simulink/Signal Routing/Goto',...
+            output_path,...
+            'GotoTag',output_adapted,...
+            'TagVisibility', 'local', ...
+            'Position',[(x3+300) y3 (x3+350) (y3+50)]);
+        if nb_merge==1
+            DstBlkH = get_param(output_path, 'PortHandles');
+        else
+            add_block('simulink/Signal Routing/Merge',...
+                merge_path,...
+                'Inputs', num2str(numel(fieldnames(branches))),...
+                'Position',[(x3+200) y3 (x3+250) (y3+50)]);
+            % Merge output
+            SrcBlkH = get_param(merge_path, 'PortHandles');
+            DstBlkH = get_param(output_path, 'PortHandles');
+            add_line(branch_block_path, SrcBlkH.Outport(1), DstBlkH.Inport(1), 'autorouting', 'on');
+            % Merge inputs
+            DstBlkH = get_param(merge_path, 'PortHandles');
+        end
+
+
+
+        j = 1;
+        for b=fieldnames(branches)'
+            branch_path = strcat(branch_block_path,'/',ID,'_branch_',branches.(b{1}).guard_value);
+            SrcBlkH = get_param(branch_path,'PortHandles');
+            add_line(branch_block_path, SrcBlkH.Outport(i), DstBlkH.Inport(j), 'autorouting', 'on');
+            j = j + 1;
+        end
+
+        y3 = y3 + 150;
+    end
+end
+
+
