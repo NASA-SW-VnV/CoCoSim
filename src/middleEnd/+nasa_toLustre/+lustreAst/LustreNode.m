@@ -20,7 +20,7 @@ classdef LustreNode < nasa_toLustre.lustreAst.LustreAst
     
     methods
         function obj = LustreNode(metaInfo, name, inputs, outputs, ...
-                localContract, localVars, bodyEqs, isMain)
+                localContract, localVars, bodyEqs, isMain, isImported)
             if nargin==0
                 obj.metaInfo = '';
                 obj.name = '';
@@ -40,7 +40,11 @@ classdef LustreNode < nasa_toLustre.lustreAst.LustreAst
                 obj.setBodyEqs(bodyEqs);
                 obj.setIsMain(isMain);
             end
-            obj.isImported = false;
+            if nargin < 9
+                obj.isImported = false;
+            else
+                obj.isImported = isImported;
+            end
             
             
             
@@ -162,7 +166,7 @@ classdef LustreNode < nasa_toLustre.lustreAst.LustreAst
             new_obj = nasa_toLustre.lustreAst.LustreNode(obj.metaInfo, obj.name,...
                 new_inputs, ...
                 new_outputs, new_localContract, new_localVars, new_bodyEqs, ...
-                obj.isMain);
+                obj.isMain, obj.isImported);
         end
         %% simplify expression
         function all_obj = getAllLustreExpr(obj)
@@ -199,7 +203,7 @@ classdef LustreNode < nasa_toLustre.lustreAst.LustreAst
             end
             new_obj = nasa_toLustre.lustreAst.LustreNode(obj.metaInfo, obj.name, obj.inputs, ...
                 obj.outputs, obj.localContract, obj.localVars, new_bodyEqs, ...
-                obj.isMain);
+                obj.isMain, obj.isImported);
         end
         
         function new_obj = changeArrowExp(obj, cond)
@@ -208,7 +212,7 @@ classdef LustreNode < nasa_toLustre.lustreAst.LustreAst
             new_obj = nasa_toLustre.lustreAst.LustreNode(obj.metaInfo, obj.name,...
                 obj.inputs, ...
                 obj.outputs, obj.localContract, obj.localVars, new_bodyEqs, ...
-                obj.isMain);
+                obj.isMain, obj.isImported);
         end
         %% This function is used for Stateflow
         function [call, oututs_Ids] = nodeCall(obj, isInner, InnerValue)
@@ -287,7 +291,7 @@ classdef LustreNode < nasa_toLustre.lustreAst.LustreAst
             end
             new_obj = LustreNode(obj.metaInfo, obj.name, obj.inputs, ...
                 obj.outputs, new_localContract, obj.localVars, new_bodyEqs, ...
-                obj.isMain);
+                obj.isMain, obj.isImported);
         end
         %% This function is used by KIND2 LustreProgram.print()
         function nodesCalled = getNodesCalled(obj)
