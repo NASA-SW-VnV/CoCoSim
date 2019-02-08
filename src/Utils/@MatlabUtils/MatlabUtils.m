@@ -13,10 +13,10 @@ classdef MatlabUtils
         st = gcd(T)
         diff1in2  = setdiff_struct( struct2, struct1, fieldname )
         res = structUnique(struct2, fieldname)        
-        removeEmpty(l)% removeEmpty
+        l = removeEmpty(l)% removeEmpty
         startsWith(s, pattern)
         endsWith(s, pattern)
-        contains(str, pattern)
+        res = contains(str, pattern)
         reg_delete(basedir, reg_exp)% delete files using regular expressions:e.g. rm *_PP.slx
         % Concat cell array with a specific delimator
         joinedStr = strjoin(str, delimiter)
