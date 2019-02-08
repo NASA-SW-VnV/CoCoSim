@@ -49,7 +49,8 @@ classdef Selector_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 
             else   % no port input.  Mapping is done in Matlab.
                 
-                [codes] = getWriteCodeForNonPortInput(obj,numOutDims,inputs,outputs,ind,outputDimsArray,in_matrix_dimension);
+                [codes] = Selector_To_Lustre.getWriteCodeForNonPortInput(obj,...
+                    numOutDims,inputs,outputs,ind,outputDimsArray,in_matrix_dimension);
                 
             end
             
