@@ -30,6 +30,7 @@ classdef MatlabUtils
         terminate(modelName)
         count = getNbLines(file)
         F = allMatlabFilesExceeds(folder, n)
+        [pList, found, alreadyHandled] = requiredProducts(filepath, alreadyHandled);
 
         
     end

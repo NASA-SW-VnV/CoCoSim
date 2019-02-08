@@ -21,7 +21,7 @@ function [Value, valueDataType, status] = evalParam(modelObj, parent, blk, param
         if isempty(regexp(param, '[a-zA-Z]', 'match'))
             % do not use str2double
             Value = str2num(param);
-            if contains(param, '.')
+            if MatlabUtils.contains(param, '.')
                 valueDataType = 'double';
             else
                 valueDataType = 'int';

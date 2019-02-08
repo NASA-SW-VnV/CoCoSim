@@ -33,7 +33,7 @@ end
 
 command = sprintf('%s %s -I "%s" -d "%s" -node %s "%s"', LUSTREC, LUSTREC_OPTS, LUCTREC_INCLUDE_DIR, output_dir,node_name,  lus_full_path);
 [~, lustrec_output] = system(command);
-if ~contains(lustrec_output, '.. done')
+if ~MatlabUtils.contains(lustrec_output, '.. done')
     display_msg('Error Generating C code', Constants.ERROR, 'C Generation', '');
     display_msg(lustrec_output, MsgType.ERROR, 'Rust Generation', '');
 else

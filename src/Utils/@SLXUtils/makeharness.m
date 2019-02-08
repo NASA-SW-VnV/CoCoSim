@@ -57,7 +57,7 @@ function [new_model_name, status] = makeharness(T, subsys_path, output_dir, post
 
         new_system(newBaseName);
 
-        if contains(subsys_path, filesep)
+        if MatlabUtils.contains(subsys_path, filesep)
             add_block(subsys_path, newSubName);
         else
             add_block('built-in/Subsystem', fullfile(newBaseName, subsys_name));
