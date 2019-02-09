@@ -7,16 +7,16 @@ classdef MatlabUtils
         
         tree = getExpTree(exp)% Matlab IR
         r = concat(varargin)% concatenate 1-D vectors
-        out = naming(nomsim)        
+        out = naming(nomsim)
         mkdir(path)
         fname = fileBase(path)
         st = gcd(T)
         diff1in2  = setdiff_struct( struct2, struct1, fieldname )
-        res = structUnique(struct2, fieldname)        
+        res = structUnique(struct2, fieldname)
         l = removeEmpty(l)% removeEmpty
-        r = startsWith(s, pattern)
-        r = endsWith(s, pattern)
-        r = contains(str, pattern)
+        tf = startsWith(s, pattern)
+        tf = endsWith(s, pattern)
+        res = contains(str, pattern)
         reg_delete(basedir, reg_exp)% delete files using regular expressions:e.g. rm *_PP.slx
         % Concat cell array with a specific delimator
         joinedStr = strjoin(str, delimiter)
@@ -31,7 +31,7 @@ classdef MatlabUtils
         count = getNbLines(file)
         F = allMatlabFilesExceeds(folder, n)
         [pList, found, alreadyHandled] = requiredProducts(filepath, alreadyHandled);
-
+        
         
     end
     
