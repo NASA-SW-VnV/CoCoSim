@@ -114,7 +114,8 @@ function [Value, valueDataType, status] = evalParam(modelObj, parent, blk, param
             end
 
         end
-    catch
+    catch me
+        display_msg(me.getReport(), MsgType.DEBUG, 'SLXUtils.evalParam', '');
         status = 1;
     end
 end

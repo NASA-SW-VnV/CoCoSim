@@ -78,7 +78,7 @@ public class EM2JSON {
 			buf.append(Quotes("type")+":"+Quotes("script"));
 			buf.append(",\n");
 
-			buf.append(Quotes("statements")+":["+getJSON(ctx.body()));
+			buf.append(Quotes("statements")+":["+getJSON(ctx.script_body()));
 			buf.append("\n]");
 			setJSON(ctx, buf.toString());
 		}
@@ -135,6 +135,18 @@ public class EM2JSON {
 		}
 
 
+		@Override public void exitScript_body(EMParser.Script_bodyContext ctx) {
+			if (ctx.script_body() != null){
+				StringBuilder buf = new StringBuilder();
+				buf.append(getJSON(ctx.script_body()));
+				buf.append(",\n");
+				buf.append(getJSON(ctx.script_body_item()));
+				setJSON(ctx, buf.toString());
+			}
+			else
+				setJSON(ctx,getJSON(ctx.script_body_item()));
+		}
+		
 		@Override public void exitBody(EMParser.BodyContext ctx) {
 			if (ctx.body() != null){
 				StringBuilder buf = new StringBuilder();
@@ -147,6 +159,11 @@ public class EM2JSON {
 				setJSON(ctx,getJSON(ctx.body_item()));
 		}
 
+		
+		@Override public void exitScript_body_item(EMParser.Script_body_itemContext ctx) { 
+			setJSON(ctx,getJSON(ctx.getChild(0)));
+		}
+		
 		@Override public void exitBody_item(EMParser.Body_itemContext ctx) { 
 			setJSON(ctx,getJSON(ctx.getChild(0)));
 
@@ -487,26 +504,27 @@ public class EM2JSON {
 			int n =  ctx.children.size();
 			while(i<n){
 
-				buf.append(Quotes("child"+(child++))+":");
-				if(ctx.getChild(i).getText().equals("(")){
-					i++;
-					buf.append("{");
-					buf.append("\n");
-					buf.append(Quotes("type")+":"+Quotes("DotPARENIndex"));
-					buf.append(",\n");
-					buf.append(Quotes("expression")+":"+getJSON(ctx.getChild(i++)));
-					buf.append("\n}");
-					i++;//consume ")"
-					if (i<n-1) buf.append(",\n");
-				}else{
-					buf.append("{");
-					buf.append("\n");
-					buf.append(Quotes("type")+":"+Quotes("DotID"));
-					buf.append(",\n");
-					buf.append(Quotes("name")+":"+Quotes(ctx.getChild(i++).getText()));
-					buf.append("\n}");
-					if (i<n-1) buf.append(",\n");
-				}
+				buf.append(Quotes("child"+(child++))+":"+getJSON(ctx.getChild(i++)));
+				if (i<n) buf.append(",\n");
+//				if(ctx.getChild(i).getText().equals("(")){
+//					i++;
+//					buf.append("{");
+//					buf.append("\n");
+//					buf.append(Quotes("type")+":"+Quotes("DotPARENIndex"));
+//					buf.append(",\n");
+//					buf.append(Quotes("expression")+":"+getJSON(ctx.getChild(i++)));
+//					buf.append("\n}");
+//					i++;//consume ")"
+//					if (i<n-1) buf.append(",\n");
+//				}else{
+//					buf.append("{");
+//					buf.append("\n");
+//					buf.append(Quotes("type")+":"+Quotes("DotID"));
+//					buf.append(",\n");
+//					buf.append(Quotes("name")+":"+Quotes(ctx.getChild(i++).getText()));
+//					buf.append("\n}");
+//					if (i<n-1) buf.append(",\n");
+//				}
 				
 			}
 
@@ -1046,10 +1064,26 @@ public class EM2JSON {
 
 	}
 	public static void main(String[] args) throws Exception {
-		StringBuilder buf = new StringBuilder();
-		buf.append("f(x)");
-		String result = StringToIR(buf.toString());
-		System.out.println(result);
+		String inputFile = null;
+		if (args.length > 0) 
+			inputFile = args[0];
+		InputStream is = System.in;
+		if (inputFile != null) {
+			try {
+				is = new FileInputStream(inputFile);
+				String result = InputStreamToIR(is);
+				System.out.println(result);
+			}catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				System.out.println("File '"+ inputFile+"' Not Found.");
+			}
+		}else {
+			StringBuilder buf = new StringBuilder();
+			buf.append("f(x)");
+			String result = StringToIR(buf.toString());
+			System.out.println(result);
+		}
+		
 
 	}
 }

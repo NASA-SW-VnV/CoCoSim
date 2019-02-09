@@ -14,7 +14,7 @@ emfile
 script
 	: contract?
 	  nlosoc?
-	  body
+	  script_body
       nlosoc?
     ;
 function
@@ -33,7 +33,14 @@ func_output
 	: ID EQ                             
 	| LSBRACE (ID COMMA?)*? RSBRACE EQ  
 	;
-
+script_body
+	:   script_body_item (nlosoc | EOF)
+    |   script_body  script_body_item (nlosoc | EOF)
+    ;
+script_body_item
+    :  statement 			
+    |  annotation 		
+    ;
 body
     :   body_item (nlosoc | EOF)
     |   body  body_item (nlosoc | EOF)
@@ -272,7 +279,7 @@ cell_indexing
 struct_indexing
 	:	ID 
     ( 
-        DOT (ID | LPAREN notAssignment RPAREN )
+        DOT indexing
 	)+
 	;
 

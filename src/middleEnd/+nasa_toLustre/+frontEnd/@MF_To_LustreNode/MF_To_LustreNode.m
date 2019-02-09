@@ -13,7 +13,8 @@ classdef MF_To_LustreNode
     methods(Static)
         [main_node, external_nodes, external_libraries ] = ...
             mfunction2node(parent,  blk,  xml_trace, lus_backend, coco_backend, main_sampleTime, varargin);
-        blk = creatInportsOutports(blk);
+        [blk, MF_DATA_MAP] = creatInportsOutports(blk);
+        [body, failed] = getMFunctionCode(parent,  blk, MF_DATA_MAP)
     end
     
     

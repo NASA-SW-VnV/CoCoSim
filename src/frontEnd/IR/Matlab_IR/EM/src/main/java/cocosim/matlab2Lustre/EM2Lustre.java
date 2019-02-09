@@ -246,10 +246,10 @@ public class EM2Lustre {
 
 
 			buf.append("let\n");
-			buf.append(getLus(ctx.body()));
+			buf.append(getLus(ctx.script_body()));
 			buf.append("tel\n");
 
-			setLus_body(getLus(ctx.body()));
+			setLus_body(getLus(ctx.script_body()));
 			setLus(ctx, buf.toString());
 		}
 
@@ -345,6 +345,22 @@ public class EM2Lustre {
 		}
 
 		@Override
+		public void exitScript_body(EMParser.Script_bodyContext ctx) {
+			if (ctx.script_body() != null) {
+				StringBuilder buf = new StringBuilder();
+				buf.append(getLus(ctx.script_body()));
+
+				buf.append(getLus(ctx.script_body_item()));
+
+				setLus(ctx, buf.toString());
+			} else {
+				setLus(ctx, getLus(ctx.script_body_item()));
+
+			}
+
+		}
+		
+		@Override
 		public void exitBody(EMParser.BodyContext ctx) {
 			if (ctx.body() != null) {
 				StringBuilder buf = new StringBuilder();
@@ -360,6 +376,10 @@ public class EM2Lustre {
 
 		}
 
+		@Override
+		public void exitScript_body_item(EMParser.Script_body_itemContext ctx) {
+			setLus(ctx, getLus(ctx.getChild(0)));
+		}
 		@Override
 		public void exitBody_item(EMParser.Body_itemContext ctx) {
 			setLus(ctx, getLus(ctx.getChild(0)));
