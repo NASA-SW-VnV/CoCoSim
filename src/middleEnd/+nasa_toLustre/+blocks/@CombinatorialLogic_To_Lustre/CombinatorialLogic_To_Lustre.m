@@ -111,15 +111,7 @@ classdef CombinatorialLogic_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     end
     methods(Static)
         
-        function v_lus = getAstValue(v, dt)
-            % in this block, the output dataType is Boolean or double
-            if strcmp(dt, 'bool')
-                v_lus = BooleanExpr(v);
-            else
-                v_lus = RealExpr(v);
-            end
-            
-        end
+        v_lus = getAstValue(v, dt)
     end
     
 end
