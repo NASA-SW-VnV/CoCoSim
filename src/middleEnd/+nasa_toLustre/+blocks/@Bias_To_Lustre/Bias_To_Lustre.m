@@ -52,32 +52,7 @@ classdef Bias_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     end
     
     methods(Static)
-        function [inputs,widths] = getBlockInputsNames_convInType2AccType(obj, parent, blk)
-            L = nasa_toLustre.ToLustreImport.L;
-            import(L{:})
-            inputs = {};
-            widths = blk.CompiledPortWidths.Inport;
-            max_width = max(widths);
-            outputDataType = blk.CompiledPortDataTypes.Outport{1};
-            for i=1:numel(widths)
-                inputs{i} =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk, i);
-                if numel(inputs{i}) < max_width
-                    inputs{i} = arrayfun(@(x) {inputs{i}{1}}, (1:max_width));
-                end
-                inport_dt = blk.CompiledPortDataTypes.Inport(i);
-                %converts the input data type(s) to
-                %its accumulator data type
-                if ~strcmp(inport_dt, outputDataType)
-                    [external_lib, conv_format] =nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(inport_dt, outputDataType);
-                    if ~isempty(conv_format)
-                        obj.addExternal_libraries(external_lib);
-                        inputs{i} = cellfun(@(x)...
-                           nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(conv_format,x),...
-                            inputs{i}, 'un', 0);
-                    end
-                end
-            end            
-        end
+        [inputs,widths] = getBlockInputsNames_convInType2AccType(obj, parent, blk)
         
     end
     
