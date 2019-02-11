@@ -52,159 +52,49 @@ classdef Block_To_Lustre < handle
         isAbstracted(obj, parent, blk, lus_backend, coco_backend, main_sampleTime, varargin)
     end
     methods
-        function addVariable(obj, varname, ...
+        addVariable(obj, varname, ...
                 xml_trace, originPath, port, width, index, isInsideContract, IsNotInSimulink)
-            if iscell(varname)
-                obj.variables = [obj.variables, varname];
-            else
-                obj.variables{end +1} = varname;
-            end
-            if nargin >= 3
-                if iscell(varname)
-                    for i=1:numel(varname)
-                        xml_trace.add_InputOutputVar('Variable', varname{i}.getId(), originPath, port, width, i, isInsideContract, IsNotInSimulink);
-                    end
-                else
-                    xml_trace.add_InputOutputVar('Variable', varname.getId(), originPath, port, width, index, isInsideContract, IsNotInSimulink);
-                end
-            end
-        end
-        function setVariables(obj, vars)
-            obj.variables = vars;
-        end
-        function addUnsupported_options(obj, option)
-            if iscell(option)
-                obj.unsupported_options = [obj.unsupported_options, option];
-            else
-                obj.unsupported_options{numel(obj.unsupported_options) +1} = option;
-            end
-        end
-        function addExternal_libraries(obj, lib)
-            if isempty(lib)
-                return;
-            elseif iscell(lib)
-                obj.external_libraries = [obj.external_libraries, lib];
-            elseif ~ischar(lib) && numel(lib) > 1
-                for i=1:numel(lib)
-                    obj.external_libraries{end +1} = lib(i);
-                end
-            else
-                obj.external_libraries{end +1} = lib;
-            end
-        end
-        function setExternal_libraries(obj, lib)
-            obj.external_libraries = lib;
-        end
-        function addExtenal_node(obj, nodeAst)
-            if iscell(nodeAst)
-                obj.external_nodes = [obj.external_nodes, nodeAst];
-            elseif ~ischar(nodeAst) && numel(nodeAst) > 1
-                for i=1:numel(nodeAst)
-                    obj.external_nodes{end +1} = nodeAst(i);
-                end
-            else
-                obj.external_nodes{end +1} = nodeAst;
-            end
-        end
-        
-        function setCode(obj, code)
-            obj.lustre_code = code;
-        end
-        function addCode(obj, code)
-            if iscell(code)
-                obj.lustre_code = [obj.lustre_code, code];
-            elseif ~ischar(code) && numel(code) > 1
-                for i=1:numel(code)
-                    obj.lustre_code{end +1} = code(i);
-                end
-            else
-                obj.lustre_code{end +1} = code;
-            end
-        end
+
+        setVariables(obj, vars)
+
+        addUnsupported_options(obj, option)
+
+        addExternal_libraries(obj, lib)
+
+        setExternal_libraries(obj, lib)
+
+        addExtenal_node(obj, nodeAst)
+     
+        setCode(obj, code)
+
+        addCode(obj, code)
         % Getters
-        function code = getCode(obj)
-            code = obj.lustre_code;
-        end
-        function variables = getVariables(obj)
-            variables = obj.variables;
-        end
-        function res = getExternalLibraries(obj)
-            res = obj.external_libraries;
-        end
-        function res = getExternalNodes(obj)
-            res = obj.external_nodes;
-        end
-        function res = isContentNeedToBeTranslated(obj)
-            res = obj.ContentNeedToBeTranslated;
-        end
+        code = getCode(obj)
+
+        variables = getVariables(obj)
+
+        res = getExternalLibraries(obj)
+
+        res = getExternalNodes(obj)
+
+        res = isContentNeedToBeTranslated(obj)
+
     end
     methods(Static)
         
         % Adapt BlockType to the name of the class that will handle its
         %translation.
-        function name = blkTypeFormat(name)
-            name = strrep(name, ' ', '');
-            name = strrep(name, '-', '');
-        end
+        name = blkTypeFormat(name)
         
         % Return if the block has not a class that handle its translation.
         % e.g Inport block is trivial and does not need a code, its name is given
         % in the node signature.
-        function b = ignored(blk)
-            % add blocks that will be ignored because they are supported
-            % somehow implicitly or not important for Code generation and Verification.
-            blksIgnored = {'Terminator', 'Scope', 'Display', ...
-                'EnablePort','ActionPort', 'ResetPort', 'TriggerPort', ...
-                'ToWorkspace', 'DataTypeDuplicate', ...
-                'Data Type Propagation'};
-            % the list of block without outputs but should be translated to
-            % Lustre.
-            blksWithNoOutputsButNotIgnored = {...
-                'Outport',...
-                'Design Verifier Assumption', ...
-                'Design Verifier Proof Objective', ...
-                'Assertion', ...
-                'VerificationSubsystem'};
-            type = blk.BlockType;
-            try
-                masktype = blk.MaskType;
-            catch
-                masktype = '';
-            end
-            hasNoOutpot = ...
-                isfield(blk, 'CompiledPortWidths') && isempty(blk.CompiledPortWidths.Outport);
-            b = ismember(type, blksIgnored) ...
-                || ismember(masktype, blksIgnored)...
-                || ...
-                (~ismember(type, blksWithNoOutputsButNotIgnored) ...
-                && ~ismember(masktype, blksWithNoOutputsButNotIgnored) ...
-                && hasNoOutpot);
-        end
+        b = ignored(blk)
+
         
         %% find_system: look for blocks inside a struct using parameters such as BlcokType, MaskType.
         % e.g blks = Block_To_Lustre.find_blocks(ss, 'BlockType', 'UnitDelay', 'StateName', 'X')
-        function blks = find_blocks(ss, varargin)
-            import nasa_toLustre.frontEnd.Block_To_Lustre
-            blks = {};
-            doesMatch = true;
-            for i=1:2:numel(varargin)
-                if ~(isfield(ss, varargin{i}) && isequal(ss.BlockType, varargin{i+1}))
-                    doesMatch = false;
-                    break;
-                end
-            end
-            if doesMatch
-                blks{1} = ss;
-            end
-            if isfield(ss, 'Content') && ~isempty(ss.Content)
-                field_names = fieldnames(ss.Content);
-                for i=1:numel(field_names)
-                    blks_i = Block_To_Lustre.find_blocks(ss.Content.(field_names{i}), varargin{:});
-                    blks = [blks, blks_i];
-                end
-            end
-            
-        end
+        blks = find_blocks(ss, varargin)
         
     end
     
