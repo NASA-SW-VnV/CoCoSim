@@ -68,13 +68,9 @@ classdef Constant_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         end
     end
     methods(Static = true)
-        function [Value, valueDataType, status] = ...
+        [Value, valueDataType, status] = ...
                 getValueFromParameter(parent, blk, param)
-            model_name = regexp(blk.Origin_path, filesep, 'split');
-            model_name = model_name{1};
-            [Value, valueDataType, status] = ...
-                SLXUtils.evalParam(model_name, parent, blk, param);
-        end
+
     end
     
     
