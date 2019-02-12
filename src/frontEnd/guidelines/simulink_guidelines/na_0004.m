@@ -12,6 +12,62 @@ function [results, passed, priority] = na_0004(model)
     results = {};
     passed = 1;
     totalFail = 0;
+    item_titles = {...
+        'View Options: Model Browser set to unchecked', ...
+        'View Options: Screen color set to white'...
+        };
+    param_names = {...
+        'ModelBrowserVisibility', ...
+        'ScreenColor'...
+        };
+    param_values = {...
+        'on',...%ModelBrowserVisibility
+        'white' ...%ScreenColor
+        };
+    subtitles = cell(length(item_titles)+1, 1);
+    for i=1:length(item_titles)
+        item_title = item_titles{i};
+        param = get_param(gcs, param_names{i});
+        if strcmp(param, param_values{i})
+            fsList = {model};
+        else
+            fsList = {};
+        end
+        [subtitles{i+1}, numFail] = ...
+            GuidelinesUtils.process_find_system_results(fsList,item_title,...
+            true);
+        totalFail = totalFail + numFail;
+    end
+    if totalFail > 0
+        passed = 0;
+        color = 'red';
+    else
+        color = 'green';
+    end
+
+    title = 'na_0004: Simulink model appearance';
+    description_text = [...
+        'The model appearance settings should conform to the <br>'...
+        'following guidelines when the model is released.  The user <br>',...
+        'is free to change the settings during the development process'];
+    description = HtmlItem(description_text, {}, 'black', 'black');   
+    subtitles{1} = description;
+    results{end+1} = HtmlItem(title, subtitles, color, color);
+end
+function [results, passed, priority] = na_0004V2(model)
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Copyright (c) 2017 United States Government as represented by the
+    % Administrator of the National Aeronautics and Space Administration.
+    % All Rights Reserved.
+    % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>,
+    %         Khanh Trinh <khanh.v.trinh@nasa.gov>
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % ORION GN&C MATLAB/Simulink Standards
+    % na_0004: Simulink model appearance
+    priority = 3;
+    results = {};
+    passed = 1;
+    totalFail = 0;
 
     % View Options
     item_title = 'View Options: Model Browser set to unchecked';

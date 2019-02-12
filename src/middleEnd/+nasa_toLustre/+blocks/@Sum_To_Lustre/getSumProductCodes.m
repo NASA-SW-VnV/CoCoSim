@@ -1,4 +1,9 @@
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Copyright (c) 2017 United States Government as represented by the
+% Administrator of the National Aeronautics and Space Administration.
+% All Rights Reserved.
+% Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [codes, outputs_dt, AdditionalVars] = getSumProductCodes(...
         obj, parent, blk, OutputDataTypeStr,isSumBlock, ...
         AccumDataTypeStr, xml_trace, lus_backend)

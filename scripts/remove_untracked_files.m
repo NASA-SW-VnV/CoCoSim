@@ -15,7 +15,7 @@ end
 PWD = pwd;
 
 cd(coco_dir);
-cmd = 'git ls-files --others --exclude-standard';
+cmd = 'git ls-files --others ';
 [status, git_output] = system(cmd);
 
 if status==0
@@ -35,6 +35,5 @@ if status==0
 else
     fprintf('Git status command can not be run see error:\n%s\n', git_output);
 end
-
 cd(PWD);
 end

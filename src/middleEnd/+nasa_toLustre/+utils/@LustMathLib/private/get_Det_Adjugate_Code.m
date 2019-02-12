@@ -1,3 +1,4 @@
+%TODO add copyright
 function body = get_Det_Adjugate_Code(n,det,a,adj)
     import nasa_toLustre.lustreAst.*
     body = {};
