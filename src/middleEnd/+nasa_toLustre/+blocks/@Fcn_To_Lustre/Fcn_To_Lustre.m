@@ -62,14 +62,7 @@ classdef Fcn_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         end
     end
     methods(Static)
-        function data_map = createDataMap(inputs, inputs_dt)
-            data_map = containers.Map('KeyType', 'char', 'ValueType', 'char');
-            for i=1:numel(inputs)
-                for j=1:numel(inputs{i})
-                    data_map(inputs{i}{j}.getId()) = inputs_dt{i}{j};
-                end
-            end
-        end
+        data_map = createDataMap(inputs, inputs_dt)
     end
 end
 
