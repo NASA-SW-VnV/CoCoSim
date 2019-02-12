@@ -127,39 +127,12 @@ classdef StateflowTruthTable_To_Lustre
         end
         
         %%
-        function id_out = incrementID()
-            persistent id;
-            if isempty(id)
-                id = 0;
-            end
-            id = id+1;
-            id_out = id;
-        end
-        function junc = buildJunctionStruct(tablePath)
-            junc.Id = StateflowTruthTable_To_Lustre.incrementID();
-            junc.Name = sprintf('Junction%d', junc.Id);
-            junc.Path = strcat (tablePath, '/',junc.Name);
-            junc.Origin_path = strcat (tablePath, '/',junc.Name);
-            junc.Type = 'CONNECTIVE';
-            
-        end
-        function transitionStruct = buildTransitionStruct(ExecutionOrder, destination, C, CAction, srcPath)
-            transitionStruct = {};
-            transitionStruct.Id = StateflowTruthTable_To_Lustre.incrementID();
-            transitionStruct.ExecutionOrder = ExecutionOrder;
-            transitionStruct.Destination.Id = destination.Id;
-            transitionStruct.Source = srcPath;
-            % parse the label string of the transition
-            transitionStruct.Event ='';
-            transitionStruct.Condition = C;
-            transitionStruct.ConditionAction = CAction;
-            transitionStruct.TransitionAction = '';
-            %keep LabelString in case the parser failed.
-            transitionStruct.LabelString = sprintf('[%s]{%s}', C, CAction);
-            transitionStruct.Destination.Type = 'Junction';
-            transitionStruct.Destination.Name = destination.Path;
-            transitionStruct.Destination.Origin_path = destination.Origin_path;
-        end
+        id_out = incrementID()
+
+        junc = buildJunctionStruct(tablePath)
+
+        transitionStruct = buildTransitionStruct(ExecutionOrder, destination, C, CAction, srcPath)
+
     end
     
 end
