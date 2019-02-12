@@ -19,7 +19,7 @@ function main_node  = write_StateNode(state)
     end
     %create the node
     node_name = ...
-        StateflowState_To_Lustre.getStateNodeName(state);
+        SF2LusUtils.getStateNodeName(state);
     main_node = LustreNode();
     main_node.setName(node_name);
     comment = LustreComment(...

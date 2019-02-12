@@ -21,7 +21,7 @@ function main_node  = write_ChartNodeWithEvents(chart, inputEvents)
     end
     %create the node
     node_name = ...
-        StateflowState_To_Lustre.getChartEventsNodeName(chart);
+        SF2LusUtils.getChartEventsNodeName(chart);
     main_node = LustreNode();
     main_node.setName(node_name);
     comment = LustreComment(...

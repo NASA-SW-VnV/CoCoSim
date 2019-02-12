@@ -39,8 +39,18 @@ function [main_node, external_nodes, external_libraries ] = ...
                 blk.Origin_path), MsgType.WARNING, 'MF_To_LustreNode.mfunction2node', '');
         else
             main_node.setBodyEqs(body);
+            % For matlab no Id is used in names because of Function internal vars
+            Inputs = cellfun(@(x) rmfield(x, 'Id'), Inputs, 'UniformOutput', 0);
+            Outputs = cellfun(@(x) rmfield(x, 'Id'), Outputs, 'UniformOutput', 0);
+            inputs = SF_To_LustreNode.getDataVars(...
+                SF_To_LustreNode.orderObjects(Inputs, 'Port'));
+            outputs = SF_To_LustreNode.getDataVars(...
+                SF_To_LustreNode.orderObjects(Outputs, 'Port'));
+            main_node.setInputs(inputs);
+            main_node.setOutputs(outputs);
+            main_node = main_node.pseudoCode2Lustre();
         end
-    catch me 
+    catch me
         display_msg(me.getReport(), MsgType.DEBUG, 'MF_To_LustreNode.mfunction2node', '');
         display_msg(sprintf('Matlab Function block "%s" will be abstracted', ...
             blk.Origin_path), MsgType.WARNING, 'MF_To_LustreNode.mfunction2node', '');

@@ -30,9 +30,9 @@ function [main_node, external_libraries] = ...
             throw(ME);
         end
         state_parent = SF_STATES_PATH_MAP(parentName);
-        idParentName = StateflowState_To_Lustre.getStateIDName(state_parent);
+        idParentName = SF2LusUtils.getStateIDName(state_parent);
         [stateEnumType, childName] = ...
-            StateflowState_To_Lustre.addStateEnum(state_parent, state);
+            SF2LusUtils.addStateEnum(state_parent, state);
         body{1} = LustreComment('set state as active');
         body{2} = LustreEq(VarIdExpr(idParentName), childName);
         outputs{1} = LustreVar(idParentName, stateEnumType);
@@ -73,7 +73,7 @@ function [main_node, external_libraries] = ...
     inputs = [inputs, inputs_i];
     %create the node
     act_node_name = ...
-        StateflowState_To_Lustre.getEntryActionNodeName(state);
+        SF2LusUtils.getEntryActionNodeName(state);
     main_node = LustreNode();
     main_node.setName(act_node_name);
     comment = LustreComment(...

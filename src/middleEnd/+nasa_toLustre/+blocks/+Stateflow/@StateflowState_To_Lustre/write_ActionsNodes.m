@@ -38,7 +38,7 @@ function  [external_nodes, external_libraries ] = ...
 
     % Create State actions as external nodes that will be called by the states nodes.
     [action_nodes,  external_libraries_i] = ...
-        StateflowState_To_Lustre.get_state_actions(state, data_map);
+        SF2LusUtils.get_state_actions(state, data_map);
     external_nodes = [external_nodes, action_nodes];
     external_libraries = [external_libraries, external_libraries_i];
 

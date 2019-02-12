@@ -20,16 +20,16 @@ function [outputs, inputs, body, variables] = write_state_body(state)
         isChart = true;
     end
     idStateVar = VarIdExpr(...
-            StateflowState_To_Lustre.getStateIDName(state));
+            SF2LusUtils.getStateIDName(state));
     [idStateEnumType, idStateInactiveEnum] = ...
-            StateflowState_To_Lustre.addStateEnum(state, [], ...
+            SF2LusUtils.addStateEnum(state, [], ...
             false, false, true);    
     if ~isChart
         %parent = SF_STATES_PATH_MAP(parentPath);   
         %1st step: OuterTransition code
         cond_prefix = {};
         outerTransNodeName = ...
-            StateflowState_To_Lustre.getStateOuterTransNodeName(state);
+            SF2LusUtils.getStateOuterTransNodeName(state);
         if isKey(SF_STATES_NODESAST_MAP, outerTransNodeName)
             nodeAst = SF_STATES_NODESAST_MAP(outerTransNodeName);
             [call, oututs_Ids] = nodeAst.nodeCall();
@@ -50,7 +50,7 @@ function [outputs, inputs, body, variables] = write_state_body(state)
 
 
         during_act_node_name = ...
-            StateflowState_To_Lustre.getDuringActionNodeName(state);
+            SF2LusUtils.getDuringActionNodeName(state);
         if isKey(SF_STATES_NODESAST_MAP, during_act_node_name)
             nodeAst = SF_STATES_NODESAST_MAP(during_act_node_name);
 
@@ -68,7 +68,7 @@ function [outputs, inputs, body, variables] = write_state_body(state)
 
         %3rd step: Inner transitions
         innerTransNodeName = ...
-            StateflowState_To_Lustre.getStateInnerTransNodeName(state);
+            SF2LusUtils.getStateInnerTransNodeName(state);
         if isKey(SF_STATES_NODESAST_MAP, innerTransNodeName)
             nodeAst = SF_STATES_NODESAST_MAP(innerTransNodeName);
             [call, oututs_Ids] = nodeAst.nodeCall();
@@ -91,10 +91,10 @@ function [outputs, inputs, body, variables] = write_state_body(state)
                     new_cond_name = strcat(cond_name, '_INNER');
                     variables{end+1} = LustreVar(new_cond_name, 'bool');
                     lhs_oututs_Ids = ...
-                        StateflowState_To_Lustre.changeVar(...
+                        SF2LusUtils.changeVar(...
                         oututs_Ids, cond_name, new_cond_name);
                     rhs_oututs_Ids = ...
-                        StateflowState_To_Lustre.changeVar(...
+                        SF2LusUtils.changeVar(...
                         oututs_Ids, cond_name, 'false');
                     body{end+1} = LustreEq(lhs_oututs_Ids, ...
                         IteExpr(cond_prefix, call, TupleExpr(rhs_oututs_Ids)));
@@ -114,7 +114,7 @@ function [outputs, inputs, body, variables] = write_state_body(state)
     else
 
         entry_act_node_name = ...
-            StateflowState_To_Lustre.getEntryActionNodeName(state);
+            SF2LusUtils.getEntryActionNodeName(state);
         if isKey(SF_STATES_NODESAST_MAP, entry_act_node_name)
             nodeAst = SF_STATES_NODESAST_MAP(entry_act_node_name);
             [call, oututs_Ids] = nodeAst.nodeCall(true, BooleanExpr(false));
@@ -138,7 +138,7 @@ function [outputs, inputs, body, variables] = write_state_body(state)
     end
 
     %4th step: execute the active child
-    children = StateflowState_To_Lustre.getSubStatesObjects(state);
+    children = SF2LusUtils.getSubStatesObjects(state);
     number_children = numel(children);
     isParallel = isequal(state.Composition.Type, 'PARALLEL_AND');
     if number_children > 0 && ~isParallel
@@ -150,7 +150,7 @@ function [outputs, inputs, body, variables] = write_state_body(state)
             cond = cond_prefix;
         else
             [~, childEnum] = ...
-                StateflowState_To_Lustre.addStateEnum(state, child);
+                SF2LusUtils.addStateEnum(state, child);
             cond = BinaryExpr(BinaryExpr.EQ, ...
                 idStateVar, childEnum);
             if ~isempty(cond_prefix) && ~isChart
@@ -159,7 +159,7 @@ function [outputs, inputs, body, variables] = write_state_body(state)
             end
         end
         child_node_name = ...
-            StateflowState_To_Lustre.getStateNodeName(child);
+            SF2LusUtils.getStateNodeName(child);
         if isKey(SF_STATES_NODESAST_MAP, child_node_name)
             nodeAst = SF_STATES_NODESAST_MAP(child_node_name);
             [call, oututs_Ids] = nodeAst.nodeCall();

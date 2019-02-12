@@ -12,5 +12,5 @@ function idName = getStateEnumType(state)
     state_name = lower(...
         SF_To_LustreNode.getUniqueName(state));
     idName = strcat(state_name, ...
-        StateflowState_To_Lustre.getStateEnumSuffix());
+        SF2LusUtils.getStateEnumSuffix());
 end

@@ -4,43 +4,50 @@
 % All Rights Reserved.
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Chart Node
-function [main_node, external_nodes]  = write_ChartNode(parent, blk, chart, dataAndEvents, events)
+
+
+function [outputs, inputs, body] = ...
+        write_ChartNodeWithEvents_body(chart, events)
+    global SF_STATES_NODESAST_MAP;
     L = nasa_toLustre.ToLustreImport.L;
     import(L{:})
-    global SF_STATES_NODESAST_MAP;
-    external_nodes = {};
+    outputs = {};
+    inputs = {};
+    body = {};
     Scopes = cellfun(@(x) x.Scope, ...
         events, 'UniformOutput', false);
     inputEvents = SF_To_LustreNode.orderObjects(...
         events(strcmp(Scopes, 'Input')), 'Port');
-    if ~isempty(inputEvents)
-        %create a node that do the multi call for each event
-        eventNode  = ...
-            StateflowState_To_Lustre.write_ChartNodeWithEvents(...
-            chart, inputEvents);
-        external_nodes{1} = eventNode;
+    inputEventsNames = cellfun(@(x) x.Name, ...
+        inputEvents, 'UniformOutput', false);
+    inputEventsVars = cellfun(@(x) VarIdExpr(x.Name), ...
+        inputEvents, 'UniformOutput', false);
+    chartNodeName = ...
+        StateflowState_To_Lustre.getStateNodeName(chart);
+    if isKey(SF_STATES_NODESAST_MAP, chartNodeName)
+        nodeAst = SF_STATES_NODESAST_MAP(chartNodeName);
+        [orig_call, oututs_Ids] = nodeAst.nodeCall();
+        outputs = [outputs, nodeAst.getOutputs()];
+        inputs = [inputs, nodeAst.getOutputs()];
+        inputs = [inputs, nodeAst.getInputs()];
+        for i=1:numel(inputEventsNames)
+            call = SF2LusUtils.changeEvents(...
+                orig_call, inputEventsNames, inputEventsNames{i});
+            cond_prefix = VarIdExpr(inputEventsNames{i});
+            body{end+1} = LustreEq(oututs_Ids, ...
+                IteExpr(cond_prefix, call, TupleExpr(oututs_Ids)));
+        end
+        %NOT CORRECT
+        % body{end+1} = LustreComment('If no event occured, time step wakes up the chart');
+        % allEventsCond = UnaryExpr(UnaryExpr.NOT, ...
+        %     BinaryExpr.BinaryMultiArgs(BinaryExpr.OR, inputEventsVars));
+        % body{end+1} = LustreEq(oututs_Ids, ...
+        %     IteExpr(allEventsCond, orig_call, TupleExpr(oututs_Ids)));
+    else
+        display_msg(...
+            sprintf('%s not found in SF_STATES_NODESAST_MAP',...
+            chartNodeName), ...
+            MsgType.ERROR, 'StateflowTransition_To_Lustre', '');
+        return;
     end
-    [outputs, inputs, variable, body] = ...
-        StateflowState_To_Lustre.write_chart_body(parent, blk, chart, dataAndEvents, inputEvents);
-
-    %create the node
-    node_name = ...
-       nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);
-    main_node = LustreNode();
-    main_node.setName(node_name);
-    comment = LustreComment(sprintf('Chart Node: %s', chart.Origin_path),...
-        true);
-    main_node.setMetaInfo(comment);
-    main_node.setBodyEqs(body);            
-    main_node.setOutputs(outputs);
-    if isempty(inputs)
-        inputs{1} = ...
-            LustreVar(SF_To_LustreNode.virtualVarStr(), 'bool');
-    end
-    main_node.setInputs(inputs);
-
-    main_node.setLocalVars(variable);
-    SF_STATES_NODESAST_MAP(node_name) = main_node;
 end
-

@@ -31,13 +31,7 @@ classdef StateflowState_To_Lustre
         
         %% Chart Node
         [main_node, external_nodes]  = write_ChartNode(parent, blk, chart, dataAndEvents, event_s)
-        
         main_node  = write_ChartNodeWithEvents(chart, inputEvents)
-        
-        %% State actions
-        [action_nodes,  external_libraries] = ...
-            get_state_actions(state, data_map)
-        
         %% ENTRY ACTION
         [main_node, external_libraries] = ...
             write_entry_action(state, data_map)
@@ -63,41 +57,11 @@ classdef StateflowState_To_Lustre
         [outputs, inputs, body] = ...
             write_ChartNodeWithEvents_body(chart, event_s)
         
-        call = changeEvents(call, EventsNames, E)
         
-        params = changeVar(params, oldName, newName)
         
-        %% Actions node name
-        name = getChartEventsNodeName(state, id)
         
-        name = getStateNodeName(state, id)
         
-        name = getStateDefaultTransNodeName(state)
         
-        name = getStateInnerTransNodeName(state)
-        
-        name = getStateOuterTransNodeName(state)
-        
-        name = getEntryActionNodeName(state, id)
-        
-        name = getExitActionNodeName(state, id)
-        
-        name = getDuringActionNodeName(state, id)
-        
-        % State ID functions
-        suf = getStateIDSuffix()
-        
-        idName = getStateIDName(state)
-        
-        suf = getStateEnumSuffix()
-        
-        idName = getStateEnumType(state)
-        
-        [stateEnumType, childAst] = ...
-            addStateEnum(state, child, isInner, isJunction, inactive)
-        
-        %% Substates objects
-        subStates = getSubStatesObjects(state)
         
     end
     

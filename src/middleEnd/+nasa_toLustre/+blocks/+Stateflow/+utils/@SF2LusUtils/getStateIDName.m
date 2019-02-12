@@ -12,5 +12,5 @@ function idName = getStateIDName(state)
     state_name = lower(...
         SF_To_LustreNode.getUniqueName(state));
     idName = strcat(state_name, ...
-        StateflowState_To_Lustre.getStateIDSuffix());
+        SF2LusUtils.getStateIDSuffix());
 end

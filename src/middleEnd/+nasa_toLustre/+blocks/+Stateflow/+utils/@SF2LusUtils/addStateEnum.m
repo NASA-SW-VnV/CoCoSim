@@ -9,7 +9,7 @@ function [stateEnumType, childAst] = ...
     global SF_STATES_ENUMS_MAP;
     L = nasa_toLustre.ToLustreImport.L;
     import(L{:})
-    stateEnumType = StateflowState_To_Lustre.getStateEnumType(state);
+    stateEnumType = SF2LusUtils.getStateEnumType(state);
     state_name = upper(...
         SF_To_LustreNode.getUniqueName(state));
     if nargin >= 3 && isInner
