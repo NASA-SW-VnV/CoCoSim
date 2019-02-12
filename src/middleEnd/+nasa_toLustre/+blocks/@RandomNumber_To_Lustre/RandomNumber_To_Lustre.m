@@ -83,43 +83,9 @@ classdef RandomNumber_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         end
     end
     methods(Static)
-        function node = randomNode(blk_name, r, lus_backend)
-            L = nasa_toLustre.ToLustreImport.L;
-            import(L{:})
-            node = LustreNode();
-            node.setName(blk_name);
-            node.setInputs(LustreVar('b', 'bool'));
-            node.setOutputs(LustreVar('r', 'real'));
-            if LusBackendType.isKIND2(lus_backend)
-                contractElts{1} = ContractGuaranteeExpr('', ...
-                    BinaryExpr(BinaryExpr.AND, ...
-                    BinaryExpr(BinaryExpr.LTE, RealExpr(min(r)), VarIdExpr('r')), ...
-                    BinaryExpr(BinaryExpr.LTE, VarIdExpr('r'), RealExpr(max(r)))));
-                contract = LustreContract();
-                contract.setBodyEqs(contractElts);
-                node.setLocalContract(contract);
-                node.setIsImported(true);
-            else
-                node.setBodyEqs(LustreEq(VarIdExpr('r'), ...
-                    RandomNumber_To_Lustre.getRandomValues(r, 1)));
-            end
-            
-            
-            
-        end
-        function r_str = getRandomValues(r, i)
-            L = nasa_toLustre.ToLustreImport.L;
-            import(L{:})
-            if i == numel(r)
-                r_str = RealExpr(r(i));
-            else
-                r_str =BinaryExpr(BinaryExpr.ARROW, ...
-                    RealExpr(r(i)), ...
-                    UnaryExpr(UnaryExpr.PRE,...
-                    RandomNumber_To_Lustre.getRandomValues(r, i+1)));
-                
-            end
-        end
+        node = randomNode(blk_name, r, lus_backend)
+
+        r_str = getRandomValues(r, i)
     end
 end
 
