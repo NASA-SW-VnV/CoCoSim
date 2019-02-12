@@ -15,9 +15,16 @@ classdef Chart_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     
     methods
         
-        function  write_code(obj, parent, blk, xml_trace, varargin)
+        function  write_code(obj, parent, blk, xml_trace, lus_backend, coco_backend, main_sampleTime, varargin)
             L = nasa_toLustre.ToLustreImport.L;
             import(L{:})
+            %% add Chart Node
+            [main_node, external_nodes, external_libraries_i] = ...
+                Chart_To_Lustre.getChartNodes(parent, blk, main_sampleTime, lus_backend, coco_backend, xml_trace);
+            obj.addExtenal_node(main_node);
+            obj.addExtenal_node(external_nodes);
+            obj.addExternal_libraries(external_libraries_i);
+            %% add Chart call
             try
                 TOLUSTRE_SF_COMPILER = evalin('base', 'TOLUSTRE_SF_COMPILER');
             catch
@@ -206,6 +213,8 @@ classdef Chart_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     end
     methods(Static)
         transitions = getAllTransitions(SFContent)
+        [main_node, external_nodes, external_libraries_i] = ...
+            getChartNodes(parent, blk, main_sampleTime, lus_backend, coco_backend, xml_trace)
     end
 end
 

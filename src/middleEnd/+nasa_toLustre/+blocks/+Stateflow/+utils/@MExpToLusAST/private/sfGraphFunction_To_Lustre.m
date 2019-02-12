@@ -11,7 +11,7 @@ function code = sfGraphFunction_To_Lustre(obj, tree, parent, ...
     else
         parameters = tree.parameters;
     end
-    sfNodename = SF_To_LustreNode.getUniqueName(func);
+    sfNodename = SF2LusUtils.getUniqueName(func);
     actionNodeAst = SF_STATES_NODESAST_MAP(sfNodename);
     node_inputs = actionNodeAst.getInputs();
     if isempty(parameters)

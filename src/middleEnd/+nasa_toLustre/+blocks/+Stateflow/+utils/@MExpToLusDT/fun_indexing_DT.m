@@ -32,7 +32,7 @@ function dt = simulinkStateflow_Fun_Indexing_DT(tree, data_map, inputs, isSimuli
     elseif isStateFlow && SF_GRAPHICALFUNCTIONS_MAP.isKey(tree.ID)
         % Graphical function in Stateflow
         func = SF_GRAPHICALFUNCTIONS_MAP(tree.ID);
-        sfNodename = nasa_toLustre.frontEnd.SF_To_LustreNode.getUniqueName(func);
+        sfNodename = nasa_toLustre.frontEnd.SF2LusUtils.getUniqueName(func);
         nodeAst = SF_STATES_NODESAST_MAP(sfNodename);
         outputs = nodeAst.getOutputs();
         dt =  cell(numel(outputs), 1);

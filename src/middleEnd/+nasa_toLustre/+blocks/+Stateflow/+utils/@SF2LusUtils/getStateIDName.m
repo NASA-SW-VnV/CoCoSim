@@ -10,7 +10,7 @@ function idName = getStateIDName(state)
     L = nasa_toLustre.ToLustreImport.L;
     import(L{:})
     state_name = lower(...
-        SF_To_LustreNode.getUniqueName(state));
+        SF2LusUtils.getUniqueName(state));
     idName = strcat(state_name, ...
         SF2LusUtils.getStateIDSuffix());
 end

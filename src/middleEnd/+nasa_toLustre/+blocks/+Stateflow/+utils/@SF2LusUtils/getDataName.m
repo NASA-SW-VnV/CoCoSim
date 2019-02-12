@@ -1,5 +1,6 @@
 
 function names = getDataName(d)
+    names = {};
     if isfield(d, 'CompiledSize')
         CompiledSize = str2num(d.CompiledSize);
     elseif isfield(d, 'ArraySize')

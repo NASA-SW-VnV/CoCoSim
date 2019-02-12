@@ -41,9 +41,9 @@ function [transitionNode, external_libraries] = ...
     inputs = LustreVar.uniqueVars(inputs);
     if isempty(inputs)
         inputs{1} = ...
-            LustreVar(SF_To_LustreNode.virtualVarStr(), 'bool');
+            LustreVar(SF2LusUtils.virtualVarStr(), 'bool');
     elseif numel(inputs) > 1
-        inputs = LustreVar.removeVar(inputs, SF_To_LustreNode.virtualVarStr());
+        inputs = LustreVar.removeVar(inputs, SF2LusUtils.virtualVarStr());
     end
     variables = LustreVar.uniqueVars(variables);
     transitionNode.setOutputs(outputs);

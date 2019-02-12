@@ -25,10 +25,10 @@ function unique_name = getUniqueName(object, src, isDefaultTrans)
     if isDefaultTrans
         sourceName = '_DefaultTransition';
     else
-        sourceName = SF_To_LustreNode.getUniqueName(src);
+        sourceName = SF2LusUtils.getUniqueName(src);
     end
     unique_name = sprintf('%s_To_%s_ExecutionOrder%s',...
         sourceName, ...
-        SF_To_LustreNode.getUniqueName(dst), id_str );
+        SF2LusUtils.getUniqueName(dst), id_str );
 
 end

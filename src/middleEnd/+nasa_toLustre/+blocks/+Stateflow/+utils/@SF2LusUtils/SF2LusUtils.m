@@ -48,6 +48,26 @@ classdef SF2LusUtils
         % State actions
         [action_nodes,  external_libraries] = ...
             get_state_actions(state, data_map)
+        
+        %%
+        % Get unique short name
+        unique_name = getUniqueName(object, id)
+        
+        % special Var Names
+        v = virtualVarStr()
+
+        v = isInnerStr()
+
+        % Order states, transitions ...
+        ordered = orderObjects(objects, fieldName)
+
+        % change events to data
+        data = eventsToData(event_s) 
+
+        vars = getDataVars(d_list)
+
+        names = getDataName(d)
+        SF_DATA_MAP = addArrayData(SF_DATA_MAP, d_list)
     end
 end
 

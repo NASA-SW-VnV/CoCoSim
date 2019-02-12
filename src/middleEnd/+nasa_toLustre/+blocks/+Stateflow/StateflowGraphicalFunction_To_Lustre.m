@@ -67,7 +67,7 @@ classdef StateflowGraphicalFunction_To_Lustre
             external_libraries = [external_libraries, external_libraries_j];
             
             
-            node_name = SF_To_LustreNode.getUniqueName(sfunc);
+            node_name = SF2LusUtils.getUniqueName(sfunc);
             comment = LustreComment(...
                 sprintf('Stateflow Graphical Function %s', sfunc.Origin_path), true);
             [main_node, external_libraries_i] = ...

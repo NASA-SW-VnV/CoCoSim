@@ -39,7 +39,7 @@ function [main_node, external_libraries] = ...
 
         %isInner variable that tells if the transition that cause this
         %exit action is an inner Transition
-        isInner = VarIdExpr(SF_To_LustreNode.isInnerStr());
+        isInner = VarIdExpr(SF2LusUtils.isInnerStr());
         inputs{end + 1} = LustreVar(isInner, 'bool');
         %actions code
         actions = SFIRPPUtils.split_actions(state.Actions.Entry);
@@ -85,9 +85,9 @@ function [main_node, external_libraries] = ...
     inputs = LustreVar.uniqueVars(inputs);
     if isempty(inputs)
         inputs{1} = ...
-            LustreVar(SF_To_LustreNode.virtualVarStr(), 'bool');
+            LustreVar(SF2LusUtils.virtualVarStr(), 'bool');
     elseif numel(inputs) > 1
-        inputs = LustreVar.removeVar(inputs, SF_To_LustreNode.virtualVarStr());
+        inputs = LustreVar.removeVar(inputs, SF2LusUtils.virtualVarStr());
     end
     main_node.setOutputs(outputs);
     main_node.setInputs(inputs);

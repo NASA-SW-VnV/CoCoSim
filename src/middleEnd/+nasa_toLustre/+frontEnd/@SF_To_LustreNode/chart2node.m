@@ -15,21 +15,21 @@ function [main_node, external_nodes, external_libraries ] = ...
     SF_STATES_ENUMS_MAP = containers.Map('KeyType', 'char', 'ValueType', 'any');
     SF_GRAPHICALFUNCTIONS_MAP = containers.Map('KeyType', 'char', 'ValueType', 'any');
     SF_DATA_MAP = containers.Map('KeyType', 'char', 'ValueType', 'any');
-
+    
     % initialize outputs
     main_node = {};
     external_nodes = {};
     external_libraries = {};
-
+    
     % get content
     content = chart.StateflowContent;
-    events = SF_To_LustreNode.eventsToData(content.Events);
+    events = SF2LusUtils.eventsToData(content.Events);
     dataAndEvents = [events; content.Data];
     for i=1:numel(dataAndEvents)
         SF_DATA_MAP(dataAndEvents{i}.Name) = dataAndEvents{i};
     end
-    SF_DATA_MAP = SF_To_LustreNode.addArrayData(SF_DATA_MAP, dataAndEvents);
-    states = SF_To_LustreNode.orderObjects(content.States);
+    SF_DATA_MAP = SF2LusUtils.addArrayData(SF_DATA_MAP, dataAndEvents);
+    states = SF2LusUtils.orderObjects(content.States);
     for i=1:numel(states)
         SF_STATES_PATH_MAP(states{i}.Path) = states{i};
     end
@@ -63,10 +63,10 @@ function [main_node, external_nodes, external_libraries ] = ...
                     sfunc.Origin_path),...
                     MsgType.ERROR, 'SF_To_LustreNode', '');
             end
-
+            
         end
     end
-
+    
     % Go over Truthtables
     if isfield(content, 'TruthTables')
         truthTables = content.TruthTables;
@@ -84,7 +84,7 @@ function [main_node, external_nodes, external_libraries ] = ...
                 external_nodes = [external_nodes, external_nodes_i];
                 external_libraries = [external_libraries, external_libraries_i];
             catch me
-
+                
                 if strcmp(me.identifier, 'COCOSIM:STATEFLOW')
                     display_msg(me.message, MsgType.ERROR,...
                         'SF_To_LustreNode', '');
@@ -116,7 +116,7 @@ function [main_node, external_nodes, external_libraries ] = ...
                 MsgType.ERROR, 'SF_To_LustreNode', '');
         end
     end
-
+    
     % Go over states: for state actions
     for i=1:numel(states)
         try
@@ -127,7 +127,7 @@ function [main_node, external_nodes, external_libraries ] = ...
             external_libraries = [external_libraries, ...
                 external_libraries_i];
         catch me
-
+            
             if strcmp(me.identifier, 'COCOSIM:STATEFLOW')
                 display_msg(me.message, MsgType.ERROR,...
                     'SF_To_LustreNode', '');
@@ -152,7 +152,7 @@ function [main_node, external_nodes, external_libraries ] = ...
             external_libraries = [external_libraries, ...
                 external_libraries_i];
         catch me
-
+            
             if strcmp(me.identifier, 'COCOSIM:STATEFLOW')
                 display_msg(me.message, MsgType.ERROR, ...
                     'SF_To_LustreNode', '');
@@ -165,7 +165,7 @@ function [main_node, external_nodes, external_libraries ] = ...
                 MsgType.ERROR, 'SF_To_LustreNode', '');
         end
     end
-
+    
     % Go over states for state Nodes
     for i=1:numel(states)
         try
@@ -175,7 +175,7 @@ function [main_node, external_nodes, external_libraries ] = ...
                 external_nodes{end+1} = node;
             end
         catch me
-
+            
             if strcmp(me.identifier, 'COCOSIM:STATEFLOW')
                 display_msg(me.message, MsgType.ERROR, ...
                     'SF_To_LustreNode', '');
@@ -188,19 +188,19 @@ function [main_node, external_nodes, external_libraries ] = ...
                 MsgType.ERROR, 'SF_To_LustreNode', '');
         end
     end
-
+    
     %Chart node
     [main_node, external_nodes_i] =...
         StateflowState_To_Lustre.write_ChartNode(parent, chart, states{end}, dataAndEvents, events);
     external_nodes = [external_nodes, ...
         external_nodes_i];
-
+    
     %change from imperative code to Lustre
     %main_node = main_node.pseudoCode2Lustre();% already handled
     for i=1:numel(external_nodes)
         external_nodes{i} = external_nodes{i}.pseudoCode2Lustre();
     end
-
+    
     % add Stateflow Enumerations to ToLustre set of enumerations.
     keys = SF_STATES_ENUMS_MAP.keys();
     for i=1:numel(keys)
@@ -209,3 +209,4 @@ function [main_node, external_nodes, external_libraries ] = ...
             'UniformOutput', false);
     end
 end
+

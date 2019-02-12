@@ -46,7 +46,7 @@ function [main_node, external_libraries] = ...
 
     %isInner variable that tells if the transition that cause this
     %exit action is an inner Transition
-    isInner = VarIdExpr(SF_To_LustreNode.isInnerStr());
+    isInner = VarIdExpr(SF2LusUtils.isInnerStr());
 
     %actions code
     actions = SFIRPPUtils.split_actions(state.Actions.Exit);

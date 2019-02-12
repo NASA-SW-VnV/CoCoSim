@@ -11,7 +11,7 @@ function [stateEnumType, childAst] = ...
     import(L{:})
     stateEnumType = SF2LusUtils.getStateEnumType(state);
     state_name = upper(...
-        SF_To_LustreNode.getUniqueName(state));
+        SF2LusUtils.getUniqueName(state));
     if nargin >= 3 && isInner
         childName = strcat(state_name, '_InnerTransition');
     elseif nargin >= 4 && isJunction
@@ -19,11 +19,11 @@ function [stateEnumType, childAst] = ...
     elseif nargin == 5 && inactive
         childName = strcat(state_name, '_INACTIVE');
     elseif ischar(child)
-        %child is given using SF_To_LustreNode.getUniqueName
+        %child is given using SF2LusUtils.getUniqueName
         childName = upper(child);
     else
         childName = upper(...
-            SF_To_LustreNode.getUniqueName(child));
+            SF2LusUtils.getUniqueName(child));
     end
     if ~isKey(SF_STATES_ENUMS_MAP, stateEnumType)
         SF_STATES_ENUMS_MAP(stateEnumType) = {childName};

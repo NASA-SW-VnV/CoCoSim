@@ -18,14 +18,14 @@ function [outputs, inputs, variables, body] = write_chart_body(...
     %create inputs
     Scopes = cellfun(@(x) x.Scope, ...
         dataAndEvents, 'UniformOutput', false);
-    inputsData = SF_To_LustreNode.orderObjects(...
+    inputsData = SF2LusUtils.orderObjects(...
         dataAndEvents(strcmp(Scopes, 'Input')), 'Port');
-    inputs = SF_To_LustreNode.getDataVars(inputsData);
+    inputs = SF2LusUtils.getDataVars(inputsData);
 
     %create outputs
-    outputsData = SF_To_LustreNode.orderObjects(...
+    outputsData = SF2LusUtils.orderObjects(...
         dataAndEvents(strcmp(Scopes, 'Output')), 'Port');
-    outputs = SF_To_LustreNode.getDataVars(outputsData);
+    outputs = SF2LusUtils.getDataVars(outputsData);
 
     %get chart node AST
     if isempty(inputEvents)
@@ -56,7 +56,7 @@ function [outputs, inputs, variables, body] = write_chart_body(...
         if isequal(d.Scope, 'Input')
             continue;
         end
-        d_names = SF_To_LustreNode.getDataName(d);
+        d_names = SF2LusUtils.getDataName(d);
         for j=1:numel(d_names)
             d_name = d_names{j};
             if ~ismember(d_name, nodeCall_outputs_Names) ...
@@ -192,7 +192,7 @@ function [outputs, inputs, variables, body] = write_chart_body(...
     body{end+1} = LustreComment('Set unused outputs');
     for i=1:numel(outputsData)
         d = outputsData{i};
-        d_names = SF_To_LustreNode.getDataName(d);
+        d_names = SF2LusUtils.getDataName(d);
         for j=1:numel(d_names)
             d_name = d_names{j};
             if ismember(d_name, nodeCall_outputs_Names)

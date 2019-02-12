@@ -19,9 +19,12 @@ function [lustre_file_path, xml_trace, status, unsupportedOptions, abstractedBlo
     
     %% global variables
     global TOLUSTRE_ENUMS_MAP TOLUSTRE_ENUMS_CONV_NODES ...
-        KIND2 Z3 LUSTREC CHECK_SF_ACTIONS ERROR_MSG ...
+        KIND2 Z3 LUSTREC CHECK_SF_ACTIONS ...
+        ERROR_MSG WARNING_MSG DEBUG_MSG COCOSIM_DEV_DEBUG...
         DED_PROP_MAP CoCoSimPreferences;
     ERROR_MSG = {};
+    WARNING_MSG = {};
+    DEBUG_MSG = {};
     if isempty(LUSTREC) || isempty(KIND2)
         tools_config;
     end
@@ -31,14 +34,16 @@ function [lustre_file_path, xml_trace, status, unsupportedOptions, abstractedBlo
     % and the path to the block under check.
     DED_PROP_MAP = containers.Map('KeyType', 'char', 'ValueType', 'any');
     CoCoSimPreferences = load_coco_preferences();
+    try
+        COCOSIM_DEV_DEBUG = evalin('base','cocosim_debug');
+    catch
+        COCOSIM_DEV_DEBUG  = false;
+    end
     %% Get start time
     t_start = tic;
     
     %% inputs treatment
-    if nargin < 1
-        display_help_message();
-        return;
-    end
+    narginchk(1,inf);
     if nargin < 2 || isempty(const_files)
         const_files = {};
     end
@@ -161,7 +166,9 @@ function [lustre_file_path, xml_trace, status, unsupportedOptions, abstractedBlo
         model_struct, model_struct, main_sampleTime, is_main_node, lus_backend, coco_backend, xml_trace);
     if ~forceGeneration && status
         html_path = fullfile(output_dir, strcat(file_name, '_error_messages.html'));
-        HtmlItem.displayErrorMessages(html_path, ERROR_MSG, mode_display);
+        %HtmlItem.displayErrorMessages(html_path, ERROR_MSG, mode_display);
+        HtmlItem.display_LOG_Messages(html_path, ...
+            ERROR_MSG, WARNING_MSG, DEBUG_MSG, mode_display);
         if mode_display
             msg = sprintf('ERRORS report is in : %s', html_path);
             display_msg(msg, MsgType.ERROR, 'ToLustre', '');
@@ -214,7 +221,10 @@ function [lustre_file_path, xml_trace, status, unsupportedOptions, abstractedBlo
         Lustrecode = program.print(lus_backend);
         fprintf(fid, '%s', Lustrecode);
         fclose(fid);
-        display_msg(Lustrecode, MsgType.DEBUG, 'lustre_multiclocks_compiler', '');
+        if COCOSIM_DEV_DEBUG
+            display_msg(Lustrecode, MsgType.DEBUG, ...
+                'lustre_multiclocks_compiler', '');
+        end
     catch me
         display_msg('Printing Lustre AST to file failed',...
             MsgType.ERROR, 'write_body', '');
@@ -243,7 +253,7 @@ function [lustre_file_path, xml_trace, status, unsupportedOptions, abstractedBlo
         end
         if syntax_status && ~isempty(output)
             display_msg('Simulink To Lustre Syntax check has failed. The parsing error is the following:', MsgType.ERROR, 'TOLUSTRE', '');
-            output = regexprep(output, lustre_file_path, HtmlItem.addOpenFileCmd(lustre_file_path, lustre_file_base)); 
+            output = regexprep(output, lustre_file_path, HtmlItem.addOpenFileCmd(lustre_file_path, lustre_file_base));
             display_msg(output, MsgType.ERROR, 'TOLUSTRE', '');
             status = syntax_status;
         else
@@ -253,7 +263,9 @@ function [lustre_file_path, xml_trace, status, unsupportedOptions, abstractedBlo
     end
     if ~isempty(ERROR_MSG)
         html_path = fullfile(output_dir, strcat(file_name, '_error_messages.html'));
-        HtmlItem.displayErrorMessages(html_path, ERROR_MSG, mode_display);
+        %HtmlItem.displayErrorMessages(html_path, ERROR_MSG, mode_display);
+        HtmlItem.display_LOG_Messages(html_path, ...
+            ERROR_MSG, WARNING_MSG, DEBUG_MSG, mode_display);
         if mode_display
             msg = sprintf('ERRORS report is in : %s', html_path);
             display_msg(msg, MsgType.ERROR, 'ToLustre', '');
@@ -332,85 +344,10 @@ function [nodes_ast, contracts_ast, external_libraries, error_status] = ...
         elseif ~isempty(main_node)
             nodes_ast{end + 1} = main_node;
         end
-    elseif isfield(blk, 'SFBlockType')
-        if isequal(blk.SFBlockType, 'Chart')
-            
-            try
-                try
-                    TOLUSTRE_SF_COMPILER = evalin('base', 'TOLUSTRE_SF_COMPILER');
-                catch
-                    TOLUSTRE_SF_COMPILER =2;
-                end
-                if TOLUSTRE_SF_COMPILER == 1
-                    % OLD compiler
-                    [main_node, ~, external_nodes, external_libraries_i] = ...
-                        SS_To_LustreNode.subsystem2node(parent, blk, main_sampleTime, ...
-                        is_main_node, lus_backend, coco_backend, xml_trace);
-                else
-                    % new compiler
-                    [main_node, external_nodes, external_libraries_i ] = ...
-                        SF_To_LustreNode.chart2node(parent,  blk,  main_sampleTime, lus_backend, xml_trace);
-                end
-            catch me
-                display_msg(sprintf('Translation to Lustre of block %s has failed.', blk.Origin_path),...
-                    MsgType.ERROR, 'write_body', '');
-                display_msg(me.getReport(), MsgType.DEBUG, 'write_body', '');
-                error_status = true;
-                return;
-            end
-            
-            external_libraries = [external_libraries, external_libraries_i];
-            if iscell(external_nodes)
-                nodes_ast = [ nodes_ast, external_nodes];
-            else
-                nodes_ast{end + 1} = external_nodes;
-            end
-            if ~isempty(main_node)
-                nodes_ast{end + 1} = main_node;
-            end
-            
-            
-        elseif isequal(blk.SFBlockType, 'MATLAB Function')
-            try
-                [main_node, external_nodes, external_libraries_i ] = ...
-                        MF_To_LustreNode.mfunction2node(parent,  blk,  xml_trace, lus_backend, coco_backend, main_sampleTime);
-            catch me
-                display_msg(sprintf('Translation to Lustre of block %s has failed.', blk.Origin_path),...
-                    MsgType.ERROR, 'write_body', '');
-                display_msg(me.getReport(), MsgType.DEBUG, 'write_body', '');
-                error_status = true;
-                return;
-            end
-            external_libraries = [external_libraries, external_libraries_i];
-            if iscell(external_nodes)
-                nodes_ast = [ nodes_ast, external_nodes];
-            else
-                nodes_ast{end + 1} = external_nodes;
-            end
-            if ~isempty(main_node)
-                nodes_ast{end + 1} = main_node;
-            end
-        end
-        
+    
     end
 end
 
-%%
-function display_help_message()
-    msg = ' -----------------------------------------------------  \n';
-    msg = [msg '  CoCoSim: Automated Analysis Framework for Simulink/Stateflow\n'];
-    msg = [msg '   \n Usage:\n'];
-    msg = [msg '    >> ToLustre(MODEL_PATH, {MAT_CONSTANTS_FILES}, lus_backend, options)\n'];
-    msg = [msg '\n'];
-    msg = [msg '      MODEL_PATH: a string containing the full/relative path to the model\n'];
-    msg = [msg '        e.g. cocoSim(''test/properties/safe_1.mdl'')\n'];
-    msg = [msg '      MAT_CONSTANT_FILES: an optional list of strings containing the\n'];
-    msg = [msg '      path to the mat files containing the simulation constants\n'];
-    msg = [msg '        e.g. {''../../constants1.mat'',''../../constants2.mat''}\n'];
-    msg = [msg '        default: {}\n'];
-    msg = [msg  '  -----------------------------------------------------  \n'];
-    cprintf('blue', msg);
-end
 
 %%
 function create_file_meta_info(lustre_file)

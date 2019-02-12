@@ -15,6 +15,12 @@ classdef MATLABFunction_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         function  write_code(obj, parent, blk, xml_trace, lus_backend, coco_backend, main_sampletime, varargin)
             L = nasa_toLustre.ToLustreImport.L;
             import(L{:})
+            %% add Matlab Function node
+            [main_node, external_nodes ] = ...
+                    MF_To_LustreNode.mfunction2node(obj, parent,  blk,  xml_trace, lus_backend, coco_backend, main_sampletime);
+            obj.addExtenal_node(main_node);
+            obj.addExtenal_node(external_nodes);
+            %% add Matlab Function call
             [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             [inputs] =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk);
             codes = {};

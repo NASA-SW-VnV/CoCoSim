@@ -1,9 +1,9 @@
-function [body, external_libraries, failed] = getMFunctionCode(parent,  blk, Inputs, Outputs)
+function [body, variables, failed] = getMFunctionCode(blkObj, parent,  blk, Inputs, Outputs)
     %GETMFUNCTIONCODE
     L = nasa_toLustre.ToLustreImport.L;
     import(L{:})
     body = {};
-    external_libraries = {};
+    variables = {};
     % get all user functions needed in one script
     [script, failed] = addrequiredFunctions(blk );
     if failed, return; end
@@ -16,14 +16,14 @@ function [body, external_libraries, failed] = getMFunctionCode(parent,  blk, Inp
         func_names = getFuncsNames(functions);
     else
         display_msg(sprintf('Parser failed for Matlab function in block %s', ...
-                blk.Origin_path),...
+                HtmlItem.addOpenCmd(blk.Origin_path)),...
                 MsgType.WARNING, 'getMFunctionCode', '');
         failed = 1;
         return;
     end
     if isempty(func_names)
         display_msg(sprintf('Parser failed for Matlab function in block %s. No function has been found.', ...
-                blk.Origin_path),...
+                HtmlItem.addOpenCmd(blk.Origin_path)),...
                 MsgType.WARNING, 'getMFunctionCode', '');
         failed = 1;
         return;
@@ -46,7 +46,6 @@ function [body, external_libraries, failed] = getMFunctionCode(parent,  blk, Inp
     isSimulink = false;
     isStateFlow = false;
     isMatlabFun = true;
-    BlkObj = DummyBlock_To_Lustre();
     for i=1:length(statements)
         if isstruct(statements)
             s = statements(i);
@@ -54,8 +53,12 @@ function [body, external_libraries, failed] = getMFunctionCode(parent,  blk, Inp
             s = statements{i};
         end
         try
-            lusCode = MExpToLusAST.expression_To_Lustre(BlkObj, s,...
-                parent, blk, data_map, {}, expected_dt, isSimulink, isStateFlow, isMatlabFun);
+            lusCode = MExpToLusAST.expression_To_Lustre(blkObj, s,...
+                parent, blk, data_map, {}, expected_dt, ...
+                isSimulink, isStateFlow, isMatlabFun);
+            [vars, ~] = SF2LusUtils.getInOutputsFromAction(lusCode, ...
+                false, data_map, s.text);
+            variables = MatlabUtils.concat(variables, vars);
             body = MatlabUtils.concat(body, lusCode);
         catch me
             if strcmp(me.identifier, 'COCOSIM:STATEFLOW')
@@ -64,11 +67,10 @@ function [body, external_libraries, failed] = getMFunctionCode(parent,  blk, Inp
                 display_msg(me.getReport(), MsgType.DEBUG, 'getMFunctionCode', '');
             end
             display_msg(sprintf('Statement "%s" failed for block %s', ...
-                s.text, blk.Origin_path),...
+                s.text, HtmlItem.addOpenCmd(blk.Origin_path)),...
                 MsgType.WARNING, 'getMFunctionCode', '');
         end
     end
-    external_libraries = BlkObj.getExternalLibraries();
 end
 %% copy all required functions in one script
 function [script, failed] = addrequiredFunctions(blk)
@@ -164,13 +166,14 @@ function [data_map, failed] = getFunVars(blk, script, ...
         CoCoVars = fhinfo.workspace{1}.CoCoVars;
         inputs_names = cellfun(@(x) x.Name, Inputs, 'UniformOutput', 0);
         outputs_names = cellfun(@(x) x.Name, Outputs, 'UniformOutput', 0);
-        for i=1:length(CoCoVars)
-            data_map(CoCoVars(i).name) = buildData(CoCoVars(i), inputs_names, ...
-                outputs_names);
-        end
+        data = arrayfun(@(d) ...
+            buildData(d, inputs_names, outputs_names), CoCoVars, 'UniformOutput', 0);
+        data_names = arrayfun(@(d) d.name, CoCoVars, 'UniformOutput', 0);
+        data_map = containers.Map(data_names, data);
+        data_map = SF2LusUtils.addArrayData(data_map, data);
     else
         display_msg(sprintf('Getting workspace of Matlab function in block %s failed.', ...
-                blk.Origin_path),...
+                HtmlItem.addOpenCmd(blk.Origin_path)),...
                 MsgType.WARNING, 'getMFunctionCode', '');
         failed = true;
     end

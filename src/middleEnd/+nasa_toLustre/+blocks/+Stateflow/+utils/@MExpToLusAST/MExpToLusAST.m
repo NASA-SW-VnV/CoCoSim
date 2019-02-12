@@ -64,7 +64,7 @@ classdef MExpToLusAST
                             isequal(tree.type, 'fun_indexing') &&...
                             isKey(SF_GRAPHICALFUNCTIONS_MAP, tree.ID)
                         func = SF_GRAPHICALFUNCTIONS_MAP(tree.ID);
-                        sfNodename = SF_To_LustreNode.getUniqueName(func);
+                        sfNodename = SF2LusUtils.getUniqueName(func);
                         actionNodeAst = SF_STATES_NODESAST_MAP(sfNodename);
                         [~, oututs_Ids] = actionNodeAst.nodeCall();
                         lusCode{1} = LustreEq(oututs_Ids,...

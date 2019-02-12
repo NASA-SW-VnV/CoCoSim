@@ -33,9 +33,9 @@ function main_node  = write_ChartNodeWithEvents(chart, inputEvents)
     inputs = LustreVar.uniqueVars(inputs);
     if isempty(inputs)
         inputs{1} = ...
-            LustreVar(SF_To_LustreNode.virtualVarStr(), 'bool');
+            LustreVar(SF2LusUtils.virtualVarStr(), 'bool');
     elseif numel(inputs) > 1
-        inputs = LustreVar.removeVar(inputs, SF_To_LustreNode.virtualVarStr());
+        inputs = LustreVar.removeVar(inputs, SF2LusUtils.virtualVarStr());
     end
     main_node.setOutputs(outputs);
     main_node.setInputs(inputs);
