@@ -1,12 +1,12 @@
-function [code, exp_dt] = unaryExpression_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, ~, isSimulink, isStateFlow)
+function [code, exp_dt] = unaryExpression_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, ~, isSimulink, isStateFlow, isMatlabFun)
     %     unaryOperator :   '&' | '*' | '+' | '-' | '~' | '!'
     import nasa_toLustre.lustreAst.*
     import nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST
     import nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT
     
-    exp_dt = MExpToLusDT.expression_DT(tree, data_map, inputs, isSimulink, isStateFlow);
+    exp_dt = MExpToLusDT.expression_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
     right = MExpToLusAST.expression_To_Lustre(BlkObj, tree.rightExp, parent,...
-        blk, data_map, inputs, exp_dt, isSimulink, isStateFlow);
+        blk, data_map, inputs, exp_dt, isSimulink, isStateFlow, isMatlabFun);
     if isequal(tree.operator, '~') || isequal(tree.operator, '!')
         op = UnaryExpr.NOT;
     elseif isequal(tree.operator, '-')

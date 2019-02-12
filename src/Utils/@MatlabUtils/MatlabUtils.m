@@ -20,9 +20,13 @@ classdef MatlabUtils
         reg_delete(basedir, reg_exp)% delete files using regular expressions:e.g. rm *_PP.slx
         % Concat cell array with a specific delimator
         joinedStr = strjoin(str, delimiter)
-        str = strescape(str)
-        c = escapeChar(c)
-        
+        f = map()
+        f = mapc()
+        f = iif()
+        %% create random vectors
+        vector = construct_random_integers(nb_iterations, IMIN, IMAX, dt, dim)
+        vector = construct_random_booleans(nb_iterations, IMIN, IMAX, dim)
+        vector = construct_random_doubles(nb_iterations, IMIN, IMAX,dim)
         %% This function for developers
         % open all files that contains a String
         whoUse(folder, str)

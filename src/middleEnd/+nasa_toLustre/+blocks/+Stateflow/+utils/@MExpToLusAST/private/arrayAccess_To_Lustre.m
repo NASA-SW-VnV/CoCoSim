@@ -1,9 +1,9 @@
-function [code, exp_dt] = sfArrayAccess(obj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow)
+function [code, exp_dt] = arrayAccess_To_Lustre(obj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun)
     % This function should be only called from fun_indexing_To_Lustre.m
     %Array access
     L = nasa_toLustre.ToLustreImport.L;
     import(L{:})
-    exp_dt = MExpToLusDT.expression_DT(tree, data_map, inputs, isSimulink, isStateFlow);
+    exp_dt = MExpToLusDT.expression_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
     d = data_map(tree.ID);
     if isfield(d, 'CompiledSize')
         CompiledSize = str2num(d.CompiledSize);
@@ -26,7 +26,7 @@ function [code, exp_dt] = sfArrayAccess(obj, tree, parent, blk, data_map, inputs
     end
     params_dt = 'int';
     namesAst = MExpToLusAST.ID_To_Lustre(obj, tree.ID, parent, blk, data_map, ...
-        inputs, expected_dt, isSimulink, isStateFlow);
+        inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun);
     
     if numel(tree.parameters) == 1
         %Vector Access
@@ -51,7 +51,7 @@ function [code, exp_dt] = sfArrayAccess(obj, tree, parent, blk, data_map, inputs
             [arg, ~] = ...
                 MExpToLusAST.expression_To_Lustre(obj, tree.parameters, ...
                 parent, blk, data_map, inputs, params_dt, isSimulink,...
-                isStateFlow);
+                isStateFlow, isMatlabFun);
             for argIdx=1:numel(arg)
                 if isa(arg{argIdx}, 'IntExpr')
                     value = arg{argIdx}.getValue();
@@ -108,7 +108,7 @@ function [code, exp_dt] = sfArrayAccess(obj, tree, parent, blk, data_map, inputs
                 [args(i), ~] = ...
                     MExpToLusAST.expression_To_Lustre(obj, parameters{i}, ...
                     parent, blk, data_map, inputs, params_dt, isSimulink,...
-                    isStateFlow);
+                    isStateFlow, isMatlabFun);
             end
             
             idx = args{1};

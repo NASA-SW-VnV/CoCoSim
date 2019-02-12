@@ -104,6 +104,12 @@ public class EM2JSON {
 			buf.append(Quotes("input_params")+":"+inputs);
 			buf.append(",\n");
 
+			if(ctx.END() == null)
+				buf.append(Quotes("has_END")+":false");
+			else
+				buf.append(Quotes("has_END")+":true");
+			buf.append(",\n");
+			
 			buf.append(Quotes("statements")+":["+getJSON(ctx.body()));
 			buf.append("\n]\n}");
 			setJSON(ctx, buf.toString());

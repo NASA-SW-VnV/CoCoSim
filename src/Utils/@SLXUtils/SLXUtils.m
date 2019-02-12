@@ -29,10 +29,9 @@ classdef SLXUtils
         %% create random vector test
         [ds, simulation_step, stop_time] = ...
             get_random_test(slx_file_name, inports, nb_steps,IMAX, IMIN)
-
-        Values = get_random_values(time, nb_steps, min, max, dim, dt)
-
-        values = construct_random_bus_values(bus, time, nb_steps, min, max, dim)
+        
+        values = get_random_values_InTimeSeries(time, min, max, dim, dt)
+        Values = get_random_values(nb_steps, min, max, dim, dt)
 
         %% Simulate the model
         simOut = simulate_model(slx_file_name, ...

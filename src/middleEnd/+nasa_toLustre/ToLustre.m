@@ -195,12 +195,12 @@ function [lustre_file_path, xml_trace, status, unsupportedOptions, abstractedBlo
     if LusBackendType.isKIND2(lus_backend)
         if ismember('lustrec_math', open_list)
             lib_path = fullfile(fileparts(mfilename('fullpath')),...
-                'lib', 'lustrec_math.lus');
+                '+lib', 'lustrec_math.lus');
             copyfile(lib_path, output_dir);
         end
         if ismember('simulink_math_fcn', open_list)
             lib_path = fullfile(fileparts(mfilename('fullpath')),...
-                'lib', 'simulink_math_fcn.lus');
+                '+lib', 'simulink_math_fcn.lus');
             copyfile(lib_path, output_dir);
         end
     end

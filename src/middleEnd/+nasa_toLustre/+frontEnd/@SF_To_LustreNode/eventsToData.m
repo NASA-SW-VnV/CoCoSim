@@ -1,11 +1,11 @@
 
 %% change events to data
-function data = eventsToData(events)
-    data = cell(numel(events), 1);
-    for i=1:numel(events)
-        data{i} = events{i};
+function data = eventsToData(event_s)
+    data = cell(numel(event_s), 1);
+    for i=1:numel(event_s)
+        data{i} = event_s{i};
         if isequal(data{i}.Scope, 'Input')
-            data{i}.Port = data{i}.Port - numel(events);%for ordering reasons
+            data{i}.Port = data{i}.Port - numel(event_s);%for ordering reasons
         end
         data{i}.LusDatatype = 'bool';
         data{i}.Datatype = 'Event';

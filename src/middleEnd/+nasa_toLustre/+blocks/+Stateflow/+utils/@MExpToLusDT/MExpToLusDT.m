@@ -6,15 +6,16 @@ classdef MExpToLusDT
     
     methods(Static)
         % use alphabetic order
-        dt = assignment_DT(tree, data_map, inputs, isSimulink, isStateFlow)
-        dt = binaryExpression_DT(tree, data_map, inputs, isSimulink, isStateFlow)
-        dt = constant_DT(tree, data_map, inputs, isSimulink, isStateFlow)
-        dt = expression_DT(tree, data_map, inputs, isSimulink, isStateFlow)
-        dt = fun_indexing_DT(tree, data_map, inputs, isSimulink, isStateFlow)
-        dt = ID_DT(tree, data_map, inputs, isSimulink, isStateFlow)
-        dt = matrix_DT(tree, data_map, inputs, isSimulink, isStateFlow)
-        dt = parenthesedExpression_DT(tree, data_map, inputs, isSimulink, isStateFlow)
-        dt = unaryExpression_DT(tree, data_map, inputs, isSimulink, isStateFlow)
+        dt = assignment_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun)
+        dt = binaryExpression_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun)
+        dt = constant_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun)
+        dt = expression_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun)
+        dt = fun_indexing_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun)
+        dt = ID_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun)
+        dt = matrix_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun)
+        dt = parenthesedExpression_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun)
+        dt = struct_indexing_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun)
+        dt = unaryExpression_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun)
     end
     
     methods(Static)

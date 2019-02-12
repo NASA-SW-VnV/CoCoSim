@@ -1,5 +1,4 @@
-function [blk, MF_DATA_MAP] = creatInportsOutports(blk)
-    MF_DATA_MAP = containers.Map('KeyType', 'char', 'ValueType', 'any');
+function [blk, Inputs, Outputs] = creatInportsOutports(blk)
     content = struct();
     Inputs = blk.Inputs;
     Outputs = blk.Outputs;
@@ -19,7 +18,7 @@ function [blk, MF_DATA_MAP] = creatInportsOutports(blk)
         in.BusObject = '';
         content.(in.Name) = in;
         % add input to data map
-        MF_DATA_MAP(in.Name) = buildData(Inputs{i}, CompiledType);
+        Inputs{i} = buildData(Inputs{i}, CompiledType);
     end
     for i=1:numel(Outputs)
         out = Outputs{i};
@@ -36,7 +35,7 @@ function [blk, MF_DATA_MAP] = creatInportsOutports(blk)
         out.BusObject = '';
         content.(out.Name) = out;
         % add input to data map
-        MF_DATA_MAP(out.Name) = buildData(Outputs{i}, CompiledType);
+        Outputs{i} = buildData(Outputs{i}, CompiledType);
     end
     blk.Content = content;
 end

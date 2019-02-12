@@ -18,7 +18,7 @@ script
       nlosoc?
     ;
 function
-	: FUNCTION func_output? ID func_input? nloc
+	: NL* FUNCTION func_output? ID func_input? nloc
 	  contract?
 	  body?
 	  END? 

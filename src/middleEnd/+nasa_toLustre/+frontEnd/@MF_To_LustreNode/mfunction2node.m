@@ -10,7 +10,7 @@ function [main_node, external_nodes, external_libraries ] = ...
     isEnableAndTrigger = false;
     isContractBlk = false;
     isMatlabFunction = true;
-    [blk, MF_DATA_MAP] = MF_To_LustreNode.creatInportsOutports(blk);
+    [blk, Inputs, Outputs] = MF_To_LustreNode.creatInportsOutports(blk);
     [node_name, node_inputs, node_outputs,...
         ~, ~] = ...
         nasa_toLustre.utils.SLX2LusUtils.extractNodeHeader(parent, blk, is_main_node,...
@@ -32,9 +32,18 @@ function [main_node, external_nodes, external_libraries ] = ...
     try
         % try translate Matlab code to Lustre if failed, it will be set as
         % imported
-        body = MF_To_LustreNode.getMFunctionCode(parent,  blk, MF_DATA_MAP);
+        [body, external_libraries, failed] = MF_To_LustreNode.getMFunctionCode(parent,  blk, Inputs, Outputs);
+        if failed
+            main_node.setIsImported(true);
+            display_msg(sprintf('Matlab Function block "%s" will be abstracted', ...
+                blk.Origin_path), MsgType.WARNING, 'MF_To_LustreNode.mfunction2node', '');
+        else
+            main_node.setBodyEqs(body);
+        end
     catch me 
         display_msg(me.getReport(), MsgType.DEBUG, 'MF_To_LustreNode.mfunction2node', '');
+        display_msg(sprintf('Matlab Function block "%s" will be abstracted', ...
+            blk.Origin_path), MsgType.WARNING, 'MF_To_LustreNode.mfunction2node', '');
         main_node.setIsImported(true);
     end
     

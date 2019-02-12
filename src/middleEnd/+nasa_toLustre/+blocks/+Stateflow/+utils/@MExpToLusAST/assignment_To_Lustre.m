@@ -1,26 +1,15 @@
 function [code, assignment_dt] = assignment_To_Lustre(BlkObj, tree, parent, blk, ...
-        data_map, inputs, ~, isSimulink, isStateFlow)
+        data_map, inputs, ~, isSimulink, isStateFlow, isMatlabFun)
     import nasa_toLustre.lustreAst.*
     import nasa_toLustre.blocks.Stateflow.utils.*
     
-    assignment_dt = MExpToLusDT.expression_DT(tree, data_map, inputs, isSimulink, isStateFlow);
-    %     if isequal(tree.leftExp.type, 'fun_indexing') ...
-    %             && ~isequal(tree.leftExp.parameters.type, 'constant')
-    %         %TODO: we can creat all vector value
-    %         %e.g. u(index) = exp
-    %         % u_1 = if index = 1 then exp else u_1;
-    %         % u_2 = if index = 2 then exp else u_2;
-    %         ME = MException('COCOSIM:TREE2CODE', ...
-    %             'Array index on the left hand of the expression "%s" should be a constant.',...
-    %             tree.text);
-    %         throw(ME);
-    %     end
+    assignment_dt = MExpToLusDT.expression_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
     left = MExpToLusAST.expression_To_Lustre(BlkObj, tree.leftExp, ...
         parent, blk, data_map, inputs, assignment_dt,...
-        isSimulink, isStateFlow);
+        isSimulink, isStateFlow, isMatlabFun);
     
     right = MExpToLusAST.expression_To_Lustre(BlkObj, tree.rightExp, parent, blk,...
-        data_map, inputs, assignment_dt, isSimulink, isStateFlow);
+        data_map, inputs, assignment_dt, isSimulink, isStateFlow, isMatlabFun);
     if isequal(tree.leftExp.type, 'fun_indexing') ...
             && ~isequal(tree.leftExp.parameters.type, 'constant')
         [code, status] = ArrayIndexNotConstant(left, right, tree);

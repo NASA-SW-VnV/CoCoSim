@@ -1,9 +1,9 @@
 function [code, dt] = matrix_To_Lustre(BlkObj, tree, parent, blk, data_map,...
-        inputs, ~, isSimulink, isStateFlow)
+        inputs, ~, isSimulink, isStateFlow, isMatlabFun)
     L = nasa_toLustre.ToLustreImport.L;
     import(L{:})
     import nasa_toLustre.blocks.Stateflow.utils.*
-    dt = MExpToLusDT.expression_DT(tree, data_map, inputs, isSimulink, isStateFlow);
+    dt = MExpToLusDT.expression_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
     
     if isstruct(tree.rows)
         rows = arrayfun(@(x) x, tree.rows, 'UniformOutput', false);
@@ -32,7 +32,7 @@ function [code, dt] = matrix_To_Lustre(BlkObj, tree, parent, blk, data_map,...
             code(end+1) =...
                 MExpToLusAST.expression_To_Lustre(BlkObj, columns(j), ...
                 parent, blk, data_map, inputs, code_dt{i, j},...
-                isSimulink, isStateFlow);
+                isSimulink, isStateFlow, isMatlabFun);
         end
     end
     

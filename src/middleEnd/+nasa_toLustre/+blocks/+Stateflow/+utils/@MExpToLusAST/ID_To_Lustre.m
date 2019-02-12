@@ -1,4 +1,4 @@
-function [code, dt] = ID_To_Lustre(~, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow)
+function [code, dt] = ID_To_Lustre(~, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun)
     L = nasa_toLustre.ToLustreImport.L;
     import(L{:})
     import nasa_toLustre.blocks.Stateflow.utils.*
@@ -7,7 +7,7 @@ function [code, dt] = ID_To_Lustre(~, tree, parent, blk, data_map, inputs, expec
     else
         id = tree.name;
     end
-    dt = MExpToLusDT.ID_DT(tree, data_map, inputs, isSimulink, isStateFlow);
+    dt = MExpToLusDT.ID_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
     if strcmp(id, 'true') || strcmp(id, 'false')
         code{1} = BooleanExpr(id);
         
@@ -22,7 +22,7 @@ function [code, dt] = ID_To_Lustre(~, tree, parent, blk, data_map, inputs, expec
         
     elseif isKey(data_map, id)
         d = data_map(id);
-        if isStateFlow
+        if isStateFlow || isMatlabFun
             names = SF_To_LustreNode.getDataName(d);
             code = cell(numel(names), 1);
             for i=1:numel(names)

@@ -26,7 +26,7 @@ classdef SF_To_LustreNode
         ordered = orderObjects(objects, fieldName)
 
         %% change events to data
-        data = eventsToData(event_s)  %TODO "events" cause eror here (why?).. changing from events to event_s
+        data = eventsToData(event_s) 
 
         vars = getDataVars(d_list)
 

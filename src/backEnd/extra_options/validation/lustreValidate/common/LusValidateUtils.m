@@ -5,39 +5,8 @@ classdef LusValidateUtils
     properties
     end
     
-    methods (Static = true)
-        %%
-        %Adapte Simulink blocks name to Lustre names
-        function str_out = name_format(str)
-            str_out =nasa_toLustre.utils.SLX2LusUtils.name_format(str);
-        end
-
-        %% Generate random vectors
-        function vector = construct_random_integers(nb_iterations, IMIN, IMAX, dt, dim)
-            if numel(dim)==1
-                vector = randi([IMIN, IMAX], [nb_iterations,dim],dt);
-            else
-                vector = randi([IMIN, IMAX], [dim,nb_iterations],dt);
-            end
-        end
-        
-        function vector = construct_random_booleans(nb_iterations, IMIN, IMAX, dim)
-            vector = boolean(LusValidateUtils.construct_random_integers(nb_iterations, IMIN, IMAX, 'uint8',dim));
-        end
-        
-        function vector = construct_random_doubles(nb_iterations, IMIN, IMAX,dim)
-            if numel(dim)==1
-                vector = double(IMIN + (IMAX-IMIN).*rand([nb_iterations,dim]));
-            else
-                vector = double(IMIN + (IMAX-IMIN).*rand([dim, nb_iterations]));
-            end
-        end
-        
-       
-        
-        
+    methods (Static = true)        
         %% from Simulink dataType to Lustre DataType
-    
         function slx_dt = get_slx_dt(lus_dt)
             if strcmp(lus_dt, 'bool')
                 slx_dt = 'boolean';

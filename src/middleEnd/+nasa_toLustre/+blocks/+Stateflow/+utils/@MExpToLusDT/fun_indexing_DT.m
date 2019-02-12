@@ -1,12 +1,12 @@
-function dt = fun_indexing_DT(tree, data_map, inputs, isSimulink, isStateFlow)
+function dt = fun_indexing_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun)
     import nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT
     tree_ID = tree.ID;
     switch tree_ID
         case {'abs', 'sgn'}
-            dt = MExpToLusDT.expression_DT(tree.parameters(1), data_map, inputs, isSimulink, isStateFlow);
+            dt = MExpToLusDT.expression_DT(tree.parameters(1), data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
         case 'rem'
-            param1 = MExpToLusDT.expression_DT(tree.parameters(1), data_map, inputs, isSimulink, isStateFlow);
-            param2 = MExpToLusDT.expression_DT(tree.parameters(2), data_map, inputs, isSimulink, isStateFlow);
+            param1 = MExpToLusDT.expression_DT(tree.parameters(1), data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
+            param2 = MExpToLusDT.expression_DT(tree.parameters(2), data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
             dt = MExpToLusDT.upperDT(param1, param2);
         case {'sqrt', 'exp', 'log', 'log10',...
                 'sin','cos','tan',...
@@ -17,16 +17,16 @@ function dt = fun_indexing_DT(tree, data_map, inputs, isSimulink, isStateFlow)
         case {'all', 'any'}
             dt = 'bool';
         otherwise
-            dt = simulinkStateflow_Fun_Indexing_DT(tree, data_map, inputs, isSimulink, isStateFlow);
+            dt = simulinkStateflow_Fun_Indexing_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
     end
 end
 
-function dt = simulinkStateflow_Fun_Indexing_DT(tree, data_map, inputs, isSimulink, isStateFlow)
+function dt = simulinkStateflow_Fun_Indexing_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun)
     global SF_GRAPHICALFUNCTIONS_MAP SF_STATES_NODESAST_MAP;
     import nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT
     dt = '';
     
-    if isStateFlow && data_map.isKey(tree.ID)
+    if (isStateFlow || isMatlabFun) && data_map.isKey(tree.ID)
         % A variable in Stateflow
         dt = data_map(tree.ID).LusDatatype;
     elseif isStateFlow && SF_GRAPHICALFUNCTIONS_MAP.isKey(tree.ID)

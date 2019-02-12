@@ -1,4 +1,4 @@
-function [code, exp_dt] = expression_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow)
+function [code, exp_dt] = expression_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun)
     %this function is extended to be used by If-Block,
     %SwitchCase and Fcn blocks. Also it is used by Stateflow
     %actions
@@ -6,7 +6,7 @@ function [code, exp_dt] = expression_To_Lustre(BlkObj, tree, parent, blk, data_m
     import(L{:})
     import nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST
     
-    narginchk(1, 9);
+    narginchk(1, 10);
     if isempty(BlkObj), BlkObj = nasa_toLustre.blocks.DummyBlock_To_Lustre; end
     if nargin < 3, parent = []; end
     if nargin < 4, blk = []; end
@@ -15,7 +15,7 @@ function [code, exp_dt] = expression_To_Lustre(BlkObj, tree, parent, blk, data_m
     if nargin < 7, expected_dt = ''; end
     if nargin < 8, isSimulink = false; end
     if nargin < 9, isStateFlow = false; end
-    
+    if nargin < 10, isMatlabFun = false; end
     
     % we assume this function returns cell.
     code = {};
@@ -45,13 +45,13 @@ function [code, exp_dt] = expression_To_Lustre(BlkObj, tree, parent, blk, data_m
                 'plus_minus', 'mtimes', 'times', ...
                 'mrdivide', 'mldivide', 'rdivide', 'ldivide', ...
                 'mpower', 'power'}
-            [code, exp_dt] = MExpToLusAST.binaryExpression_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow);
+            [code, exp_dt] = MExpToLusAST.binaryExpression_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun);
         otherwise
             % we use the name of tree_type to call the associated function
             func_name = strcat(tree_type, '_To_Lustre');
             func_handle = str2func(strcat('MExpToLusAST.', func_name));
             try
-                [code, exp_dt] = func_handle(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow);
+                [code, exp_dt] = func_handle(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun);
             catch me
                 if isequal(me.identifier, 'MATLAB:UndefinedFunction')
                     display_msg(me.getReport(), MsgType.DEBUG, 'MExpToLusAST.expression_To_Lustre', '');

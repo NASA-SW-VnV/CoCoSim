@@ -1,4 +1,4 @@
-function [code, exp_dt] = constant_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow)
+function [code, exp_dt] = constant_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun)
     
     import nasa_toLustre.lustreAst.*
     import nasa_toLustre.blocks.Stateflow.utils.*

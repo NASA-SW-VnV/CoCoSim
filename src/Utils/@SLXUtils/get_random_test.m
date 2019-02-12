@@ -42,7 +42,7 @@ function [ds, ...
             min = IMIN(1);
             max = IMAX(1);
         end
-        element.Values = SLXUtils.get_random_values(time, nb_steps, min, max, dim, inports(i).datatype);
+        element.Values = SLXUtils.get_random_values_InTimeSeries(time, min, max, dim, inports(i).datatype);
         ds{i} = element;
     end
 

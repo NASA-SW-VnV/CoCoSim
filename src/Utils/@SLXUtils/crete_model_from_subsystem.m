@@ -2,7 +2,7 @@
 function [new_model_path, new_model_name, status] = ...
     crete_model_from_subsystem(file_name, ss_path, output_dir )
     block_name_adapted = ...
-        BUtils.adapt_block_name(MatlabUtils.naming(LusValidateUtils.name_format(ss_path)));
+        BUtils.adapt_block_name(MatlabUtils.naming(nasa_toLustre.utils.SLX2LusUtils.name_format(ss_path)));
     new_model_name = strcat(file_name,'_', block_name_adapted);
     new_model_name = BUtils.adapt_block_name(new_model_name);
     new_model_path = fullfile(output_dir, strcat(new_model_name,'.slx'));

@@ -12,7 +12,13 @@ function names = getDataName(d)
         names = {d.Name};
     else
         for i=1:CompiledSize
-            names{i} = sprintf('%s__ID%.0f_Index%d', d.Name, d.Id, i);
+            if isfield(d,'Id')
+                %Stateflow case
+                names{i} = sprintf('%s__ID%.0f_Index%d', d.Name, d.Id, i);
+            else
+                %Matlab case
+                names{i} = sprintf('%s__Index%d', d.Name, i);
+            end
         end
     end
 end
