@@ -1,6 +1,13 @@
 function new_model_path = transformContractToSLDV(model_path)
     %TRANSFORMCONTRACTTOSLDV transform COCOSPEC contract to SLDV Library:
     %Assertion, Proof, A...
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Copyright (c) 2017 United States Government as represented by the
+    % Administrator of the National Aeronautics and Space Administration.
+    % All Rights Reserved.
+    % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
+    
     [model_dir, model_name, ext] = fileparts(model_path);
     if ~bdIsLoaded(model_name), load_system(model_path); end
     new_model_path = fullfile(model_dir, strcat(model_name, '_SLDV', ext));

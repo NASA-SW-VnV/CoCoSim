@@ -7,19 +7,19 @@
 
 
 function schema = contractToSLDVMenu(callbackInfo)
-schema = sl_action_schema;
-schema.label = 'Transform Contract to SLDV';
-schema.callback = @contractToSLDV;
+    schema = sl_action_schema;
+    schema.label = 'Transform Contract to SLDV';
+    schema.callback = @contractToSLDV;
 end
 
 
 function contractToSLDV(varargin)
-try
-    model_full_path = MenuUtils.get_file_name(gcs) ;
-    transformContractToSLDV( model_full_path );
-catch ME
-    display_msg(ME.getReport(), MsgType.DEBUG,'IRMenu','');
-    display_msg(ME.message, MsgType.ERROR,'IRMenu','');
-end
+    try
+        model_full_path = MenuUtils.get_file_name(gcs) ;
+        transformContractToSLDV( model_full_path );
+    catch ME
+        display_msg(ME.getReport(), MsgType.DEBUG,'IRMenu','');
+        display_msg(ME.message, MsgType.ERROR,'IRMenu','');
+    end
 end
 
