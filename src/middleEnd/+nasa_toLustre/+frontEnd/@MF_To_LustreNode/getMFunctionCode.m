@@ -95,6 +95,13 @@ function [script, failed] = addrequiredFunctions(blk)
             script = sprintf('%s\n%s', script, fileread(fList{i}));
         end
     end
+    %clean up script
+    % remove multiline comment
+    script = regexprep(script, '%\{(.|[\r\n])*?%\}', '');
+    % remove one line comment
+    script = regexprep(script, '%[^\r\n]*[\r\n]?', '');
+    % remove multi return to line
+    script = regexprep(script, '[\r\n]+', '\n');
     try delete(func_path), catch, end
 end
 %% get Function names
@@ -138,7 +145,7 @@ function [data_map, failed] = getFunVars(blk, script, ...
     fprintf(fid, '\n');
     script = regexprep(script, '%', '%%');
     if has_END
-        script = regexprep(script, 'end[.]*$', 'CoCoVars = whos;\nend\nend');
+        script = regexprep(script, 'end(.|[\r\n])*$', 'CoCoVars = whos;\nend\nend');
         fprintf(fid, script);
     else
         fprintf(fid, script);
