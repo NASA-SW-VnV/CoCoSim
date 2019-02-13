@@ -25,9 +25,6 @@ function new_model_path = generate_invariants_Zustre(model_path, contract_path, 
         new_model_path = '';
         data = BUtils.read_json(contract_path);
         
-        
-        
-        
         % we add a Postfix to differentiate it with the original Simulink model
         new_model_name = strcat(base_name,'_with_cocospec');
         new_name = fullfile(model_dir,strcat(new_model_name,'.slx'));
@@ -54,8 +51,7 @@ function new_model_path = generate_invariants_Zustre(model_path, contract_path, 
         xRoot = DOMNODE.getDocumentElement;
         
         nb_coco = 0;
-        
-        
+                
         [status, translated_nodes_path, ~]  = lus2slx(contract_path, coco_dir, [], [], 1);
         if status
             return;
@@ -156,15 +152,12 @@ function new_model_path = generate_invariants_Zustre(model_path, contract_path, 
     end
 end
 
-
-
 %%
 function input_block_name = get_input_block_name_from_variable(xRoot, node, var_name, Sim_file_name,new_model_name)
     
     input_block_name = SLX2Lus_Trace.get_SlxBlockName_from_LusVar_UsingXML(xRoot, node, var_name);
     input_block_name = regexprep(input_block_name,strcat('^',Sim_file_name,'/(\w)'),strcat(new_model_name,'/$1'));
 end
-
 
 %%
 function link_block_with_its_cocospec( cocospec_bloc_path, input_block_name, simulink_block_name, parent_block_name, index, isBaseName)
@@ -197,9 +190,6 @@ function link_block_with_its_cocospec( cocospec_bloc_path, input_block_name, sim
         add_line(parent_block_name, SrcPortHandle, DstBlkH.Inport(index), 'autorouting', 'on');
     end
 end
-
-
-
 
 function set_mask_parameters(observer_path)
     
