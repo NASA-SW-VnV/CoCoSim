@@ -1,4 +1,3 @@
-
 function [status, new_name_path] = construct_EMF_verif_model(slx_file_name,...
         lus_file_path, node_name, output_dir)
     new_name_path = '';
@@ -21,7 +20,6 @@ function [status, new_name_path] = construct_EMF_verif_model(slx_file_name,...
     if status
         return;
     end
-
     %generate simulink model
     new_model_name = BUtils.adapt_block_name(strcat(slx_file_name,'_Verif'));
     clear lus2slx
@@ -29,19 +27,16 @@ function [status, new_name_path] = construct_EMF_verif_model(slx_file_name,...
     if status
         return;
     end
-
     %2- Create Simulink model containing both SLX1 and SLX2
     load_system(new_name_path);
 
     emf_sub_path = fullfile(new_model_name, BUtils.adapt_block_name(node_name));
     emf_pos = get_param(emf_sub_path, 'Position');
     % copy contents of slx_file to a subsytem
-
     original_sub_path = fullfile(new_model_name, 'original');
     add_block('built-in/Subsystem', original_sub_path);
     load_system(slx_file_name);
     Simulink.BlockDiagram.copyContentsToSubSystem(slx_file_name, original_sub_path);
-
     %add inputs and outputs for original subsystem
     OrigSubPortHandles = get_param(original_sub_path, 'PortHandles');
     nb_inports = numel(OrigSubPortHandles.Inport);
@@ -66,7 +61,6 @@ function [status, new_name_path] = construct_EMF_verif_model(slx_file_name,...
         add_line(new_model_name,...
             inportPortHandle.Outport(1), OrigSubPortHandles.Inport(i),...
             'autorouting', 'on');
-
         %add the inport to emf subsytem, it depends to dimension we should
         %inline vectors
         code_on=sprintf('%s([], [], [], ''compile'')', new_model_name);
@@ -131,7 +125,6 @@ function [status, new_name_path] = construct_EMF_verif_model(slx_file_name,...
                     LustrecUtils.add_demux(new_model_name, emf_inport_idx, ...
                     demuxID, dim(3), portHandlesEMF, concat_Porthandl);
             end
-
         end
     end
     % add verification subsystem
@@ -145,7 +138,6 @@ function [status, new_name_path] = construct_EMF_verif_model(slx_file_name,...
     add_block('built-in/Subsystem', verif_sub_path, ...
         'Position',verif_pos, ...
         'TreatAsAtomicUnit', 'on');
-
     mask = Simulink.Mask.create(verif_sub_path);
     mask.Type = 'VerificationSubsystem';
     set_param(verif_sub_path, 'ForegroundColor', 'red');
@@ -223,7 +215,6 @@ function [status, new_name_path] = construct_EMF_verif_model(slx_file_name,...
                 strcat('Product',num2str(j), '/1'),...
                 strcat('AND', '/',num2str(j)),...
                 'autorouting', 'on');
-
         else
             add_line(verif_sub_path, ...
                 strcat('Product',num2str(j), '/1'),...
@@ -270,7 +261,6 @@ function [status, new_name_path] = construct_EMF_verif_model(slx_file_name,...
             return;
         end
 
-
         if dim == 1
             outport_idx = outport_idx + 1;
             add_line(new_model_name, portHandlesEMF.Outport(outport_idx), VerifportHandles.Inport(2*i), 'autorouting', 'on');
@@ -300,9 +290,6 @@ function [status, new_name_path] = construct_EMF_verif_model(slx_file_name,...
                 'autorouting', 'on');
             outport_idx = last_index;
         end
-    end
-
-    %add inputs and outputs for EMF subsystem
-
-    save_system(new_name_path);
+    end    
+    save_system(new_name_path);   %add inputs and outputs for EMF subsystem
 end
