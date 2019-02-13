@@ -22,6 +22,14 @@ classdef LustreExpr < nasa_toLustre.lustreAst.LustreAst
         print_jkind(obj)
         print_prelude(obj)
     end
-
+    methods(Static)
+        function r = isSimpleExpr(expr)
+            r = isa(expr, 'nasa_toLustre.lustreAst.VarIdExpr')...
+                || isa(expr, 'nasa_toLustre.lustreAst.IntExpr')...
+                || isa(expr, 'nasa_toLustre.lustreAst.RealExpr')...
+                || isa(expr, 'nasa_toLustre.lustreAst.BooleanExpr')...
+                || isa(expr, 'nasa_toLustre.lustreAst.EnumValueExpr');
+        end
+    end
 end
 

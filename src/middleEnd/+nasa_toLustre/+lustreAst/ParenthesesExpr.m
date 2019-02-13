@@ -28,11 +28,16 @@ classdef ParenthesesExpr < nasa_toLustre.lustreAst.LustreExpr
         end
         %% simplify expression
         function new_obj = simplify(obj)
-            new_expr = obj.expr.simplify();
-            if isa(new_expr, 'nasa_toLustre.lustreAst.ParenthesesExpr')
-                new_obj = nasa_toLustre.lustreAst.ParenthesesExpr(new_expr.getExp());
+            
+            if isa(obj.expr, 'nasa_toLustre.lustreAst.ParenthesesExpr')
+                new_obj = obj.expr.simplify();
             else
-                new_obj = nasa_toLustre.lustreAst.ParenthesesExpr(new_expr);
+                new_expr = obj.expr.simplify();
+                if nasa_toLustre.lustreAst.LustreExpr.isSimpleExpr(new_expr)
+                    new_obj = new_expr;
+                else
+                    new_obj = nasa_toLustre.lustreAst.ParenthesesExpr(new_expr);
+                end
             end
         end
         %% nbOccuranceVar
