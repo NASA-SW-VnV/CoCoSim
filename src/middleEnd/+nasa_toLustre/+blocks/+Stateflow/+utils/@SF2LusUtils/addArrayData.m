@@ -20,6 +20,7 @@ function SF_DATA_MAP = addArrayData(SF_DATA_MAP, d_list)
                     v = v(1);
                 end
                 d.InitialValue = num2str(v);
+                d.Scope = 'Array';
                 SF_DATA_MAP(names{j}) = d;
             end
         end

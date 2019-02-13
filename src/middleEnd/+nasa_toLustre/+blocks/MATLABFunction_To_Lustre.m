@@ -24,7 +24,7 @@ classdef MATLABFunction_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             [inputs] =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk);
             codes = {};
-            node_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);
+            node_name = main_node.getName();
             codes{end+1} = LustreEq(outputs, NodeCallExpr(node_name, inputs));
             obj.setCode( codes );
             obj.addVariable(outputs_dt);
@@ -35,7 +35,7 @@ classdef MATLABFunction_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         end
         %%
         function is_Abstracted = isAbstracted(varargin)
-            is_Abstracted = true;
+            is_Abstracted = false;
         end
     end
     

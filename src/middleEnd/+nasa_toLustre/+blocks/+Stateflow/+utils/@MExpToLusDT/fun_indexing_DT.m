@@ -22,18 +22,16 @@ function dt = fun_indexing_DT(tree, data_map, inputs, isSimulink, isStateFlow, i
 end
 
 function dt = simulinkStateflow_Fun_Indexing_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun)
-    global SF_GRAPHICALFUNCTIONS_MAP SF_STATES_NODESAST_MAP;
+    global SF_MF_FUNCTIONS_MAP SF_STATES_NODESAST_MAP;
     import nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT
     dt = '';
     
     if (isStateFlow || isMatlabFun) && data_map.isKey(tree.ID)
         % A variable in Stateflow
         dt = data_map(tree.ID).LusDatatype;
-    elseif isStateFlow && SF_GRAPHICALFUNCTIONS_MAP.isKey(tree.ID)
+    elseif (isStateFlow || isMatlabFun)  && SF_MF_FUNCTIONS_MAP.isKey(tree.ID)
         % Graphical function in Stateflow
-        func = SF_GRAPHICALFUNCTIONS_MAP(tree.ID);
-        sfNodename = nasa_toLustre.frontEnd.SF2LusUtils.getUniqueName(func);
-        nodeAst = SF_STATES_NODESAST_MAP(sfNodename);
+        nodeAst = SF_MF_FUNCTIONS_MAP(tree.ID);
         outputs = nodeAst.getOutputs();
         dt =  cell(numel(outputs), 1);
         for i=1:numel(outputs)

@@ -16,7 +16,7 @@ classdef StateflowGraphicalFunction_To_Lustre
                 write_code(sfunc, chart_data)
             L = nasa_toLustre.ToLustreImport.L;
             import(L{:})
-            global SF_GRAPHICALFUNCTIONS_MAP SF_JUNCTIONS_PATH_MAP SF_STATES_NODESAST_MAP;
+            global SF_MF_FUNCTIONS_MAP SF_JUNCTIONS_PATH_MAP SF_STATES_NODESAST_MAP;
             external_nodes = {};
             external_libraries = {};
             % add junctions
@@ -128,7 +128,7 @@ classdef StateflowGraphicalFunction_To_Lustre
             
             
             SF_STATES_NODESAST_MAP(node_name) = main_node;
-            SF_GRAPHICALFUNCTIONS_MAP(sfunc.Name) = sfunc;
+            SF_MF_FUNCTIONS_MAP(sfunc.Name) = main_node;
             
             
         end

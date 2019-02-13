@@ -6,7 +6,7 @@ classdef MExpToLusAST
     methods(Static)
         function [lusCode, status] = translate(BlkObj, exp, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun)
             import nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST
-            global SF_GRAPHICALFUNCTIONS_MAP SF_STATES_NODESAST_MAP;
+            global SF_MF_FUNCTIONS_MAP SF_STATES_NODESAST_MAP;
             L = nasa_toLustre.ToLustreImport.L;
             import(L{:})
             
@@ -62,10 +62,8 @@ classdef MExpToLusAST
                     end
                     if isfield(tree, 'type') && ...
                             isequal(tree.type, 'fun_indexing') &&...
-                            isKey(SF_GRAPHICALFUNCTIONS_MAP, tree.ID)
-                        func = SF_GRAPHICALFUNCTIONS_MAP(tree.ID);
-                        sfNodename = SF2LusUtils.getUniqueName(func);
-                        actionNodeAst = SF_STATES_NODESAST_MAP(sfNodename);
+                            isKey(SF_MF_FUNCTIONS_MAP, tree.ID)
+                        actionNodeAst = SF_MF_FUNCTIONS_MAP(tree.ID);
                         [~, oututs_Ids] = actionNodeAst.nodeCall();
                         lusCode{1} = LustreEq(oututs_Ids,...
                             lusCode{1});

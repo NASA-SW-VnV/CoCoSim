@@ -38,10 +38,18 @@ function [code, exp_dt] = fun_indexing_To_Lustre(BlkObj, tree, parent, blk,...
                 func_handle = str2func(func_name);
                 [code, exp_dt] = func_handle(BlkObj, tree, parent, blk, ...
                     data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun);
-            catch
-                code = parseOtherFunc(BlkObj, tree, ...
-                    parent, blk, data_map, inputs, ...
-                    expected_dt, isSimulink, isStateFlow, isMatlabFun);
+            catch me
+                if isequal(me.identifier, 'MATLAB:UndefinedFunction')
+                    code = parseOtherFunc(BlkObj, tree, ...
+                        parent, blk, data_map, inputs, ...
+                        expected_dt, isSimulink, isStateFlow, isMatlabFun);
+                else
+                    display_msg(me.getReport(), MsgType.DEBUG, 'MExpToLusAST.fun_indexing_To_Lustre', '');
+                    ME = MException('COCOSIM:TREE2CODE', ...
+                        'Parser ERROR for function "%s" in Expression "%s"',...
+                        tree_ID, tree.text);
+                    throw(ME);
+                end
             end
     end
     
@@ -50,18 +58,18 @@ end
 
 
 function code = parseOtherFunc(obj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun)
-    global SF_GRAPHICALFUNCTIONS_MAP;
+    global SF_MF_FUNCTIONS_MAP;
     L = nasa_toLustre.ToLustreImport.L;
     import(L{:})
     import nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST
-    if ~isSimulink && data_map.isKey(tree.ID)
+    if (isStateFlow || isMatlabFun) && data_map.isKey(tree.ID)
         %Array Access
         code = arrayAccess_To_Lustre(obj, tree, parent, blk, ...
             data_map, inputs,  expected_dt, isSimulink, isStateFlow, isMatlabFun);
         
-    elseif isStateFlow && SF_GRAPHICALFUNCTIONS_MAP.isKey(tree.ID)
-        %Stateflow Function
-        code = sfGraphFunction_To_Lustre(obj, tree, parent, blk, ...
+    elseif (isStateFlow || isMatlabFun) && SF_MF_FUNCTIONS_MAP.isKey(tree.ID)
+        %Stateflow Function and Matlab Function block
+        code = sf_mf_functionCall_To_Lustre(obj, tree, parent, blk, ...
             data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun);
         
     elseif isSimulink && isequal(tree.ID, 'u')

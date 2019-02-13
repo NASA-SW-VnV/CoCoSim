@@ -10,8 +10,11 @@ function [main_node, external_nodes ] = ...
     try
         % try translate Matlab code to Lustre if failed, it will be set as
         % imported
-        [main_node, external_nodes, failed] = MF_To_LustreNode.getMFunctionCode(blkObj, parent,  blk, Inputs, Outputs);
-        
+        [ fun_nodes, failed] = MF_To_LustreNode.getMFunctionCode(blkObj, parent,  blk, Inputs);
+        main_node = fun_nodes{1};
+        if length(fun_nodes) > 1
+            external_nodes = fun_nodes(2:end);
+        end
     catch me
         display_msg(me.getReport(), MsgType.DEBUG, 'MF_To_LustreNode.mfunction2node', '');
         failed = true;

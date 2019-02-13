@@ -7,13 +7,13 @@ function [main_node, external_nodes, external_libraries ] = ...
     % global varibale mapping between states and their nodes AST.
     global SF_STATES_NODESAST_MAP SF_STATES_PATH_MAP ...
         SF_JUNCTIONS_PATH_MAP SF_STATES_ENUMS_MAP ...
-        SF_GRAPHICALFUNCTIONS_MAP TOLUSTRE_ENUMS_MAP;
+        SF_MF_FUNCTIONS_MAP TOLUSTRE_ENUMS_MAP;
     %It's initialized for each call of this function
     SF_STATES_NODESAST_MAP = containers.Map('KeyType', 'char', 'ValueType', 'any');
     SF_STATES_PATH_MAP = containers.Map('KeyType', 'char', 'ValueType', 'any');
     SF_JUNCTIONS_PATH_MAP = containers.Map('KeyType', 'char', 'ValueType', 'any');
     SF_STATES_ENUMS_MAP = containers.Map('KeyType', 'char', 'ValueType', 'any');
-    SF_GRAPHICALFUNCTIONS_MAP = containers.Map('KeyType', 'char', 'ValueType', 'any');
+    SF_MF_FUNCTIONS_MAP = containers.Map('KeyType', 'char', 'ValueType', 'any');
     SF_DATA_MAP = containers.Map('KeyType', 'char', 'ValueType', 'any');
     
     % initialize outputs
