@@ -104,8 +104,7 @@ classdef LustreNode < nasa_toLustre.lustreAst.LustreAst
                     MatlabUtils.strjoin(outputsClass, ', '));
                 throw(ME);
             end
-        end
-        
+        end        
         function setLocalContract(obj, localContract)
             if iscell(localContract) && numel(localContract) == 1
                 obj.localContract = localContract{1};
@@ -141,11 +140,9 @@ classdef LustreNode < nasa_toLustre.lustreAst.LustreAst
         function addBodyEqs(obj, eq)
             obj.bodyEqs{end+1} = eq;
         end
-        
         function r = getBodyEqs(obj)
             r = obj.bodyEqs;
         end
-            
         function setIsMain(obj, isMain)
             obj.isMain = isMain;
         end
@@ -205,7 +202,6 @@ classdef LustreNode < nasa_toLustre.lustreAst.LustreAst
                 obj.outputs, obj.localContract, obj.localVars, new_bodyEqs, ...
                 obj.isMain, obj.isImported);
         end
-        
         function new_obj = changeArrowExp(obj, cond)
             new_bodyEqs = cellfun(@(x) x.changeArrowExp(cond), obj.bodyEqs, 'UniformOutput', 0);
             
@@ -308,9 +304,7 @@ classdef LustreNode < nasa_toLustre.lustreAst.LustreAst
             addNodes(obj.localContract);
             addNodes(obj.bodyEqs);
         end
-        
-        
-        
+         
         %%
         function code = print(obj, backend)
             %TODO: check if LUSTREC syntax is OK for the other backends.
@@ -362,8 +356,7 @@ classdef LustreNode < nasa_toLustre.lustreAst.LustreAst
             end
             lines{end+1} = sprintf('tel\n');
             code = MatlabUtils.strjoin(lines, '');
-        end
-        
+        end        
         function code = print_kind2(obj)
             code = obj.print_lustrec(LusBackendType.KIND2);
         end
