@@ -14,7 +14,11 @@ classdef MF_To_LustreNode
         [main_node, external_nodes ] = ...
             mfunction2node(blkObj, parent,  blk,  xml_trace, lus_backend, coco_backend, main_sampleTime, varargin);
         [blk , Inputs, Outputs] = creatInportsOutports(blk);
-        [body, variables, failed] = getMFunctionCode(blkObj, parent,  blk, Inputs, Outputs)
+        [main_node, external_nodes, failed] = getMFunctionCode(blkObj, parent,  blk, Inputs, Outputs)
+        [script, failed] = getAllRequiredFunctionsInOneScript(blk)
+        [functions, failed] = getFunctionList(blk, script)
+        [data_map, failed] = getFuncsDataMap(blk, script, functions, Inputs, Outputs)
+        [fun_node,failed ]  = getFuncCode(func, data_map, blkObj, parent, blk)
     end
     
     
