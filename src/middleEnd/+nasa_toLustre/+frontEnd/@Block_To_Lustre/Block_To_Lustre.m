@@ -7,6 +7,7 @@ classdef Block_To_Lustre < handle
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
     properties
         
         % the code of the block, e.g. a list of LustreEq;
@@ -55,28 +56,43 @@ classdef Block_To_Lustre < handle
         addVariable(obj, varname, ...
                 xml_trace, originPath, port, width, index, isInsideContract, IsNotInSimulink)
 
-        setVariables(obj, vars)
+        function setVariables(obj, vars)
+            obj.variables = vars;
+        end
 
         addUnsupported_options(obj, option)
 
         addExternal_libraries(obj, lib)
 
-        setExternal_libraries(obj, lib)
+        function setExternal_libraries(obj, lib)
+            obj.external_libraries = lib;
+        end
 
         addExtenal_node(obj, nodeAst)
      
-        setCode(obj, code)
+        function setCode(obj, code)
+            obj.lustre_code = code;
+        end
 
         addCode(obj, code)
+
         % Getters
-        code = getCode(obj)
+        function code = getCode(obj)
+            code = obj.lustre_code;
+        end
 
-        variables = getVariables(obj)
-
-        res = getExternalLibraries(obj)
-
-        res = getExternalNodes(obj)
-
+        function variables = getVariables(obj)
+            variables = obj.variables;
+        end
+        
+        function res = getExternalLibraries(obj)            
+            res = obj.external_libraries;
+        end
+        
+        function res = getExternalNodes(obj)
+            res = obj.external_nodes;
+        end
+        
         res = isContentNeedToBeTranslated(obj)
 
     end

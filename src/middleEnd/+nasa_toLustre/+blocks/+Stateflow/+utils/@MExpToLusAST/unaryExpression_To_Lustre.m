@@ -1,5 +1,13 @@
-function [code, exp_dt] = unaryExpression_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, ~, isSimulink, isStateFlow, isMatlabFun)
+function [code, exp_dt] = unaryExpression_To_Lustre(BlkObj, tree, parent,...
+    blk, data_map, inputs, ~, isSimulink, isStateFlow, isMatlabFun)
     %     unaryOperator :   '&' | '*' | '+' | '-' | '~' | '!'
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Copyright (c) 2017 United States Government as represented by the
+    % Administrator of the National Aeronautics and Space Administration.
+    % All Rights Reserved.
+    % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        
     import nasa_toLustre.lustreAst.*
     import nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST
     import nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT
