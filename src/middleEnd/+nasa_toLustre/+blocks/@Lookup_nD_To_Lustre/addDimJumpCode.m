@@ -1,7 +1,13 @@
-
 function [body, vars,Ast_dimJump] = ...
         addDimJumpCode(NumberOfTableDimensions,blk_name,...
         indexDataType,BreakpointsForDimension)
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Copyright (c) 2017 United States Government as represented by the
+    % Administrator of the National Aeronautics and Space Administration.
+    % All Rights Reserved.
+    % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
     L = nasa_toLustre.ToLustreImport.L;
     import(L{:})
     %  This function defines dimJump.  table breakpoints and values are inline in Lustre, the

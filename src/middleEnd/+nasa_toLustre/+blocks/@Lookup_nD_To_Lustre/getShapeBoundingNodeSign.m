@@ -1,7 +1,13 @@
-
 function shapeNodeSign = getShapeBoundingNodeSign(dims)
     % generating sign for nodes bounding element for up to 7
     % dimensions
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Copyright (c) 2017 United States Government as represented by the
+    % Administrator of the National Aeronautics and Space Administration.
+    % All Rights Reserved.
+    % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
     shapeNodeSign = [];
     if dims == 1
         shapeNodeSign = [-1;1];

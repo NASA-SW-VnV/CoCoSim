@@ -1,4 +1,10 @@
 function [codes] = getWriteCodeForNonPortInput(~, in_matrix_dimension,inputs,outputs,numOutDims,U_expanded_dims,ind)
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Copyright (c) 2017 United States Government as represented by the
+    % Administrator of the National Aeronautics and Space Administration.
+    % All Rights Reserved.
+    % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     L = nasa_toLustre.ToLustreImport.L;
     import(L{:})
     %% function get code for noPortInput
