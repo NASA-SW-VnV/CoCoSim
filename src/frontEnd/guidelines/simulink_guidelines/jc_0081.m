@@ -7,6 +7,7 @@ function [results, passed, priority] = jc_0081(model)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % ORION GN&C MATLAB/Simulink Standards
     % jc_0081: Icon display for Port block
+    
     priority = 3;  
     results = {};
     passed = 1;

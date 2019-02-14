@@ -7,6 +7,7 @@ function [results, passed, priority] = hyl_0307(model)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % ORION GN&C MATLAB/Simulink Standards
     % hyl_0307: No "subsystem" in block name
+    
     priority = 2;
     results = {};
     passed = 1;

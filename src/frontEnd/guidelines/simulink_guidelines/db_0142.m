@@ -7,6 +7,7 @@ function [results, passed, priority] = db_0142(model)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % ORION GN&C MATLAB/Simulink Standards
     % db_0142: Position of block names
+    
     priority = 2;
     results = {};
     passed = 1;

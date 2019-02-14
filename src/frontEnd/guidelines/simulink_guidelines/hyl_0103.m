@@ -6,14 +6,13 @@ function [results, passed, priority] = hyl_0103(model)
     % Author: Khanh Trinh <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % ORION GN&C MATLAB/Simulink Standards
-    % hyl_0103: Model color coding
-        
+    % hyl_0103: Model color coding        
     %     Don't support checking for non ORION Library blocks
     %     Don't support checking for Domain level blocks (non-CSU)    
-    
     % Possible color options from format>background_colors are 'black', ...
     % 'white', 'red', 'green', 'blue', 'cyan', 
     % 'magenta', 'yellow', 'gray', 'lightBlue', 'orange', 'darkGreen'.
+    
     priority = 2;
     results = {};
     passed = 1;

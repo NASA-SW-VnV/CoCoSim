@@ -7,6 +7,7 @@ function [results, passed, priority] = na_0005(model)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % ORION GN&C MATLAB/Simulink Standards
     % na_0005: Port block name visibility in Simulink model
+    
     priority = 2;
     results = {};
     passed = 1;

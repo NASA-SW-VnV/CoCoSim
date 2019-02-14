@@ -8,6 +8,7 @@ function [results, passed, priority] = db_0043(model)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % ORION GN&C MATLAB/Simulink Standards
     % db_0043: Simulink font and font size
+    
     priority = 2;
     results = {};
     passed = 1;
