@@ -11,8 +11,7 @@ classdef SFIRPPUtils
     end
     
     methods(Static = true)
-        
-        
+   
         function new_name = adapt_root_name(name)
             new_name = regexprep(...
                 nasa_toLustre.utils.SLX2LusUtils.name_format(name), '/', '_');
@@ -32,10 +31,7 @@ classdef SFIRPPUtils
                 action_Array, 'UniformOutput', false);
             action_Array = action_Array(~strcmp(action_Array,''));
         end%split_actions
-       
-        
-        
-        
+         
     end
     
 end

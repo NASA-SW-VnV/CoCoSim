@@ -1,7 +1,13 @@
-
-%% Go over SS Content
 function [body, variables, external_nodes, external_libraries] =...
         write_body(subsys, main_sampleTime, lus_backend, coco_backend, xml_trace)
+    %% Go over SS Content
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Copyright (c) 2017 United States Government as represented by the
+    % Administrator of the National Aeronautics and Space Administration.
+    % All Rights Reserved.
+    % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+         
     L = nasa_toLustre.ToLustreImport.L;
     import(L{:})
     variables = {};

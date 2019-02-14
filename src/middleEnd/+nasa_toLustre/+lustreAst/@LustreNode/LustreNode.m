@@ -51,41 +51,127 @@ classdef LustreNode < nasa_toLustre.lustreAst.LustreAst
         end
         
         %%
-        setMetaInfo(obj, metaInfo)
 
-        setName(obj, name)
+        function setMetaInfo(obj, metaInfo)
+            obj.metaInfo = metaInfo;
+        end
+        
+        function setName(obj, name)
+            obj.name = name;
+            % check the object is a valid Lustre AST.
+            if ~ischar(name)
+                ME = MException('COCOSIM:LUSTREAST', ...
+                    'LustreNode ERROR: Expected parameter name of type char got "%s".',...
+                    class(name));
+                throw(ME);
+            end
+        end        
 
-        name = getName(obj)
+        function name = getName(obj)
+            name = obj.name;
+        end
 
-        inputs = getInputs(obj)
+        function inputs = getInputs(obj)
+            inputs = obj.inputs;
+        end
+        
+        function setInputs(obj, inputs)
+            if ~iscell(inputs) && numel(inputs) == 1
+                obj.inputs{1} = inputs;
+            else
+                obj.inputs = inputs;
+            end
+            inputsClass = unique(...
+                cellfun(@(x) class(x), obj.inputs, 'UniformOutput', 0));
+            if ~isempty(obj.inputs) && ~(numel(inputsClass) == 1 ...
+                    && isequal(inputsClass{1}, 'nasa_toLustre.lustreAst.LustreVar'))
+                ME = MException('COCOSIM:LUSTREAST', ...
+                    'LustreNode ERROR: Expected inputs of type LustreVar got types "%s".',...
+                    MatlabUtils.strjoin(inputsClass, ', '));
+                throw(ME);
+            end
+        end
+        
+        function outputs = getOutputs(obj)
+            outputs = obj.outputs;
+        end
 
-        setInputs(obj, inputs)
-
-        outputs = getOutputs(obj)
-
-        setOutputs(obj, outputs)
+        function setOutputs(obj, outputs)
+            if ~iscell(outputs) && numel(outputs) == 1
+                obj.outputs{1} = outputs;
+            else
+                obj.outputs = outputs;
+            end
+            outputsClass = unique(...
+                cellfun(@(x) class(x), obj.outputs, 'UniformOutput', 0));
+            if ~isempty(obj.outputs) && ~(numel(outputsClass) == 1 ...
+                    && isequal(outputsClass{1}, 'nasa_toLustre.lustreAst.LustreVar'))
+                ME = MException('COCOSIM:LUSTREAST', ...
+                    'LustreNode ERROR: Expected outputs of type LustreVar got types "%s".',...
+                    MatlabUtils.strjoin(outputsClass, ', '));
+                throw(ME);
+            end
+        end
        
-        setLocalContract(obj, localContract)
+        function setLocalContract(obj, localContract)
+            if iscell(localContract) && numel(localContract) == 1
+                obj.localContract = localContract{1};
+            elseif iscell(localContract) && numel(localContract) > 1
+                display_msg(...
+                    sprintf(['Node %s has more than one contract.', ...
+                    ' A node can contain only one local contract. ', ...
+                    'The first one will be used.'], obj.name), ...
+                    MsgType.ERROR, 'LustreNode', '');
+                
+                obj.localContract = localContract{1};
+            else
+                obj.localContract = localContract;
+            end
+        end
 
-        setLocalVars(obj, localVars)
+        function setLocalVars(obj, localVars)
+            if ~iscell(localVars) && numel(localVars) == 1
+                obj.localVars{1} = localVars;
+            else
+                obj.localVars = localVars;
+            end
+        end
 
         addVar(obj, v)
 
-        setBodyEqs(obj, bodyEqs)
+        function setBodyEqs(obj, bodyEqs)
+            if ~iscell(bodyEqs) && numel(bodyEqs) == 1
+                obj.bodyEqs{1} = bodyEqs;
+            else
+                obj.bodyEqs = bodyEqs;
+            end
+        end
 
         addBodyEqs(obj, eq)
 
-        r = getBodyEqs(obj)
+        function r = getBodyEqs(obj)
+            r = obj.bodyEqs;
+        end
 
-        setIsMain(obj, isMain)
+        function setIsMain(obj, isMain)
+            obj.isMain = isMain;
+        end
+        
 
-        setIsImported(obj, isImported)
+        function setIsImported(obj, isImported)
+            obj.isImported = isImported;
+        end
 
         %%
         new_obj = deepCopy(obj)
 
         %% simplify expression
-        all_obj = getAllLustreExpr(obj)
+        function all_obj = getAllLustreExpr(obj)
+            all_obj = {};
+            for i=1:numel(obj.bodyEqs)
+                all_obj = [all_obj; {obj.bodyEqs{i}}; obj.bodyEqs{i}.getAllLustreExpr()];
+            end
+        end
 
         nb_occ = nbOccuranceVar(obj, var)
 
@@ -105,9 +191,22 @@ classdef LustreNode < nasa_toLustre.lustreAst.LustreAst
 
         [new_obj, varIds] = pseudoCode2Lustre(obj)
 
-        %% This is used by KIND2 LustreProgram.print()
-        nodesCalled = getNodesCalled(obj)
-         
+        %% This function is used by KIND2 LustreProgram.print()
+        function nodesCalled = getNodesCalled(obj)
+            nodesCalled = {};
+            function addNodes(objects)
+                if iscell(objects)
+                    for i=1:numel(objects)
+                        nodesCalled = [nodesCalled, objects{i}.getNodesCalled()];
+                    end
+                else
+                    nodesCalled = [nodesCalled, objects.getNodesCalled()];
+                end
+            end
+            addNodes(obj.localContract);
+            addNodes(obj.bodyEqs);
+        end
+        
         %%
         code = print(obj, backend)
 
