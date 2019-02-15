@@ -36,48 +36,31 @@ classdef LustreVar < nasa_toLustre.lustreAst.LustreExpr
         end
         
         
-        function new_obj = deepCopy(obj)
-            new_obj = nasa_toLustre.lustreAst.LustreVar(obj.name, obj.type);
-        end
+        new_obj = deepCopy(obj)
         
         %% simplify expression
-        function new_obj = simplify(obj)
-            new_obj = obj;
-        end
+        new_obj = simplify(obj)
         
         %% nbOccuranceVar
-        function nb_occ = nbOccuranceVar(~, ~)
-            nb_occ = 0;
-        end
+        nb_occ = nbOccuranceVar(~, ~)
         
          %% substituteVars
-        function new_obj = substituteVars(obj, varargin)
-            new_obj = obj;
-        end
+        new_obj = substituteVars(obj, varargin)
         %% This function is used in substitute vars in LustreNode
         function all_obj = getAllLustreExpr(obj)
             all_obj = {};
         end
         %% This functions are used for ForIterator block
-        function [new_obj, varIds] = changePre2Var(obj)
-            new_obj = obj;
-            varIds = {};
-        end
+        [new_obj, varIds] = changePre2Var(obj)
         
-        function new_obj = changeArrowExp(obj, ~)
-            new_obj = obj;
-        end
+        new_obj = changeArrowExp(obj, ~)
         %% This function is used by Stateflow function SF_To_LustreNode.getPseudoLusAction
         function varIds = GetVarIds(obj)
             varIds = {obj.name};
         end
         % this function is used in Stateflow compiler to change from imperative
         % code to Lustre
-        function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft)
-            vId = nasa_toLustre.lustreAst.VarIdExpr(obj.name);
-            [new_vId, outputs_map] = vId.pseudoCode2Lustre(outputs_map, isLeft);
-            new_obj = nasa_toLustre.lustreAst.LustreVar(new_vId, obj.type);
-        end
+        [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft)
         
         %% This function is used by KIND2 LustreProgram.print()
         function nodesCalled = getNodesCalled(obj)
@@ -87,34 +70,14 @@ classdef LustreVar < nasa_toLustre.lustreAst.LustreExpr
         
         
         %%
-        function code = print(obj, backend)
-            %TODO: check if LUSTREC syntax is OK for the other backends.
-            code = obj.print_lustrec(backend);
-        end
+        code = print(obj, backend)
         
-        function code = print_lustrec(obj, backend)
-            if LusBackendType.isKIND2(backend) ...
-                    && isequal(obj.type, 'bool clock')
-                dt = 'bool';
-            else
-                dt = obj.type;
-            end
-            
-            code = sprintf('%s : %s;', obj.name, dt);
-        end
+        code = print_lustrec(obj, backend)
         
-        function code = print_kind2(obj)
-            code = obj.print_lustrec(LusBackendType.KIND2);
-        end
-        function code = print_zustre(obj)
-            code = obj.print_lustrec(LusBackendType.ZUSTRE);
-        end
-        function code = print_jkind(obj)
-            code = obj.print_lustrec(LusBackendType.JKIND);
-        end
-        function code = print_prelude(obj)
-            code = obj.print_lustrec(LusBackendType.PRELUDE);
-        end
+        code = print_kind2(obj)
+        code = print_zustre(obj)
+        code = print_jkind(obj)
+        code = print_prelude(obj)
     end
     methods(Static)
         U = uniqueVars(vars)

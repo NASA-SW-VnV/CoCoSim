@@ -30,31 +30,14 @@ classdef TupleExpr < nasa_toLustre.lustreAst.LustreExpr
             end
         end
         
-        function new_obj = deepCopy(obj)
-            new_args = cellfun(@(x) x.deepCopy(), obj.args, 'UniformOutput', 0);
-            new_obj = nasa_toLustre.lustreAst.TupleExpr(new_args);
-        end
+        new_obj = deepCopy(obj)
         
         %% simplify expression
-        function new_obj = simplify(obj)
-            new_args = cellfun(@(x) x.simplify(), obj.args, 'UniformOutput', 0);
-            % (x) => x
-            if numel(new_args) == 1
-                new_obj = new_args{1};
-            else
-                new_obj = nasa_toLustre.lustreAst.TupleExpr(new_args);
-            end
-        end
+        new_obj = simplify(obj)
         %% nbOccuranceVar
-        function nb_occ = nbOccuranceVar(obj, var)
-            nb_occ_perEq = cellfun(@(x) x.nbOccuranceVar(var), obj.args, 'UniformOutput', true);
-            nb_occ = sum(nb_occ_perEq);
-        end
+        nb_occ = nbOccuranceVar(obj, var)
         %% substituteVars
-        function new_obj = substituteVars(obj, var, newVar)
-            new_args = cellfun(@(x) x.substituteVars(var, newVar), obj.args, 'UniformOutput', 0);
-            new_obj = nasa_toLustre.lustreAst.TupleExpr(new_args);
-        end
+        new_obj = substituteVars(obj, var, newVar)
         %% This function is used in substitute vars in LustreNode
         function all_obj = getAllLustreExpr(obj)
             all_obj = {};
@@ -63,22 +46,8 @@ classdef TupleExpr < nasa_toLustre.lustreAst.LustreExpr
             end
         end
         %% This functions are used for ForIterator block
-        function [new_obj, varIds] = changePre2Var(obj)
-            varIds = {};
-            new_args = cell(numel(obj.args), 1);
-            for i=1:numel(obj.args)
-                [new_args{i}, varIds_i] = obj.args{i}.changePre2Var();
-                varIds = [varIds, varIds_i];
-            end
-            
-            new_obj = nasa_toLustre.lustreAst.TupleExpr(new_args);
-            
-        end
-        function new_obj = changeArrowExp(obj, cond)
-            new_args = cellfun(@(x) x.changeArrowExp(cond), obj.args, 'UniformOutput', 0);
-            
-            new_obj = nasa_toLustre.lustreAst.TupleExpr(new_args);
-        end
+        [new_obj, varIds] = changePre2Var(obj)
+        new_obj = changeArrowExp(obj, cond)
         %% This function is used by Stateflow function SF_To_LustreNode.getPseudoLusAction
         function varIds = GetVarIds(obj)
             varIds = {};
@@ -89,14 +58,7 @@ classdef TupleExpr < nasa_toLustre.lustreAst.LustreExpr
         end
         % This function is used in Stateflow compiler to change from imperative
         % code to Lustre
-        function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft)
-            new_args = cell(numel(obj.args), 1);
-            for i=1:numel(obj.args)
-                [new_args{i}, outputs_map] = ...
-                    obj.args{i}.pseudoCode2Lustre(outputs_map, isLeft);
-            end
-            new_obj = nasa_toLustre.lustreAst.TupleExpr(new_args);
-        end
+        [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft)
         %% This function is used by KIND2 LustreProgram.print()
         function nodesCalled = getNodesCalled(obj)
             nodesCalled = {};
@@ -110,28 +72,14 @@ classdef TupleExpr < nasa_toLustre.lustreAst.LustreExpr
         
         
         %%
-        function code = print(obj, backend)
-            %TODO: check if LUSTREC syntax is OK for the other backends.
-            code = obj.print_lustrec(backend);
-        end
+        code = print(obj, backend)
         
-        function code = print_lustrec(obj, backend)
-            code = sprintf('(%s)', ...
-                nasa_toLustre.lustreAst.NodeCallExpr.getArgsStr(obj.args, backend));
-        end
+        code = print_lustrec(obj, backend)
         
-        function code = print_kind2(obj)
-            code = obj.print_lustrec(LusBackendType.KIND2);
-        end
-        function code = print_zustre(obj)
-            code = obj.print_lustrec(LusBackendType.ZUSTRE);
-        end
-        function code = print_jkind(obj)
-            code = obj.print_lustrec(LusBackendType.JKIND);
-        end
-        function code = print_prelude(obj)
-            code = obj.print_lustrec(LusBackendType.PRELUDE);
-        end
+        code = print_kind2(obj)
+        code = print_zustre(obj)
+        code = print_jkind(obj)
+        code = print_prelude(obj)
     end
     
 end

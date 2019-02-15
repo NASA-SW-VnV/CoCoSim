@@ -37,120 +37,29 @@ classdef LustreProgram < nasa_toLustre.lustreAst.LustreAst
             end
         end
         
-        function new_obj = deepCopy(obj)
-            new_types = cellfun(@(x) x.deepCopy(), obj.types,...
-                'UniformOutput', 0);
-            new_nodes = cellfun(@(x) x.deepCopy(), obj.nodes, ...
-                'UniformOutput', 0);
-            new_contracts = cellfun(@(x) x.deepCopy(), obj.contracts,...
-                'UniformOutput', 0);
-            new_obj = nasa_toLustre.lustreAst.LustreProgram(obj.opens, new_types, new_nodes, new_contracts);
-        end
+        new_obj = deepCopy(obj)
         
-        function new_obj = simplify(obj)
-            new_nodes = cellfun(@(x) x.simplify(), obj.nodes, ...
-                'UniformOutput', 0);
-            new_contracts = cellfun(@(x) x.simplify(), obj.contracts,...
-                'UniformOutput', 0);
-            new_obj = nasa_toLustre.lustreAst.LustreProgram(obj.opens, obj.types, new_nodes, new_contracts);
-        end
+        new_obj = simplify(obj)
         
         %% This functions are used for ForIterator block
-        function [new_obj, varIds] = changePre2Var(obj)
-            new_obj = obj;
-            varIds = {};
-        end
-        function new_obj = changeArrowExp(obj, ~)
-            new_obj = obj;
-        end
+        [new_obj, varIds] = changePre2Var(obj)
+        new_obj = changeArrowExp(obj, ~)
         %% This function is used in Stateflow compiler to change from imperative
         % code to Lustre
-        function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, ~)
-            %it is not used by stateflow.
-            new_obj = obj;
-        end
+        [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, ~)
        
         %% nbOccuranceVar is used within a node
-        function nb_occ = nbOccuranceVar(varargin)
-            nb_occ = 0;
-        end
+        nb_occ = nbOccuranceVar(varargin)
         
         %%
-        function code = print(obj, backend)
-            %TODO: check if LUSTREC syntax is OK for the other backends.
-            code = obj.print_lustrec(backend);
-        end
+        code = print(obj, backend)
         
-        function code = print_lustrec(obj, backend)
-            lines = {};
-            %opens
-            if (LusBackendType.isKIND2(backend) || LusBackendType.isJKIND(backend))
-                lines = [lines; ...
-                    cellfun(@(x) sprintf('include "%s.lus"\n', x), obj.opens, ...
-                    'UniformOutput', false)];
-            else
-                lines = [lines; ...
-                    cellfun(@(x) sprintf('#open <%s>\n', x), obj.opens, ...
-                    'UniformOutput', false)];
-            end
-            
-            %types
-            lines = [lines; ...
-                cellfun(@(x) sprintf('%s', x.print(backend)), obj.types, ...
-                'UniformOutput', false)];
-            
-            
-            % contracts and nodes
-            if LusBackendType.isKIND2(backend)
-                nodesList = [obj.nodes, obj.contracts];
-            else
-                nodesList = obj.nodes;
-            end
-            
-            if LusBackendType.isKIND2(backend)
-                call_map = containers.Map('KeyType', 'char', ...
-                    'ValueType', 'any');
-                for i=1:numel(nodesList)
-                    if isempty(nodesList{i})
-                        continue;
-                    end
-                    call_map(nodesList{i}.name) = nodesList{i}.getNodesCalled();
-                end
-                % Print nodes in order of calling, because KIND2 Contracts
-                % need all nodes used in the contract to be defined first.
-                alreadyPrinted = {};
-                for i=1:numel(nodesList)
-                    if isempty(nodesList{i})
-                        continue;
-                    end
-                    [lines, alreadyPrinted] = obj.printWithOrder(...
-                        nodesList, nodesList{i}.name, call_map, alreadyPrinted, lines, backend);
-                end
-            else
-                for i=1:numel(nodesList)
-                    if isempty(nodesList{i})
-                        continue;
-                    end
-                    lines{end+1} = sprintf('%s\n', ...
-                        nodesList{i}.print(backend));
-                end
-            end
-            
-            code = MatlabUtils.strjoin(lines, '');
-        end
+        code = print_lustrec(obj, backend)
         
-        function code = print_kind2(obj)
-            code = obj.print_lustrec(LusBackendType.KIND2);
-        end
-        function code = print_zustre(obj)
-            code = obj.print_lustrec(LusBackendType.ZUSTRE);
-        end
-        function code = print_jkind(obj)
-            code = obj.print_lustrec(LusBackendType.JKIND);
-        end
-        function code = print_prelude(obj)
-            code = obj.print_lustrec(LusBackendType.PRELUDE);
-        end
+        code = print_kind2(obj)
+        code = print_zustre(obj)
+        code = print_jkind(obj)
+        code = print_prelude(obj)
         
         [lines, alreadyPrinted] = printWithOrder(obj, ...
     end

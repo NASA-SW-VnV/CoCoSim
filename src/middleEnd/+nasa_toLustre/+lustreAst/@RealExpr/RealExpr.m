@@ -27,34 +27,21 @@ classdef RealExpr < nasa_toLustre.lustreAst.LustreExpr
             end
         end
         %%
-        function new_obj = deepCopy(obj)
-            new_obj = nasa_toLustre.lustreAst.RealExpr(obj.value);
-        end
+        new_obj = deepCopy(obj)
         %% simplify expression
-        function new_obj = simplify(obj)
-            new_obj = obj;
-        end
+        new_obj = simplify(obj)
         %% nbOccuranceVar
-        function nb_occ = nbOccuranceVar(varargin)
-            nb_occ = 0;
-        end
+        nb_occ = nbOccuranceVar(varargin)
         %% substituteVars
-        function new_obj = substituteVars(obj, varargin)
-            new_obj = obj;
-        end
+        new_obj = substituteVars(obj, varargin)
         %% This function is used in substitute vars in LustreNode
         function all_obj = getAllLustreExpr(obj)
             all_obj = {};
         end
         
         %% This functions are used for ForIterator block
-        function [new_obj, varIds] = changePre2Var(obj)
-            new_obj = obj;
-            varIds = {};
-        end
-        function new_obj = changeArrowExp(obj, ~)
-            new_obj = obj;
-        end
+        [new_obj, varIds] = changePre2Var(obj)
+        new_obj = changeArrowExp(obj, ~)
         
         %% This function is used by Stateflow function SF_To_LustreNode.getPseudoLusAction
         function varIds = GetVarIds(~)
@@ -62,9 +49,7 @@ classdef RealExpr < nasa_toLustre.lustreAst.LustreExpr
         end
         % This function is used in Stateflow compiler to change from imperative
         % code to Lustre
-        function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, ~)
-            new_obj = obj;
-        end
+        [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, ~)
         
         %% This function is used by KIND2 LustreProgram.print()
         function nodesCalled = getNodesCalled(~)
@@ -74,29 +59,14 @@ classdef RealExpr < nasa_toLustre.lustreAst.LustreExpr
         
         
         %%
-        function code = print(obj, ~)
-            %TODO: check if LUSTREC syntax is OK for the other backends.
-            code = obj.print_lustrec();
-        end
+        code = print(obj, ~)
         
-        function code = print_lustrec(obj)
-            code = sprintf('%.15f', obj.getValue());
-            %3.43040000 => 3.4304 code has always "." in it
-            code = regexprep(code, '0+$', '0');
-        end
+        code = print_lustrec(obj)
         
-        function code = print_kind2(obj)
-            code = obj.print_lustrec();
-        end
-        function code = print_zustre(obj)
-            code = obj.print_lustrec();
-        end
-        function code = print_jkind(obj)
-            code = obj.print_lustrec();
-        end
-        function code = print_prelude(obj)
-            code = obj.print_lustrec();
-        end
+        code = print_kind2(obj)
+        code = print_zustre(obj)
+        code = print_jkind(obj)
+        code = print_prelude(obj)
     end
     
 end
