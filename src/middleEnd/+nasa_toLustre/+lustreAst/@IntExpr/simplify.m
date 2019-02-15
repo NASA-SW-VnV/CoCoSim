@@ -1,0 +1,16 @@
+function new_obj = simplify(obj)
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Copyright (c) 2017 United States Government as represented by the
+    % Administrator of the National Aeronautics and Space Administration.
+    % All Rights Reserved.
+    % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ 
+    import nasa_toLustre.lustreAst.*
+    if isnumeric(obj.value) && obj.value < 0
+        % -1 => -(1)
+        new_obj = UnaryExpr(UnaryExpr.NEG, IntExpr(-obj.value));
+    else
+        new_obj = obj;
+    end
+end
