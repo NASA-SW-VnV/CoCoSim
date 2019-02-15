@@ -100,70 +100,24 @@ classdef LustreContract < nasa_toLustre.lustreAst.LustreAst
             end
         end
         %%
-        function new_obj = deepCopy(obj)
-            new_inputs = cellfun(@(x) x.deepCopy(), obj.inputs, ...
-                'UniformOutput', 0);
-            
-            new_outputs = cellfun(@(x) x.deepCopy(), obj.outputs,...
-                'UniformOutput', 0);
-            
-            new_localVars = cellfun(@(x) x.deepCopy(), obj.localVars, ...
-                'UniformOutput', 0);
-            
-            new_localEqs = cellfun(@(x) x.deepCopy(), obj.bodyEqs, ...
-                'UniformOutput', 0);
-            
-            new_obj = nasa_toLustre.lustreAst.LustreContract(obj.metaInfo, obj.name,...
-                new_inputs, ...
-                new_outputs, new_localVars, new_localEqs, ...
-                obj.islocalContract);
-        end
+        new_obj = deepCopy(obj)
         
         %% simplify expression
-        function new_obj = simplify(obj)
-            new_obj = obj.substituteVars();
-            new_localEqs = cellfun(@(x) x.simplify(), new_obj.bodyEqs, ...
-                'UniformOutput', 0);
-            new_obj.setBodyEqs(new_localEqs);
-        end
+        new_obj = simplify(obj)
         
         %% nbOccuranceVar
-        function nb_occ = nbOccuranceVar(obj, var)
-            nb_occ_perEq = cellfun(@(x) x.nbOccuranceVar(var), obj.bodyEqs, 'UniformOutput', true);
-            nb_occ = sum(nb_occ_perEq);
-        end
+        nb_occ = nbOccuranceVar(obj, var)
         
          %% substituteVars 
-        function new_obj = substituteVars(obj)
-            new_obj = nasa_toLustre.lustreAst.LustreNode.contractNode_substituteVars(obj);
-        end
+        new_obj = substituteVars(obj)
         
         %% This functions are used for ForIterator block
-        function [new_obj, varIds] = changePre2Var(obj)
-            new_obj = obj;
-            varIds = {};
-        end
-        function new_obj = changeArrowExp(obj, ~)
-            new_obj = obj;
-        end
+        [new_obj, varIds] = changePre2Var(obj)
+        new_obj = changeArrowExp(obj, ~)
         
         %% This function is used in Stateflow compiler to change from imperative
         % code to Lustre
-        function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft)
-            if obj.islocalContract
-                %Only import contracts are supported for the moment.
-                for i=1:numel(obj.bodyEqs)
-                    if isa(obj.bodyEqs{i}, 'nasa_toLustre.lustreAst.ContractImportExpr')
-                        [obj.bodyEqs{i}, outputs_map] = ...
-                            obj.bodyEqs{i}.pseudoCode2Lustre(outputs_map);
-                    end
-                end
-                new_obj = obj;
-            else
-                %it is not used by stateflow.
-                new_obj = obj;
-            end
-        end
+        [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft)
         %% This function is used by KIND2 LustreProgram.print()
         function nodesCalled = getNodesCalled(obj)
             nodesCalled = {};
@@ -178,53 +132,14 @@ classdef LustreContract < nasa_toLustre.lustreAst.LustreAst
         
         
         %%
-        function code = print(obj, backend)
-            if LusBackendType.isKIND2(backend)
-                code = obj.print_kind2(backend);
-            else
-                code = '';
-            end
-        end
+        code = print(obj, backend)
         
-        function code = print_lustrec(obj)
-            code = '';
-        end
+        code = print_lustrec(obj)
         
-        function code = print_kind2(obj, backend)
-            lines = {};
-            if ~isempty(obj.metaInfo)
-                if ischar(obj.metaInfo)
-                    lines{end + 1} = sprintf('(*\n%s\n*)\n',...
-                        obj.metaInfo);
-                else
-                    lines{end + 1} = obj.metaInfo.print(backend);
-                end
-            end
-            if obj.islocalContract
-                lines{end+1} = '(*@contract\n';
-                lines = obj.getLustreEq( lines, backend);
-                lines{end+1} = '*)\n';
-            else
-                lines{end + 1} = sprintf('contract %s(%s)\nreturns(%s);\n', ...
-                    obj.name, ...
-                    LustreAst.listVarsWithDT(obj.inputs, backend), ...
-                    LustreAst.listVarsWithDT(obj.outputs, backend));
-                lines{end+1} = 'let\n';
-                % local Eqs
-                lines = obj.getLustreEq( lines, backend);
-                lines{end+1} = 'tel\n';
-            end
-            code = sprintf(MatlabUtils.strjoin(lines, ''));
-        end
-        function code = print_zustre(obj)
-            code = '';
-        end
-        function code = print_jkind(obj)
-            code = '';
-        end
-        function code = print_prelude(obj)
-            code = '';
-        end
+        code = print_kind2(obj, backend)
+        code = print_zustre(obj)
+        code = print_jkind(obj)
+        code = print_prelude(obj)
         
         %% utils
         lines = getLustreEq(obj, lines, backend)
