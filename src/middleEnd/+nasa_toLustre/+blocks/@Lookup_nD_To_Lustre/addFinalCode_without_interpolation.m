@@ -1,9 +1,15 @@
-
 function [body, vars] = addFinalCode_without_interpolation(...
         outputs,inputs,indexDataType,blk_name,...
         blkParams,...
         coords_node,lusInport_dt,...
         index_node,Ast_dimJump,table_elem, lus_backend)
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Copyright (c) 2017 United States Government as represented by the
+    % Administrator of the National Aeronautics and Space Administration.
+    % All Rights Reserved.
+    % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
     L = nasa_toLustre.ToLustreImport.L;
     import(L{:})
     % This function carries out the interpolation depending on algorithm

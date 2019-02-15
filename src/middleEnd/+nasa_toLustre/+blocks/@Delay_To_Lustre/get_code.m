@@ -1,7 +1,12 @@
-
 function [lustre_code, delay_node_code, variables, external_libraries] = ...
         get_code( parent, blk, InitialConditionSource, DelayLengthSource,...
         DelayLength, DelayLengthUpperLimit, ExternalReset, ShowEnablePort, xml_trace )
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Copyright (c) 2017 United States Government as represented by the
+    % Administrator of the National Aeronautics and Space Administration.
+    % All Rights Reserved.
+    % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
     L = nasa_toLustre.ToLustreImport.L;
     import(L{:})
     %initialize outputs

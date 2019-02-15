@@ -8,6 +8,7 @@ function [results, passed, priority] = na_0004(model)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % ORION GN&C MATLAB/Simulink Standards
     % na_0004: Simulink model appearance
+    
     priority = 3;
     results = {};
     passed = 1;
@@ -75,6 +76,7 @@ function [results, passed, priority] = na_0004(model)
         'on',...            % WideLines
         'normal'...        % SimulationMode
         };
+    
     subtitles = cell(length(item_titles)+1, 1);
     for i=1:length(item_titles)
         item_title = item_titles{i};

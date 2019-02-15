@@ -7,6 +7,7 @@ function [results, passed, priority] = hyl_0305(model)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % ORION GN&C MATLAB/Simulink Standards
     % hyl_0305: Block names shall not be made unique by using case.
+    
     priority = 2;
     results = {};
     passed = 1;

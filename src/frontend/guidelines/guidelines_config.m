@@ -20,8 +20,6 @@ config_path = fileparts(mfilename('fullpath'));
 % src/pp
 addpath(genpath(fullfile(config_path, 'main')));
 
-
-
 %% TODO: Go to 'main/pp_order.m' to configure functions orders.
 if exist(fullfile(config_path, 'main/guidelines_order.m'), 'file')
     guidelines_order;

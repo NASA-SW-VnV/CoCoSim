@@ -1,4 +1,3 @@
-
 function [body, vars,numBoundNodes,u_node,N_shape_node,coords_node,index_node] = ...
         addBoundNodeCode(blkParams,...
         blk_name,...
@@ -7,6 +6,13 @@ function [body, vars,numBoundNodes,u_node,N_shape_node,coords_node,index_node] =
         indexDataType, ...
         inputs,...
         lus_backend)
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Copyright (c) 2017 United States Government as represented by the
+    % Administrator of the National Aeronautics and Space Administration.
+    % All Rights Reserved.
+    % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
     L = nasa_toLustre.ToLustreImport.L;
     import(L{:})
     %  This function finds the bounding polytop which is required to define

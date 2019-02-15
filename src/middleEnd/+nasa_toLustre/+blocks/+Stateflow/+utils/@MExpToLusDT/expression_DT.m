@@ -1,4 +1,11 @@
 function dt = expression_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun)
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Copyright (c) 2017 United States Government as represented by the
+    % Administrator of the National Aeronautics and Space Administration.
+    % All Rights Reserved.
+    % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
     import nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT
     %this function is extended to be used by If-Block,
     %SwitchCase and Fcn blocks. Also it is used by Stateflow

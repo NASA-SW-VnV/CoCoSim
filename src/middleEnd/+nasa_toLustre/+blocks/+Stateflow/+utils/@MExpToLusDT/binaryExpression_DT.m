@@ -1,6 +1,14 @@
-function dt = binaryExpression_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun)
+function dt = binaryExpression_DT(tree, data_map, inputs, isSimulink, ...
+    isStateFlow, isMatlabFun)
     %BINARYEXPRESSION_DT for arithmetic operation such as +, *, / ...
     % and relational operation
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Copyright (c) 2017 United States Government as represented by the
+    % Administrator of the National Aeronautics and Space Administration.
+    % All Rights Reserved.
+    % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        
     import nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT
     tree_type = tree.type;
     switch tree_type

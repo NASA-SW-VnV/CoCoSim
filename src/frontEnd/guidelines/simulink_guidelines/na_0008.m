@@ -7,6 +7,7 @@ function [results, passed, priority] = na_0008(model)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % ORION GN&C MATLAB/Simulink Standards
     % na_0008: Display of labels on signals
+    
         priority = 2;
         results = {};
         passed = 1;
@@ -45,7 +46,7 @@ function [results, passed, priority] = na_0008(model)
     % create entered_blocksTypes = {'Inport', 'BusCreator' ...} propagated_blockTypes= {'SubSystem', 'Chart'}
 
     
-    % signal originating from the following blocks
+    % TODO: signal originating from the following blocks
     item_title = 'Inport block';
     failedList = {};
     [Inport_signal_display, numFail] = ...

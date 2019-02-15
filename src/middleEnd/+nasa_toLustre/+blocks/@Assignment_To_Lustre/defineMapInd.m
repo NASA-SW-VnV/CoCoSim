@@ -1,5 +1,11 @@
 function [isPortIndex,ind,selectorOutputDimsArray] = ...
         defineMapInd(~,parent,blk,inputs,U_expanded_dims,isSelector)
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Copyright (c) 2017 United States Government as represented by the
+    % Administrator of the National Aeronautics and Space Administration.
+    % All Rights Reserved.
+    % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
     L = nasa_toLustre.ToLustreImport.L;
     import(L{:})
     % if isSelector then U_expanded_dims should be in_matrix_dimension{1}

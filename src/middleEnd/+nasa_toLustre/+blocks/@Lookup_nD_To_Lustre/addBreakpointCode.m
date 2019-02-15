@@ -1,7 +1,13 @@
-
 function [body,vars,Breakpoints] = ...
         addBreakpointCode(BreakpointsForDimension,blk_name,...
         lusInport_dt,isLookupTableDynamic,inputs,NumberOfTableDimensions)
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Copyright (c) 2017 United States Government as represented by the
+    % Administrator of the National Aeronautics and Space Administration.
+    % All Rights Reserved.
+    % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
     L = nasa_toLustre.ToLustreImport.L;
     import(L{:})
     % This function define the breakpoints defined by

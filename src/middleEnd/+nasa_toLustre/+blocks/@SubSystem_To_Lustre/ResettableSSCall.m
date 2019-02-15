@@ -1,7 +1,13 @@
-
 function [codes, ResetCondVar] = ResettableSSCall(parent, blk, ...
         node_name, blk_name, ...
         ResetType, codes, inputs, outputs)
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Copyright (c) 2017 United States Government as represented by the
+    % Administrator of the National Aeronautics and Space Administration.
+    % All Rights Reserved.
+    % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
     L = nasa_toLustre.ToLustreImport.L;
     import(L{:})
     ResetCondName = sprintf('ResetCond_of_%s', blk_name);

@@ -1,5 +1,11 @@
-
 function ExecutionCondName = getExecutionCondName(blk)
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Copyright (c) 2017 United States Government as represented by the
+    % Administrator of the National Aeronautics and Space Administration.
+    % All Rights Reserved.
+    % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
     import nasa_toLustre.utils.SLX2LusUtils
     blk_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);
     ExecutionCondName = sprintf('ExecutionCond_of_%s', blk_name);

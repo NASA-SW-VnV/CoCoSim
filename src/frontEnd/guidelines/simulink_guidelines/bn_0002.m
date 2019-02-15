@@ -8,6 +8,7 @@ function [results, passed, priority] = bn_0002(model)
     % ORION GN&C MATLAB/Simulink Standards
     % bn_0002: Signal name length limit
     % 32 characters is the maximum limit
+    
     priority = 2;
     results = {};
     passed = 1;

@@ -1,4 +1,5 @@
-function [ main_node] = condExecSS_To_LusAutomaton( parent_ir, ss_ir, hasEnablePort, hasActionPort, hasTriggerPort, isContractBlk, main_sampleTime, xml_trace)
+function [ main_node] = condExecSS_To_LusAutomaton( parent_ir, ss_ir, ...
+    hasEnablePort, hasActionPort, hasTriggerPort, isContractBlk, main_sampleTime, xml_trace)
     %condExecSS_To_LusAutomaton create an automaton lustre node for
     %enabled/triggered/Action subsystem
     %INPUTS:

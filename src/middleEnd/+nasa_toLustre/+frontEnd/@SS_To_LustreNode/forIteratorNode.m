@@ -1,7 +1,13 @@
-
-%% ForIterator block
 function [main_node, iterator_node] = forIteratorNode(main_node, variables,...
         node_inputs, node_outputs, contract, ss_ir)
+    %% ForIterator block
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Copyright (c) 2017 United States Government as represented by the
+    % Administrator of the National Aeronautics and Space Administration.
+    % All Rights Reserved.
+    % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
     L = nasa_toLustre.ToLustreImport.L;
     import(L{:})
     % this node will be called many times using many

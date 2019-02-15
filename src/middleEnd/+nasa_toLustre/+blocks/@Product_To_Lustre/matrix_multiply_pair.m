@@ -1,7 +1,12 @@
-
 function [codes, product_out, addVars] = matrix_multiply_pair(m1_dim, m2_dim, ...
         input_m1, input_m2, output_m, zero, pair_number,...
         OutputDT, tmp_prefix, conv_format)
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Copyright (c) 2017 United States Government as represented by the
+    % Administrator of the National Aeronautics and Space Administration.
+    % All Rights Reserved.
+    % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
     L = nasa_toLustre.ToLustreImport.L;
     import(L{:})
     % adding additional variables for inside matrices.  For

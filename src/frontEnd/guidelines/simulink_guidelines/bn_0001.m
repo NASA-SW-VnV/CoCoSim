@@ -8,6 +8,7 @@ function [results, passed, priority] = bn_0001(model)
     % ORION GN&C MATLAB/Simulink Standards
     % bn_0001: Sussystem name length limit
     % 32 characters is the maximum limit
+    
     priority = 2;
     results = {};
     passed = 1;

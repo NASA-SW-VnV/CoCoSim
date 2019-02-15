@@ -1,7 +1,15 @@
-function [code, exp_dt] = expression_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun)
+function [code, exp_dt] = expression_To_Lustre(BlkObj, tree, parent, blk,...
+    data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun)
     %this function is extended to be used by If-Block,
     %SwitchCase and Fcn blocks. Also it is used by Stateflow
     %actions
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Copyright (c) 2017 United States Government as represented by the
+    % Administrator of the National Aeronautics and Space Administration.
+    % All Rights Reserved.
+    % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        
     L = nasa_toLustre.ToLustreImport.L;
     import(L{:})
     import nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST

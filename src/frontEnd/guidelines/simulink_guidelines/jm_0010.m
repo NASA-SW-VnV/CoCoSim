@@ -7,6 +7,7 @@ function [results, passed, priority] = jm_0010(model)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % ORION GN&C MATLAB/Simulink Standards
     % jm_0010: Port block name in Simulink model
+    
     priority = 2;
     results = {};
     passed = 1;
@@ -30,8 +31,6 @@ function [results, passed, priority] = jm_0010(model)
         GuidelinesUtils.process_find_system_results(failedList,item_title,...
         true, true); 
     totalFail = totalFail + numFail;
-    
-    
 
     item_title = 'Outport must match corresponding signal or bus name';
     failedList = {};
@@ -51,10 +50,6 @@ function [results, passed, priority] = jm_0010(model)
         GuidelinesUtils.process_find_system_results(failedList,item_title,...
         true, true); 
     totalFail = totalFail + numFail;    
-    
-    
-    
-    
     
     if totalFail > 0
         passed = 0;

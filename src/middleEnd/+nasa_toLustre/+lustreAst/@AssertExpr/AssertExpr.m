@@ -31,7 +31,9 @@ classdef AssertExpr < nasa_toLustre.lustreAst.LustreExpr
         %% substituteVars
         new_obj = substituteVars(obj, oldVar, newVar)
             
-        all_obj = getAllLustreExpr(obj)
+        function all_obj = getAllLustreExpr(obj)
+            all_obj = [{obj.exp}; obj.exp.getAllLustreExpr()];
+        end        
             
         %% This functions are used for ForIterator block
         [new_obj, varIds] = changePre2Var(obj)
@@ -39,14 +41,18 @@ classdef AssertExpr < nasa_toLustre.lustreAst.LustreExpr
         new_obj = changeArrowExp(obj, cond)
         
         %% This is used by Stateflow SF_To_LustreNode.getPseudoLusAction
-        varIds = GetVarIds(obj)
+        function varIds = GetVarIds(obj)
+            varIds = obj.exp.GetVarIds();
+        end        
 
         % This is used in Stateflow compiler to change from imperative
         % code to Lustre
         [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft)
 
         %% This is used by KIND2 LustreProgram.print()
-        nodesCalled = getNodesCalled(obj)
+        function nodesCalled = getNodesCalled(obj)
+            nodesCalled = obj.exp.getNodesCalled();
+        end        
 
         %%
         code = print(obj, backend)

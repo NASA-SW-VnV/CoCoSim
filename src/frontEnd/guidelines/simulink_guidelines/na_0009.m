@@ -7,39 +7,37 @@ function [results, passed, priority] = na_0009(model)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % ORION GN&C MATLAB/Simulink Standards
     % na_0009: Entry versus propagation of signal labels
-        priority = 2;
-        results = {};
-        passed = 1;
-        totalFail = 0;
 
-       allLines = find_system(model,'FindAll', 'On', 'type', 'line');
-       % Intialize Line Information Class
-       %allLineProperties = LineInformation;
-       % Parse through lines and Assign the object properties. 
-       for i = 1 : length(allLines)
-           %allLineProperties(i).Identifier =  allLines(i);  
-           sourceData = get_param(allLines(i),'SrcBlockHandle');
-           destinationData = get_param(allLines(i),'DstBlockHandle');
-           sourcePortData = get_param(allLines(i),'SrcportHandle');
-           destinationPortData = get_param(allLines(i),'DstportHandle');
-           SourceBlock =  get_param(sourceData, 'Name');
-           DestinationBlock =  get_param(destinationData, 'Name');
-           SourcePort =  get_param(sourcePortData, 'Name');
-           DestinationPort =  get_param(destinationPortData, 'Name');
-       end    
+    priority = 2;
+    results = {};
+    passed = 1;
+    totalFail = 0;
 
+    allLines = find_system(model,'FindAll', 'On', 'type', 'line');
+    % Intialize Line Information Class
+    %allLineProperties = LineInformation;
+    % Parse through lines and Assign the object properties.
+    for i = 1 : length(allLines)
+        %allLineProperties(i).Identifier =  allLines(i);
+        sourceData = get_param(allLines(i),'SrcBlockHandle');
+        destinationData = get_param(allLines(i),'DstBlockHandle');
+        sourcePortData = get_param(allLines(i),'SrcportHandle');
+        destinationPortData = get_param(allLines(i),'DstportHandle');
+        SourceBlock =  get_param(sourceData, 'Name');
+        DestinationBlock =  get_param(destinationData, 'Name');
+        SourcePort =  get_param(sourcePortData, 'Name');
+        DestinationPort =  get_param(destinationPortData, 'Name');
+    end
 
-%         lineList = find_system(model, 'Regexp', 'on','FindAll','on',...
-%             'type','line');
-%     for i=1:numel(lineList)
-%         lineName = get_param(lineList(i),'Name');
-%         source = get_param(lineList(i), 'SourceBlock');
-%         % if < , then propagate
-%         display(lineName);
-%         display(source);
-%     end    
-    
-    
+    %         lineList = find_system(model, 'Regexp', 'on','FindAll','on',...
+    %             'type','line');
+    %     for i=1:numel(lineList)
+    %         lineName = get_param(lineList(i),'Name');
+    %         source = get_param(lineList(i), 'SourceBlock');
+    %         % if < , then propagate
+    %         display(lineName);
+    %         display(source);
+    %     end    
     % get linesNames      two type with/without brackets
     % get_param(lineHandle, 'Source')
     % create entered_blocksTypes = {'Inport', 'BusCreator' ...} propagated_blockTypes= {'SubSystem', 'Chart'}
@@ -51,8 +49,6 @@ function [results, passed, priority] = na_0009(model)
         true, true); 
     totalFail = totalFail + numFail;
     
-    
-
     item_title = 'Outport must match corresponding signal or bus name';
     failedList = {};
     portBlocks = find_system(model,'Regexp', 'on','blocktype','port');
@@ -71,10 +67,6 @@ function [results, passed, priority] = na_0009(model)
         GuidelinesUtils.process_find_system_results(failedList,item_title,...
         true, true); 
     totalFail = totalFail + numFail;    
-    
-    
-    
-    
     
     if totalFail > 0
         passed = 0;
