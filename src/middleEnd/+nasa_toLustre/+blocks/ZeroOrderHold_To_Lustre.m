@@ -41,10 +41,6 @@ classdef ZeroOrderHold_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         end
         %%
         function options = getUnsupportedOptions(obj,~, blk, lus_backend, varargin)
-            if LusBackendType.isKIND2(lus_backend)
-                obj.addUnsupported_options(...
-                    sprintf('multi-clocks in block "%s" is currently not supported by KIND2.', HtmlItem.addOpenCmd(blk.Origin_path)));
-            end
             options = obj.unsupported_options;
         end
         function is_Abstracted = isAbstracted(varargin)
