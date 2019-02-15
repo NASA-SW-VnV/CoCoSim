@@ -21,14 +21,19 @@ classdef ZeroOrderHold_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             OutportCompiledSampleTime = blk.OutportCompiledSampleTime;
             outTs = OutportCompiledSampleTime(1);
             outTsOffset = OutportCompiledSampleTime(2);
-                        
-            clockName =nasa_toLustre.utils.SLX2LusUtils.clockName(outTs/main_sampleTime(1), outTsOffset/main_sampleTime(1));
-            codes = cell(1, numel(outputs));
-            for i=1:numel(outputs)
-                codes{i} = LustreEq(outputs{i}, ...
+            period = outTs/main_sampleTime(1);
+            phase = outTsOffset/main_opsampleTime(1);
+            if nasa_toLustre.utils.SLX2LusUtils.isIgnoredSampleTime(period, phase)
+                codes = arrayfun(@(i) LustreEq(outputs{i}, inputs{i}), ...
+                    (1:numel(outputs)), 'UniformOutput', 0);
+            else
+                clockName =nasa_toLustre.utils.SLX2LusUtils.clockName(period, phase);
+                codes = arrayfun(@(i) ...
+                    LustreEq(outputs{i}, ...
                     BinaryExpr(BinaryExpr.WHEN, ...
-                                inputs{i}, ...
-                                VarIdExpr(clockName)));
+                    inputs{i}, ...
+                    VarIdExpr(clockName))), ...
+                    (1:numel(outputs)), 'UniformOutput', 0);
             end
             
             obj.setCode( codes );
