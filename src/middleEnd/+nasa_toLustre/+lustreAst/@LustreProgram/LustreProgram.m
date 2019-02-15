@@ -62,6 +62,7 @@ classdef LustreProgram < nasa_toLustre.lustreAst.LustreAst
         code = print_prelude(obj)
         
         [lines, alreadyPrinted] = printWithOrder(obj, ...
+                nodesList, nodeName, call_map, alreadyPrinted, lines, backend)
     end
     
 end
