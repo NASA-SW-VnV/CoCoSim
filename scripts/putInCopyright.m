@@ -1,8 +1,9 @@
 % this function traverse files in the workingDir, looks for 'Copyright (c)'
-%   if not found, it will put in the Copyright text
+%   if not found, it will put in the Copyright text, does not do this for
+%   subfolders
 credit = 'Hamza';
 %credit = 'Khanh';
-workDir = '.';
+workDir = '/Users/ktrinh/cocosim/cocosim2/src/backEnd/extra_options';
 searchString = 'Copyright (c)';
 
 cpRight{1} = '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%';
@@ -30,7 +31,7 @@ for i=1:numel(dirInfo)
             numberCopyrightFound = numberCopyrightFound + 1;
         end
         tlines{end+1,1} = tline;
-        tline = fgetl(oldclassFileName);
+        tline = fgetl(curFile);
     end
     fclose(curFile);    % close read file
     
