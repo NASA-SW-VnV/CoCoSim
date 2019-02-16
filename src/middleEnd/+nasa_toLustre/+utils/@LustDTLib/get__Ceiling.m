@@ -1,4 +1,11 @@
 function [node, external_nodes, opens, abstractedNodes] = get__Ceiling(lus_backend, varargin)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Copyright (c) 2017 United States Government as represented by the
+% Administrator of the National Aeronautics and Space Administration.
+% All Rights Reserved.
+% Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
     if LusBackendType.isKIND2(lus_backend)
         import nasa_toLustre.lustreAst.*
         opens = {};
