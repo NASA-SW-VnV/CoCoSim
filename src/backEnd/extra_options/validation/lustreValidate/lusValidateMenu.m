@@ -6,7 +6,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function schema = lusValidateMenu(varargin)
 schema = sl_container_schema;
-schema.label = 'Simulink to Lustre compiler using ...';
+schema.label = 'Validate Simulink to Lustre compiler using ...';
 schema.statustip = 'Validate Lustre compiler';
 schema.autoDisableWhen = 'Busy';
 

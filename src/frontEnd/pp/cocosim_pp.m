@@ -74,6 +74,8 @@ function [new_file_path, status] = cocosim_pp(model_path, varargin)
     if ~already_pp; copyfile(model_path, new_file_path); end
     display_msg(['Loading ' new_file_path ], MsgType.INFO, 'PP', '');
     load_system(new_file_path);
+    
+    % DO not remove to support as many blocks as possible.
     %BreakUserLinks
     save_system(new_model_base,[],'BreakUserLinks',true)
     %% Make sure model compile

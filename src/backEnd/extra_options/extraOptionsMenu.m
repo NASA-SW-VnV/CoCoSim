@@ -14,7 +14,8 @@ function schema = extraOptionsMenu(callbackInfo)
     options_items{1} = fullfile(validation_root, 'pp', 'ppMenu.m');
     options_items{2} = fullfile(validation_root, 'IR', 'IRMenu.m');
     options_items{3} = fullfile(validation_root, 'contractToSLDV', 'contractToSLDVMenu.m');
-    options_items{4} = fullfile(validation_root, 'validation','validationMenu.m');
+    %     options_items{4} = fullfile(validation_root, 'validation','validationMenu.m');
+    options_items{4} = fullfile(validation_root, 'validation', 'lustreValidate', 'lusValidateMenu.m');
 
     callbacks = cellfun(@MenuUtils.funPath2Handle, options_items,...
         'UniformOutput', false);

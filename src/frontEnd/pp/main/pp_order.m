@@ -80,8 +80,14 @@ else
         'pp2/blocks/Sigbuilderblock_pp.m', ...
         'std_pp/blocks/to_workspace_process.m',...
         'std_pp/blocks/transfer_function_process.m'}; 
+    
+    
+    
     % small number has the highest priority starting from zero
+    
+    % DO not remove LinkStatus_pp to support as many blocks as possible.
     pp_order_map(0) = {'pp2/blocks/LinkStatus_pp.m'};
+    
     pp_order_map(1) = {'pp2/blocks/ModelReference_pp.m'};
     pp_order_map(2) = {'pp2/blocks/Outport_pp.m'};
     

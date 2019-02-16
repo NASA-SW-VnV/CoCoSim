@@ -43,8 +43,17 @@ classdef BitwiseOperator_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     inputs{i} = arrayfun(@(x) {inputs{i}{1}}, (1:max_width));
                 end
             end
+            [bitMaskValue, ~, status] = ...
+                Constant_To_Lustre.getValueFromParameter(parent,...
+                blk, blk.BitMask);
+            if status
+                display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
+                    blk.BitMask, HtmlItem.addOpenCmd(blk.Origin_path)), ...
+                    MsgType.ERROR, 'Constant_To_Lustre', '');
+                return;
+            end
             if strcmp(blk.UseBitMask, 'on')
-                inputs{end+1} = {IntExpr(eval(blk.BitMask))};
+                inputs{end+1} = {IntExpr(bitMaskValue)};
                 if numel(inputs{end}) < max_width
                     inputs{end} = arrayfun(@(x) {inputs{end}{1}}, (1:max_width));
                 end
