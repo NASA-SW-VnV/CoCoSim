@@ -50,7 +50,7 @@ addpath(model_path);
 try
     f_msg = sprintf('Compiling model "%s" to Lustre\n',file_name);
     display_msg(f_msg, MsgType.RESULT, 'validation', '');
-    GUIUtils.update_status('Runing CocoSim');
+    %GUIUtils.update_status('Runing CocoSim');
     [lus_file_path, ~, is_unsupported, ~, ~, pp_model_full_path] = ...
         nasa_toLustre.ToLustre(model_full_path, [], LusBackendType.LUSTREC, ...
         CoCoBackendType.VALIDATION, options{:});

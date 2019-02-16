@@ -76,8 +76,8 @@ function [valid, cex_msg, diff_name, diff] = ...
                         diff_name =  ...
                             BUtils.naming_alone(yout{k}.BlockPath.getBlock(1));
                         diff_name =  strcat(diff_name, '(',num2str(j), ')');
-                        error_index = i;
-                        break
+                        % don't break now untile this timestep finish displatyin all outputs
+                        %break
                     end
                 else
                     warn = sprintf('strange behavour of output %s',...
@@ -91,10 +91,10 @@ function [valid, cex_msg, diff_name, diff] = ...
                     break;
                 end
             end
-
-            if  ~valid
-                break;
-            end
+            % don't break now untile this timestep finish displatyin all outputs
+%             if  ~valid
+%                 break;
+%             end
         end
         if ~found_output
             cex_msg{end+1} = sprintf('No Output saved for this time step.\n');
