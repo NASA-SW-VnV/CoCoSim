@@ -1,3 +1,10 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Copyright (c) 2017 United States Government as represented by the
+% Administrator of the National Aeronautics and Space Administration.
+% All Rights Reserved.
+% Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ 
 function [ lustre_nodes , open_list, abstractedNodes] = getExternalLibrariesNodes( external_libraries , lus_backend )
     [ lustre_nodes, open_list, abstractedNodes ] = recursive_call( external_libraries, {} ,lus_backend);
     if ~isempty(open_list)

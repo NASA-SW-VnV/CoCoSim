@@ -1,4 +1,11 @@
 function [node, external_nodes_i, opens, abstractedNodes] = get_inverse_code(lus_backend,n)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Copyright (c) 2017 United States Government as represented by the
+% Administrator of the National Aeronautics and Space Administration.
+% All Rights Reserved.
+% Author: Khanh Tringh <khanh.v.trinh@nasa.gov>
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
     % support 2x2 matrix inversion
     % support 3x3 matrix inversion
     % support 4x4 matrix inversion
