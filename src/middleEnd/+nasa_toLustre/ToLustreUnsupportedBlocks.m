@@ -117,16 +117,23 @@ function [unsupportedOptions, ...
     end
     display_msg('Unsupported blocks detection', Constants.INFO, 'ToLustreUnsupportedBlocks', '');
     
-    
+    % detecte if the model has variable size signals
+    variableSizeMsg = SLX2LusUtils.variableSizeCheck(file_name);
+    % Check sample time offset is null
     main_block = ir_struct.(IRUtils.name_format(file_name));
     main_sampleTime = main_block.CompiledSampleTime;
     if numel(main_sampleTime) >= 2 && main_sampleTime(2) ~= 0
         msg = sprintf('Your model is running with a CompiledSampleTime [%d, %d], offset time not null is not supported in the root level.',...
             main_sampleTime(1), main_sampleTime(2));
-        unsupportedOptions{1} = ...
-            HtmlItem('Model', ...
-            HtmlItem(msg, {}, 'black'),...
-            'blue');
+        if ~isempty(variableSizeMsg)
+            subtitles = {HtmlItem(msg, {}, 'black'); variableSizeMsg};
+        else
+            subtitles = {HtmlItem(msg, {}, 'black')};
+        end
+        unsupportedOptions{1} = HtmlItem('Model', subtitles, 'blue');
+        
+    elseif ~isempty(variableSizeMsg)
+        unsupportedOptions{1} = HtmlItem('Model', variableSizeMsg, 'blue');
     end
     unsupportedOptionsMap = containers.Map('KeyType', 'char', 'ValueType', 'any');
     [unsupportedOptionsMap, abstractedBlocks] = ...

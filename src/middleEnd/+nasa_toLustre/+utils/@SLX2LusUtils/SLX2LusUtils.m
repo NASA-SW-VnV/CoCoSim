@@ -115,6 +115,9 @@ classdef SLX2LusUtils
 
         clocks_list = getRTClocksSTR(blk, main_sampleTime)
 
+        %% check variable size of signals 
+        htmlItemMsg = variableSizeCheck(model_name)
+        
     end
     
 end

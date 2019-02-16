@@ -97,13 +97,13 @@ classdef Selector_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 if strcmp(blk.IndexOptionArray{i}, 'Starting and ending indices (port)')
                     obj.addUnsupported_options(...
                         sprintf('Starting and ending indices (port) is not supported in block %s',...
-                        indexBlock.Origin_path));
+                        HtmlItem.addOpenCmd(blk.Origin_path)));
                 end
             end
             if numOutDims>7
                 obj.addUnsupported_options(...
                     sprintf('More than 7 dimensions is not supported in block %s',...
-                    indexBlock.Origin_path));
+                    HtmlItem.addOpenCmd(blk.Origin_path)));
             end
             
             options = obj.unsupported_options;
