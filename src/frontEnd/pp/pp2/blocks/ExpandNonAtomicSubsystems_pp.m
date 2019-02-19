@@ -15,7 +15,12 @@ if not(isempty(ssys_list))
     for i=1:length(ssys_list)
         try
             atomic = get_param(ssys_list{i},'TreatAsAtomicUnit');
-            if strcmp(atomic, 'off')
+            try
+                mask = get_param(ssys_list{i},'Mask');
+            catch
+                mask = 'off';
+            end
+            if strcmp(atomic, 'off') && ~isequal(mask, 'on')
                 display_msg(['Expanding ' ssys_list{i}], MsgType.INFO, 'PP', '');
                 Simulink.BlockDiagram.expandSubsystem(ssys_list{i});
             end

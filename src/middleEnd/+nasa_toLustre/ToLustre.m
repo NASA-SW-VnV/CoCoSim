@@ -262,22 +262,24 @@ function [lustre_file_path, xml_trace, status, unsupportedOptions, abstractedBlo
         status = syntax_status;
     end
     if ~isempty(ERROR_MSG)
-        html_path = fullfile(output_dir, strcat(file_name, '_error_messages.html'));
+        f_base =strcat(file_name, '_error_messages.html');
+        html_path = fullfile(output_dir, f_base);
         %HtmlItem.displayErrorMessages(html_path, ERROR_MSG, mode_display);
         HtmlItem.display_LOG_Messages(html_path, ...
             ERROR_MSG, WARNING_MSG, DEBUG_MSG, mode_display);
         if mode_display
-            msg = sprintf('ERRORS report is in : %s', html_path);
+            msg = sprintf('ERRORS report is in : %s', HtmlItem.addOpenFileCmd(html_path, f_base));
             display_msg(msg, MsgType.ERROR, 'ToLustre', '');
         end
         
     end
     %% REPORT ABSTRACTED BLOCKS
     if ~isempty(abstractedBlocks)
-        html_path = fullfile(output_dir, strcat(file_name, '_abstracted_blocks.html'));
+        f_base = strcat(file_name, '_abstracted_blocks.html');
+        html_path = fullfile(output_dir, f_base);
         HtmlItem.displayWarningMessages(html_path, 'The following Blocks/Nodes are abstracted:', abstractedBlocks, mode_display);
         if mode_display
-            msg = sprintf('Abstracted blocks report is in : %s', html_path);
+            msg = sprintf('Abstracted blocks report is in : %s', HtmlItem.addOpenFileCmd(html_path, f_base));
             display_msg(msg, MsgType.RESULT, 'ToLustre', '');
         end
     end

@@ -151,10 +151,11 @@ function [unsupportedOptions, ...
     elseif mode_display == 1
         try
             output_dir = fullfile(model_dir, 'cocosim_output', file_name);
-            html_path = fullfile(output_dir, strcat(file_name, '_unsupportedOptions.html'));
+            f_base = strcat(file_name, '_unsupportedOptions.html');
+            html_path = fullfile(output_dir, f_base);
             if ~exist(output_dir, 'dir'); MatlabUtils.mkdir(output_dir); end
             MenuUtils.createHtmlListUsingHTMLITEM('Unsupported options/blocks', unsupportedOptions, html_path, file_name);
-            msg = sprintf('HTML report is in : %s', html_path);
+            msg = sprintf('HTML report of Unsupported options/blocks is in : %s', HtmlItem.addOpenFileCmd(html_path, f_base));
             display_msg(msg, MsgType.ERROR, 'ToLustreUnsupportedBlocks', '');
         catch me
             display_msg(me.getReport(), MsgType.DEBUG, 'unsupportedBlocksMenu', '');

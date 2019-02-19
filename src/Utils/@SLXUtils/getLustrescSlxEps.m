@@ -10,6 +10,11 @@
 function eps = getLustrescSlxEps(model_path)
     [~, model, ~ ] = fileparts(model_path);
     if ~bdIsLoaded(model); load_system(model_path); end
+    try
+        eps = evalin('base', 'lustrec_slx_eps');
+        return;
+    catch
+    end
     hws = get_param(model, 'modelworkspace') ;
     if hasVariable(hws,'lustrec_slx_eps')
         eps = getVariable(hws,'lustrec_slx_eps');
