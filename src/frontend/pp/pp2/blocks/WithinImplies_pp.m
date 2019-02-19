@@ -27,7 +27,7 @@ function [status, errors_msg] = WithinImplies_pp(model)
                 else
                     pp_name = 'WithinImpliesResetTrue';
                 end
-                replace_one_block(wimplies_list{i},fullfile('pp_lib',pp_name));
+                PPUtils.replace_one_block(wimplies_list{i},fullfile('pp_lib',pp_name));
                 set_param(wimplies_list{i}, 'LinkStatus', 'inactive');
             catch
                 status = 1;

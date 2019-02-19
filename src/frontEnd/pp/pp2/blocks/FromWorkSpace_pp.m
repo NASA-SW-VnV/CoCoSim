@@ -96,7 +96,7 @@ function [status, errors_msg] = FromWorkSpace_pp(model)
                 Interpolate = get_param(fromWorkSpace_list{i},'Interpolate');
                 OutputAfterFinalValue = get_param(fromWorkSpace_list{i},'OutputAfterFinalValue');
 
-                replace_one_block(fromWorkSpace_list{i},fullfile('pp_lib','FromWorkSpace'));
+                PPUtils.replace_one_block(fromWorkSpace_list{i},fullfile('pp_lib','FromWorkSpace'));
                 set_param(fromWorkSpace_list{i}, 'LinkStatus', 'inactive');
                 % set digital clock sample time
                 % The block 'FromWorkSpace_1_PP/From Workspace/D' does not permit continuous sample

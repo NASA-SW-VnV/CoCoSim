@@ -75,7 +75,7 @@ classdef PPUtils
             SaturateOnIntegerOverflow = get_param(blk,'SaturateOnIntegerOverflow');
             
             % replacing
-            replace_one_block(blk,'pp_lib/DTF');
+            PPUtils.replace_one_block(blk,'pp_lib/DTF');
             set_param(blk, 'LinkStatus', 'inactive');
             %restoring info
             set_param(strcat(blk,'/DTFScalar/A'),...

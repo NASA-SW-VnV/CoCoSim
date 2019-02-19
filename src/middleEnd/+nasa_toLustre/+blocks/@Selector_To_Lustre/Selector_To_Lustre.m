@@ -121,7 +121,7 @@ classdef Selector_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         [codes] = getWriteCodeForNonPortInput(~, numOutDims,...
                 inputs,outputs,ind,outputDimsArray,...
                 in_matrix_dimension) % do not remove in_matrix_dimension parameter
-                                    % It is used in eveal function.        
+                                    % It is used in eval function.        
     end        
 end
 

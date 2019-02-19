@@ -19,7 +19,7 @@ function [status, errors_msg] = Quantizer_pp(model)
             try
             display_msg(Quantizer_list{i}, MsgType.INFO, 'Quantizer_process', ''); 
             QuantizationInterval = get_param(Quantizer_list{i},'QuantizationInterval' );
-            replace_one_block(Quantizer_list{i},'pp_lib/quantizer');
+            PPUtils.replace_one_block(Quantizer_list{i},'pp_lib/quantizer');
             set_param(Quantizer_list{i}, 'LinkStatus', 'inactive');
             set_param(strcat(Quantizer_list{i},'/q'),'Value', num2str(QuantizationInterval));
             catch

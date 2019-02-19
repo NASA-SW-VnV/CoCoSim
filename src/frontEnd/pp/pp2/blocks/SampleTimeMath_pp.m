@@ -49,7 +49,7 @@ if not(isempty(SampleTimeMath_list))
         end
         pp_block_name = fullfile('pp_lib', strcat('SampleTimeMath', suffix));
         
-        replace_one_block(SampleTimeMath_list{i},pp_block_name);
+        PPUtils.replace_one_block(SampleTimeMath_list{i},pp_block_name);
         set_param(SampleTimeMath_list{i}, 'LinkStatus', 'inactive');
         %set Value
         set_param(strcat(SampleTimeMath_list{i},'/weightValue'),'Value', weightValue);

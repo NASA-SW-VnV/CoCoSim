@@ -34,13 +34,13 @@ if ~ ( isempty( saturation_list ) )
                 LowerIsInf = false;
             end
             if UpperIsInf && LowerIsInf
-                replace_one_block(saturation_list{i},'pp_lib/saturation_upper_and_lower_is_Inf');
+                PPUtils.replace_one_block(saturation_list{i},'pp_lib/saturation_upper_and_lower_is_Inf');
             elseif UpperIsInf
-                replace_one_block(saturation_list{i},'pp_lib/saturation_upper_is_Inf');
+                PPUtils.replace_one_block(saturation_list{i},'pp_lib/saturation_upper_is_Inf');
             elseif LowerIsInf
-                replace_one_block(saturation_list{i},'pp_lib/saturation_lower_is_Inf');
+                PPUtils.replace_one_block(saturation_list{i},'pp_lib/saturation_lower_is_Inf');
             else
-                replace_one_block(saturation_list{i},'pp_lib/saturation');
+                PPUtils.replace_one_block(saturation_list{i},'pp_lib/saturation');
             end
             set_param(saturation_list{i}, 'LinkStatus', 'inactive');
             if ~LowerIsInf

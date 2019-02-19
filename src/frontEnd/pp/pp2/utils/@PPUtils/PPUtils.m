@@ -23,6 +23,7 @@ classdef PPUtils
         
         [denum, status] = getTfDenum(model,blk, ppName)
         
+        [failed] = replace_one_block(block,new_block)
     end
     
 end
