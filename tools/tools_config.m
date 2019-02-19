@@ -53,12 +53,12 @@ else
             errordlg('OS not supported yet','CoCoSim backend configuration');
         end
         OldLibPath = getenv(LD_LIBRARY_PATH);
-        if ~contains(OldLibPath,Z3Library_path)
+        if ~MatlabUtils.contains(OldLibPath,Z3Library_path)
             setenv(LD_LIBRARY_PATH,[OldLibPath ':' Z3Library_path]);
         end
         oldPythonPath = getenv('PYTHONPATH');
         z3PythonPath = fullfile(solvers_path,'spacer', 'lib', 'python2.7','dist-packages');
-        if ~contains(oldPythonPath, z3PythonPath)
+        if ~MatlabUtils.contains(oldPythonPath, z3PythonPath)
             setenv('PYTHONPATH', [z3PythonPath ':' oldPythonPath]);
         end
     end

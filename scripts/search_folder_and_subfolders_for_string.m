@@ -1,9 +1,11 @@
 
 % function to search folder and subfolder for string
-function [numFileRead, numFileModified] = search_folder_and_subfolders_for_string(dirInfo,searchString)
+function [numFileRead, numFileModified, typesFound] = ...
+    search_folder_and_subfolders_for_string(dirInfo,searchString,searchType)
     
     numFileRead = 0;
     numFileModified = 0;
+    typesFound = {};
     for i=1:numel(dirInfo)
         if strcmp(dirInfo(i).name,'.')
             continue;
@@ -12,7 +14,7 @@ function [numFileRead, numFileModified] = search_folder_and_subfolders_for_strin
             continue;
         end        
         if dirInfo(i).isdir
-            fprintf('%s is a directory\n',dirInfo(i).name);
+            %fprintf('%s is a directory\n',dirInfo(i).name);
             if strcmp(dirInfo(i).name,'lustret')
                 continue;
             end
@@ -21,15 +23,34 @@ function [numFileRead, numFileModified] = search_folder_and_subfolders_for_strin
                 continue;
             end
             curDirInfo = dir(curDirectory(1).path);
-            [nRead, numModified] = search_folder_and_subfolders_for_string(curDirInfo,searchString);
+            [nRead, numModified, curTypesFound] = ...
+                search_folder_and_subfolders_for_string(curDirInfo,searchString,searchType);
             numFileRead = numFileRead + nRead;
             numFileModified = numFileModified + numModified;
+            for j=1:numel(curTypesFound)
+                if isempty(ismember(typesFound,curTypesFound{j}))
+                    typesFound{end+1} = curTypesFound{j};
+                end                
+            end
+
         else 
-            fprintf('     file %s \n',which(dirInfo(i).name));
+            %fprintf('     file %s \n',which(dirInfo(i).name));
+            [~,~,ext] = fileparts(which(dirInfo(i).name));
+            if strcmp(ext,'.fig')
+                fprintf('     file %s \n',which(dirInfo(i).name));
+            end
+            if isempty(ismember(typesFound,ext))
+                typesFound{end+1} = ext;
+            end       
+            if isempty(ismember(searchType,ext))
+                continue;
+            end   
             curFile = fopen(which(dirInfo(i).name),'r');  %read file through 1st
             if curFile < 0
                 continue;
             end
+
+
             tline = fgetl(curFile);
             tlines = cell(0,1);
             numberCopyrightFound = 0;
@@ -45,7 +66,7 @@ function [numFileRead, numFileModified] = search_folder_and_subfolders_for_strin
             
 
             if numberCopyrightFound < 1
-                fprintf('No Copyright in file %s, adding Copyright text to it',dirInfo(i).name);
+                fprintf('No Copyright in file %s, adding Copyright text to it\n',dirInfo(i).name);
                 %curFile = fopen(sprintf('%s/%s',workDir,dirInfo(i).name),'w');  % open for modification
                 curFile = fopen(which(dirInfo(i).name),'w');  % open for modification
                 if curFile < 0
