@@ -13,7 +13,9 @@ disp('  WELCOME TO COCOSIM (NASA Ames)  ')
 disp('**********************************')
 disp('... Starting cocoSim configuration')
 cocosim_config;
+warning('off');
 sl_refresh_customizations;
+warning('on');
 disp('... Configuration is Done');
 [cocoSim_root, ~, ~] = fileparts(mfilename('fullpath'));
 example_path = fullfile(cocoSim_root, 'examples', 'contract', 'absolute.slx');

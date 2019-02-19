@@ -4,14 +4,12 @@
 % All Rights Reserved.
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
- 
-
-%% get the value of a parameter
 function [Value, valueDataType, status] = evalParam(modelObj, parent, blk, param)
-% This function should work with IR structure extracted from
-% the Simulink model and used in ToLustre compiler.
-% It can be used with char parameters as well. We change them
-% to objects
+    % get the value of a parameter
+    % This function should work with IR structure extracted from
+    % the Simulink model and used in ToLustre compiler.
+    % It can be used with char parameters as well. We change them
+    % to objects
     status = 0;
     valueDataType = 'double';
     Value = 0;
@@ -38,8 +36,8 @@ function [Value, valueDataType, status] = evalParam(modelObj, parent, blk, param
             Value = evalin('base', param);
             valueDataType = 'boolean';
         else
-            % this is the case of variable from model workspace
             try
+                % if this is the case of variable from model workspace
                 hws = modelObj.ModelWorkspace ;
                 if isvarname(param) && hasVariable(hws, param)
                     Value = getVariable(hws, param);
@@ -48,6 +46,16 @@ function [Value, valueDataType, status] = evalParam(modelObj, parent, blk, param
                 end
             catch
                 % It is not a variable from model workspace
+            end
+            try
+                % if this is the case of variable from Mask Work space
+                v = get_param(parent.Handle, 'MaskWSVariables');
+                getMaskValue = containers.Map({v.Name}', {v.Value}');
+                Value = getMaskValue(param);
+                valueDataType =  class(Value);
+                return;
+            catch
+                % It is not a Mask workspace variable
             end
             try
                 try
@@ -119,7 +127,7 @@ function [Value, valueDataType, status] = evalParam(modelObj, parent, blk, param
                     status = 1;
                 end
             end
-
+            
         end
     catch me
         display_msg(me.getReport(), MsgType.DEBUG, 'SLXUtils.evalParam', '');
