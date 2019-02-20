@@ -29,15 +29,6 @@ if not(isempty(LookupNDDirect_list))
             TableMax = get_param(LookupNDDirect_list{i},'TableMax');
             TableDataTypeStr = get_param(LookupNDDirect_list{i},'TableDataTypeStr');
             Table = get_param(LookupNDDirect_list{i},'Table');
-%             [TableValue, ~, status] = SLXUtils.evalParam(...
-%                 model, ...
-%                 get_param(LookupNDDirect_list{i}, 'Parent'), ...
-%                 LookupNDDirect_list{i}, ...
-%                 Table);
-%             if status
-%                 errors_msg{end + 1} = sprintf('Could not read Table parameter from %s.', LookupNDDirect_list{i});
-%                 continue;
-%             end
             
             % add pp subsystem
             tmp_block_path = strcat(LookupNDDirect_list{i}, '__tmp');
