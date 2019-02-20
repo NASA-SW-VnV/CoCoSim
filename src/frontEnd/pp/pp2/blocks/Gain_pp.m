@@ -16,11 +16,11 @@ Gain_list = find_system(model, ...
     'LookUnderMasks', 'all', 'BlockType','Gain');
 if not(isempty(Gain_list))
     display_msg('Replacing Gain blocks...', MsgType.INFO,...
-        'Gain_process', '');
+        'Gain_pp', '');
     for i=1:length(Gain_list)
         try
             display_msg(Gain_list{i}, MsgType.INFO, ...
-                'Gain_process', '');
+                'Gain_pp', '');
             gain = get_param(Gain_list{i},'Gain');
             [gain_value, ~, status] = SLXUtils.evalParam(...
                 model, ...
@@ -54,17 +54,21 @@ if not(isempty(Gain_list))
             set_param(strcat(Gain_list{i},'/K'),...
                 'OutDataTypeStr','Inherit: Inherit via back propagation');
  
+            if isequal(outputDataType, 'Inherit: Same as input')
+                outputDataType = 'Inherit: Same as first input';
+            end
             set_param(strcat(Gain_list{i},'/Product'),...
                 'OutDataTypeStr',outputDataType);
             set_param(strcat(Gain_list{i},'/Product'),...
                 'SaturateOnIntegerOverflow',SaturateOnIntegerOverflow);
-        catch
+        catch me
+            display_msg(me.getReport(), MsgType.DEBUG, 'Gain_pp', '');
             status = 1;
             errors_msg{end + 1} = sprintf('Gain pre-process has failed for block %s', Gain_list{i});
             continue;
         end
     end
-    display_msg('Done\n\n', MsgType.INFO, 'Gain_process', '');
+    display_msg('Done\n\n', MsgType.INFO, 'Gain_pp', '');
 end
 
 end
