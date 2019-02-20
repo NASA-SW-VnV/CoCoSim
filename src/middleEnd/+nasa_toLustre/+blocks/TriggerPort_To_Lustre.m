@@ -15,12 +15,7 @@ classdef TriggerPort_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         function  write_code(varargin)
         end
         %%
-        function options = getUnsupportedOptions(obj, ~, blk, varargin)
-            if strcmp(blk.TriggerType, 'function-call')
-                obj.addUnsupported_options(...
-                    sprintf('Option function-call is not supported in TriggerPort block %s', ...
-                    HtmlItem.addOpenCmd(blk.Origin_path)));
-            end
+        function options = getUnsupportedOptions(obj, ~, ~, varargin)
             options = obj.unsupported_options;
         end
         %%

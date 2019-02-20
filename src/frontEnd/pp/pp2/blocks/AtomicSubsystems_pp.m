@@ -30,6 +30,7 @@ if not(isempty(ssys_list))
 end
 configSet = getActiveConfigSet(new_model_base);
 set_param(configSet, 'AlgebraicLoopMsg', 'error');
+set_param(configSet, 'ArtificialAlgebraicLoopMsg', 'error');
 solveAlgebraicLoops(new_model_base);
 end
 

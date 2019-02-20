@@ -22,7 +22,8 @@ function [ Lustre_type, zero, one, isBus, isEnum, hasEnum] = ...
     if strcmp(slx_dt, 'real') || strcmp(slx_dt, 'int') || strcmp(slx_dt, 'bool')
         Lustre_type = slx_dt;
     else
-        if strcmp(slx_dt, 'logical') || strcmp(slx_dt, 'boolean') || strcmp(slx_dt, 'action')
+        if strcmp(slx_dt, 'logical') || strcmp(slx_dt, 'boolean') ...
+                || strcmp(slx_dt, 'action') || strcmp(slx_dt, 'fcn_call')
             Lustre_type = 'bool';
         elseif strncmp(slx_dt, 'int', 3) || strncmp(slx_dt, 'uint', 4) || strncmp(slx_dt, 'fixdt(1,16,', 11) || strncmp(slx_dt, 'sfix64', 6)
             Lustre_type = 'int';
