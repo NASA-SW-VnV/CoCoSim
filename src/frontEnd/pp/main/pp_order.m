@@ -93,6 +93,8 @@ else
     
     pp_order_map(10) = {'std_pp/blocks/integrator_process.m'};
     pp_order_map(11) = {'std_pp/blocks/discrete_integrator_process.m'};
+    
+    
     % '*.m' means all std_pp functions have the same priority 3,
     % if a function already defined it will keep its highest priority.
     pp_order_map(20) = {'pp2/blocks/*.m', ...
