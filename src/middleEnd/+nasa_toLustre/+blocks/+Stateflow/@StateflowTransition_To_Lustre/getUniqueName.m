@@ -25,10 +25,10 @@ function unique_name = getUniqueName(object, src, isDefaultTrans)
     if isDefaultTrans
         sourceName = '_DefaultTransition';
     else
-        sourceName = SF2LusUtils.getUniqueName(src);
+        sourceName = nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getUniqueName(src);
     end
     unique_name = sprintf('%s_To_%s_ExecutionOrder%s',...
         sourceName, ...
-        SF2LusUtils.getUniqueName(dst), id_str );
+        nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getUniqueName(dst), id_str );
 
 end

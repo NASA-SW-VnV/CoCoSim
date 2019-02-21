@@ -13,9 +13,7 @@ classdef Abs_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     methods
         
         function  write_code(obj, parent, blk, xml_trace, varargin)
-            L = nasa_toLustre.ToLustreImport.L;
-            import(L{:})
-            [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+            [outputs, outputs_dt] = nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             obj.addVariable(outputs_dt);
             outputDataType = blk.CompiledPortDataTypes.Outport{1};
             
@@ -50,21 +48,21 @@ classdef Abs_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 thens = cell(1, n+1);
                 if MatlabUtils.startsWith(inport_dt, 'int')
                     v_min = double(intmin(inport_dt));
-                    conds{1} = BinaryExpr(BinaryExpr.EQ, ...
+                    conds{1} = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.EQ, ...
                         inputs{1}{j}, ...
-                        IntExpr(v_min));
-                    thens{1} = IntExpr(v_min);
+                         nasa_toLustre.lustreAst.IntExpr(v_min));
+                    thens{1} = nasa_toLustre.lustreAst.IntExpr(v_min);
                 end
-                conds{n} = BinaryExpr(BinaryExpr.GTE, ...
+                conds{n} = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.GTE, ...
                     inputs{1}{j}, zero);
                 thens{n} = inputs{1}{j};
-                thens{n+1} = UnaryExpr(UnaryExpr.NEG, ...
+                thens{n+1} = nasa_toLustre.lustreAst.UnaryExpr(nasa_toLustre.lustreAst.UnaryExpr.NEG, ...
                     inputs{1}{j});
                 code = ...
                    nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(...
                     conv_format,...
-                    IteExpr.nestedIteExpr(conds, thens));
-                codes{j} = LustreEq(outputs{j}, code);
+                    nasa_toLustre.lustreAst.IteExpr.nestedIteExpr(conds, thens));
+                codes{j} = nasa_toLustre.lustreAst.LustreEq(outputs{j}, code);
             end
             
             obj.setCode(codes);

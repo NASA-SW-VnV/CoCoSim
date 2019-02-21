@@ -29,13 +29,13 @@ function [main_node, external_nodes, external_libraries ] = ...
     
     % get content
     content = chart.StateflowContent;
-    events = SF2LusUtils.eventsToData(content.Events);
+    events = nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.eventsToData(content.Events);
     dataAndEvents = [events; content.Data];
     for i=1:numel(dataAndEvents)
         SF_DATA_MAP(dataAndEvents{i}.Name) = dataAndEvents{i};
     end
-    SF_DATA_MAP = SF2LusUtils.addArrayData(SF_DATA_MAP, dataAndEvents);
-    states = SF2LusUtils.orderObjects(content.States);
+    SF_DATA_MAP = nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.addArrayData(SF_DATA_MAP, dataAndEvents);
+    states = nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.orderObjects(content.States);
     for i=1:numel(states)
         SF_STATES_PATH_MAP(states{i}.Path) = states{i};
     end

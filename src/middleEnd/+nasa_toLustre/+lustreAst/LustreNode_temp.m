@@ -223,10 +223,10 @@ classdef LustreNode < nasa_toLustre.lustreAst.LustreAst
             
             for i=1:numel(inputs_Ids)
                 if isInner && isequal(inputs_Ids{i}.getId(), ...
-                        SF2LusUtils.isInnerStr())
+                        nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.isInnerStr())
                     inputs_Ids{i} = InnerValue;
                 elseif isequal(inputs_Ids{i}.getId(), ...
-                        SF2LusUtils.virtualVarStr())
+                        nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.virtualVarStr())
                     inputs_Ids{i} = nasa_toLustre.lustreAst.BooleanExpr(true);
                 end
             end

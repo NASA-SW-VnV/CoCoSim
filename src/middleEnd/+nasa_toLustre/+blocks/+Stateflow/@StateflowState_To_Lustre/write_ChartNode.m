@@ -12,7 +12,7 @@ function [main_node, external_nodes]  = write_ChartNode(parent, blk, chart, data
     external_nodes = {};
     Scopes = cellfun(@(x) x.Scope, ...
         events, 'UniformOutput', false);
-    inputEvents = SF2LusUtils.orderObjects(...
+    inputEvents = nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.orderObjects(...
         events(strcmp(Scopes, 'Input')), 'Port');
     if ~isempty(inputEvents)
         %create a node that do the multi call for each event
@@ -36,7 +36,7 @@ function [main_node, external_nodes]  = write_ChartNode(parent, blk, chart, data
     main_node.setOutputs(outputs);
     if isempty(inputs)
         inputs{1} = ...
-            LustreVar(SF2LusUtils.virtualVarStr(), 'bool');
+            LustreVar(nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.virtualVarStr(), 'bool');
     end
     main_node.setInputs(inputs);
 

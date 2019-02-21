@@ -8,7 +8,7 @@ function SF_DATA_MAP = addArrayData(SF_DATA_MAP, d_list)
     
     import nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils
     for i=1:numel(d_list)
-        names = SF2LusUtils.getDataName(d_list{i});
+        names = nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getDataName(d_list{i});
         if numel(names) > 1
             for j=1:numel(names)
                 d = d_list{i};

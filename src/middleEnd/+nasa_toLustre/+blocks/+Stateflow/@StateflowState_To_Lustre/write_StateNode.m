@@ -19,7 +19,7 @@ function main_node  = write_StateNode(state)
     end
     %create the node
     node_name = ...
-        SF2LusUtils.getStateNodeName(state);
+        nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getStateNodeName(state);
     main_node = LustreNode();
     main_node.setName(node_name);
     comment = LustreComment(...
@@ -31,9 +31,9 @@ function main_node  = write_StateNode(state)
     inputs = LustreVar.uniqueVars(inputs);
     if isempty(inputs)
         inputs{1} = ...
-            LustreVar(SF2LusUtils.virtualVarStr(), 'bool');
+            LustreVar(nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.virtualVarStr(), 'bool');
     elseif numel(inputs) > 1
-        inputs = LustreVar.removeVar(inputs, SF2LusUtils.virtualVarStr());
+        inputs = LustreVar.removeVar(inputs, nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.virtualVarStr());
     end
     main_node.setOutputs(outputs);
     main_node.setInputs(inputs);

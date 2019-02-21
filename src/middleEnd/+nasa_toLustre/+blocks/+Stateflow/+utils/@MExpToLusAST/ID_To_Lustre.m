@@ -31,7 +31,7 @@ function [code, dt] = ID_To_Lustre(~, tree, parent, blk, data_map, ...
     elseif isKey(data_map, id)
         d = data_map(id);
         if isStateFlow || isMatlabFun
-            names = SF2LusUtils.getDataName(d);
+            names = nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getDataName(d);
             code = cell(numel(names), 1);
             for i=1:numel(names)
                 code{i} = VarIdExpr(names{i});

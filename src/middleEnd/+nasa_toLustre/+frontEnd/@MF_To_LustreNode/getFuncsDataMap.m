@@ -58,7 +58,7 @@ function [fun_data_map, failed] = getFuncsDataMap(blk, script, ...
                 buildData(d, inputs_names, outputs_names), CoCoVars{i}, 'UniformOutput', 0);
             data_names = arrayfun(@(d) d.name, CoCoVars{i}, 'UniformOutput', 0);
             data_map = containers.Map(data_names, data);
-            data_map = SF2LusUtils.addArrayData(data_map, data);
+            data_map = nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.addArrayData(data_map, data);
             fun_data_map(functions_struct{i}.name) = data_map;
         end
     else

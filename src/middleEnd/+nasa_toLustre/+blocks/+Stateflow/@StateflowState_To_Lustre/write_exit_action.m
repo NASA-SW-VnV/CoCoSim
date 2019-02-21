@@ -23,9 +23,9 @@ function [main_node, external_libraries] = ...
         return;
     end
     %get stateEnumType
-    idStateName = SF2LusUtils.getStateIDName(state);
+    idStateName = nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getStateIDName(state);
     [stateEnumType, stateInactive] = ...
-        SF2LusUtils.addStateEnum(state, [], ...
+        nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.addStateEnum(state, [], ...
         false, false, true);
 
     % history junctions
@@ -46,7 +46,7 @@ function [main_node, external_libraries] = ...
 
     %isInner variable that tells if the transition that cause this
     %exit action is an inner Transition
-    isInner = VarIdExpr(SF2LusUtils.isInnerStr());
+    isInner = VarIdExpr(nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.isInnerStr());
 
     %actions code
     actions = SFIRPPUtils.split_actions(state.Actions.Exit);
@@ -58,7 +58,7 @@ function [main_node, external_libraries] = ...
             outputs = [outputs, outputs_i];
             inputs = [inputs, inputs_i, outputs_i];
             external_libraries = [external_libraries, external_libraries_i];
-            new_assignements = SF2LusUtils.addInnerCond(lus_action, isInner, actions{i}, state);
+            new_assignements = nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.addInnerCond(lus_action, isInner, actions{i}, state);
             body = MatlabUtils.concat(body, new_assignements);
         catch me
             if strcmp(me.identifier, 'COCOSIM:STATEFLOW')
@@ -81,9 +81,9 @@ function [main_node, external_libraries] = ...
 
 
     state_parent = SF_STATES_PATH_MAP(parentName);
-    idParentName = SF2LusUtils.getStateIDName(state_parent);
+    idParentName = nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getStateIDName(state_parent);
     [parentEnumType, parentInactive] = ...
-            SF2LusUtils.addStateEnum(state_parent, [], ...
+            nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.addStateEnum(state_parent, [], ...
             false, false, true);
     body{end + 1} = LustreComment('set state as inactive');
     % idParentName = if (not isInner) then 0 else idParentName;
@@ -108,7 +108,7 @@ function [main_node, external_libraries] = ...
 
     %create the node
     act_node_name = ...
-        SF2LusUtils.getExitActionNodeName(state);
+        nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getExitActionNodeName(state);
     main_node = LustreNode();
     main_node.setName(act_node_name);
     comment = LustreComment(...

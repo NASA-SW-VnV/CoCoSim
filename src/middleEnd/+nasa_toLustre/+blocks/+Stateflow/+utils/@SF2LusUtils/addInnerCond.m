@@ -12,7 +12,7 @@ function new_assignements = addInnerCond(lus_eqts, isInnerLusVar, orig_exp, stat
     for i=1:numel(lus_eqts)
         if isa(lus_eqts{i}, 'ConcurrentAssignments')
             assignments = lus_eqts{i}.getAssignments();
-            new_assignements_i = SF2LusUtils.addInnerCond(assignments, isInnerLusVar, orig_exp, state);
+            new_assignements_i = nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.addInnerCond(assignments, isInnerLusVar, orig_exp, state);
             new_assignements{i} = ConcurrentAssignments(new_assignements_i);
         elseif isa(lus_eqts{i}, 'LustreEq')
             new_assignements{i} = LustreEq(lus_eqts{i}.getLhs(), ...

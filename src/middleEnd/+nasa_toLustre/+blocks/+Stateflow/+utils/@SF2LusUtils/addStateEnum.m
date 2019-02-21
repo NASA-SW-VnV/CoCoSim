@@ -9,9 +9,9 @@ function [stateEnumType, childAst] = ...
     global SF_STATES_ENUMS_MAP;
     L = nasa_toLustre.ToLustreImport.L;
     import(L{:})
-    stateEnumType = SF2LusUtils.getStateEnumType(state);
+    stateEnumType = nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getStateEnumType(state);
     state_name = upper(...
-        SF2LusUtils.getUniqueName(state));
+        nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getUniqueName(state));
     if nargin >= 3 && isInner
         childName = strcat(state_name, '_InnerTransition');
     elseif nargin >= 4 && isJunction
@@ -19,11 +19,11 @@ function [stateEnumType, childAst] = ...
     elseif nargin == 5 && inactive
         childName = strcat(state_name, '_INACTIVE');
     elseif ischar(child)
-        %child is given using SF2LusUtils.getUniqueName
+        %child is given using nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getUniqueName
         childName = upper(child);
     else
         childName = upper(...
-            SF2LusUtils.getUniqueName(child));
+            nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getUniqueName(child));
     end
     if ~isKey(SF_STATES_ENUMS_MAP, stateEnumType)
         SF_STATES_ENUMS_MAP(stateEnumType) = {childName};

@@ -37,6 +37,6 @@ function [lus_action, outputs, inputs, external_libraries] = ...
     if ignoreOutInputs
         return;
     end
-    [outputs, inputs] = SF2LusUtils.getInOutputsFromAction(lus_action, isCondition, data_map, expreession);
+    [outputs, inputs] = nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getInOutputsFromAction(lus_action, isCondition, data_map, expreession);
 end
 

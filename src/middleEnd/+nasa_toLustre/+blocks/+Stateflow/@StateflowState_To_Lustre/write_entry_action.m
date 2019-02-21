@@ -30,16 +30,16 @@ function [main_node, external_libraries] = ...
             throw(ME);
         end
         state_parent = SF_STATES_PATH_MAP(parentName);
-        idParentName = SF2LusUtils.getStateIDName(state_parent);
+        idParentName = nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getStateIDName(state_parent);
         [stateEnumType, childName] = ...
-            SF2LusUtils.addStateEnum(state_parent, state);
+            nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.addStateEnum(state_parent, state);
         body{1} = LustreComment('set state as active');
         body{2} = LustreEq(VarIdExpr(idParentName), childName);
         outputs{1} = LustreVar(idParentName, stateEnumType);
 
         %isInner variable that tells if the transition that cause this
         %exit action is an inner Transition
-        isInner = VarIdExpr(SF2LusUtils.isInnerStr());
+        isInner = VarIdExpr(nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.isInnerStr());
         inputs{end + 1} = LustreVar(isInner, 'bool');
         %actions code
         actions = SFIRPPUtils.split_actions(state.Actions.Entry);
@@ -51,7 +51,7 @@ function [main_node, external_libraries] = ...
                 outputs = [outputs, outputs_i];
                 inputs = [inputs, inputs_i, outputs_i];
                 external_libraries = [external_libraries, external_libraries_i];
-                new_assignements = SF2LusUtils.addInnerCond(lus_action, isInner, actions{i}, state);
+                new_assignements = nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.addInnerCond(lus_action, isInner, actions{i}, state);
                 body = MatlabUtils.concat(body, new_assignements);
             catch me
                 if strcmp(me.identifier, 'COCOSIM:STATEFLOW')
@@ -73,7 +73,7 @@ function [main_node, external_libraries] = ...
     inputs = [inputs, inputs_i];
     %create the node
     act_node_name = ...
-        SF2LusUtils.getEntryActionNodeName(state);
+        nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getEntryActionNodeName(state);
     main_node = LustreNode();
     main_node.setName(act_node_name);
     comment = LustreComment(...
@@ -85,9 +85,9 @@ function [main_node, external_libraries] = ...
     inputs = LustreVar.uniqueVars(inputs);
     if isempty(inputs)
         inputs{1} = ...
-            LustreVar(SF2LusUtils.virtualVarStr(), 'bool');
+            LustreVar(nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.virtualVarStr(), 'bool');
     elseif numel(inputs) > 1
-        inputs = LustreVar.removeVar(inputs, SF2LusUtils.virtualVarStr());
+        inputs = LustreVar.removeVar(inputs, nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.virtualVarStr());
     end
     main_node.setOutputs(outputs);
     main_node.setInputs(inputs);

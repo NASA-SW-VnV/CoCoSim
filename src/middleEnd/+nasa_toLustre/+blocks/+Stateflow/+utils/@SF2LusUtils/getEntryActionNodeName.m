@@ -10,9 +10,9 @@ function name = getEntryActionNodeName(state, id)
     L = nasa_toLustre.ToLustreImport.L;
     import(L{:})
     if nargin == 2
-        state_name = SF2LusUtils.getUniqueName(state, id);
+        state_name = nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getUniqueName(state, id);
     else
-        state_name = SF2LusUtils.getUniqueName(state);
+        state_name = nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getUniqueName(state);
     end
     name = strcat(state_name, '_EntryAction');
 end
