@@ -12,7 +12,9 @@ function schema = cocoSim_menu(varargin)
     schema.statustip = 'Automated Analysis Framework';
     schema.autoDisableWhen = 'Busy';
 
-    [backEnd_root, ~, ~] = fileparts(mfilename('fullpath'));
+    [cocosim_menu_root, ~, ~] = fileparts(mfilename('fullpath'));
+    src_root = fileparts(cocosim_menu_root);
+    backEnd_root = fullfile(src_root, 'backEnd');
     menue_items = {};
     menue_items{end + 1} = fullfile(backEnd_root, 'unsupported_blocks','unsupportedBlocksMenu.m');
     menue_items{end + 1} = fullfile(backEnd_root, 'guidelines','checkGuidelinesMenu.m');
