@@ -40,15 +40,7 @@ if status==0
     parents = parents(II);
     parents = parents(cellfun(@(x) isdir(x), parents));
     % remove empty folders
-    
-    for i=1:length(parents)
-        try 
-            % rmdir removes folder only if empty
-            MatlabUtils.rmdir(parents{i});
-        catch
-            % not empty folder
-        end
-    end
+    cellfun(@(x) MatlabUtils.rmdir(x), parents);
 else
     fprintf('Git status command can not be run see error:\n%s\n', git_output);
 end

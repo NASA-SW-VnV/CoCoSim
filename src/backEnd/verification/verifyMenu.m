@@ -20,7 +20,7 @@ function verifCallback(varargin)
         [ CoCoSimPreferences ] = loadCoCoSimPreferences();
         warning('off')
         MenuUtils.add_pp_warning(model_full_path);
-        if CoCoSimPreferences.lustreCompiler ==1
+        if isequal(CoCoSimPreferences.lustreCompiler, 'NASA')
             toLustreVerify(model_full_path, [], CoCoSimPreferences.lustreBackend);
             
         else
@@ -38,66 +38,3 @@ function verifCallback(varargin)
         MenuUtils.handleExceptionMessage(me, 'Prove properties');
     end
 end
-
-
-%
-% function schema = getZustre(varargin)
-% schema = sl_action_schema;
-% schema.label = 'Zustre';
-% schema.callback = @zustreCallback;
-% end
-%
-% function zustreCallback(varargin)
-% clear;
-% assignin('base', 'SOLVER', 'Z');
-% assignin('base', 'RUST_GEN', 0);
-% assignin('base', 'C_GEN', 0);
-% VerificationMenu.runCoCoSim;
-% end
-%
-%
-% function schema = getKind(varargin)
-% schema = sl_action_schema;
-% schema.label = 'Kind2';
-% schema.callback = @kindCallback;
-% end
-%
-% function kindCallback(varargin)
-% clear;
-% model_full_path = MenuUtils.get_file_name(gcs);
-% [ CoCoSimPreferences ] = loadCoCoSimPreferences();
-% warning('off')
-% if CoCoSimPreferences.lustreCompiler ==1
-%     toLustreVerify(model_full_path);
-% elseif CoCoSimPreferences.lustreCompiler
-%     assignin('base', 'SOLVER', 'K');
-%     VerificationMenu.runCoCoSim;
-% end
-% warning('on')
-% end
-%
-% function schema = getJKind(varargin)
-% schema = sl_action_schema;
-% schema.label = 'JKind';
-% schema.callback = @jkindCallback;
-% end
-%
-% function jkindCallback(varargin)
-% clear;
-% assignin('base', 'SOLVER', 'J');
-% assignin('base', 'RUST_GEN', 0);
-% assignin('base', 'C_GEN', 0);
-% VerificationMenu.runCoCoSim;
-% end
-%
-% function  schema = helpItem(varargin)
-% schema = sl_action_schema;
-% schema.label = 'Help';
-% schema.callback = @helpCallback;
-% end
-%
-% function helpCallback(varargin)
-% msg = sprintf('We recommend using Kind2 for compositional and contracts based Verification.');
-% msg = sprintf('%s\nZustre may be good for non-linear functions.', msg);
-% helpdlg(msg, 'CoCoSim help');
-% end

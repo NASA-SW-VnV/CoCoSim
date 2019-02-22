@@ -12,7 +12,7 @@ function [ CoCoSimPreferences ] = load_coco_preferences(  )
     
     % check if the lustreCompiler is defined
     if ~ isfield(CoCoSimPreferences,'lustreCompiler')
-        CoCoSimPreferences.lustreCompiler = 1;
+        CoCoSimPreferences.lustreCompiler = 'NASA';
         modified = true;
     end
     
