@@ -34,12 +34,17 @@ if status==0
             end
         end
     end
+    parents = unique(parents);
+    I = cellfun(@(x) length(x), parents);
+    [~, II] = sort(I, 'descend');
+    parents = parents(II);
     parents = parents(cellfun(@(x) isdir(x), parents));
     % remove empty folders
+    
     for i=1:length(parents)
         try 
             % rmdir removes folder only if empty
-            rmdir(parents{i});
+            MatlabUtils.rmdir(parents{i});
         catch
             % not empty folder
         end

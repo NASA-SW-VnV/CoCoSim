@@ -15,7 +15,8 @@ classdef MatlabUtils
         tree = getExpTree(exp)% Matlab IR
         r = concat(varargin)% concatenate 1-D vectors
         out = naming(nomsim)
-        mkdir(path)
+        mkdir(path)% recursively mkdir from top to bottom
+        rmdir(path)% recursively rmdir empty folders from bottom to top
         fname = fileBase(path)
         st = gcd(T)
         diff1in2  = setdiff_struct( struct2, struct1, fieldname )
