@@ -53,7 +53,7 @@ function [ ] = toLustreVerify(model_full_path,  const_files, lus_backend, vararg
             display_msg('Having both Assertion/Proof blocks and contracts are not supported in KIND2.', MsgType.ERROR, 'toLustreVerify', '');
             return;
         end
-        CoCoSimPreferences = load_coco_preferences();
+        CoCoSimPreferences = cocosim_menu.CoCoSimPreferences.load();
         if isfield(CoCoSimPreferences, 'verificationTimeout')
             timeout = CoCoSimPreferences.verificationTimeout;
         else

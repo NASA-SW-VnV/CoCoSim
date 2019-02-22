@@ -40,7 +40,7 @@ function [status, solver_output] = runKIND2(...
     end
     %
     if ~exist('timeout', 'var') || isempty(timeout)
-        CoCoSimPreferences = load_coco_preferences();
+        CoCoSimPreferences = cocosim_menu.CoCoSimPreferences.load();
         if isfield(CoCoSimPreferences, 'verificationTimeout')
             timeout = num2str(CoCoSimPreferences.verificationTimeout);
         else

@@ -27,9 +27,12 @@ function schema = tools_menu(varargin)
     menue_items{end + 1} = fullfile(backEnd_root, 'importLustreRequirements','importLusReqMenu.m');
     menue_items{end + 1} = fullfile(backEnd_root, 'generate_code','generateCodeMenu.m');
     menue_items{end + 1} = fullfile(backEnd_root, 'extra_options','extraOptionsMenu.m');
-    menue_items{end + 1} = fullfile(backEnd_root, 'preferences','preferences_menu.m');
+    menue_items{end + 1} = @cocosim_menu.preferences_menu;
 
-    callbacks = cellfun(@MenuUtils.funPath2Handle, menue_items,...
+    iif = MatlabUtils.iif();
+    obj2Handle = @(x) iif( isa(x, 'function_handle'), @() x, ...
+        true, @() MenuUtils.funPath2Handle(x));
+    callbacks = cellfun(obj2Handle, menue_items,...
         'UniformOutput', false);
     schema.childrenFcns = cellfun(@(x) {@MenuUtils.addTryCatch, x}, callbacks, 'UniformOutput', false);
 

@@ -28,7 +28,6 @@ classdef CoCoSimPreferences < handle
             fpath = fileparts(mfilename('fullpath'));
             preferencesFile = fullfile(fpath, 'preferences.mat');
             if exist(preferencesFile, 'file') == 2
-                
                 load(preferencesFile, 'CoCoSimPreferences');
             end
             warning('off', 'MATLAB:structOnObject')

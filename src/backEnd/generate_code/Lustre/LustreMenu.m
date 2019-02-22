@@ -15,7 +15,7 @@ end
 function schema = getKind(varargin)
     schema = sl_action_schema;
     schema.label = 'For Verification';
-    CoCoSimPreferences = load_coco_preferences();
+    CoCoSimPreferences = cocosim_menu.CoCoSimPreferences.load();
     schema.callback =  @(x) LusCompilerCallback(CoCoSimPreferences.lustreBackend, x);
 end
 
@@ -29,7 +29,7 @@ function LusCompilerCallback(bckend, ~)
     try
         mdl_full_path = MenuUtils.get_file_name(gcs);
         MenuUtils.add_pp_warning(mdl_full_path);
-        CoCoSimPreferences = load_coco_preferences();
+        CoCoSimPreferences = cocosim_menu.CoCoSimPreferences.load();
         if CoCoSimPreferences.lustreCompiler == 1
             nasa_toLustre.ToLustre(mdl_full_path, [], bckend);
         elseif CoCoSimPreferences.lustreCompiler == 2

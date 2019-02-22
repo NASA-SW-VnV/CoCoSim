@@ -34,7 +34,7 @@ function [ ] = lustreDED(model_full_path,  const_files, lus_backend, varargin)
     
     %% run Verification
     
-    CoCoSimPreferences = load_coco_preferences();
+    CoCoSimPreferences = cocosim_menu.CoCoSimPreferences.load();
     mapping_file = xml_trace.json_file_path;
     try
         fid = fopen(mapping_file);

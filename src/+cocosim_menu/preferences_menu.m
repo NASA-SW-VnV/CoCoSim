@@ -12,7 +12,7 @@ function schema = preferences_menu(callbackInfo)
     schema.statustip = 'Preferences';
     schema.autoDisableWhen = 'Busy';
     
-    CoCoSimPreferences = load_coco_preferences();
+    CoCoSimPreferences = cocosim_menu.CoCoSimPreferences.load();
     
     schema.childrenFcns = {...
         {@getLustreCompiler, CoCoSimPreferences}, ...

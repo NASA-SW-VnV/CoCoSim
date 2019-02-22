@@ -33,7 +33,7 @@ function [lustre_file_path, xml_trace, status, unsupportedOptions, abstractedBlo
     % This map takes as keys the Properties ID and as value the type of check
     % and the path to the block under check.
     DED_PROP_MAP = containers.Map('KeyType', 'char', 'ValueType', 'any');
-    CoCoSimPreferences = load_coco_preferences();
+    CoCoSimPreferences = cocosim_menu.CoCoSimPreferences.load();
     try
         COCOSIM_DEV_DEBUG = evalin('base','cocosim_debug');
     catch
