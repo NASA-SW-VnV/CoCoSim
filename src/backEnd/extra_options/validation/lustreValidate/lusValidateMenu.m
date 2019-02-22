@@ -29,7 +29,7 @@ end
 function VCallback(tests_method, varargin)
 try
     CoCoSimPreferences = cocosim_menu.CoCoSimPreferences.load();
-    if CoCoSimPreferences.lustreCompiler ~= 1
+    if ~isequal(CoCoSimPreferences.lustreCompiler, 'NASA') 
         msgbox(...
             sprintf('This Functionality is only supported by the NASA Lustre compiler.\n Go to Tools -> Preferences -> Lustre Compiler -> NASA Compiler'), 'CoCoSim');
     else

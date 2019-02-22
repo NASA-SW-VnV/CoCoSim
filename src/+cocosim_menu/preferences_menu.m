@@ -32,9 +32,9 @@ function schema = getLustreCompiler(callbackInfo)
     schema.autoDisableWhen = 'Busy';
     CoCoSimPreferences = callbackInfo.userdata;
     callbacks = {};
-    compilerName = {'NASA Compiler', 'IOWA Compiler', 'CMU Compiler'};
-    for i=1:3
-        callbacks{end+1} = @(x) lustreCompilerCallback(compilerName{i}, i, ...
+    compilerNames = {'NASA Compiler', 'IOWA Compiler'};
+    for i=1:length(compilerNames)
+        callbacks{end+1} = @(x) lustreCompilerCallback(compilerNames{i}, i, ...
             CoCoSimPreferences, x);
     end
     schema.childrenFcns = callbacks;
@@ -43,19 +43,19 @@ end
 function schema = lustreCompilerCallback(compilerName, compilerIndex, CoCoSimPreferences, varargin)
     schema = sl_toggle_schema;
     schema.label = compilerName;
-    
-    if CoCoSimPreferences.lustreCompiler == compilerIndex
+    compilerNameValues = {'NASA', 'IOWA'};
+    if isequal(CoCoSimPreferences.lustreCompiler, compilerNameValues{compilerIndex})
         schema.checked = 'checked';
     else
         schema.checked = 'unchecked';
     end
-    schema.callback = @(x) setCompilerOption(compilerIndex, ...
+    schema.callback = @(x) setCompilerOption(compilerNameValues{compilerIndex}, ...
         CoCoSimPreferences, x);
 end
 
-function setCompilerOption(compilerIndex, CoCoSimPreferences, varargin)
-    CoCoSimPreferences.lustreCompiler = compilerIndex;
-    CoCoSimPreferences.irToLustreCompiler = compilerIndex == 2;
+function setCompilerOption(compilerNameValue, CoCoSimPreferences, varargin)
+    CoCoSimPreferences.lustreCompiler = compilerNameValue;
+    CoCoSimPreferences.irToLustreCompiler = isequal(compilerNameValue, 'IOWA');
     PreferencesMenu.saveCoCoSimPreferences(CoCoSimPreferences);
 end
 

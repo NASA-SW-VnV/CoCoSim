@@ -30,19 +30,20 @@ if status
     %No netwrok connexion
     return;
 end
+scripts_path = fileparts(mfilename('fullpath'));
+cocosim_path = fileparts(scripts_path);
 %% update cocosim
-updateRepo()
+updateRepo(cocosim_path)
 %% copy files from cocosim in github
-copyCoCoFiles(force);
+copyCoCoFiles(force, cocosim_path);
 %% install binaries: Zustre, Kind2, Lustrec, Z3 ...
-install_tools();
+install_tools(cocosim_path);
 
 cd(PWD);
 end
 
 %% update repo
-function updateRepo()
-cocosim_path = fileparts(mfilename('fullpath'));
+function updateRepo(cocosim_path)
 cd(cocosim_path);
 [status, sys_out] = system('git pull', '-echo'); 
 if status
@@ -52,8 +53,7 @@ end
 end
 
 %%
-function copyCoCoFiles(force)
-cocosim_path = fileparts(mfilename('fullpath'));
+function copyCoCoFiles(force, cocosim_path)
 build_dir = fullfile(cocosim_path, 'tools', 'build');
 coco_git_dir = fullfile(build_dir, 'github', 'cocosim');
 cocosim_url = 'https://github.com/coco-team/cocoSim2.git';
@@ -86,7 +86,7 @@ if ~force && contains(sys_out{pull_idex}, 'Already up to date.')
 end
 fprintf('Copying files from cocosim2 in tools/build\n');
 sources = {...
-    %'doc', ...
+    fullfile('doc', 'installation.md'), ...
     'examples', ...
     'libs', ...
     fullfile('src', 'gui'), ...
@@ -101,7 +101,7 @@ sources = {...
     fullfile('src', 'backEnd', 'verification')...
     };
 destinations = {...
-    %'doc', ...
+    fullfile('doc', 'installation.md'), ...
     'examples', ...
     'libs',  ...
     fullfile('src', 'external', 'cocosim_iowa', 'gui'), ...
@@ -143,16 +143,16 @@ addpath(fullfile(cocosim_path, 'tools'));
 
 end
 %%
-function install_tools()
+function install_tools(cocosim_path)
 tools_config;
 if exist(LUSTREC,'file') || exist(ZUSTRE,'file') || exist(KIND2,'file')
     % the user has at least one of the tools.
     return;
 end
-scripts_path = fullfile(fileparts(mfilename('fullpath')), 'scripts');
+scripts_path = fullfile(cocosim_path, 'scripts');
 
 if ispc
-    installation_path = fullfile(fileparts(mfilename('fullpath')), 'doc', 'installation.md');
+    installation_path = fullfile(cocosim_path, 'doc', 'installation.md');
     fprintf('ONLY kind2 can be used in Windows. follow the instructions <a href="matlab: open %s">here</a>\n', installation_path) ;
     return;
 elseif ismac

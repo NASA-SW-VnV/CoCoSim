@@ -20,7 +20,7 @@ else
     [cocoSim_root, ~, ~] = fileparts(mfilename('fullpath'));
     warning off
     %add all folders except tools sub-folders
-    addpath(genpath(cocoSim_root));
+    addpath(genpath(cocoSim_root)); 
     rmpath(genpath(fullfile(cocoSim_root, 'tools')));
     %add only tools not its sub-folders
     addpath(fullfile(cocoSim_root, 'tools'));
