@@ -1,8 +1,12 @@
 function [report] = get_BlocksInfo(folder)
-%GET_BLOCKSTYPE This function go over all Simulink model inside a folder
+%GET_BLOCKSTYPE goes over all Simulink model inside a folder
 %and get information about the blocks used. It does not care about the
 %architecture of your models, it is generating information only about
 %BlockType, the dimensions used and the DataTypes.
+% Parameter:
+%   folder: the full path to the folder.
+% Outputs:
+%   report: a cell array of all blocks informations.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Copyright (c) 2017 United States Government as represented by the

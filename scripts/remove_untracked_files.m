@@ -21,7 +21,9 @@ cmd = 'git ls-files --others ';
 if status==0
     untrackFiles = regexprep(git_output, '[\t\b]', '');
     lines = regexp(untrackFiles, '\n', 'split');
+    parents = cell(1, numel(lines));
     for i=1:numel(lines)
+        parents{i} = fileparts(lines{i});
         if ~strncmp(lines{i}, 'tools/', 6)
             cmd = sprintf('mv -f "%s" ~/.Trash/', lines{i});
             [status, ~] = system(cmd);
@@ -30,6 +32,16 @@ if status==0
             else
                 fprintf('file/repository %s could not be removed.\n', lines{i});
             end
+        end
+    end
+    parents = parents(cellfun(@(x) isdir(x), parents));
+    % remove empty folders
+    for i=1:length(parents)
+        try 
+            % rmdir removes folder only if empty
+            rmdir(parents{i});
+        catch
+            % not empty folder
         end
     end
 else

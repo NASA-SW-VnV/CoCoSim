@@ -11,7 +11,8 @@ function importLusReqGui(model_full_path)
 
 
 cocoSim_path = fileparts(which('start_cocosim'));
-css_source = fullfile(cocoSim_path, 'lib', 'materialize' , 'css' , 'materialize.css');
+css_source = fullfile(cocoSim_path, 'src', 'external', 'html_lib',...
+    'materialize' , 'css' , 'materialize.css');
 
 % change the css path
 html_text = fileread(fullfile(cocoSim_path, 'src', 'backEnd' , 'html_templates' , 'importLusReq.html'));

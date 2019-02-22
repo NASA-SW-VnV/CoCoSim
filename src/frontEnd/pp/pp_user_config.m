@@ -17,7 +17,7 @@ function pp_user_config(fcts_map, ordered_functions)
         ordered_functions = ordered_pp_functions;
     end
     cocoSim_path = fileparts(which('start_cocosim'));
-    css_source = fullfile(cocoSim_path, 'libs', 'materialize' , 'css' , 'materialize.css');
+    css_source = fullfile(cocoSim_path, 'src', 'external', 'html_lib', 'materialize' , 'css' , 'materialize.css');
     html_text = fileread(fullfile(cocoSim_path, 'src', 'backEnd' , 'html_templates' , 'pp_config.html'));
     html_text = strrep(html_text, '[css_source]', css_source);
 

@@ -1,5 +1,6 @@
-function schema = cocoSim_menu(varargin)
-    %cocoSim_menu Define the custom menu function.
+function schema = tools_menu(varargin)
+    %tools_menu Define the custom menu function for CoCoSim.
+    
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.

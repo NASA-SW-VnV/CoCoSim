@@ -42,7 +42,8 @@ classdef MatlabUtils
         count = getNbLines(file)
         F = allMatlabFilesExceeds(folder, n)
         [pList, found, alreadyHandled] = requiredProducts(filepath, alreadyHandled);
-        
+        exportModelsTo(folder_Path, version)
+
         
     end
     

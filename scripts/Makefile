@@ -17,4 +17,4 @@ install:
 	./install_cocosim
 
 clean:
-	rm -rf $(IR_path)/* $(std_pp_path)/* $(build_dir)
+	rm -rf  $(build_dir)
