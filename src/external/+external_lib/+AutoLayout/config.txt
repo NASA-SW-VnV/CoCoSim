@@ -1,0 +1,85 @@
+# GRAPHING_METHOD The method to use for generating an initial layout.
+#   The method looks at blocks as nodes and signals as edges to build a layered
+#   (hierarchical) graph which is then used to initially place the blocks.
+#
+# Acceptable parameter values are:
+#    graphplot    use built-in MATLAB functions (compatible with R2015b and up)
+#    graphviz     use Graphviz graphing algorithm (requires separate download)
+#    auto         use graphplot if the MATLAB version is R2015b or above, else Graphviz
+#
+# Default is auto.
+#
+graphing_method: auto
+
+# SHOW_NAMES Whether or not block names are shown.
+#
+# Acceptable parameter values are:
+#    no-change    blocks names will remain shown/hidden without change
+#    all          all blocks will show their name
+#    none         no blocks will show their name
+#
+# Default is no-change.
+#
+show_names: no-change
+
+# PORTLESS_RULE How blocks with no ports will be placed in the layout, with
+#    respect to the rest of the blocks in the system.
+#
+# Acceptable parameter values are:
+#    bottom    blocks are placed along the bottom of the system
+#    top       blocks are placed along the top of the system
+#    left      blocks are placed along the left side of the system
+#    right     blocks are placed along the right side of the system
+#    same_half_vertical    blocks will be placed along the bottom/top of the
+#                          system according to which half they started in
+#    same_half_horizontal  blocks will be placed along the left/right side of
+#                          the system according to which half they started in
+#
+# Default is top.
+#
+portless_rule: top
+
+# SORT_PORTLESS How blocks with no ports will be grouped, within the placement
+#    described by PORTLESS_RULE.
+#
+# Acceptable parameter values are:
+#    blocktype             blocks will be grouped by their BlockType parameter
+#    masktype_blocktype    blocks will be grouped for each unique MaskType-BlockType pair
+#    none                  no grouping is done
+#
+# Default is blocktype.
+#
+sort_portless: blocktype
+
+# INPORT_RULE How inport blocks will be placed in the layout.
+#
+# Acceptable parameter values are:
+#    left_align    inports are aligned along the left, unless there are obstructions
+#    none          no special rule is used
+#
+# Default is left_align.
+#
+inport_rule: left_align
+
+# OUTPORT_RULE How outport blocks will be placed in the layout.
+#
+# Acceptable parameter values are:
+#    right_align    outports are aligned along the right, unless there are obstructions
+#    none           no special rule is used
+#
+# Default is right_align.
+#
+outport_rule: right_align
+
+# NOTE_RULE How annotations will be placed in the the layout. Annotations are
+#    not associated with any particular block(s), so it is not possible to
+#    infer where they should be placed.
+#
+# Acceptable parameter values are:
+#    on-right    all annotations are moved to the right side of the system,
+#                so they can be found easily
+#    none        annotations are not moved at all
+#
+# Default is on-right.
+#
+note_rule: on-right

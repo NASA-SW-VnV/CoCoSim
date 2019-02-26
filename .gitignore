@@ -49,7 +49,6 @@ src/middleEnd/lustre_compiler2/
 src/miscellaneous/
 src/preferences/
 src/+cocosim_menu/preferences.mat
-src/external
 src/middleEnd/iowa_toLustre/
 tools/build/
 tools/verifiers/
