@@ -7,6 +7,7 @@ function output = addTryCatch(callbackInfo)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     funcHandle = callbackInfo.userdata;
+    output = [];
     try
         output = funcHandle(callbackInfo);
     catch ME

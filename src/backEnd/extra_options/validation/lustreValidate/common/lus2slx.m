@@ -55,9 +55,11 @@ if ~exist(output_dir, 'dir')
 end
 
 new_model_path = fullfile(output_dir,strcat(new_model_name,'.slx'));
-trace_file_name = fullfile(output_dir, ...
+xml_trace_file_name = fullfile(output_dir, ...
     strcat(cocospec_name, '.emf.trace.xml'));
-xml_trace = SLX2Lus_Trace(new_model_path, trace_file_name);
+json_trace_file_name = fullfile(output_dir, ...
+    strcat(cocospec_name, '.emf.trace.json'));
+xml_trace = nasa_toLustre.utils.SLX2Lus_Trace(new_model_path, xml_trace_file_name, json_trace_file_name);
 xml_trace.init();
 if exist(new_model_path,'file')
     if BUtils.isLastModified(json_path, new_model_path) && ~force
@@ -93,7 +95,7 @@ if onlyMainNode
         status = 1;
         new_model_path = '';
         close_system(new_model_name,0);
-        trace_file_name = '';
+        xml_trace_file_name = '';
         return
     end
     node_idx = ismember(nodes_names, main_node);

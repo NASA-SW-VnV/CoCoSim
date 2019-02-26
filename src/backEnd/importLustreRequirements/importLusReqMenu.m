@@ -5,50 +5,59 @@
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function schema = importLusReqMenu(callbackInfo)
-schema = sl_container_schema;
-schema.label = 'Requirements';
-schema.statustip = 'Import/Create Lustre Requirements';
-schema.autoDisableWhen = 'Busy';
-
-schema.childrenFcns = {@createReqMenu, @importReqMenu};
+    schema = sl_container_schema;
+    schema.label = 'Requirements';
+    schema.statustip = 'Import/Create Lustre Requirements';
+    schema.autoDisableWhen = 'Busy';
+    
+    schema.childrenFcns = {...
+        %@createReqMenu,...
+        @importReqMenu};
 end
 
 %%
-function schema = createReqMenu(callbackInfo)
-schema = sl_action_schema;
-schema.label = 'Create Requirement';
-schema.callback = @createReqCallback;
-end
+% function schema = createReqMenu(callbackInfo)
+% schema = sl_action_schema;
+% schema.label = 'Create Requirement';
+% schema.callback = @createReqCallback;
+% end
+%
+%
+% function createReqCallback(callbackInfo)
+% model_full_path = MenuUtils.get_file_name(gcs);
+% try
+%     createReqGui(model_full_path);
+% catch ME
+%     display_msg(ME.getReport(),Constants.DEBUG,'importLusReqMenu','');
+%     msg = sprintf('Failed to create Requirements for %s', gcs);
+%     warndlg(msg,'CoCoSim: Warning');
+% end
 
-
-function createReqCallback(callbackInfo)
-model_full_path = MenuUtils.get_file_name(gcs);
-try
-    createReqGui(model_full_path);
-catch ME
-    display_msg(ME.getReport(),Constants.DEBUG,'importLusReqMenu','');
-    msg = sprintf('Failed to create Requirements for %s', gcs);
-    warndlg(msg,'CoCoSim: Warning');
-end
-
-end
+%end
 %%
 function schema = importReqMenu(callbackInfo)
-schema = sl_action_schema;
-schema.label = 'Import Requirements';
-schema.callback = @lustreReqCallback;
+    schema = sl_action_schema;
+    schema.label = 'Import Requirements';
+    schema.callback = @lustreReqCallback;
 end
 
 
 function lustreReqCallback(callbackInfo)
-model_full_path = MenuUtils.get_file_name(gcs);
-
-try
-    importLusReqGui(model_full_path);
-catch ME
-    display_msg(ME.getReport(),Constants.DEBUG,'importLusReqMenu','');
-    msg = sprintf('Failed to import Requirements for %s', gcs);
-    warndlg(msg,'CoCoSim: Warning');
-end
-
+    model_name = gcs;
+    model_full_path = MenuUtils.get_file_name(model_name);
+    
+    try
+        [file, p] = uigetfile({'*.lus', '*.lusi'});
+        if ischar(file) && ~isempty(file)
+            lus_file_path = fullfile(p, file);
+            importLusReq(model_full_path, lus_file_path);
+        else
+            warndlg('No Lustre File has been selected');
+        end
+    catch ME
+        display_msg(ME.getReport(),Constants.DEBUG,'importLusReqMenu','');
+        msg = sprintf('Failed to import Requirements for %s', model_name);
+        warndlg(msg,'CoCoSim: Warning');
+    end
+    
 end

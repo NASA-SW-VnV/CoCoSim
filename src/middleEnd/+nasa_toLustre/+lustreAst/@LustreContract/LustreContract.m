@@ -102,6 +102,14 @@ classdef LustreContract < nasa_toLustre.lustreAst.LustreAst
         %%
         new_obj = deepCopy(obj)
         
+         %% simplify expression
+        function all_obj = getAllLustreExpr(obj)
+            all_obj = {};
+            for i=1:numel(obj.bodyEqs)
+                all_obj = [all_obj; {obj.bodyEqs{i}}; obj.bodyEqs{i}.getAllLustreExpr()];
+            end
+        end
+        
         %% simplify expression
         new_obj = simplify(obj)
         

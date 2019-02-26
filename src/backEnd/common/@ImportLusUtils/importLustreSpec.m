@@ -23,7 +23,12 @@ function [new_model_path, status] = importLustreSpec(...
     [coco_dir, ~, ~] = fileparts(lus_json_path);
     [model_dir, base_name, ~] = fileparts(model_path);
 
-    if ~exist('createNewFile', 'var')
+    no_traceability = false;
+    if nargin < 3 || isempty(cocosim_trace_file)
+        cocosim_trace_file = '';
+        no_traceability = true;
+    end
+    if nargin < 4
         createNewFile = 0;
     end
     try
@@ -61,10 +66,10 @@ function [new_model_path, status] = importLustreSpec(...
         end
 
         %get tracability
-
-        DOMNODE = xmlread(cocosim_trace_file);
-        xRoot = DOMNODE.getDocumentElement;
-
+        if ~no_traceability
+            DOMNODE = xmlread(cocosim_trace_file);
+            xRoot = DOMNODE.getDocumentElement;
+        end
         nb_coco = 0;
 
 
@@ -78,8 +83,18 @@ function [new_model_path, status] = importLustreSpec(...
         nodes = data.nodes;
         for node = fieldnames(nodes)'
             original_name = nodes.(node{1}).original_name;
-            simulink_block_name = SLX2Lus_Trace.get_Simulink_block_from_lustre_node_name(xRoot, ...
-                original_name, base_name, new_model_name);
+            if no_traceability 
+                if MatlabUtils.endsWith(original_name, 'Spec')
+                    % Give the current opened Subsystem
+                    simulink_block_name = gcs;
+                else
+                    % Not considered Spec node
+                    continue;
+                end
+            else
+                simulink_block_name = SLX2Lus_Trace.get_Simulink_block_from_lustre_node_name(xRoot, ...
+                    original_name, base_name, new_model_name);
+            end
             if strcmp(simulink_block_name, '')
                 continue;
             elseif strcmp(simulink_block_name,base_name)
@@ -142,13 +157,16 @@ function [new_model_path, status] = importLustreSpec(...
             SrcBlkH = get_param(strcat(cocospec_block_path),'PortHandles');
             DstBlkH = get_param(scope_block_path, 'PortHandles');
             add_line(parent_block_name, SrcBlkH.Outport(1), DstBlkH.Inport(1), 'autorouting', 'on');
-
-            blk_inputs = nodes.(node{1}).inputs;
-            %link inputs to the subsystem.
-            for index=1:numel(blk_inputs)
-                var_name = BUtils.adapt_block_name(blk_inputs(index).original_name);
-                input_block_name = ImportLusUtils.get_input_block_name_from_variable(xRoot, original_name, var_name, base_name,new_model_name);
-                ImportLusUtils.link_block_with_its_cocospec(cocospec_block_path,  input_block_name, simulink_block_name, parent_block_name, index, isBaseName);
+            if no_traceability 
+                % Do Not Link contract, keep it for the user
+            else
+                blk_inputs = nodes.(node{1}).inputs;
+                %link inputs to the subsystem.
+                for index=1:numel(blk_inputs)
+                    var_name = BUtils.adapt_block_name(blk_inputs(index).original_name);
+                    input_block_name = ImportLusUtils.get_input_block_name_from_variable(xRoot, original_name, var_name, base_name,new_model_name);
+                    ImportLusUtils.link_block_with_its_cocospec(cocospec_block_path,  input_block_name, simulink_block_name, parent_block_name, index, isBaseName);
+                end
             end
         end
 

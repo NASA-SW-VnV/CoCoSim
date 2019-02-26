@@ -11,6 +11,10 @@ function tf = startsWith(s, pattern)
         tf = startsWithw(s, pattern);
     catch
         try
+            regexpKeys = {'+', '*', '?', '.'};
+            for i=1:length(regexpKeys)
+                pattern = strrep(pattern, regexpKeys{i}, strcat('\', regexpKeys{i}));
+            end
             res = regexp(s, strcat('^', pattern), 'match', 'once');
             if ischar(res)
                 res = {res};
