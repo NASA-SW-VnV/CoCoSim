@@ -3,7 +3,7 @@ function layout = fixLabelOutOfBounds(layout)
 %   system's left bound if a block's name label extends past it.
 %
 %   Inputs:
-%       layout  As returned by getRelativeLayout.
+%       layout  As returned by external_lib.AutoLayout.getRelativeLayout.
 %
 %   Outputs:
 %       layout  With modified (left, right) position information for labels.
@@ -21,7 +21,7 @@ function layout = fixLabelOutOfBounds(layout)
                 end
             end
         end
-        horzAdjustBlocks(layout, j-1, largestX);
+        external_lib.AutoLayout.horzAdjustBlocks(layout, j-1, largestX);
     end
 end
 
@@ -30,7 +30,7 @@ function labelSize = getLabelSize(block)
 % from where AutoLayout places it initially and we don't want to take that into account.
 
     if strcmp(get_param(block, 'ShowName'), 'on')
-        [~, labelSize] = blockStringDims(block, get_param(block, 'Name'));
+        [~, labelSize] = external_lib.AutoLayout.blockStringDims(block, get_param(block, 'Name'));
     else
         labelSize = 0;
     end

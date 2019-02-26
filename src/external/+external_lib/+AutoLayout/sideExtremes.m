@@ -4,8 +4,8 @@ function [leftBound, topBound, rightBound, botBound] = sideExtremes(layout, port
 %   shouldn't be considered).
 %
 %   Inputs:
-%       layout                  As returned by getRelativeLayout.
-%       portlessInfo            As returned by getPortlessInfo.
+%       layout                  As returned by external_lib.AutoLayout.getRelativeLayout.
+%       portlessInfo            As returned by external_lib.AutoLayout.getPortlessInfo.
 %       ignorePortlessBlocks    Whether to consider portlessInfo (1) or not (0).
 %
 %   Outputs:

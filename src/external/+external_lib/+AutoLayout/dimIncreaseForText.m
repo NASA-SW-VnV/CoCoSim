@@ -61,6 +61,6 @@ function xIncrease = getTextXIncrease(block, pos)
 %       xIncrease   Amount to increase block width to fit its text.
 
     currentWidth = pos(3) - pos(1);
-    neededWidth = getBlockTextWidth(block);
+    neededWidth = external_lib.AutoLayout.getBlockTextWidth(block);
     xIncrease = max(0, neededWidth - currentWidth);
 end

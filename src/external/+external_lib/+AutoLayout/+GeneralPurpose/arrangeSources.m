@@ -37,7 +37,7 @@ function [srcs, srcPositions, didMove] = arrangeSources(blk, doMove)
 
         srcph = get_param(orderedSrcs{i}, 'PortHandles');
         srcout = srcph.Outport;
-        if isBranching(lh)
+        if external_lib.AutoLayout.Utility.isBranching(lh)
             doMove = false;
         end
         if length(srcout) > 1

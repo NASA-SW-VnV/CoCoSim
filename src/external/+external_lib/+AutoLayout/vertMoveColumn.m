@@ -3,7 +3,7 @@ function layout = vertMoveColumn(layout, row, col, y)
 %   downward by y.
 %
 %   Inputs:
-%       layout      As returned by getRelativeLayout.
+%       layout      As returned by external_lib.AutoLayout.getRelativeLayout.
 %       row         Row number, below which blocks will be moved.
 %       col         Column number, in whihch blocks will be moved.
 %       y           Number of pixels to move blocks.

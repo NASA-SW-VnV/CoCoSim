@@ -54,6 +54,6 @@ function dg  = systemToDigraph(sys)
             end
         end
     end
-    nodes = applyNamingConvention(nodes);
+    nodes = external_lib.AutoLayout.GraphPlot_Portion.applyNamingConvention(nodes);
     dg = digraph(A, nodes);
 end

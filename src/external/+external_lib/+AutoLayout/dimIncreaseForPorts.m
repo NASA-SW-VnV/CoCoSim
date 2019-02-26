@@ -75,11 +75,11 @@ function yIncrease = getPortYIncrease(block, pos, varargin)
     currentHeight = pos(4) - pos(2);
 
     if nargin == 3
-        desiredHeight = desiredHeightForPorts(block, varargin{2});
+        desiredHeight = external_lib.AutoLayout.desiredHeightForPorts(block, varargin{2});
     elseif nargin > 3
-        desiredHeight = desiredHeightForPorts(block, varargin{2}, varargin{3});
+        desiredHeight = external_lib.AutoLayout.desiredHeightForPorts(block, varargin{2}, varargin{3});
     else
-        desiredHeight = desiredHeightForPorts(block);
+        desiredHeight = external_lib.AutoLayout.desiredHeightForPorts(block);
     end
 
     yIncrease = max(0, desiredHeight - currentHeight);

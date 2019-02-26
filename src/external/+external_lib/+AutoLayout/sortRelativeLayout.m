@@ -2,8 +2,8 @@ function grid = sortRelativeLayout(grid, colLengths)
 % SORTRELATIVELAYOUT Sort blocks in grid within columns by their top positions.
 %
 %   Inputs:
-%       grid        Format as defined in getRelativeLayout.
-%       colLengths  Format as defined in getRelativeLayout.
+%       grid        Format as defined in external_lib.AutoLayout.getRelativeLayout.
+%       colLengths  Format as defined in external_lib.AutoLayout.getRelativeLayout.
 %
 %   Outputs:
 %       grid        Same format, but sorted so that layout is accurate for

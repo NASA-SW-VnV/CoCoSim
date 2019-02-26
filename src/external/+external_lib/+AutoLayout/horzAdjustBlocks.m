@@ -3,7 +3,7 @@ function layout = horzAdjustBlocks(layout, col, x)
 %   the column, right by x.
 %
 %   Inputs:
-%       layout          As returned by getRelativeLayout.
+%       layout          As returned by external_lib.AutoLayout.getRelativeLayout.
 %       col             Column number, to the left of which blocks will not be moved.
 %       x               Number of pixels to move blocks.
 %

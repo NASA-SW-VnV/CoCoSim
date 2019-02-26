@@ -25,8 +25,8 @@ function writes = findWritesInScope(block)
     end
 
     dataStoreName = get_param(block, 'DataStoreName');
-    memBlock = findDataStoreMemory(block);
-    writes = findReadWritesInScope(memBlock);
+    memBlock = external_lib.AutoLayout.Utility.FindingConnectedBlocks.findDataStoreMemory(block);
+    writes = external_lib.AutoLayout.Utility.FindingConnectedBlocks.findReadWritesInScope(memBlock);
     blocksToExclude = find_system(get_param(memBlock, 'parent'), ...
         'FollowLinks', 'on', 'BlockType', 'DataStoreRead', 'DataStoreName', dataStoreName);
     writes = setdiff(writes, blocksToExclude);

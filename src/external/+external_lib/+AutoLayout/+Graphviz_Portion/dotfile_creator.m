@@ -14,10 +14,10 @@ function [fullname, replacementMap] = dotfile_creator(name)
 %                       replacing the keys with the values in block names.
 %
 %   Example:
-%       filename = dotfile_creator('testModel');
+%       filename = external_lib.AutoLayout.Graphviz_Portion.dotfile_creator('testModel');
 
-    %redraw_lines(name)
-    %redraw_lines(name,autorouting,off)
+    %external_lib.AutoLayout.redraw_lines(name)
+    %external_lib.AutoLayout.redraw_lines(name,autorouting,off)
     function string = subwidth(number)
         % Get dimensions for a SubSystem for the dotfile graph
         if number > 3

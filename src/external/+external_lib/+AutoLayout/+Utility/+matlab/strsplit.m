@@ -1,5 +1,5 @@
 function [c, matches] = strsplit(str, aDelim, varargin)
-%R2014a\toolbox\matlab\strfun\strsplit.m
+%R2014a\toolbox\matlab\strfun\external_lib.AutoLayout.Utility.matlab.strsplit.m
 %
 %STRSPLIT  Split string at delimiter
 %   C = STRSPLIT(S) splits the string S at whitespace into the cell array
@@ -43,22 +43,22 @@ function [c, matches] = strsplit(str, aDelim, varargin)
 %       str = 'The rain in Spain stays mainly in the plain.';
 %
 %       % Split on all whitespace.
-%       strsplit(str)
+%       external_lib.AutoLayout.Utility.matlab.strsplit(str)
 %       % {'The', 'rain', 'in', 'Spain', 'stays',
 %       %  'mainly', 'in', 'the', 'plain.'}
 %
 %       % Split on 'ain'.
-%       strsplit(str, 'ain')
+%       external_lib.AutoLayout.Utility.matlab.strsplit(str, 'ain')
 %       % {'The r', ' in Sp', ' stays m', 'ly in the pl', '.'}
 %
 %       % Split on ' ' and on 'ain' (treating multiple delimiters as one).
-%       strsplit(str, {' ', 'ain'})
+%       external_lib.AutoLayout.Utility.matlab.strsplit(str, {' ', 'ain'})
 %       % ('The', 'r', 'in', 'Sp', 'stays',
 %       %  'm', 'ly', 'in', 'the', 'pl', '.'}
 %
 %       % Split on all whitespace and on 'ain', and treat multiple
 %       % delimiters separately.
-%       strsplit(str, {'\s', 'ain'}, 'CollapseDelimiters', false, ...
+%       external_lib.AutoLayout.Utility.matlab.strsplit(str, {'\s', 'ain'}, 'CollapseDelimiters', false, ...
 %                     'DelimiterType', 'RegularExpression')
 %       % {'The', 'r', '', 'in', 'Sp', '', 'stays',
 %       %  'm', 'ly', 'in', 'the', 'pl', '.'}

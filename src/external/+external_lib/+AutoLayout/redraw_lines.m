@@ -11,10 +11,10 @@ function redraw_lines(sys, varargin)
 %       N/A
 %
 %   Examples:
-%       redraw_lines(gcs)
+%       external_lib.AutoLayout.redraw_lines(gcs)
 %           Redraws lines in the current system with autorouting off.
 %
-%       redraw_lines(gcs, 'autorouting', 'on')
+%       external_lib.AutoLayout.redraw_lines(gcs, 'autorouting', 'on')
 %           Redraws lines in the current system with autorouting on.
 
     % Handle inputs

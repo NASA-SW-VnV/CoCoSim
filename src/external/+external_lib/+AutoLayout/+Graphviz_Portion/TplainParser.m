@@ -4,12 +4,12 @@ classdef TplainParser < handle
 %
 %   Examples:
 %       1)
-%       g = TplainParser('testModel', testModel.txt, containers.Map());
+%       g = external_lib.AutoLayout.Graphviz_Portion.TplainParser('testModel', testModel.txt, containers.Map());
 %       g.plain_wrappers;
 %
 %       2)
-%       [filename, map] = dotfile_creator('testModel');
-%       h = TplainParser('testModel', filename, map);
+%       [filename, map] = external_lib.AutoLayout.Graphviz_Portion.dotfile_creator('testModel');
+%       h = external_lib.AutoLayout.Graphviz_Portion.TplainParser('testModel', filename, map);
 %       h.plain_wrappers;
 
     properties
@@ -19,7 +19,7 @@ classdef TplainParser < handle
     end
 
     methods
-        function object = TplainParser(rootSystemName, filename, replacementMap)
+        function object = external_lib.AutoLayout.Graphviz_Portion.TplainParser(rootSystemName, filename, replacementMap)
         % Constructor for the TplainParser object. This object represents
         %   the mapping between Graphviz node locations and Simulink block
         %   locations.
@@ -159,7 +159,7 @@ classdef TplainParser < handle
                 bottom  = round(blocky + blockheight/2);
 
                 pos = [left top right bottom];
-                setPositionAL(systemBlocks{z}, pos);
+                external_lib.AutoLayout.GeneralPurpose.setPositionAL(systemBlocks{z}, pos);
             end
         end
     end

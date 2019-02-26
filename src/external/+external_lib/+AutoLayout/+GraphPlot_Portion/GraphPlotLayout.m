@@ -8,12 +8,12 @@ function GraphPlotLayout(address)
 %   Output:
 %       N/A
 
-    dg = systemToDigraph(address);
-    dg2 = addImplicitEdges(address, dg);
+    dg = external_lib.AutoLayout.GraphPlot_Portion.systemToDigraph(address);
+    dg2 = external_lib.AutoLayout.GraphPlot_Portion.addImplicitEdges(address, dg);
 
     defaultFigureVisible = get(0, 'DefaultFigureVisible');
     set(0, 'DefaultFigureVisible', 'off');    % Don't show the figure
-    p = plotSimulinkDigraph(address, dg2);
+    p = external_lib.AutoLayout.GraphPlot_Portion.plotSimulinkDigraph(address, dg2);
     set(0,'DefaultFigureVisible', defaultFigureVisible);
 
     systemBlocks = p.NodeLabel';
@@ -49,7 +49,7 @@ function GraphPlotLayout(address)
         bottom  = round(blocky + blockheight/2);
 
         pos = [left top right bottom];
-        setPositionAL(systemBlocks{i}, pos);
+        external_lib.AutoLayout.GeneralPurpose.setPositionAL(systemBlocks{i}, pos);
     end
 
     % Try to fix knots caused by the arbitrary ordering of out/inputs to a node
@@ -57,14 +57,14 @@ function GraphPlotLayout(address)
         ph = get_param(systemBlocks{i}, 'PortHandles');
         out = ph.Outport;
         if length(out) > 1
-            arrangeSinks(systemBlocks{i}, true);
+            external_lib.AutoLayout.GeneralPurpose.arrangeSinks(systemBlocks{i}, true);
         end
     end
     for i = 1:length(systemBlocks)
         ph = get_param(systemBlocks{i}, 'PortHandles');
         in = ph.Inport;
         if length(in) > 1
-            arrangeSources(systemBlocks{i}, true);
+            external_lib.AutoLayout.GeneralPurpose.arrangeSources(systemBlocks{i}, true);
         end
     end
 end

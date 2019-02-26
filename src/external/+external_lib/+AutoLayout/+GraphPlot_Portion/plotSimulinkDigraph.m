@@ -25,7 +25,7 @@ function h = plotSimulinkDigraph(sys, dg)
 
     % Check second input
     try
-        assert(isdigraph(dg));
+        assert(external_lib.AutoLayout.GraphPlot_Portion.isdigraph(dg));
     catch
         error('Digraph argument provided is not a digraph');
     end

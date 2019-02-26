@@ -6,7 +6,7 @@ function layout = justifyBlocks(address, layout, blocks, justifyType)
 %
 %   Inputs:
 %       address         Simulink system name or path.
-%       layout          As returned by getRelativeLayout.
+%       layout          As returned by external_lib.AutoLayout.getRelativeLayout.
 %       blocks          List of blocks to be affected by the justification.
 %       justifyType     How the blocks will be aligned: left justified (1) or
 %                       right justified (3) (The numbers correspond with
@@ -44,7 +44,7 @@ function layout = changeBlockColumn(layout, oldRow, oldCol, newCol)
 
     % Move layout.grid{oldRow,oldCol} (visually and with the .position)
     pos = get_param(layout.grid{oldRow, oldCol}.fullname, 'Position');
-    x = getBlockSidePositions({layout.grid{1, newCol}.fullname}, 5) - getBlockSidePositions({layout.grid{oldRow, oldCol}.fullname}, 5);
+    x = external_lib.AutoLayout.getBlockSidePositions({layout.grid{1, newCol}.fullname}, 5) - external_lib.AutoLayout.getBlockSidePositions({layout.grid{oldRow, oldCol}.fullname}, 5);
     set_param(layout.grid{oldRow, oldCol}.fullname, 'Position', [pos(1) + x, pos(2), pos(3) + x, pos(4)]);
     layout.grid{oldRow, oldCol}.position = [pos(1) + x, pos(2), pos(3) + x, pos(4)];
 
@@ -57,7 +57,7 @@ function layout = changeBlockColumn(layout, oldRow, oldCol, newCol)
     layout.colLengths(newCol) = layout.colLengths(newCol) + 1;
     layout.colLengths(oldCol) = layout.colLengths(oldCol) - 1;
 
-    layout.grid = sortRelativeLayout(layout.grid, layout.colLengths);
+    layout.grid = external_lib.AutoLayout.sortRelativeLayout(layout.grid, layout.colLengths);
 end
 
 function linesInTheWay = linesInTheWay(address, layout, row, col, jT)
@@ -69,8 +69,8 @@ function linesInTheWay = linesInTheWay(address, layout, row, col, jT)
 
     pos = get_param(layout.grid{row,col}.fullname, 'Position');
     newCol = (jT == 1) * 1 + (jT == 3) * size(layout.grid, 2);
-    x = getBlockSidePositions({layout.grid{1, newCol}.fullname}, 5) ...
-        - getBlockSidePositions({layout.grid{row, col}.fullname}, 5);
+    x = external_lib.AutoLayout.getBlockSidePositions({layout.grid{1, newCol}.fullname}, 5) ...
+        - external_lib.AutoLayout.getBlockSidePositions({layout.grid{row, col}.fullname}, 5);
 
     systemLines = find_system(address, 'LookUnderMasks', 'all', 'SearchDepth', 1, 'findall', 'on', 'Type', 'Line');
     for i = 1:length(systemLines)

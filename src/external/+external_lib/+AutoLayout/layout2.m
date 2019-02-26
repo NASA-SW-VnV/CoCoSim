@@ -1,6 +1,6 @@
 function layout = layout2(address, layout, systemBlocks)
 % LAYOUT2 Performs a series of operations to further improve the layout
-% from AutoLayout. The functionality it provides is listed below roughly 
+% from external_lib.AutoLayout.AutoLayout. The functionality it provides is listed below roughly 
 % ordered with when it is done in this function.
 %   Moves inputs and outputs to the outsides when it is easy (and not messy) to do so
 %   Adjusts the vertical spacing between close blocks
@@ -22,24 +22,24 @@ function layout = layout2(address, layout, systemBlocks)
 %
 %   Updates:
 %       layout          Input in the same format as returned by 
-%                       getRelativeLayout. Returned according to the
+%                       external_lib.AutoLayout.getRelativeLayout. Returned according to the
 %                       operations performed in this function.
 
     % Adjust the spacing between adjacent blocks in columns of layout.grid
     layout = adjustColVertSpacing(layout);
     %Update block positions according to layout
-    updateLayout(address, layout);
+    external_lib.AutoLayout.updateLayout(address, layout);
 
     % Shift everything right if any label is too far left
-    layout = fixLabelOutOfBounds(layout);
+    layout = external_lib.AutoLayout.fixLabelOutOfBounds(layout);
     %Update block positions according to layout
-    updateLayout(address, layout);
+    external_lib.AutoLayout.updateLayout(address, layout);
 
     % Enlarge blocks to fit strings in them
     %layout = fixBlockSize(layout);
 
     % Make lines reasonable
-    redraw_lines(address,'autorouting','on');
+    external_lib.AutoLayout.redraw_lines(address,'autorouting','on');
 
     systemLines = find_system(address, 'LookUnderMasks', 'all', 'SearchDepth', 1, 'FindAll', 'on', 'Type', 'Line');
     colDims = getColumnDimensions(layout);
@@ -48,17 +48,17 @@ function layout = layout2(address, layout, systemBlocks)
     % Adjust net horizontal space between columns in blocksMatrix
     layout = adjustHorzSpacing(layout, vSegs, colDims);
     %Update block positions according to layout
-    updateLayout(address, layout);
-    redraw_lines(address,'autorouting','on');
+    external_lib.AutoLayout.updateLayout(address, layout);
+    external_lib.AutoLayout.redraw_lines(address,'autorouting','on');
 
     systemLines = find_system(address, 'LookUnderMasks', 'all', 'SearchDepth', 1, 'FindAll', 'on', 'Type', 'Line'); % can I just do get_param(address,'Lines')?
     vSegs = getVSegs(systemLines);
 
     % Prevent cases where lines become diagonal lines when fixVSegs runs later
-    preventDiagVSegs(systemLines);
+    external_lib.AutoLayout.preventDiagVSegs(systemLines);
 
     % Fix any remaining diagonal lines
-    fixDiagonalLines(systemLines);
+    external_lib.AutoLayout.fixDiagonalLines(systemLines);
 
     % Fix a specific problem with redraw_lines
     fixRedrawLinesOvershoot(vSegs) % This doesn't preserve correctness of vSegs values
@@ -68,7 +68,7 @@ function layout = layout2(address, layout, systemBlocks)
     systemBlocks = systemBlocks(2:end);
 
     % Prevent lines from travelling over a block to get the ports on top
-    fixLineOverBlock(systemLines, systemBlocks);
+    external_lib.AutoLayout.fixLineOverBlock(systemLines, systemBlocks);
 
     systemLines = find_system(address, 'LookUnderMasks', 'all', 'SearchDepth', 1, 'FindAll', 'on', 'Type', 'Line');
     colDims = getColumnDimensions(layout);
@@ -212,11 +212,11 @@ function layout = adjustColVertSpacing(layout)
             freeSpace = pos2(2) - pos1(4);
 
             string = layout.grid{i, j}.fullname;
-            [minSpace, ~] = blockStringDims(layout.grid{i, j}.fullname, string);
+            [minSpace, ~] = external_lib.AutoLayout.blockStringDims(layout.grid{i, j}.fullname, string);
 
             if freeSpace < minSpace
                 adjustment = minSpace - freeSpace;
-                layout = vertMoveColumn(layout, i, j, adjustment);
+                layout = external_lib.AutoLayout.vertMoveColumn(layout, i, j, adjustment);
             end
 
             pos1 = pos2;
@@ -240,7 +240,7 @@ function layout = adjustHorzSpacing(layout, vSegs, colDims)
         minSpace = minSpacePerVSeg * length(tempVSegs);
         if freeSpace < minSpace
             adjustment = minSpace - freeSpace;
-            layout = horzAdjustBlocks(layout, i-1, adjustment);
+            layout = external_lib.AutoLayout.horzAdjustBlocks(layout, i-1, adjustment);
         end
     end
 end
@@ -266,11 +266,11 @@ function colDims = getColumnDimensions(layout)
         lowestLeft = 32767; % Maximum coordinate in Simulink
         largestRight = 0;
         for i = 1:layout.colLengths(j) % For each non-empty in column
-            if lowestLeft > getBlockSidePositions({layout.grid{i,j}.fullname}, 1) % 1->left side
-                lowestLeft = getBlockSidePositions({layout.grid{i,j}.fullname}, 1);
+            if lowestLeft > external_lib.AutoLayout.getBlockSidePositions({layout.grid{i,j}.fullname}, 1) % 1->left side
+                lowestLeft = external_lib.AutoLayout.getBlockSidePositions({layout.grid{i,j}.fullname}, 1);
             end
-            if largestRight < getBlockSidePositions({layout.grid{i,j}.fullname}, 3) % 3->right side
-                largestRight = getBlockSidePositions({layout.grid{i,j}.fullname}, 3);
+            if largestRight < external_lib.AutoLayout.getBlockSidePositions({layout.grid{i,j}.fullname}, 3) % 3->right side
+                largestRight = external_lib.AutoLayout.getBlockSidePositions({layout.grid{i,j}.fullname}, 3);
             end
         end
         colDims{j} = [lowestLeft, largestRight];
@@ -290,7 +290,7 @@ function vSegs = getVSegs(lines)
 %       pointIndex2 - point2's index in line
 
     vSegs = {};
-    linePoints = getAllLinePoints(lines);
+    linePoints = external_lib.AutoLayout.getAllLinePoints(lines);
     for i = 1:length(linePoints) % For all lines
         for j = 2:size(linePoints{i}, 1) % For all points after first in line
             points = linePoints{i};

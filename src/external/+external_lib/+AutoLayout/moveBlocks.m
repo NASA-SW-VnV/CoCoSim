@@ -14,7 +14,7 @@ function moveBlocks(address, blocks, positions)
 %       N/A
 %
 %   Example:
-%       moveBlocks('AutoLayoutDemo',{'AutoLayoutDemo/In1', ...
+%       external_lib.AutoLayout.moveBlocks('AutoLayoutDemo',{'AutoLayoutDemo/In1', ...
 %           'AutoLayoutDemo/In2'}, {[-35,50,-15,70],[-35,185,-15,205]})
 
     % Check number of arguments
@@ -56,5 +56,5 @@ function moveBlocks(address, blocks, positions)
         %(may make sense to include this outside this function to keep this
         %general)
     end
-    redraw_lines(address, 'autorouting', 'on');
+    external_lib.AutoLayout.redraw_lines(address, 'autorouting', 'on');
 end

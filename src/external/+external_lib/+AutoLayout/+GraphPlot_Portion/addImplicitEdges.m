@@ -24,7 +24,7 @@ function dgNew = addImplicitEdges(sys, dg)
 
     % Check second input
     try
-        assert(isdigraph(dg));
+        assert(external_lib.AutoLayout.GraphPlot_Portion.isdigraph(dg));
     catch
         error('Digraph argument provided is not a digraph');
     end
@@ -38,14 +38,14 @@ function dgNew = addImplicitEdges(sys, dg)
 
     % For each Goto tags, find the corresponding From tags
     for i = 1:length(gotos)
-        subFroms = findFromsInScope(gotos{i});
+        subFroms = external_lib.AutoLayout.Utility.FindingConnectedBlocks.findFromsInScope(gotos{i});
         for j = 1:length(subFroms)
             snk = getRootInSys(subFroms{j});
             if(isempty(snk))
                 continue
             end
-            srcName = applyNamingConvention(gotos{i});
-            snkName = applyNamingConvention(snk);
+            srcName = external_lib.AutoLayout.GraphPlot_Portion.applyNamingConvention(gotos{i});
+            snkName = external_lib.AutoLayout.GraphPlot_Portion.applyNamingConvention(snk);
             % If the implicit edge does not exist in the graph, add it to the
             % graph
             if ~edgeExists(dgNew, srcName, snkName)
@@ -55,14 +55,14 @@ function dgNew = addImplicitEdges(sys, dg)
     end
     % For each From tags, find the corresponding Goto tags
     for i = 1:length(froms)
-        subGotos = findGotosInScope(froms{i});
+        subGotos = external_lib.AutoLayout.Utility.FindingConnectedBlocks.findGotosInScope(froms{i});
         for j = 1:length(subGotos)
             src = getRootInSys(subGotos{j});
             if(isempty(src))
                 continue
             end
-            srcName = applyNamingConvention(src);
-            snkName = applyNamingConvention(froms{i});
+            srcName = external_lib.AutoLayout.GraphPlot_Portion.applyNamingConvention(src);
+            snkName = external_lib.AutoLayout.GraphPlot_Portion.applyNamingConvention(froms{i});
             % If the implicit edge does not exist in the graph, add it to the
             % graph
             if ~edgeExists(dgNew, srcName, snkName)
@@ -77,14 +77,14 @@ function dgNew = addImplicitEdges(sys, dg)
 
     % For each DataStoreWrite, find the corresponding DataStoreRead
     for i = 1:length(writes)
-        subReads = findReadsInScope(writes{i});
+        subReads = external_lib.AutoLayout.Utility.FindingConnectedBlocks.findReadsInScope(writes{i});
         for j = 1:length(subReads)
             snk = getRootInSys(subReads{j});
             if(isempty(snk))
                 continue
             end
-            srcName = applyNamingConvention(writes{i});
-            snkName = applyNamingConvention(snk);
+            srcName = external_lib.AutoLayout.GraphPlot_Portion.applyNamingConvention(writes{i});
+            snkName = external_lib.AutoLayout.GraphPlot_Portion.applyNamingConvention(snk);
             % If the implicit edge does not exist in the graph, add it to the
             % graph
             if ~edgeExists(dgNew, srcName, snkName)
@@ -94,14 +94,14 @@ function dgNew = addImplicitEdges(sys, dg)
     end
     % For each DataStoreReads
     for i = 1:length(reads)
-        subWrites = findWritesInScope(reads{i});
+        subWrites = external_lib.AutoLayout.Utility.FindingConnectedBlocks.findWritesInScope(reads{i});
         for j = 1:length(subWrites)
             src = getRootInSys(subWrites{j});
             if(isempty(src))
                 continue
             end
-            srcName = applyNamingConvention(src);
-            snkName = applyNamingConvention(reads{i});
+            srcName = external_lib.AutoLayout.GraphPlot_Portion.applyNamingConvention(src);
+            snkName = external_lib.AutoLayout.GraphPlot_Portion.applyNamingConvention(reads{i});
             % If the implicit edge does not exist in the graph, add it to the
             % graph
             if ~edgeExists(dgNew, srcName, snkName)

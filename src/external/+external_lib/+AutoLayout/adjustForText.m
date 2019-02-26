@@ -3,7 +3,7 @@ function layout = adjustForText(layout)
 %   their text without disturbing the relative layout.
 %
 %   Inputs:
-%       layout      As returned by getRelativeLayout.
+%       layout      As returned by external_lib.AutoLayout.getRelativeLayout.
 %
 %   Outputs:
 %       layout      With modified position information.
@@ -13,13 +13,13 @@ function layout = adjustForText(layout)
         for i = 1:layout.colLengths(j) % for each non empty row in column
             block = layout.grid{i,j}.fullname; % block to resize
             pos = layout.grid{i,j}.position;
-            [layout.grid{i,j}.position, xDisplace] = dimIncreaseForText(...
+            [layout.grid{i,j}.position, xDisplace] = external_lib.AutoLayout.dimIncreaseForText(...
                 block, pos, 'right'); % Returns amount to move other blocks
             if xDisplace > largestX
                 largestX = xDisplace;
             end
         end
 
-        layout = horzAdjustBlocks(layout, j, largestX);
+        layout = external_lib.AutoLayout.horzAdjustBlocks(layout, j, largestX);
     end
 end

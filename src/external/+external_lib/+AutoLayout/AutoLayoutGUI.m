@@ -1,5 +1,5 @@
 function varargout = AutoLayoutGUI(varargin)
-% AUTOLAYOUTGUI MATLAB code for AutoLayoutGUI.fig
+% AUTOLAYOUTGUI MATLAB code for external_lib.AutoLayout.AutoLayoutGUI.fig
 %      AUTOLAYOUTGUI, by itself, creates a new AUTOLAYOUTGUI or raises the existing
 %      singleton*.
 %
@@ -22,11 +22,11 @@ function varargout = AutoLayoutGUI(varargin)
 
 % Edit the above text to modify the response to help AutoLayoutGUI
 
-% Last Modified by GUIDE v2.5 17-Jun-2017 19:58:13
+% Last Modified by GUIDE v2.5 25-Feb-2019 22:39:30
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
-gui_State = struct('gui_Name',       mfilename, ...
+gui_State = struct('gui_Name',       '+external_lib/+AutoLayout/AutoLayoutGUI.fig', ...
                    'gui_Singleton',  gui_Singleton, ...
                    'gui_OpeningFcn', @AutoLayoutGUI_OpeningFcn, ...
                    'gui_OutputFcn',  @AutoLayoutGUI_OutputFcn, ...
@@ -82,7 +82,7 @@ address=bdroot;
 addressToLayout=gcs;
 save_system(address);
 close(handles.autoLayoutGUI)
-AutoLayout(addressToLayout);
+external_lib.AutoLayout.AutoLayout(addressToLayout);
 
 
 % --- Executes on button press in pushbutton2.
@@ -92,7 +92,7 @@ function pushbutton2_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 close(handles.autoLayoutGUI)
-AutoLayout(gcs);
+external_lib.AutoLayout.AutoLayout(gcs);
 
 
 % --- Executes on button press in pushbutton3.

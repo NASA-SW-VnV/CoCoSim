@@ -37,7 +37,7 @@ function dims = getTextDims(string, fontName, fontSize, varargin)
         delete(handle)
     else
         % Create dummy model for the system and create annotation
-        name = new_system_makenameunique('TempToFindTextSize');
+        name = external_lib.AutoLayout.Utility.new_system_makenameunique('TempToFindTextSize');
         open_system(name)
         [~, bounds] = createNoteGetDims();
         close_system(name, 0)

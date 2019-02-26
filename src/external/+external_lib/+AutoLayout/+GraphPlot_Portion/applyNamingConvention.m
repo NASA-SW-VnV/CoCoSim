@@ -44,7 +44,7 @@ function name = applyNamingConvention(handle)
         name = cell(rows, cols);
         for i = 1:rows
             for j = 1:cols
-                name(i,j) = {applyNamingConvention(handle(i,j))}; % Recurse
+                name(i,j) = {external_lib.AutoLayout.GraphPlot_Portion.applyNamingConvention(handle(i,j))}; % Recurse
             end
         end
     end

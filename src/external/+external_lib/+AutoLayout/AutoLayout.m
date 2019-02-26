@@ -9,19 +9,19 @@ function AutoLayout(address)
 %       N/A
 %
 %   Example:
-%       AutoLayout('AutoLayoutDemo')
+%       external_lib.AutoLayout.AutoLayout('AutoLayoutDemo')
 %           Modifies the AutoLayoutDemo system with one that performs the same
 %           functionally, but is laid out to be more readable.
 
     %% Constants:
     % Getting parameters for the tool to determine its behaviour
-    GRAPHING_METHOD = getAutoLayoutConfig('graphing_method', 'auto'); %Indicates which graphing method to use
-    SHOW_NAMES = getAutoLayoutConfig('show_names', 'no-change'); %Indicates which block names to show
-    PORTLESS_RULE = getAutoLayoutConfig('portless_rule', 'top'); %Indicates how to place portless blocks
-    INPORT_RULE = getAutoLayoutConfig('inport_rule', 'none'); %Indicates how to place inports
-    OUTPORT_RULE = getAutoLayoutConfig('outport_rule', 'none'); %Indicates how to place outports
-    SORT_PORTLESS = getAutoLayoutConfig('sort_portless', 'blocktype'); %Indicates how to group portless blocks
-    NOTE_RULE = getAutoLayoutConfig('note_rule', 'on-right'); %Indicates what to do with annotations
+    GRAPHING_METHOD = external_lib.AutoLayout.getAutoLayoutConfig('graphing_method', 'auto'); %Indicates which graphing method to use
+    SHOW_NAMES = external_lib.AutoLayout.getAutoLayoutConfig('show_names', 'no-change'); %Indicates which block names to show
+    PORTLESS_RULE = external_lib.AutoLayout.getAutoLayoutConfig('portless_rule', 'top'); %Indicates how to place portless blocks
+    INPORT_RULE = external_lib.AutoLayout.getAutoLayoutConfig('inport_rule', 'none'); %Indicates how to place inports
+    OUTPORT_RULE = external_lib.AutoLayout.getAutoLayoutConfig('outport_rule', 'none'); %Indicates how to place outports
+    SORT_PORTLESS = external_lib.AutoLayout.getAutoLayoutConfig('sort_portless', 'blocktype'); %Indicates how to group portless blocks
+    NOTE_RULE = external_lib.AutoLayout.getAutoLayoutConfig('note_rule', 'on-right'); %Indicates what to do with annotations
 
     function ErrorInvalidConfig(config)
         % Call this if a config setting was given an invalid value
@@ -65,19 +65,19 @@ function AutoLayout(address)
     systemBlocks = systemBlocks(2:end); %Remove address itself
 
     %% Make sum blocks rectangular so that they will look better
-    makeSumsRectangular(systemBlocks);
+    external_lib.AutoLayout.GeneralPurpose.makeSumsRectangular(systemBlocks);
 
     %%
     % Find which blocks have no ports
-    portlessBlocks = getPortlessBlocks(systemBlocks);
+    portlessBlocks = external_lib.AutoLayout.getPortlessBlocks(systemBlocks);
 
     % Check that portless_rule is set properly
-    if ~AinB(PORTLESS_RULE, {'top', 'left', 'bottom', 'right', 'same_half_vertical', 'same_half_horizontal'})
+    if ~external_lib.AutoLayout.AinB(PORTLESS_RULE, {'top', 'left', 'bottom', 'right', 'same_half_vertical', 'same_half_horizontal'})
         ErrorInvalidConfig('portless_rule')
     end
 
     % Find where to place portless blocks in the final layout
-    [portlessInfo, smallOrLargeHalf] = getPortlessInfo(PORTLESS_RULE, systemBlocks, portlessBlocks);
+    [portlessInfo, smallOrLargeHalf] = external_lib.AutoLayout.getPortlessInfo(PORTLESS_RULE, systemBlocks, portlessBlocks);
 
     %%
     % 1) For each block, show or do not show its name depending on the SHOW_NAMES
@@ -108,14 +108,14 @@ function AutoLayout(address)
         ge2015b = str2num(ver(1:4)) > 2015 || strcmp(ver(1:5),'2015b');
         if ge2015b
             % Graphplot
-            initLayout = @GraphPlotLayout;
+            initLayout = @external_lib.AutoLayout.GraphPlot_Portion.GraphPlotLayout;
         else
             % Graphviz
             initLayout = @GraphvizLayout;
         end
     elseif strcmp(GRAPHING_METHOD, 'graphplot')
         % Graphplot
-        initLayout = @GraphPlotLayout;
+        initLayout = @external_lib.AutoLayout.GraphPlot_Portion.GraphPlotLayout;
     elseif strcmp(GRAPHING_METHOD, 'graphviz')
         % Graphviz
         initLayout = @GraphvizLayout;
@@ -130,7 +130,7 @@ function AutoLayout(address)
     %%
     % blocksInfo -  keeps track of where to move blocks so that they can all be
     %               moved at the end as opposed to throughout all of AutoLayout
-    blocksInfo = getBlocksInfo(address);
+    blocksInfo = external_lib.AutoLayout.getBlocksInfo(address);
 
     %% Show/hide block names (initLayout may inadvertently set it off)
     if strcmp(SHOW_NAMES, 'no-change')
@@ -175,30 +175,30 @@ function AutoLayout(address)
 
     %%
     % Find relative positioning of blocks in the layout from initLayout
-    layout = getRelativeLayout(blocksInfo); %layout will also take over the role of blocksInfo
-    updateLayout(address, layout); % Only included here for feedback purposes
+    layout = external_lib.AutoLayout.getRelativeLayout(blocksInfo); %layout will also take over the role of blocksInfo
+    external_lib.AutoLayout.updateLayout(address, layout); % Only included here for feedback purposes
 
     %%
-    [layout, portlessInfo] = resizeBlocks(layout, portlessInfo);
+    [layout, portlessInfo] = external_lib.AutoLayout.resizeBlocks(layout, portlessInfo);
 
-    layout = fixSizeOfBlocks(layout);
+    layout = external_lib.AutoLayout.fixSizeOfBlocks(layout);
 
-    % Update block positions according to layout that was changed by resizeBlocks()
-    % and fixSizeOfBlocks()
-    updateLayout(address, layout);
+    % Update block positions according to layout that was changed by external_lib.AutoLayout.resizeBlocks()
+    % and external_lib.AutoLayout.fixSizeOfBlocks()
+    external_lib.AutoLayout.updateLayout(address, layout);
 
     % Move blocks with single inport/outport so their port is in line with
     % the source/destination port
-    layout = vertAlign(layout);
+    layout = external_lib.AutoLayout.vertAlign(layout);
     % % layout = easyAlign(layout); %old method, still relevant since it attempts to cover more cases
 
-    layout = layout2(address, layout, systemBlocks);
+    layout = external_lib.AutoLayout.layout2(address, layout, systemBlocks);
 
     % Align inport/outport blocks if set to do so by inport/outport rules
     if strcmp(INPORT_RULE, 'left_align')
         % Left align the inports
         inports = find_system(address, 'LookUnderMasks', 'all','SearchDepth',1,'BlockType','Inport');
-        layout = justifyBlocks(address, layout, inports, 1);
+        layout = external_lib.AutoLayout.justifyBlocks(address, layout, inports, 1);
     elseif ~strcmp(INPORT_RULE, 'none')
         ErrorInvalidConfig('inport_rule')
     end
@@ -206,27 +206,27 @@ function AutoLayout(address)
     if strcmp(OUTPORT_RULE, 'right_align')
         % Right align the outports
         outports = find_system(address, 'LookUnderMasks', 'all','SearchDepth',1,'BlockType','Outport');
-        layout = justifyBlocks(address, layout, outports, 3);
+        layout = external_lib.AutoLayout.justifyBlocks(address, layout, outports, 3);
     elseif ~strcmp(OUTPORT_RULE, 'none')
         ErrorInvalidConfig('outport_rule')
     end
 
     % Update block positions according to layout
-    updateLayout(address, layout);
+    external_lib.AutoLayout.updateLayout(address, layout);
 
     %%
     % Check that sort_portless is set properly
-    if ~AinB(SORT_PORTLESS, {'blocktype', 'masktype_blocktype', 'none'})
+    if ~external_lib.AutoLayout.AinB(SORT_PORTLESS, {'blocktype', 'masktype_blocktype', 'none'})
         ErrorInvalidConfig('sort_portless')
     end
 
     % Place blocks that have no ports in a line along the top/bottom or left/right
     % horizontally, depending on where they were initially in the system and the
     % PORTLESS_RULE.
-    portlessInfo = repositionPortlessBlocks(portlessInfo, layout, PORTLESS_RULE, smallOrLargeHalf, SORT_PORTLESS);
+    portlessInfo = external_lib.AutoLayout.repositionPortlessBlocks(portlessInfo, layout, PORTLESS_RULE, smallOrLargeHalf, SORT_PORTLESS);
 
     % Update block positions according to portlessInfo
-    updatePortless(address, portlessInfo);
+    external_lib.AutoLayout.updatePortless(address, portlessInfo);
 
     %%
     % Get all the annotations
@@ -235,13 +235,13 @@ function AutoLayout(address)
     if ~(strcmp(NOTE_RULE, 'none') || strcmp(NOTE_RULE, 'on-right'))
         ErrorInvalidConfig('note_rule')
     else
-        handleAnnotations(layout, portlessInfo, annotations, NOTE_RULE);
+        external_lib.AutoLayout.handleAnnotations(layout, portlessInfo, annotations, NOTE_RULE);
     end
 
     %%
     % Orient blocks left-to-right and place name on bottom
     %setOrientations(systemBlocks);
-    setNamePlacements(systemBlocks);
+    external_lib.AutoLayout.GeneralPurpose.setNamePlacements(systemBlocks);
 
     %%
     % Zoom on system (if it ends up zoomed out that means there is

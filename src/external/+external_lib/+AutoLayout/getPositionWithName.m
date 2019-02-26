@@ -16,7 +16,7 @@ function bounds = getPositionWithName(block)
         blockWidth = position(3) - position(1);
 
         name = get_param(block, 'Name');
-        [nameHeight, nameWidth] = blockStringDims(block, name);
+        [nameHeight, nameWidth] = external_lib.AutoLayout.blockStringDims(block, name);
         namePlace = get_param(block, 'NamePlacement');
 
         if nameWidth > blockWidth

@@ -31,13 +31,13 @@ function goto = findGotosInScope(block)
     end
 
     % Get the corresponding Gotos for a given From that are in the correct scope
-    visibilityBlock = findVisibilityTag(block);
+    visibilityBlock = external_lib.AutoLayout.Utility.FindingConnectedBlocks.findVisibilityTag(block);
     if isempty(visibilityBlock)
         goto = find_system(bdroot(block), 'LookUnderMasks', 'all', 'FollowLinks', 'on', ...
             'BlockType', 'Goto', 'GotoTag', tag, 'TagVisibility', 'global');
         return
     end
-    goto = findGotoFromsInScope(visibilityBlock);
+    goto = external_lib.AutoLayout.Utility.FindingConnectedBlocks.findGotoFromsInScope(visibilityBlock);
     blocksToExclude = find_system(get_param(visibilityBlock, 'parent'), 'LookUnderMasks', 'all', ...
         'FollowLinks', 'on', 'BlockType', 'From', 'GotoTag', tag);
     goto = setdiff(goto, blocksToExclude);

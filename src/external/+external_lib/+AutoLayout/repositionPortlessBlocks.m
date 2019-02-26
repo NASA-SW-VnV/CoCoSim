@@ -3,8 +3,8 @@ function portlessInfo = repositionPortlessBlocks(portlessInfo, layout, portless_
 %   Organize portless blocks into groups on the designated sides.
 %
 %   Inputs:
-%       portlessInfo        As returned by getPortlessInfo.
-%       layout              As returned by getRelativeLayout.
+%       portlessInfo        As returned by external_lib.AutoLayout.getPortlessInfo.
+%       layout              As returned by external_lib.AutoLayout.getRelativeLayout.
 %       portless_rule       Rule by which portless blocks should be
 %                           positioned. See PORTLESS_RULE in config.txt.
 %       smallOrLargeHalf    Map relating blocks with the side of the system
@@ -17,7 +17,7 @@ function portlessInfo = repositionPortlessBlocks(portlessInfo, layout, portless_
 %       portlessInfo        Updated portlessInfo with new positions.
 
     ignorePortlessBlocks = true;
-    [leftBound,topBound,rightBound,botBound] = sideExtremes(layout, portlessInfo, ignorePortlessBlocks);
+    [leftBound,topBound,rightBound,botBound] = external_lib.AutoLayout.sideExtremes(layout, portlessInfo, ignorePortlessBlocks);
 
     vertSpace = 20; % Space to leave between blocks vertically
     horzSpace = 20; % Space to leave between blocks horizontally
@@ -62,7 +62,7 @@ function newPortlessInfo = sortPortlessInfo(portlessInfo, sort_portless)
     newPortlessInfo = {};
 
     for i = 1:length(portlessInfo) % for each portless block
-        isNewType = ~AinB(getBlockCategory(portlessInfo{i}.fullname,sort_portless), categories);
+        isNewType = ~external_lib.AutoLayout.AinB(getBlockCategory(portlessInfo{i}.fullname,sort_portless), categories);
         if isNewType % if the block's value for the sort_portless is new to categories
 
             % Record category
@@ -82,7 +82,7 @@ function cat = getBlockCategory(block,sort_portless)
     if strcmp(sort_portless, 'blocktype')
         cat = get_param(block,sort_portless);
     elseif strcmp(sort_portless, 'masktype_blocktype')
-        params = strsplit('masktype_blocktype','_');
+        params = external_lib.AutoLayout.Utility.matlab.strsplit('masktype_blocktype','_');
         cat = [get_param(block,params{1}), '_', get_param(block,params{2})];
     end
 end

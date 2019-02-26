@@ -3,7 +3,7 @@ function layout = adjustForPorts(layout)
 %   their ports without disturbing the relative layout.
 %
 %   Inputs:
-%       layout      As returned by getRelativeLayout.
+%       layout      As returned by external_lib.AutoLayout.getRelativeLayout.
 %
 %   Outputs:
 %       layout      With modified position information.
@@ -12,10 +12,10 @@ function layout = adjustForPorts(layout)
         for i = 1:layout.colLengths(j) % for each non empty row in column
             block = layout.grid{i,j}.fullname; % block to resize
             pos = layout.grid{i,j}.position;
-            [layout.grid{i,j}.position, yDisplace] = dimIncreaseForPorts(...
+            [layout.grid{i,j}.position, yDisplace] = external_lib.AutoLayout.dimIncreaseForPorts(...
                 block, pos, 'bot'); % Returns amount to move other blocks
 
-            layout = vertMoveColumn(layout, i, j, yDisplace);
+            layout = external_lib.AutoLayout.vertMoveColumn(layout, i, j, yDisplace);
         end
     end
 end

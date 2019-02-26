@@ -3,7 +3,7 @@ function updatePortless(address, portlessInfo)
 %
 %   Inputs:
 %       address         Simulink system name or path.
-%       portlessInfo    As returned by getPortlessInfo.
+%       portlessInfo    As returned by external_lib.AutoLayout.getPortlessInfo.
 %
 %   Outputs:
 %       N/A
@@ -16,5 +16,5 @@ function updatePortless(address, portlessInfo)
     end
 
     % Move blocks to the desired positions
-    moveBlocks(address, fullnames, positions);
+    external_lib.AutoLayout.moveBlocks(address, fullnames, positions);
 end

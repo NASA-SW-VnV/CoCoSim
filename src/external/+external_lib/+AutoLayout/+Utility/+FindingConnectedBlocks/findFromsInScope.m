@@ -37,8 +37,8 @@ function froms = findFromsInScope(block)
         return
     % Goto is scoped
     elseif strcmp(tagVis, 'scoped');
-        visibilityBlock = findVisibilityTag(block);
-        froms = findGotoFromsInScope(visibilityBlock);
+        visibilityBlock = external_lib.AutoLayout.Utility.FindingConnectedBlocks.findVisibilityTag(block);
+        froms = external_lib.AutoLayout.Utility.FindingConnectedBlocks.findGotoFromsInScope(visibilityBlock);
         blocksToExclude = find_system(get_param(visibilityBlock, 'parent'), 'LookUnderMasks', 'all', ...
             'FollowLinks', 'on', 'BlockType', 'Goto', 'GotoTag', tag);
         froms = setdiff(froms, blocksToExclude);

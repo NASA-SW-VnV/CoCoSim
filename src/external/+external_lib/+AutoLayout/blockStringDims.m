@@ -15,7 +15,7 @@ function [height, width] = blockStringDims(block, string)
     if fontSize == -1
         fontSize = get_param(bdroot(block), 'DefaultBlockFontSize');
     end
-    dims = getTextDims(string, fontName, fontSize, get_param(block, 'Parent'));
+    dims = external_lib.AutoLayout.Utility.getTextDims(string, fontName, fontSize, get_param(block, 'Parent'));
     width = dims(1);
     height = dims(2);
 end

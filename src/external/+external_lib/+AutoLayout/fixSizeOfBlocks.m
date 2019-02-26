@@ -3,7 +3,7 @@ function layout = fixSizeOfBlocks(layout)
 %   to default sizes.
 %
 %   Inputs:
-%       layout          As returned by getRelativeLayout.
+%       layout          As returned by external_lib.AutoLayout.getRelativeLayout.
 %
 %   Output:
 %       layout          With modified position information.

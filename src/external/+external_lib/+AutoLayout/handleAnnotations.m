@@ -4,8 +4,8 @@ function handleAnnotations(layout, portlessInfo, annotations, note_rule)
 %   system.
 %
 %   Inputs:
-%       layout          As returned by getRelativeLayout.
-%       portlessInfo    As returned by getPortlessInfo.
+%       layout          As returned by external_lib.AutoLayout.getRelativeLayout.
+%       portlessInfo    As returned by external_lib.AutoLayout.getPortlessInfo.
 %       annotations     Vector of all of the annotations in the system.
 %       note_rule       Rule indicating what to do with annotations. See
 %                       NOTE_RULE in config.txt.
@@ -17,7 +17,7 @@ function handleAnnotations(layout, portlessInfo, annotations, note_rule)
         arbitraryBuffer = 50;
 
         ignorePortlessBlocks = false;
-        [~,topBound,rightBound,botBound] = sideExtremes(layout, portlessInfo, ignorePortlessBlocks);
+        [~,topBound,rightBound,botBound] = external_lib.AutoLayout.sideExtremes(layout, portlessInfo, ignorePortlessBlocks);
 
         top = topBound;
         left = rightBound + arbitraryBuffer;
@@ -27,7 +27,7 @@ function handleAnnotations(layout, portlessInfo, annotations, note_rule)
         for i = 1:length(annotations)
 
             % Find width and height to maintain during repositioning
-            bounds = boundingBox(annotations(i));
+            bounds = external_lib.AutoLayout.boundingBox(annotations(i));
 
             width = bounds(3) - bounds(1);
             height = bounds(4) - bounds(2);

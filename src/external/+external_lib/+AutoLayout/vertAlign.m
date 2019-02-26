@@ -4,7 +4,7 @@ function layout = vertAlign(layout)
 %   which connect to a single block through an inport/outport.
 %
 %   Inputs:
-%       layout          As returned by getRelativeLayout.
+%       layout          As returned by external_lib.AutoLayout.getRelativeLayout.
 %
 %   Outputs:
 %       layout          With modified position information.
@@ -80,14 +80,14 @@ function layout = vertAlign(layout)
             % then mark to move and remove from list to align.
             % Else leave in list to align
             doAlign = false; % Used to see if the variable has space to undergo the alignment
-            curBounds = getPositionWithName(layout.grid{row,col}.fullname);
+            curBounds = external_lib.AutoLayout.getPositionWithName(layout.grid{row,col}.fullname);
             if shamt < 0
                 if row == 1
                     % Block has enough space to move
                     doAlign = true;
                     blocksToTryAlign(i) = [];
                 else
-                    blockBounds = getPositionWithName(layout.grid{row-1,col}.fullname);
+                    blockBounds = external_lib.AutoLayout.getPositionWithName(layout.grid{row-1,col}.fullname);
                     if blockBounds(4) < curBounds(2) + shamt
                         % Block has enough space to move
                         doAlign = true;
@@ -100,7 +100,7 @@ function layout = vertAlign(layout)
                     doAlign = true;
                     blocksToTryAlign(i) = [];
                 else
-                    blockBounds = getPositionWithName(layout.grid{row+1,col}.fullname);
+                    blockBounds = external_lib.AutoLayout.getPositionWithName(layout.grid{row+1,col}.fullname);
                     if blockBounds(2) > curBounds(4) + shamt
                         % Block has enough space to move
                         doAlign = true;

@@ -14,23 +14,35 @@ function schema = precontext_menu(varargin)
     schema.autoDisableWhen = 'Busy';
     
     schema.childrenFcns = {@verificationResultPrecontextMenu, ...
-        @MiscellaneousMenu.replaceInportsWithSignalBuilders};
+        @MiscellaneousMenu.replaceInportsWithSignalBuilders, ...
+        @getAutoLayoutTool};
     
 end
-
+%%
 function schema = verificationResultPrecontextMenu(varargin)
     schema = sl_container_schema;
     schema.label = 'Verification Results';
     schema.statustip = 'Get the Active verification results';
     schema.autoDisableWhen = 'Busy';
     schema.childrenFcns = {...
-            @VerificationMenu.displayHtmlVerificationResults,...
-            @VerificationMenu.compositionalOptions...
-            };
-    modelWorkspace = get_param(gcs,'modelworkspace');
+        @VerificationMenu.displayHtmlVerificationResults,...
+        @VerificationMenu.compositionalOptions...
+        };
+    modelWorkspace = get_param(bdroot(gcs),'modelworkspace');
     if ~isempty(modelWorkspace) && modelWorkspace.hasVariable('compositionalMap')
-        schema.state = 'Enabled';        
+        schema.state = 'Enabled';
     else
         schema.state = 'Hidden';
     end
+end
+%%
+function schema = getAutoLayoutTool(callbackinfo)
+    schema = sl_action_schema;
+    schema.label = 'Auto Layout';
+    schema.userdata = 'autolayout';
+    schema.callback = @AutoLayoutToolCallback;
+end
+
+function AutoLayoutToolCallback(callbackInfo)
+    external_lib.AutoLayout.AutoLayout(gcs);
 end

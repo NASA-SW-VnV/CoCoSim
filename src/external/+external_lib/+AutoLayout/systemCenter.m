@@ -18,10 +18,10 @@ function [x,y] = systemCenter(blocks)
     % For each block, compare its position to the current smallest bound and
     % set it as the new smallest bounds if is smaller
     for i = 1:length(blocks)
-        leftPos = getBlockSidePositions(blocks(i), 1);
-        topPos = getBlockSidePositions(blocks(i), 2);
-        rightPos = getBlockSidePositions(blocks(i), 3);
-        botPos = getBlockSidePositions(blocks(i), 4);
+        leftPos = external_lib.AutoLayout.getBlockSidePositions(blocks(i), 1);
+        topPos = external_lib.AutoLayout.getBlockSidePositions(blocks(i), 2);
+        rightPos = external_lib.AutoLayout.getBlockSidePositions(blocks(i), 3);
+        botPos = external_lib.AutoLayout.getBlockSidePositions(blocks(i), 4);
 
         if topPos < smallestY
             smallestY = topPos;

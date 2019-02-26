@@ -20,20 +20,20 @@ function [layout] = getRelativeLayout(blocksInfo)
 
     % Ordering is based on the horizontal midpoints of blocks. The justification
     % of justifyBlocks assumes this and needs to be updated if it changes.
-    [midXPositions, ~] = rectCenter({blocksInfo.position});
+    [midXPositions, ~] = external_lib.AutoLayout.rectCenter({blocksInfo.position});
     midXPositions = sort(unique(midXPositions));
 
     % Get column lengths and make an unsorted blocksMatrix
     colLengths = zeros(1,length(midXPositions));
     for i = 1:length(blocksInfo)
-        [midXPos, ~] = rectCenter({blocksInfo(i).position});
+        [midXPos, ~] = external_lib.AutoLayout.rectCenter({blocksInfo(i).position});
         col = isWhere(midXPos, midXPositions);
         colLengths(col) = colLengths(col) + 1;
         grid{colLengths(col), col} = blocksInfo(i);
     end
 
     % Sort grid
-    grid = sortRelativeLayout(grid, colLengths);
+    grid = external_lib.AutoLayout.sortRelativeLayout(grid, colLengths);
 
     layout = struct('grid', {grid}, 'colLengths', {colLengths});
 end

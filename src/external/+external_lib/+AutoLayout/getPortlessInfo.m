@@ -52,14 +52,14 @@ function [portlessInfo, smallOrLargeHalf] = getPortlessInfo(portless_rule, syste
                     'position', []);
             end
         case 'same_half_vertical'
-            [~,center] = systemCenter(systemBlocks);
+            [~,center] = external_lib.AutoLayout.systemCenter(systemBlocks);
 
             portlessInfo = struct('fullname', {}, ...
                         'position', {});
             smallOrLargeHalf = containers.Map();
 
             for i = 1:length(portlessBlocks)
-                bool = onSide(portlessBlocks{i}, center, 'top');
+                bool = external_lib.AutoLayout.onSide(portlessBlocks{i}, center, 'top');
                 if bool
                     smallOrLargeHalf(portlessBlocks{i}) = 'top';
                 else
@@ -69,14 +69,14 @@ function [portlessInfo, smallOrLargeHalf] = getPortlessInfo(portless_rule, syste
                     'position', []);
             end
         case 'same_half_horizontal'
-            [center,~] = systemCenter(systemBlocks);
+            [center,~] = external_lib.AutoLayout.systemCenter(systemBlocks);
 
             portlessInfo = struct('fullname', {}, ...
                         'position', {});
             smallOrLargeHalf = containers.Map();
 
             for i = 1:length(portlessBlocks)
-                bool = onSide(portlessBlocks{i}, center, 'top');
+                bool = external_lib.AutoLayout.onSide(portlessBlocks{i}, center, 'top');
                 if bool
                     smallOrLargeHalf(portlessBlocks{i}) = 'left';
                 else

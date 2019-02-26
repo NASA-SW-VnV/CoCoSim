@@ -17,9 +17,9 @@ function bool = onSide(block, center, side)
 
     switch side
         case 'left'
-            midPos = getBlockSidePositions({block}, 5);
+            midPos = external_lib.AutoLayout.getBlockSidePositions({block}, 5);
         case 'top'
-            midPos = getBlockSidePositions({block}, 6);
+            midPos = external_lib.AutoLayout.getBlockSidePositions({block}, 6);
     end
     bool = midPos <= center;
 end

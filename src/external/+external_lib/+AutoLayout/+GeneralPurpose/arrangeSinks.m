@@ -34,7 +34,7 @@ function [snks, snkPositions, didMove] = arrangeSinks(blk, doMove)
     for i = 1:length(out)
         lh = get_param(out(i), 'Line');
         dst = get_param(lh, 'DstPortHandle');
-        if isBranching(lh)
+        if external_lib.AutoLayout.Utility.isBranching(lh)
             doMove = false;
             dst = dst(1); % Arbitrarily select a destination to use
         end

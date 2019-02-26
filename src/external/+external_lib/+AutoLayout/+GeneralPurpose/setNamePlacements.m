@@ -13,8 +13,8 @@ function setNamePlacements(blocks, varargin)
 %       N/A
 %
 %   Example:
-%       setNamePlacements(gcbs, 'normal')
-%       setNamePlacements(gcbs, 'alternate')
+%       external_lib.AutoLayout.GeneralPurpose.setNamePlacements(gcbs, 'normal')
+%       external_lib.AutoLayout.GeneralPurpose.setNamePlacements(gcbs, 'alternate')
 
     if nargin > 1
         namePlacement = varargin{1};

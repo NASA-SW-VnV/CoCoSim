@@ -3,7 +3,7 @@ function updateLayout(address, layout)
 %
 %   Inputs:
 %       address         Simulink system name or path.
-%       layout          As returned by getRelativeLayout.
+%       layout          As returned by external_lib.AutoLayout.getRelativeLayout.
 %
 %   Outputs:
 %       N/A
@@ -18,5 +18,5 @@ function updateLayout(address, layout)
     end
 
     % Move blocks to the desired positions
-    moveBlocks(address, fullnames, positions);
+    external_lib.AutoLayout.moveBlocks(address, fullnames, positions);
 end
