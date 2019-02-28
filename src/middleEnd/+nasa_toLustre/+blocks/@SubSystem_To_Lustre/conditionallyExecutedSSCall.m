@@ -14,7 +14,8 @@ function [codes, node_name, inputs, ExecutionCondVar] = ...
     L = nasa_toLustre.ToLustreImport.L;
     import(L{:})
     codes = {};
-    node_name = strcat(node_name, '_automaton');
+    node_name = strcat(node_name, '_condExecSS');
+    %node_name = strcat(node_name, '_automaton');
     % ExecutionCondName may be used by Merge block, keep it even if
     % not given as input to the automaton node.
     ExecutionCondName = nasa_toLustre.blocks.SubSystem_To_Lustre.getExecutionCondName(blk);

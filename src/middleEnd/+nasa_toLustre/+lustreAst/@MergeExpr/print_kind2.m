@@ -1,4 +1,4 @@
-function code = print_kind2(obj)
+function code = print_kind2(obj, backend)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -6,5 +6,9 @@ function code = print_kind2(obj)
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  
-    code = obj.print_lustrec(LusBackendType.KIND2);
+    exprs_cell = cellfun(@(x) sprintf('%s', x.print(backend)),...
+        obj.exprs, 'UniformOutput', 0);
+    exprs_str = MatlabUtils.strjoin(exprs_cell, ';\n\t\t');
+    
+    code = sprintf('merge(%s;\n\t\t %s)', obj.clock.print(backend), exprs_str);
 end

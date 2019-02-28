@@ -60,7 +60,7 @@ classdef RandomNumber_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             obj.setCode( codes );
         end
         
-        function options = getUnsupportedOptions(obj, parent, blk, varargin)
+        function options = getUnsupportedOptions(obj, parent, blk, lus_backend, varargin)
             L = nasa_toLustre.ToLustreImport.L;
             import(L{:})
             [~, ~, status] = ...
@@ -74,6 +74,13 @@ classdef RandomNumber_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             if status
                 obj.addUnsupported_options(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
                     blk.Variance, HtmlItem.addOpenCmd(blk.Origin_path)));
+            end
+            if LusBackendType.isJKIND(lus_backend)
+                obj.addUnsupported_options(sprintf(...
+                    ['Block "%s" is not supported by JKind model checker.', ...
+                'This optiont is supported by the other model checks. ', ...
+                cocosim_menu.CoCoSimPreferences.getChangeModelCheckerMsg()], ...
+                    HtmlItem.addOpenCmd(blk.Origin_path)));
             end
             options = obj.unsupported_options;
         end

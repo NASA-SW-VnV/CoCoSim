@@ -67,7 +67,7 @@ classdef MergeExpr < nasa_toLustre.lustreAst.LustreExpr
         
         code = print_lustrec(obj, backend)
         
-        code = print_kind2(obj)
+        code = print_kind2(obj, backend)
         code = print_zustre(obj)
         code = print_jkind(obj)
         code = print_prelude(obj)

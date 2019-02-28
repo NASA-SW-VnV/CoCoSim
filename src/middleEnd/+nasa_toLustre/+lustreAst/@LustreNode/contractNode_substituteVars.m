@@ -41,11 +41,11 @@ function new_obj = contractNode_substituteVars(obj)
     % go over Assignments
     for i=1:numel(new_bodyEqs)
         % e.g. y = f(x); 
-        var = new_bodyEqs{i}.getLhs();
+        
         if isa(new_bodyEqs{i}, 'LustreEq')...
-                && isa(var, 'VarIdExpr')...
-                && nasa_toLustre.lustreAst.VarIdExpr.ismemberVar(var, new_localVars)
-            
+                && isa(new_bodyEqs{i}.getLhs(), 'VarIdExpr')...
+                && nasa_toLustre.lustreAst.VarIdExpr.ismemberVar(new_bodyEqs{i}.getLhs(), new_localVars)
+            var = new_bodyEqs{i}.getLhs();
             rhs = new_bodyEqs{i}.getRhs();
             new_var = nasa_toLustre.lustreAst.ParenthesesExpr(rhs.deepCopy());
 

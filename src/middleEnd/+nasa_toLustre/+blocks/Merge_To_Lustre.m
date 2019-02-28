@@ -115,7 +115,7 @@ classdef Merge_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             L = nasa_toLustre.ToLustreImport.L;
             import(L{:})
             if strcmp(blk.AllowUnequalInputPortWidths, 'on')
-                display_msg(sprintf('Merge block "%s" is not supported. CoCoSim supports only Merge blocks with equal Input Port widths', ...
+                obj.addUnsupported_options(sprintf('Merge block "%s" is not supported. CoCoSim supports only Merge blocks with equal Input Port widths', ...
                     HtmlItem.addOpenCmd(blk.Origin_path)));
             end
             widths = blk.CompiledPortWidths.Inport;

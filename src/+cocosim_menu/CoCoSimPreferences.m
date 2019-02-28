@@ -65,5 +65,9 @@ classdef CoCoSimPreferences < handle
             preferencesFile = cocosim_menu.CoCoSimPreferences.getPreferencesMatPath();
             save(preferencesFile, 'CoCoSimPreferences');
         end
+        
+        function msg = getChangeModelCheckerMsg()
+            msg = 'To change the default model checker go to "tools -> CoCoSim -> Preferences -> Lustre Verification Backend".';
+        end
     end
 end

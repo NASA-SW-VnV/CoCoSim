@@ -36,7 +36,7 @@ function [ main_node] = condExecSS_To_LusAutomaton( parent_ir, ss_ir, ...
     
     
     
-    node_name = strcat(blk_name, '_automaton');
+    node_name = strcat(blk_name, '_condExecSS');
     
     
     % Body code

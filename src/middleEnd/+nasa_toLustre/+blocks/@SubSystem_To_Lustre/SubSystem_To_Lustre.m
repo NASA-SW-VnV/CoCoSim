@@ -51,7 +51,7 @@ classdef SubSystem_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     isEnabledSubsystem, EnableShowOutputPortIsOn, ...
                     isTriggered, TriggerShowOutputPortIsOn, TriggerType, TriggerDT, ...
                     isActionSS);
-                    obj.addVariable(EnableCondVar);
+                obj.addVariable(EnableCondVar);
             elseif isForIteraorSS
                 node_name = strcat(node_name, '_iterator');
             end
@@ -89,10 +89,10 @@ classdef SubSystem_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             
             
             obj.setCode( codes );
-            obj.addVariable(outputs_dt); 
+            obj.addVariable(outputs_dt);
         end
         %%
-        function options = getUnsupportedOptions(obj, parent, blk, varargin)
+        function options = getUnsupportedOptions(obj, parent, blk, lus_backend, varargin)
             L = nasa_toLustre.ToLustreImport.L;
             import(L{:})
             isInsideContract =nasa_toLustre.utils.SLX2LusUtils.isContractBlk(parent);
@@ -112,7 +112,14 @@ classdef SubSystem_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             end
             [isResetSubsystem, ResetType] =nasa_toLustre.blocks.SubSystem_To_Lustre.hasResetPort(blk);
             if isResetSubsystem
-                if ~nasa_toLustre.utils.SLX2LusUtils.resetTypeIsSupported(ResetType)
+                if LusBackendType.isJKIND(lus_backend)
+                    obj.addUnsupported_options(sprintf(...
+                        ['Block "%s" is not supported by JKind model checker.', ...
+                        ' The block has a "reset" option that resets the Subsystem internal memories. ', ...
+                        'This optiont is supported by other model checks. ', ...
+                        cocosim_menu.CoCoSimPreferences.getChangeModelCheckerMsg()], ...
+                        HtmlItem.addOpenCmd(blk.Origin_path)));
+                elseif ~nasa_toLustre.utils.SLX2LusUtils.resetTypeIsSupported(ResetType)
                     obj.addUnsupported_options(sprintf('This External reset type [%s] is not supported in block %s.', ...
                         ResetType, HtmlItem.addOpenCmd(blk.Origin_path)));
                 end
@@ -128,35 +135,35 @@ classdef SubSystem_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     methods (Static = true)
         %%
         code = contractBlkCode(parent, blk, node_name, inputs, ...
-                outputs, maskType, xml_trace)
+            outputs, maskType, xml_trace)
         %%
         [b, hasNoOutputs, vsBlk] = hasVerificationSubsystem(blk)
-
+        
         [b, ShowOutputPortIsOn, StatesWhenEnabling] = hasEnablePort(blk)
         
         [b, StatesWhenEnabling] = hasActionPort(blk)
         
         [b, ResetType] = hasResetPort(blk)
-
+        
         [b, ShowOutputPortIsOn, TriggerType, TriggerDT] = hasTriggerPort(blk)
-
+        
         [b, Iteratorblk] = hasForIterator(blk)
         %%
         ExecutionCondName = getExecutionCondName(blk)
-
+        
         [codes, node_name, inputs, ExecutionCondVar] = ...
-                conditionallyExecutedSSCall(parent, blk, ...
-                node_name, inputs, ...
-                isEnabledSubsystem, EnableShowOutputPortIsOn, ...
-                isTriggered, TriggerShowOutputPortIsOn, TriggerType, TriggerBlockDT, ...
-                isActionSS)
-
+            conditionallyExecutedSSCall(parent, blk, ...
+            node_name, inputs, ...
+            isEnabledSubsystem, EnableShowOutputPortIsOn, ...
+            isTriggered, TriggerShowOutputPortIsOn, TriggerType, TriggerBlockDT, ...
+            isActionSS)
+        
         [codes, ResetCondVar] = ResettableSSCall(parent, blk, ...
-                node_name, blk_name, ...
-                ResetType, codes, inputs, outputs)
+            node_name, blk_name, ...
+            ResetType, codes, inputs, outputs)
         %% trigger value
         TriggerinputExp = getTriggerValue(Cond, triggerInput, ...
-                TriggerType, TriggerBlockDt, IncomingSignalDT)
+            TriggerType, TriggerBlockDt, IncomingSignalDT)
     end
 end
 

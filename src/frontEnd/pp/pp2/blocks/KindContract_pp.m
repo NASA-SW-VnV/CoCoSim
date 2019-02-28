@@ -24,7 +24,6 @@ if not(isempty(contractBlocks_list))
     
     for i=1:length(contractBlocks_list)
         try
-        display_msg(contractBlocks_list{i}, MsgType.DEBUG, 'KindContract_pp', '');
         % setting the MaskType
         try
             if isempty(get_param(contractBlocks_list{i},'MaskType'))
@@ -49,7 +48,6 @@ if not(isempty(LusOperator_list))
     display_msg('Processing LustreOperator blocks', MsgType.INFO, 'PP', '');
     
     for i=1:length(LusOperator_list)
-        display_msg(LusOperator_list{i}, MsgType.DEBUG, 'KindContract_pp', '');
         % setting the MaskType
         try
             set_param(LusOperator_list{i},'MaskType',...
