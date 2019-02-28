@@ -21,7 +21,7 @@ classdef LustreAst < handle
         print_prelude(obj)
     end
     methods(Static)
-        code = listVarsWithDT(vars, backend)
+        code = listVarsWithDT(vars, backend, forNodeHeader)
         
     end
 end

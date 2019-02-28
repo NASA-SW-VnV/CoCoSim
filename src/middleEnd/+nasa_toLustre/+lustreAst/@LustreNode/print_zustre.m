@@ -6,5 +6,5 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function code = print_zustre(obj)
-    code = obj.print_lustrec(LusBackendType.ZUSTRE);
+    code = obj.print(LusBackendType.ZUSTRE);
 end

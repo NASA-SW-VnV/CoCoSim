@@ -6,5 +6,5 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function code = print_prelude(obj)
-    code = obj.print_lustrec(LusBackendType.PRELUDE);
+    code = obj.print(LusBackendType.PRELUDE);
 end
