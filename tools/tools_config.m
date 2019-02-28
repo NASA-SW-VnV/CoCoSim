@@ -23,12 +23,10 @@
 %   KIND2
 
 global tools_config_already_run LUSTREC LUSTREC_OPTS LUSTRET ...
-    LUCTREC_INCLUDE_DIR ZUSTRE Z3 KIND2 JKIND SEAHORN...
+    LUCTREC_INCLUDE_DIR ZUSTRE Z3 KIND2 JKIND JLUSTRE2KIND SEAHORN...
     WLLVM WLLVMPP EXTRACT_BC IKOS cocosim_version;
-if isempty(tools_config_already_run)
-    tools_config_already_run = 0;
-else
-    tools_config_already_run = 1;
+if isempty(tools_config_already_run) 
+    tools_config_already_run = false;
 end
 if tools_config_already_run && ~isempty(LUSTREC) && ~isempty(KIND2) && ~isempty(Z3)
     %already run
@@ -37,7 +35,8 @@ else
     [tools_root, ~, ~] = fileparts(which('tools_config')); %fileparts(mfilename('fullpath'));
     cocoSim_root = fileparts(tools_root);
     if ~exist('solvers_path', 'var')
-        solvers_path = fullfile(cocoSim_root, 'tools', 'verifiers');
+        verifiers_path = fullfile(cocoSim_root, 'tools', 'verifiers');
+        solvers_path = verifiers_path;
         if ismac
             solvers_path = fullfile(solvers_path, 'osx');
             Z3Library_path = fullfile(solvers_path,'spacer', 'lib', 'libz3.dylib');
@@ -73,7 +72,8 @@ else
     ZUSTRE = fullfile(solvers_path, 'bin', 'zustre');
     Z3 = fullfile(solvers_path,'z3', 'bin', 'z3');
     KIND2 = fullfile(solvers_path, 'bin', 'kind2');
-    JKIND = 'Path to Jkind binary';
+    JKIND = fullfile(verifiers_path, 'jkind', 'jkind');
+    JLUSTRE2KIND = fullfile(verifiers_path, 'jkind', 'jlustre2kind');
     SEAHORN = 'PATH';
     
     if ~tools_config_already_run
@@ -146,4 +146,5 @@ else
     end
     %%
     cocosim_version = 'v0.1';
+    tools_config_already_run = true;
 end

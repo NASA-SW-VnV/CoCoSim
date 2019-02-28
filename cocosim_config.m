@@ -8,9 +8,7 @@
 % variable.
 global cocosim_config_already_run;
 if isempty(cocosim_config_already_run)
-    cocosim_config_already_run = 0;
-else
-    cocosim_config_already_run = 1;
+    cocosim_config_already_run = false;
 end
 if cocosim_config_already_run
     % only tools_config is needed from old compiler
@@ -79,4 +77,5 @@ else
     end
     
     warning on
+    cocosim_config_already_run = true;
 end

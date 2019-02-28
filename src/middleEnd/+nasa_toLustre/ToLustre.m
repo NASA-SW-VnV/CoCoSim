@@ -19,7 +19,7 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, abstractedBlo
     
     %% global variables
     global TOLUSTRE_ENUMS_MAP TOLUSTRE_ENUMS_CONV_NODES ...
-        KIND2 Z3 LUSTREC CHECK_SF_ACTIONS ...
+        KIND2 JKIND JLUSTRE2KIND Z3 LUSTREC CHECK_SF_ACTIONS ...
         ERROR_MSG WARNING_MSG DEBUG_MSG COCOSIM_DEV_DEBUG...
         DED_PROP_MAP CoCoSimPreferences;
     ERROR_MSG = {};
@@ -245,11 +245,13 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, abstractedBlo
     ToLustre_datenum_map(model_path) = lustre_file_path;
     
     %% check lustre syntax
-    if LusBackendType.isKIND2(lus_backend) || LusBackendType.isLUSTREC(lus_backend)
+    if ~LusBackendType.isPRELUDE(lus_backend) 
         if LusBackendType.isKIND2(lus_backend)
             [syntax_status, output] = Kind2Utils2.checkSyntaxError(lustre_file_path, KIND2, Z3);
         elseif LusBackendType.isLUSTREC(lus_backend)
             [~, syntax_status, output] = LustrecUtils.generate_lusi(lustre_file_path, LUSTREC );
+        elseif LusBackendType.isJKIND(lus_backend)
+            [syntax_status, output] = JKindUtils.checkSyntaxError(lustre_file_path, JLUSTRE2KIND);
         else
             syntax_status = 0;
             output = '';

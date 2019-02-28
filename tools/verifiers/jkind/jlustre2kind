@@ -1,0 +1,12 @@
+#!/bin/sh
+
+# Follow symbolic links to find actual JKind directory
+# By David Greve
+# Adapted from http://stackoverflow.com/a/7400673/984145
+
+rawpath() { [ ! -h "$1" ] && echo "$1" || (local link="$(expr "$(command ls -ld -- "$1")" : '.*-> \(.*\)$')"; cd $(dirname $1); rawpath "$link" | sed "s|^\([^/].*\)\$|$(dirname $1)/\1|"); }
+
+linkdir() { cd $(dirname $(rawpath $1)); pwd -P; }
+
+JKIND_DIR=$(linkdir $0)
+java -jar $JKIND_DIR/jkind.jar -jlustre2kind "$@"
