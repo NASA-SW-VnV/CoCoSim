@@ -1,0 +1,23 @@
+function code = print_lustrec(obj, backend)
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Copyright (c) 2017 United States Government as represented by the
+    % Administrator of the National Aeronautics and Space Administration.
+    % All Rights Reserved.
+    % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    args_clocked = cellfun(@(x) nasa_toLustre.lustreAst.BinaryExpr(...
+        nasa_toLustre.lustreAst.BinaryExpr.WHEN, x, obj.activate_cond), ...
+        obj.nodeArgs, 'un', 0);
+    args_str_cell = cellfun(@(x) x.print(backend), args_clocked, 'un', 0);
+    args_str = MatlabUtils.strjoin(args_str_cell, ', ');
+    if obj.has_restart
+        code = sprintf('(%s(%s) every %s)', ...
+            obj.nodeName, ...
+            args_str,...
+            obj.has_restart.print(backend));
+    else
+        code = sprintf('%s(%s)', ...
+            obj.nodeName, ...
+            args_str);
+    end
+end
