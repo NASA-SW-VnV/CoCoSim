@@ -21,23 +21,23 @@ function [body, vars,Ast_dimJump] = ...
     vars = cell(1,NumberOfTableDimensions);            
     dimJump = ones(1,NumberOfTableDimensions);
     L_dimjump = cell(1,NumberOfTableDimensions);
-    L_dimjump{1} =  VarIdExpr(sprintf('%s_dimJump_%d',blk_name,1));
+    L_dimjump{1} =  nasa_toLustre.lustreAst.VarIdExpr(sprintf('%s_dimJump_%d',blk_name,1));
     Ast_dimJump = cell(1,NumberOfTableDimensions);
-    Ast_dimJump{1} = IntExpr(1);
+    Ast_dimJump{1} = nasa_toLustre.lustreAst.IntExpr(1);
     %vars = sprintf('%s\t%s:%s;\n',vars,L_dimjump{1},indexDataType);
-    vars{1} = LustreVar(L_dimjump{1},indexDataType);
+    vars{1} = nasa_toLustre.lustreAst.LustreVar(L_dimjump{1},indexDataType);
     %body = sprintf('%s%s = %d;\n\t', body,L_dimjump{1}, dimJump(1));
-    body{1} = LustreEq(L_dimjump{1},IntExpr(dimJump(1)));
+    body{1} = nasa_toLustre.lustreAst.LustreEq(L_dimjump{1},nasa_toLustre.lustreAst.IntExpr(dimJump(1)));
     for i=2:NumberOfTableDimensions
-        L_dimjump{i} =  VarIdExpr(sprintf('%s_dimJump_%d',blk_name,i));
+        L_dimjump{i} =  nasa_toLustre.lustreAst.VarIdExpr(sprintf('%s_dimJump_%d',blk_name,i));
         %vars = sprintf('%s\t%s:%s;\n',vars,L_dimjump{i},indexDataType);
-        vars{i} = LustreVar(L_dimjump{i},indexDataType);
+        vars{i} = nasa_toLustre.lustreAst.LustreVar(L_dimjump{i},indexDataType);
         for j=1:i-1
             dimJump(i) = dimJump(i)*numel(BreakpointsForDimension{j});
         end
         %body = sprintf('%s%s = %d;\n\t', body,L_dimjump{i}, dimJump(i));
-        body{i} = LustreEq(L_dimjump{i},IntExpr(dimJump(i)));
-        Ast_dimJump{i} = IntExpr(dimJump(i));
+        body{i} = nasa_toLustre.lustreAst.LustreEq(L_dimjump{i},nasa_toLustre.lustreAst.IntExpr(dimJump(i)));
+        Ast_dimJump{i} = nasa_toLustre.lustreAst.IntExpr(dimJump(i));
     end
 end
 

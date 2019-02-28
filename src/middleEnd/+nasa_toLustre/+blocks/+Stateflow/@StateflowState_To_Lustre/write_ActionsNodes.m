@@ -30,7 +30,7 @@ function  [external_nodes, external_libraries ] = ...
         addNodes(T{i}, true)
     end
     [node,  external_libraries_i] = ...
-        StateflowTransition_To_Lustre.get_DefaultTransitionsNode(state, data_map);
+        nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.get_DefaultTransitionsNode(state, data_map);
     if ~isempty(node)
         external_nodes{end+1} = node;
     end

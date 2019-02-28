@@ -41,7 +41,7 @@ classdef Gain_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             [lusOutDT, zero] =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(outputDataType);
             
             [gain, ~, status] = ...
-                Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Gain);
+                nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Gain);
             if status
                 display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
                     blk.Gain, HtmlItem.addOpenCmd(blk.Origin_path)), ...
@@ -55,21 +55,21 @@ classdef Gain_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 return;
             end
             if strcmp(lusOutDT, 'int')
-                gainAst = IntExpr(gain);
+                gainAst = nasa_toLustre.lustreAst.IntExpr(gain);
             elseif strcmp(lusOutDT, 'bool')
                 % this case never occur as output can never be bool.
-                gainAst = BooleanExpr(gain);
+                gainAst = nasa_toLustre.lustreAst.BooleanExpr(gain);
             else
-                gainAst = RealExpr(gain);
+                gainAst = nasa_toLustre.lustreAst.RealExpr(gain);
             end
             codes = cell(1, numel(inputs{1}));
             for j=1:numel(inputs{1})
                 if strcmp(lusInDT, 'bool')
-                    code = IteExpr(inputs{1}{j}, gainAst, zero);
+                    code = nasa_toLustre.lustreAst.IteExpr(inputs{1}{j}, gainAst, zero);
                 else
-                    code = BinaryExpr(BinaryExpr.MULTIPLY, inputs{1}{j}, gainAst);
+                    code = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.MULTIPLY, inputs{1}{j}, gainAst);
                 end
-                codes{j} = LustreEq(outputs{j}, code);
+                codes{j} = nasa_toLustre.lustreAst.LustreEq(outputs{j}, code);
             end
             
             obj.setCode(codes);
@@ -84,7 +84,7 @@ classdef Gain_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     sprintf('The minimum/maximum value is not supported in block %s', HtmlItem.addOpenCmd(blk.Origin_path)));
             end
             [gain, ~, status] = ...
-                Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Gain);
+                nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Gain);
             if status
                 obj.addUnsupported_options(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
                     blk.Gain, HtmlItem.addOpenCmd(blk.Origin_path)));

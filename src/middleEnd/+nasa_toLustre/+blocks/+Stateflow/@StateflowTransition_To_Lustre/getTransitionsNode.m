@@ -25,7 +25,7 @@ function [transitionNode, external_libraries] = ...
     end
     % create body
     [body, outputs, inputs, variables, external_libraries] = ...
-        StateflowTransition_To_Lustre.transitions_code(T, data_map, ...
+        nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.transitions_code(T, data_map, ...
         isDefaultTrans, parentPath, {}, {}, {}, {}, {});
 
     if isempty(outputs)
@@ -33,19 +33,19 @@ function [transitionNode, external_libraries] = ...
     end
 
     % creat node
-    transitionNode = LustreNode();
+    transitionNode = nasa_toLustre.lustreAst.LustreNode();
     transitionNode.setName(node_name);
     transitionNode.setMetaInfo(comment);
     transitionNode.setBodyEqs(body);
-    outputs = LustreVar.uniqueVars(outputs);
-    inputs = LustreVar.uniqueVars(inputs);
+    outputs = nasa_toLustre.lustreAst.LustreVar.uniqueVars(outputs);
+    inputs = nasa_toLustre.lustreAst.LustreVar.uniqueVars(inputs);
     if isempty(inputs)
         inputs{1} = ...
-            LustreVar(nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.virtualVarStr(), 'bool');
+            nasa_toLustre.lustreAst.LustreVar(nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.virtualVarStr(), 'bool');
     elseif numel(inputs) > 1
-        inputs = LustreVar.removeVar(inputs, nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.virtualVarStr());
+        inputs = nasa_toLustre.lustreAst.LustreVar.removeVar(inputs, nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.virtualVarStr());
     end
-    variables = LustreVar.uniqueVars(variables);
+    variables = nasa_toLustre.lustreAst.LustreVar.uniqueVars(variables);
     transitionNode.setOutputs(outputs);
     transitionNode.setInputs(inputs);
     transitionNode.setLocalVars(variables);

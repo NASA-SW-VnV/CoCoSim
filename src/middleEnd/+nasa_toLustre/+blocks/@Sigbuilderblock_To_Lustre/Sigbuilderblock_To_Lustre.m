@@ -16,7 +16,7 @@ classdef Sigbuilderblock_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             obj.addVariable(outputs_dt);
             [time,data,~] = signalbuilder(blk.Origin_path);
-            blkParams = Sigbuilderblock_To_Lustre.readBlkParams(blk);
+            blkParams = nasa_toLustre.blocks.Sigbuilderblock_To_Lustre.readBlkParams(blk);
             
             model_name = strsplit(blk.Origin_path, '/');
             model_name = model_name{1};

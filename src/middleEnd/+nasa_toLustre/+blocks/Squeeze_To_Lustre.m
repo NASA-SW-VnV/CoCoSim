@@ -19,7 +19,7 @@ classdef Squeeze_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             obj.addVariable(outputs_dt);
             inputs =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk);
             
-            codes = arrayfun(@(i) LustreEq(outputs{i}, inputs{i}), ...
+            codes = arrayfun(@(i) nasa_toLustre.lustreAst.LustreEq(outputs{i}, inputs{i}), ...
                 (1:numel(outputs)), 'un', 0);
             obj.setCode( codes );
             

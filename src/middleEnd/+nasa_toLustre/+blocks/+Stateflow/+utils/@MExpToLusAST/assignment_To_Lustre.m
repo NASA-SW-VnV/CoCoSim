@@ -10,12 +10,12 @@ function [code, assignment_dt] = assignment_To_Lustre(BlkObj, tree, parent, blk,
     import nasa_toLustre.lustreAst.*
     import nasa_toLustre.blocks.Stateflow.utils.*
     
-    assignment_dt = MExpToLusDT.expression_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
-    left = MExpToLusAST.expression_To_Lustre(BlkObj, tree.leftExp, ...
+    assignment_dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.expression_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
+    left = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(BlkObj, tree.leftExp, ...
         parent, blk, data_map, inputs, assignment_dt,...
         isSimulink, isStateFlow, isMatlabFun);
     
-    right = MExpToLusAST.expression_To_Lustre(BlkObj, tree.rightExp, parent, blk,...
+    right = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(BlkObj, tree.rightExp, parent, blk,...
         data_map, inputs, assignment_dt, isSimulink, isStateFlow, isMatlabFun);
     if isequal(tree.leftExp.type, 'fun_indexing') ...
             && ~isequal(tree.leftExp.parameters.type, 'constant')
@@ -30,7 +30,7 @@ function [code, assignment_dt] = assignment_To_Lustre(BlkObj, tree, parent, blk,
     end
     if isequal(tree.leftExp.type, 'matrix') && numel(right) == 1
         %e.g. [z,y] = f(x)
-        left{1} = TupleExpr(left);
+        left{1} = nasa_toLustre.lustreAst.TupleExpr(left);
     elseif  numel(left) ~= numel(right)
         ME = MException('COCOSIM:TREE2CODE', ...
             'Assignement "%s" has incompatible dimensions. Left width is %d where the right width is %d',...
@@ -40,11 +40,11 @@ function [code, assignment_dt] = assignment_To_Lustre(BlkObj, tree, parent, blk,
     if numel(left) > 1
         eqts = cell(numel(left), 1);
         for i=1:numel(left)
-            eqts{i} = LustreEq(left{i}, right{i});
+            eqts{i} = nasa_toLustre.lustreAst.LustreEq(left{i}, right{i});
         end
-        code{1} = ConcurrentAssignments(eqts);
+        code{1} = nasa_toLustre.lustreAst.ConcurrentAssignments(eqts);
     else
-        code{1} =  LustreEq(left{1}, right{1});
+        code{1} =  nasa_toLustre.lustreAst.LustreEq(left{1}, right{1});
     end
     
 end
@@ -57,12 +57,12 @@ function [code, status] = ArrayIndexNotConstant(left, right, tree)
     import nasa_toLustre.blocks.Stateflow.utils.*
     status = 0;
     code = {};
-    [left, right] = MExpToLusAST.inlineOperands(left, right, tree);
+    [left, right] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.inlineOperands(left, right, tree);
     eqts = {};
     for i=1:numel(left)
-        [conds, thens] = IteExpr.getCondsThens(left{i});
+        [conds, thens] = nasa_toLustre.lustreAst.IteExpr.getCondsThens(left{i});
         if isempty(conds)
-            eqts{end+1} = LustreEq(left{i}, right{i});
+            eqts{end+1} = nasa_toLustre.lustreAst.LustreEq(left{i}, right{i});
         else
             new_thens = thens;
             for j=1:numel(new_thens)
@@ -74,14 +74,14 @@ function [code, status] = ArrayIndexNotConstant(left, right, tree)
                 if numel(conds) >= j
                     c = conds{j};
                 else
-                    c = nasa_toLustre.lustreAst.UnaryExpr(UnaryExpr.NOT, ...
-                        BinaryExpr.BinaryMultiArgs(BinaryExpr.OR, conds));
+                    c = nasa_toLustre.lustreAst.UnaryExpr(nasa_toLustre.lustreAst.UnaryExpr.NOT, ...
+                        nasa_toLustre.lustreAst.BinaryExpr.BinaryMultiArgs(nasa_toLustre.lustreAst.BinaryExpr.OR, conds));
                 end
-                eqts{end+1} = LustreEq(varId, IteExpr(c, right{i}, varId));
+                eqts{end+1} = nasa_toLustre.lustreAst.LustreEq(varId, nasa_toLustre.lustreAst.IteExpr(c, right{i}, varId));
             end
         end
     end
-    code{1} = ConcurrentAssignments(eqts);
+    code{1} = nasa_toLustre.lustreAst.ConcurrentAssignments(eqts);
 end
 
 function [varId, status] = getVarID(then)

@@ -26,34 +26,34 @@ classdef Probe_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             outputs_idx = 1;
             if isequal(blk.ProbeWidth, 'on')
                 slx_dt = blk.CompiledPortDataTypes.Outport{blk_out_idx};
-                lus_dt = SLX2LusUtils.get_lustre_dt(slx_dt);
+                lus_dt = nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(slx_dt);
                 width = blk.CompiledPortWidths.Inport(1);
-                codes{outputs_idx} = LustreEq(outputs{outputs_idx}, ...
-                    SLX2LusUtils.num2LusExp(width, lus_dt, slx_dt));
+                codes{outputs_idx} = nasa_toLustre.lustreAst.LustreEq(outputs{outputs_idx}, ...
+                    nasa_toLustre.utils.SLX2LusUtils.num2LusExp(width, lus_dt, slx_dt));
                 blk_out_idx = blk_out_idx + 1;
                 outputs_idx = outputs_idx + 1;
             end
             
             if isequal(blk.ProbeSampleTime, 'on')
                 slx_dt = blk.CompiledPortDataTypes.Outport{blk_out_idx};
-                lus_dt = SLX2LusUtils.get_lustre_dt(slx_dt);
+                lus_dt = nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(slx_dt);
                 % Sample Time is Inherited from driving block
                 sampleTime = blk.CompiledSampleTime;
-                codes{outputs_idx} = LustreEq(outputs{outputs_idx}, ...
-                    SLX2LusUtils.num2LusExp(sampleTime(1), lus_dt, slx_dt));
+                codes{outputs_idx} = nasa_toLustre.lustreAst.LustreEq(outputs{outputs_idx}, ...
+                    nasa_toLustre.utils.SLX2LusUtils.num2LusExp(sampleTime(1), lus_dt, slx_dt));
                 outputs_idx = outputs_idx + 1;
-                codes{outputs_idx} = LustreEq(outputs{outputs_idx}, ...
-                    SLX2LusUtils.num2LusExp(sampleTime(2), lus_dt, slx_dt));
+                codes{outputs_idx} = nasa_toLustre.lustreAst.LustreEq(outputs{outputs_idx}, ...
+                    nasa_toLustre.utils.SLX2LusUtils.num2LusExp(sampleTime(2), lus_dt, slx_dt));
                 outputs_idx = outputs_idx + 1;
                 blk_out_idx = blk_out_idx + 1;
             end
             
             if isequal(blk.ProbeComplexSignal, 'on')
                 slx_dt = blk.CompiledPortDataTypes.Outport{blk_out_idx};
-                lus_dt = SLX2LusUtils.get_lustre_dt(slx_dt);
+                lus_dt = nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(slx_dt);
                 complexSignal = blk.CompiledPortComplexSignals.Inport(1);
-                codes{outputs_idx} = LustreEq(outputs{outputs_idx}, ...
-                    SLX2LusUtils.num2LusExp(complexSignal, lus_dt, slx_dt));
+                codes{outputs_idx} = nasa_toLustre.lustreAst.LustreEq(outputs{outputs_idx}, ...
+                    nasa_toLustre.utils.SLX2LusUtils.num2LusExp(complexSignal, lus_dt, slx_dt));
                 blk_out_idx = blk_out_idx + 1;
                 outputs_idx = outputs_idx + 1;
             end
@@ -61,13 +61,13 @@ classdef Probe_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             
             if isequal(blk.ProbeSignalDimensions, 'on')
                 slx_dt = blk.CompiledPortDataTypes.Outport{blk_out_idx};
-                lus_dt = SLX2LusUtils.get_lustre_dt(slx_dt);
+                lus_dt = nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(slx_dt);
                 inport_dimensions = blk.CompiledPortDimensions.Inport;
-                in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(inport_dimensions);
+                in_matrix_dimension = nasa_toLustre.blocks.Assignment_To_Lustre.getInputMatrixDimensions(inport_dimensions);
                 dims = in_matrix_dimension{1}.dims;
                 for d=dims
-                    codes{outputs_idx} = LustreEq(outputs{outputs_idx}, ...
-                        SLX2LusUtils.num2LusExp(d, lus_dt, slx_dt));
+                    codes{outputs_idx} = nasa_toLustre.lustreAst.LustreEq(outputs{outputs_idx}, ...
+                        nasa_toLustre.utils.SLX2LusUtils.num2LusExp(d, lus_dt, slx_dt));
                     outputs_idx = outputs_idx + 1;
                 end                
             end

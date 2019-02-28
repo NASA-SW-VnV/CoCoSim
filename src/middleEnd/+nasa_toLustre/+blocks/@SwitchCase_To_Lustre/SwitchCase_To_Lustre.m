@@ -38,7 +38,7 @@ classdef SwitchCase_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             % get all conditions expressions
             IfExp = obj.getIfExp(blk);
             %% Step 4: start filling the definition of each output
-            code = If_To_Lustre.ifElseCode(obj, parent, blk, outputs, ...
+            code = nasa_toLustre.blocks.If_To_Lustre.ifElseCode(obj, parent, blk, outputs, ...
                 inputs, inports_dt, IfExp);
             obj.setCode( code );
             
@@ -48,11 +48,11 @@ classdef SwitchCase_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             L = nasa_toLustre.ToLustreImport.L;
             import(L{:})
             [inputs, inports_dt] = obj.getInputs( parent, blk);
-            data_map = Fcn_To_Lustre.createDataMap(inputs, inports_dt);
+            data_map = nasa_toLustre.blocks.Fcn_To_Lustre.createDataMap(inputs, inports_dt);
             IfExp = obj.getIfExp(blk);
             nbOutputs = numel(blk.CompiledPortWidths.Outport);
             for j=1:nbOutputs
-                [~, status] = If_To_Lustre.formatConditionToLustre(obj, ...
+                [~, status] = nasa_toLustre.blocks.If_To_Lustre.formatConditionToLustre(obj, ...
                     IfExp{j}, inputs, data_map, parent, blk);
                 if status
                     obj.addUnsupported_options(sprintf('ParseError  character unsupported  %s in block %s', ...

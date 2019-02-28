@@ -23,10 +23,10 @@ classdef Width_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             
             
             slx_dt = blk.CompiledPortDataTypes.Outport{1};
-            lus_dt = SLX2LusUtils.get_lustre_dt(slx_dt);
+            lus_dt = nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(slx_dt);
             width = blk.CompiledPortWidths.Inport(1);
-            codes{1} = LustreEq(outputs{1}, ...
-                SLX2LusUtils.num2LusExp(width, lus_dt, slx_dt));
+            codes{1} = nasa_toLustre.lustreAst.LustreEq(outputs{1}, ...
+                nasa_toLustre.utils.SLX2LusUtils.num2LusExp(width, lus_dt, slx_dt));
             
             obj.setCode( codes );
             

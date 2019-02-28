@@ -37,8 +37,8 @@ classdef Merge_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     is_supported = false;
                     break;
                 end
-                pre_blksConds{i} = VarIdExpr(...
-                    SubSystem_To_Lustre.getExecutionCondName(pre_blk));
+                pre_blksConds{i} = nasa_toLustre.lustreAst.VarIdExpr(...
+                    nasa_toLustre.blocks.SubSystem_To_Lustre.getExecutionCondName(pre_blk));
             end
             if ~is_supported
                 display_msg(sprintf('Merge block "%s" is not supported. CoCoSim supports only Merge blocks that are connected to conditionally-executed subsystem', ...
@@ -100,11 +100,11 @@ classdef Merge_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     conds{j} = pre_blksConds{j};
                     thens{j} = inputs{j}{i};
                 end
-                thens{j+1} = BinaryExpr(BinaryExpr.ARROW,...
+                thens{j+1} = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.ARROW,...
                     InitialOutput_cell{i}, ...
-                    UnaryExpr(UnaryExpr.PRE,  outputs{i}));
-                codes{i} = LustreEq(outputs{i},...
-                    IteExpr.nestedIteExpr(conds, thens));
+                    nasa_toLustre.lustreAst.UnaryExpr(UnaryExpr.PRE,  outputs{i}));
+                codes{i} = nasa_toLustre.lustreAst.LustreEq(outputs{i},...
+                    nasa_toLustre.lustreAst.IteExpr.nestedIteExpr(conds, thens));
             end
             % join the lines and set the block code.
             obj.setCode( codes );

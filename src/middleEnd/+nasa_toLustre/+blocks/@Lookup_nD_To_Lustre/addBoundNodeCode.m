@@ -40,26 +40,26 @@ function [body, vars,numBoundNodes,u_node,N_shape_node,coords_node,index_node] =
     for i=1:NumberOfTableDimensions
 
         % low node for dimension i                
-        index_node{i,1} = VarIdExpr(...
+        index_node{i,1} = nasa_toLustre.lustreAst.VarIdExpr(...
             sprintf('%s_index_dim_%d_1',blk_name,i));
-        index_node{i,2} = VarIdExpr(...
+        index_node{i,2} = nasa_toLustre.lustreAst.VarIdExpr(...
             sprintf('%s_index_dim_%d_2',blk_name,i));
-        vars{end+1} = LustreVar(index_node{i,1},indexDataType);
+        vars{end+1} = nasa_toLustre.lustreAst.LustreVar(index_node{i,1},indexDataType);
         if ~strcmp(InterpMethod,'Flat')
-            vars{end+1} = LustreVar(index_node{i,2},indexDataType);
+            vars{end+1} = nasa_toLustre.lustreAst.LustreVar(index_node{i,2},indexDataType);
         end
 
-        coords_node{i,1} = VarIdExpr(...
+        coords_node{i,1} = nasa_toLustre.lustreAst.VarIdExpr(...
             sprintf('%s_coords_dim_%d_1',blk_name,i));
 
         % high node for dimension i
-        coords_node{i,2} = VarIdExpr(...
+        coords_node{i,2} = nasa_toLustre.lustreAst.VarIdExpr(...
             sprintf('%s_coords_dim_%d_2',blk_name,i));
 
         if ~strcmp(InterpMethod,'Flat')
-            vars{end+1} = LustreVar(coords_node{i,1},lusInport_dt);
+            vars{end+1} = nasa_toLustre.lustreAst.LustreVar(coords_node{i,1},lusInport_dt);
             if ~strcmp(InterpMethod,'Above')
-                vars{end+1} = LustreVar(coords_node{i,2},lusInport_dt);
+                vars{end+1} = nasa_toLustre.lustreAst.LustreVar(coords_node{i,2},lusInport_dt);
             end
         end
         % looking for low node
@@ -78,51 +78,51 @@ function [body, vars,numBoundNodes,u_node,N_shape_node,coords_node,index_node] =
 
                     numberOfBreakPoint_cond = numberOfBreakPoint_cond + 1;
                     if blkParams.isLookupTableDynamic
-                        cond_index{end+1} =  BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend));
-                        cond_coords{end+1} = BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend));
+                        cond_index{end+1} =  nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend));
+                        cond_coords{end+1} = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend));
                     else
-                        epsilon = Lookup_nD_To_Lustre.calculate_eps(BreakpointsForDimension{i}, j);
-                        cond_index{end+1} =  BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
-                        cond_coords{end+1} = BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
+                        epsilon = nasa_toLustre.blocks.Lookup_nD_To_Lustre.calculate_eps(BreakpointsForDimension{i}, j);
+                        cond_index{end+1} =  nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
+                        cond_coords{end+1} = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
                     end
-                    then_index{end+1} = IntExpr(j-1);
+                    then_index{end+1} = nasa_toLustre.lustreAst.IntExpr(j-1);
                     then_coords{end+1} = Breakpoints{i}{j-1};
                 else
                     % for "flat" we want lower node to be last node
                     numberOfBreakPoint_cond = numberOfBreakPoint_cond + 1;
                     if blkParams.isLookupTableDynamic
-                        cond_index{end+1} = BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend));
-                        cond_coords{end+1} = BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend));
+                        cond_index{end+1} = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend));
+                        cond_coords{end+1} = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend));
                     else
-                        epsilon = Lookup_nD_To_Lustre.calculate_eps(BreakpointsForDimension{i}, j);
-                        cond_index{end+1} = BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
-                        cond_coords{end+1} = BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
+                        epsilon = nasa_toLustre.blocks.Lookup_nD_To_Lustre.calculate_eps(BreakpointsForDimension{i}, j);
+                        cond_index{end+1} = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
+                        cond_coords{end+1} = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
                     end
-                    then_index{end+1} = IntExpr(j);
+                    then_index{end+1} = nasa_toLustre.lustreAst.IntExpr(j);
                     then_coords{end+1} = Breakpoints{i}{j-1};
                 end
             else
                 numberOfBreakPoint_cond = numberOfBreakPoint_cond + 1;
                 if blkParams.isLookupTableDynamic
-                    cond_index{end+1} = BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend));
-                    cond_coords{end+1} = BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend));
+                    cond_index{end+1} = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend));
+                    cond_coords{end+1} = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend));
                 else
-                    epsilon = Lookup_nD_To_Lustre.calculate_eps(BreakpointsForDimension{i}, j);
-                    cond_index{end+1} = BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
-                    cond_coords{end+1} = BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
+                    epsilon = nasa_toLustre.blocks.Lookup_nD_To_Lustre.calculate_eps(BreakpointsForDimension{i}, j);
+                    cond_index{end+1} = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
+                    cond_coords{end+1} = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
                 end
-                then_index{end+1} = IntExpr(j);
+                then_index{end+1} = nasa_toLustre.lustreAst.IntExpr(j);
                 then_coords{end+1} = Breakpoints{i}{j};                        
             end
         end                
-        then_index{end+1} = IntExpr(1);
+        then_index{end+1} = nasa_toLustre.lustreAst.IntExpr(1);
         then_coords{end+1} = Breakpoints{i}{1};
 
-        index_1_rhs = IteExpr.nestedIteExpr(cond_index,then_index);
-        coords_1_rhs = IteExpr.nestedIteExpr(cond_coords,then_coords);
-        body{end+1} = LustreEq(index_node{i,1}, index_1_rhs);
+        index_1_rhs = nasa_toLustre.lustreAst.IteExpr.nestedIteExpr(cond_index,then_index);
+        coords_1_rhs = nasa_toLustre.lustreAst.IteExpr.nestedIteExpr(cond_coords,then_coords);
+        body{end+1} = nasa_toLustre.lustreAst.LustreEq(index_node{i,1}, index_1_rhs);
         if ~strcmp(InterpMethod,'Flat')
-            body{end+1} = LustreEq(coords_node{i,1}, coords_1_rhs);
+            body{end+1} = nasa_toLustre.lustreAst.LustreEq(coords_node{i,1}, coords_1_rhs);
         end
 
         % looking for high node
@@ -134,40 +134,40 @@ function [body, vars,numBoundNodes,u_node,N_shape_node,coords_node,index_node] =
         for j=numel(BreakpointsForDimension{i}):-1:1
             if j==numel(BreakpointsForDimension{i})
                 if blkParams.isLookupTableDynamic
-                    cond_index{end+1} = BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend));
-                    cond_coords{end+1} = BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend));
+                    cond_index{end+1} = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend));
+                    cond_coords{end+1} = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend));
                 else
-                    epsilon = Lookup_nD_To_Lustre.calculate_eps(BreakpointsForDimension{i}, j);
-                    cond_index{end+1} = BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
-                    cond_coords{end+1} = BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
+                    epsilon = nasa_toLustre.blocks.Lookup_nD_To_Lustre.calculate_eps(BreakpointsForDimension{i}, j);
+                    cond_index{end+1} = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
+                    cond_coords{end+1} = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
                 end
-                then_index{end+1} = IntExpr((j));
+                then_index{end+1} = nasa_toLustre.lustreAst.IntExpr((j));
                 then_coords{end+1} = Breakpoints{i}{j};
 
             else
                 if blkParams.isLookupTableDynamic
-                    cond_index{end+1} = BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend));
-                    cond_coords{end+1} = BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend));
+                    cond_index{end+1} = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend));
+                    cond_coords{end+1} = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend));
                 else
-                    epsilon = Lookup_nD_To_Lustre.calculate_eps(BreakpointsForDimension{i}, j);
-                    cond_index{end+1} = BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
-                    cond_coords{end+1} = BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
+                    epsilon = nasa_toLustre.blocks.Lookup_nD_To_Lustre.calculate_eps(BreakpointsForDimension{i}, j);
+                    cond_index{end+1} = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
+                    cond_coords{end+1} = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
                 end
-                then_index{end+1} = IntExpr(j+1);
+                then_index{end+1} = nasa_toLustre.lustreAst.IntExpr(j+1);
                 then_coords{end+1} = Breakpoints{i}{j+1};
             end
         end
 
-        then_index{end+1} = IntExpr(2);
+        then_index{end+1} = nasa_toLustre.lustreAst.IntExpr(2);
         then_coords{end+1} = Breakpoints{i}{2};        
 
-        index_2_rhs = IteExpr.nestedIteExpr(cond_index,then_index);
-        coords_2_rhs = IteExpr.nestedIteExpr(cond_coords,then_coords);
+        index_2_rhs = nasa_toLustre.lustreAst.IteExpr.nestedIteExpr(cond_index,then_index);
+        coords_2_rhs = nasa_toLustre.lustreAst.IteExpr.nestedIteExpr(cond_coords,then_coords);
 
         if ~strcmp(InterpMethod,'Flat')
-            body{end+1} = LustreEq(index_node{i,2}, index_2_rhs);
+            body{end+1} = nasa_toLustre.lustreAst.LustreEq(index_node{i,2}, index_2_rhs);
             if ~strcmp(InterpMethod,'Above')
-                body{end+1} = LustreEq(coords_node{i,2}, coords_2_rhs);   
+                body{end+1} = nasa_toLustre.lustreAst.LustreEq(coords_node{i,2}, coords_2_rhs);   
             end
         end
 
@@ -182,13 +182,13 @@ function [body, vars,numBoundNodes,u_node,N_shape_node,coords_node,index_node] =
     if ~skipInterpolation
         for i=1:numBoundNodes
             % y results at the node of the element
-            u_node{i} = VarIdExpr(sprintf('%s_u_node_%d',blk_name,i));
+            u_node{i} = nasa_toLustre.lustreAst.VarIdExpr(sprintf('%s_u_node_%d',blk_name,i));
             %vars = sprintf('%s\t%s:%s;\n',vars,u_node{i},lusInport_dt);
-            vars{end+1} = LustreVar(u_node{i},lusInport_dt);
+            vars{end+1} = nasa_toLustre.lustreAst.LustreVar(u_node{i},lusInport_dt);
             % shape function result at the node of the element
-            N_shape_node{i} = VarIdExpr(sprintf('%s_N_shape_%d',blk_name,i));
+            N_shape_node{i} = nasa_toLustre.lustreAst.VarIdExpr(sprintf('%s_N_shape_%d',blk_name,i));
             %vars = sprintf('%s\t%s:%s;\n',vars,N_shape_node{i},lusInport_dt);
-            vars{end+1} = LustreVar(N_shape_node{i},lusInport_dt);
+            vars{end+1} = nasa_toLustre.lustreAst.LustreVar(N_shape_node{i},lusInport_dt);
         end
     end
 

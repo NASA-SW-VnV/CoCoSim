@@ -10,7 +10,7 @@ function [code, exp_dt] = arrayAccess_To_Lustre(obj, tree, parent, blk, data_map
     %Array access
     L = nasa_toLustre.ToLustreImport.L;
     import(L{:})
-    exp_dt = MExpToLusDT.expression_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
+    exp_dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.expression_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
     d = data_map(tree.ID);
     if isfield(d, 'CompiledSize')
         CompiledSize = str2num(d.CompiledSize);
@@ -32,7 +32,7 @@ function [code, exp_dt] = arrayAccess_To_Lustre(obj, tree, parent, blk, data_map
         throw(ME);
     end
     params_dt = 'int';
-    namesAst = MExpToLusAST.ID_To_Lustre(obj, tree.ID, parent, blk, data_map, ...
+    namesAst = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.ID_To_Lustre(obj, tree.ID, parent, blk, data_map, ...
         inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun);
     
     if numel(tree.parameters) == 1
@@ -56,7 +56,7 @@ function [code, exp_dt] = arrayAccess_To_Lustre(obj, tree, parent, blk, data_map
             end
         else
             [arg, ~] = ...
-                MExpToLusAST.expression_To_Lustre(obj, tree.parameters, ...
+                nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(obj, tree.parameters, ...
                 parent, blk, data_map, inputs, params_dt, isSimulink,...
                 isStateFlow, isMatlabFun);
             for argIdx=1:numel(arg)
@@ -75,11 +75,11 @@ function [code, exp_dt] = arrayAccess_To_Lustre(obj, tree, parent, blk, data_map
                     conds = cell(n-1, 1);
                     thens = cell(n, 1);
                     for i=1:n-1
-                        conds{i} = BinaryExpr(BinaryExpr.EQ, arg{argIdx}, IntExpr(i));
+                        conds{i} = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.EQ, arg{argIdx}, nasa_toLustre.lustreAst.IntExpr(i));
                         thens{i} = namesAst{i};
                     end
                     thens{n} = namesAst{n};
-                    code{argIdx} = ParenthesesExpr(IteExpr.nestedIteExpr(conds, thens));
+                    code{argIdx} = nasa_toLustre.lustreAst.ParenthesesExpr(nasa_toLustre.lustreAst.IteExpr.nestedIteExpr(conds, thens));
                 end
             end
         end
@@ -113,7 +113,7 @@ function [code, exp_dt] = arrayAccess_To_Lustre(obj, tree, parent, blk, data_map
             args = cell(numel(parameters), 1);
             for i=1:numel(parameters)
                 [args(i), ~] = ...
-                    MExpToLusAST.expression_To_Lustre(obj, parameters{i}, ...
+                    nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(obj, parameters{i}, ...
                     parent, blk, data_map, inputs, params_dt, isSimulink,...
                     isStateFlow, isMatlabFun);
             end
@@ -121,21 +121,21 @@ function [code, exp_dt] = arrayAccess_To_Lustre(obj, tree, parent, blk, data_map
             idx = args{1};
             for i=2:numel(parameters)
                 v = args{i};
-                idx = BinaryExpr(BinaryExpr.PLUS,...
+                idx = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.PLUS,...
                     idx,...
-                    BinaryExpr(BinaryExpr.MULTIPLY,...
-                    BinaryExpr(BinaryExpr.MINUS, v, IntExpr(1)),...
-                    IntExpr(prod(CompiledSize(1:i-1)))));
+                    nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.MULTIPLY,...
+                    nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.MINUS, v, nasa_toLustre.lustreAst.IntExpr(1)),...
+                    nasa_toLustre.lustreAst.IntExpr(prod(CompiledSize(1:i-1)))));
             end
             n = numel(namesAst);
             conds = cell(n-1, 1);
             thens = cell(n, 1);
             for i=1:n-1
-                conds{i} = BinaryExpr(BinaryExpr.EQ, idx, IntExpr(i));
+                conds{i} = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.EQ, idx, nasa_toLustre.lustreAst.IntExpr(i));
                 thens{i} = namesAst{i};
             end
             thens{n} = namesAst{n};
-            code = ParenthesesExpr(IteExpr.nestedIteExpr(conds, thens));
+            code = nasa_toLustre.lustreAst.ParenthesesExpr(nasa_toLustre.lustreAst.IteExpr.nestedIteExpr(conds, thens));
         end
     end
 end

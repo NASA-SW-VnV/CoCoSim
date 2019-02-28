@@ -11,10 +11,10 @@ function code = print_lustrec(obj, backend)
             && (isequal(obj.op, '>=') || isequal(obj.op, '>') ...
             || isequal(obj.op, '<=') || isequal(obj.op, '<'))
         if isequal(obj.op, '>=') || isequal(obj.op, '<=')
-            epsilonOp = BinaryExpr.LTE;
+            epsilonOp = nasa_toLustre.lustreAst.BinaryExpr.LTE;
             and_or = 'or';
         else
-            epsilonOp = BinaryExpr.GT;
+            epsilonOp = nasa_toLustre.lustreAst.BinaryExpr.GT;
             and_or = 'and';
         end
         if isempty(obj.epsilon)

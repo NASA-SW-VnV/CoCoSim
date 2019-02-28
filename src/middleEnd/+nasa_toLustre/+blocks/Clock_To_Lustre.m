@@ -16,8 +16,8 @@ classdef Clock_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             import(L{:})
             [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             obj.addVariable(outputs_dt);
-            code = LustreEq( outputs{1},...
-                VarIdExpr(SLX2LusUtils.timeStepStr()));
+            code = nasa_toLustre.lustreAst.LustreEq( outputs{1},...
+                nasa_toLustre.lustreAst.VarIdExpr(nasa_toLustre.utils.SLX2LusUtils.timeStepStr()));
             obj.setCode( code);
         end
         

@@ -17,21 +17,21 @@ function [node, external_nodes, opens, abstractedNodes] = getIntToIntSaturate(dt
     %
     % node = sprintf(format, node_name, v_max, v_max, v_min, v_min);
     
-    v_max = IntExpr(intmax(dt));
-    v_min = IntExpr(intmin(dt));
-    conds{1} = BinaryExpr(BinaryExpr.GT, VarIdExpr('x'),v_max);
-    conds{2} = BinaryExpr(BinaryExpr.LT, VarIdExpr('x'), v_min);
+    v_max = nasa_toLustre.lustreAst.IntExpr(intmax(dt));
+    v_min = nasa_toLustre.lustreAst.IntExpr(intmin(dt));
+    conds{1} = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.GT, nasa_toLustre.lustreAst.VarIdExpr('x'),v_max);
+    conds{2} = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.LT, nasa_toLustre.lustreAst.VarIdExpr('x'), v_min);
     thens{1} = v_max;
     thens{2} = v_min;
-    thens{3} = VarIdExpr('x');
-    bodyElts{1} =   LustreEq(...
-        VarIdExpr('y'), ...
-        IteExpr.nestedIteExpr(conds, thens));
+    thens{3} = nasa_toLustre.lustreAst.VarIdExpr('x');
+    bodyElts{1} =   nasa_toLustre.lustreAst.LustreEq(...
+        nasa_toLustre.lustreAst.VarIdExpr('y'), ...
+        nasa_toLustre.lustreAst.IteExpr.nestedIteExpr(conds, thens));
     
-    node = LustreNode();
+    node = nasa_toLustre.lustreAst.LustreNode();
     node.setName(node_name);
-    node.setInputs(LustreVar('x', 'int'));
-    node.setOutputs(LustreVar('y', 'int'));
+    node.setInputs(nasa_toLustre.lustreAst.LustreVar('x', 'int'));
+    node.setOutputs(nasa_toLustre.lustreAst.LustreVar('y', 'int'));
     node.setBodyEqs(bodyElts);
     node.setIsMain(false);
     

@@ -8,8 +8,8 @@ function [main_node, external_nodes, external_libraries] = ...
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
        
-    L = nasa_toLustre.ToLustreImport.L;
-    import(L{:})
+    %L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
+    %import(L{:})
     external_nodes = {};
     external_libraries = {};
     rt = sfroot;
@@ -17,7 +17,7 @@ function [main_node, external_nodes, external_libraries] = ...
     chart = m.find('-isa','Stateflow.Chart', 'Path', ss_ir.Origin_path);
     [ char_node, extern_Stateflow_nodes_fun] = write_Chart( chart, 0, xml_trace,'' );
     node_name = get_full_name( chart, true );
-    main_node = RawLustreCode(sprintf(char_node), node_name);
+    main_node = nasa_toLustre.lustreAst.RawLustreCode(sprintf(char_node), node_name);
     if isempty(extern_Stateflow_nodes_fun)
         return;
     end
@@ -32,7 +32,7 @@ function [main_node, external_nodes, external_libraries] = ...
         elseif strcmp(fun.Name,'lustre_conv_fun')
             external_libraries{end + 1} = 'LustDTLib_conv';
         elseif strcmp(fun.Name,'after')
-            external_nodes{end + 1} = RawLustreCode(sprintf(temporal_operators(fun)), 'after');
+            external_nodes{end + 1} = nasa_toLustre.lustreAst.RawLustreCode(sprintf(temporal_operators(fun)), 'after');
         elseif strcmp(fun.Name, 'min') && strcmp(fun.Type, 'int*int')
             external_libraries{end + 1} = 'LustMathLib_min_int';
         elseif strcmp(fun.Name, 'min') && strcmp(fun.Type, 'real*real')

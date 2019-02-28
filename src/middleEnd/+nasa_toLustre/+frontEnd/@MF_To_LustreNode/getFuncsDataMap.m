@@ -8,12 +8,12 @@ function [fun_data_map, failed] = getFuncsDataMap(blk, script, ...
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         
-    L = nasa_toLustre.ToLustreImport.L;
-    import(L{:})
+    %L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
+    %import(L{:})
     fun_data_map = containers.Map('KeyType', 'char', 'ValueType', 'any');
     failed = false;
     %% create matlab file to execute it and get all its workspace
-    blk_name = SLX2LusUtils.node_name_format(blk);
+    blk_name = nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);
     try
         [func_path, failed] = print_script(blk_name, functions_struct, script);
         if failed, return;end

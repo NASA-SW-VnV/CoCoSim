@@ -141,8 +141,8 @@ if tests_method == 1 || tests_method == 2
         
         if done
             %% report
-            f_msg = '\n Simulation Input (workspace) input_struct \n';
-            f_msg = [f_msg 'Simulation Output (workspace) : yout_signals \n'];
+            f_msg = '\n Simulation Input (workspace) cocosim_input_dataset \n';
+            f_msg = [f_msg 'Simulation Output (workspace) : yout \n'];
             f_msg = [f_msg 'LustreC binary Input ' fullfile(output_dir,'input_values') '\n'];
             f_msg = [f_msg 'LustreC binary Output ' fullfile(output_dir,'outputs_values') '\n'];
             display_msg(f_msg, MsgType.RESULT, 'validation', '');

@@ -93,7 +93,7 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             L = nasa_toLustre.ToLustreImport.L;
             import(L{:})
             [NumberOfTableDimensions, ~, ~] = ...
-                Constant_To_Lustre.getValueFromParameter(parent, blk, blk.NumberOfTableDimensions);
+                nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(parent, blk, blk.NumberOfTableDimensions);
             if NumberOfTableDimensions >= 7
                 obj.addUnsupported_options(sprintf('More than 7 dimensions is not supported in block %s', HtmlItem.addOpenCmd(blk.Origin_path)));
             end
@@ -153,7 +153,7 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 lus_backend)
         
         [body,vars,table_elem] = ...
-                addTableCode(Table,blk_name,lusInport_dt,isLookupTableDynamic,inputs)
+                nasa_toLustre.blocks.Lookup_nD_To_Lustre.addTableCode(Table,blk_name,lusInport_dt,isLookupTableDynamic,inputs)
 
         ep = calculate_eps(BP, j)
 

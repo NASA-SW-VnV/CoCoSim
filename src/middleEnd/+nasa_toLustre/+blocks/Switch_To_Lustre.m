@@ -30,7 +30,7 @@ classdef Switch_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             RndMeth = blk.RndMeth;
             SaturateOnIntegerOverflow = blk.SaturateOnIntegerOverflow;
             [threshold, ~, status] = ...
-                Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Threshold);
+                nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Threshold);
             if status
                 display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
                     blk.Threshold, HtmlItem.addOpenCmd(blk.Origin_path)), ...
@@ -61,11 +61,11 @@ classdef Switch_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     [lus_inportDataType, ~] =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(inport_dt);
                     if strcmp(blk.Criteria, 'u2 ~= 0')
                         if strcmp(lus_inportDataType, 'real')
-                            threshold_str_temp = RealExpr('0.0');
+                            threshold_str_temp = nasa_toLustre.lustreAst.RealExpr('0.0');
                         elseif strcmp(lus_inportDataType, 'int')
-                            threshold_str_temp = IntExpr(0);
+                            threshold_str_temp = nasa_toLustre.lustreAst.IntExpr(0);
                         else
-                            threshold_str_temp = BooleanExpr('false');
+                            threshold_str_temp = nasa_toLustre.lustreAst.BooleanExpr('false');
                             secondInputIsBoolean = 1;
                         end
                         threshold_ast = cell(1, max_width);
@@ -77,9 +77,9 @@ classdef Switch_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                         threshold_ast = cell(1, numel(threshold));
                         for j=1:numel(threshold)
                             if strcmp(lus_inportDataType, 'real')
-                                threshold_ast{j} = RealExpr(threshold(j));
+                                threshold_ast{j} = nasa_toLustre.lustreAst.RealExpr(threshold(j));
                             elseif strcmp(lus_inportDataType, 'int')
-                                threshold_ast{j} = IntExpr(int32(threshold(j)));
+                                threshold_ast{j} = nasa_toLustre.lustreAst.IntExpr(int32(threshold(j)));
                             else
                                 secondInputIsBoolean = 1;
                             end
@@ -102,18 +102,18 @@ classdef Switch_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     cond = inputs{2}{i};
                 else
                     if strcmp(blk.Criteria, 'u2 > Threshold')
-                        cond = BinaryExpr(BinaryExpr.GT, ...
+                        cond = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.GT, ...
                             inputs{2}{i}, threshold_ast{i});
                     elseif strcmp(blk.Criteria, 'u2 >= Threshold')
-                        cond = BinaryExpr(BinaryExpr.GTE, ...
+                        cond = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.GTE, ...
                             inputs{2}{i}, threshold_ast{i});
                     elseif strcmp(blk.Criteria, 'u2 ~= 0')
-                        cond = BinaryExpr(BinaryExpr.NEQ, ...
+                        cond = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.NEQ, ...
                             inputs{2}{i}, threshold_ast{i});
                     end
                 end
-                codes{i} = LustreEq(outputs{i}, ...
-                    IteExpr(cond, inputs{1}{i}, inputs{3}{i}));
+                codes{i} = nasa_toLustre.lustreAst.LustreEq(outputs{i}, ...
+                    nasa_toLustre.lustreAst.IteExpr(cond, inputs{1}{i}, inputs{3}{i}));
             end
             
             obj.setCode( codes );

@@ -33,21 +33,21 @@ function [main_node, external_libraries] = ...
         idParentName = nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getStateIDName(state_parent);
         [stateEnumType, childName] = ...
             nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.addStateEnum(state_parent, state);
-        body{1} = LustreComment('set state as active');
-        body{2} = LustreEq(VarIdExpr(idParentName), childName);
-        outputs{1} = LustreVar(idParentName, stateEnumType);
+        body{1} = nasa_toLustre.lustreAst.LustreComment('set state as active');
+        body{2} = nasa_toLustre.lustreAst.LustreEq(nasa_toLustre.lustreAst.VarIdExpr(idParentName), childName);
+        outputs{1} = nasa_toLustre.lustreAst.LustreVar(idParentName, stateEnumType);
 
         %isInner variable that tells if the transition that cause this
         %exit action is an inner Transition
-        isInner = VarIdExpr(nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.isInnerStr());
-        inputs{end + 1} = LustreVar(isInner, 'bool');
+        isInner = nasa_toLustre.lustreAst.VarIdExpr(nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.isInnerStr());
+        inputs{end + 1} = nasa_toLustre.lustreAst.LustreVar(isInner, 'bool');
         %actions code
-        actions = SFIRPPUtils.split_actions(state.Actions.Entry);
+        actions = nasa_toLustre.IR_pp.stateflow_IR_pp.SFIRPPUtils.split_actions(state.Actions.Entry);
         nb_actions = numel(actions);
         for i=1:nb_actions
             try
                 [lus_action, outputs_i, inputs_i, external_libraries_i] = ...
-                    getPseudoLusAction(actions{i}, data_map, false, state.Path);
+                    nasa_toLustre.blocks.Stateflow.utils.getPseudoLusAction(actions{i}, data_map, false, state.Path);
                 outputs = [outputs, outputs_i];
                 inputs = [inputs, inputs_i, outputs_i];
                 external_libraries = [external_libraries, external_libraries_i];
@@ -67,27 +67,27 @@ function [main_node, external_libraries] = ...
     end
     %write children states entry action
     [actions, outputs_i, inputs_i] = ...
-        StateflowState_To_Lustre.write_children_actions(state, 'Entry');
+        nasa_toLustre.blocks.Stateflow.StateflowState_To_Lustre.write_children_actions(state, 'Entry');
     body = [body, actions];
     outputs = [outputs, outputs_i];
     inputs = [inputs, inputs_i];
     %create the node
     act_node_name = ...
         nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getEntryActionNodeName(state);
-    main_node = LustreNode();
+    main_node = nasa_toLustre.lustreAst.LustreNode();
     main_node.setName(act_node_name);
-    comment = LustreComment(...
+    comment = nasa_toLustre.lustreAst.LustreComment(...
         sprintf('Entry action of state %s',...
         state.Origin_path), true);
     main_node.setMetaInfo(comment);
     main_node.setBodyEqs(body);
-    outputs = LustreVar.uniqueVars(outputs);
-    inputs = LustreVar.uniqueVars(inputs);
+    outputs = nasa_toLustre.lustreAst.LustreVar.uniqueVars(outputs);
+    inputs = nasa_toLustre.lustreAst.LustreVar.uniqueVars(inputs);
     if isempty(inputs)
         inputs{1} = ...
-            LustreVar(nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.virtualVarStr(), 'bool');
+            nasa_toLustre.lustreAst.LustreVar(nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.virtualVarStr(), 'bool');
     elseif numel(inputs) > 1
-        inputs = LustreVar.removeVar(inputs, nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.virtualVarStr());
+        inputs = nasa_toLustre.lustreAst.LustreVar.removeVar(inputs, nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.virtualVarStr());
     end
     main_node.setOutputs(outputs);
     main_node.setInputs(inputs);

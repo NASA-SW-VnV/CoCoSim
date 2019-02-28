@@ -53,9 +53,9 @@ classdef RelationalOperator_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             
             op = blk.Operator;
             if strcmp(op, '==')
-                op = BinaryExpr.EQ;
+                op = nasa_toLustre.lustreAst.BinaryExpr.EQ;
             elseif strcmp(op, '~=')
-                op = BinaryExpr.NEQ;
+                op = nasa_toLustre.lustreAst.BinaryExpr.NEQ;
             elseif strcmp(op, 'isInf') || strcmp(op, 'isNaN') ...
                     ||strcmp(op, 'isFinite')
                 display_msg(sprintf('Operator %s in blk %s is not supported',...
@@ -65,12 +65,12 @@ classdef RelationalOperator_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             end
             codes = cell(1, numel(outputs));
             for j=1:numel(outputs)
-                code = BinaryExpr(op, inputs{1}{j}, inputs{2}{j});
+                code = nasa_toLustre.lustreAst.BinaryExpr(op, inputs{1}{j}, inputs{2}{j});
                 if isequal(lus_outputDT, 'bool')
-                    codes{j} = LustreEq(outputs{j}, code);
+                    codes{j} = nasa_toLustre.lustreAst.LustreEq(outputs{j}, code);
                 else
-                    codes{j} = LustreEq(outputs{j}, ...
-                        IteExpr(code, one, zero));
+                    codes{j} = nasa_toLustre.lustreAst.LustreEq(outputs{j}, ...
+                        nasa_toLustre.lustreAst.IteExpr(code, one, zero));
                 end
             end
             obj.setCode( codes );

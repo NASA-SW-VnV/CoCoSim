@@ -22,7 +22,7 @@ function [codes] = getWriteCodeForNonPortInput(~, numOutDims,...
         codes = cell(1, numel(outputs));
         for i=1:numel(outputs)
             U_index = ind{1}(i);
-            codes{i} = LustreEq(outputs{i}, inputs{1}{U_index});
+            codes{i} = nasa_toLustre.lustreAst.LustreEq(outputs{i}, inputs{1}{U_index});
         end
     else
         % support max dimensions = 7
@@ -48,7 +48,7 @@ function [codes] = getWriteCodeForNonPortInput(~, numOutDims,...
 
             sub2ind_string = sprintf('%s);',sub2ind_string);
             eval(sub2ind_string);
-            codes{i} = LustreEq(outputs{i}, inputs{1}{U_index});
+            codes{i} = nasa_toLustre.lustreAst.LustreEq(outputs{i}, inputs{1}{U_index});
         end
 
     end

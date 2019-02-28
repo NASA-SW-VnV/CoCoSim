@@ -55,7 +55,7 @@ function [ lustre_nodes, open_list, abstractedNodes ] = recursive_call( external
             continue;
         end
         if ischar(node)
-            lustre_nodes{end + 1} = RawLustreCode(node, lib);
+            lustre_nodes{end + 1} = nasa_toLustre.lustreAst.RawLustreCode(node, lib);
         else
             lustre_nodes{end + 1} = node;
         end

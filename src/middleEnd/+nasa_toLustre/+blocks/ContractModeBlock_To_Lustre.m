@@ -23,7 +23,7 @@ classdef ContractModeBlock_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         function  write_code(obj, parent, blk, varargin)
             L = nasa_toLustre.ToLustreImport.L;
             import(L{:})
-            if ~SLX2LusUtils.isContractBlk(parent)
+            if ~nasa_toLustre.utils.SLX2LusUtils.isContractBlk(parent)
                 display_msg(sprintf('Mode block "%s" should not be outside a Contract Subsystem', HtmlItem.addOpenCmd(blk.Origin_path)),...
                     MsgType.ERROR, 'ContractModeBlock_To_Lustre', '');
                 return;
@@ -58,7 +58,7 @@ classdef ContractModeBlock_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             end
             
             blk_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);
-            code = ContractModeExpr(blk_name, inputs{1}, inputs{2});
+            code = nasa_toLustre.lustreAst.ContractModeExpr(blk_name, inputs{1}, inputs{2});
             obj.setCode( code );
             
         end
@@ -67,7 +67,7 @@ classdef ContractModeBlock_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             L = nasa_toLustre.ToLustreImport.L;
             import(L{:})
             % add your unsuported options list here
-            if ~SLX2LusUtils.isContractBlk(parent)
+            if ~nasa_toLustre.utils.SLX2LusUtils.isContractBlk(parent)
                 obj.addUnsupported_options(...
                     sprintf('Mode block "%s" should not be outside a Contract Subsystem', HtmlItem.addOpenCmd(blk.Origin_path)));
             end

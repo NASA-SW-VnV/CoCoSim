@@ -103,6 +103,20 @@ function [valid,...
             numberOfInports,...
             show_models);
 
+        yout = get(simOut,'yout');
+        if isempty(yout)
+            f_msg = sprintf('Model "%s" has no Outport.',slx_file_name);
+            display_msg(f_msg, MsgType.RESULT, 'validation', '');
+            done = 0;
+            sim_failed = 1;
+            return;
+        elseif ~isa(yout, 'Simulink.SimulationData.Dataset')
+            f_msg = sprintf('Model "%s" shoud use Simulink.SimulationData.Dataset save format.',slx_file_name);
+            display_msg(f_msg, MsgType.ERROR, 'validation', '');
+            done = 0;
+            return;
+        end
+        
         % extract lustre outputs from lustre binary
         status = LustrecUtils.extract_lustre_outputs(lus_file_name,...
             output_dir, ...
@@ -118,13 +132,7 @@ function [valid,...
         % compare Simulin outputs and Lustre outputs
         %GUIUtils.update_status('Compare Simulink outputs and lustrec outputs');
 
-        yout = get(simOut,'yout');
-        if ~isa(yout, 'Simulink.SimulationData.Dataset')
-            f_msg = sprintf('Model "%s" shoud use Simulink.SimulationData.Dataset save format.',slx_file_name);
-            display_msg(f_msg, MsgType.ERROR, 'validation', '');
-            done = 0;
-            return;
-        end
+        
         assignin('base','yout',yout);
         outputs_array = importdata(output_file_name,'\n');
         [valid, cex_msg, diff_name, diff] = ...

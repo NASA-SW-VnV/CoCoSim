@@ -10,8 +10,8 @@
 %value is also given as a string.
 function [ Lustre_type, zero, one, isBus, isEnum, hasEnum] = ...
         get_lustre_dt( slx_dt)
-    L = nasa_toLustre.ToLustreImport.L;
-    import(L{:})
+    %L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
+    %import(L{:})
     global TOLUSTRE_ENUMS_MAP;
     if isempty(TOLUSTRE_ENUMS_MAP)
         TOLUSTRE_ENUMS_MAP = containers.Map;
@@ -60,14 +60,14 @@ function [ Lustre_type, zero, one, isBus, isEnum, hasEnum] = ...
                 one{i} = members{1};
                 hasEnum = true;
             elseif strcmp(Lustre_type{i}, 'bool')
-                zero{i} = BooleanExpr('false');
-                one{i} = BooleanExpr('true') ;
+                zero{i} = nasa_toLustre.lustreAst.BooleanExpr('false');
+                one{i} = nasa_toLustre.lustreAst.BooleanExpr('true') ;
             elseif strcmp(Lustre_type{i}, 'int')
-                zero{i} = IntExpr('0');
-                one{i} = IntExpr('1');
+                zero{i} = nasa_toLustre.lustreAst.IntExpr('0');
+                one{i} = nasa_toLustre.lustreAst.IntExpr('1');
             else
-                zero{i} = RealExpr('0.0');
-                one{i} = RealExpr('1.0');
+                zero{i} = nasa_toLustre.lustreAst.RealExpr('0.0');
+                one{i} = nasa_toLustre.lustreAst.RealExpr('1.0');
             end
         end
     else
@@ -77,14 +77,14 @@ function [ Lustre_type, zero, one, isBus, isEnum, hasEnum] = ...
             one = members{1};
             hasEnum = true;
         elseif strcmp(Lustre_type, 'bool')
-            zero = BooleanExpr('false');
-            one = BooleanExpr('true');
+            zero = nasa_toLustre.lustreAst.BooleanExpr('false');
+            one = nasa_toLustre.lustreAst.BooleanExpr('true');
         elseif strcmp(Lustre_type, 'int')
-            zero = IntExpr('0');
-            one = IntExpr('1');
+            zero = nasa_toLustre.lustreAst.IntExpr('0');
+            one = nasa_toLustre.lustreAst.IntExpr('1');
         else
-            zero = RealExpr('0.0');
-            one = RealExpr('1.0');
+            zero = nasa_toLustre.lustreAst.RealExpr('0.0');
+            one = nasa_toLustre.lustreAst.RealExpr('1.0');
         end
     end
 end

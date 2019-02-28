@@ -11,7 +11,7 @@ function dt = unaryExpression_DT(tree, data_map, inputs, isSimulink, isStateFlow
     if isequal(tree.operator, '~') || isequal(tree.operator, '!')
         dt = 'bool';
     else
-        dt = MExpToLusDT.expression_DT(tree.rightExp, data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
+        dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.expression_DT(tree.rightExp, data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
     end
 end
 

@@ -64,7 +64,7 @@ function [ new_ir, status ] = transitionSource_SFIR_pp( new_ir )
             [new_ir.GraphicalFunctions{i}.Composition.DefaultTransitions, ~] = ...
                 adapt_transitions(new_ir.GraphicalFunctions{i}.Composition.DefaultTransitions, '');
             % junctions
-            [new_ir.GraphicalFunctions{i}, status_i] = transitionSource_SFIR_pp( new_ir.GraphicalFunctions{i} );
+            [new_ir.GraphicalFunctions{i}, status_i] = nasa_toLustre.IR_pp.stateflow_IR_pp.stateflow_fields.transitionSource_SFIR_pp( new_ir.GraphicalFunctions{i} );
             if status_i
                 display_msg(['ERROR found in StateflowFunction:' new_ir.GraphicalFunctions{i}.origin_path], ...
                     MsgType.ERROR, 'transitionSource_SFIR_pp', '');

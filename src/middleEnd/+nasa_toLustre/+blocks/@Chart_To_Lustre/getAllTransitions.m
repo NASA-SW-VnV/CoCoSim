@@ -21,7 +21,7 @@ function transitions = getAllTransitions(SFContent)
     end
     for i=1:numel(SFContent.GraphicalFunctions)
         transitions = [transitions, ...
-            Chart_To_Lustre.getAllTransitions(SFContent.GraphicalFunctions{i})];
+            nasa_toLustre.blocks.Chart_To_Lustre.getAllTransitions(SFContent.GraphicalFunctions{i})];
     end
 end
 

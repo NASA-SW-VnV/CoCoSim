@@ -17,7 +17,7 @@ classdef MATLABFunction_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             import(L{:})
             %% add Matlab Function node
             [main_node, external_nodes ] = ...
-                    MF_To_LustreNode.mfunction2node(obj, parent,  blk,  xml_trace, lus_backend, coco_backend, main_sampletime);
+                    nasa_toLustre.frontEnd.MF_To_LustreNode.mfunction2node(obj, parent,  blk,  xml_trace, lus_backend, coco_backend, main_sampletime);
             obj.addExtenal_node(main_node);
             obj.addExtenal_node(external_nodes);
             %% add Matlab Function call
@@ -25,7 +25,7 @@ classdef MATLABFunction_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             [inputs] =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk);
             codes = {};
             node_name = main_node.getName();
-            codes{end+1} = LustreEq(outputs, NodeCallExpr(node_name, inputs));
+            codes{end+1} = nasa_toLustre.lustreAst.LustreEq(outputs, nasa_toLustre.lustreAst.NodeCallExpr(node_name, inputs));
             obj.setCode( codes );
             obj.addVariable(outputs_dt);
         end

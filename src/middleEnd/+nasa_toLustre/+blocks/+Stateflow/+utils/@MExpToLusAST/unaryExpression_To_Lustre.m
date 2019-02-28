@@ -12,11 +12,11 @@ function [code, exp_dt] = unaryExpression_To_Lustre(BlkObj, tree, parent,...
     import nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST
     import nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT
     
-    exp_dt = MExpToLusDT.expression_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
-    right = MExpToLusAST.expression_To_Lustre(BlkObj, tree.rightExp, parent,...
+    exp_dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.expression_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
+    right = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(BlkObj, tree.rightExp, parent,...
         blk, data_map, inputs, exp_dt, isSimulink, isStateFlow, isMatlabFun);
     if isequal(tree.operator, '~') || isequal(tree.operator, '!')
-        op = UnaryExpr.NOT;
+        op = nasa_toLustre.lustreAst.UnaryExpr.NOT;
     elseif isequal(tree.operator, '-')
         op = nasa_toLustre.lustreAst.UnaryExpr.NEG;
     elseif isequal(tree.operator, '+')
@@ -28,7 +28,7 @@ function [code, exp_dt] = unaryExpression_To_Lustre(BlkObj, tree, parent,...
             tree.text, tree.operator);
         throw(ME);
     end
-    code = arrayfun(@(i) UnaryExpr(op, right{i}, false), ...
+    code = arrayfun(@(i) nasa_toLustre.lustreAst.UnaryExpr(op, right{i}, false), ...
         (1:numel(right)), 'UniformOutput', false);
     
 end

@@ -73,7 +73,7 @@ classdef IteExpr < nasa_toLustre.lustreAst.LustreExpr
                 return;
                 
             end
-            new_obj = IteExpr(new_cond, new_then, new_else, obj.OneLine);
+            new_obj = nasa_toLustre.lustreAst.IteExpr(new_cond, new_then, new_else, obj.OneLine);
             
         end
         
@@ -225,7 +225,7 @@ classdef IteExpr < nasa_toLustre.lustreAst.LustreExpr
             conds{1} = exp.getCondition();
             thens{1} = exp.getThenExpr();
             elseExp = exp.getElseExpr();
-            [conds_i, thens_i] = IteExpr.getCondsThens(elseExp);
+            [conds_i, thens_i] = nasa_toLustre.lustreAst.IteExpr.getCondsThens(elseExp);
             conds = MatlabUtils.concat(conds, conds_i);
             thens = MatlabUtils.concat(thens, thens_i);
         end

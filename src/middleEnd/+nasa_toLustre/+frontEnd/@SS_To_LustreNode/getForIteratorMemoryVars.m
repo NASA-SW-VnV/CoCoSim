@@ -8,8 +8,8 @@ function [new_variables, additionalOutputs, ...
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    L = nasa_toLustre.ToLustreImport.L;
-    import(L{:})
+    %L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
+    %import(L{:})
     new_variables = {};
     additionalOutputs = {};
     additionalInputs = {};
@@ -20,7 +20,7 @@ function [new_variables, additionalOutputs, ...
     for i=1:numel(variables_names)
         if ismember(variables_names{i}, memoryIds_names)
             additionalOutputs{end+1} = variables{i};
-            additionalInputs{end+1} = LustreVar(strcat('_pre_',...
+            additionalInputs{end+1} = nasa_toLustre.lustreAst.LustreVar(strcat('_pre_',...
                 variables_names{i}), variables{i}.getDT());
         else
             new_variables{end + 1} = variables{i};
@@ -28,7 +28,7 @@ function [new_variables, additionalOutputs, ...
     end
     for i=1:numel(node_inputs_names)
         if ismember(node_inputs_names{i}, memoryIds_names)
-            inputsMemory{end+1} = LustreVar(strcat('_pre_',...
+            inputsMemory{end+1} = nasa_toLustre.lustreAst.LustreVar(strcat('_pre_',...
                 node_inputs_names{i}), node_inputs{i}.getDT());
         end
     end

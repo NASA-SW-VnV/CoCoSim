@@ -39,7 +39,7 @@ classdef BusSelector_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     continue;
                 end
                 for j=1:numel(inputs_i)
-                    codes{out_idx} = LustreEq(outputs{out_idx}, inputs_i{j});
+                    codes{out_idx} = nasa_toLustre.lustreAst.LustreEq(outputs{out_idx}, inputs_i{j});
                     out_idx = out_idx + 1;
                 end
             end

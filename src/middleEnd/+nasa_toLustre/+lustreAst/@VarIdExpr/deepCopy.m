@@ -7,5 +7,5 @@ function new_obj = deepCopy(obj)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  
     import nasa_toLustre.lustreAst.VarIdExpr
-    new_obj = VarIdExpr(obj.id);
+    new_obj = nasa_toLustre.lustreAst.VarIdExpr(obj.id);
 end

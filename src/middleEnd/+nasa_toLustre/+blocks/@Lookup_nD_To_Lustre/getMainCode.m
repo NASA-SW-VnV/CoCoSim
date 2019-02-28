@@ -25,12 +25,12 @@ function codes = getMainCode(outputs,inputs,ext_node_name,...
         end
 
         if isempty(output_conv_format)
-            codes{outIdx} = LustreEq(outputs{outIdx}, ...
-                NodeCallExpr(ext_node_name, nodeCall_inputs));
+            codes{outIdx} = nasa_toLustre.lustreAst.LustreEq(outputs{outIdx}, ...
+                nasa_toLustre.lustreAst.NodeCallExpr(ext_node_name, nodeCall_inputs));
         else
             code =nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(output_conv_format, ...
-                NodeCallExpr(ext_node_name, nodeCall_inputs));
-            codes{outIdx} = LustreEq(outputs{outIdx}, code);                    
+                nasa_toLustre.lustreAst.NodeCallExpr(ext_node_name, nodeCall_inputs));
+            codes{outIdx} = nasa_toLustre.lustreAst.LustreEq(outputs{outIdx}, code);                    
         end
     end
 end

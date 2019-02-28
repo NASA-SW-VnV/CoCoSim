@@ -5,7 +5,7 @@ function new_obj = simplify(obj)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
- 
+    display_msg('Start Optimizing Lustre code.', MsgType.INFO, 'LustreProgram.simplify', '');
     new_nodes = cellfun(@(x) x.simplify(), obj.nodes, ...
         'UniformOutput', 0);
     new_contracts = cellfun(@(x) x.simplify(), obj.contracts,...

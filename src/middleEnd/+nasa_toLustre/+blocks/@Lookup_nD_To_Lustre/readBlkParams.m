@@ -61,10 +61,10 @@ function blkParams = readBlkParams(parent,blk,isLookupTableDynamic,inputs)
         end
     else
         [blkParams.NumberOfTableDimensions, ~, ~] = ...
-            Constant_To_Lustre.getValueFromParameter(parent, blk, blk.NumberOfTableDimensions);
+            nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(parent, blk, blk.NumberOfTableDimensions);
         % cast table data
         [T, ~, ~] = ...
-            Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Table); 
+            nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Table); 
         validDT = {'double', 'single', 'int8', 'int16', ...
             'int32', 'uint8', 'uint16', 'uint32', 'boolean'};
         if ismember(blk.CompiledPortDataTypes.Outport{1}, validDT)
@@ -89,9 +89,9 @@ function blkParams = readBlkParams(parent,blk,isLookupTableDynamic,inputs)
         tableDims = size(blkParams.Table);
         if strcmp(blk.BreakpointsSpecification, 'Even spacing')
             for i=1:blkParams.NumberOfTableDimensions
-                evalString = sprintf('[firstPoint, ~, ~] = Constant_To_Lustre.getValueFromParameter(parent, blk, blk.BreakpointsForDimension%dFirstPoint); ',i);
+                evalString = sprintf('[firstPoint, ~, ~] = nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(parent, blk, blk.BreakpointsForDimension%dFirstPoint); ',i);
                 eval(evalString);  % read firstPoint
-                evalString = sprintf('[spacing, ~, ~] = Constant_To_Lustre.getValueFromParameter(parent, blk, blk.BreakpointsForDimension%dSpacing); ',i);
+                evalString = sprintf('[spacing, ~, ~] = nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(parent, blk, blk.BreakpointsForDimension%dSpacing); ',i);
                 eval(evalString);  % read spacing      
                 curBreakPoint = [];
 
@@ -102,7 +102,7 @@ function blkParams = readBlkParams(parent,blk,isLookupTableDynamic,inputs)
             end                    
         else
             for i=1:blkParams.NumberOfTableDimensions
-                evalString = sprintf('[blkParams.BreakpointsForDimension{i}, ~, ~] = Constant_To_Lustre.getValueFromParameter(parent, blk, blk.BreakpointsForDimension%d); ',i);
+                evalString = sprintf('[blkParams.BreakpointsForDimension{i}, ~, ~] = nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(parent, blk, blk.BreakpointsForDimension%d); ',i);
                 eval(evalString);
             end
         end

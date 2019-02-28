@@ -19,16 +19,16 @@ classdef Ground_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             lus_outputDataType =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Outport{1});
             
             if strcmp(lus_outputDataType, 'bool')
-                v = BooleanExpr('false');
+                v = nasa_toLustre.lustreAst.BooleanExpr('false');
             elseif strcmp(lus_outputDataType, 'int')
-                v = IntExpr('0');
+                v = nasa_toLustre.lustreAst.IntExpr('0');
             else
-                v = RealExpr('0.0');
+                v = nasa_toLustre.lustreAst.RealExpr('0.0');
             end
             
             codes = cell(1, numel(outputs));
             for j=1:numel(outputs)
-                codes{j} = LustreEq(outputs{j}, v);
+                codes{j} = nasa_toLustre.lustreAst.LustreEq(outputs{j}, v);
             end
             
             obj.setCode( codes );

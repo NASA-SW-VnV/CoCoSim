@@ -25,7 +25,7 @@ classdef BusCreator_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             nb_outputs = numel(outputs);
             % everything is inlined
 %             f = @(i)  LustreEq(outputs{i}, inputs{i});
-            codes = arrayfun( @(i)  LustreEq(outputs{i}, inputs{i}), ...
+            codes = arrayfun( @(i)  nasa_toLustre.lustreAst.LustreEq(outputs{i}, inputs{i}), ...
                 (1:nb_outputs),'UniformOutput', 0);
 %             codes = cell(1, numel(outputs));
 %             for i=1:numel(outputs)

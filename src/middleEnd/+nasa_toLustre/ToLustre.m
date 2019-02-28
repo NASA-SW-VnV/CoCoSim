@@ -1,4 +1,4 @@
-function [lustre_file_path, xml_trace, status, unsupportedOptions, abstractedBlocks, pp_model_full_path]= ...
+function [lustre_file_path, xml_trace, failed, unsupportedOptions, abstractedBlocks, pp_model_full_path]= ...
         ToLustre(model_path, const_files, lus_backend, coco_backend, varargin)
     %lustre_multiclocks_compiler translate Simulink models to Lustre. It is based on
     %article :
@@ -14,8 +14,8 @@ function [lustre_file_path, xml_trace, status, unsupportedOptions, abstractedBlo
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    L = nasa_toLustre.ToLustreImport.L;
-    import(L{:})
+    %L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
+    %import(L{:})
     
     %% global variables
     global TOLUSTRE_ENUMS_MAP TOLUSTRE_ENUMS_CONV_NODES ...
@@ -54,37 +54,37 @@ function [lustre_file_path, xml_trace, status, unsupportedOptions, abstractedBlo
         coco_backend = CoCoBackendType.VALIDATION;
     end
     try
-        forceGeneration = evalin('base', 'cocosim_force');
+        forceGeneration = evalin('base', nasa_toLustre.utils.ToLustreOptions.FORCE_CODE_GEN);
     catch
         forceGeneration = 0;
     end
     mode_display = 1;
     try
-        skip_sf_actions_check = evalin('base', 'skip_sf_actions_check');
+        skip_sf_actions_check = evalin('base', nasa_toLustre.utils.ToLustreOptions.SKIP_SF_ACTIONS_CHECK);
         CHECK_SF_ACTIONS = ~skip_sf_actions_check;
     catch
         CHECK_SF_ACTIONS = 1;
     end
     try
-        cocosim_optim = evalin('base', 'cocosim_optim');
+        cocosim_optim = ~evalin('base', nasa_toLustre.utils.ToLustreOptions.SKIP_CODE_OPTIMIZATION);
     catch
-        cocosim_optim = 1;
+        cocosim_optim = true;
     end
     for i=1:numel(varargin)
-        if strcmp(varargin{i}, ToLustreOptions.NODISPLAY)
+        if strcmp(varargin{i}, nasa_toLustre.utils.ToLustreOptions.NODISPLAY)
             mode_display = 0;
-        elseif strcmp(varargin{i}, ToLustreOptions.FORCE_CODE_GEN)
+        elseif strcmp(varargin{i}, nasa_toLustre.utils.ToLustreOptions.FORCE_CODE_GEN)
             forceGeneration = 1;
-        elseif strcmp(varargin{i}, ToLustreOptions.SKIP_SF_ACTIONS_CHECK)
+        elseif strcmp(varargin{i}, nasa_toLustre.utils.ToLustreOptions.SKIP_SF_ACTIONS_CHECK)
             CHECK_SF_ACTIONS = 0;
-        elseif strcmp(varargin{i}, ToLustreOptions.SKIP_CODE_OPTIMIZATION)
-            cocosim_optim = 0;
+        elseif strcmp(varargin{i}, nasa_toLustre.utils.ToLustreOptions.SKIP_CODE_OPTIMIZATION)
+            cocosim_optim = false;
         end
     end
     %% initialize outputs
     lustre_file_path = '';
     xml_trace = [];
-    status = 0;
+    failed = 0;
     unsupportedOptions = {};
     abstractedBlocks = {};
     pp_model_full_path = '';
@@ -109,7 +109,7 @@ function [lustre_file_path, xml_trace, status, unsupportedOptions, abstractedBlo
                 if exist(M.pp_model_full_path, 'file') ...
                         && BUtils.isLastModified(M.pp_model_full_path, lustre_file_path)
                     xml_trace = M.xml_trace;
-                    status = M.status;
+                    failed = M.failed;
                     unsupportedOptions = M.unsupportedOptions;
                     abstractedBlocks = M.abstractedBlocks;
                     pp_model_full_path = M.pp_model_full_path;
@@ -123,17 +123,18 @@ function [lustre_file_path, xml_trace, status, unsupportedOptions, abstractedBlo
     
     
     try
-        [unsupportedOptions, status, pp_model_full_path, ir_struct, ...
+        [unsupportedOptions, failed, pp_model_full_path, ir_struct, ...
             output_dir, abstractedBlocks]= ...
-            ToLustreUnsupportedBlocks(model_path, const_files, lus_backend, ...
+            nasa_toLustre.ToLustreUnsupportedBlocks(model_path, const_files, lus_backend, ...
             coco_backend, varargin{:});
         
-        if ~forceGeneration && (status || ~isempty(unsupportedOptions))
+        if ~forceGeneration && (failed || ~isempty(unsupportedOptions))
+            failed = true;
             return;
         end
     catch me
         display_msg(me.getReport(), MsgType.DEBUG, 'ToLustre', '');
-        status = 1;
+        failed = 1;
         return;
     end
     [~, file_name, ~] = fileparts(pp_model_full_path);
@@ -149,7 +150,7 @@ function [lustre_file_path, xml_trace, status, unsupportedOptions, abstractedBlo
     display_msg('Start tracebility', MsgType.INFO, 'lustre_multiclocks_compiler', '');
     xml_trace_file_name = fullfile(output_dir, strcat(file_name, '.toLustre.trace.xml'));
     json_trace_file_name = fullfile(output_dir, strcat(file_name, '_mapping.json'));
-    xml_trace = SLX2Lus_Trace(pp_model_full_path,...
+    xml_trace = nasa_toLustre.utils.SLX2Lus_Trace(pp_model_full_path,...
         xml_trace_file_name, json_trace_file_name);
     
     
@@ -162,9 +163,9 @@ function [lustre_file_path, xml_trace, status, unsupportedOptions, abstractedBlo
     model_struct = ir_struct.(IRUtils.name_format(file_name));
     main_sampleTime = model_struct.CompiledSampleTime;
     is_main_node = 1;
-    [nodes_ast, contracts_ast, external_libraries, status] = recursiveGeneration(...
+    [nodes_ast, contracts_ast, external_libraries, failed] = recursiveGeneration(...
         model_struct, model_struct, main_sampleTime, is_main_node, lus_backend, coco_backend, xml_trace);
-    if ~forceGeneration && status
+    if ~forceGeneration && failed
         html_path = fullfile(output_dir, strcat(file_name, '_error_messages.html'));
         %HtmlItem.displayErrorMessages(html_path, ERROR_MSG, mode_display);
         HtmlItem.display_LOG_Messages(html_path, ...
@@ -175,7 +176,7 @@ function [lustre_file_path, xml_trace, status, unsupportedOptions, abstractedBlo
         end
         return;
     end
-    [external_lib_code, open_list, abstractedNodes] = getExternalLibrariesNodes(external_libraries, lus_backend);
+    [external_lib_code, open_list, abstractedNodes] = nasa_toLustre.utils.getExternalLibrariesNodes(external_libraries, lus_backend);
     abstractedBlocks = [abstractedBlocks, abstractedNodes];
     
     %TODO: change it to AST
@@ -187,16 +188,18 @@ function [lustre_file_path, xml_trace, status, unsupportedOptions, abstractedBlo
     keys = TOLUSTRE_ENUMS_MAP.keys();
     enumsAst = cell(numel(keys), 1);
     for i=1:numel(keys)
-        enumsAst{i} = EnumTypeExpr(keys{i}, TOLUSTRE_ENUMS_MAP(keys{i}));
+        enumsAst{i} = nasa_toLustre.lustreAst.EnumTypeExpr(keys{i}, TOLUSTRE_ENUMS_MAP(keys{i}));
     end
     if ~isempty(TOLUSTRE_ENUMS_CONV_NODES)
         nodes_ast = [TOLUSTRE_ENUMS_CONV_NODES, nodes_ast];
     end
     nodes_ast = MatlabUtils.removeEmpty(nodes_ast);
     contracts_ast = MatlabUtils.removeEmpty(contracts_ast);
-    program =  LustreProgram(open_list, enumsAst, nodes_ast, contracts_ast);
-    if cocosim_optim
-        program = program.simplify();
+    program =  nasa_toLustre.lustreAst.LustreProgram(open_list, enumsAst, nodes_ast, contracts_ast);
+    if cocosim_optim ...
+            && ~(LusBackendType.isLUSTREC(lus_backend) || LusBackendType.isZUSTRE(lus_backend))
+        % Optimization is not important for Lustrec as the later normalize all expressions. 
+        try program = program.simplify(); catch me, display_msg(me.getReport(), MsgType.DEBUG, 'ToLustre.simplify', ''); end
     end
     % copy Kind2 libraries
     if LusBackendType.isKIND2(lus_backend)
@@ -229,7 +232,7 @@ function [lustre_file_path, xml_trace, status, unsupportedOptions, abstractedBlo
         display_msg('Printing Lustre AST to file failed',...
             MsgType.ERROR, 'write_body', '');
         display_msg(me.getReport(), MsgType.DEBUG, 'write_body', '');
-        status = 1;
+        failed = 1;
         return;
     end
     
@@ -238,7 +241,7 @@ function [lustre_file_path, xml_trace, status, unsupportedOptions, abstractedBlo
     xml_trace.write();
     
     %% save results in mat file.
-    save(mat_file, 'xml_trace', 'status', 'unsupportedOptions', 'abstractedBlocks', 'pp_model_full_path');
+    save(mat_file, 'xml_trace', 'failed', 'unsupportedOptions', 'abstractedBlocks', 'pp_model_full_path');
     ToLustre_datenum_map(model_path) = lustre_file_path;
     
     %% check lustre syntax
@@ -255,11 +258,11 @@ function [lustre_file_path, xml_trace, status, unsupportedOptions, abstractedBlo
             display_msg('Simulink To Lustre Syntax check has failed. The parsing error is the following:', MsgType.ERROR, 'TOLUSTRE', '');
             output = regexprep(output, lustre_file_path, HtmlItem.addOpenFileCmd(lustre_file_path, lustre_file_base));
             display_msg(output, MsgType.ERROR, 'TOLUSTRE', '');
-            status = syntax_status;
+            failed = syntax_status;
         else
             display_msg('Simulink To Lustre Syntax check passed successfully.', MsgType.RESULT, 'TOLUSTRE', '');
         end
-        status = syntax_status;
+        failed = syntax_status;
     end
     if ~isempty(ERROR_MSG)
         f_base =strcat(file_name, '_error_messages.html');
@@ -326,7 +329,7 @@ function [nodes_ast, contracts_ast, external_libraries, error_status] = ...
         end
         try
             [main_node, is_contract, external_nodes, external_libraries_i] ...
-                = SS_To_LustreNode.subsystem2node(parent, blk, main_sampleTime, ...
+                = nasa_toLustre.frontEnd.SS_To_LustreNode.subsystem2node(parent, blk, main_sampleTime, ...
                 is_main_node, lus_backend, coco_backend, xml_trace);
         catch me
             display_msg(sprintf('Translation to Lustre of block %s has failed.', HtmlItem.addOpenCmd(blk.Origin_path)),...
@@ -356,7 +359,7 @@ function create_file_meta_info(lustre_file)
     % Create lustre file
     fid = fopen(lustre_file, 'w');
     text = '-- This file has been generated by CoCoSim2.\n\n';
-    text = [text, '-- Compiler: Lustre compiler 2 (ToLustre.m)\n'];
+    text = [text, '-- Compiler: Lustre compiler 2 (nasa_toLustre.ToLustre.m)\n'];
     text = [text, '-- Time: ', char(datetime), '\n'];
     fprintf(fid, text);
     fclose(fid);

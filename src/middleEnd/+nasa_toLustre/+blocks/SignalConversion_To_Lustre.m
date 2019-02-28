@@ -22,7 +22,7 @@ classdef SignalConversion_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             % Thanks to inlining signals as well as BusCreator and BusSelector, 
             % Signal Conversion is passing the inputs
             for i=1:numel(outputs)
-                codes{i} = LustreEq(outputs{i}, inputs{i});
+                codes{i} = nasa_toLustre.lustreAst.LustreEq(outputs{i}, inputs{i});
             end
             
             obj.setCode( codes );

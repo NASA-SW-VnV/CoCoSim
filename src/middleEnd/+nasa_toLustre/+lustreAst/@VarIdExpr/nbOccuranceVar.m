@@ -5,10 +5,5 @@ function nb_occ = nbOccuranceVar(obj, var)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
- 
-    if isequal(obj.getId(), var.getId())
-        nb_occ = 1;
-    else
-        nb_occ = 0;
-    end
+    nb_occ = double(strcmp(obj.id, var.id));
 end

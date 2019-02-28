@@ -44,7 +44,7 @@ classdef Demux_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             
             codes = cell(1, widths);
             for i=1:widths
-                codes{i} = LustreEq(outputs{i}, inputs{1}{i});
+                codes{i} = nasa_toLustre.lustreAst.LustreEq(outputs{i}, inputs{1}{i});
                 %sprintf('%s = %s;\n\t', outputs{i}, inputs{1}{i});
             end
             

@@ -30,16 +30,16 @@ classdef Selector_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             
             [inputs] = ...
-                Assignment_To_Lustre.getBlockInputsNames_convInType2AccType(obj, parent, blk,isSelector);            
+                nasa_toLustre.blocks.Assignment_To_Lustre.getBlockInputsNames_convInType2AccType(obj, parent, blk,isSelector);            
             
             [numOutDims, ~, ~] = ...
-                Constant_To_Lustre.getValueFromParameter(parent, blk, blk.NumberOfDimensions);
+                nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(parent, blk, blk.NumberOfDimensions);
             
-            in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(blk.CompiledPortDimensions.Inport);
+            in_matrix_dimension = nasa_toLustre.blocks.Assignment_To_Lustre.getInputMatrixDimensions(blk.CompiledPortDimensions.Inport);
                         
             % define mapping array ind
             %outputDimsArray = in_matrix_dimension{1};   % assume full selection, will update after below function
-            [isPortIndex,ind,outputDimsArray] = Assignment_To_Lustre.defineMapInd(obj,parent,blk,inputs,in_matrix_dimension{1},isSelector);                
+            [isPortIndex,ind,outputDimsArray] = nasa_toLustre.blocks.Assignment_To_Lustre.defineMapInd(obj,parent,blk,inputs,in_matrix_dimension{1},isSelector);                
             
             % if index assignment is read in form index port, write mapping
             % code on Lustre side
@@ -49,7 +49,7 @@ classdef Selector_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 
             else   % no port input.  Mapping is done in Matlab.
                 
-                [codes] = Selector_To_Lustre.getWriteCodeForNonPortInput(obj,...
+                [codes] = nasa_toLustre.blocks.Selector_To_Lustre.getWriteCodeForNonPortInput(obj,...
                     numOutDims,inputs,outputs,ind,outputDimsArray,in_matrix_dimension);
                 
             end
@@ -73,7 +73,7 @@ classdef Selector_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                             prop = DEDUtils.OutOfBoundCheck(inputs{i+1}, U_dim(i));
                             propID = sprintf('%s_OUTOFBOUND_%d',...
                                 blk_name, i);
-                            codes{end+1} = LocalPropertyExpr(propID, prop);
+                            codes{end+1} = nasa_toLustre.lustreAst.LocalPropertyExpr(propID, prop);
                             % add traceability:
                             xml_trace.add_Property(blk.Origin_path, ...
                                 parent_name, propID, i, ...
@@ -92,7 +92,7 @@ classdef Selector_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             import(L{:})
             obj.unsupported_options = {};
             [numOutDims, ~, ~] = ...
-                Constant_To_Lustre.getValueFromParameter(parent, blk, blk.NumberOfDimensions);
+                nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(parent, blk, blk.NumberOfDimensions);
             for i=1:numOutDims
                 if strcmp(blk.IndexOptionArray{i}, 'Starting and ending indices (port)')
                     obj.addUnsupported_options(...

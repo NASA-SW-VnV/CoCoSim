@@ -15,10 +15,10 @@ function  [main_node, external_nodes, external_libraries ] = ...
     external_nodes = {};
     external_libraries = {};
     if isequal(type, 'ConditionAction')
-        t_act_node_name = StateflowTransition_To_Lustre.getCondActionNodeName(T, source_state, isDefaultTrans);
+        t_act_node_name = nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.getCondActionNodeName(T, source_state, isDefaultTrans);
         action = T.ConditionAction;
     else
-        t_act_node_name = StateflowTransition_To_Lustre.getTranActionNodeName(T, source_state, isDefaultTrans);
+        t_act_node_name = nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.getTranActionNodeName(T, source_state, isDefaultTrans);
         action = T.TransitionAction;
     end
     if isDefaultTrans
@@ -32,9 +32,9 @@ function  [main_node, external_nodes, external_libraries ] = ...
         T.Destination.Origin_path, ...
         T.ExecutionOrder, type);
     [main_node, external_nodes, external_libraries ] = ...
-        StateflowTransition_To_Lustre.write_Action_Node(action, data_map, t_act_node_name, transitionPath);
+        nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.write_Action_Node(action, data_map, t_act_node_name, transitionPath);
     if ~isempty(main_node)
-        comment = LustreComment(transitionPath, true);
+        comment = nasa_toLustre.lustreAst.LustreComment(transitionPath, true);
         main_node.setMetaInfo(comment);
     end
 

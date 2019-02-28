@@ -21,16 +21,16 @@ function [new_inputs, invertCodes, AdditionalVars] = invertInputs(obj, exp, inpu
                 else
                     v = inputs{i}{j};
                 end
-                v = VarIdExpr(...
+                v = nasa_toLustre.lustreAst.VarIdExpr(...
                     strcat(v.getId(), '_inv_', blk_id));
                 new_inputs{i}{j} = v;
-                AdditionalVars{end+1} = LustreVar(v, LusOutputDataTypeStr);
+                AdditionalVars{end+1} = nasa_toLustre.lustreAst.LustreVar(v, LusOutputDataTypeStr);
             end
             n = sqrt(numel(inputs{i}));
             lib_name = sprintf('_inv_M_%dx%d', n, n);
             obj.addExternal_libraries(strcat('LustMathLib_', lib_name));
-            invertCodes{end + 1} = LustreEq(new_inputs{i},...
-                    NodeCallExpr(lib_name, inputs{i}));
+            invertCodes{end + 1} = nasa_toLustre.lustreAst.LustreEq(new_inputs{i},...
+                    nasa_toLustre.lustreAst.NodeCallExpr(lib_name, inputs{i}));
             %create the equation B_inv= inv_x(B)
             %add the new variables to new_inputs
         else

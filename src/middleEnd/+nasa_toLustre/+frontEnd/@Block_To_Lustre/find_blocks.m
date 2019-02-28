@@ -23,7 +23,7 @@ function blks = find_blocks(ss, varargin)
     if isfield(ss, 'Content') && ~isempty(ss.Content)
         field_names = fieldnames(ss.Content);
         for i=1:numel(field_names)
-            blks_i = Block_To_Lustre.find_blocks(ss.Content.(field_names{i}), varargin{:});
+            blks_i = nasa_toLustre.frontEnd.Block_To_Lustre.find_blocks(ss.Content.(field_names{i}), varargin{:});
             blks = [blks, blks_i];
         end
     end

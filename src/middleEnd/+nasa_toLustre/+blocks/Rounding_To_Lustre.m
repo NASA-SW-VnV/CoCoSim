@@ -31,8 +31,8 @@ classdef Rounding_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             % Just pass inputs to outputs.
             codes = cell(1, numel(outputs));
             for i=1:numel(outputs)
-                codes{i} = LustreEq(outputs{i}, ...
-                    NodeCallExpr(RndMeth, inputs{1}{i}));
+                codes{i} = nasa_toLustre.lustreAst.LustreEq(outputs{i}, ...
+                    nasa_toLustre.lustreAst.NodeCallExpr(RndMeth, inputs{1}{i}));
             end
             
             obj.setCode( codes );

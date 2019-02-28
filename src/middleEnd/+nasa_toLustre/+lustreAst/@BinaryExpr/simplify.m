@@ -12,19 +12,19 @@ function new_obj = simplify(obj)
     right_exp = obj.right.simplify();
     % x + (-y) => x - y, x - (-y) => x+y
     if isa(right_exp, 'UnaryExpr') ...
-            && isequal(right_exp.op, UnaryExpr.NEG) 
-        if isequal(new_op, BinaryExpr.PLUS)
+            && isequal(right_exp.op, nasa_toLustre.lustreAst.UnaryExpr.NEG) 
+        if isequal(new_op, nasa_toLustre.lustreAst.BinaryExpr.PLUS)
             right_exp = right_exp.expr;
-            new_op = BinaryExpr.MINUS;
-        elseif isequal(new_op, BinaryExpr.MINUS)
+            new_op = nasa_toLustre.lustreAst.BinaryExpr.MINUS;
+        elseif isequal(new_op, nasa_toLustre.lustreAst.BinaryExpr.MINUS)
             right_exp = right_exp.expr;
-            new_op = BinaryExpr.PLUS;
+            new_op = nasa_toLustre.lustreAst.BinaryExpr.PLUS;
         end
     end
     % x+0 => x, x -0 => x
-    if (isequal(new_op, BinaryExpr.MINUS) ...
-            || isequal(new_op, BinaryExpr.PLUS) )
-        if isequal(new_op, BinaryExpr.PLUS) ...
+    if (isequal(new_op, nasa_toLustre.lustreAst.BinaryExpr.MINUS) ...
+            || isequal(new_op, nasa_toLustre.lustreAst.BinaryExpr.PLUS) )
+        if isequal(new_op, nasa_toLustre.lustreAst.BinaryExpr.PLUS) ...
                 && (isa(left_exp, 'IntExpr') || isa(left_exp, 'RealExpr'))...
                 && left_exp.getValue() == 0
             new_obj = right_exp;
@@ -36,7 +36,7 @@ function new_obj = simplify(obj)
             return;
         end
     end
-    new_obj = BinaryExpr(new_op,...
+    new_obj = nasa_toLustre.lustreAst.BinaryExpr(new_op,...
         left_exp,...
         right_exp, ...
         obj.withPar, obj.addEpsilon, obj.epsilon);

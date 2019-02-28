@@ -61,14 +61,14 @@ classdef UnaryMinus_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             codes = cell(1, numel(outputs));
             isSignedInt = true;
             if strcmp(inport_dt, 'int8')
-                vmin = IntExpr(-128);
-                vmax = IntExpr(127);
+                vmin = nasa_toLustre.lustreAst.IntExpr(-128);
+                vmax = nasa_toLustre.lustreAst.IntExpr(127);
             elseif strcmp(inport_dt, 'int16')
-                vmin = IntExpr(-32768);
-                vmax = IntExpr(32767);
+                vmin = nasa_toLustre.lustreAst.IntExpr(-32768);
+                vmax = nasa_toLustre.lustreAst.IntExpr(32767);
             elseif strcmp(inport_dt, 'int32')
-                vmin = IntExpr(-2147483648);
-                vmax = IntExpr(2147483647);
+                vmin = nasa_toLustre.lustreAst.IntExpr(-2147483648);
+                vmax = nasa_toLustre.lustreAst.IntExpr(2147483647);
             else
                 isSignedInt = false;
             end
@@ -79,21 +79,21 @@ classdef UnaryMinus_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 % Go over outputs
                 for j=1:numel(outputs)
                     % example of lement wise product block.
-                    codes{j} = LustreEq(outputs{j}, ...
-                        IteExpr(...
-                                BinaryExpr(BinaryExpr.EQ, ...
+                    codes{j} = nasa_toLustre.lustreAst.LustreEq(outputs{j}, ...
+                        nasa_toLustre.lustreAst.IteExpr(...
+                                nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.EQ, ...
                                            inputs{1}{j}, ...
                                            vmin), ...
                                  vmax, ...
-                                 UnaryExpr(UnaryExpr.NEG, inputs{1}{j})));
+                                 nasa_toLustre.lustreAst.UnaryExpr(UnaryExpr.NEG, inputs{1}{j})));
                     
                 end
             else
                 % Go over outputs
                 for j=1:numel(outputs)
                     % example of lement wise product block.
-                    codes{j} = LustreEq(outputs{j}, ...
-                         UnaryExpr(UnaryExpr.NEG, inputs{1}{j}));
+                    codes{j} = nasa_toLustre.lustreAst.LustreEq(outputs{j}, ...
+                         nasa_toLustre.lustreAst.UnaryExpr(UnaryExpr.NEG, inputs{1}{j}));
                 end
             end
             

@@ -21,7 +21,7 @@ classdef Reshape_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             
             % As we inline following columns, reshape doesn't do anything. 
             % Just pass inputs to outputs.
-            codes = arrayfun(@(i) LustreEq(outputs{i}, inputs{i}), ...
+            codes = arrayfun(@(i) nasa_toLustre.lustreAst.LustreEq(outputs{i}, inputs{i}), ...
                 (1:numel(outputs)), 'un', 0);
             obj.setCode( codes );
             obj.addVariable(outputs_dt);

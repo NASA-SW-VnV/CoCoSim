@@ -19,36 +19,36 @@ function [b, status, type, masktype, sfblockType, isIgnored] = getWriteType(sub_
         return;
     end
     type = sub_blk.BlockType;
-    if Block_To_Lustre.ignored(sub_blk)
+    if nasa_toLustre.frontEnd.Block_To_Lustre.ignored(sub_blk)
         status = 1;
         isIgnored = 1;
         return;
     end
     if isfield(sub_blk, 'Mask') && strcmp(sub_blk.Mask, 'on')
         masktype = sub_blk.MaskType;
-        fun_name = [Block_To_Lustre.blkTypeFormat(masktype) '_To_Lustre'];
+        fun_name = [nasa_toLustre.frontEnd.Block_To_Lustre.blkTypeFormat(masktype) '_To_Lustre'];
         try
             h = str2func(fun_name);
             b = h();
             return;
         catch
             type = sub_blk.BlockType;
-            fun_name = [Block_To_Lustre.blkTypeFormat(type) '_To_Lustre'];
+            fun_name = [nasa_toLustre.frontEnd.Block_To_Lustre.blkTypeFormat(type) '_To_Lustre'];
         end
     elseif isfield(sub_blk, 'SFBlockType')
         sfblockType = sub_blk.SFBlockType;
-        fun_name = [Block_To_Lustre.blkTypeFormat(sfblockType) '_To_Lustre'];
+        fun_name = [nasa_toLustre.frontEnd.Block_To_Lustre.blkTypeFormat(sfblockType) '_To_Lustre'];
         try
             h = str2func(fun_name);
             b = h();
             return;
         catch
             type = sub_blk.BlockType;
-            fun_name = [Block_To_Lustre.blkTypeFormat(type) '_To_Lustre'];
+            fun_name = [nasa_toLustre.frontEnd.Block_To_Lustre.blkTypeFormat(type) '_To_Lustre'];
         end
     else
         type = sub_blk.BlockType;
-        fun_name = [Block_To_Lustre.blkTypeFormat(type) '_To_Lustre'];
+        fun_name = [nasa_toLustre.frontEnd.Block_To_Lustre.blkTypeFormat(type) '_To_Lustre'];
     end
     try
         h = str2func(fun_name);

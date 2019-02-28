@@ -12,7 +12,7 @@ classdef MExpToLusAST
     methods(Static)
         function [lusCode, status] = translate(BlkObj, exp, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun)
             import nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST
-            global SF_MF_FUNCTIONS_MAP SF_STATES_NODESAST_MAP;
+            global SF_MF_FUNCTIONS_MAP ;
             L = nasa_toLustre.ToLustreImport.L;
             import(L{:})
             
@@ -60,7 +60,7 @@ classdef MExpToLusAST
             end
             try
                 
-                lusCode = MExpToLusAST.expression_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun);
+                lusCode = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun);
                 % transform Stateflow Function call with no outputs to an equation
                 if isStateFlow && ~isempty(tree)
                     if iscell(tree) && numel(tree) == 1
@@ -71,7 +71,7 @@ classdef MExpToLusAST
                             isKey(SF_MF_FUNCTIONS_MAP, tree.ID)
                         actionNodeAst = SF_MF_FUNCTIONS_MAP(tree.ID);
                         [~, oututs_Ids] = actionNodeAst.nodeCall();
-                        lusCode{1} = LustreEq(oututs_Ids,...
+                        lusCode{1} = nasa_toLustre.lustreAst.LustreEq(oututs_Ids,...
                             lusCode{1});
                     end
                 end

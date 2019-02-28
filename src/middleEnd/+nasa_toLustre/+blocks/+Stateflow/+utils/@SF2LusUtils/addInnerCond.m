@@ -13,10 +13,10 @@ function new_assignements = addInnerCond(lus_eqts, isInnerLusVar, orig_exp, stat
         if isa(lus_eqts{i}, 'ConcurrentAssignments')
             assignments = lus_eqts{i}.getAssignments();
             new_assignements_i = nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.addInnerCond(assignments, isInnerLusVar, orig_exp, state);
-            new_assignements{i} = ConcurrentAssignments(new_assignements_i);
+            new_assignements{i} = nasa_toLustre.lustreAst.ConcurrentAssignments(new_assignements_i);
         elseif isa(lus_eqts{i}, 'LustreEq')
-            new_assignements{i} = LustreEq(lus_eqts{i}.getLhs(), ...
-                IteExpr(UnaryExpr(UnaryExpr.NOT, isInnerLusVar), ...
+            new_assignements{i} = nasa_toLustre.lustreAst.LustreEq(lus_eqts{i}.getLhs(), ...
+                nasa_toLustre.lustreAst.IteExpr(nasa_toLustre.lustreAst.UnaryExpr(UnaryExpr.NOT, isInnerLusVar), ...
                 lus_eqts{i}.getRhs(), lus_eqts{i}.getLhs()));
             
         elseif ~isempty(lus_eqts{i})

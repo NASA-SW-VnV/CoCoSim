@@ -20,11 +20,11 @@ classdef MultiPortSwitch_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             [inputs] = getBlockInputsNames_convInType2AccType(obj, parent, blk);
             
             [numInputs, ~, ~] = ...
-                Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Inputs);
+                nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Inputs);
             blk_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);
             
-            portIndex = VarIdExpr(sprintf('%s_portIndex',blk_name));
-            obj.addVariable(LustreVar(portIndex, 'int'));
+            portIndex = nasa_toLustre.lustreAst.VarIdExpr(sprintf('%s_portIndex',blk_name));
+            obj.addVariable(nasa_toLustre.lustreAst.LustreVar(portIndex, 'int'));
             
             indexShift = 0;    % portIndex = readin index + indexShift.  
             %                    indexShift = 0 for 1-based contiguous (1st port is control port)
@@ -38,10 +38,10 @@ classdef MultiPortSwitch_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             end
             
             codes = cell(1, numel(outputs) + 1); 
-            codes{1} = LustreEq(portIndex, ...
-                BinaryExpr(BinaryExpr.PLUS, ...
+            codes{1} = nasa_toLustre.lustreAst.LustreEq(portIndex, ...
+                nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.PLUS, ...
                             inputs{1}{1},...
-                            IntExpr(indexShift)));
+                            nasa_toLustre.lustreAst.IntExpr(indexShift)));
             %sprintf('%s = %s + %d; \n\t', portIndex, inputs{1}{1},indexShift);
                         
             for i=1:numel(outputs)
@@ -49,14 +49,14 @@ classdef MultiPortSwitch_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 conds = cell(1, numInputs);
                 thens = cell(1, numInputs + 1);
                 for j=1:numInputs
-                    conds{j} = BinaryExpr(BinaryExpr.EQ, portIndex, IntExpr(j));
+                    conds{j} = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.EQ, portIndex, nasa_toLustre.lustreAst.IntExpr(j));
                     thens{j} = inputs{j+1}{i};
                     %code = sprintf('%s  if(%s = %d) then %s\n\t', code, portIndex,j,inputs{j+1}{i});   % 1st port is control port
                 end
                 thens{numInputs + 1} = inputs{numel(inputs)}{i};
                 %codes{i + 1} = sprintf('%s  else %s ;\n\t', code,inputs{numel(inputs)}{i});   % default port is always last port whether there is additional port or not
-                codes{i + 1} = LustreEq(outputs{i}, ...
-                    IteExpr.nestedIteExpr(conds, thens));
+                codes{i + 1} = nasa_toLustre.lustreAst.LustreEq(outputs{i}, ...
+                    nasa_toLustre.lustreAst.IteExpr.nestedIteExpr(conds, thens));
             end
             
             obj.setCode( codes );

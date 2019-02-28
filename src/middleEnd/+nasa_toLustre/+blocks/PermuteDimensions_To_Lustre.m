@@ -19,7 +19,7 @@ classdef PermuteDimensions_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             obj.addVariable(outputs_dt);
             inputs =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk);
             [Order, ~, status] = ...
-                Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Order);
+                nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Order);
             if status
                 display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
                     blk.Order, HtmlItem.addOpenCmd(blk.Origin_path)), ...
@@ -30,7 +30,7 @@ classdef PermuteDimensions_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             new_inputs = reshape(inputs, CompiledPortDimensions(2:end));
             new_inputs = permute(new_inputs, Order);
             
-            codes = arrayfun(@(i) LustreEq(outputs{i}, new_inputs{i}), ...
+            codes = arrayfun(@(i) nasa_toLustre.lustreAst.LustreEq(outputs{i}, new_inputs{i}), ...
                 (1:numel(outputs)), 'un', 0);
             obj.setCode( codes );
             

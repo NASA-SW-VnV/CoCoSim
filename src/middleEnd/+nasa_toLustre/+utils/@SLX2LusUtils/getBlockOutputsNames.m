@@ -60,8 +60,8 @@ else
 end
 
     function [names, names_dt] = blockOutputs(portNumber)
-        L = nasa_toLustre.ToLustreImport.L;
-        import(L{:})
+        %L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
+        %import(L{:})
         names = {};
         names_dt = {};
         if strcmp(type, 'Inports')
@@ -129,18 +129,18 @@ end
         for i=1:width(portNumber)
             if isBus
                 for k=1:numel(lus_dt)
-                    names{end+1} = VarIdExpr(...
+                    names{end+1} = nasa_toLustre.lustreAst.VarIdExpr(...
                         nasa_toLustre.utils.SLX2LusUtils.name_format(strcat(blk.Name, '_', num2str(idx), '_BusElem', num2str(k))));
-                    names_dt{end+1} = LustreVar(names{end} , lus_dt{k});
+                    names_dt{end+1} = nasa_toLustre.lustreAst.LustreVar(names{end} , lus_dt{k});
                 end
             elseif iscell(lus_dt) && numel(lus_dt) == width(portNumber)
-                names{end+1} = VarIdExpr(...
+                names{end+1} = nasa_toLustre.lustreAst.VarIdExpr(...
                     nasa_toLustre.utils.SLX2LusUtils.name_format(strcat(blk.Name, '_', num2str(idx))));
-                names_dt{end+1} = LustreVar(names{end}, char(lus_dt{i}));
+                names_dt{end+1} = nasa_toLustre.lustreAst.LustreVar(names{end}, char(lus_dt{i}));
             else
-                names{end+1} = VarIdExpr(...
+                names{end+1} = nasa_toLustre.lustreAst.VarIdExpr(...
                     nasa_toLustre.utils.SLX2LusUtils.name_format(strcat(blk.Name, '_', num2str(idx))));
-                names_dt{end+1} = LustreVar(names{end}, char(lus_dt));
+                names_dt{end+1} = nasa_toLustre.lustreAst.LustreVar(names{end}, char(lus_dt));
             end
             idx = idx + 1;
         end

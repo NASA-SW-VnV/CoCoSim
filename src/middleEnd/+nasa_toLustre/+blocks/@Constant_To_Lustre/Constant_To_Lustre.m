@@ -19,7 +19,7 @@ classdef Constant_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             slx_dt = blk.CompiledPortDataTypes.Outport{1};
             lus_outputDataType =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(slx_dt);
             [Value, ~, status] = ...
-                Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Value);
+                nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Value);
             if status
                 display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
                     blk.Value, HtmlItem.addOpenCmd(blk.Origin_path)), ...
@@ -41,7 +41,7 @@ classdef Constant_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             
             codes = cell(1, numel(outputs));
             for j=1:numel(outputs)
-                codes{j} = LustreEq(outputs{j}, values_AST{j});
+                codes{j} = nasa_toLustre.lustreAst.LustreEq(outputs{j}, values_AST{j});
             end
             
             
@@ -55,7 +55,7 @@ classdef Constant_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             % search the variable in Model workspace, if not raise
             % unsupported option
             [~, ~, status] = ...
-                Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Value);
+                nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Value);
             if status
                 obj.addUnsupported_options(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
                     blk.Value, blk.Origin_path));

@@ -27,7 +27,7 @@ classdef DesignVerifierProofObjective_To_Lustre < nasa_toLustre.frontEnd.Block_T
                 obj.addVariable(outputs_dt);
                 codes = cell(1, numel(outputs));
                 for i=1:numel(outputs)
-                    codes{i} = LustreEq(outputs{i}, inputs{i});
+                    codes{i} = nasa_toLustre.lustreAst.LustreEq(outputs{i}, inputs{i});
                 end
                 obj.setCode( codes );
             end
@@ -37,12 +37,12 @@ classdef DesignVerifierProofObjective_To_Lustre < nasa_toLustre.frontEnd.Block_T
                 return;
             end
             try
-                code = DesignVerifierAssumption_To_Lustre.getAssumptionExpr(...
+                code = nasa_toLustre.blocks.DesignVerifierAssumption_To_Lustre.getAssumptionExpr(...
                     blk, inputs, inport_lus_dt);
                 if ~isempty(code)
                     blk_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);
                     parent_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(parent);
-                    obj.addCode(LocalPropertyExpr( blk_name, code ));
+                    obj.addCode(nasa_toLustre.lustreAst.LocalPropertyExpr( blk_name, code ));
                     xml_trace.add_Property(blk.Origin_path, parent_name, blk_name, 1, ...
                         'localProperty')
                 end

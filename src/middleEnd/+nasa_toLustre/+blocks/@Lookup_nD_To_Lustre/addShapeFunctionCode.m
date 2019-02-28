@@ -19,9 +19,9 @@ function [body, vars] = addShapeFunctionCode(numBoundNodes,...
     for i=1:numBoundNodes
         dimSign = shapeNodeSign(i,:);
         % declaring boundingi{i}
-        boundingi{i} = VarIdExpr(sprintf('%s_bound_node_index_%d',blk_name,i));
+        boundingi{i} = nasa_toLustre.lustreAst.VarIdExpr(sprintf('%s_bound_node_index_%d',blk_name,i));
         %vars = sprintf('%s\t%s:%s;\n',vars,boundingi{i},indexDataType);
-        vars{i} = LustreVar(boundingi{i},indexDataType);
+        vars{i} = nasa_toLustre.lustreAst.LustreVar(boundingi{i},indexDataType);
 
         % defining boundingi{i}
         %value = '0';
@@ -35,13 +35,13 @@ function [body, vars] = addShapeFunctionCode(numBoundNodes,...
             end
             if j==1
                 %value = sprintf('%s + %s*%d',value,curIndex, dimJump(j));
-                terms{j} = BinaryExpr(BinaryExpr.MULTIPLY,curIndex,Ast_dimJump{j});
+                terms{j} = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.MULTIPLY,curIndex,Ast_dimJump{j});
             else
                 %value = sprintf('%s + (%s-1)*%d',value,curIndex, dimJump(j));
-                terms{j} = BinaryExpr(BinaryExpr.MULTIPLY,...
-                    BinaryExpr(BinaryExpr.MINUS,...
+                terms{j} = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.MULTIPLY,...
+                    nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.MINUS,...
                                 curIndex, ...
-                                IntExpr(1)),...
+                                nasa_toLustre.lustreAst.IntExpr(1)),...
                     Ast_dimJump{j});
             end
         end
@@ -49,9 +49,9 @@ function [body, vars] = addShapeFunctionCode(numBoundNodes,...
         if NumberOfTableDimensions == 1
             value = terms{1};
         else
-            value = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,terms);
+            value = nasa_toLustre.lustreAst.BinaryExpr.BinaryMultiArgs(nasa_toLustre.lustreAst.BinaryExpr.PLUS,terms);
         end
-        body{end+1} = LustreEq(boundingi{i},value);
+        body{end+1} = nasa_toLustre.lustreAst.LustreEq(boundingi{i},value);
 
         if ~skipInterpolation
             % defining u_node{i}
@@ -61,7 +61,7 @@ function [body, vars] = addShapeFunctionCode(numBoundNodes,...
             for j=1:numel(table_elem)-1
 %                        if j==1
                     %code = sprintf('%s  if(%s = %d) then %s\n\t', code, boundingi{i},j,table_elem{j});
-                    conds{j} = BinaryExpr(BinaryExpr.EQ,boundingi{i},IntExpr(j));
+                    conds{j} = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.EQ,boundingi{i},nasa_toLustre.lustreAst.IntExpr(j));
                     thens{j} = table_elem{j};
 %                         else
 %                             %code = sprintf('%s  else if(%s = %d) then %s\n\t', code, boundingi{i},j,table_elem{j});
@@ -71,8 +71,8 @@ function [body, vars] = addShapeFunctionCode(numBoundNodes,...
             end
             %body = sprintf('%s%s  else %s ;\n\t', body,code,table_elem{numel(table_elem)});
             thens{numel(table_elem)} = table_elem{numel(table_elem)};
-            rhs = IteExpr.nestedIteExpr(conds, thens);
-            body{end+1} = LustreEq(u_node{i},rhs);
+            rhs = nasa_toLustre.lustreAst.IteExpr.nestedIteExpr(conds, thens);
+            body{end+1} = nasa_toLustre.lustreAst.LustreEq(u_node{i},rhs);
         end
 
     end

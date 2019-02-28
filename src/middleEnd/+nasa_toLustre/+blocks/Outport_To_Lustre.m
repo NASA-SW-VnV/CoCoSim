@@ -36,7 +36,7 @@ classdef Outport_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             codes = cell(1, numel(outputs));
             for i=1:numel(outputs)
                 %codes{i} = sprintf('%s = %s;\n\t', outputs{i}, inputs{i});
-                codes{i} = LustreEq(outputs{i}, inputs{i});
+                codes{i} = nasa_toLustre.lustreAst.LustreEq(outputs{i}, inputs{i});
             end
             
             obj.setCode( codes);

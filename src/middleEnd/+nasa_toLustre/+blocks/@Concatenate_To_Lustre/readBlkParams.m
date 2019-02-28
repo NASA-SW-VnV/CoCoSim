@@ -11,7 +11,7 @@ function [blkParams,in_matrix_dimension] = readBlkParams(blk)
     blkParams = struct;
     blkParams.isVector = strcmp(blk.Mode,'Vector');
     in_matrix_dimension = ...
-        Assignment_To_Lustre.getInputMatrixDimensions(blk.CompiledPortDimensions.Inport);
+        nasa_toLustre.blocks.Assignment_To_Lustre.getInputMatrixDimensions(blk.CompiledPortDimensions.Inport);
     % Users may specified Multidimensional array but define vector
     % for inputs.  This case is equivalent to Vector.
     if ~blkParams.isVector

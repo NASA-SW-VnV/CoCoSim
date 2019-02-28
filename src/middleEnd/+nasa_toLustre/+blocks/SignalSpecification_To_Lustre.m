@@ -22,7 +22,7 @@ classdef SignalSpecification_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             % the Signal Specification block is a virtual block. It exists
             % only to specify the attributes of a signal and plays no role 
             % in the simulation of the model.
-            codes = arrayfun(@(i) LustreEq(outputs{i}, inputs{i}), ...
+            codes = arrayfun(@(i) nasa_toLustre.lustreAst.LustreEq(outputs{i}, inputs{i}), ...
                 (1:numel(outputs)), 'un', 0);
             obj.setCode( codes );
             

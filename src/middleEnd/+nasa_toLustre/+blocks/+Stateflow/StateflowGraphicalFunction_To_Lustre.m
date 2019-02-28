@@ -31,16 +31,16 @@ classdef StateflowGraphicalFunction_To_Lustre
                 x = sfunc.Data{i};
                 data_map(sfunc.Data{i}.Name) = x;
                 if isequal(x.Scope, 'Input')
-                    func_inputs{end+1} = LustreVar(x.Name, x.LusDatatype);
+                    func_inputs{end+1} = nasa_toLustre.lustreAst.LustreVar(x.Name, x.LusDatatype);
                 elseif isequal(x.Scope, 'Output')
-                    func_outputs{end+1} = LustreVar(x.Name, x.LusDatatype);
+                    func_outputs{end+1} = nasa_toLustre.lustreAst.LustreVar(x.Name, x.LusDatatype);
                 end
             end
             % Go over Junctions Outertransitions: condition/Transition Actions
             for i=1:numel(junctions)
                 try
                     [external_nodes_i, external_libraries_i ] = ...
-                        StateflowJunction_To_Lustre.write_code(junctions{i}, data_map);
+                        nasa_toLustre.blocks.Stateflow.StateflowJunction_To_Lustre.write_code(junctions{i}, data_map);
                     external_nodes = [external_nodes, external_nodes_i];
                     external_libraries = [external_libraries, external_libraries_i];
                 catch me
@@ -61,17 +61,17 @@ classdef StateflowGraphicalFunction_To_Lustre
             isDefaultTrans = true;
             % Default transitions actions
             [transition_nodes_j, external_libraries_j ] = ...
-                StateflowTransition_To_Lustre.get_Actions(T{1}, data_map, sfunc, ...
+                nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.get_Actions(T{1}, data_map, sfunc, ...
                 isDefaultTrans);
             external_nodes = [external_nodes, transition_nodes_j];
             external_libraries = [external_libraries, external_libraries_j];
             
             
             node_name = nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getUniqueName(sfunc);
-            comment = LustreComment(...
+            comment = nasa_toLustre.lustreAst.LustreComment(...
                 sprintf('Stateflow Graphical Function %s', sfunc.Origin_path), true);
             [main_node, external_libraries_i] = ...
-                StateflowTransition_To_Lustre.getTransitionsNode(T, data_map, ...
+                nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.getTransitionsNode(T, data_map, ...
                 parentPath, ...
                 isDefaultTrans, ...
                 node_name, comment);
@@ -100,12 +100,12 @@ classdef StateflowGraphicalFunction_To_Lustre
                 if numel(func_inputs) < numel(computed_inputs)
                     bodyEqs = main_node.getBodyEqs();
                     for i=1:numel(computed_inputs)
-                        if VarIdExpr.ismemberVar(computed_inputs{i}, func_inputs)
+                        if nasa_toLustre.lustreAst.VarIdExpr.ismemberVar(computed_inputs{i}, func_inputs)
                             continue;
                         end
-                        if VarIdExpr.ismemberVar(computed_inputs{i}, func_outputs)
+                        if nasa_toLustre.lustreAst.VarIdExpr.ismemberVar(computed_inputs{i}, func_outputs)
                             % substitute first occurance of the variable by zero
-                            var = VarIdExpr(computed_inputs{i}.getId());
+                            var = nasa_toLustre.lustreAst.VarIdExpr(computed_inputs{i}.getId());
                             var_dt = computed_inputs{i}.getDT();
                             for j=1:numel(bodyEqs)
                                 if isa(bodyEqs{j}, 'LustreEq')
@@ -115,7 +115,7 @@ classdef StateflowGraphicalFunction_To_Lustre
                                     if nb_occ > 0
                                         newVar =nasa_toLustre.utils.SLX2LusUtils.num2LusExp(0, var_dt);
                                         new_rhs = rhs.substituteVars( var, newVar);
-                                        bodyEqs{j} = LustreEq(lhs, new_rhs);
+                                        bodyEqs{j} = nasa_toLustre.lustreAst.LustreEq(lhs, new_rhs);
                                         break;
                                     end
                                 end

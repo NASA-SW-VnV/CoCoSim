@@ -68,27 +68,27 @@ classdef Logic_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     end
                 end
                 if strcmp(blk.Operator, 'AND')
-                    rhs = BinaryExpr.BinaryMultiArgs(BinaryExpr.AND, scalars);
+                    rhs = nasa_toLustre.lustreAst.BinaryExpr.BinaryMultiArgs(nasa_toLustre.lustreAst.BinaryExpr.AND, scalars);
                 elseif strcmp(blk.Operator, 'OR')
-                    rhs = BinaryExpr.BinaryMultiArgs(BinaryExpr.OR, scalars);
+                    rhs = nasa_toLustre.lustreAst.BinaryExpr.BinaryMultiArgs(nasa_toLustre.lustreAst.BinaryExpr.OR, scalars);
                 elseif strcmp(blk.Operator, 'XOR')
-                    rhs = BinaryExpr.BinaryMultiArgs(BinaryExpr.XOR, scalars);
+                    rhs = nasa_toLustre.lustreAst.BinaryExpr.BinaryMultiArgs(nasa_toLustre.lustreAst.BinaryExpr.XOR, scalars);
                 elseif strcmp(blk.Operator, 'NOT')
-                    rhs = UnaryExpr(UnaryExpr.NOT, inputs{1}{i});
+                    rhs = nasa_toLustre.lustreAst.UnaryExpr(UnaryExpr.NOT, inputs{1}{i});
                 elseif strcmp(blk.Operator, 'NAND')
-                    rhs = UnaryExpr(UnaryExpr.NOT, ...
-                        BinaryExpr.BinaryMultiArgs(BinaryExpr.AND, scalars));
+                    rhs = nasa_toLustre.lustreAst.UnaryExpr(UnaryExpr.NOT, ...
+                        nasa_toLustre.lustreAst.BinaryExpr.BinaryMultiArgs(nasa_toLustre.lustreAst.BinaryExpr.AND, scalars));
                 elseif strcmp(blk.Operator, 'NOR')
-                    rhs = UnaryExpr(UnaryExpr.NOT, ...
-                        BinaryExpr.BinaryMultiArgs(BinaryExpr.OR, scalars));
+                    rhs = nasa_toLustre.lustreAst.UnaryExpr(UnaryExpr.NOT, ...
+                        nasa_toLustre.lustreAst.BinaryExpr.BinaryMultiArgs(nasa_toLustre.lustreAst.BinaryExpr.OR, scalars));
                 elseif strcmp(blk.Operator, 'NXOR')
-                    rhs = UnaryExpr(UnaryExpr.NOT, ...
-                        BinaryExpr.BinaryMultiArgs(BinaryExpr.XOR, scalars));
+                    rhs = nasa_toLustre.lustreAst.UnaryExpr(UnaryExpr.NOT, ...
+                        nasa_toLustre.lustreAst.BinaryExpr.BinaryMultiArgs(nasa_toLustre.lustreAst.BinaryExpr.XOR, scalars));
                 end
                 if ~isempty(out_conv_format)
                     rhs =nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(out_conv_format,rhs);
                 end
-                codes{i} = LustreEq(outputs{i}, rhs);
+                codes{i} = nasa_toLustre.lustreAst.LustreEq(outputs{i}, rhs);
             end
             obj.setCode( codes );
             obj.addVariable(outputs_dt);

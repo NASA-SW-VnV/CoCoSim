@@ -53,27 +53,27 @@ classdef Trigonometry_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 for i=1:widths
                     index = index + 1;
                     operator = 'sin';
-                    codes{index} = LustreEq(outputs{index}, ...
-                        NodeCallExpr(operator, inputs{1}{i}));
+                    codes{index} = nasa_toLustre.lustreAst.LustreEq(outputs{index}, ...
+                        nasa_toLustre.lustreAst.NodeCallExpr(operator, inputs{1}{i}));
                 end
                 for i=1:widths
                     index = index + 1;
                     operator = 'cos';
-                    codes{index} = LustreEq(outputs{index}, ...
-                        NodeCallExpr(operator, inputs{1}{i}));
+                    codes{index} = nasa_toLustre.lustreAst.LustreEq(outputs{index}, ...
+                        nasa_toLustre.lustreAst.NodeCallExpr(operator, inputs{1}{i}));
                 end
             elseif strcmp(operator, 'atan2')
                 codes = cell(1, numel(outputs));
                 for i=1:numel(outputs)
-                    codes{i} = LustreEq(outputs{i}, ...
-                        NodeCallExpr(operator, ...
+                    codes{i} = nasa_toLustre.lustreAst.LustreEq(outputs{i}, ...
+                        nasa_toLustre.lustreAst.NodeCallExpr(operator, ...
                         {inputs{1}{i}, inputs{2}{i}}));
                 end
             else
                 codes = cell(1, numel(outputs));
                 for i=1:numel(outputs)
-                    codes{i} = LustreEq(outputs{i}, ...
-                        NodeCallExpr(operator, inputs{1}{i}));
+                    codes{i} = nasa_toLustre.lustreAst.LustreEq(outputs{i}, ...
+                        nasa_toLustre.lustreAst.NodeCallExpr(operator, inputs{1}{i}));
                 end
             end
             

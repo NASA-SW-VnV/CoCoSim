@@ -276,16 +276,16 @@ classdef LustreNode < nasa_toLustre.lustreAst.LustreAst
                 last_Idx = outputs_map(out_name);
                 for j=1:last_Idx-1
                     obj.addVar(...
-                        LustreVar(strcat(out_name, '__', num2str(j)),...
+                        nasa_toLustre.lustreAst.LustreVar(strcat(out_name, '__', num2str(j)),...
                         out_DT));
                 end
                 if last_Idx > 0
                     obj.outputs{i} = ...
-                        LustreVar(strcat(out_name, '__', num2str(last_Idx)),...
+                        nasa_toLustre.lustreAst.LustreVar(strcat(out_name, '__', num2str(last_Idx)),...
                         out_DT);
                 end
             end
-            new_obj = LustreNode(obj.metaInfo, obj.name, obj.inputs, ...
+            new_obj = nasa_toLustre.lustreAst.LustreNode(obj.metaInfo, obj.name, obj.inputs, ...
                 obj.outputs, new_localContract, obj.localVars, new_bodyEqs, ...
                 obj.isMain, obj.isImported);
         end
@@ -402,10 +402,10 @@ classdef LustreNode < nasa_toLustre.lustreAst.LustreAst
                 % e.g. y = f(x); 
                 if isa(new_bodyEqs{i}, 'LustreEq')...
                         && isa(new_bodyEqs{i}.getLhs(), 'VarIdExpr')...
-                        && VarIdExpr.ismemberVar(new_bodyEqs{i}.getLhs(), new_localVars)
+                        && nasa_toLustre.lustreAst.VarIdExpr.ismemberVar(new_bodyEqs{i}.getLhs(), new_localVars)
                     var = new_bodyEqs{i}.getLhs();
                     rhs = new_bodyEqs{i}.getRhs();
-                    new_var = ParenthesesExpr(rhs.deepCopy());
+                    new_var = nasa_toLustre.lustreAst.ParenthesesExpr(rhs.deepCopy());
                     
                     % if rhs class is IteExpr, skip it. To hep debugging.
                     if isa(rhs, 'IteExpr')
@@ -432,9 +432,9 @@ classdef LustreNode < nasa_toLustre.lustreAst.LustreAst
                     
                     
                     %delete the current Eqts
-                    new_bodyEqs{i} = DummyExpr();
+                    new_bodyEqs{i} = nasa_toLustre.lustreAst.DummyExpr();
                     %remove it from variables
-                    new_localVars = LustreVar.removeVar(new_localVars, var);
+                    new_localVars = nasa_toLustre.lustreAst.LustreVar.removeVar(new_localVars, var);
                     % change var by new_var
                     new_bodyEqs = cellfun(@(x) x.substituteVars(var, new_var), new_bodyEqs, 'UniformOutput', false);
                 end

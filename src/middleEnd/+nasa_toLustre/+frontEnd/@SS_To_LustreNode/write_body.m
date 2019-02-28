@@ -8,8 +8,8 @@ function [body, variables, external_nodes, external_libraries] =...
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
          
-    L = nasa_toLustre.ToLustreImport.L;
-    import(L{:})
+    %L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
+    %import(L{:})
     variables = {};
     body = {};
     external_nodes = {};
@@ -24,7 +24,7 @@ function [body, variables, external_nodes, external_libraries] =...
     end
     for i=1:numel(fields)
         blk = subsys.Content.(fields{i});
-        [b, status] = getWriteType(blk);
+        [b, status] = nasa_toLustre.utils.getWriteType(blk);
         if status
             continue;
         end

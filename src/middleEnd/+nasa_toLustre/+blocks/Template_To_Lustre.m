@@ -103,8 +103,8 @@ classdef Template_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 % out_2 = in1_2 / in2_2;
                 % ....
                 % out_n = in1_n / in2_n;
-                codes{j} = LustreEq(outputs{j},...
-                    BinaryExpr(BinaryExpr.DIVIDE,...
+                codes{j} = nasa_toLustre.lustreAst.LustreEq(outputs{j},...
+                    nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.DIVIDE,...
                     inputs{1}{j}, inputs{2}{j}));
             end
             
@@ -125,19 +125,19 @@ classdef Template_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     inport_dt = blk.CompiledPortDataTypes.Inport(2);
                     lus_dt =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(inport_dt);
                     if isequal(lus_dt, 'int')
-                        zero = IntExpr(0);
+                        zero = nasa_toLustre.lustreAst.IntExpr(0);
                     else
-                        zero = RealExpr(0);
+                        zero = nasa_toLustre.lustreAst.RealExpr(0);
                     end
                     prop1 = {};
                     for i=1:numel(inputs{2})
                         % set the property
                         % denominator <> 0.0;
-                        prop1{i} = BinaryExpr(BinaryExpr.NEQ, inputs{2}{i}, zero);
+                        prop1{i} = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.NEQ, inputs{2}{i}, zero);
                     end
                     propID = sprintf('%s_DIVBYZERO',blk_name);
-                    codes{end+1} = LocalPropertyExpr(propID, ...
-                        BinaryExpr.BinaryMultiArgs(BinaryExpr.AND, prop1));
+                    codes{end+1} = nasa_toLustre.lustreAst.LocalPropertyExpr(propID, ...
+                        nasa_toLustre.lustreAst.BinaryExpr.BinaryMultiArgs(nasa_toLustre.lustreAst.BinaryExpr.AND, prop1));
                     % add traceability:
                     parent_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(parent);
                     xml_trace.add_Property(blk.Origin_path, ...
@@ -156,21 +156,21 @@ classdef Template_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     lus_dt =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(outputDataType);
                     if isequal(lus_dt, 'int')
                         % calculate intMin intMax
-                        intMin = IntExpr(intmin(outputDataType));
-                        intMax = IntExpr(intmax(outputDataType));
+                        intMin = nasa_toLustre.lustreAst.IntExpr(intmin(outputDataType));
+                        intMax = nasa_toLustre.lustreAst.IntExpr(intmax(outputDataType));
                         % set the property
                         prop2 = {};
                         for j=1:nb_outputs
                             % Lustre int is a BigInt: detecting integer overflow
                             % can be easily be expressed as:
                             % intMin <= out and out <= intMax
-                            prop2{j} = BinaryExpr(BinaryExpr.AND, ...
-                                BinaryExpr(BinaryExpr.LTE, intMin, outputs{j}), ...
-                                BinaryExpr(BinaryExpr.LTE, outputs{j}, intMax));
+                            prop2{j} = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.AND, ...
+                                nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.LTE, intMin, outputs{j}), ...
+                                nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.LTE, outputs{j}, intMax));
                         end
                         propID = sprintf('%s_INTOVERFLOW',blk_name);
-                        codes{end+1} = LocalPropertyExpr(propID, ...
-                            BinaryExpr.BinaryMultiArgs(BinaryExpr.AND, prop2));
+                        codes{end+1} = nasa_toLustre.lustreAst.LocalPropertyExpr(propID, ...
+                            nasa_toLustre.lustreAst.BinaryExpr.BinaryMultiArgs(nasa_toLustre.lustreAst.BinaryExpr.AND, prop2));
                         % add traceability:
                         parent_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(parent);
                         xml_trace.add_Property(blk.Origin_path, ...
@@ -186,7 +186,7 @@ classdef Template_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     % example:
                     propID = sprintf('%s_OUTOFBOUND',blk_name);
                     prop = DEDUtils.OutOfBoundCheck(inputs{2}, widths(2));
-                    codes{end+1} = LocalPropertyExpr(propID, prop);
+                    codes{end+1} = nasa_toLustre.lustreAst.LocalPropertyExpr(propID, prop);
                     % add traceability:
                     parent_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(parent);
                     xml_trace.add_Property(blk.Origin_path, ...
@@ -202,7 +202,7 @@ classdef Template_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     prop = DEDUtils.OutMinMaxCheck(parent, blk, outputs, lus_dt);
                     if ~isempty(prop)
                         propID = sprintf('%s_OUTMINMAX',blk_name);
-                        codes{end+1} = LocalPropertyExpr(propID, prop);
+                        codes{end+1} = nasa_toLustre.lustreAst.LocalPropertyExpr(propID, prop);
                         % add traceability:
                         parent_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(parent);
                         xml_trace.add_Property(blk.Origin_path, ...

@@ -10,10 +10,10 @@ function new_obj = simplify(obj)
     new_expr = obj.expr.simplify();
     if isa(new_expr, 'UnaryExpr') ...
             && isequal(new_expr.op, obj.op) ...
-            && (isequal(obj.op, UnaryExpr.NOT) || isequal(obj.op, UnaryExpr.NEG))
+            && (isequal(obj.op, nasa_toLustre.lustreAst.UnaryExpr.NOT) || isequal(obj.op, nasa_toLustre.lustreAst.UnaryExpr.NEG))
         % - - x => x, not not b => b
         new_obj = new_expr.expr;
     else
-        new_obj = UnaryExpr(obj.op, new_expr, obj.withPar);
+        new_obj = nasa_toLustre.lustreAst.UnaryExpr(obj.op, new_expr, obj.withPar);
     end
 end

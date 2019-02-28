@@ -13,10 +13,10 @@ function [Termination_cond, body, outputs, variables] = ...
     L = nasa_toLustre.ToLustreImport.L;
     import(L{:})
     if addToVariables
-        if VarIdExpr.ismemberVar(condName, variables)
+        if nasa_toLustre.lustreAst.VarIdExpr.ismemberVar(condName, variables)
             i = 1;
             new_condName = strcat(condName, num2str(i));
-            while(VarIdExpr.ismemberVar(new_condName, variables))
+            while(nasa_toLustre.lustreAst.VarIdExpr.ismemberVar(new_condName, variables))
                 i = i + 1;
                 new_condName = strcat(condName, num2str(i));
             end
@@ -26,26 +26,26 @@ function [Termination_cond, body, outputs, variables] = ...
     if isempty(Termination_cond)
         if isempty(trans_cond)
             body{end+1} = ...
-                LustreEq(VarIdExpr(condName), BooleanExpr('true'));
+                nasa_toLustre.lustreAst.LustreEq(nasa_toLustre.lustreAst.VarIdExpr(condName), nasa_toLustre.lustreAst.BooleanExpr('true'));
         else
             body{end+1} = ...
-                LustreEq(VarIdExpr(condName), trans_cond);
+                nasa_toLustre.lustreAst.LustreEq(nasa_toLustre.lustreAst.VarIdExpr(condName), trans_cond);
         end
     else
         if isempty(trans_cond)
             body{end+1} = ...
-                LustreEq(VarIdExpr(condName), BooleanExpr('true'));
+                nasa_toLustre.lustreAst.LustreEq(nasa_toLustre.lustreAst.VarIdExpr(condName), nasa_toLustre.lustreAst.BooleanExpr('true'));
         else
             body{end+1} = ...
-                LustreEq(VarIdExpr(condName), ...
-                BinaryExpr(BinaryExpr.OR, Termination_cond, trans_cond));
+                nasa_toLustre.lustreAst.LustreEq(nasa_toLustre.lustreAst.VarIdExpr(condName), ...
+                nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.OR, Termination_cond, trans_cond));
         end
     end
-    Termination_cond = VarIdExpr(condName);
+    Termination_cond = nasa_toLustre.lustreAst.VarIdExpr(condName);
     if addToVariables
-        variables{end+1} = LustreVar(condName, 'bool');
+        variables{end+1} = nasa_toLustre.lustreAst.LustreVar(condName, 'bool');
     else
-        outputs{end+1} = LustreVar(condName, 'bool');
+        outputs{end+1} = nasa_toLustre.lustreAst.LustreVar(condName, 'bool');
     end
 end
 

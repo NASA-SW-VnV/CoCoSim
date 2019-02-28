@@ -56,7 +56,7 @@ classdef ManualSwitch_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             % Go over outputs
             codes = cell(1, numel(outputs));
             for j=1:numel(outputs)
-                codes{j} = LustreEq(outputs{j}, inputs{port}{j});
+                codes{j} = nasa_toLustre.lustreAst.LustreEq(outputs{j}, inputs{port}{j});
             end
             % join the lines and set the block code.
             obj.setCode( codes );

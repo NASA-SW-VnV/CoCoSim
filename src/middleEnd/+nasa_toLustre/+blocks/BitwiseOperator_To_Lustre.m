@@ -44,7 +44,7 @@ classdef BitwiseOperator_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 end
             end
             [bitMaskValue, ~, status] = ...
-                Constant_To_Lustre.getValueFromParameter(parent,...
+                nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(parent,...
                 blk, blk.BitMask);
             if status
                 display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
@@ -53,7 +53,7 @@ classdef BitwiseOperator_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 return;
             end
             if strcmp(blk.UseBitMask, 'on')
-                inputs{end+1} = {IntExpr(bitMaskValue)};
+                inputs{end+1} = {nasa_toLustre.lustreAst.IntExpr(bitMaskValue)};
                 if numel(inputs{end}) < max_width
                     inputs{end} = arrayfun(@(x) {inputs{end}{1}}, (1:max_width));
                 end
@@ -95,9 +95,9 @@ classdef BitwiseOperator_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 obj.addExternal_libraries(...
                     {strcat('LustMathLib_', new_fun), ...
                     strcat('LustMathLib_', not_fun)});
-                res = NodeCallExpr(not_fun, ...
-                    MinMax_To_Lustre.recursiveMinMax(new_fun, scalars));
-                codes{1} = LustreEq(outputs{1}, res);
+                res = nasa_toLustre.lustreAst.NodeCallExpr(not_fun, ...
+                    nasa_toLustre.blocks.MinMax_To_Lustre.recursiveMinMax(new_fun, scalars));
+                codes{1} = nasa_toLustre.lustreAst.LustreEq(outputs{1}, res);
             else
                 codes = cell(1, numel(outputs));
                 for j=1:numel(outputs)
@@ -116,12 +116,12 @@ classdef BitwiseOperator_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                         end
                     end
                     if strcmp(op, 'NOT')
-                        res = NodeCallExpr(fun, scalars);
+                        res = nasa_toLustre.lustreAst.NodeCallExpr(fun, scalars);
                     else
-                        res = MinMax_To_Lustre.recursiveMinMax(fun, scalars);
+                        res = nasa_toLustre.blocks.MinMax_To_Lustre.recursiveMinMax(fun, scalars);
                     end
                     
-                    codes{j} =  LustreEq(outputs{j}, res);
+                    codes{j} =  nasa_toLustre.lustreAst.LustreEq(outputs{j}, res);
                 end
                 obj.addExternal_libraries(strcat('LustMathLib_', fun));
             end

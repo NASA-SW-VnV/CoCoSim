@@ -17,7 +17,7 @@ function [codes] = oneInputSumProduct(parent, blk, outputs, inputs, ...
                     else
                         code = inputs{1}{i};
                     end
-                    codes{i} = LustreEq(outputs{i}, code);
+                    codes{i} = nasa_toLustre.lustreAst.LustreEq(outputs{i}, code);
                 end
                 return;
             end
@@ -26,25 +26,25 @@ function [codes] = oneInputSumProduct(parent, blk, outputs, inputs, ...
                 % if output is a scalar,
                 % operate over the elements of same input.
                 for j=1:widths
-                    code = BinaryExpr(exp(1), ...
+                    code = nasa_toLustre.lustreAst.BinaryExpr(exp(1), ...
                         code, inputs{1}{j}, false);
                 end
                 if ~isempty(conv_format)
                     code =nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(conv_format,code);
                 end
-                codes{1} = LustreEq(outputs{1}, code);
+                codes{1} = nasa_toLustre.lustreAst.LustreEq(outputs{1}, code);
                 
             elseif numel(outputs)>1        % needed for collapsing of matrix
                 [CollapseDim, ~, status] = ...
-                    Constant_To_Lustre.getValueFromParameter(parent, blk, blk.CollapseDim);
+                    nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(parent, blk, blk.CollapseDim);
                 if status
                     display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
                         blk.CollapseDim, HtmlItem.addOpenCmd(blk.Origin_path)), ...
                         MsgType.ERROR, 'Sum_To_Lustre', '');
                     return;
                 end
-                in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(blk.CompiledPortDimensions.Inport);
-                [numelCollapseDim, delta, collapseDims] = Sum_To_Lustre.collapseMatrix(in_matrix_dimension, CollapseDim);
+                in_matrix_dimension = nasa_toLustre.blocks.Assignment_To_Lustre.getInputMatrixDimensions(blk.CompiledPortDimensions.Inport);
+                [numelCollapseDim, delta, collapseDims] = nasa_toLustre.blocks.Sum_To_Lustre.collapseMatrix(in_matrix_dimension, CollapseDim);
                 % the variable matSize is used in eval function, do not
                 % remove it.
                 matSize = in_matrix_dimension{1}.dims;
@@ -75,18 +75,18 @@ function [codes] = oneInputSumProduct(parent, blk, outputs, inputs, ...
                     sub2ind_string = sprintf('%s);',sub2ind_string);
                     eval(sub2ind_string);
                     
-                    code = BinaryExpr(exp(1), ...
+                    code = nasa_toLustre.lustreAst.BinaryExpr(exp(1), ...
                         code, inputs{1}{inpIndex}, false);
                     
                     for j=2:numelCollapseDim
-                        code = BinaryExpr(exp(1), ...
+                        code = nasa_toLustre.lustreAst.BinaryExpr(exp(1), ...
                             code, inputs{1}{inpIndex+(j-1)*delta}, false);
                     end
                     
                     if ~isempty(conv_format)
                         code =nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(conv_format,code);
                     end
-                    codes{i} = LustreEq(outputs{i}, code);
+                    codes{i} = nasa_toLustre.lustreAst.LustreEq(outputs{i}, code);
                 end
             end
         end

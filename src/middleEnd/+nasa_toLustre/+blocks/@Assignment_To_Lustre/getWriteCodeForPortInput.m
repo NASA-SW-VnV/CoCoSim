@@ -21,48 +21,48 @@ function [codes] = getWriteCodeForPortInput(obj, in_matrix_dimension,inputs,outp
     addVars = {};
     addVarIndex = 0;
     for i=1:numel(inputs{2})
-        U_index{i} = VarIdExpr(sprintf('%s_U_index_%d',...
+        U_index{i} = nasa_toLustre.lustreAst.VarIdExpr(sprintf('%s_U_index_%d',...
             blk_name,i));
-        addVars{end + 1} = LustreVar(U_index{i},indexDataType);
+        addVars{end + 1} = nasa_toLustre.lustreAst.LustreVar(U_index{i},indexDataType);
     end
     % pass to Lustre ind
     codes = {};
     for i=1:numel(ind)
         if ~MatlabUtils.contains(blk.IndexOptionArray{i}, '(port)')
             for j=1:numel(ind{i})
-                v_name =  VarIdExpr(...
+                v_name =  nasa_toLustre.lustreAst.VarIdExpr(...
                     sprintf('%s_ind_dim_%d_%d',...
                     blk_name,i,j));
-                addVars{end + 1} = LustreVar(v_name, indexDataType);
-                codes{end + 1} = LustreEq(v_name, IntExpr(ind{i}(j))) ;
+                addVars{end + 1} = nasa_toLustre.lustreAst.LustreVar(v_name, indexDataType);
+                codes{end + 1} = nasa_toLustre.lustreAst.LustreEq(v_name, nasa_toLustre.lustreAst.IntExpr(ind{i}(j))) ;
             end
         else
             % port
             if strcmp(blk.IndexOptionArray{i}, 'Starting index (port)')
                 for j=1:numel(ind{i})
-                    v_name = VarIdExpr(...
+                    v_name = nasa_toLustre.lustreAst.VarIdExpr(...
                         sprintf('%s_ind_dim_%d_%d',...
                         blk_name,i,j));
-                    addVars{end + 1} = LustreVar(v_name, indexDataType);
+                    addVars{end + 1} = nasa_toLustre.lustreAst.LustreVar(v_name, indexDataType);
                     
                     if j==1
-                        codes{end + 1} = LustreEq(v_name, ind{i}{1}) ;
+                        codes{end + 1} = nasa_toLustre.lustreAst.LustreEq(v_name, ind{i}{1}) ;
                     else
-                        codes{end + 1} = LustreEq(v_name,...
-                            BinaryExpr(BinaryExpr.PLUS,...
+                        codes{end + 1} = nasa_toLustre.lustreAst.LustreEq(v_name,...
+                            nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.PLUS,...
                             ind{i}{1}, ...
-                            IntExpr(j-1))) ;
+                            nasa_toLustre.lustreAst.IntExpr(j-1))) ;
                         %sprintf('%s_ind_dim_%d_%d = %s + %d;\n\t',...
                         %    blk_name,i,j, ind{i}{1}, (j-1)) ;
                     end
                 end
             else   % 'Index vector (port)'
                 for j=1:numel(ind{i})
-                    v_name = VarIdExpr(...
+                    v_name = nasa_toLustre.lustreAst.VarIdExpr(...
                         sprintf('%s_ind_dim_%d_%d',...
                         blk_name,i,j));
-                    addVars{end + 1} = LustreVar(v_name, indexDataType);
-                    codes{end + 1} =  LustreEq(v_name, ind{i}{j});
+                    addVars{end + 1} = nasa_toLustre.lustreAst.LustreVar(v_name, indexDataType);
+                    codes{end + 1} =  nasa_toLustre.lustreAst.LustreEq(v_name, ind{i}{j});
                     %sprintf('%s_ind_dim_%d_%d = %s;\n\t',...
                     %    blk_name,i,j, ind{i}{j}) ;
                 end
@@ -95,35 +95,35 @@ function [codes] = getWriteCodeForPortInput(obj, in_matrix_dimension,inputs,outp
         curSub(6) = d6;
         curSub(7) = d7;
         for j=1:numel(in_matrix_dimension{1}.dims)
-            varId_Y_index{i}{j} = VarIdExpr(...
+            varId_Y_index{i}{j} = nasa_toLustre.lustreAst.VarIdExpr(...
                 sprintf('%s_str_Y_index_%d_%d',...
                 blk_name,i,j));
-            addVars{end + 1} = LustreVar(varId_Y_index{i}{j}, indexDataType);
-            codes{end + 1} = LustreEq(varId_Y_index{i}{j}, ...
-                VarIdExpr(sprintf('%s_ind_dim_%d_%d',...
+            addVars{end + 1} = nasa_toLustre.lustreAst.LustreVar(varId_Y_index{i}{j}, indexDataType);
+            codes{end + 1} = nasa_toLustre.lustreAst.LustreEq(varId_Y_index{i}{j}, ...
+                nasa_toLustre.lustreAst.VarIdExpr(sprintf('%s_ind_dim_%d_%d',...
                 blk_name,j,curSub(j))));
             %sprintf('%s = %s_ind_dim_%d_%d;\n\t',...
             %    str_Y_index{i}{j},blk_name,j,curSub(j)) ;
         end
-        value = IntExpr('0');
+        value = nasa_toLustre.lustreAst.IntExpr('0');
         value_terms = cell(1, numel(in_matrix_dimension{1}.dims));
         for j=1:numel(in_matrix_dimension{1}.dims)
             if j==1
-                value_terms{j} = BinaryExpr(BinaryExpr.MULTIPLY,...
-                    varId_Y_index{i}{j}, IntExpr(Y0_dimJump(j)));
+                value_terms{j} = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.MULTIPLY,...
+                    varId_Y_index{i}{j}, nasa_toLustre.lustreAst.IntExpr(Y0_dimJump(j)));
                 %value = sprintf('%s + %s*%d',value,str_Y_index{i}{j}, Y0_dimJump(j));
             else
-                value_terms{j} = BinaryExpr(...
-                    BinaryExpr.MULTIPLY,...
-                    BinaryExpr(BinaryExpr.MINUS,...
+                value_terms{j} = nasa_toLustre.lustreAst.BinaryExpr(...
+                    nasa_toLustre.lustreAst.BinaryExpr.MULTIPLY,...
+                    nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.MINUS,...
                     varId_Y_index{i}{j}, ...
-                    IntExpr(1)), ...
-                    IntExpr(Y0_dimJump(j)));
+                    nasa_toLustre.lustreAst.IntExpr(1)), ...
+                    nasa_toLustre.lustreAst.IntExpr(Y0_dimJump(j)));
                 %value = sprintf('%s + (%s-1)*%d',value,str_Y_index{i}{j}, Y0_dimJump(j));
             end
         end
-        value = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS, value_terms);
-        codes{end + 1} = LustreEq( U_index{i}, value);
+        value = nasa_toLustre.lustreAst.BinaryExpr.BinaryMultiArgs(nasa_toLustre.lustreAst.BinaryExpr.PLUS, value_terms);
+        codes{end + 1} = nasa_toLustre.lustreAst.LustreEq( U_index{i}, value);
     end
     if numel(in_matrix_dimension{1}.dims) > 7
         
@@ -135,8 +135,8 @@ function [codes] = getWriteCodeForPortInput(obj, in_matrix_dimension,inputs,outp
         conds = {};
         thens = {};
         for j=numel(inputs{2}):-1:1
-            conds{end+1} = BinaryExpr(BinaryExpr.EQ,...
-                U_index{j}, IntExpr(i));
+            conds{end+1} = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.EQ,...
+                U_index{j}, nasa_toLustre.lustreAst.IntExpr(i));
             thens{end + 1} = inputs{2}{j};
             %if j==numel(inputs{2})
             %code = sprintf('%s  if(%s = %d) then %s\n\t', code, U_index{j},i,inputs{2}{j});
@@ -146,8 +146,8 @@ function [codes] = getWriteCodeForPortInput(obj, in_matrix_dimension,inputs,outp
         end
         %codes{end + 1} = sprintf('%s  else %s ;\n\t', code,inputs{1}{i});
         thens{end + 1} = inputs{1}{i};
-        code = IteExpr.nestedIteExpr(conds, thens);
-        codes{end + 1} = LustreEq( outputs{i}, code);
+        code = nasa_toLustre.lustreAst.IteExpr.nestedIteExpr(conds, thens);
+        codes{end + 1} = nasa_toLustre.lustreAst.LustreEq( outputs{i}, code);
     end
     obj.addVariable(addVars);
 end

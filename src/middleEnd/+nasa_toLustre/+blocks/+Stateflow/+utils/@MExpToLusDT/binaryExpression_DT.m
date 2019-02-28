@@ -19,9 +19,9 @@ function dt = binaryExpression_DT(tree, data_map, inputs, isSimulink, ...
         case {'plus_minus', 'mtimes', 'times', ...
                 'mrdivide', 'mldivide', 'rdivide', 'ldivide', ...
                 'mpower', 'power'}
-            left_dt = MExpToLusDT.expression_DT(tree.leftExp, data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
-            right_dt = MExpToLusDT.expression_DT(tree.rightExp, data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
-            dt = MExpToLusDT.upperDT(left_dt, right_dt);
+            left_dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.expression_DT(tree.leftExp, data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
+            right_dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.expression_DT(tree.rightExp, data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
+            dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.upperDT(left_dt, right_dt);
         otherwise
             dt = '';
     end

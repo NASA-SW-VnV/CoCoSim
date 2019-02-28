@@ -22,19 +22,19 @@ function [body, outputs, inputs] = ...
         t = transitions{i};
         source = t.Source;%Path of the source
         transTransActionNodeName = ...
-            StateflowTransition_To_Lustre.getTranActionNodeName(t, ...
+            nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.getTranActionNodeName(t, ...
             source);
         if isKey(SF_STATES_NODESAST_MAP, transTransActionNodeName)
             %transition Action exists.
             actionNodeAst = SF_STATES_NODESAST_MAP(transTransActionNodeName);
             [call, oututs_Ids] = actionNodeAst.nodeCall();
             if isempty(trans_cond)
-                body{end+1} = LustreEq(oututs_Ids, call);
+                body{end+1} = nasa_toLustre.lustreAst.LustreEq(oututs_Ids, call);
                 outputs = [outputs, actionNodeAst.getOutputs()];
                 inputs = [inputs, actionNodeAst.getInputs()];
             else
-                body{end+1} = LustreEq(oututs_Ids, ...
-                    IteExpr(trans_cond, call, TupleExpr(oututs_Ids)));
+                body{end+1} = nasa_toLustre.lustreAst.LustreEq(oututs_Ids, ...
+                    nasa_toLustre.lustreAst.IteExpr(trans_cond, call, nasa_toLustre.lustreAst.TupleExpr(oututs_Ids)));
                 outputs = [outputs, actionNodeAst.getOutputs()];
                 inputs = [inputs, actionNodeAst.getOutputs()];
                 inputs = [inputs, actionNodeAst.getInputs()];

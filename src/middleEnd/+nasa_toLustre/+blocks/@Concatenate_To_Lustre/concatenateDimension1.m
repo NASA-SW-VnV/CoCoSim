@@ -37,7 +37,7 @@ function [codes] = concatenateDimension1(inputs, outputs,in_matrix_dimension)
         curD1 = d1-rowCounted;
         curMatSize = in_matrix_dimension{inputPortIndex}.dims;
         inputIndex = sub2ind(curMatSize,curD1,d2);
-        codes{i} = LustreEq(outputs{i},...
+        codes{i} = nasa_toLustre.lustreAst.LustreEq(outputs{i},...
             inputs{inputPortIndex}{inputIndex});
     end
 end

@@ -28,12 +28,12 @@ classdef Fcn_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             inputs_dt{1} = arrayfun(@(x) 'real', (1:numel(inputs{1})), ...
                 'UniformOutput', false);
             
-            data_map = Fcn_To_Lustre.createDataMap(inputs, inputs_dt);
+            data_map = nasa_toLustre.blocks.Fcn_To_Lustre.createDataMap(inputs, inputs_dt);
             
             expected_dt = 'real';
             
             [lusCode, status] = ...
-                MExpToLusAST.translate(obj, blk.Expr, parent, blk, data_map, inputs, expected_dt, true, false, false);
+                nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.translate(obj, blk.Expr, parent, blk, data_map, inputs, expected_dt, true, false, false);
             
             if status
                 display_msg(sprintf('Block %s is not supported', HtmlItem.addOpenCmd(blk.Origin_path)), ...
@@ -42,7 +42,7 @@ classdef Fcn_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             end
             
            
-            obj.setCode(LustreEq(outputs{1}, lusCode{1}));
+            obj.setCode(nasa_toLustre.lustreAst.LustreEq(outputs{1}, lusCode{1}));
             obj.addVariable(outputs_dt);
             
         end

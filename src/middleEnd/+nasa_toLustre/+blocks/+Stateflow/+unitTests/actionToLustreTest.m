@@ -32,7 +32,7 @@ function notSupportedActions = actionToLustreTest()
         % That's how we will know which test is not passing through.
         
         try
-            getPseudoLusAction(actions{i}, false, true);
+            nasa_toLustre.blocks.Stateflow.utils.getPseudoLusAction(actions{i}, false, true);
         catch
             display_msg(sprintf('Expression Failed: %s', actions{i}), ...
                 MsgType.INFO, 'actionToLustreTest', '');
@@ -45,7 +45,7 @@ function notSupportedActions = actionToLustreTest()
         % The following call will raise an exception if something wrong.
         % That's how we will know which test is not passing through.
         try
-            getPseudoLusAction(conditions{i}, true, true);
+            nasa_toLustre.blocks.Stateflow.utils.getPseudoLusAction(conditions{i}, true, true);
         catch
             display_msg(sprintf('Condition failed: %s', conditions{i}), ...
                 MsgType.INFO, 'actionToLustreTest', '');

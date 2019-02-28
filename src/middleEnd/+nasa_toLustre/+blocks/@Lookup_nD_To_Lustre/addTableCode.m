@@ -14,13 +14,13 @@ function [body,vars,table_elem] = ...
     body = cell(1, numel(Table));
     vars = cell(1, numel(Table));
     for i=1:numel(Table)
-        table_elem{i} = VarIdExpr(...
+        table_elem{i} = nasa_toLustre.lustreAst.VarIdExpr(...
             sprintf('%s_table_elem_%d',blk_name,i));
-        vars{i} = LustreVar(table_elem{i},lusInport_dt);
+        vars{i} = nasa_toLustre.lustreAst.LustreVar(table_elem{i},lusInport_dt);
         if ~isLookupTableDynamic
-            body{i} = LustreEq(table_elem{i}, RealExpr(Table(i)));
+            body{i} = nasa_toLustre.lustreAst.LustreEq(table_elem{i}, nasa_toLustre.lustreAst.RealExpr(Table(i)));
         else
-            body{i} = LustreEq(table_elem{i}, inputs{3}{i});
+            body{i} = nasa_toLustre.lustreAst.LustreEq(table_elem{i}, inputs{3}{i});
         end
 
 

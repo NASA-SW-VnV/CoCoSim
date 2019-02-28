@@ -19,7 +19,7 @@ classdef LookupTableDynamic_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             import(L{:})
             isLookupTableDynamic = 1;
             [mainCode, main_vars, extNode, external_lib] =  ...
-                Lookup_nD_To_Lustre.get_code_to_write(parent, blk, xml_trace, isLookupTableDynamic,lus_backend);
+                nasa_toLustre.blocks.Lookup_nD_To_Lustre.get_code_to_write(parent, blk, xml_trace, isLookupTableDynamic,lus_backend);
             if ~isempty(external_lib)
                 obj.addExternal_libraries(external_lib);
             end

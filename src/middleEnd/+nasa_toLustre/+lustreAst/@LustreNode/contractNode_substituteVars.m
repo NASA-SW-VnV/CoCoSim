@@ -8,8 +8,13 @@
 function new_obj = contractNode_substituteVars(obj)
    import nasa_toLustre.lustreAst.*
     new_obj = obj.deepCopy();
+    if length(new_obj.bodyEqs) > 500
+        %Ignore optimization for Big Nodes (Like Lookup Table)
+        display_msg(sprintf('Optimization ignored for node "%d" as the number of equations exceeds 500 Eqs.',...
+            obj.getName()), MsgType.INFO, 'substituteVars', '');
+        return;
+    end
     new_localVars = new_obj.localVars;
-    outputs = new_obj.getOutputs();
     % include ConcurrentAssignments as normal Eqts
     new_bodyEqs = {};
     for i=1:numel(new_obj.bodyEqs)
@@ -30,16 +35,19 @@ function new_obj = contractNode_substituteVars(obj)
     EveryExprObjects = all_obj(strcmp(all_objClass, 'nasa_toLustre.lustreAst.EveryExpr'));
     EveryConds = cellfun(@(x) x.getCond(), EveryExprObjects, 'UniformOutput', false);
 
-
+    %get all VarIdExpr objects
+    VarIdExprObjects = all_obj(strcmp(all_objClass, 'nasa_toLustre.lustreAst.VarIdExpr'));
+    varIDs = cellfun(@(x) x.getId(), VarIdExprObjects, 'UniformOutput', false);
     % go over Assignments
     for i=1:numel(new_bodyEqs)
         % e.g. y = f(x); 
+        var = new_bodyEqs{i}.getLhs();
         if isa(new_bodyEqs{i}, 'LustreEq')...
-                && isa(new_bodyEqs{i}.getLhs(), 'VarIdExpr')...
-                && VarIdExpr.ismemberVar(new_bodyEqs{i}.getLhs(), new_localVars)
-            var = new_bodyEqs{i}.getLhs();
+                && isa(var, 'VarIdExpr')...
+                && nasa_toLustre.lustreAst.VarIdExpr.ismemberVar(var, new_localVars)
+            
             rhs = new_bodyEqs{i}.getRhs();
-            new_var = ParenthesesExpr(rhs.deepCopy());
+            new_var = nasa_toLustre.lustreAst.ParenthesesExpr(rhs.deepCopy());
 
             % if rhs class is IteExpr, skip it. To hep debugging.
             if isa(rhs, 'IteExpr')
@@ -50,10 +58,9 @@ function new_obj = contractNode_substituteVars(obj)
             if rhs.nbOccuranceVar(var) >= 1
                 continue;
             end
-            nb_occ_perEq = cellfun(@(x) x.nbOccuranceVar(var), new_bodyEqs, 'UniformOutput', true);
             % skip var if it is never used or used more than once. 
             % For code readability and CEX debugging.
-            nb_occ = sum(nb_occ_perEq);
+            nb_occ = sum(strcmp(var.getId(), varIDs));
             if nb_occ > 1
                 continue;
             end
@@ -66,9 +73,9 @@ function new_obj = contractNode_substituteVars(obj)
 
 
             %delete the current Eqts
-            new_bodyEqs{i} = DummyExpr();
+            new_bodyEqs{i} = nasa_toLustre.lustreAst.DummyExpr();
             %remove it from variables
-            new_localVars = LustreVar.removeVar(new_localVars, var);
+            new_localVars = nasa_toLustre.lustreAst.LustreVar.removeVar(new_localVars, var);
             % change var by new_var
             new_bodyEqs = cellfun(@(x) x.substituteVars(var, new_var), new_bodyEqs, 'UniformOutput', false);
         end

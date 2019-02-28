@@ -19,11 +19,11 @@ classdef If_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             obj.addVariable(outputs_dt);
             
-            [inputs, inports_dt] = If_To_Lustre.getInputs(parent, blk);
+            [inputs, inports_dt] = nasa_toLustre.blocks.If_To_Lustre.getInputs(parent, blk);
             % get all expressions
-            IfExp = If_To_Lustre.getIfExp(blk);
+            IfExp = nasa_toLustre.blocks.If_To_Lustre.getIfExp(blk);
             %% Step 4: start filling the definition of each output
-            code = If_To_Lustre.ifElseCode(obj, parent, blk, outputs, ...
+            code = nasa_toLustre.blocks.If_To_Lustre.ifElseCode(obj, parent, blk, outputs, ...
                 inputs, inports_dt, IfExp);
             obj.setCode(code);
             
@@ -33,12 +33,12 @@ classdef If_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             L = nasa_toLustre.ToLustreImport.L;
             import(L{:})
             % add your unsuported options list here
-            [inputs, inports_dt] = If_To_Lustre.getInputs(parent, blk);
-            data_map = Fcn_To_Lustre.createDataMap(inputs, inports_dt);
-            IfExp = If_To_Lustre.getIfExp(blk);
+            [inputs, inports_dt] = nasa_toLustre.blocks.If_To_Lustre.getInputs(parent, blk);
+            data_map = nasa_toLustre.blocks.Fcn_To_Lustre.createDataMap(inputs, inports_dt);
+            IfExp = nasa_toLustre.blocks.If_To_Lustre.getIfExp(blk);
             nbOutputs=numel(blk.CompiledPortWidths.Outport);
             for j=1:nbOutputs
-                [~, status] = If_To_Lustre.formatConditionToLustre(obj, ...
+                [~, status] = nasa_toLustre.blocks.If_To_Lustre.formatConditionToLustre(obj, ...
                     IfExp{j}, inputs, data_map, parent, blk);
                 if status
                     obj.addUnsupported_options(sprintf('ParseError  character unsupported  %s in block %s', ...

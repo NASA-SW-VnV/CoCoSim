@@ -42,7 +42,7 @@ classdef Mux_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             for i=1:numel(widths)
                 for j=1:numel(inputs{i})
                     outputIndex = outputIndex + 1;
-                    codes{outputIndex} = LustreEq( outputs{outputIndex}, inputs{i}{j});
+                    codes{outputIndex} = nasa_toLustre.lustreAst.LustreEq( outputs{outputIndex}, inputs{i}{j});
                 end
             end
             

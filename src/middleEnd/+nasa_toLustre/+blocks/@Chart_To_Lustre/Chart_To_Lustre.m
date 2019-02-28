@@ -20,7 +20,7 @@ classdef Chart_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             import(L{:})
             %% add Chart Node
             [main_node, external_nodes, external_libraries_i] = ...
-                Chart_To_Lustre.getChartNodes(parent, blk, main_sampleTime, lus_backend, coco_backend, xml_trace);
+                nasa_toLustre.blocks.Chart_To_Lustre.getChartNodes(parent, blk, main_sampleTime, lus_backend, coco_backend, xml_trace);
             obj.addExtenal_node(main_node);
             obj.addExtenal_node(external_nodes);
             obj.addExternal_libraries(external_libraries_i);
@@ -56,18 +56,18 @@ classdef Chart_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                         return;
                     end
                     v_name = sprintf('%s_Event%d', node_name, i);
-                    obj.addVariable(LustreVar(v_name, 'bool'));
-                    codes{end+1} = LustreEq(VarIdExpr(v_name), triggerCode);
-                    cond{i} = VarIdExpr(v_name);
+                    obj.addVariable(nasa_toLustre.lustreAst.LustreVar(v_name, 'bool'));
+                    codes{end+1} = nasa_toLustre.lustreAst.LustreEq(nasa_toLustre.lustreAst.VarIdExpr(v_name), triggerCode);
+                    cond{i} = nasa_toLustre.lustreAst.VarIdExpr(v_name);
                 end
                 inputs = [cond, inputs];
             end
             if isempty(inputs)
-                inputs{1} = BooleanExpr(true);
+                inputs{1} = nasa_toLustre.lustreAst.BooleanExpr(true);
             end
             
             
-            codes{end+1} = LustreEq(outputs, NodeCallExpr(node_name, inputs));
+            codes{end+1} = nasa_toLustre.lustreAst.LustreEq(outputs, nasa_toLustre.lustreAst.NodeCallExpr(node_name, inputs));
             
             obj.setCode( codes );
             obj.addVariable(outputs_dt);
@@ -154,19 +154,19 @@ classdef Chart_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             states = SFContent.States;
             for i=1:numel(states)
                 obj.addUnsupported_options(...
-                    StateflowState_To_Lustre.getUnsupportedOptions(states{i}));
+                    nasa_toLustre.blocks.Stateflow.StateflowState_To_Lustre.getUnsupportedOptions(states{i}));
             end
             %% get all junctions unsupported Options
             Junctions = SFContent.Junctions;
             for i=1:numel(Junctions)
                 obj.addUnsupported_options(...
-                    StateflowJunction_To_Lustre.getUnsupportedOptions(Junctions{i}));
+                    nasa_toLustre.blocks.Stateflow.StateflowJunction_To_Lustre.getUnsupportedOptions(Junctions{i}));
             end
             %% get all transitions unsupported Options
-            transitions = Chart_To_Lustre.getAllTransitions(SFContent);
+            transitions = nasa_toLustre.blocks.Chart_To_Lustre.getAllTransitions(SFContent);
             for i=1:numel(transitions)
                 obj.addUnsupported_options(...
-                    StateflowTransition_To_Lustre.getUnsupportedOptions(transitions{i}));
+                    nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.getUnsupportedOptions(transitions{i}));
             end
             %% get all graphical functions unsupported Options
             graphicalFunctions = SFContent.GraphicalFunctions;
@@ -182,7 +182,7 @@ classdef Chart_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     gfunctionsNames{end+1} = graphicalFunctions{i}.Name;
                 end
                 obj.addUnsupported_options(...
-                    StateflowGraphicalFunction_To_Lustre.getUnsupportedOptions(graphicalFunctions{i}, blk));
+                    nasa_toLustre.blocks.Stateflow.StateflowGraphicalFunction_To_Lustre.getUnsupportedOptions(graphicalFunctions{i}, blk));
             end
             
             %% get all TruthTables unsupported Optionse
@@ -199,7 +199,7 @@ classdef Chart_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     truthTablesNames{end+1} = truthTables{i}.Name;
                 end
                 obj.addUnsupported_options(...
-                    StateflowTruthTable_To_Lustre.getUnsupportedOptions(truthTables{i}, blk));
+                    nasa_toLustre.blocks.Stateflow.StateflowTruthTable_To_Lustre.getUnsupportedOptions(truthTables{i}, blk));
             end
             
             

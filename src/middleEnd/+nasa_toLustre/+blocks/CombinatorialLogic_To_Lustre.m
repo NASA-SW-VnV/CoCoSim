@@ -19,11 +19,11 @@ classdef CombinatorialLogic_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             
             [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             outputDataType = blk.CompiledPortDataTypes.Outport{1};
-            out_lus_dt = SLX2LusUtils.get_lustre_dt(outputDataType);
+            out_lus_dt = nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(outputDataType);
             obj.addVariable(outputs_dt);
             [inputs] =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk);
             slx_inport_dt = blk.CompiledPortDataTypes.Inport(1);
-            [lus_inport_dt] = SLX2LusUtils.get_lustre_dt(slx_inport_dt);
+            [lus_inport_dt] = nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(slx_inport_dt);
             
             % transform input to 1 or 0 of type int
             if ~strcmp(lus_inport_dt, 'int')
@@ -46,7 +46,7 @@ classdef CombinatorialLogic_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             end
             
             [TruthTable, ~, status] = ...
-                Constant_To_Lustre.getValueFromParameter(parent,...
+                nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(parent,...
                 blk, blk.TruthTable);
             if status
                 display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
@@ -56,26 +56,26 @@ classdef CombinatorialLogic_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             end
             
             %row index = 1 + u(m)*2^0 + u(m-1)*2^1 + ... + u(1)*2^m-1
-            indexVar = VarIdExpr(strcat(outputs{1}.getId(), '_rowIndex'));
-            obj.addVariable(LustreVar(indexVar, 'int'));
+            indexVar = nasa_toLustre.lustreAst.VarIdExpr(strcat(outputs{1}.getId(), '_rowIndex'));
+            obj.addVariable(nasa_toLustre.lustreAst.LustreVar(indexVar, 'int'));
             m = length(inputs);
             coeff = 2.^(m-1:-1:0);
             product_terms = arrayfun(@(i) ...
-                BinaryExpr(BinaryExpr.MULTIPLY, inputs{i},  IntExpr(coeff(i))), (1:m), 'un', 0);
-            product_terms{end+1} = IntExpr(1);
-            indexValue = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS, product_terms);
-            obj.addCode(LustreEq(indexVar, indexValue));
+                nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.MULTIPLY, inputs{i},  nasa_toLustre.lustreAst.IntExpr(coeff(i))), (1:m), 'un', 0);
+            product_terms{end+1} = nasa_toLustre.lustreAst.IntExpr(1);
+            indexValue = nasa_toLustre.lustreAst.BinaryExpr.BinaryMultiArgs(nasa_toLustre.lustreAst.BinaryExpr.PLUS, product_terms);
+            obj.addCode(nasa_toLustre.lustreAst.LustreEq(indexVar, indexValue));
             
             %Go over Table
             nb_rows = length(TruthTable(:,1));
-            conds = arrayfun(@(i)  BinaryExpr(BinaryExpr.EQ, indexVar, IntExpr(i)), (1:nb_rows-1), 'un', 0);
+            conds = arrayfun(@(i)  nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.EQ, indexVar, nasa_toLustre.lustreAst.IntExpr(i)), (1:nb_rows-1), 'un', 0);
             for outIdx=1:length(outputs)
                 thens = arrayfun(@(i) ...
-                    SLX2LusUtils.num2LusExp(TruthTable(i, outIdx), ...
+                    nasa_toLustre.utils.SLX2LusUtils.num2LusExp(TruthTable(i, outIdx), ...
                     out_lus_dt, outputDataType), (1:nb_rows), 'un', 0);
                 
-                obj.addCode(LustreEq(outputs{outIdx}, ...
-                    IteExpr.nestedIteExpr(conds, thens)));
+                obj.addCode(nasa_toLustre.lustreAst.LustreEq(outputs{outIdx}, ...
+                    nasa_toLustre.lustreAst.IteExpr.nestedIteExpr(conds, thens)));
             end
             
         end

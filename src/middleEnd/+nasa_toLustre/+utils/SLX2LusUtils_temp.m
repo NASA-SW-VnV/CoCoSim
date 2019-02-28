@@ -82,8 +82,8 @@ classdef SLX2LusUtils
                 extractNodeHeader(parent_ir, blk, is_main_node, ...
                 isEnableORAction, isEnableAndTrigger, isContractBlk, isMatlabFunction, ...
                 main_sampleTime, xml_trace)
-            L = nasa_toLustre.ToLustreImport.L;
-            import(L{:})
+            %L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
+            %import(L{:})
             % this function is used to get the Lustre node inputs and
             % outputs.
             
@@ -113,20 +113,20 @@ classdef SLX2LusUtils
             % add the execution condition if it is a conditionally executed
             % SS
             if isEnableORAction
-                node_inputs_cell{end + 1} = LustreVar(...
+                node_inputs_cell{end + 1} = nasa_toLustre.lustreAst.LustreVar(...
                     nasa_toLustre.utils.SLX2LusUtils.isEnabledStr() , 'bool');
                 % we don't include them in node_inputs_withoutDT_cell, see
                 % condExecSS_To_LusAutomaton
                 %node_inputs_withoutDT_cell{end + 1} = VarIdExpr(...
                 %    nasa_toLustre.utils.SLX2LusUtils.isEnabledStr());
             elseif isEnableAndTrigger
-                node_inputs_cell{end + 1} = LustreVar(...
+                node_inputs_cell{end + 1} = nasa_toLustre.lustreAst.LustreVar(...
                     nasa_toLustre.utils.SLX2LusUtils.isEnabledStr() , 'bool');
                 % we don't include them in node_inputs_withoutDT_cell, see
                 % condExecSS_To_LusAutomaton
                 %node_inputs_withoutDT_cell{end + 1} = VarIdExpr(...
                 %    nasa_toLustre.utils.SLX2LusUtils.isEnabledStr());
-                node_inputs_cell{end + 1} = LustreVar(...
+                node_inputs_cell{end + 1} = nasa_toLustre.lustreAst.LustreVar(...
                     nasa_toLustre.utils.SLX2LusUtils.isTriggeredStr() , 'bool');
                 % we don't include them in node_inputs_withoutDT_cell, see
                 % condExecSS_To_LusAutomaton
@@ -140,8 +140,8 @@ classdef SLX2LusUtils
             end
             % if the node has no inputs, add virtual input for Lustrec.
             if isempty(node_inputs_cell)
-                node_inputs_cell{end + 1} = LustreVar('_virtual', 'bool');
-                node_inputs_withoutDT_cell{end+1} = VarIdExpr('_virtual');
+                node_inputs_cell{end + 1} = nasa_toLustre.lustreAst.LustreVar('_virtual', 'bool');
+                node_inputs_withoutDT_cell{end+1} = nasa_toLustre.lustreAst.VarIdExpr('_virtual');
             end
            
             % creating outputs
@@ -150,9 +150,9 @@ classdef SLX2LusUtils
                 nasa_toLustre.utils.SLX2LusUtils.extract_node_InOutputs_withDT(blk, 'Outport', xml_trace);
             
             if is_main_node && isempty(node_outputs_cell)
-                node_outputs_cell{end+1} = LustreVar(...
+                node_outputs_cell{end+1} = nasa_toLustre.lustreAst.LustreVar(...
                     nasa_toLustre.utils.SLX2LusUtils.timeStepStr(), 'real');
-                node_outputs_withoutDT_cell{end+1} = VarIdExpr(nasa_toLustre.utils.SLX2LusUtils.timeStepStr());
+                node_outputs_withoutDT_cell{end+1} = nasa_toLustre.lustreAst.VarIdExpr(nasa_toLustre.utils.SLX2LusUtils.timeStepStr());
             end
         end
         
@@ -234,21 +234,21 @@ classdef SLX2LusUtils
                 getTimeClocksInputs(blk, main_sampleTime, node_inputs_cell, node_inputs_withoutDT_cell)
             import nasa_toLustre.lustreAst.LustreVar 
             import nasa_toLustre.lustreAst.VarIdExpr
-            node_inputs_cell{end + 1} = LustreVar(...
+            node_inputs_cell{end + 1} = nasa_toLustre.lustreAst.LustreVar(...
                 nasa_toLustre.utils.SLX2LusUtils.timeStepStr(), 'real');
             node_inputs_withoutDT_cell{end+1} = ...
-                VarIdExpr(nasa_toLustre.utils.SLX2LusUtils.timeStepStr());
-            node_inputs_cell{end + 1} = LustreVar(...
+                nasa_toLustre.lustreAst.VarIdExpr(nasa_toLustre.utils.SLX2LusUtils.timeStepStr());
+            node_inputs_cell{end + 1} = nasa_toLustre.lustreAst.LustreVar(...
                 nasa_toLustre.utils.SLX2LusUtils.nbStepStr(), 'int');
             node_inputs_withoutDT_cell{end+1} = ...
-                VarIdExpr(nasa_toLustre.utils.SLX2LusUtils.nbStepStr());
+                nasa_toLustre.lustreAst.VarIdExpr(nasa_toLustre.utils.SLX2LusUtils.nbStepStr());
             % add clocks
             clocks_list = nasa_toLustre.utils.SLX2LusUtils.getRTClocksSTR(blk, main_sampleTime);
             if ~isempty(clocks_list)
                 for i=1:numel(clocks_list)
-                    node_inputs_cell{end + 1} = LustreVar(...
+                    node_inputs_cell{end + 1} = nasa_toLustre.lustreAst.LustreVar(...
                         clocks_list{i}, 'bool clock');
-                    node_inputs_withoutDT_cell{end+1} = VarIdExpr(...
+                    node_inputs_withoutDT_cell{end+1} = nasa_toLustre.lustreAst.VarIdExpr(...
                         clocks_list{i});
                 end
             end
@@ -450,8 +450,8 @@ classdef SLX2LusUtils
             end
             
             function [names, names_dt] = blockOutputs(portNumber)
-                L = nasa_toLustre.ToLustreImport.L;
-                import(L{:})
+                %L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
+                %import(L{:})
                 names = {};
                 names_dt = {};
                 if strcmp(type, 'Inports')
@@ -519,18 +519,18 @@ classdef SLX2LusUtils
                 for i=1:width(portNumber)
                     if isBus
                         for k=1:numel(lus_dt)
-                            names{end+1} = VarIdExpr(...
+                            names{end+1} = nasa_toLustre.lustreAst.VarIdExpr(...
                                 nasa_toLustre.utils.SLX2LusUtils.name_format(strcat(blk.Name, '_', num2str(idx), '_BusElem', num2str(k))));
-                            names_dt{end+1} = LustreVar(names{end} , lus_dt{k});
+                            names_dt{end+1} = nasa_toLustre.lustreAst.LustreVar(names{end} , lus_dt{k});
                         end
                     elseif iscell(lus_dt) && numel(lus_dt) == width(portNumber)
-                        names{end+1} = VarIdExpr(...
+                        names{end+1} = nasa_toLustre.lustreAst.VarIdExpr(...
                             nasa_toLustre.utils.SLX2LusUtils.name_format(strcat(blk.Name, '_', num2str(idx))));
-                        names_dt{end+1} = LustreVar(names{end}, char(lus_dt{i}));
+                        names_dt{end+1} = nasa_toLustre.lustreAst.LustreVar(names{end}, char(lus_dt{i}));
                     else
-                        names{end+1} = VarIdExpr(...
+                        names{end+1} = nasa_toLustre.lustreAst.VarIdExpr(...
                             nasa_toLustre.utils.SLX2LusUtils.name_format(strcat(blk.Name, '_', num2str(idx))));
-                        names_dt{end+1} = LustreVar(names{end}, char(lus_dt));
+                        names_dt{end+1} = nasa_toLustre.lustreAst.LustreVar(names{end}, char(lus_dt));
                     end
                     idx = idx + 1;
                 end
@@ -781,8 +781,8 @@ classdef SLX2LusUtils
         %value is also given as a string.
         function [ Lustre_type, zero, one, isBus, isEnum, hasEnum] = ...
                 get_lustre_dt( slx_dt)
-            L = nasa_toLustre.ToLustreImport.L;
-            import(L{:})
+            %L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
+            %import(L{:})
             global TOLUSTRE_ENUMS_MAP;
             if isempty(TOLUSTRE_ENUMS_MAP)
                 TOLUSTRE_ENUMS_MAP = containers.Map;
@@ -830,14 +830,14 @@ classdef SLX2LusUtils
                         one{i} = members{1};
                         hasEnum = true;
                     elseif strcmp(Lustre_type{i}, 'bool')
-                        zero{i} = BooleanExpr('false');
-                        one{i} = BooleanExpr('true') ;
+                        zero{i} = nasa_toLustre.lustreAst.BooleanExpr('false');
+                        one{i} = nasa_toLustre.lustreAst.BooleanExpr('true') ;
                     elseif strcmp(Lustre_type{i}, 'int')
-                        zero{i} = IntExpr('0');
-                        one{i} = IntExpr('1');
+                        zero{i} = nasa_toLustre.lustreAst.IntExpr('0');
+                        one{i} = nasa_toLustre.lustreAst.IntExpr('1');
                     else
-                        zero{i} = RealExpr('0.0');
-                        one{i} = RealExpr('1.0');
+                        zero{i} = nasa_toLustre.lustreAst.RealExpr('0.0');
+                        one{i} = nasa_toLustre.lustreAst.RealExpr('1.0');
                     end
                 end
             else
@@ -847,14 +847,14 @@ classdef SLX2LusUtils
                     one = members{1};
                     hasEnum = true;
                 elseif strcmp(Lustre_type, 'bool')
-                    zero = BooleanExpr('false');
-                    one = BooleanExpr('true');
+                    zero = nasa_toLustre.lustreAst.BooleanExpr('false');
+                    one = nasa_toLustre.lustreAst.BooleanExpr('true');
                 elseif strcmp(Lustre_type, 'int')
-                    zero = IntExpr('0');
-                    one = IntExpr('1');
+                    zero = nasa_toLustre.lustreAst.IntExpr('0');
+                    one = nasa_toLustre.lustreAst.IntExpr('1');
                 else
-                    zero = RealExpr('0.0');
-                    one = RealExpr('1.0');
+                    zero = nasa_toLustre.lustreAst.RealExpr('0.0');
+                    one = nasa_toLustre.lustreAst.RealExpr('1.0');
                 end
             end
         end
@@ -925,7 +925,7 @@ classdef SLX2LusUtils
                 InitialOutput = '0';
             end
             [InitialOutputValue, InitialOutputType, status] = ...
-                Constant_To_Lustre.getValueFromParameter(parent, blk, InitialOutput);
+                nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(parent, blk, InitialOutput);
             if status
                 display_msg(sprintf('InitialOutput %s in block %s not found neither in Matlab workspace or in Model workspace',...
                     InitialOutput, blk.Origin_path), ...
@@ -955,44 +955,44 @@ classdef SLX2LusUtils
         
         %% change numerical value to Lustre Expr string based on DataType dt.
         function lustreExp = num2LusExp(v, lus_dt, slx_dt)
-            L = nasa_toLustre.ToLustreImport.L;
-            import(L{:})
+            %L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
+            %import(L{:})
             global TOLUSTRE_ENUMS_MAP;
             if nargin < 3
                 slx_dt = lus_dt;
             end
             if isKey(TOLUSTRE_ENUMS_MAP, lus_dt)
-                lustreExp = EnumValueExpr(char(v));
+                lustreExp = nasa_toLustre.lustreAst.EnumValueExpr(char(v));
             elseif strcmp(lus_dt, 'real')
-                lustreExp = RealExpr(v);
+                lustreExp = nasa_toLustre.lustreAst.RealExpr(v);
             elseif strcmp(lus_dt, 'int')
                 if numel(slx_dt) > 3 ...
                         && strncmp(slx_dt, 'int', 3) ...
                         || strncmp(slx_dt, 'uint', 4)
                     % e.g. cast double value to int32
                     f = eval(strcat('@', slx_dt));
-                    lustreExp = IntExpr(...
+                    lustreExp = nasa_toLustre.lustreAst.IntExpr(...
                         f(v));
                 else
-                    lustreExp = IntExpr(v);
+                    lustreExp = nasa_toLustre.lustreAst.IntExpr(v);
                 end
             elseif strcmp(lus_dt, 'bool')
-                lustreExp = BooleanExpr(v);
+                lustreExp = nasa_toLustre.lustreAst.BooleanExpr(v);
             elseif strncmp(slx_dt, 'int', 3) ...
                     || strncmp(slx_dt, 'uint', 4)
-                lustreExp = IntExpr(v);
+                lustreExp = nasa_toLustre.lustreAst.IntExpr(v);
             elseif strcmp(slx_dt, 'boolean') || strcmp(slx_dt, 'logical')
-               lustreExp = BooleanExpr(v);
+               lustreExp = nasa_toLustre.lustreAst.BooleanExpr(v);
             else
-                lustreExp = RealExpr(v);
+                lustreExp = nasa_toLustre.lustreAst.RealExpr(v);
             end
         end
         %% Data type conversion node name
         function new_callObj = setArgInConvFormat(callObj, arg)
             % this function goes with dataType_conversion funciton to set 
             % the missing argument in conv_format.
-            L = nasa_toLustre.ToLustreImport.L;
-            import(L{:})
+            %L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
+            %import(L{:})
             if isempty(callObj)
                 new_callObj = arg;
                 return;
@@ -1012,8 +1012,8 @@ classdef SLX2LusUtils
             end
         end
         function [external_lib, conv_format] = dataType_conversion(inport_dt, outport_dt, RndMeth, SaturateOnIntegerOverflow)
-            L = nasa_toLustre.ToLustreImport.L;
-            import(L{:})
+            %L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
+            %import(L{:})
             [lus_in_dt, ~, ~, ~, InIsEnum] = nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt( inport_dt);
             [lus_out_dt, ~, ~, ~, OutIsEnum] = nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt( outport_dt);
             if nargin < 3 || isempty(RndMeth)
@@ -1038,12 +1038,12 @@ classdef SLX2LusUtils
             if InIsEnum
                 [external_lib, conv_format1] = nasa_toLustre.utils.SLX2LusUtils.dataType_conversion('int', outport_dt, RndMeth, SaturateOnIntegerOverflow);
                 conv_format = nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(conv_format1,...
-                    NodeCallExpr(sprintf('%s_to_int', char(lus_in_dt)), {}));
+                    nasa_toLustre.lustreAst.NodeCallExpr(sprintf('%s_to_int', char(lus_in_dt)), {}));
                 return;
             end
             if OutIsEnum
                 [external_lib, conv_format1] = nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(inport_dt, 'int', RndMeth, SaturateOnIntegerOverflow);
-                conv_format = NodeCallExpr(...
+                conv_format = nasa_toLustre.lustreAst.NodeCallExpr(...
                     sprintf('int_to_%s', char(lus_out_dt)), conv_format1);
                 return;
             end
@@ -1054,18 +1054,18 @@ classdef SLX2LusUtils
                 case 'boolean'
                     if strcmp(lus_in_dt, 'int')
                         external_lib = {'LustDTLib_int_to_bool'};
-                        conv_format = NodeCallExpr('int_to_bool', {});
+                        conv_format = nasa_toLustre.lustreAst.NodeCallExpr('int_to_bool', {});
                     elseif strcmp(lus_in_dt, 'real')
                         external_lib = {'LustDTLib_real_to_bool'};
-                        conv_format = NodeCallExpr('real_to_bool', {});
+                        conv_format = nasa_toLustre.lustreAst.NodeCallExpr('real_to_bool', {});
                     end
                 case {'double', 'single'}
                     if strcmp(lus_in_dt, 'int')
                         external_lib = {strcat('LustDTLib_', RndMeth)};
-                        conv_format = NodeCallExpr(RndMeth, {});
+                        conv_format = nasa_toLustre.lustreAst.NodeCallExpr(RndMeth, {});
                     elseif strcmp(lus_in_dt, 'bool')
                         external_lib = {'LustDTLib_bool_to_real'};
-                        conv_format = NodeCallExpr('bool_to_real', {});
+                        conv_format = nasa_toLustre.lustreAst.NodeCallExpr('bool_to_real', {});
                     end
                 case {'int8','uint8','int16','uint16', 'int32','uint32'}
                     if strcmp(SaturateOnIntegerOverflow, 'on')
@@ -1075,15 +1075,15 @@ classdef SLX2LusUtils
                     end
                     if strcmp(lus_in_dt, 'int')
                         external_lib = {strcat('LustDTLib_',conv)};
-                        conv_format = NodeCallExpr(conv, {});
+                        conv_format = nasa_toLustre.lustreAst.NodeCallExpr(conv, {});
                     elseif strcmp(lus_in_dt, 'bool')
                         external_lib = {'LustDTLib_bool_to_int'};
-                        conv_format = NodeCallExpr('bool_to_int', {});
+                        conv_format = nasa_toLustre.lustreAst.NodeCallExpr('bool_to_int', {});
                     elseif strcmp(lus_in_dt, 'real')
                         external_lib = {strcat('LustDTLib_', conv),...
                             strcat('LustDTLib_', RndMeth)};
-                        conv_format = NodeCallExpr(conv, ...
-                            NodeCallExpr(RndMeth, {}));
+                        conv_format = nasa_toLustre.lustreAst.NodeCallExpr(conv, ...
+                            nasa_toLustre.lustreAst.NodeCallExpr(RndMeth, {}));
                     end
                     
                     
@@ -1092,36 +1092,36 @@ classdef SLX2LusUtils
                 case 'int'
                     if strcmp(lus_in_dt, 'bool')
                         external_lib = {'LustDTLib_bool_to_int'};
-                        conv_format = NodeCallExpr('bool_to_int', {});
+                        conv_format = nasa_toLustre.lustreAst.NodeCallExpr('bool_to_int', {});
                     elseif strcmp(lus_in_dt, 'real')
                         external_lib = {strcat('LustDTLib_', RndMeth)};
-                        conv_format = NodeCallExpr(RndMeth, {});
+                        conv_format = nasa_toLustre.lustreAst.NodeCallExpr(RndMeth, {});
                     end
                 case 'real'
                     if strcmp(lus_in_dt, 'int')
                         external_lib = {strcat('LustDTLib_', RndMeth)};
-                        conv_format = NodeCallExpr(RndMeth, {});
+                        conv_format = nasa_toLustre.lustreAst.NodeCallExpr(RndMeth, {});
                     elseif strcmp(lus_in_dt, 'bool')
                         external_lib = {'LustDTLib_bool_to_real'};
-                        conv_format = NodeCallExpr('bool_to_real', {});
+                        conv_format = nasa_toLustre.lustreAst.NodeCallExpr('bool_to_real', {});
                     end
                 case 'bool'
                     if strcmp(lus_in_dt, 'int')
                         external_lib = {'LustDTLib_int_to_bool'};
-                        conv_format = NodeCallExpr('int_to_bool', {});
+                        conv_format = nasa_toLustre.lustreAst.NodeCallExpr('int_to_bool', {});
                     elseif strcmp(lus_in_dt, 'real')
                         external_lib = {'LustDTLib_real_to_bool'};
-                        conv_format = NodeCallExpr('real_to_bool', {});
+                        conv_format = nasa_toLustre.lustreAst.NodeCallExpr('real_to_bool', {});
                     end
                     
                 otherwise
                     %fixdt 
                     if strcmp(lus_in_dt, 'int')
                         external_lib = {strcat('LustDTLib_', RndMeth)};
-                        conv_format = NodeCallExpr(RndMeth, {});
+                        conv_format = nasa_toLustre.lustreAst.NodeCallExpr(RndMeth, {});
                     elseif strcmp(lus_in_dt, 'bool')
                         external_lib = {'LustDTLib_bool_to_real'};
-                        conv_format = NodeCallExpr('bool_to_real', {});
+                        conv_format = nasa_toLustre.lustreAst.NodeCallExpr('bool_to_real', {});
                     end
             end
         end
@@ -1133,23 +1133,23 @@ classdef SLX2LusUtils
         end
         function [resetCode, status] = getResetCode(...
                 resetType, resetDT, resetInput, zero )
-            L = nasa_toLustre.ToLustreImport.L;
-            import(L{:})
+            %L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
+            %import(L{:})
             status = 0;
             if strcmp(resetDT, 'bool')
                 b = resetInput;
             else
                 %b = sprintf('(%s > %s)',resetInput , zero);
-                b = BinaryExpr(BinaryExpr.GT, resetInput, zero);
+                b = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.GT, resetInput, zero);
             end
             if strcmpi(resetType, 'rising')
                 resetCode = ...
-                    BinaryExpr(BinaryExpr.ARROW, ...
-                               BooleanExpr('false'),...
-                               BinaryExpr(BinaryExpr.AND,...
+                    nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.ARROW, ...
+                               nasa_toLustre.lustreAst.BooleanExpr('false'),...
+                               nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.AND,...
                                           b, ...
-                                          UnaryExpr(UnaryExpr.NOT, ...
-                                                    UnaryExpr(UnaryExpr.PRE, b)...
+                                          nasa_toLustre.lustreAst.UnaryExpr(nasa_toLustre.lustreAst.UnaryExpr.NOT, ...
+                                                    nasa_toLustre.lustreAst.UnaryExpr(nasa_toLustre.lustreAst.UnaryExpr.PRE, b)...
                                                     )...
                                          )...
                               );
@@ -1162,11 +1162,11 @@ classdef SLX2LusUtils
                 %    'false -> (not %s and pre %s)'...
                 %    ,b ,b);
                 resetCode = ...
-                    BinaryExpr(BinaryExpr.ARROW, ...
-                               BooleanExpr('false'),...
-                               BinaryExpr(BinaryExpr.AND,...
-                                          UnaryExpr(UnaryExpr.NOT, b), ...
-                                          UnaryExpr(UnaryExpr.PRE, b)...
+                    nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.ARROW, ...
+                               nasa_toLustre.lustreAst.BooleanExpr('false'),...
+                               nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.AND,...
+                                          nasa_toLustre.lustreAst.UnaryExpr(nasa_toLustre.lustreAst.UnaryExpr.NOT, b), ...
+                                          nasa_toLustre.lustreAst.UnaryExpr(nasa_toLustre.lustreAst.UnaryExpr.PRE, b)...
                                          )...
                               );
             elseif strcmpi(resetType, 'either')
@@ -1174,18 +1174,18 @@ classdef SLX2LusUtils
                 %                     'false -> ((%s and not pre %s) or (not %s and pre %s)) '...
                 %                     ,b ,b ,b ,b);
                 resetCode = ...
-                    BinaryExpr(BinaryExpr.ARROW, ...
-                               BooleanExpr('false'),...
-                               BinaryExpr(BinaryExpr.OR,...
-                                          BinaryExpr(BinaryExpr.AND,...
+                    nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.ARROW, ...
+                               nasa_toLustre.lustreAst.BooleanExpr('false'),...
+                               nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.OR,...
+                                          nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.AND,...
                                                       b, ...
-                                                      UnaryExpr(UnaryExpr.NOT, ...
-                                                                UnaryExpr(UnaryExpr.PRE, b)...
+                                                      nasa_toLustre.lustreAst.UnaryExpr(nasa_toLustre.lustreAst.UnaryExpr.NOT, ...
+                                                                nasa_toLustre.lustreAst.UnaryExpr(nasa_toLustre.lustreAst.UnaryExpr.PRE, b)...
                                                                 )...
                                                      ),...
-                                          BinaryExpr(BinaryExpr.AND,...
-                                                      UnaryExpr(UnaryExpr.NOT, b), ...
-                                                      UnaryExpr(UnaryExpr.PRE, b)...
+                                          nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.AND,...
+                                                      nasa_toLustre.lustreAst.UnaryExpr(nasa_toLustre.lustreAst.UnaryExpr.NOT, b), ...
+                                                      nasa_toLustre.lustreAst.UnaryExpr(nasa_toLustre.lustreAst.UnaryExpr.PRE, b)...
                                                      )...
                                           )...
                               );
@@ -1195,7 +1195,7 @@ classdef SLX2LusUtils
                     b = resetInput;
                 else
                     %b = sprintf('(%s <> %s)',resetInput , zero);
-                    b = BinaryExpr(BinaryExpr.NEQ, resetInput, zero);
+                    b = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.NEQ, resetInput, zero);
                 end
                 % Reset in either of these cases:
                 % when the reset signal is nonzero at the current time step
@@ -1204,13 +1204,13 @@ classdef SLX2LusUtils
                 %                     'false -> (%s or (pre %s and not %s)) '...
                 %                     ,b ,b ,b);
                 resetCode = ...
-                    BinaryExpr(BinaryExpr.ARROW, ...
-                               BooleanExpr('false'),...
-                               BinaryExpr(BinaryExpr.OR,...
+                    nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.ARROW, ...
+                               nasa_toLustre.lustreAst.BooleanExpr('false'),...
+                               nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.OR,...
                                           b,...
-                                          BinaryExpr(BinaryExpr.AND,...
-                                                    UnaryExpr(UnaryExpr.PRE, b),...
-                                                    UnaryExpr(UnaryExpr.NOT, b) ...
+                                          nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.AND,...
+                                                    nasa_toLustre.lustreAst.UnaryExpr(nasa_toLustre.lustreAst.UnaryExpr.PRE, b),...
+                                                    nasa_toLustre.lustreAst.UnaryExpr(nasa_toLustre.lustreAst.UnaryExpr.NOT, b) ...
                                                     )...
                                           )... 
                               );
@@ -1220,18 +1220,18 @@ classdef SLX2LusUtils
                     b = resetInput;
                 else
                     %b = sprintf('(%s <> %s)',resetInput , zero);
-                    b = BinaryExpr(BinaryExpr.NEQ, resetInput, zero);
+                    b = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.NEQ, resetInput, zero);
                 end
                 %Reset when the reset signal is nonzero at the current time step
                 %                 resetCode = sprintf(...
                 %                     'false -> b);
                 resetCode = ...
-                    BinaryExpr(BinaryExpr.ARROW, ...
-                               BooleanExpr('false'),...
+                    nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.ARROW, ...
+                               nasa_toLustre.lustreAst.BooleanExpr('false'),...
                                b);              
                          
             else
-                resetCode = VarIdExpr('');
+                resetCode = nasa_toLustre.lustreAst.VarIdExpr('');
                 status = 1;
                 return;
             end

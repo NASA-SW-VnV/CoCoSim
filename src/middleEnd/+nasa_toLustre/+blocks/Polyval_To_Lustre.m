@@ -19,11 +19,11 @@ classdef Polyval_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             
             [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             outputDataType = blk.CompiledPortDataTypes.Outport{1};
-            out_lus_dt = SLX2LusUtils.get_lustre_dt(outputDataType);
+            out_lus_dt = nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(outputDataType);
             obj.addVariable(outputs_dt);
             [inputs] =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk);
             slx_inport_dt = blk.CompiledPortDataTypes.Inport(1);
-            [lus_inport_dt] = SLX2LusUtils.get_lustre_dt(slx_inport_dt);
+            [lus_inport_dt] = nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(slx_inport_dt);
             if ~strcmp(lus_inport_dt, 'real')
                 % transfor first to bool
                 [external_lib, conv_format] =nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(slx_inport_dt, 'real');
@@ -36,7 +36,7 @@ classdef Polyval_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             end
             
             [coefs, ~, status] = ...
-                Constant_To_Lustre.getValueFromParameter(parent,...
+                nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(parent,...
                 blk, blk.Coefs);
             if status
                 display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
@@ -60,17 +60,17 @@ classdef Polyval_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             pows = (polynom_degree:-1:1);
             for outIdx=1:length(outputs)
                 x_power = arrayfun(@(x) ...
-                    NodeCallExpr('pow', {inputs{outIdx}, RealExpr(x)}), ...
+                    nasa_toLustre.lustreAst.NodeCallExpr('pow', {inputs{outIdx}, nasa_toLustre.lustreAst.RealExpr(x)}), ...
                     pows, 'un', 0);
                 product_terms = arrayfun(@(i) ...
-                    BinaryExpr(BinaryExpr.MULTIPLY, x_power{i},  RealExpr(coefs(i))), ...
+                    nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.MULTIPLY, x_power{i},  nasa_toLustre.lustreAst.RealExpr(coefs(i))), ...
                     (1:polynom_degree), 'un', 0);
-                product_terms{end+1} = RealExpr(coefs(end));
-                rhs = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS, product_terms);
+                product_terms{end+1} = nasa_toLustre.lustreAst.RealExpr(coefs(end));
+                rhs = nasa_toLustre.lustreAst.BinaryExpr.BinaryMultiArgs(nasa_toLustre.lustreAst.BinaryExpr.PLUS, product_terms);
                 if ~isempty(out_conv_format)
-                    rhs = SLX2LusUtils.setArgInConvFormat(out_conv_format,rhs);
+                    rhs = nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(out_conv_format,rhs);
                 end
-                obj.addCode(LustreEq(outputs{outIdx}, rhs));
+                obj.addCode(nasa_toLustre.lustreAst.LustreEq(outputs{outIdx}, rhs));
             end
             
             

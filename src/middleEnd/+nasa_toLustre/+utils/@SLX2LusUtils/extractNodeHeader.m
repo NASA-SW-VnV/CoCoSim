@@ -12,8 +12,8 @@ function [node_name,  node_inputs_cell, node_outputs_cell,...
         extractNodeHeader(parent_ir, blk, is_main_node, ...
         isEnableORAction, isEnableAndTrigger, isContractBlk, isMatlabFunction, ...
         main_sampleTime, xml_trace)
-    L = nasa_toLustre.ToLustreImport.L;
-    import(L{:})
+    %L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
+    %import(L{:})
     % this function is used to get the Lustre node inputs and
     % outputs.
 
@@ -43,20 +43,20 @@ function [node_name,  node_inputs_cell, node_outputs_cell,...
     % add the execution condition if it is a conditionally executed
     % SS
     if isEnableORAction
-        node_inputs_cell{end + 1} = LustreVar(...
+        node_inputs_cell{end + 1} = nasa_toLustre.lustreAst.LustreVar(...
             nasa_toLustre.utils.SLX2LusUtils.isEnabledStr() , 'bool');
         % we don't include them in node_inputs_withoutDT_cell, see
         % condExecSS_To_LusAutomaton
         %node_inputs_withoutDT_cell{end + 1} = VarIdExpr(...
         %    nasa_toLustre.utils.SLX2LusUtils.isEnabledStr());
     elseif isEnableAndTrigger
-        node_inputs_cell{end + 1} = LustreVar(...
+        node_inputs_cell{end + 1} = nasa_toLustre.lustreAst.LustreVar(...
             nasa_toLustre.utils.SLX2LusUtils.isEnabledStr() , 'bool');
         % we don't include them in node_inputs_withoutDT_cell, see
         % condExecSS_To_LusAutomaton
         %node_inputs_withoutDT_cell{end + 1} = VarIdExpr(...
         %    nasa_toLustre.utils.SLX2LusUtils.isEnabledStr());
-        node_inputs_cell{end + 1} = LustreVar(...
+        node_inputs_cell{end + 1} = nasa_toLustre.lustreAst.LustreVar(...
             nasa_toLustre.utils.SLX2LusUtils.isTriggeredStr() , 'bool');
         % we don't include them in node_inputs_withoutDT_cell, see
         % condExecSS_To_LusAutomaton
@@ -70,8 +70,8 @@ function [node_name,  node_inputs_cell, node_outputs_cell,...
     end
     % if the node has no inputs, add virtual input for Lustrec.
     if isempty(node_inputs_cell)
-        node_inputs_cell{end + 1} = LustreVar('_virtual', 'bool');
-        node_inputs_withoutDT_cell{end+1} = VarIdExpr('_virtual');
+        node_inputs_cell{end + 1} = nasa_toLustre.lustreAst.LustreVar('_virtual', 'bool');
+        node_inputs_withoutDT_cell{end+1} = nasa_toLustre.lustreAst.VarIdExpr('_virtual');
     end
 
     % creating outputs
@@ -80,9 +80,9 @@ function [node_name,  node_inputs_cell, node_outputs_cell,...
         nasa_toLustre.utils.SLX2LusUtils.extract_node_InOutputs_withDT(blk, 'Outport', xml_trace);
 
     if is_main_node && isempty(node_outputs_cell)
-        node_outputs_cell{end+1} = LustreVar(...
+        node_outputs_cell{end+1} = nasa_toLustre.lustreAst.LustreVar(...
             nasa_toLustre.utils.SLX2LusUtils.timeStepStr(), 'real');
-        node_outputs_withoutDT_cell{end+1} = VarIdExpr(nasa_toLustre.utils.SLX2LusUtils.timeStepStr());
+        node_outputs_withoutDT_cell{end+1} = nasa_toLustre.lustreAst.VarIdExpr(nasa_toLustre.utils.SLX2LusUtils.timeStepStr());
     end
 end
 

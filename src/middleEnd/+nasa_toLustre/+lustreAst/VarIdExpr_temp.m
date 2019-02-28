@@ -41,7 +41,7 @@ classdef VarIdExpr < nasa_toLustre.lustreAst.LustreExpr
         %% deep copy
         function new_obj = deepCopy(obj)
             import nasa_toLustre.lustreAst.VarIdExpr
-            new_obj = VarIdExpr(obj.id);
+            new_obj = nasa_toLustre.lustreAst.VarIdExpr(obj.id);
         end
         %% simplify expression
         function new_obj = simplify(obj)
@@ -133,7 +133,7 @@ classdef VarIdExpr < nasa_toLustre.lustreAst.LustreExpr
             import nasa_toLustre.lustreAst.VarIdExpr
             import nasa_toLustre.lustreAst.LustreVar
             if iscell(v)
-                r = cellfun(@(x) VarIdExpr.ismemberVar(x, vars), v);
+                r = cellfun(@(x) nasa_toLustre.lustreAst.VarIdExpr.ismemberVar(x, vars), v);
                 return;
             end
             if isa(v, 'VarIdExpr') || isa(v, 'LustreVar')

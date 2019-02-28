@@ -34,7 +34,7 @@ function dt = expression_DT(tree, data_map, inputs, isSimulink, isStateFlow, isM
                 'plus_minus', 'mtimes', 'times', ...
                 'mrdivide', 'mldivide', 'rdivide', 'ldivide', ...
                 'mpower', 'power'}
-            dt = MExpToLusDT.binaryExpression_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
+            dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.binaryExpression_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
             
         otherwise
             % we use the name of tree_type to call the associated function

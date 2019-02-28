@@ -19,7 +19,7 @@ function [outputs, inputs, body, variables] = write_state_body(state)
     if isempty(parentPath)
         isChart = true;
     end
-    idStateVar = VarIdExpr(...
+    idStateVar = nasa_toLustre.lustreAst.VarIdExpr(...
             nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getStateIDName(state));
     [idStateEnumType, idStateInactiveEnum] = ...
             nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.addStateEnum(state, [], ...
@@ -33,16 +33,16 @@ function [outputs, inputs, body, variables] = write_state_body(state)
         if isKey(SF_STATES_NODESAST_MAP, outerTransNodeName)
             nodeAst = SF_STATES_NODESAST_MAP(outerTransNodeName);
             [call, oututs_Ids] = nodeAst.nodeCall();
-            body{end+1} = LustreEq(oututs_Ids, call);
+            body{end+1} = nasa_toLustre.lustreAst.LustreEq(oututs_Ids, call);
             outputs = [outputs, nodeAst.getOutputs()];
             inputs = [inputs, nodeAst.getInputs()];
             cond_name = ...
-                StateflowTransition_To_Lustre.getValidPathCondName();
-            if VarIdExpr.ismemberVar(cond_name, oututs_Ids)
-                outputs = LustreVar.removeVar(outputs, cond_name);
-                variables{end+1} = LustreVar(cond_name, 'bool');
-                cond_prefix = UnaryExpr(UnaryExpr.NOT,...
-                    VarIdExpr(cond_name));
+                nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.getValidPathCondName();
+            if nasa_toLustre.lustreAst.VarIdExpr.ismemberVar(cond_name, oututs_Ids)
+                outputs = nasa_toLustre.lustreAst.LustreVar.removeVar(outputs, cond_name);
+                variables{end+1} = nasa_toLustre.lustreAst.LustreVar(cond_name, 'bool');
+                cond_prefix = nasa_toLustre.lustreAst.UnaryExpr(UnaryExpr.NOT,...
+                    nasa_toLustre.lustreAst.VarIdExpr(cond_name));
             end
         end
 
@@ -56,10 +56,10 @@ function [outputs, inputs, body, variables] = write_state_body(state)
 
             [call, oututs_Ids] = nodeAst.nodeCall();
             if isempty(cond_prefix)
-                body{end+1} = LustreEq(oututs_Ids, call);
+                body{end+1} = nasa_toLustre.lustreAst.LustreEq(oututs_Ids, call);
             else
-                body{end+1} = LustreEq(oututs_Ids, ...
-                    IteExpr(cond_prefix, call, TupleExpr(oututs_Ids)));
+                body{end+1} = nasa_toLustre.lustreAst.LustreEq(oututs_Ids, ...
+                    nasa_toLustre.lustreAst.IteExpr(cond_prefix, call, nasa_toLustre.lustreAst.TupleExpr(oututs_Ids)));
                 inputs = [inputs, nodeAst.getOutputs()];
             end
             outputs = [outputs, nodeAst.getOutputs()];
@@ -75,38 +75,38 @@ function [outputs, inputs, body, variables] = write_state_body(state)
             outputs = [outputs, nodeAst.getOutputs()];
             inputs = [inputs, nodeAst.getInputs()];
             cond_name = ...
-                StateflowTransition_To_Lustre.getValidPathCondName();
-            if VarIdExpr.ismemberVar(cond_name, oututs_Ids)
-                outputs = LustreVar.removeVar(outputs, cond_name);
+                nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.getValidPathCondName();
+            if nasa_toLustre.lustreAst.VarIdExpr.ismemberVar(cond_name, oututs_Ids)
+                outputs = nasa_toLustre.lustreAst.LustreVar.removeVar(outputs, cond_name);
             end
             if isempty(cond_prefix)
-                body{end+1} = LustreEq(oututs_Ids, call);
-                if VarIdExpr.ismemberVar(cond_name, oututs_Ids)
-                    variables{end+1} = LustreVar(cond_name, 'bool');
-                    cond_prefix = UnaryExpr(UnaryExpr.NOT,...
-                        VarIdExpr(cond_name));
+                body{end+1} = nasa_toLustre.lustreAst.LustreEq(oututs_Ids, call);
+                if nasa_toLustre.lustreAst.VarIdExpr.ismemberVar(cond_name, oututs_Ids)
+                    variables{end+1} = nasa_toLustre.lustreAst.LustreVar(cond_name, 'bool');
+                    cond_prefix = nasa_toLustre.lustreAst.UnaryExpr(UnaryExpr.NOT,...
+                        nasa_toLustre.lustreAst.VarIdExpr(cond_name));
                 end
             else
-                if VarIdExpr.ismemberVar(cond_name, oututs_Ids)
+                if nasa_toLustre.lustreAst.VarIdExpr.ismemberVar(cond_name, oututs_Ids)
                     new_cond_name = strcat(cond_name, '_INNER');
-                    variables{end+1} = LustreVar(new_cond_name, 'bool');
+                    variables{end+1} = nasa_toLustre.lustreAst.LustreVar(new_cond_name, 'bool');
                     lhs_oututs_Ids = ...
                         nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.changeVar(...
                         oututs_Ids, cond_name, new_cond_name);
                     rhs_oututs_Ids = ...
                         nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.changeVar(...
                         oututs_Ids, cond_name, 'false');
-                    body{end+1} = LustreEq(lhs_oututs_Ids, ...
-                        IteExpr(cond_prefix, call, TupleExpr(rhs_oututs_Ids)));
+                    body{end+1} = nasa_toLustre.lustreAst.LustreEq(lhs_oututs_Ids, ...
+                        nasa_toLustre.lustreAst.IteExpr(cond_prefix, call, nasa_toLustre.lustreAst.TupleExpr(rhs_oututs_Ids)));
                     inputs = [inputs, nodeAst.getOutputs()];
-                    inputs = LustreVar.removeVar(inputs, cond_name);
+                    inputs = nasa_toLustre.lustreAst.LustreVar.removeVar(inputs, cond_name);
                     %add Inner termination condition
-                    cond_prefix = UnaryExpr(UnaryExpr.NOT,...
-                        BinaryExpr(BinaryExpr.OR, ...
-                        VarIdExpr(cond_name), VarIdExpr(new_cond_name)));
+                    cond_prefix = nasa_toLustre.lustreAst.UnaryExpr(UnaryExpr.NOT,...
+                        nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.OR, ...
+                        nasa_toLustre.lustreAst.VarIdExpr(cond_name), nasa_toLustre.lustreAst.VarIdExpr(new_cond_name)));
                 else
-                    body{end+1} = LustreEq(oututs_Ids, ...
-                        IteExpr(cond_prefix, call, TupleExpr(oututs_Ids)));
+                    body{end+1} = nasa_toLustre.lustreAst.LustreEq(oututs_Ids, ...
+                        nasa_toLustre.lustreAst.IteExpr(cond_prefix, call, nasa_toLustre.lustreAst.TupleExpr(oututs_Ids)));
                     inputs = [inputs, nodeAst.getOutputs()];
                 end
             end
@@ -117,22 +117,22 @@ function [outputs, inputs, body, variables] = write_state_body(state)
             nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getEntryActionNodeName(state);
         if isKey(SF_STATES_NODESAST_MAP, entry_act_node_name)
             nodeAst = SF_STATES_NODESAST_MAP(entry_act_node_name);
-            [call, oututs_Ids] = nodeAst.nodeCall(true, BooleanExpr(false));
-            cond = BinaryExpr(BinaryExpr.EQ,...
+            [call, oututs_Ids] = nodeAst.nodeCall(true, nasa_toLustre.lustreAst.BooleanExpr(false));
+            cond = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.EQ,...
                 idStateVar, idStateInactiveEnum);
-            children_actions{end+1} = LustreEq(oututs_Ids, ...
-                IteExpr(cond, call, TupleExpr(oututs_Ids)));
+            children_actions{end+1} = nasa_toLustre.lustreAst.LustreEq(oututs_Ids, ...
+                nasa_toLustre.lustreAst.IteExpr(cond, call, nasa_toLustre.lustreAst.TupleExpr(oututs_Ids)));
             outputs = [outputs, nodeAst.getOutputs()];
             inputs = [inputs, nodeAst.getOutputs()];
             inputs = [inputs, nodeAst.getInputs()];
-            inputs{end + 1} = LustreVar(idStateVar, idStateEnumType);
+            inputs{end + 1} = nasa_toLustre.lustreAst.LustreVar(idStateVar, idStateEnumType);
             %remove isInner input from the node inputs
             inputs_name = cellfun(@(x) x.getId(), ...
                 inputs, 'UniformOutput', false);
             inputs = inputs(~strcmp(inputs_name, ...
                 nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.isInnerStr()));
         end
-        cond_prefix = BinaryExpr(BinaryExpr.NEQ,...
+        cond_prefix = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.NEQ,...
             idStateVar, idStateInactiveEnum);
         %cond_prefix = {};
     end
@@ -142,7 +142,7 @@ function [outputs, inputs, body, variables] = write_state_body(state)
     number_children = numel(children);
     isParallel = isequal(state.Composition.Type, 'PARALLEL_AND');
     if number_children > 0 && ~isParallel
-        inputs{end + 1} = LustreVar(idStateVar, idStateEnumType);
+        inputs{end + 1} = nasa_toLustre.lustreAst.LustreVar(idStateVar, idStateEnumType);
     end
     for i=1:number_children
         child = children{i};
@@ -151,11 +151,11 @@ function [outputs, inputs, body, variables] = write_state_body(state)
         else
             [~, childEnum] = ...
                 nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.addStateEnum(state, child);
-            cond = BinaryExpr(BinaryExpr.EQ, ...
+            cond = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.EQ, ...
                 idStateVar, childEnum);
             if ~isempty(cond_prefix) && ~isChart
                 cond = ...
-                    BinaryExpr(BinaryExpr.AND, cond, cond_prefix);
+                    nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.AND, cond, cond_prefix);
             end
         end
         child_node_name = ...
@@ -164,12 +164,12 @@ function [outputs, inputs, body, variables] = write_state_body(state)
             nodeAst = SF_STATES_NODESAST_MAP(child_node_name);
             [call, oututs_Ids] = nodeAst.nodeCall();
             if isempty(cond)
-                children_actions{end+1} = LustreEq(oututs_Ids, call);
+                children_actions{end+1} = nasa_toLustre.lustreAst.LustreEq(oututs_Ids, call);
                 outputs = [outputs, nodeAst.getOutputs()];
                 inputs = [inputs, nodeAst.getInputs()];
             else
-                children_actions{end+1} = LustreEq(oututs_Ids, ...
-                    IteExpr(cond, call, TupleExpr(oututs_Ids)));
+                children_actions{end+1} = nasa_toLustre.lustreAst.LustreEq(oututs_Ids, ...
+                    nasa_toLustre.lustreAst.IteExpr(cond, call, nasa_toLustre.lustreAst.TupleExpr(oututs_Ids)));
                 outputs = [outputs, nodeAst.getOutputs()];
                 inputs = [inputs, nodeAst.getOutputs()];
                 inputs = [inputs, nodeAst.getInputs()];
@@ -187,7 +187,7 @@ function [outputs, inputs, body, variables] = write_state_body(state)
                 body = [body, children_actions];
             end
         else
-            body{end+1} = ConcurrentAssignments(children_actions);
+            body{end+1} = nasa_toLustre.lustreAst.ConcurrentAssignments(children_actions);
         end
     end
 end

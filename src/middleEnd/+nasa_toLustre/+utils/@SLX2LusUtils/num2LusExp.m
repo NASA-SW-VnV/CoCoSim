@@ -8,35 +8,35 @@
 
 %% change numerical value to Lustre Expr string based on DataType dt.
 function lustreExp = num2LusExp(v, lus_dt, slx_dt)
-    L = nasa_toLustre.ToLustreImport.L;
-    import(L{:})
+    %L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
+    %import(L{:})
     global TOLUSTRE_ENUMS_MAP;
     if nargin < 3
         slx_dt = lus_dt;
     end
     if isKey(TOLUSTRE_ENUMS_MAP, lus_dt)
-        lustreExp = EnumValueExpr(char(v));
+        lustreExp = nasa_toLustre.lustreAst.EnumValueExpr(char(v));
     elseif strcmp(lus_dt, 'real')
-        lustreExp = RealExpr(v);
+        lustreExp = nasa_toLustre.lustreAst.RealExpr(v);
     elseif strcmp(lus_dt, 'int')
         if numel(slx_dt) > 3 ...
                 && strncmp(slx_dt, 'int', 3) ...
                 || strncmp(slx_dt, 'uint', 4)
             % e.g. cast double value to int32
             f = eval(strcat('@', slx_dt));
-            lustreExp = IntExpr(...
+            lustreExp = nasa_toLustre.lustreAst.IntExpr(...
                 f(v));
         else
-            lustreExp = IntExpr(v);
+            lustreExp = nasa_toLustre.lustreAst.IntExpr(v);
         end
     elseif strcmp(lus_dt, 'bool')
-        lustreExp = BooleanExpr(v);
+        lustreExp = nasa_toLustre.lustreAst.BooleanExpr(v);
     elseif strncmp(slx_dt, 'int', 3) ...
             || strncmp(slx_dt, 'uint', 4)
-        lustreExp = IntExpr(v);
+        lustreExp = nasa_toLustre.lustreAst.IntExpr(v);
     elseif strcmp(slx_dt, 'boolean') || strcmp(slx_dt, 'logical')
-       lustreExp = BooleanExpr(v);
+       lustreExp = nasa_toLustre.lustreAst.BooleanExpr(v);
     else
-        lustreExp = RealExpr(v);
+        lustreExp = nasa_toLustre.lustreAst.RealExpr(v);
     end
 end

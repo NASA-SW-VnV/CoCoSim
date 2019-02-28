@@ -8,8 +8,8 @@ function imported_contracts = getImportedContracts(...
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    L = nasa_toLustre.ToLustreImport.L;
-    import(L{:})
+    %L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
+    %import(L{:})
     % contracts may have differents signature of the node imported
     % in. This function is trying to make the use of contract the most
     % flexible possible. For example having only specific inputs
@@ -85,7 +85,7 @@ function imported_contracts = getImportedContracts(...
         end
         [~, contract_inputs] = ...
            nasa_toLustre.utils.SLX2LusUtils.getTimeClocksInputs(ss_ir, main_sampleTime, {}, contract_inputs);
-        imported_contracts{end+1} = ContractImportExpr(...
+        imported_contracts{end+1} = nasa_toLustre.lustreAst.ContractImportExpr(...
             ss_ir.ContractNodeNames{i}, contract_inputs, contract_outputs);
     end
 end

@@ -11,7 +11,7 @@ function [codes, ResetCondVar] = ResettableSSCall(parent, blk, ...
     L = nasa_toLustre.ToLustreImport.L;
     import(L{:})
     ResetCondName = sprintf('ResetCond_of_%s', blk_name);
-    ResetCondVar = LustreVar(ResetCondName, 'bool');
+    ResetCondVar = nasa_toLustre.lustreAst.LustreVar(ResetCondName, 'bool');
     resetportDataType = blk.CompiledPortDataTypes.Reset{1};
     [lusResetportDataType, zero] =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(resetportDataType);
     resetInputs =nasa_toLustre.utils.SLX2LusUtils.getSubsystemResetInputsNames(parent, blk);
@@ -27,11 +27,11 @@ function [codes, ResetCondVar] = ResettableSSCall(parent, blk, ...
         end
         cond{i} = resetCode;
     end
-    ResetCond = BinaryExpr.BinaryMultiArgs(BinaryExpr.OR, cond);
+    ResetCond = nasa_toLustre.lustreAst.BinaryExpr.BinaryMultiArgs(nasa_toLustre.lustreAst.BinaryExpr.OR, cond);
     %codes{end + 1} = sprintf('%s = %s;\n\t'...
     %    ,ResetCondName,  ResetCond);
-    codes{end + 1} = LustreEq(VarIdExpr(ResetCondName), ResetCond);
+    codes{end + 1} = nasa_toLustre.lustreAst.LustreEq(nasa_toLustre.lustreAst.VarIdExpr(ResetCondName), ResetCond);
     codes{end + 1} = ...
-        LustreEq(outputs, ...
-        EveryExpr(node_name, inputs, VarIdExpr(ResetCondName)));
+        nasa_toLustre.lustreAst.LustreEq(outputs, ...
+        nasa_toLustre.lustreAst.EveryExpr(node_name, inputs, nasa_toLustre.lustreAst.VarIdExpr(ResetCondName)));
 end

@@ -15,12 +15,12 @@ function [main_node, external_nodes, external_libraries_i] = getChartNodes(paren
     if TOLUSTRE_SF_COMPILER == 1
         % OLD compiler
         [main_node, ~, external_nodes, external_libraries_i] = ...
-            SS_To_LustreNode.subsystem2node(parent, blk, main_sampleTime, ...
+            nasa_toLustre.frontEnd.SS_To_LustreNode.subsystem2node(parent, blk, main_sampleTime, ...
             false, lus_backend, coco_backend, xml_trace);
     else
         % new compiler
         [main_node, external_nodes, external_libraries_i ] = ...
-            SF_To_LustreNode.chart2node(parent,  blk,  main_sampleTime, lus_backend, xml_trace);
+            nasa_toLustre.frontEnd.SF_To_LustreNode.chart2node(parent,  blk,  main_sampleTime, lus_backend, xml_trace);
     end
 end
 

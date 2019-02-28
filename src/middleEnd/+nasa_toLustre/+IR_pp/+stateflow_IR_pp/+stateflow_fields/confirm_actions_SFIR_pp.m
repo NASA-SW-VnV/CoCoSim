@@ -43,7 +43,7 @@ function [ new_ir, status ] = confirm_actions_SFIR_pp( new_ir )
     %
     if isfield(new_ir, 'GraphicalFunctions')
         for i=1:numel(new_ir.GraphicalFunctions)
-            new_ir.GraphicalFunctions{i} = confirm_actions_SFIR_pp( new_ir.GraphicalFunctions{i} );
+            new_ir.GraphicalFunctions{i} = nasa_toLustre.IR_pp.stateflow_IR_pp.stateflow_fields.confirm_actions_SFIR_pp( new_ir.GraphicalFunctions{i} );
         end
     end
 end

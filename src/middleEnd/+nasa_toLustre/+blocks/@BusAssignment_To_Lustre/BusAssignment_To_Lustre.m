@@ -41,14 +41,14 @@ classdef BusAssignment_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     continue;
                 end
                 for j=1:numel(inputs_i)
-                    idx = BusAssignment_To_Lustre.findIdx(modifiedInputs, inputs_i{j});
+                    idx = nasa_toLustre.blocks.BusAssignment_To_Lustre.findIdx(modifiedInputs, inputs_i{j});
                     modifiedInputs{idx} = ...
                         inputs{i+1}{j};
                 end
             end
             codes = cell(1, numel(outputs));
             for i=1:numel(outputs)
-                codes{i} = LustreEq(outputs{i}, modifiedInputs{i});
+                codes{i} = nasa_toLustre.lustreAst.LustreEq(outputs{i}, modifiedInputs{i});
             end
             obj.setCode( codes );
         end

@@ -54,7 +54,8 @@ function err = compile_lustre_to_Cbinary(lus_file_path, ...
     makefile_name = fullfile(output_dir,strcat(file_name,'.makefile'));
     msg = sprintf('start compiling model "%s"\n',file_name);
     display_msg(msg, MsgType.INFO, 'compile_lustre_to_Cbinary', '');
-    command = sprintf('make -f "%s"', makefile_name);
+    makefile_OPTS = sprintf('BINNAME="%s" GCC="gcc -O0 -Wno-all -fbracket-depth=10000"', binary_name);
+    command = sprintf('make %s -f "%s"',makefile_OPTS, makefile_name);
     msg = sprintf('MAKE_LUSTREC_COMMAND : %s\n',command);
     display_msg(msg, MsgType.INFO, 'compile_lustre_to_Cbinary', '');
     [err, make_out] = system(command);

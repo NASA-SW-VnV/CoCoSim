@@ -27,8 +27,8 @@ function [body, vars] = addFinalCode_without_interpolation(...
     BreakpointsForDimension = blkParams.BreakpointsForDimension;            
     body = {};
     vars = {};
-    returnTableIndex{1} =  VarIdExpr(sprintf('%s_retTableInd_%d',blk_name,1));
-    vars{end+1} = LustreVar(returnTableIndex{1}, indexDataType);
+    returnTableIndex{1} =  nasa_toLustre.lustreAst.VarIdExpr(sprintf('%s_retTableInd_%d',blk_name,1));
+    vars{end+1} = nasa_toLustre.lustreAst.LustreVar(returnTableIndex{1}, indexDataType);
     terms = cell(1,NumberOfTableDimensions);
     if strcmp(InterpMethod,'Flat')
         % defining returnTableIndex{1}
@@ -37,9 +37,9 @@ function [body, vars] = addFinalCode_without_interpolation(...
         for j=1:NumberOfTableDimensions
             curIndex =  index_node{j,1};
             if j==1
-                terms{j} = BinaryExpr(BinaryExpr.MULTIPLY,curIndex, Ast_dimJump{j});
+                terms{j} = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.MULTIPLY,curIndex, Ast_dimJump{j});
             else
-                terms{j} = BinaryExpr(BinaryExpr.MULTIPLY,BinaryExpr(BinaryExpr.MINUS,curIndex,IntExpr(1)), Ast_dimJump{j});
+                terms{j} = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.MULTIPLY,nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.MINUS,curIndex,nasa_toLustre.lustreAst.IntExpr(1)), Ast_dimJump{j});
             end
         end
     elseif strcmp(InterpMethod,'Above')
@@ -52,18 +52,18 @@ function [body, vars] = addFinalCode_without_interpolation(...
             curIndex1 =  index_node{j,1};
             curIndex2 =  index_node{j,2};
             if blkParams.isLookupTableDynamic
-                cond = BinaryExpr(BinaryExpr.LTE,inputs{j}{1},coords_node{j,1}, [], LusBackendType.isLUSTREC(lus_backend));
+                cond = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.LTE,inputs{j}{1},coords_node{j,1}, [], LusBackendType.isLUSTREC(lus_backend));
             else
                 epsilon = 1.e-15;
-                cond = BinaryExpr(BinaryExpr.LTE,inputs{j}{1},coords_node{j,1}, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
+                cond = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.LTE,inputs{j}{1},coords_node{j,1}, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
             end
             if j==1
-                terms{j} = IteExpr(cond,BinaryExpr(BinaryExpr.MULTIPLY,curIndex1, Ast_dimJump{j}),...
-                    BinaryExpr(BinaryExpr.MULTIPLY,curIndex2, Ast_dimJump{j}));
+                terms{j} = nasa_toLustre.lustreAst.IteExpr(cond,nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.MULTIPLY,curIndex1, Ast_dimJump{j}),...
+                    nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.MULTIPLY,curIndex2, Ast_dimJump{j}));
             else
-                terms{j} = IteExpr(cond,BinaryExpr(BinaryExpr.MULTIPLY,...
-                    BinaryExpr(BinaryExpr.MINUS,curIndex1,IntExpr(1)), Ast_dimJump{j}),...
-                    BinaryExpr(BinaryExpr.MULTIPLY,BinaryExpr(BinaryExpr.MINUS,curIndex2,IntExpr(1)), Ast_dimJump{j}));
+                terms{j} = nasa_toLustre.lustreAst.IteExpr(cond,nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.MULTIPLY,...
+                    nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.MINUS,curIndex1,nasa_toLustre.lustreAst.IntExpr(1)), Ast_dimJump{j}),...
+                    nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.MULTIPLY,nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.MINUS,curIndex2,nasa_toLustre.lustreAst.IntExpr(1)), Ast_dimJump{j}));
             end
         end
     else   % 'Nearest' case
@@ -71,49 +71,49 @@ function [body, vars] = addFinalCode_without_interpolation(...
         disFromTableNode = cell(NumberOfTableDimensions,2);
         nearestIndex = cell(1,NumberOfTableDimensions);
         for i=1:NumberOfTableDimensions
-            disFromTableNode{i,1} = VarIdExpr(sprintf('%s_disFromTableNode_dim_%d_1',blk_name,i));
-            vars{end+1} = LustreVar(disFromTableNode{i,1},lusInport_dt);
-            disFromTableNode{i,2} = VarIdExpr(sprintf('%s_disFromTableNode_dim_%d_2',blk_name,i));
-            vars{end+1} = LustreVar(disFromTableNode{i,2},lusInport_dt);
-            body{end+1} = LustreEq(disFromTableNode{i,1},BinaryExpr(BinaryExpr.MINUS,inputs{i}{1},coords_node{i,1}));
-            body{end+1} = LustreEq(disFromTableNode{i,2},BinaryExpr(BinaryExpr.MINUS,coords_node{i,2},inputs{i}{1}));
+            disFromTableNode{i,1} = nasa_toLustre.lustreAst.VarIdExpr(sprintf('%s_disFromTableNode_dim_%d_1',blk_name,i));
+            vars{end+1} = nasa_toLustre.lustreAst.LustreVar(disFromTableNode{i,1},lusInport_dt);
+            disFromTableNode{i,2} = nasa_toLustre.lustreAst.VarIdExpr(sprintf('%s_disFromTableNode_dim_%d_2',blk_name,i));
+            vars{end+1} = nasa_toLustre.lustreAst.LustreVar(disFromTableNode{i,2},lusInport_dt);
+            body{end+1} = nasa_toLustre.lustreAst.LustreEq(disFromTableNode{i,1},nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.MINUS,inputs{i}{1},coords_node{i,1}));
+            body{end+1} = nasa_toLustre.lustreAst.LustreEq(disFromTableNode{i,2},nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.MINUS,coords_node{i,2},inputs{i}{1}));
 
-            nearestIndex{i} = VarIdExpr(sprintf('%s_nearestIndex_dim_%d',blk_name,i));
-            vars{end+1} = LustreVar(nearestIndex{i},indexDataType);
+            nearestIndex{i} = nasa_toLustre.lustreAst.VarIdExpr(sprintf('%s_nearestIndex_dim_%d',blk_name,i));
+            vars{end+1} = nasa_toLustre.lustreAst.LustreVar(nearestIndex{i},indexDataType);
             if blkParams.isLookupTableDynamic
-                condC = BinaryExpr(BinaryExpr.LTE,disFromTableNode{i,2},disFromTableNode{i,1}, [], LusBackendType.isLUSTREC(lus_backend));
+                condC = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.LTE,disFromTableNode{i,2},disFromTableNode{i,1}, [], LusBackendType.isLUSTREC(lus_backend));
             else
-                epsilon = Lookup_nD_To_Lustre.calculate_eps(BreakpointsForDimension{i}, 2);
-                condC = BinaryExpr(BinaryExpr.LTE,disFromTableNode{i,2},disFromTableNode{i,1}, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
+                epsilon = nasa_toLustre.blocks.Lookup_nD_To_Lustre.calculate_eps(BreakpointsForDimension{i}, 2);
+                condC = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.LTE,disFromTableNode{i,2},disFromTableNode{i,1}, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
             end
-            body{end+1} = LustreEq(nearestIndex{i},IteExpr(condC,index_node{i,2},index_node{i,1}));
+            body{end+1} = nasa_toLustre.lustreAst.LustreEq(nearestIndex{i},nasa_toLustre.lustreAst.IteExpr(condC,index_node{i,2},index_node{i,1}));
         end
 
         %value = '0';
         for j=1:NumberOfTableDimensions
             if j==1
                 %value = sprintf('%s + %s*%d',value,nearestIndex{j}, dimJump(j));
-                terms{j} = BinaryExpr(BinaryExpr.MULTIPLY,nearestIndex{j}, Ast_dimJump{j});
+                terms{j} = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.MULTIPLY,nearestIndex{j}, Ast_dimJump{j});
             else
                 %value = sprintf('%s + (%s-1)*%d',value,nearestIndex{j}, dimJump(j));
-                terms{j} = BinaryExpr(BinaryExpr.MULTIPLY,BinaryExpr(BinaryExpr.MINUS,nearestIndex{j},IntExpr(1)), Ast_dimJump{j});
+                terms{j} = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.MULTIPLY,nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.MINUS,nearestIndex{j},nasa_toLustre.lustreAst.IntExpr(1)), Ast_dimJump{j});
             end
         end
     end
     if NumberOfTableDimensions == 1
         rhs = terms{1};
     elseif NumberOfTableDimensions == 2
-        rhs = BinaryExpr(BinaryExpr.PLUS,terms{1},terms{2});
+        rhs = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.PLUS,terms{1},terms{2});
     else
-        rhs = BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS,terms);
+        rhs = nasa_toLustre.lustreAst.BinaryExpr.BinaryMultiArgs(nasa_toLustre.lustreAst.BinaryExpr.PLUS,terms);
     end
-    body{end+1} = LustreEq(returnTableIndex{1},rhs);
+    body{end+1} = nasa_toLustre.lustreAst.LustreEq(returnTableIndex{1},rhs);
 
     % defining outputs{1}
     conds = cell(1,numel(table_elem)-1);
     thens = cell(1,numel(table_elem));
     for j=1:numel(table_elem)-1
-        conds{j} = BinaryExpr(BinaryExpr.EQ,returnTableIndex{1},IntExpr(j));
+        conds{j} = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.EQ,returnTableIndex{1},nasa_toLustre.lustreAst.IntExpr(j));
         thens{j} = table_elem{j};
         %                     if j==1
         %                         code = sprintf('%s  if(%s = %d) then %s\n\t', code, returnTableIndex{1},j,table_elem{j});
@@ -123,10 +123,10 @@ function [body, vars] = addFinalCode_without_interpolation(...
     end
     thens{numel(table_elem)} = table_elem{numel(table_elem)};
     if numel(table_elem) == 1
-        rhs = IteExpr(conds{1},thens{1},thens{2});
+        rhs = nasa_toLustre.lustreAst.IteExpr(conds{1},thens{1},thens{2});
     else
-        rhs = IteExpr.nestedIteExpr(conds, thens);
+        rhs = nasa_toLustre.lustreAst.IteExpr.nestedIteExpr(conds, thens);
     end
-    body{end+1} = LustreEq(outputs{1},rhs);
+    body{end+1} = nasa_toLustre.lustreAst.LustreEq(outputs{1},rhs);
 end
 

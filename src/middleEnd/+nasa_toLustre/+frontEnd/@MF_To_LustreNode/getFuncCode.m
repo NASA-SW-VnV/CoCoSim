@@ -6,8 +6,8 @@ function [fun_node,failed ]  = getFuncCode(func, data_map, blkObj, parent, blk)
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    L = nasa_toLustre.ToLustreImport.L;
-    import(L{:})
+    %L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
+    %import(L{:})
     
     statements = func.statements;
     expected_dt = '';
@@ -27,7 +27,7 @@ function [fun_node,failed ]  = getFuncCode(func, data_map, blkObj, parent, blk)
             s = statements{i};
         end
         try
-            lusCode = MExpToLusAST.expression_To_Lustre(blkObj, s,...
+            lusCode = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(blkObj, s,...
                 parent, blk, data_map, {}, expected_dt, ...
                 isSimulink, isStateFlow, isMatlabFun);
             [vars, ~] = nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getInOutputsFromAction(lusCode, ...
@@ -46,10 +46,10 @@ function [fun_node,failed ]  = getFuncCode(func, data_map, blkObj, parent, blk)
             failed = true;
         end
     end
-    [fun_node] = MF_To_LustreNode.getFunHeader(func, blk, data_map);
+    [fun_node] = nasa_toLustre.frontEnd.MF_To_LustreNode.getFunHeader(func, blk, data_map);
     node_outputs = fun_node.getOutputs();
-    variables = LustreVar.uniqueVars(variables);
-    variables = LustreVar.setDiff(variables, node_outputs);
+    variables = nasa_toLustre.lustreAst.LustreVar.uniqueVars(variables);
+    variables = nasa_toLustre.lustreAst.LustreVar.setDiff(variables, node_outputs);
     fun_node.setLocalVars(variables);
     fun_node.setBodyEqs(body);
     fun_node = fun_node.pseudoCode2Lustre();

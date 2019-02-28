@@ -14,7 +14,7 @@ function simOut = simulate_model(slx_file_name, ...
     numberOfInports,...
     show_models)
     try
-        configSet = getActiveConfigSet(slx_file_name);
+        configSet = copy(getActiveConfigSet(slx_file_name));
     catch
         configSet = Simulink.ConfigSet;
     end
@@ -33,10 +33,10 @@ function simOut = simulate_model(slx_file_name, ...
         set_param(configSet, 'OutputSaveName', 'yout');
         try set_param(configSet, 'ExtMode', 'on');catch, end
         set_param(configSet, 'LoadExternalInput', 'on');
-        set_param(configSet, 'ExternalInput', 'input_dataset');
-        hws = get_param(slx_file_name, 'modelworkspace');
-        hws.assignin('input_dataset',eval('input_dataset'));
-        assignin('base','input_dataset',input_dataset);
+        set_param(configSet, 'ExternalInput', 'cocosim_input_dataset');
+        %hws = get_param(slx_file_name, 'modelworkspace');
+        %hws.assignin('input_dataset',eval('input_dataset'));
+        assignin('base','cocosim_input_dataset',input_dataset);
         if show_models
             open(slx_file_name)
         end

@@ -47,8 +47,8 @@ classdef MinMax_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             op = strcat('_', blk.Function, '_', LusoutputDataType);
             obj.addExternal_libraries(strcat('LustMathLib_', op));
             if numInputs == 1
-                code = MinMax_To_Lustre.recursiveMinMax(op, inputs{1} );
-                codes{1} = LustreEq(outputs{1}, code);
+                code = nasa_toLustre.blocks.MinMax_To_Lustre.recursiveMinMax(op, inputs{1} );
+                codes{1} = nasa_toLustre.lustreAst.LustreEq(outputs{1}, code);
             else
                 codes = cell(1, max_width);
                 for j=1:max_width
@@ -56,8 +56,8 @@ classdef MinMax_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     for k=1:numInputs
                         comparedElements{k} = inputs{k}{j};
                     end
-                    code = MinMax_To_Lustre.recursiveMinMax(op, comparedElements);
-                    codes{j} = LustreEq(outputs{j}, code);
+                    code = nasa_toLustre.blocks.MinMax_To_Lustre.recursiveMinMax(op, comparedElements);
+                    codes{j} = nasa_toLustre.lustreAst.LustreEq(outputs{j}, code);
                 end
             end
             obj.setCode( codes );

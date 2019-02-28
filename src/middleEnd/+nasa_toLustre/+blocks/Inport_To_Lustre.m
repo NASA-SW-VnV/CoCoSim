@@ -25,7 +25,7 @@ classdef Inport_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             
             prop = DEDUtils.OutMinMaxCheck(parent, blk, outputs, lus_dt);
             if ~isempty(prop)
-                codes{1} = AssertExpr(prop);
+                codes{1} = nasa_toLustre.lustreAst.AssertExpr(prop);
                 obj.setCode(codes);
             end
         end

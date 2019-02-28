@@ -12,7 +12,7 @@ function main_node  = write_StateNode(state)
     main_node = {};
 
     [outputs, inputs, body, variables] = ...
-        StateflowState_To_Lustre.write_state_body(state);
+        nasa_toLustre.blocks.Stateflow.StateflowState_To_Lustre.write_state_body(state);
     if isempty(body)
         %no code is required
         return;
@@ -20,20 +20,20 @@ function main_node  = write_StateNode(state)
     %create the node
     node_name = ...
         nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getStateNodeName(state);
-    main_node = LustreNode();
+    main_node = nasa_toLustre.lustreAst.LustreNode();
     main_node.setName(node_name);
-    comment = LustreComment(...
+    comment = nasa_toLustre.lustreAst.LustreComment(...
         sprintf('Main node of state %s',...
         state.Origin_path), true);
     main_node.setMetaInfo(comment);
     main_node.setBodyEqs(body);
-    outputs = LustreVar.uniqueVars(outputs);
-    inputs = LustreVar.uniqueVars(inputs);
+    outputs = nasa_toLustre.lustreAst.LustreVar.uniqueVars(outputs);
+    inputs = nasa_toLustre.lustreAst.LustreVar.uniqueVars(inputs);
     if isempty(inputs)
         inputs{1} = ...
-            LustreVar(nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.virtualVarStr(), 'bool');
+            nasa_toLustre.lustreAst.LustreVar(nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.virtualVarStr(), 'bool');
     elseif numel(inputs) > 1
-        inputs = LustreVar.removeVar(inputs, nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.virtualVarStr());
+        inputs = nasa_toLustre.lustreAst.LustreVar.removeVar(inputs, nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.virtualVarStr());
     end
     main_node.setOutputs(outputs);
     main_node.setInputs(inputs);

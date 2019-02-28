@@ -13,7 +13,7 @@ function [codes] = concatenateDimension2(inputs, outputs,in_matrix_dimension)
     for i=1:numel(in_matrix_dimension)       %loop over number of inports
         for j=1:numel(inputs{i})     % loop over each element of inport
             index = index + 1;
-            codes{index} = LustreEq(outputs{index}, inputs{i}{j});
+            codes{index} = nasa_toLustre.lustreAst.LustreEq(outputs{index}, inputs{i}{j});
         end
     end
 end

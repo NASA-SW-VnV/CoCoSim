@@ -23,12 +23,12 @@ function [ new_ir, status ] = DT_SFIR_PP( new_ir )
     end
     if isfield(new_ir, 'GraphicalFunctions')
         for i=1:numel(new_ir.GraphicalFunctions)
-            new_ir.GraphicalFunctions{i} = DT_SFIR_PP( new_ir.GraphicalFunctions{i} );
+            new_ir.GraphicalFunctions{i} = nasa_toLustre.IR_pp.stateflow_IR_pp.stateflow_fields.DT_SFIR_PP( new_ir.GraphicalFunctions{i} );
         end
     end
     if isfield(new_ir, 'TruthTables')
         for i=1:numel(new_ir.TruthTables)
-            new_ir.TruthTables{i} = DT_SFIR_PP( new_ir.TruthTables{i} );
+            new_ir.TruthTables{i} = nasa_toLustre.IR_pp.stateflow_IR_pp.stateflow_fields.DT_SFIR_PP( new_ir.TruthTables{i} );
         end
     end
 end

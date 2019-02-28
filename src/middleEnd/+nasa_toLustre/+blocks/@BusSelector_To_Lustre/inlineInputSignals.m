@@ -29,12 +29,12 @@ function inputSignalsInlined = inlineInputSignals(InputSignals, main_cell, prefi
             prefix = sprintf('%s.%s', prefix, InputSignals{1});
         end
         inputSignalsInlined = ...
-            BusSelector_To_Lustre.inlineInputSignals(InputSignals{2}, 0, prefix);
+            nasa_toLustre.blocks.BusSelector_To_Lustre.inlineInputSignals(InputSignals{2}, 0, prefix);
     else
         for i=1:numel(InputSignals)
             if iscell(InputSignals{i})
                 inputSignalsInlined = [inputSignalsInlined, ...
-                    BusSelector_To_Lustre.inlineInputSignals(InputSignals{i}, 0, prefix)];
+                    nasa_toLustre.blocks.BusSelector_To_Lustre.inlineInputSignals(InputSignals{i}, 0, prefix)];
             else
                 if isempty(prefix)
                     inputSignalsInlined{end+1} = InputSignals{i};

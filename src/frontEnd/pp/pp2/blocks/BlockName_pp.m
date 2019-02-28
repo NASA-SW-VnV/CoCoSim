@@ -19,7 +19,7 @@ function [status, errors_msg] = BlockName_pp(model)
         for i=1:length(block_handles)
             try
                 path = fullfile(get_param(block_handles{i}, 'Parent'), get_param(block_handles{i}, 'Name'));
-                display_msg(path, Constants.INFO, 'rename_numerical_prefix', '');
+                display_msg(path, Constants.INFO, 'BlockName_pp', '');
                 name = get_param(block_handles{i},'Name');
                 %remove / before callingnasa_toLustre.utils.SLX2LusUtils.name_format
                 new_name = strrep(name, '/', '_');
@@ -32,7 +32,7 @@ function [status, errors_msg] = BlockName_pp(model)
                 continue;
             end
         end
-        display_msg('Done\n\n', Constants.INFO, 'rename_numerical_prefix', '');
+        display_msg('Done\n\n', Constants.INFO, 'BlockName_pp', '');
     end
 end
 

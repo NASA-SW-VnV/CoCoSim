@@ -54,8 +54,8 @@ classdef MExpToLusDT
             if ischar(output_dt)
                 output_dt = {output_dt};
             end
-            [code, input_dt] = MExpToLusAST.inlineOperands(code, input_dt);
-            [output_dt, input_dt] = MExpToLusAST.inlineOperands(output_dt, input_dt);
+            [code, input_dt] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.inlineOperands(code, input_dt);
+            [output_dt, input_dt] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.inlineOperands(output_dt, input_dt);
             for i=1:numel(code)
                 if isequal(input_dt{i}, output_dt{i})
                     return;

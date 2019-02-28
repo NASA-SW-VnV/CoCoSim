@@ -11,6 +11,6 @@ function  [main_node, external_nodes, external_libraries ] = ...
         write_ConditionAction(T, data_map, source_state, isDefaultTrans)
     import nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre
     [main_node, external_nodes, external_libraries ] = ...
-        StateflowTransition_To_Lustre.write_Action(T, data_map, source_state, 'ConditionAction', isDefaultTrans);
+        nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.write_Action(T, data_map, source_state, 'ConditionAction', isDefaultTrans);
 end
 

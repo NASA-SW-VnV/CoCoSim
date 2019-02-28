@@ -9,26 +9,26 @@ function exp = getIntervalExpr(x, xDT, interval)
     L = nasa_toLustre.ToLustreImport.L;
     import(L{:})
     if interval.lowIncluded
-        op1 = BinaryExpr.LTE;
+        op1 = nasa_toLustre.lustreAst.BinaryExpr.LTE;
     else
-        op1 = BinaryExpr.LT;
+        op1 = nasa_toLustre.lustreAst.BinaryExpr.LT;
     end
     if interval.highIncluded
-        op2 = BinaryExpr.LTE;
+        op2 = nasa_toLustre.lustreAst.BinaryExpr.LTE;
     else
-        op2 = BinaryExpr.LT;
+        op2 = nasa_toLustre.lustreAst.BinaryExpr.LT;
     end
     if strcmp(xDT, 'int')
-        vLow = IntExpr(interval.low);
-        vHigh = IntExpr(interval.high);
+        vLow = nasa_toLustre.lustreAst.IntExpr(interval.low);
+        vHigh = nasa_toLustre.lustreAst.IntExpr(interval.high);
     elseif strcmp(xDT, 'bool')
-        vLow = BooleanExpr(interval.low);
-        vHigh = BooleanExpr(interval.high);
+        vLow = nasa_toLustre.lustreAst.BooleanExpr(interval.low);
+        vHigh = nasa_toLustre.lustreAst.BooleanExpr(interval.high);
     else
-        vLow = RealExpr(interval.low);
-        vHigh = RealExpr(interval.high);
+        vLow = nasa_toLustre.lustreAst.RealExpr(interval.low);
+        vHigh = nasa_toLustre.lustreAst.RealExpr(interval.high);
     end
-    exp = BinaryExpr(BinaryExpr.AND, ...
-        BinaryExpr(op1, vLow, x), ...
-        BinaryExpr(op2, x, vHigh));
+    exp = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.AND, ...
+        nasa_toLustre.lustreAst.BinaryExpr(op1, vLow, x), ...
+        nasa_toLustre.lustreAst.BinaryExpr(op2, x, vHigh));
 end

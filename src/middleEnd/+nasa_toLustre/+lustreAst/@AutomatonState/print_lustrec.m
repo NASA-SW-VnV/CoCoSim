@@ -16,7 +16,7 @@ function code = print_lustrec(obj, backend)
     %local variables
     if ~isempty(obj.local_vars)
         lines{end + 1} = sprintf('var %s\n', ...
-            LustreAst.listVarsWithDT(obj.local_vars, backend));
+            nasa_toLustre.lustreAst.LustreAst.listVarsWithDT(obj.local_vars, backend));
     end
     % body
     lines{end+1} = sprintf('\tlet\n');

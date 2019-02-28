@@ -14,14 +14,14 @@ function [action_nodes, external_libraries ] = ...
     import(L{:})
     action_nodes = {};
     [ConditionAction_node, ConditionAction_external_nodes, ConditionActionext_ernal_libraries ] = ...
-        StateflowTransition_To_Lustre.write_ConditionAction(T, data_map, source_state, isDefaultTrans);
+        nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.write_ConditionAction(T, data_map, source_state, isDefaultTrans);
     if ~isempty(ConditionAction_node)
         action_nodes{end+1} = ConditionAction_node;
     end
     action_nodes = [action_nodes, ConditionAction_external_nodes];
     external_libraries = ConditionActionext_ernal_libraries;
     [TransitionAction_node, TransitionAction_external_nodes, TransitionAction_external_libraries ] = ...
-        StateflowTransition_To_Lustre.write_TransitionAction(T, data_map, source_state, isDefaultTrans);
+        nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.write_TransitionAction(T, data_map, source_state, isDefaultTrans);
     if ~isempty(TransitionAction_node)
         action_nodes{end+1} = TransitionAction_node;
     end

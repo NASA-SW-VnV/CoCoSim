@@ -22,16 +22,16 @@ function [body, outputs, inputs] = ...
     source_parent = first_source;
     if ~strcmp(source_parent.Path, parentPath)
         %Go to the same level of the destination.
-        while ~StateflowTransition_To_Lustre.isParent(...
-                StateflowTransition_To_Lustre.getParent(source_parent),...
+        while ~nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.isParent(...
+                nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.getParent(source_parent),...
                 last_destination)
             source_parent = ...
-                StateflowTransition_To_Lustre.getParent(source_parent);
+                nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.getParent(source_parent);
         end
         if isequal(source_parent.Composition.Type,'AND')
             %Parallel state Exit.
             parent = ...
-                StateflowTransition_To_Lustre.getParent(source_parent);
+                nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.getParent(source_parent);
             siblings = nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.orderObjects(...
                 nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getSubStatesObjects(parent), ...
                 'ExecutionOrder');
@@ -42,14 +42,14 @@ function [body, outputs, inputs] = ...
                 if isKey(SF_STATES_NODESAST_MAP, exitNodeName)
                     %condition Action exists.
                     actionNodeAst = SF_STATES_NODESAST_MAP(exitNodeName);
-                    [call, oututs_Ids] = actionNodeAst.nodeCall(true, BooleanExpr(false));
+                    [call, oututs_Ids] = actionNodeAst.nodeCall(true, nasa_toLustre.lustreAst.BooleanExpr(false));
                     if isempty(trans_cond)
-                        body{end+1} = LustreEq(oututs_Ids, call);
+                        body{end+1} = nasa_toLustre.lustreAst.LustreEq(oututs_Ids, call);
                         outputs = [outputs, actionNodeAst.getOutputs()];
                         inputs = [inputs, actionNodeAst.getInputs()];
                     else
-                        body{end+1} = LustreEq(oututs_Ids, ...
-                            IteExpr(trans_cond, call, TupleExpr(oututs_Ids)));
+                        body{end+1} = nasa_toLustre.lustreAst.LustreEq(oututs_Ids, ...
+                            nasa_toLustre.lustreAst.IteExpr(trans_cond, call, nasa_toLustre.lustreAst.TupleExpr(oututs_Ids)));
                         outputs = [outputs, actionNodeAst.getOutputs()];
                         inputs = [inputs, actionNodeAst.getOutputs()];
                         inputs = [inputs, actionNodeAst.getInputs()];
@@ -64,14 +64,14 @@ function [body, outputs, inputs] = ...
             if isKey(SF_STATES_NODESAST_MAP, exitNodeName)
                 %condition Action exists.
                 actionNodeAst = SF_STATES_NODESAST_MAP(exitNodeName);
-                [call, oututs_Ids] = actionNodeAst.nodeCall(true, BooleanExpr(false));
+                [call, oututs_Ids] = actionNodeAst.nodeCall(true, nasa_toLustre.lustreAst.BooleanExpr(false));
                 if isempty(trans_cond)
-                    body{end+1} = LustreEq(oututs_Ids, call);
+                    body{end+1} = nasa_toLustre.lustreAst.LustreEq(oututs_Ids, call);
                     outputs = [outputs, actionNodeAst.getOutputs()];
                     inputs = [inputs, actionNodeAst.getInputs()];
                 else
-                    body{end+1} = LustreEq(oututs_Ids, ...
-                        IteExpr(trans_cond, call, TupleExpr(oututs_Ids)));
+                    body{end+1} = nasa_toLustre.lustreAst.LustreEq(oututs_Ids, ...
+                        nasa_toLustre.lustreAst.IteExpr(trans_cond, call, nasa_toLustre.lustreAst.TupleExpr(oututs_Ids)));
                     outputs = [outputs, actionNodeAst.getOutputs()];
                     inputs = [inputs, actionNodeAst.getOutputs()];
                     inputs = [inputs, actionNodeAst.getInputs()];
@@ -86,14 +86,14 @@ function [body, outputs, inputs] = ...
         if isKey(SF_STATES_NODESAST_MAP, exitNodeName)
             %condition Action exists.
             actionNodeAst = SF_STATES_NODESAST_MAP(exitNodeName);
-            [call, oututs_Ids] = actionNodeAst.nodeCall(true, BooleanExpr(true));
+            [call, oututs_Ids] = actionNodeAst.nodeCall(true, nasa_toLustre.lustreAst.BooleanExpr(true));
             if isempty(trans_cond)
-                body{end+1} = LustreEq(oututs_Ids, call);
+                body{end+1} = nasa_toLustre.lustreAst.LustreEq(oututs_Ids, call);
                 outputs = [outputs, actionNodeAst.getOutputs()];
                 inputs = [inputs, actionNodeAst.getInputs()];
             else
-                body{end+1} = LustreEq(oututs_Ids, ...
-                    IteExpr(trans_cond, call, TupleExpr(oututs_Ids)));
+                body{end+1} = nasa_toLustre.lustreAst.LustreEq(oututs_Ids, ...
+                    nasa_toLustre.lustreAst.IteExpr(trans_cond, call, nasa_toLustre.lustreAst.TupleExpr(oututs_Ids)));
                 outputs = [outputs, actionNodeAst.getOutputs()];
                 inputs = [inputs, actionNodeAst.getOutputs()];
                 inputs = [inputs, actionNodeAst.getInputs()];

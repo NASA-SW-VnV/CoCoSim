@@ -7,18 +7,18 @@ classdef LustreVar < nasa_toLustre.lustreAst.LustreExpr
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     properties
-        name;%String
+        id;%String
         type;%String
     end
     
     methods
-        function obj = LustreVar(name, type)
-            if isa(name, 'nasa_toLustre.lustreAst.VarIdExpr')
-                obj.name = name.getId();
-            elseif iscell(name) && numel(name) == 1
-                obj.name = name{1};
+        function obj = LustreVar(id, type)
+            if isa(id, 'nasa_toLustre.lustreAst.VarIdExpr')
+                obj.id = id.getId();
+            elseif iscell(id) && numel(id) == 1
+                obj.id = id{1};
             else
-                obj.name = name;
+                obj.id = id;
             end
             if iscell(type) && numel(type) == 1
                 obj.type = type{1};
@@ -29,7 +29,7 @@ classdef LustreVar < nasa_toLustre.lustreAst.LustreExpr
         
         %%
         function id = getId(obj)
-            id = obj.name;
+            id = obj.id;
         end
         function dt = getDT(obj)
             dt = obj.type;
@@ -56,7 +56,7 @@ classdef LustreVar < nasa_toLustre.lustreAst.LustreExpr
         new_obj = changeArrowExp(obj, ~)
         %% This function is used by Stateflow function SF_To_LustreNode.getPseudoLusAction
         function varIds = GetVarIds(obj)
-            varIds = {obj.name};
+            varIds = {obj.id};
         end
         % this function is used in Stateflow compiler to change from imperative
         % code to Lustre

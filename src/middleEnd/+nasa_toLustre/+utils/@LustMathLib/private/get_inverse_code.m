@@ -15,7 +15,7 @@ function [node, external_nodes_i, opens, abstractedNodes] = get_inverse_code(lus
     abstractedNodes = {};
     external_nodes_i ={};
     node_name = sprintf('_inv_M_%dx%d',n,n);
-    node = LustreNode();
+    node = nasa_toLustre.lustreAst.LustreNode();
     node.setName(node_name);
     node.setIsMain(false);
     vars = {};
@@ -27,8 +27,8 @@ function [node, external_nodes_i, opens, abstractedNodes] = get_inverse_code(lus
     ai = cell(n,n);
     for i=1:n
         for j=1:n
-            a{i,j} = VarIdExpr(sprintf('a%d%d',i,j));
-            ai{i,j} = VarIdExpr(sprintf('ai%d%d',i,j));
+            a{i,j} = nasa_toLustre.lustreAst.VarIdExpr(sprintf('a%d%d',i,j));
+            ai{i,j} = nasa_toLustre.lustreAst.VarIdExpr(sprintf('ai%d%d',i,j));
         end
     end
     inputs = cell(1,n*n);
@@ -41,13 +41,13 @@ function [node, external_nodes_i, opens, abstractedNodes] = get_inverse_code(lus
             counter = counter + 1;
             inline_a{counter} = a{i,j};
             inline_ai{counter} = ai{i,j};
-            inputs{counter} = LustreVar(a{i,j},'real');
-            outputs{counter} = LustreVar(ai{i,j},'real');
+            inputs{counter} = nasa_toLustre.lustreAst.LustreVar(a{i,j},'real');
+            outputs{counter} = nasa_toLustre.lustreAst.LustreVar(ai{i,j},'real');
         end
     end
     if LusBackendType.isKIND2(lus_backend)
         contractBody = getContractBody_nxn_inverstion(n,inline_a,inline_ai);
-        contract = LustreContract();
+        contract = nasa_toLustre.lustreAst.LustreContract();
         contract.setBodyEqs(contractBody);
         node.setLocalContract(contract);
     end
@@ -64,14 +64,14 @@ function [node, external_nodes_i, opens, abstractedNodes] = get_inverse_code(lus
         end
         if Lustre_inversion == 1
             vars = cell(1,n*n+1);
-            det = VarIdExpr('det');
-            vars{1} = LustreVar(det,'real');
+            det = nasa_toLustre.lustreAst.VarIdExpr('det');
+            vars{1} = nasa_toLustre.lustreAst.LustreVar(det,'real');
             % adj: adjugate
             adj = cell(n,n);
             for i=1:n
                 for j=1:n
-                    adj{i,j} = VarIdExpr(sprintf('adj%d%d',i,j));
-                    vars{(i-1)*n+j+1} = LustreVar(adj{i,j},'real');
+                    adj{i,j} = nasa_toLustre.lustreAst.VarIdExpr(sprintf('adj%d%d',i,j));
+                    vars{(i-1)*n+j+1} = nasa_toLustre.lustreAst.LustreVar(adj{i,j},'real');
                 end
             end
             
@@ -80,7 +80,7 @@ function [node, external_nodes_i, opens, abstractedNodes] = get_inverse_code(lus
             % define inverse
             for i=1:n
                 for j=1:n
-                    body{end+1} = LustreEq(ai{i,j},BinaryExpr(BinaryExpr.DIVIDE,adj{i,j},det));
+                    body{end+1} = nasa_toLustre.lustreAst.LustreEq(ai{i,j},nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.DIVIDE,adj{i,j},det));
                 end
             end
         else

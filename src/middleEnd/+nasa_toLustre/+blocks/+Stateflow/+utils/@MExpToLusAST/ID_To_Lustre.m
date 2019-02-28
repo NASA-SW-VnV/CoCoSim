@@ -15,9 +15,9 @@ function [code, dt] = ID_To_Lustre(~, tree, parent, blk, data_map, ...
     else
         id = tree.name;
     end
-    dt = MExpToLusDT.ID_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
+    dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.ID_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
     if strcmp(id, 'true') || strcmp(id, 'false')
-        code{1} = BooleanExpr(id);
+        code{1} = nasa_toLustre.lustreAst.BooleanExpr(id);
         
     elseif isSimulink && strcmp(id, 'u')
         %the case of u with no index in IF/Fcn/SwitchCase blocks
@@ -34,16 +34,16 @@ function [code, dt] = ID_To_Lustre(~, tree, parent, blk, data_map, ...
             names = nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getDataName(d);
             code = cell(numel(names), 1);
             for i=1:numel(names)
-                code{i} = VarIdExpr(names{i});
+                code{i} = nasa_toLustre.lustreAst.VarIdExpr(names{i});
             end
         else
-            code{1} = VarIdExpr(id);
+            code{1} = nasa_toLustre.lustreAst.VarIdExpr(id);
         end
     else
         try
             %check for variables in workspace
             [value, ~, status] = ...
-                Constant_To_Lustre.getValueFromParameter(parent, blk, id);
+                nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(parent, blk, id);
             if status
                 ME = MException('COCOSIM:TREE2CODE', ...
                     'Not found Variable "%s" in block "%s"', ...
@@ -54,11 +54,11 @@ function [code, dt] = ID_To_Lustre(~, tree, parent, blk, data_map, ...
             code = cell(numel(value), 1);
             for i=1:numel(value)
                 if strcmp(expected_dt, 'bool')
-                    code{i} = BooleanExpr(value(i));
+                    code{i} = nasa_toLustre.lustreAst.BooleanExpr(value(i));
                 elseif strcmp(expected_dt, 'int')
-                    code{i} = IntExpr(value(i));
+                    code{i} = nasa_toLustre.lustreAst.IntExpr(value(i));
                 else
-                    code{i} = RealExpr(value(i));
+                    code{i} = nasa_toLustre.lustreAst.RealExpr(value(i));
                     dt = 'real';
                 end
             end

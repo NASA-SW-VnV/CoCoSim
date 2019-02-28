@@ -23,13 +23,13 @@ function [main_node, external_libraries] = ...
     end
 
     %actions code
-    actions = SFIRPPUtils.split_actions(state.Actions.During);
+    actions = nasa_toLustre.IR_pp.stateflow_IR_pp.SFIRPPUtils.split_actions(state.Actions.During);
     nb_actions = numel(actions);
 
     for i=1:nb_actions
         try
             [actions_i, outputs_i, inputs_i, external_libraries_i] = ...
-                getPseudoLusAction(actions{i}, data_map, false, state.Path);
+                nasa_toLustre.blocks.Stateflow.utils.getPseudoLusAction(actions{i}, data_map, false, state.Path);
             body = [body, actions_i];
             outputs = [outputs, outputs_i];
             inputs = [inputs, inputs_i];
@@ -51,20 +51,20 @@ function [main_node, external_libraries] = ...
     %create the node
     act_node_name = ...
         nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getDuringActionNodeName(state);
-    main_node = LustreNode();
+    main_node = nasa_toLustre.lustreAst.LustreNode();
     main_node.setName(act_node_name);
-    comment = LustreComment(...
+    comment = nasa_toLustre.lustreAst.LustreComment(...
         sprintf('During action of state %s',...
         state.Origin_path), true);
     main_node.setMetaInfo(comment);
     main_node.setBodyEqs(body);
-    outputs = LustreVar.uniqueVars(outputs);
-    inputs = LustreVar.uniqueVars(inputs);
+    outputs = nasa_toLustre.lustreAst.LustreVar.uniqueVars(outputs);
+    inputs = nasa_toLustre.lustreAst.LustreVar.uniqueVars(inputs);
     if isempty(inputs)
         inputs{1} = ...
-            LustreVar(nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.virtualVarStr(), 'bool');
+            nasa_toLustre.lustreAst.LustreVar(nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.virtualVarStr(), 'bool');
     elseif numel(inputs) > 1
-        inputs = LustreVar.removeVar(inputs, nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.virtualVarStr());
+        inputs = nasa_toLustre.lustreAst.LustreVar.removeVar(inputs, nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.virtualVarStr());
     end
     main_node.setOutputs(outputs);
     main_node.setInputs(inputs);

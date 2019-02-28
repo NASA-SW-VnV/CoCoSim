@@ -18,14 +18,14 @@ classdef Concatenate_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             [outputs, outputs_dt] = ...
                nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             [inputs,widths] = ...
-                Concatenate_To_Lustre.getBlockInputsNames_convInType2AccType(obj, parent, blk);
-            [blkParams,in_matrix_dimension] = Concatenate_To_Lustre.readBlkParams(blk);
+                nasa_toLustre.blocks.Concatenate_To_Lustre.getBlockInputsNames_convInType2AccType(obj, parent, blk);
+            [blkParams,in_matrix_dimension] = nasa_toLustre.blocks.Concatenate_To_Lustre.readBlkParams(blk);
             nb_inputs = numel(widths);
             if blkParams.isVector
-                [codes] = Concatenate_To_Lustre.concatenateVector(nb_inputs, inputs, outputs);
+                [codes] = nasa_toLustre.blocks.Concatenate_To_Lustre.concatenateVector(nb_inputs, inputs, outputs);
             else
                 [ConcatenateDimension, ~, status] = ...
-                    Constant_To_Lustre.getValueFromParameter(parent, blk, blk.ConcatenateDimension);
+                    nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(parent, blk, blk.ConcatenateDimension);
                 if status
                     display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
                         blk.ConcatenateDimension, HtmlItem.addOpenCmd(blk.Origin_path)), ...
@@ -39,9 +39,9 @@ classdef Concatenate_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     return;
                 end
                 if ConcatenateDimension == 2    %concat matrix in row direction
-                    [codes] = Concatenate_To_Lustre.concatenateDimension2(inputs, outputs,in_matrix_dimension);
+                    [codes] = nasa_toLustre.blocks.Concatenate_To_Lustre.concatenateDimension2(inputs, outputs,in_matrix_dimension);
                 elseif ConcatenateDimension == 1    %concat matrix in column direction
-                    [codes] = Concatenate_To_Lustre.concatenateDimension1(inputs, outputs,in_matrix_dimension);
+                    [codes] = nasa_toLustre.blocks.Concatenate_To_Lustre.concatenateDimension1(inputs, outputs,in_matrix_dimension);
                 else
                     display_msg(sprintf('ConcatenateDimension > 2 in block %s',...
                         HtmlItem.addOpenCmd(blk.Origin_path)), ...
@@ -58,7 +58,7 @@ classdef Concatenate_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             L = nasa_toLustre.ToLustreImport.L;
             import(L{:})
             [ConcatenateDimension, ~, status] = ...
-                Constant_To_Lustre.getValueFromParameter(parent, blk, blk.ConcatenateDimension);
+                nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(parent, blk, blk.ConcatenateDimension);
             if status
                 obj.addUnsupported_options(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
                     blk.ConcatenateDimension, HtmlItem.addOpenCmd(blk.Origin_path)));

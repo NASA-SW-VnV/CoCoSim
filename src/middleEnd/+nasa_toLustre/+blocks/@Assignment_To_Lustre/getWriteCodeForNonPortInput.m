@@ -43,9 +43,9 @@ function [codes] = getWriteCodeForNonPortInput(~, in_matrix_dimension,inputs,out
     for i=1:numel(outputs)
         if find(U_to_Y0==i)
             Uindex = find(U_to_Y0==i);
-            codes{i} = LustreEq(outputs{i}, inputs{2}{Uindex});
+            codes{i} = nasa_toLustre.lustreAst.LustreEq(outputs{i}, inputs{2}{Uindex});
         else
-            codes{i} = LustreEq(outputs{i}, inputs{1}{i});
+            codes{i} = nasa_toLustre.lustreAst.LustreEq(outputs{i}, inputs{1}{i});
         end
     end
 end

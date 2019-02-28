@@ -30,10 +30,10 @@ classdef IteExpr < nasa_toLustre.lustreAst.LustreExpr
             else
                 obj.ElseExpr = ElseExpr;
             end
-            if exist('OneLine', 'var')
-                obj.OneLine = OneLine;
-            else
+            if nargin < 4
                 obj.OneLine = false;
+            else
+                obj.OneLine = OneLine;
             end
         end
         %% getters
@@ -73,7 +73,7 @@ classdef IteExpr < nasa_toLustre.lustreAst.LustreExpr
                 return;
                 
             end
-            new_obj = IteExpr(new_cond, new_then, new_else, obj.OneLine);
+            new_obj = nasa_toLustre.lustreAst.IteExpr(new_cond, new_then, new_else, obj.OneLine);
             
         end
         

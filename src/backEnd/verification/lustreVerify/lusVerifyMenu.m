@@ -4,6 +4,7 @@
 % All Rights Reserved.
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% TODO: Not used anymore
 function schema = lusVerifyMenu(callbackInfo)
     schema = sl_container_schema;
     schema.label = 'Monolithic Verification';
@@ -54,7 +55,7 @@ function kindCallback(callbackInfo)
     assignin('base', 'SOLVER', 'K');
     [ CoCoSimPreferences ] = loadCoCoSimPreferences();
     CoCoSimPreferences.compositionalAnalysis = false;
-    PreferencesMenu.saveCoCoSimPreferences(CoCoSimPreferences);
+    cocosim_menu.CoCoSimPreferences.save(CoCoSimPreferences);
     VerificationMenu.runCoCoSim;
 end
 

@@ -48,17 +48,17 @@ classdef BinaryExpr < nasa_toLustre.lustreAst.LustreExpr
             else
                 obj.right = right;
             end
-            if ~exist('withPar', 'var') || isempty(withPar)
+            if nargin < 4 || isempty(withPar)
                 obj.withPar = true;
             else
                 obj.withPar = withPar;
             end
-            if ~exist('addEpsilon', 'var') || isempty(addEpsilon)
+            if nargin < 5 || isempty(addEpsilon)
                 obj.addEpsilon = false;
             else
                 obj.addEpsilon = addEpsilon;
             end
-            if ~exist('epsilon', 'var') || isempty(epsilon)
+            if nargin < 6 || isempty(epsilon)
                 obj.epsilon = [];
             else
                 obj.epsilon = epsilon;
@@ -147,20 +147,20 @@ classdef BinaryExpr < nasa_toLustre.lustreAst.LustreExpr
                     exp = args;
                 end
             elseif numel(args) == 2
-                exp = BinaryExpr(op, ...
+                exp = nasa_toLustre.lustreAst.BinaryExpr(op, ...
                     args{1}, ...
                     args{2},...
                     false);
                 if isFirstTime
-                    exp = ParenthesesExpr(exp);
+                    exp = nasa_toLustre.lustreAst.ParenthesesExpr(exp);
                 end
             else
-                exp = BinaryExpr(op, ...
+                exp = nasa_toLustre.lustreAst.BinaryExpr(op, ...
                     args{1}, ...
-                    BinaryExpr.BinaryMultiArgs(op, args(2:end), false), ...
+                    nasa_toLustre.lustreAst.BinaryExpr.BinaryMultiArgs(op, args(2:end), false), ...
                     false);
                 if isFirstTime
-                    exp = ParenthesesExpr(exp);
+                    exp = nasa_toLustre.lustreAst.ParenthesesExpr(exp);
                 end
             end
         end

@@ -12,12 +12,12 @@ function [exp, status] = formatConditionToLustre(obj, cond, inputs_cell, data_ma
     %display_msg(cond, MsgType.DEBUG, 'If_To_Lustre', '');
     expected_dt = 'bool';
     [exp, status] = ...
-        MExpToLusAST.translate(obj, cond, parent, blk,data_map, inputs_cell, expected_dt, true, false, false);
+        nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.translate(obj, cond, parent, blk,data_map, inputs_cell, expected_dt, true, false, false);
     if iscell(exp) 
         if numel(exp) == 1
             exp = exp{1};
         elseif numel(exp) > 1
-            exp = BinaryExpr.BinaryMultiArgs(BinaryExpr.AND, exp);
+            exp = nasa_toLustre.lustreAst.BinaryExpr.BinaryMultiArgs(nasa_toLustre.lustreAst.BinaryExpr.AND, exp);
         end
     end
     if status

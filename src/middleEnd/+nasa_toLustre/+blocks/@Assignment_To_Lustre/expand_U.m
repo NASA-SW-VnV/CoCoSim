@@ -8,7 +8,7 @@ function [in_matrix_dimension, U_expanded_dims,inputs] = ...
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
     L = nasa_toLustre.ToLustreImport.L;
     import(L{:})
-    in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(blk.CompiledPortDimensions.Inport);
+    in_matrix_dimension = nasa_toLustre.blocks.Assignment_To_Lustre.getInputMatrixDimensions(blk.CompiledPortDimensions.Inport);
     U_expanded_dims = in_matrix_dimension{2};
     % if U input is a scalar and it is to be expanded, U_expanded_dims
     % needed to be calculated.
@@ -22,7 +22,7 @@ function [in_matrix_dimension, U_expanded_dims,inputs] = ...
                 U_expanded_dims.dims(i) = in_matrix_dimension{1}.dims(i);
             elseif strcmp(blk.IndexOptionArray{i}, 'Index vector (dialog)')
                 U_expanded_dims.dims(i) = ...
-                    numel(Constant_To_Lustre.getValueFromParameter(parent, blk,blk.IndexParamArray{i}));
+                    numel(nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(parent, blk,blk.IndexParamArray{i}));
             elseif strcmp(blk.IndexOptionArray{i}, 'Index vector (port)')
                 indexPortNumber = indexPortNumber + 1;
                 portNumber = indexPortNumber + 2;

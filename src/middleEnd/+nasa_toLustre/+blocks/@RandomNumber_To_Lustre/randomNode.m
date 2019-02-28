@@ -8,22 +8,22 @@ function node = randomNode(blk_name, r, lus_backend)
     
     L = nasa_toLustre.ToLustreImport.L;
     import(L{:})
-    node = LustreNode();
+    node = nasa_toLustre.lustreAst.LustreNode();
     node.setName(blk_name);
-    node.setInputs(LustreVar('b', 'bool'));
-    node.setOutputs(LustreVar('r', 'real'));
+    node.setInputs(nasa_toLustre.lustreAst.LustreVar('b', 'bool'));
+    node.setOutputs(nasa_toLustre.lustreAst.LustreVar('r', 'real'));
     if LusBackendType.isKIND2(lus_backend)
-        contractElts{1} = ContractGuaranteeExpr('', ...
-            BinaryExpr(BinaryExpr.AND, ...
-            BinaryExpr(BinaryExpr.LTE, RealExpr(min(r)), VarIdExpr('r')), ...
-            BinaryExpr(BinaryExpr.LTE, VarIdExpr('r'), RealExpr(max(r)))));
-        contract = LustreContract();
+        contractElts{1} = nasa_toLustre.lustreAst.ContractGuaranteeExpr('', ...
+            nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.AND, ...
+            nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.LTE, nasa_toLustre.lustreAst.RealExpr(min(r)), nasa_toLustre.lustreAst.VarIdExpr('r')), ...
+            nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.LTE, nasa_toLustre.lustreAst.VarIdExpr('r'), nasa_toLustre.lustreAst.RealExpr(max(r)))));
+        contract = nasa_toLustre.lustreAst.LustreContract();
         contract.setBodyEqs(contractElts);
         node.setLocalContract(contract);
         node.setIsImported(true);
     else
-        node.setBodyEqs(LustreEq(VarIdExpr('r'), ...
-            RandomNumber_To_Lustre.getRandomValues(r, 1)));
+        node.setBodyEqs(nasa_toLustre.lustreAst.LustreEq(nasa_toLustre.lustreAst.VarIdExpr('r'), ...
+            nasa_toLustre.blocks.RandomNumber_To_Lustre.getRandomValues(r, 1)));
     end
 
 

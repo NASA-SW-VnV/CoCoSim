@@ -6,6 +6,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function new_obj = simplify(obj)
+    
     new_obj = obj.substituteVars();
     if ~isempty(obj.localContract)
         new_obj.setLocalContract(new_obj.localContract.simplify());

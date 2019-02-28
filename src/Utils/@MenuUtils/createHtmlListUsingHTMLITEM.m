@@ -22,9 +22,9 @@ function html_path = createHtmlListUsingHTMLITEM(title, items_list, html_path, m
 
     % this css file is modified from the original. Dont use the
     % minified version materialize.min.css
-    materialize_path = fullfile(cocoSim_path, 'libs', 'materialize');
-    css_source = fullfile(cocoSim_path, 'src', 'external', 'html_lib', 'materialize' , 'css' , 'materialize.css');
-    js_source = fullfile(cocoSim_path, 'src', 'external', 'html_lib', 'materialize' , 'js' , 'materialize.min.js');
+    materialize_path = fullfile(cocoSim_path, 'src', 'external', 'html_lib', 'materialize');
+    %css_source = fullfile(cocoSim_path, 'src', 'external', 'html_lib', 'materialize' , 'css' , 'materialize.css');
+    %js_source = fullfile(cocoSim_path, 'src', 'external', 'html_lib', 'materialize' , 'js' , 'materialize.min.js');
     if exist(materialize_path, 'dir')
         copyfile(materialize_path, output_dir);
     else

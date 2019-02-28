@@ -26,7 +26,7 @@ classdef DesignVerifierAssumption_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lu
                 obj.addVariable(outputs_dt);
                 codes = cell(1, numel(outputs));
                 for i=1:numel(outputs)
-                    codes{i} = LustreEq(outputs{i}, inputs{i});
+                    codes{i} = nasa_toLustre.lustreAst.LustreEq(outputs{i}, inputs{i});
                 end
                 obj.setCode( codes );
             end
@@ -36,10 +36,10 @@ classdef DesignVerifierAssumption_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lu
                 return;
             end
             try
-                code = DesignVerifierAssumption_To_Lustre.getAssumptionExpr(...
+                code = nasa_toLustre.blocks.DesignVerifierAssumption_To_Lustre.getAssumptionExpr(...
                     blk, inputs, inport_lus_dt);
                 if ~isempty(code)
-                    obj.addCode(AssertExpr(code));
+                    obj.addCode(nasa_toLustre.lustreAst.AssertExpr(code));
                 end
             catch me
                 display_msg(me.getReport(),  MsgType.DEBUG, ...

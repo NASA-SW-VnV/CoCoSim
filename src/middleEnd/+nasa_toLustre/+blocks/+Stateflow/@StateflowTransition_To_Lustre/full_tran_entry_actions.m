@@ -18,7 +18,7 @@ function [body, outputs, inputs, antiCondition] = ...
     antiCondition = trans_cond;
     last_destination = transitions{end}.Destination;
     if isHJ
-        dest_parent = StateflowTransition_To_Lustre.getParent(...
+        dest_parent = nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.getParent(...
             last_destination);
     else
         dest_parent = SF_STATES_PATH_MAP(last_destination.Name);
@@ -26,12 +26,12 @@ function [body, outputs, inputs, antiCondition] = ...
     first_source = transitions{1}.Source;
     if ~strcmp(dest_parent.Path, parentPath)
         %Go to the same level of the destination.
-        while ~StateflowTransition_To_Lustre.isParent(...
-                StateflowTransition_To_Lustre.getParent(dest_parent),...
+        while ~nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.isParent(...
+                nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.getParent(dest_parent),...
                 first_source)
             child = dest_parent;
             dest_parent = ...
-                StateflowTransition_To_Lustre.getParent(dest_parent);
+                nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.getParent(dest_parent);
 
             % set the child as active, so when the parent execute
             % entry action, it will enter the right child.
@@ -42,25 +42,25 @@ function [body, outputs, inputs, antiCondition] = ...
                 dest_parent);
             [idParentEnumType, idParentStateEnum] = ...
                 nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.addStateEnum(dest_parent, child);
-            body{end + 1} = LustreComment(...
+            body{end + 1} = nasa_toLustre.lustreAst.LustreComment(...
                 sprintf('set state %s as active', child.Name));
             if isempty(trans_cond)
-                body{end + 1} = LustreEq(VarIdExpr(idParentName), ...
+                body{end + 1} = nasa_toLustre.lustreAst.LustreEq(nasa_toLustre.lustreAst.VarIdExpr(idParentName), ...
                     idParentStateEnum);
-                outputs{end + 1} = LustreVar(idParentName, idParentEnumType);
+                outputs{end + 1} = nasa_toLustre.lustreAst.LustreVar(idParentName, idParentEnumType);
             else
-                body{end+1} = LustreEq(VarIdExpr(idParentName), ...
-                    IteExpr(trans_cond, idParentStateEnum, ...
-                    VarIdExpr(idParentName)));
-                outputs{end + 1} = LustreVar(idParentName, idParentEnumType);
-                inputs{end+1} = LustreVar(idParentName, idParentEnumType);
+                body{end+1} = nasa_toLustre.lustreAst.LustreEq(nasa_toLustre.lustreAst.VarIdExpr(idParentName), ...
+                    nasa_toLustre.lustreAst.IteExpr(trans_cond, idParentStateEnum, ...
+                    nasa_toLustre.lustreAst.VarIdExpr(idParentName)));
+                outputs{end + 1} = nasa_toLustre.lustreAst.LustreVar(idParentName, idParentEnumType);
+                inputs{end+1} = nasa_toLustre.lustreAst.LustreVar(idParentName, idParentEnumType);
             end
 
         end
         if isequal(dest_parent.Composition.Type,'AND')
             %Parallel state Enter.
             parent = ...
-                StateflowTransition_To_Lustre.getParent(dest_parent);
+                nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.getParent(dest_parent);
             siblings = nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.orderObjects(...
                 nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getSubStatesObjects(parent), ...
                 'ExecutionOrder');
@@ -74,14 +74,14 @@ function [body, outputs, inputs, antiCondition] = ...
                 if isKey(SF_STATES_NODESAST_MAP, entryNodeName)
                     %entry Action exists.
                     actionNodeAst = SF_STATES_NODESAST_MAP(entryNodeName);
-                    [call, oututs_Ids] = actionNodeAst.nodeCall(true, BooleanExpr(false));
+                    [call, oututs_Ids] = actionNodeAst.nodeCall(true, nasa_toLustre.lustreAst.BooleanExpr(false));
                     if isempty(trans_cond)
-                        body{end+1} = LustreEq(oututs_Ids, call);
+                        body{end+1} = nasa_toLustre.lustreAst.LustreEq(oututs_Ids, call);
                         outputs = [outputs, actionNodeAst.getOutputs()];
                         inputs = [inputs, actionNodeAst.getInputs()];
                     else
-                        body{end+1} = LustreEq(oututs_Ids, ...
-                            IteExpr(trans_cond, call, TupleExpr(oututs_Ids)));
+                        body{end+1} = nasa_toLustre.lustreAst.LustreEq(oututs_Ids, ...
+                            nasa_toLustre.lustreAst.IteExpr(trans_cond, call, nasa_toLustre.lustreAst.TupleExpr(oututs_Ids)));
                         outputs = [outputs, actionNodeAst.getOutputs()];
                         inputs = [inputs, actionNodeAst.getOutputs()];
                         inputs = [inputs, actionNodeAst.getInputs()];
@@ -95,14 +95,14 @@ function [body, outputs, inputs, antiCondition] = ...
                 nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getEntryActionNodeName(dest_parent);
             if isKey(SF_STATES_NODESAST_MAP, entryNodeName)
                 actionNodeAst = SF_STATES_NODESAST_MAP(entryNodeName);
-                [call, oututs_Ids] = actionNodeAst.nodeCall(true, BooleanExpr(false));
+                [call, oututs_Ids] = actionNodeAst.nodeCall(true, nasa_toLustre.lustreAst.BooleanExpr(false));
                 if isempty(trans_cond)
-                    body{end+1} = LustreEq(oututs_Ids, call);
+                    body{end+1} = nasa_toLustre.lustreAst.LustreEq(oututs_Ids, call);
                     outputs = [outputs, actionNodeAst.getOutputs()];
                     inputs = [inputs, actionNodeAst.getInputs()];
                 else
-                    body{end+1} = LustreEq(oututs_Ids, ...
-                        IteExpr(trans_cond, call, TupleExpr(oututs_Ids)));
+                    body{end+1} = nasa_toLustre.lustreAst.LustreEq(oututs_Ids, ...
+                        nasa_toLustre.lustreAst.IteExpr(trans_cond, call, nasa_toLustre.lustreAst.TupleExpr(oututs_Ids)));
                     outputs = [outputs, actionNodeAst.getOutputs()];
                     inputs = [inputs, actionNodeAst.getOutputs()];
                     inputs = [inputs, actionNodeAst.getInputs()];
@@ -119,32 +119,32 @@ function [body, outputs, inputs, antiCondition] = ...
             [idStateEnumType, idStateInactiveEnum] = ...
                 nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.addStateEnum(dest_parent, [], ...
                 false, false, true);
-            body{end + 1} = LustreComment(...
+            body{end + 1} = nasa_toLustre.lustreAst.LustreComment(...
                 sprintf('set state %s as inactive', dest_parent.Name));
             if isempty(trans_cond)
-                body{end + 1} = LustreEq(VarIdExpr(idState), ...
+                body{end + 1} = nasa_toLustre.lustreAst.LustreEq(nasa_toLustre.lustreAst.VarIdExpr(idState), ...
                     idStateInactiveEnum);
-                outputs{end + 1} = LustreVar(idState, idStateEnumType);
+                outputs{end + 1} = nasa_toLustre.lustreAst.LustreVar(idState, idStateEnumType);
             else
-                body{end+1} = LustreEq(VarIdExpr(idState), ...
-                    IteExpr(trans_cond, idStateInactiveEnum, ...
-                    VarIdExpr(idState)));
-                outputs{end + 1} = LustreVar(idState, idStateEnumType);
-                inputs{end+1} = LustreVar(idState, idStateEnumType);
+                body{end+1} = nasa_toLustre.lustreAst.LustreEq(nasa_toLustre.lustreAst.VarIdExpr(idState), ...
+                    nasa_toLustre.lustreAst.IteExpr(trans_cond, idStateInactiveEnum, ...
+                    nasa_toLustre.lustreAst.VarIdExpr(idState)));
+                outputs{end + 1} = nasa_toLustre.lustreAst.LustreVar(idState, idStateEnumType);
+                inputs{end+1} = nasa_toLustre.lustreAst.LustreVar(idState, idStateEnumType);
             end
         end
         entryNodeName = ...
             nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getEntryActionNodeName(dest_parent);
         if isKey(SF_STATES_NODESAST_MAP, entryNodeName)
             actionNodeAst = SF_STATES_NODESAST_MAP(entryNodeName);
-            [call, oututs_Ids] = actionNodeAst.nodeCall(true, BooleanExpr(true));
+            [call, oututs_Ids] = actionNodeAst.nodeCall(true, nasa_toLustre.lustreAst.BooleanExpr(true));
             if isempty(trans_cond)
-                body{end+1} = LustreEq(oututs_Ids, call);
+                body{end+1} = nasa_toLustre.lustreAst.LustreEq(oututs_Ids, call);
                 outputs = [outputs, actionNodeAst.getOutputs()];
                 inputs = [inputs, actionNodeAst.getInputs()];
             else
-                body{end+1} = LustreEq(oututs_Ids, ...
-                    IteExpr(trans_cond, call, TupleExpr(oututs_Ids)));
+                body{end+1} = nasa_toLustre.lustreAst.LustreEq(oututs_Ids, ...
+                    nasa_toLustre.lustreAst.IteExpr(trans_cond, call, nasa_toLustre.lustreAst.TupleExpr(oututs_Ids)));
                 outputs = [outputs, actionNodeAst.getOutputs()];
                 inputs = [inputs, actionNodeAst.getOutputs()];
                 inputs = [inputs, actionNodeAst.getInputs()];

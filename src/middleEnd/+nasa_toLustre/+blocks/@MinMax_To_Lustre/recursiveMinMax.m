@@ -12,11 +12,11 @@ function res = recursiveMinMax(op, inputs)
     if n == 1
         res = inputs{1};
     elseif n == 2
-        res = NodeCallExpr(op, {inputs{1}, inputs{2}});
+        res = nasa_toLustre.lustreAst.NodeCallExpr(op, {inputs{1}, inputs{2}});
     else
-        res = NodeCallExpr(op, ...
+        res = nasa_toLustre.lustreAst.NodeCallExpr(op, ...
             {inputs{1}, ...
-            MinMax_To_Lustre.recursiveMinMax(op,  inputs(2:end))});
+            nasa_toLustre.blocks.MinMax_To_Lustre.recursiveMinMax(op,  inputs(2:end))});
     end
 end
 

@@ -7,6 +7,6 @@ function dt = parenthesedExpression_DT(tree, data_map, inputs, isSimulink, isSta
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     import nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT
-    dt = MExpToLusDT.expression_DT(tree.expression, data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
+    dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.expression_DT(tree.expression, data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
 end
 

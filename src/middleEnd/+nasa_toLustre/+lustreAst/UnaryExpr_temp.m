@@ -48,11 +48,11 @@ classdef UnaryExpr < nasa_toLustre.lustreAst.LustreExpr
             new_expr = obj.expr.simplify();
             if isa(new_expr, 'UnaryExpr') ...
                     && isequal(new_expr.op, obj.op) ...
-                    && (isequal(obj.op, UnaryExpr.NOT) || isequal(obj.op, UnaryExpr.NEG))
+                    && (isequal(obj.op, nasa_toLustre.lustreAst.UnaryExpr.NOT) || isequal(obj.op, nasa_toLustre.lustreAst.UnaryExpr.NEG))
                 % - - x => x, not not b => b
                 new_obj = new_expr.expr;
             else
-                new_obj = UnaryExpr(obj.op, new_expr, obj.withPar);
+                new_obj = nasa_toLustre.lustreAst.UnaryExpr(obj.op, new_expr, obj.withPar);
             end
         end
         %% nbOccuranceVar
@@ -73,12 +73,12 @@ classdef UnaryExpr < nasa_toLustre.lustreAst.LustreExpr
         function [new_obj, varIds] = changePre2Var(obj)
             import nasa_toLustre.lustreAst.*
             v = obj.expr;
-            if isequal(obj.op, UnaryExpr.PRE) && isa(v, 'VarIdExpr')
+            if isequal(obj.op, nasa_toLustre.lustreAst.UnaryExpr.PRE) && isa(v, 'VarIdExpr')
                 varIds{1} = v;
-                new_obj = VarIdExpr(strcat('_pre_', v.getId()));
+                new_obj = nasa_toLustre.lustreAst.VarIdExpr(strcat('_pre_', v.getId()));
             else
                 [new_expr, varIds] = v.changePre2Var();
-                new_obj = UnaryExpr(obj.op, new_expr, obj.withPar);
+                new_obj = nasa_toLustre.lustreAst.UnaryExpr(obj.op, new_expr, obj.withPar);
             end
         end
         function new_obj = changeArrowExp(obj, cond)

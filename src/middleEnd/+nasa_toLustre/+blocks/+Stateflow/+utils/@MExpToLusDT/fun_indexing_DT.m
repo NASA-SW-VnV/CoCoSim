@@ -10,11 +10,11 @@ function dt = fun_indexing_DT(tree, data_map, inputs, isSimulink, isStateFlow, i
     tree_ID = tree.ID;
     switch tree_ID
         case {'abs', 'sgn'}
-            dt = MExpToLusDT.expression_DT(tree.parameters(1), data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
+            dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.expression_DT(tree.parameters(1), data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
         case 'rem'
-            param1 = MExpToLusDT.expression_DT(tree.parameters(1), data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
-            param2 = MExpToLusDT.expression_DT(tree.parameters(2), data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
-            dt = MExpToLusDT.upperDT(param1, param2);
+            param1 = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.expression_DT(tree.parameters(1), data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
+            param2 = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.expression_DT(tree.parameters(2), data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
+            dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.upperDT(param1, param2);
         case {'sqrt', 'exp', 'log', 'log10',...
                 'sin','cos','tan',...
                 'asin','acos','atan','atan2', 'power', ...
@@ -51,12 +51,12 @@ function dt = simulinkStateflow_Fun_Indexing_DT(tree, data_map, inputs, isSimuli
         if isequal(tree.parameters(1).type, 'constant')
             %the case of u(1), u(2) ...
             input_idx = str2double(tree.parameters(1).value);
-            dt = MExpToLusDT.getVarDT(data_map, ...
+            dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.getVarDT(data_map, ...
                 inputs{1}{input_idx}.getId());
         else
             % we assume "u" is a vector of the same dataType. Which is the
             % case for Fcn/IF/Switch case blocks where isSimulink=true
-            dt = MExpToLusDT.getVarDT(data_map, ...
+            dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.getVarDT(data_map, ...
                 inputs{1}{1}.getId());
         end
         
@@ -65,12 +65,12 @@ function dt = simulinkStateflow_Fun_Indexing_DT(tree, data_map, inputs, isSimuli
         input_number = str2double(regexp(tree.ID, 'u(\d+)', 'tokens', 'once'));
         if isequal(tree.parameters(1).type, 'constant')
             arrayIndex = str2double(tree.parameters(1).value);
-            dt = MExpToLusDT.getVarDT(data_map, ...
+            dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.getVarDT(data_map, ...
                 inputs{input_number}{arrayIndex}.getId());
         else
             % we assume "u" is a vector of the same dataType. Which is the
             % case for Fcn/IF/Switch case blocks where isSimulink=true
-            dt = MExpToLusDT.getVarDT(data_map, ...
+            dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.getVarDT(data_map, ...
                 inputs{input_number}{1}.getId());
         end
     end

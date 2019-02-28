@@ -11,15 +11,15 @@ function [node, external_nodes, opens, abstractedNodes] = get__Ceiling(lus_backe
         opens = {};
         abstractedNodes = {};
         external_nodes = {'LustDTLib__Floor'};
-        node = LustreNode();
+        node = nasa_toLustre.lustreAst.LustreNode();
         node.setName('_Ceiling');
-        node.setInputs(LustreVar('x', 'real'));
-        node.setOutputs(LustreVar('y', 'int'));
+        node.setInputs(nasa_toLustre.lustreAst.LustreVar('x', 'real'));
+        node.setOutputs(nasa_toLustre.lustreAst.LustreVar('y', 'int'));
         node.setIsMain(false);
-        node.setBodyEqs(LustreEq(VarIdExpr('y'), ...
-            UnaryExpr(UnaryExpr.NEG, ...
-            NodeCallExpr('_Floor', ...
-            UnaryExpr(UnaryExpr.NEG, VarIdExpr('x'), false)))));
+        node.setBodyEqs(nasa_toLustre.lustreAst.LustreEq(nasa_toLustre.lustreAst.VarIdExpr('y'), ...
+            nasa_toLustre.lustreAst.UnaryExpr(nasa_toLustre.lustreAst.UnaryExpr.NEG, ...
+            nasa_toLustre.lustreAst.NodeCallExpr('_Floor', ...
+            nasa_toLustre.lustreAst.UnaryExpr(nasa_toLustre.lustreAst.UnaryExpr.NEG, nasa_toLustre.lustreAst.VarIdExpr('x'), false)))));
     else
         opens = {'conv'};
         abstractedNodes = {};

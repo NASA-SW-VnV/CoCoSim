@@ -31,5 +31,5 @@ function [stateEnumType, childAst] = ...
         SF_STATES_ENUMS_MAP(stateEnumType) = [...
             SF_STATES_ENUMS_MAP(stateEnumType), childName];
     end
-    childAst = EnumValueExpr(childName);
+    childAst = nasa_toLustre.lustreAst.EnumValueExpr(childName);
 end

@@ -30,10 +30,10 @@ function schema = getLustreCompiler(callbackInfo)
     schema.statustip = 'Lustre compiler';
     schema.autoDisableWhen = 'Busy';
     CoCoSimPreferences = callbackInfo.userdata;
-    callbacks = {};
     compilerNames = {'NASA Compiler', 'IOWA Compiler'};
+    callbacks = cell(1, length(compilerNames));
     for i=1:length(compilerNames)
-        callbacks{end+1} = @(x) lustreCompilerCallback(compilerNames{i}, i, ...
+        callbacks{i} = @(x) lustreCompilerCallback(compilerNames{i}, i, ...
             CoCoSimPreferences, x);
     end
     schema.childrenFcns = callbacks;
@@ -55,7 +55,7 @@ end
 function setCompilerOption(compilerNameValue, CoCoSimPreferences, varargin)
     CoCoSimPreferences.lustreCompiler = compilerNameValue;
     CoCoSimPreferences.irToLustreCompiler = isequal(compilerNameValue, 'IOWA');
-    PreferencesMenu.saveCoCoSimPreferences(CoCoSimPreferences);
+    cocosim_menu.CoCoSimPreferences.save(CoCoSimPreferences);
 end
 
 %% Lustre Backend
@@ -65,11 +65,12 @@ function schema = getLustreBackend(callbackInfo)
     schema.statustip = 'Lustre backend';
     schema.autoDisableWhen = 'Busy';
     CoCoSimPreferences = callbackInfo.userdata;
-    callbacks = {};
-    backendName = {LusBackendType.KIND2, LusBackendType.JKIND, ...
+    
+    backendNames = {LusBackendType.KIND2, LusBackendType.JKIND, ...
         LusBackendType.ZUSTRE};
-    for i=1:numel(backendName)
-        callbacks{end+1} = @(x) lustreBackendCallback(backendName{i}, ...
+    callbacks = cell(1, length(backendNames));
+    for i=1:length(backendNames)
+        callbacks{i} = @(x) lustreBackendCallback(backendNames{i}, ...
             CoCoSimPreferences, x);
     end
     schema.childrenFcns = callbacks;
@@ -90,7 +91,7 @@ end
 
 function setBackendOption(backendName, CoCoSimPreferences, varargin)
     CoCoSimPreferences.lustreBackend = backendName;
-    PreferencesMenu.saveCoCoSimPreferences(CoCoSimPreferences);
+    cocosim_menu.CoCoSimPreferences.save(CoCoSimPreferences);
 end
 
 %% Kind2 options
@@ -114,11 +115,11 @@ function schema = getDEDChecks(callbackInfo)
     schema.statustip = 'Design Error Detection';
     schema.autoDisableWhen = 'Busy';
     CoCoSimPreferences = callbackInfo.userdata;
-    callbacks = {};
     checksNames = {CoCoBackendType.DED_DIVBYZER,CoCoBackendType.DED_INTOVERFLOW ,...
         CoCoBackendType.DED_OUTOFBOUND, CoCoBackendType.DED_OUTMINMAX };
-    for i=1:numel(checksNames)
-        callbacks{end+1} = @(x) checkNameCallback(checksNames{i}, ...
+    callbacks = cell(1, length(checksNames));
+    for i=1:length(checksNames)
+        callbacks{i} = @(x) checkNameCallback(checksNames{i}, ...
             CoCoSimPreferences, x);
     end
     schema.childrenFcns = callbacks;
@@ -144,5 +145,5 @@ function setCheckOption(checkName, CoCoSimPreferences, varargin)
     else
         CoCoSimPreferences.dedChecks{end+1} = checkName;
     end
-    PreferencesMenu.saveCoCoSimPreferences(CoCoSimPreferences);
+    cocosim_menu.CoCoSimPreferences.save(CoCoSimPreferences);
 end

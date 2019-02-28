@@ -53,14 +53,14 @@ function [actions, conditions] = getAllSFActions(regression_path)
                     MsgType.RESULT, 'getAllSFActions', '');
                 display_msg(sprintf('Exit Expression: %s', MatlabUtils.strjoin(Exit, ';')), ...
                     MsgType.RESULT, 'getAllSFActions', '');
-                actions = [actions, SFIRPPUtils.split_actions(Entry)];
-                actions = [actions, SFIRPPUtils.split_actions(During)];
-                actions = [actions, SFIRPPUtils.split_actions(Exit)];
+                actions = [actions, nasa_toLustre.IR_pp.stateflow_IR_pp.SFIRPPUtils.split_actions(Entry)];
+                actions = [actions, nasa_toLustre.IR_pp.stateflow_IR_pp.SFIRPPUtils.split_actions(During)];
+                actions = [actions, nasa_toLustre.IR_pp.stateflow_IR_pp.SFIRPPUtils.split_actions(Exit)];
             end
             for tId = 1 : numel(allTransitions)
                 
                 %transitionObject = edu.uiowa.chart.transition.TransitionParser.parse(allTransitions(tId).LabelString);
-                [transitionObject, status, unsupportedExp] = TransitionLabelParser(allTransitions(tId).LabelString);
+                [transitionObject, status, unsupportedExp] = nasa_toLustre.utils.TransitionLabelParser(allTransitions(tId).LabelString);
                 Event = char(transitionObject.eventOrMessage);
                 Condition = char(transitionObject.condition);
                 ConditionAction = char(transitionObject.conditionAction);
@@ -71,10 +71,10 @@ function [actions, conditions] = getAllSFActions(regression_path)
                     display(transitionObject)
                     display(unsupportedExp)
                 end
-                actions = [actions, SFIRPPUtils.split_actions(ConditionAction)];
-                actions = [actions, SFIRPPUtils.split_actions(TransitionAction)];
-                conditions = [conditions, SFIRPPUtils.split_actions(Condition)];
-                conditions = [conditions, SFIRPPUtils.split_actions(Event)];
+                actions = [actions, nasa_toLustre.IR_pp.stateflow_IR_pp.SFIRPPUtils.split_actions(ConditionAction)];
+                actions = [actions, nasa_toLustre.IR_pp.stateflow_IR_pp.SFIRPPUtils.split_actions(TransitionAction)];
+                conditions = [conditions, nasa_toLustre.IR_pp.stateflow_IR_pp.SFIRPPUtils.split_actions(Condition)];
+                conditions = [conditions, nasa_toLustre.IR_pp.stateflow_IR_pp.SFIRPPUtils.split_actions(Event)];
             end
         end
     end

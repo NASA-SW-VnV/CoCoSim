@@ -19,7 +19,7 @@ function [new_ir, status] = chart_name_SFIR_pp(new_ir, isSF)
         new_name = regexp(new_ir.Path, filesep, 'split');
         new_name = new_name{end};
     else
-        new_name = SFIRPPUtils.adapt_root_name(new_ir.Path);
+        new_name = nasa_toLustre.IR_pp.stateflow_IR_pp.SFIRPPUtils.adapt_root_name(new_ir.Path);
     end
     origin_name_pattern = strcat('^', new_ir.Path);
     
@@ -36,13 +36,13 @@ function [new_ir, status] = chart_name_SFIR_pp(new_ir, isSF)
         for i=1:numel(new_ir.GraphicalFunctions)
             new_ir.GraphicalFunctions{i}.Composition = adapt_composition_name(...
                 new_ir.GraphicalFunctions{i}.Composition, origin_name_pattern, new_name);
-            new_ir.GraphicalFunctions{i} = chart_name_SFIR_pp( new_ir.GraphicalFunctions{i}, 1 );
+            new_ir.GraphicalFunctions{i} = nasa_toLustre.IR_pp.stateflow_IR_pp.stateflow_fields.chart_name_SFIR_pp( new_ir.GraphicalFunctions{i}, 1 );
         end
     end
     
     if isfield(new_ir, 'TruthTables')
         for i=1:numel(new_ir.TruthTables)
-            new_ir.TruthTables{i} = chart_name_SFIR_pp( new_ir.TruthTables{i}, 1 );
+            new_ir.TruthTables{i} = nasa_toLustre.IR_pp.stateflow_IR_pp.stateflow_fields.chart_name_SFIR_pp( new_ir.TruthTables{i}, 1 );
         end
     end
 end

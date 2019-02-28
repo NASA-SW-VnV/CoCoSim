@@ -16,22 +16,22 @@ classdef Bias_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             L = nasa_toLustre.ToLustreImport.L;
             import(L{:})
             [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
-            [inputs] = Bias_To_Lustre.getBlockInputsNames_convInType2AccType(obj, parent, blk);
+            [inputs] = nasa_toLustre.blocks.Bias_To_Lustre.getBlockInputsNames_convInType2AccType(obj, parent, blk);
             outputDataType = blk.CompiledPortDataTypes.Outport{1};
 
             [outLusDT] =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(outputDataType);
             if isequal(outLusDT, 'int')
-                bias = IntExpr(blk.Bias);
+                bias = nasa_toLustre.lustreAst.IntExpr(blk.Bias);
             else
-                bias = RealExpr(blk.Bias);
+                bias = nasa_toLustre.lustreAst.RealExpr(blk.Bias);
             end
             n = numel(inputs{1});
             codes = cell(1, n);            
             for j=1:n
                 %codes{j} = sprintf('%s = %s + %s;', outputs{j}, inputs{1}{j},bias);
-                codes{j} = LustreEq(...
+                codes{j} = nasa_toLustre.lustreAst.LustreEq(...
                     outputs{j}, ...
-                    BinaryExpr(BinaryExpr.PLUS, ...
+                    nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.PLUS, ...
                                 inputs{1}{j}, ...
                                 bias));
             end

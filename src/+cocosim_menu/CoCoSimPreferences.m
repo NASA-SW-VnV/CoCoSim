@@ -23,10 +23,14 @@ classdef CoCoSimPreferences < handle
     end
     
     methods(Static)
-        function [ CoCoSimPreferences, modified ] = load()
-            modified = false;
+        function preferencesFile = getPreferencesMatPath()
             fpath = fileparts(mfilename('fullpath'));
             preferencesFile = fullfile(fpath, 'preferences.mat');
+        end
+        
+        function [ CoCoSimPreferences, modified ] = load()
+            modified = false;
+            preferencesFile = cocosim_menu.CoCoSimPreferences.getPreferencesMatPath();
             if exist(preferencesFile, 'file') == 2
                 load(preferencesFile, 'CoCoSimPreferences');
             end
@@ -55,6 +59,11 @@ classdef CoCoSimPreferences < handle
                 save(preferencesFile, 'CoCoSimPreferences');
             end
             warning('on', 'MATLAB:structOnObject')
+        end
+        
+        function save(CoCoSimPreferences)% the parameter is used by save function
+            preferencesFile = cocosim_menu.CoCoSimPreferences.getPreferencesMatPath();
+            save(preferencesFile, 'CoCoSimPreferences');
         end
     end
 end

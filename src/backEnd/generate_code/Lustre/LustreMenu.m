@@ -9,10 +9,10 @@ function schema = LustreMenu(~)
     schema.label = 'Lustre';
     schema.statustip = 'Generate Lustre Code';
     schema.autoDisableWhen = 'Busy';
-    schema.childrenFcns = {@getKind, @getLustrec};
+    schema.childrenFcns = {@getCodeForVerification, @getLustrec};
 end
 
-function schema = getKind(varargin)
+function schema = getCodeForVerification(varargin)
     schema = sl_action_schema;
     schema.label = 'For Verification';
     CoCoSimPreferences = cocosim_menu.CoCoSimPreferences.load();

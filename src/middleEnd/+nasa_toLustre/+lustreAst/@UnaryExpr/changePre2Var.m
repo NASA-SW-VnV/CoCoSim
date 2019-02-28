@@ -8,11 +8,11 @@ function [new_obj, varIds] = changePre2Var(obj)
  
     import nasa_toLustre.lustreAst.*
     v = obj.expr;
-    if isequal(obj.op, UnaryExpr.PRE) && isa(v, 'VarIdExpr')
+    if isequal(obj.op, nasa_toLustre.lustreAst.UnaryExpr.PRE) && isa(v, 'VarIdExpr')
         varIds{1} = v;
-        new_obj = VarIdExpr(strcat('_pre_', v.getId()));
+        new_obj = nasa_toLustre.lustreAst.VarIdExpr(strcat('_pre_', v.getId()));
     else
         [new_expr, varIds] = v.changePre2Var();
-        new_obj = UnaryExpr(obj.op, new_expr, obj.withPar);
+        new_obj = nasa_toLustre.lustreAst.UnaryExpr(obj.op, new_expr, obj.withPar);
     end
 end

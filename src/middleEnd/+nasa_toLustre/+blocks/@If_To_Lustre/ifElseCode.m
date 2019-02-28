@@ -17,25 +17,25 @@ function code = ifElseCode(obj, parent, blk, outputs, inputs, inports_dt, IfExp)
     end
     thens = cell(1, n_conds + 1);
     conds = cell(1, n_conds);
-    data_map = Fcn_To_Lustre.createDataMap(inputs, inports_dt);
+    data_map = nasa_toLustre.blocks.Fcn_To_Lustre.createDataMap(inputs, inports_dt);
     for j=1:nbOutputs
-        lusCond = If_To_Lustre.formatConditionToLustre(obj, ...
+        lusCond = nasa_toLustre.blocks.If_To_Lustre.formatConditionToLustre(obj, ...
             IfExp{j}, inputs, data_map, parent, blk);
         if j==nbOutputs && isempty(IfExp{j})
             %default condition
-            thens{j} = If_To_Lustre.outputsValues(nbOutputs, j);
+            thens{j} = nasa_toLustre.blocks.If_To_Lustre.outputsValues(nbOutputs, j);
         elseif j==nbOutputs
             %last condition
             conds{j} = lusCond;
-            thens{j} = If_To_Lustre.outputsValues(nbOutputs, j);
-            thens{j + 1} = If_To_Lustre.outputsValues(nbOutputs, 0);
+            thens{j} = nasa_toLustre.blocks.If_To_Lustre.outputsValues(nbOutputs, j);
+            thens{j + 1} = nasa_toLustre.blocks.If_To_Lustre.outputsValues(nbOutputs, 0);
         else
             conds{j} = lusCond;
-            thens{j} = If_To_Lustre.outputsValues(nbOutputs, j);
+            thens{j} = nasa_toLustre.blocks.If_To_Lustre.outputsValues(nbOutputs, j);
         end
 
     end
-    code = LustreEq(outputs, ...
-        IteExpr.nestedIteExpr(conds, thens));
+    code = nasa_toLustre.lustreAst.LustreEq(outputs, ...
+        nasa_toLustre.lustreAst.IteExpr.nestedIteExpr(conds, thens));
 end
 

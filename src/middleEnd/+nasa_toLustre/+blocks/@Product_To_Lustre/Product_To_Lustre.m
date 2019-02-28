@@ -24,7 +24,7 @@ classdef Product_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             OutputDataTypeStr = blk.CompiledPortDataTypes.Outport{1};
             isSumBlock = false;
             [codes, outputs_dt, additionalVars] = ...
-                Sum_To_Lustre.getSumProductCodes(obj, parent, blk, ...
+                nasa_toLustre.blocks.Sum_To_Lustre.getSumProductCodes(obj, parent, blk, ...
                 OutputDataTypeStr,isSumBlock, OutputDataTypeStr, xml_trace, lus_backend);
             
             obj.setCode( codes );
@@ -59,7 +59,7 @@ classdef Product_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 end
             end
 
-            b = Sum_To_Lustre();
+            b = nasa_toLustre.blocks.Sum_To_Lustre();
             obj.addUnsupported_options(b.getUnsupportedOptions( parent, blk, varargin));
             options = obj.unsupported_options;
         end

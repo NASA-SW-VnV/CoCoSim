@@ -52,7 +52,7 @@ classdef NodeCallExpr < nasa_toLustre.lustreAst.LustreExpr
                     new_args{i}.setPar(false);
                 end
             end
-            new_obj = NodeCallExpr(obj.nodeName, new_args);
+            new_obj = nasa_toLustre.lustreAst.NodeCallExpr(obj.nodeName, new_args);
         end
         
         %% nbOccuranceVar

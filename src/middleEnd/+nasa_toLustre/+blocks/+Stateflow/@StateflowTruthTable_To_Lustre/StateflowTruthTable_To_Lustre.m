@@ -34,11 +34,11 @@ classdef StateflowTruthTable_To_Lustre
             end
             
             finalJunction = ...
-                StateflowTruthTable_To_Lustre.buildJunctionStruct(tablePath);
+                nasa_toLustre.blocks.Stateflow.StateflowTruthTable_To_Lustre.buildJunctionStruct(tablePath);
             finalJunction.OuterTransitions = {};
             beforeFinalJunction = ...
-                StateflowTruthTable_To_Lustre.buildJunctionStruct(tablePath);
-            beforeFinalJunction.OuterTransitions{1} = StateflowTruthTable_To_Lustre.buildTransitionStruct(1, ...
+                nasa_toLustre.blocks.Stateflow.StateflowTruthTable_To_Lustre.buildJunctionStruct(tablePath);
+            beforeFinalJunction.OuterTransitions{1} = nasa_toLustre.blocks.Stateflow.StateflowTruthTable_To_Lustre.buildTransitionStruct(1, ...
                 finalJunction, '', FINAL_action, beforeFinalJunction.Path);
             
             junctions = {};
@@ -61,14 +61,14 @@ classdef StateflowTruthTable_To_Lustre
                     end
                 end
                 actions_str = MatlabUtils.strjoin(actions, '\n');
-                junc =  StateflowTruthTable_To_Lustre.buildJunctionStruct(tablePath);
-                junc.OuterTransitions{1} = StateflowTruthTable_To_Lustre.buildTransitionStruct(1, ...
+                junc =  nasa_toLustre.blocks.Stateflow.StateflowTruthTable_To_Lustre.buildJunctionStruct(tablePath);
+                junc.OuterTransitions{1} = nasa_toLustre.blocks.Stateflow.StateflowTruthTable_To_Lustre.buildTransitionStruct(1, ...
                     beforeFinalJunction, cond_str, actions_str, junc.Path);
                 junctions{i} = junc;
             end
             % connect between junctions
             for i=1:numel(junctions)-1
-                junctions{i}.OuterTransitions{2} = StateflowTruthTable_To_Lustre.buildTransitionStruct(2, ...
+                junctions{i}.OuterTransitions{2} = nasa_toLustre.blocks.Stateflow.StateflowTruthTable_To_Lustre.buildTransitionStruct(2, ...
                     junctions{i + 1}, '', '', junctions{i}.Path);
             end
             junctions{end+1} = beforeFinalJunction;
@@ -99,17 +99,17 @@ classdef StateflowTruthTable_To_Lustre
             
             
             functionStruct.Composition.DefaultTransitions{1} = ...
-                StateflowTruthTable_To_Lustre.buildTransitionStruct(1, ...
+                nasa_toLustre.blocks.Stateflow.StateflowTruthTable_To_Lustre.buildTransitionStruct(1, ...
                 functionStruct.Junctions{1}, '', INIT_action, '');
 %             try
 %                 % apply the same IR pre-processing to this structure
 %                 chart.GraphicalFunctions{1} = functionStruct;
-%                 [new_chart, ~] = stateflow_IR_pp(chart, false);
+%                 [new_chart, ~] = nasa_toLustre.IR_pp.stateflow_IR_pp.stateflow_IR_pp(chart, false);
 %                 functionStruct = new_chart.GraphicalFunctions{1};
 %             catch
 %             end
             [main_node, external_nodes, external_libraries ] = ...
-                StateflowGraphicalFunction_To_Lustre.write_code(functionStruct, chart_data);
+                nasa_toLustre.blocks.Stateflow.StateflowGraphicalFunction_To_Lustre.write_code(functionStruct, chart_data);
         end
         
         function options = getUnsupportedOptions(table, varargin)

@@ -18,12 +18,12 @@ function dt = ID_DT(tree, data_map, inputs, isSimulink, varargin)
         
     elseif isSimulink && strcmp(id, 'u')
         %the case of u with no index in IF/Fcn/SwitchCase blocks
-        dt = MExpToLusDT.getVarDT(data_map, inputs{1}{1}.getId());
+        dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.getVarDT(data_map, inputs{1}{1}.getId());
         
     elseif isSimulink && ~isempty(regexp(id, 'u\d+', 'match'))
         %the case of u1, u2 in IF/Fcn/SwitchCase blocks
         input_idx = regexp(id, 'u(\d+)', 'tokens', 'once');
-        dt = MExpToLusDT.getVarDT(data_map, ...
+        dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.getVarDT(data_map, ...
             inputs{str2double(input_idx)}{1}.getId());
         
     elseif isKey(data_map, id)

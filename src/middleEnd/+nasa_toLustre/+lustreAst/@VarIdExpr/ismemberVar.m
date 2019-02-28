@@ -9,7 +9,7 @@ function r = ismemberVar(v, vars)
     import nasa_toLustre.lustreAst.VarIdExpr
     import nasa_toLustre.lustreAst.LustreVar
     if iscell(v)
-        r = cellfun(@(x) VarIdExpr.ismemberVar(x, vars), v);
+        r = cellfun(@(x) nasa_toLustre.lustreAst.VarIdExpr.ismemberVar(x, vars), v);
         return;
     end
     if isa(v, 'VarIdExpr') || isa(v, 'LustreVar')

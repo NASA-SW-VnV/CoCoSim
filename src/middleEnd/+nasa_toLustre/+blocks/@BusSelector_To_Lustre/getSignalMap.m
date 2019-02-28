@@ -16,11 +16,11 @@ function [SignalsInputsMap, OutputSignals] = getSignalMap(obj, blk, inputs)
     for i=1:numel(OutputSignals)
         OutputSignals_Width_Map(OutputSignals{i}) = OutportWidths(i);
     end
-    inputSignalsInlined = BusSelector_To_Lustre.inlineInputSignals(InputSignals);
+    inputSignalsInlined = nasa_toLustre.blocks.BusSelector_To_Lustre.inlineInputSignals(InputSignals);
     if InportDimensions(1) == -2
         % case of virtual bus
         inport_cell_dimension =...
-            Assignment_To_Lustre.getInputMatrixDimensions(InportDimensions);
+            nasa_toLustre.blocks.Assignment_To_Lustre.getInputMatrixDimensions(InportDimensions);
     else
         InportDT = blk.CompiledPortDataTypes.Inport{1};
         try
@@ -37,7 +37,7 @@ function [SignalsInputsMap, OutputSignals] = getSignalMap(obj, blk, inputs)
                 || MatlabUtils.startsWith(InportDT, 'uint')...
                 || isequal(InportDT, 'boolean')
             inport_cell_dimension =...
-                Assignment_To_Lustre.getInputMatrixDimensions(InportDimensions);
+                nasa_toLustre.blocks.Assignment_To_Lustre.getInputMatrixDimensions(InportDimensions);
         else
             ME = MException('COCOSIM:BusSelector_To_Lustre', ...
                 'Block %s with type %s is not supported.', ...
@@ -45,7 +45,7 @@ function [SignalsInputsMap, OutputSignals] = getSignalMap(obj, blk, inputs)
             throw(ME);
         end
     end
-    SignalsInputsMap = BusSelector_To_Lustre.signalInputsUsingDimensions(...
+    SignalsInputsMap = nasa_toLustre.blocks.BusSelector_To_Lustre.signalInputsUsingDimensions(...
         blk, inport_cell_dimension, inputSignalsInlined, inputs, OutputSignals_Width_Map);
 
 end

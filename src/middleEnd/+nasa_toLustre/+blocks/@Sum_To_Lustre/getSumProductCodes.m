@@ -13,7 +13,7 @@ function [codes, outputs_dt, AdditionalVars] = getSumProductCodes(...
     codes = {};
     [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
     widths = blk.CompiledPortWidths.Inport;
-    inputs = Sum_To_Lustre.createBlkInputs(obj, parent, blk, widths, AccumDataTypeStr, isSumBlock);
+    inputs = nasa_toLustre.blocks.Sum_To_Lustre.createBlkInputs(obj, parent, blk, widths, AccumDataTypeStr, isSumBlock);
 
     [LusOutputDataTypeStr, zero, one] =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Outport(1));
     if (isSumBlock)
@@ -47,8 +47,8 @@ function [codes, outputs_dt, AdditionalVars] = getSumProductCodes(...
             else
                 lib_name = sprintf('_inv_M_%dx%d', n, n);
                 obj.addExternal_libraries(strcat('LustMathLib_', lib_name));
-                codes{1} =LustreEq(outputs,...
-                    NodeCallExpr(lib_name, inputs{1}));
+                codes{1} =nasa_toLustre.lustreAst.LustreEq(outputs,...
+                    nasa_toLustre.lustreAst.NodeCallExpr(lib_name, inputs{1}));
                 return;
             end
 
@@ -70,13 +70,13 @@ function [codes, outputs_dt, AdditionalVars] = getSumProductCodes(...
     if numel(exp) == 1 && numel(inputs) == 1
         % one input and 1 expression
 
-        [codes] = Sum_To_Lustre.oneInputSumProduct(parent, blk, outputs, ...
+        [codes] = nasa_toLustre.blocks.Sum_To_Lustre.oneInputSumProduct(parent, blk, outputs, ...
             inputs, widths, exp, initCode,isSumBlock, conv_format);
     else
         if ~isSumBlock && strcmp(blk.Multiplication, 'Matrix(*)')
             %This is a matrix multiplication, only applies to
             %Product block
-            [codes, AdditionalVars] = Product_To_Lustre.matrix_multiply(obj, exp, blk, inputs, outputs, zero, LusOutputDataTypeStr, conv_format );
+            [codes, AdditionalVars] = nasa_toLustre.blocks.Product_To_Lustre.matrix_multiply(obj, exp, blk, inputs, outputs, zero, LusOutputDataTypeStr, conv_format );
         else
             % element wise operations / Sum
             % If it is integer division, we need to call the
@@ -101,7 +101,7 @@ function [codes, outputs_dt, AdditionalVars] = getSumProductCodes(...
             else
                 int_divFun = '';
             end
-            [codes] = Sum_To_Lustre.elementWiseSumProduct(exp, ...
+            [codes] = nasa_toLustre.blocks.Sum_To_Lustre.elementWiseSumProduct(exp, ...
                 inputs, outputs, widths, initCode, conv_format, int_divFun);
         end
     end

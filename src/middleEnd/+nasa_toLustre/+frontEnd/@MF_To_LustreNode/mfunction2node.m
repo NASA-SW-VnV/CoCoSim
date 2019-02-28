@@ -8,17 +8,17 @@ function [main_node, external_nodes ] = ...
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    L = nasa_toLustre.ToLustreImport.L;
-    import(L{:})
+    %L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
+    %import(L{:})
     external_nodes = {};
     main_node = {};
     % get Matlab Function parameters
     
-    [blk, Inputs, Outputs] = MF_To_LustreNode.creatInportsOutports(blk);
+    [blk, Inputs, Outputs] = nasa_toLustre.frontEnd.MF_To_LustreNode.creatInportsOutports(blk);
     try
         % try translate Matlab code to Lustre if failed, it will be set as
         % imported
-        [ fun_nodes, failed] = MF_To_LustreNode.getMFunctionCode(blkObj, parent,  blk, Inputs);
+        [ fun_nodes, failed] = nasa_toLustre.frontEnd.MF_To_LustreNode.getMFunctionCode(blkObj, parent,  blk, Inputs);
         main_node = fun_nodes{1};
         if length(fun_nodes) > 1
             external_nodes = fun_nodes(2:end);
@@ -40,9 +40,9 @@ function [main_node, external_nodes ] = ...
             isEnableORAction, isEnableAndTrigger, isContractBlk, isMatlabFunction, ...
             main_sampleTime, xml_trace);
         
-        comment = LustreComment(...
+        comment = nasa_toLustre.lustreAst.LustreComment(...
             sprintf('Original block name: %s', blk.Origin_path), true);
-        main_node = LustreNode(...
+        main_node = nasa_toLustre.lustreAst.LustreNode(...
             comment, ...
             node_name,...
             node_inputs, ...

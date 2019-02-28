@@ -8,11 +8,11 @@ function exp  = outputsValues(outputsNumber, outputIdx)
     
     L = nasa_toLustre.ToLustreImport.L;
     import(L{:})
-    values = arrayfun(@(x) BooleanExpr('false'), (1:outputsNumber),...
+    values = arrayfun(@(x) nasa_toLustre.lustreAst.BooleanExpr('false'), (1:outputsNumber),...
         'UniformOutput', 0);
     if outputIdx > 0 && outputIdx <= outputsNumber
-        values{outputIdx} = BooleanExpr('true');
+        values{outputIdx} = nasa_toLustre.lustreAst.BooleanExpr('true');
     end
-    exp = TupleExpr(values);
+    exp = nasa_toLustre.lustreAst.TupleExpr(values);
 end
 

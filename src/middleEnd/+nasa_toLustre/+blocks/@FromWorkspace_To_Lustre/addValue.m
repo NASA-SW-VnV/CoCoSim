@@ -9,15 +9,15 @@ function code = addValue(a, code, outLusDT)
     L = nasa_toLustre.ToLustreImport.L;
     import(L{:})
     if strcmp(outLusDT, 'int')
-        v = IntExpr(int32(a));
+        v = nasa_toLustre.lustreAst.IntExpr(int32(a));
     elseif strcmp(outLusDT, 'bool')
-        v = BooleanExpr(a);
+        v = nasa_toLustre.lustreAst.BooleanExpr(a);
     else
-        v = RealExpr(a);
+        v = nasa_toLustre.lustreAst.RealExpr(a);
     end
-    code = BinaryExpr(BinaryExpr.ARROW, ...
+    code = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.ARROW, ...
             v, ...
-            UnaryExpr(UnaryExpr.PRE, code));
+            nasa_toLustre.lustreAst.UnaryExpr(UnaryExpr.PRE, code));
 end
 
 

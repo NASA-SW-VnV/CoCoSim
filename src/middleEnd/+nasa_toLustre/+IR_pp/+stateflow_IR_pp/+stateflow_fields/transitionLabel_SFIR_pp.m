@@ -56,7 +56,7 @@ function [ new_ir, status ] = transitionLabel_SFIR_pp( new_ir )
     end
     if isfield(new_ir, 'GraphicalFunctions')
         for i=1:numel(new_ir.GraphicalFunctions)
-            [new_ir.GraphicalFunctions{i}, status_i] = transitionLabel_SFIR_pp( new_ir.GraphicalFunctions{i} );
+            [new_ir.GraphicalFunctions{i}, status_i] = nasa_toLustre.IR_pp.stateflow_IR_pp.stateflow_fields.transitionLabel_SFIR_pp( new_ir.GraphicalFunctions{i} );
             if status_i
                 display_msg(['ERROR found in StateflowFunction:' new_ir.GraphicalFunctions{i}.origin_path], ...
                     MsgType.ERROR, 'transitionLabel_SFIR_pp', '');

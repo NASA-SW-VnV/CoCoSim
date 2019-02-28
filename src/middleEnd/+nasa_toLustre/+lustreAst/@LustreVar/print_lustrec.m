@@ -13,5 +13,5 @@ function code = print_lustrec(obj, backend)
         dt = obj.type;
     end
     
-    code = sprintf('%s : %s;', obj.name, dt);
+    code = sprintf('%s : %s;', obj.id, dt);
 end

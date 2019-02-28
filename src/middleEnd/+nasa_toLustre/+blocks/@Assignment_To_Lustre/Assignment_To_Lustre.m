@@ -121,14 +121,14 @@ classdef Assignment_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             %               'Assignment_6: real;'}            
             
             [inputs] = ...
-                Assignment_To_Lustre.getBlockInputsNames_convInType2AccType(obj, parent, blk,isSelector);
+                nasa_toLustre.blocks.Assignment_To_Lustre.getBlockInputsNames_convInType2AccType(obj, parent, blk,isSelector);
             % For the exmple above:
             % inputs{1} = 'In1_1'    'In1_2'    'In1_3'  'In1_4'    'In1_5'    'In1_6'
             % inputs{2} = 'Constant1_1'
             % inputs{3} = 'real_to_int(Saturation_1)'
    
             [numOutDims, ~, ~] = ...
-                Constant_To_Lustre.getValueFromParameter(parent, blk, blk.NumberOfDimensions);   
+                nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(parent, blk, blk.NumberOfDimensions);   
             % For the example above
             % numOutDims = 2
             
@@ -147,7 +147,7 @@ classdef Assignment_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 
             % define mapping array ind
             isSelector = 0;
-            [isPortIndex,ind,~] = Assignment_To_Lustre.defineMapInd(obj,parent,blk,inputs,U_expanded_dims,isSelector);
+            [isPortIndex,ind,~] = nasa_toLustre.blocks.Assignment_To_Lustre.defineMapInd(obj,parent,blk,inputs,U_expanded_dims,isSelector);
             % For the example above
             % isPortIndex = 1
             % ind{1} = [1,3]  
@@ -167,7 +167,7 @@ classdef Assignment_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         function options = getUnsupportedOptions(obj, ~, blk, varargin)
             L = nasa_toLustre.ToLustreImport.L;
             import(L{:})
-            in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(blk.CompiledPortDimensions.Inport);
+            in_matrix_dimension = nasa_toLustre.blocks.Assignment_To_Lustre.getInputMatrixDimensions(blk.CompiledPortDimensions.Inport);
             if in_matrix_dimension{1}.numDs>7
                 msg = sprintf('More than 7 dimensions is not supported in block %s',...
                     HtmlItem.addOpenCmd(blk.Origin_path));

@@ -37,9 +37,9 @@ function [unsupportedOptions, ...
         skip_unsupportedblocks = 0;
     end
     for i=1:numel(varargin)
-        if strcmp(varargin{i}, ToLustreOptions.NODISPLAY)
+        if strcmp(varargin{i}, nasa_toLustre.utils.ToLustreOptions.NODISPLAY)
             mode_display = 0;
-        elseif strcmp(varargin{i}, ToLustreOptions.SKIP_COMPATIBILITY)
+        elseif strcmp(varargin{i}, nasa_toLustre.utils.ToLustreOptions.SKIP_COMPATIBILITY)
             skip_unsupportedblocks = 1;
         end
     end
@@ -78,7 +78,7 @@ function [unsupportedOptions, ...
     
     %% Pre-process model
     display_msg('Pre-processing', MsgType.INFO, 'ToLustreUnsupportedBlocks', '');
-    varargin{end+1} = ToLustreOptions.SKIP_DEFECTED_PP;
+    varargin{end+1} = nasa_toLustre.utils.ToLustreOptions.SKIP_DEFECTED_PP;
     [new_file_name, status] = cocosim_pp(model_full_path , varargin{:});
     if status
         return;
@@ -105,7 +105,7 @@ function [unsupportedOptions, ...
     [ir_struct, ~, ~, ~] = cocosim_IR(model_full_path,  0, output_dir);
     % Pre-process IR
     global ir_handle_struct_map;
-    [ir_struct, ir_handle_struct_map] = internalRep_pp(ir_struct, 1, output_dir);
+    [ir_struct, ir_handle_struct_map] = nasa_toLustre.IR_pp.internalRep_pp(ir_struct, 1, output_dir);
     
     % add enumeration from Stateflow and from IR
     add_IR_Enum(ir_struct);
@@ -123,7 +123,7 @@ function [unsupportedOptions, ...
     main_sampleTime = main_block.CompiledSampleTime;
     
     % detecte if the model has unsupported options
-    htmlItemMsg = SLX2LusUtils.modelCompatibilityCheck(file_name, main_sampleTime);
+    htmlItemMsg = nasa_toLustre.utils.SLX2LusUtils.modelCompatibilityCheck(file_name, main_sampleTime);
     if ~isempty(htmlItemMsg)
         unsupportedOptions{1} = htmlItemMsg;
     end
@@ -198,7 +198,7 @@ function  [unsupportedOptionsMap, abstractedBlocks]  = blockUnsupportedOptions( 
     %   blk: The internal representation of the subsystem.
     %   main_clock   : The model sample time.
     [b, status, type, masktype, sfblockType, isIgnored] = nasa_toLustre.utils.getWriteType(blk);
-    if ~isempty(sfblockType) || ~isequal(sfblockType, 'NONE')
+    if ~isempty(sfblockType) && ~isequal(sfblockType, 'NONE')
         blkType = sfblockType;
     elseif ~isempty(masktype)
         blkType = masktype;
@@ -270,18 +270,18 @@ function node = get_Enum2Int_conv_node(name, members)
     conds = cell(numel(members), 1);
     thens = cell(numel(members) + 1, 1);
     for i=1:numel(members)
-        conds{i} = BinaryExpr(BinaryExpr.EQ, VarIdExpr('x'), ...
-            EnumValueExpr(members{i}.Name));
-        thens{i} = IntExpr(members{i}.Value);
+        conds{i} = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.EQ, nasa_toLustre.lustreAst.VarIdExpr('x'), ...
+            nasa_toLustre.lustreAst.EnumValueExpr(members{i}.Name));
+        thens{i} = nasa_toLustre.lustreAst.IntExpr(members{i}.Value);
     end
-    thens{end} = IntExpr(0);
-    bodyElts{1} = LustreEq(...
-        VarIdExpr('y'), ...
-        IteExpr.nestedIteExpr(conds, thens));
-    node = LustreNode();
+    thens{end} = nasa_toLustre.lustreAst.IntExpr(0);
+    bodyElts{1} = nasa_toLustre.lustreAst.LustreEq(...
+        nasa_toLustre.lustreAst.VarIdExpr('y'), ...
+        nasa_toLustre.lustreAst.IteExpr.nestedIteExpr(conds, thens));
+    node = nasa_toLustre.lustreAst.LustreNode();
     node.setName(strcat(name, '_to_int'));
-    node.setInputs(LustreVar('x', name));
-    node.setOutputs(LustreVar('y', 'int'));
+    node.setInputs(nasa_toLustre.lustreAst.LustreVar('x', name));
+    node.setOutputs(nasa_toLustre.lustreAst.LustreVar('y', 'int'));
     node.setBodyEqs(bodyElts);
     node.setIsMain(false);
 end
@@ -290,18 +290,18 @@ function node = get_Int2Enum_conv_node(name, members)
     conds = cell(numel(members)-1, 1);
     thens = cell(numel(members), 1);
     for i=1:numel(members)-1
-        conds{i} = BinaryExpr(BinaryExpr.EQ, VarIdExpr('x'), ...
-            IntExpr(members{i}.Value));
-        thens{i} = EnumValueExpr(members{i}.Name);
+        conds{i} = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.EQ, nasa_toLustre.lustreAst.VarIdExpr('x'), ...
+            nasa_toLustre.lustreAst.IntExpr(members{i}.Value));
+        thens{i} = nasa_toLustre.lustreAst.EnumValueExpr(members{i}.Name);
     end
-    thens{end} = EnumValueExpr(members{end}.Name);
-    bodyElts{1} = LustreEq(...
-        VarIdExpr('y'), ...
-        IteExpr.nestedIteExpr(conds, thens));
-    node = LustreNode();
+    thens{end} = nasa_toLustre.lustreAst.EnumValueExpr(members{end}.Name);
+    bodyElts{1} = nasa_toLustre.lustreAst.LustreEq(...
+        nasa_toLustre.lustreAst.VarIdExpr('y'), ...
+        nasa_toLustre.lustreAst.IteExpr.nestedIteExpr(conds, thens));
+    node = nasa_toLustre.lustreAst.LustreNode();
     node.setName(strcat('int_to_', name));
-    node.setInputs(LustreVar('x', 'int'));
-    node.setOutputs(LustreVar('y', name));
+    node.setInputs(nasa_toLustre.lustreAst.LustreVar('x', 'int'));
+    node.setOutputs(nasa_toLustre.lustreAst.LustreVar('y', name));
     node.setBodyEqs(bodyElts);
     node.setIsMain(false);
 end

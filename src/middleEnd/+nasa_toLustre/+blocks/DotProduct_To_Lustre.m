@@ -44,11 +44,11 @@ classdef DotProduct_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                        
             right = cell(1, numel(inputs{1}));
             for j=1:numel(inputs{1})
-                right{j} = BinaryExpr(BinaryExpr.MULTIPLY, ...
+                right{j} = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.MULTIPLY, ...
                     inputs{1}{j}, inputs{2}{j});
             end
-            code = LustreEq(outputs{1}, ...
-                BinaryExpr.BinaryMultiArgs(BinaryExpr.PLUS, right));
+            code = nasa_toLustre.lustreAst.LustreEq(outputs{1}, ...
+                nasa_toLustre.lustreAst.BinaryExpr.BinaryMultiArgs(nasa_toLustre.lustreAst.BinaryExpr.PLUS, right));
             obj.setCode( code );
             obj.addVariable(outputs_dt);
         end

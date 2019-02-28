@@ -18,7 +18,7 @@ classdef ForIterator_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             obj.addVariable(outputs_dt);
             % join the lines and set the block code.
-            obj.setCode( LustreEq(outputs{1},nasa_toLustre.utils.SLX2LusUtils.iterationVariable()));
+            obj.setCode( nasa_toLustre.lustreAst.LustreEq(outputs{1},nasa_toLustre.utils.SLX2LusUtils.iterationVariable()));
         end
         %%
         function options = getUnsupportedOptions(obj, parent, blk, varargin)
@@ -35,15 +35,15 @@ classdef ForIterator_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     HtmlItem.addOpenCmd(blk.Origin_path)));
             end
             [~, ~, status] = ...
-                Constant_To_Lustre.getValueFromParameter(parent, blk, blk.IterationLimit);
+                nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(parent, blk, blk.IterationLimit);
             if status
                 obj.addUnsupported_options(...
                     sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
                     blk.IterationLimit, HtmlItem.addOpenCmd(blk.Origin_path)));
             end
             %
-            Actionblks = Block_To_Lustre.find_blocks(parent, 'BlockType', 'ActionPort');
-            Enableblks = Block_To_Lustre.find_blocks(parent, 'BlockType', 'EnablePort');
+            Actionblks = nasa_toLustre.frontEnd.Block_To_Lustre.find_blocks(parent, 'BlockType', 'ActionPort');
+            Enableblks = nasa_toLustre.frontEnd.Block_To_Lustre.find_blocks(parent, 'BlockType', 'EnablePort');
             Actionblks = [Actionblks, Enableblks];
             if ~isempty(Actionblks)
                 for i=1:numel(Actionblks)
@@ -65,7 +65,7 @@ classdef ForIterator_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                         catch me
                             continue;
                         end
-                        ActionSS_Outports = Block_To_Lustre.find_blocks(action_parant, 'BlockType', 'Outport');
+                        ActionSS_Outports = nasa_toLustre.frontEnd.Block_To_Lustre.find_blocks(action_parant, 'BlockType', 'Outport');
                         for j=1:numel(ActionSS_Outports)
                             if isfield(ActionSS_Outports{j}, 'OutputWhenDisabled') ...
                                     && isequal(ActionSS_Outports{j}.OutputWhenDisabled, 'held')
@@ -78,7 +78,7 @@ classdef ForIterator_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 end
             end
             %Blocks with memories
-            all_blks = Block_To_Lustre.find_blocks(parent);
+            all_blks = nasa_toLustre.frontEnd.Block_To_Lustre.find_blocks(parent);
             for i=1:numel(all_blks)
                 if isfield(all_blks{i}, 'StateName')
                     blk_parent = fileparts(all_blks{i}.Origin_path);

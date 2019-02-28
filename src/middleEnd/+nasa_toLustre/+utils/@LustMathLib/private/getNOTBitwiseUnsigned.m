@@ -15,14 +15,14 @@ function [node, external_nodes, opens, abstractedNodes] = getNOTBitwiseUnsigned(
     %format = 'node %s (x: int)\nreturns(y:int);\nlet\n\t';
     %format = [format, 'y=  %d - x ;\ntel\n\n'];
     %node = sprintf(format, node_name,v2_pown);
-    bodyElts{1} = LustreEq(...
-        VarIdExpr('y'), ...
-        BinaryExpr(BinaryExpr.MINUS, IntExpr(v2_pown), VarIdExpr('x'))...
+    bodyElts{1} = nasa_toLustre.lustreAst.LustreEq(...
+        nasa_toLustre.lustreAst.VarIdExpr('y'), ...
+        nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.MINUS, nasa_toLustre.lustreAst.IntExpr(v2_pown), nasa_toLustre.lustreAst.VarIdExpr('x'))...
         );
-    node = LustreNode();
+    node = nasa_toLustre.lustreAst.LustreNode();
     node.setName(node_name);
-    node.setInputs(LustreVar('x', 'int'));
-    node.setOutputs(LustreVar('y', 'int'));
+    node.setInputs(nasa_toLustre.lustreAst.LustreVar('x', 'int'));
+    node.setOutputs(nasa_toLustre.lustreAst.LustreVar('y', 'int'));
     node.setBodyEqs(bodyElts);
     node.setIsMain(false);
 end

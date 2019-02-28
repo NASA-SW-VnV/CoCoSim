@@ -17,17 +17,17 @@ function [main_node, external_nodes]  = write_ChartNode(parent, blk, chart, data
     if ~isempty(inputEvents)
         %create a node that do the multi call for each event
         eventNode  = ...
-            StateflowState_To_Lustre.write_ChartNodeWithEvents(...
+            nasa_toLustre.blocks.Stateflow.StateflowState_To_Lustre.write_ChartNodeWithEvents(...
             chart, inputEvents);
         external_nodes{1} = eventNode;
     end
     [outputs, inputs, variable, body] = ...
-        StateflowState_To_Lustre.write_chart_body(parent, blk, chart, dataAndEvents, inputEvents);
+        nasa_toLustre.blocks.Stateflow.StateflowState_To_Lustre.write_chart_body(parent, blk, chart, dataAndEvents, inputEvents);
 
     %create the node
     node_name = ...
        nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);
-    main_node = LustreNode();
+    main_node = nasa_toLustre.lustreAst.LustreNode();
     main_node.setName(node_name);
     comment = LustreComment(sprintf('Chart Node: %s', chart.Origin_path),...
         true);
@@ -36,7 +36,7 @@ function [main_node, external_nodes]  = write_ChartNode(parent, blk, chart, data
     main_node.setOutputs(outputs);
     if isempty(inputs)
         inputs{1} = ...
-            LustreVar(nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.virtualVarStr(), 'bool');
+            nasa_toLustre.lustreAst.LustreVar(nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.virtualVarStr(), 'bool');
     end
     main_node.setInputs(inputs);
 

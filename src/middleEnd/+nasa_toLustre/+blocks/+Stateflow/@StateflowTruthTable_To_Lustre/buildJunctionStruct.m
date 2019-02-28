@@ -8,7 +8,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function junc = buildJunctionStruct(tablePath)
-    junc.Id = StateflowTruthTable_To_Lustre.incrementID();
+    junc.Id = nasa_toLustre.blocks.Stateflow.StateflowTruthTable_To_Lustre.incrementID();
     junc.Name = sprintf('Junction%d', junc.Id);
     junc.Path = strcat (tablePath, '/',junc.Name);
     junc.Origin_path = strcat (tablePath, '/',junc.Name);

@@ -9,7 +9,7 @@
 
 function transitionStruct = buildTransitionStruct(ExecutionOrder, destination, C, CAction, srcPath)
     transitionStruct = {};
-    transitionStruct.Id = StateflowTruthTable_To_Lustre.incrementID();
+    transitionStruct.Id = nasa_toLustre.blocks.Stateflow.StateflowTruthTable_To_Lustre.incrementID();
     transitionStruct.ExecutionOrder = ExecutionOrder;
     transitionStruct.Destination.Id = destination.Id;
     transitionStruct.Source = srcPath;

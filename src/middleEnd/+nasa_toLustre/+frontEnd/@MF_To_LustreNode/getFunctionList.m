@@ -6,8 +6,8 @@ function [new_function_list, failed] = getFunctionList(blk, script)
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    L = nasa_toLustre.ToLustreImport.L;
-    import(L{:})
+    %L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
+    %import(L{:})
     em2json =  cocosim.matlab2IR.EM2JSON;
     IR_string = em2json.StringToIR(script);
     IR = json_decode(char(IR_string));

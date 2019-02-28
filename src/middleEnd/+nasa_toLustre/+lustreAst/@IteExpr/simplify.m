@@ -21,6 +21,6 @@ function new_obj = simplify(obj)
         return;
         
     end
-    new_obj = IteExpr(new_cond, new_then, new_else, obj.OneLine);
+    new_obj = nasa_toLustre.lustreAst.IteExpr(new_cond, new_then, new_else, obj.OneLine);
     
 end

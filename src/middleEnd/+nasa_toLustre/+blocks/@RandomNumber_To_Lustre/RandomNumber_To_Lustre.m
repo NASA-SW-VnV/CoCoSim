@@ -18,7 +18,7 @@ classdef RandomNumber_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             obj.addVariable(outputs_dt);
             [mean, ~, status] = ...
-                Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Mean);
+                nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Mean);
             if status
                 display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
                     blk.Mean, HtmlItem.addOpenCmd(blk.Origin_path)), ...
@@ -26,7 +26,7 @@ classdef RandomNumber_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 return;
             end
             [variance, ~, status] = ...
-                Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Variance);
+                nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Variance);
             if status
                 display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
                     blk.Variance, HtmlItem.addOpenCmd(blk.Origin_path)), ...
@@ -38,23 +38,23 @@ classdef RandomNumber_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             nbSteps = 100;
             r = a + (b-a).*rand(nbSteps,1);
             blk_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);
-            obj.addExtenal_node(RandomNumber_To_Lustre.randomNode(blk_name, r, lus_backend));
+            obj.addExtenal_node(nasa_toLustre.blocks.RandomNumber_To_Lustre.randomNode(blk_name, r, lus_backend));
             
             codes = {};
             if LusBackendType.isKIND2(lus_backend)
-                codes{1} = LustreEq(outputs{1}, ...
-                    NodeCallExpr(blk_name, BooleanExpr('true')));
+                codes{1} = nasa_toLustre.lustreAst.LustreEq(outputs{1}, ...
+                    nasa_toLustre.lustreAst.NodeCallExpr(blk_name, nasa_toLustre.lustreAst.BooleanExpr('true')));
             else
-                clk_var = VarIdExpr(sprintf('%s_clock', blk_name));
-                obj.addVariable(LustreVar(clk_var, 'bool clock'));
+                clk_var = nasa_toLustre.lustreAst.VarIdExpr(sprintf('%s_clock', blk_name));
+                obj.addVariable(nasa_toLustre.lustreAst.LustreVar(clk_var, 'bool clock'));
                 obj.addExternal_libraries('_make_clock');
-                codes{1} = LustreEq(clk_var, ...
-                    NodeCallExpr('_make_clock',...
-                    {IntExpr(nbSteps), IntExpr(0)}));
+                codes{1} = nasa_toLustre.lustreAst.LustreEq(clk_var, ...
+                    nasa_toLustre.lustreAst.NodeCallExpr('_make_clock',...
+                    {nasa_toLustre.lustreAst.IntExpr(nbSteps), nasa_toLustre.lustreAst.IntExpr(0)}));
                 % generating 100 random random that will be repeated each 100
                 % steps
-                codes{2} = LustreEq(outputs{1}, ...
-                    EveryExpr(blk_name, BooleanExpr('true'), clk_var));
+                codes{2} = nasa_toLustre.lustreAst.LustreEq(outputs{1}, ...
+                    nasa_toLustre.lustreAst.EveryExpr(blk_name, nasa_toLustre.lustreAst.BooleanExpr('true'), clk_var));
             end
             
             obj.setCode( codes );
@@ -64,13 +64,13 @@ classdef RandomNumber_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             L = nasa_toLustre.ToLustreImport.L;
             import(L{:})
             [~, ~, status] = ...
-                Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Mean);
+                nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Mean);
             if status
                 obj.addUnsupported_options(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
                     blk.Mean, HtmlItem.addOpenCmd(blk.Origin_path)));
             end
             [~, ~, status] = ...
-                Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Variance);
+                nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Variance);
             if status
                 obj.addUnsupported_options(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
                     blk.Variance, HtmlItem.addOpenCmd(blk.Origin_path)));

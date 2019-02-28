@@ -15,6 +15,6 @@ function node_name = getCondActionName(T)
         isDefaultTrans = false;
     end
     transition_prefix = ...
-        StateflowTransition_To_Lustre.getUniqueName(T, src, isDefaultTrans);
+        nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.getUniqueName(T, src, isDefaultTrans);
     node_name = sprintf('%s_Cond', transition_prefix);
 end
