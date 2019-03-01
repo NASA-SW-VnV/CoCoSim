@@ -11,7 +11,7 @@ classdef Outport_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     
     methods
         
-        function  write_code(obj, parent, blk, lus_backend, varargin)
+        function  write_code(obj, parent, blk, ~, lus_backend, varargin)
             L = nasa_toLustre.ToLustreImport.L;
             import(L{:})
             [outputs, ~] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk);
