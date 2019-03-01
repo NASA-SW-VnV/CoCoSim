@@ -44,7 +44,8 @@ classdef RateTransition_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     blk.InitialCondition, outputDataType, numel(outputs));
                 if LusBackendType.isJKIND(lus_backend)...
                         || LusBackendType.isKIND2(lus_backend)
-                    % use condact
+                    %TODO: second argument of condact should be a node call
+                    % use merge for Kind2 instead
                     condact_args{1} = clockVar;
                     condact_args{2} = nasa_toLustre.lustreAst.TupleExpr(inputs);
                     condact_args = [condact_args, init_cond];
@@ -64,7 +65,8 @@ classdef RateTransition_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     blk.InitialCondition, outputDataType, numel(outputs));
                 if LusBackendType.isJKIND(lus_backend)...
                         || LusBackendType.isKIND2(lus_backend)
-                    % use condact
+                    %TODO: second argument of condact should be a node call
+                    % use merge for Kind2 instead
                     condact_args{1} = clockVar;
                     pre_inputs = arrayfun(@(i) ...
                         nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.ARROW, ...
@@ -123,11 +125,17 @@ classdef RateTransition_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             outTs = OutportCompiledSampleTime(1);
             inTsOffset = InportCompiledSampleTime(2);
             outTsOffset = OutportCompiledSampleTime(2);
-            [~, error_msg] = nasa_toLustre.blocks.getRateTransferType(blk, inTs, inTsOffset, outTs, outTsOffset );
+            [type, error_msg] = nasa_toLustre.blocks.getRateTransferType(blk, inTs, inTsOffset, outTs, outTsOffset );
             if ~isempty(error_msg)
                 obj.addUnsupported_options(error_msg);
             end
-            
+            if ~strcmp(type, 'Copy') && ...
+                    (LusBackendType.isJKIND(lus_backend)...
+                    || LusBackendType.isKIND2(lus_backend))
+                obj.addUnsupported_options(...
+                    sprintf('RateTransition block "%s" is not supported by Kind2 and JKind.', ...
+                            HtmlItem.addOpenCmd(blk.Origin_path)));
+            end
             options = obj.unsupported_options;
         end
         %%

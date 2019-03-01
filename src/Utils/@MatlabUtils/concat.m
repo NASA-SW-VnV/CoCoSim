@@ -18,6 +18,13 @@ function r = concat(varargin)
         v1 = varargin{1};
         v2 = varargin{2};
     end
+    if isempty(v1)
+        r = v2;
+        return;
+    elseif isempty(v2)
+        r = v1;
+        return;
+    end
     [n1, ~] = size(v1);
     [n2, ~] = size(v2);
     if n1 == 1
