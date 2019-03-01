@@ -134,9 +134,16 @@ classdef DiscretePulseGenerator_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lust
             
         end
         %%
-        function options = getUnsupportedOptions(obj, parent, blk, varargin)
+        function options = getUnsupportedOptions(obj, parent, blk, lus_backend, varargin)
             L = nasa_toLustre.ToLustreImport.L;
             import(L{:})
+            if LusBackendType.isJKIND(lus_backend)
+                obj.addUnsupported_options(sprintf(...
+                    ['Block "%s" is not supported by JKind model checker.', ...
+                'This optiont is supported by the other model checkers. ', ...
+                cocosim_menu.CoCoSimPreferences.getChangeModelCheckerMsg()], ...
+                    HtmlItem.addOpenCmd(blk.Origin_path)));
+            end
             [~, ~, status] = ...
                 nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Amplitude);
             if status

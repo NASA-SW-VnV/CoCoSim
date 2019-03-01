@@ -26,17 +26,18 @@ function new_obj = contractNode_substituteVars(obj)
         end
     end
     %ignore simplification if there is automaton
-    all_obj = obj.getAllLustreExpr();
-    all_objClass = cellfun(@(x) class(x), all_obj, 'UniformOutput', false);
+    all_body_obj = cellfun(@(x) x.getAllLustreExpr(), new_bodyEqs, 'un',0);
+    all_body_obj = MatlabUtils.concat(all_body_obj{:});
+    all_objClass = cellfun(@(x) class(x), all_body_obj, 'UniformOutput', false);
     if ismember('nasa_toLustre.lustreAst.LustreAutomaton', all_objClass)
         return;
     end
     %get EveryExpr Conditions
-    EveryExprObjects = all_obj(strcmp(all_objClass, 'nasa_toLustre.lustreAst.EveryExpr'));
+    EveryExprObjects = all_body_obj(strcmp(all_objClass, 'nasa_toLustre.lustreAst.EveryExpr'));
     EveryConds = cellfun(@(x) x.getCond(), EveryExprObjects, 'UniformOutput', false);
 
     %get all VarIdExpr objects
-    VarIdExprObjects = all_obj(strcmp(all_objClass, 'nasa_toLustre.lustreAst.VarIdExpr'));
+    VarIdExprObjects = all_body_obj(strcmp(all_objClass, 'nasa_toLustre.lustreAst.VarIdExpr'));
     varIDs = cellfun(@(x) x.getId(), VarIdExprObjects, 'UniformOutput', false);
     % go over Assignments
     for i=1:numel(new_bodyEqs)
@@ -60,8 +61,8 @@ function new_obj = contractNode_substituteVars(obj)
             end
             % skip var if it is never used or used more than once. 
             % For code readability and CEX debugging.
-            nb_occ = sum(strcmp(var.getId(), varIDs));
-            if nb_occ > 1
+            nb_occ = sum(strcmp(var.getId(), varIDs)) - 1;%minus itself
+            if nb_occ ~= 1
                 continue;
             end
 

@@ -14,7 +14,7 @@ end
 
 function dedCallback(~)
     try
-        [ CoCoSimPreferences ] = loadCoCoSimPreferences();
+        [ CoCoSimPreferences ] = cocosim_menu.CoCoSimPreferences.load();
         model_full_path = MenuUtils.get_file_name(gcs);
         MenuUtils.add_pp_warning(model_full_path);
         lustreDED(model_full_path, [], CoCoSimPreferences.lustreBackend);

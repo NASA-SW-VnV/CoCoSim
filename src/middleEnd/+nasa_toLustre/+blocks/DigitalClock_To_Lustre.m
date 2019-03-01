@@ -48,14 +48,22 @@ classdef DigitalClock_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             obj.setCode( codes);
         end
         
-        function options = getUnsupportedOptions(obj, parent, blk, varargin)
+        function options = getUnsupportedOptions(obj, parent, blk, ...
+                lus_backend, varargin)
             [~, ~, status] = ...
                 nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(parent, blk, blk.SampleTime);
             if status
                 obj.addUnsupported_options(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
                     blk.SampleTime, HtmlItem.addOpenCmd(blk.Origin_path)));
             end
-            
+            if LusBackendType.isJKIND(lus_backend)
+                % Jkind does not support non-constant modulus: "mod" operator.
+                obj.addUnsupported_options(sprintf(...
+                    ['Block "%s" is not supported by JKind model checker.', ...
+                'This optiont is supported by the other model checkers. ', ...
+                cocosim_menu.CoCoSimPreferences.getChangeModelCheckerMsg()], ...
+                    HtmlItem.addOpenCmd(blk.Origin_path)));
+            end
             options = obj.unsupported_options;
         end
         %%

@@ -53,7 +53,7 @@ end
 function kindCallback(callbackInfo)
     clear;
     assignin('base', 'SOLVER', 'K');
-    [ CoCoSimPreferences ] = loadCoCoSimPreferences();
+    [ CoCoSimPreferences ] = cocosim_menu.CoCoSimPreferences.load();
     CoCoSimPreferences.compositionalAnalysis = false;
     cocosim_menu.CoCoSimPreferences.save(CoCoSimPreferences);
     VerificationMenu.runCoCoSim;

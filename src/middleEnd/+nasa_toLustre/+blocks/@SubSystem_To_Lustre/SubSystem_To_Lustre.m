@@ -21,11 +21,8 @@ classdef SubSystem_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             node_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);
             codes = {};
             isInsideContract =nasa_toLustre.utils.SLX2LusUtils.isContractBlk(parent);
-            maskType = '';
-            if isInsideContract && isfield(blk, 'MaskType')
-                maskType = blk.MaskType;
-            end
-            if isInsideContract && numel(outputs) > 1
+            
+            if isInsideContract && numel(outputs) > 1 && LusBackendType.isKIND2(lus_backend)
                 display_msg(...
                     sprintf('Subsystem %s has more than one outputs. All Subsystems inside Contract should have one output.', ...
                     HtmlItem.addOpenCmd(blk.Origin_path)), MsgType.ERROR, 'SubSystem_To_Lustre', '')
@@ -78,13 +75,8 @@ classdef SubSystem_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     ResetType, codes, inputs, outputs);
                 obj.addVariable(ResetCondVar);
             else
-                if isInsideContract
-                    codes{end + 1} = nasa_toLustre.blocks.SubSystem_To_Lustre.contractBlkCode(...
-                        parent, blk, node_name, inputs, outputs, maskType, xml_trace);
-                else
-                    codes{end + 1} = nasa_toLustre.lustreAst.LustreEq(outputs,...
-                        nasa_toLustre.lustreAst.NodeCallExpr(node_name, inputs));
-                end
+                codes{end + 1} = nasa_toLustre.lustreAst.LustreEq(outputs,...
+                    nasa_toLustre.lustreAst.NodeCallExpr(node_name, inputs));
             end
             
             

@@ -5,11 +5,18 @@ function code = print(obj, backend)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
- 
+    
     if LusBackendType.isPRELUDE(backend)
         code = obj.print_prelude();
     else
-        %TODO: check if KIND2 syntax is OK for the other backends.
-        code = obj.print_kind2(backend);
+        if isempty(obj.id) || LusBackendType.isJKIND(backend)
+            %Jkind does not support ID
+            code = sprintf('--%%PROPERTY %s;', ...
+                obj.exp.print(backend));
+        else
+            code = sprintf('--%%PROPERTY "%s" %s;', ...
+                obj.id, ...
+                obj.exp.print(backend));
+        end
     end
 end

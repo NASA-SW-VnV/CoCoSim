@@ -1,6 +1,5 @@
-classdef ModelReference_To_Lustre < nasa_toLustre.blocks.SubSystem_To_Lustre
-    % ModelReference_To_Lustre translates ModelReferences call as Subsystem
-    % call
+classdef ContractRequireBlock_To_Lustre < nasa_toLustre.blocks.SubSystem_To_Lustre
+    % ContractRequireBlock_To_Lustre
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -15,14 +14,17 @@ classdef ModelReference_To_Lustre < nasa_toLustre.blocks.SubSystem_To_Lustre
         
         function  write_code(obj, parent, blk, xml_trace, lus_backend, ...
                 coco_backend, main_sampleTime, varargin)
-            
             write_code@nasa_toLustre.blocks.SubSystem_To_Lustre(obj, ...
                 parent, blk, xml_trace, lus_backend, ...
                 coco_backend, main_sampleTime, varargin{:});
-            
+            xml_trace.add_Property(...
+                blk.Origin_path, ...
+                nasa_toLustre.utils.SLX2LusUtils.node_name_format(parent),...
+                prop_ID, 1, 'require')
         end
         
-        function options = getUnsupportedOptions(obj,parent, blk, lus_backend, varargin)
+        function options = getUnsupportedOptions(obj, parent, blk,...
+                lus_backend, varargin)
             getUnsupportedOptions@nasa_toLustre.blocks.SubSystem_To_Lustre(obj,...
                 parent, blk, lus_backend, varargin{:});
             options = obj.unsupported_options;

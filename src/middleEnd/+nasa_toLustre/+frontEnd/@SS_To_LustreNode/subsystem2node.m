@@ -7,9 +7,7 @@ function [ main_node, isContractBlk, external_nodes, external_libraries ] = ...
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-         
-    %L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
-    %import(L{:})
+
     %BLOCK_TO_LUSTRE create a lustre node for every Simulink subsystem within
     %subsys_struc.
     %INPUTS:
@@ -45,7 +43,9 @@ function [ main_node, isContractBlk, external_nodes, external_libraries ] = ...
 
     if isContractBlk && ~LusBackendType.isKIND2(lus_backend)
         %generate contracts only for KIND2 lus_backend
-        return;
+        % For other backends, a contract will be considered as a node
+        % containing sub properties.
+        isContractBlk = false;
     end
 
 
@@ -131,9 +131,29 @@ function [ main_node, isContractBlk, external_nodes, external_libraries ] = ...
     % the contract of conditional SS is done in the automaton node
     if isfield(ss_ir, 'ContractNodeNames')
         contractImports = nasa_toLustre.frontEnd.SS_To_LustreNode.getImportedContracts(...
-            parent_ir, ss_ir, main_sampleTime, node_inputs_withoutDT_cell, node_outputs_withoutDT_cell);
-        contract = nasa_toLustre.lustreAst.LustreContract('', '', {}, {}, {}, ...
-            contractImports, true);
+                parent_ir, ss_ir, main_sampleTime, node_inputs_withoutDT_cell, node_outputs_withoutDT_cell);
+        if LusBackendType.isKIND2(lus_backend) ...
+                || LusBackendType.isLUSTREC(lus_backend)
+            %import contract
+            contract = nasa_toLustre.lustreAst.LustreContract('', '', {}, {}, {}, ...
+                contractImports, true);
+            %No need for the following code. It will be handled in
+            %ContractBlock_To_Lustre.m
+%         else
+%             % add contracts as local calls. They will be checked as
+%             % subProperties.
+%             for i=1:length(contractImports)
+%                 contract_name = contractImports{i}.name;
+%                 contract_input = MatlabUtils.concat(contractImports{i}.inputs, ...
+%                     contractImports{i}.outputs);
+%                 varId = nasa_toLustre.lustreAst.VarIdExpr(...
+%                     strcat(contract_name, '_virtual'));
+%                 var = nasa_toLustre.lustreAst.LustreVar(varId, 'bool');
+%                 variables{end+1} = var;
+%                 body{end+1} = nasa_toLustre.lustreAst.LustreEq(varId, ...
+%                     nasa_toLustre.lustreAst.NodeCallExpr(contract_name, contract_input));
+%             end
+        end
     end
     % If the Subsystem is VerificationSubsystem, then add virtual
     % output
@@ -155,7 +175,7 @@ function [ main_node, isContractBlk, external_nodes, external_libraries ] = ...
         sprintf('Original block name: %s', ss_ir.Origin_path), true);
     %main_node = sprintf('%s\n%s\n%s\n%s\nlet\n\t%s\ntel\n',...
     %    comment, node_header, contract, variables_str, body);
-    if isContractBlk
+    if isContractBlk && LusBackendType.isKIND2(lus_backend)
         main_node = nasa_toLustre.lustreAst.LustreContract(...
             comment, ...
             node_name,...
@@ -165,6 +185,7 @@ function [ main_node, isContractBlk, external_nodes, external_libraries ] = ...
             body, ...
             false);
     else
+        isContractBlk = 0;
         main_node = nasa_toLustre.lustreAst.LustreNode(...
             comment, ...
             node_name,...

@@ -12,9 +12,20 @@ classdef ContractValidatorBlock_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lust
     
     methods
         
-        function  write_code(varargin)
-            % Validator block willl be ignored as it will be
-            % supported in its contract
+        function  write_code(obj, parent, blk, xml_trace, lus_backend, ...
+                ~, ~, varargin)
+            if LusBackendType.isKIND2(lus_backend)
+                % Validator block willl be ignored as it will be
+                % supported in its contract
+                return;
+            end
+            % ignore it for other backends as it is not important.
+            [outputs, outputs_dt] =...
+                nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+            obj.addVariable(outputs_dt);
+            obj.addCode(cellfun(@(x) ...
+                nasa_toLustre.lustreAst.LustreEq(x, nasa_toLustre.lustreAst.BooleanExpr(true)), ...
+                outputs, 'un', 0));
             
         end
         

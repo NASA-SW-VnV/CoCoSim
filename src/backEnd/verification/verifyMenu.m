@@ -17,7 +17,7 @@ function verifCallback(varargin)
     try
         clear;
         model_full_path = MenuUtils.get_file_name(gcs);
-        [ CoCoSimPreferences ] = loadCoCoSimPreferences();
+        [ CoCoSimPreferences ] = cocosim_menu.CoCoSimPreferences.load();
         warning('off')
         MenuUtils.add_pp_warning(model_full_path);
         if isequal(CoCoSimPreferences.lustreCompiler, 'NASA')

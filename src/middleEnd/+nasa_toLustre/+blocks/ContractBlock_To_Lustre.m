@@ -1,4 +1,4 @@
-classdef ContractBlock_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
+classdef ContractBlock_To_Lustre < nasa_toLustre.blocks.SubSystem_To_Lustre
     % ContractBlock_To_Lustre translates contract observer as contract in
     % kind2
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -13,11 +13,17 @@ classdef ContractBlock_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     
     methods
         
-        function  write_code(varargin)
-            % Contracts Subsystems willl be ignored as they will be
-            % imported in the node definition of the associate Simulink
-            % Subsystem.
-            
+        function  write_code(obj, parent, blk, xml_trace, lus_backend, ...
+                coco_backend, main_sampleTime, varargin)
+            if LusBackendType.isKIND2(lus_backend)
+                % Contracts Subsystems willl be ignored as they will be
+                % imported in the node definition of the associate Simulink
+                % Subsystem. See SS_To_LustreNode.subsystem2node function
+                return;
+            end
+            write_code@nasa_toLustre.blocks.SubSystem_To_Lustre(obj, ...
+                parent, blk, xml_trace, lus_backend, ...
+                coco_backend, main_sampleTime, varargin{:});
         end
         
         function options = getUnsupportedOptions(obj,parent, blk, varargin)

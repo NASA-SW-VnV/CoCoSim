@@ -12,7 +12,7 @@ classdef Kind2Utils2
     
     methods(Static = true)
         %% Check the lustre syntax
-        [status, output] = checkSyntaxError(lus_file_path, KIND2, Z3)
+        [status, output] = checkSyntaxError(lus_file_path, KIND2)
         %% run kind2 with arguments
         [status, solver_output] = runKIND2(...
                 verif_lus_path,...

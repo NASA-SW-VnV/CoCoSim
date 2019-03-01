@@ -19,7 +19,7 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, abstractedBlo
     
     %% global variables
     global TOLUSTRE_ENUMS_MAP TOLUSTRE_ENUMS_CONV_NODES ...
-        KIND2 JKIND JLUSTRE2KIND Z3 LUSTREC CHECK_SF_ACTIONS ...
+        KIND2 JLUSTRE2KIND LUSTREC CHECK_SF_ACTIONS ...
         ERROR_MSG WARNING_MSG DEBUG_MSG COCOSIM_DEV_DEBUG...
         DED_PROP_MAP CoCoSimPreferences;
     ERROR_MSG = {};
@@ -225,7 +225,7 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, abstractedBlo
         fprintf(fid, '%s', Lustrecode);
         fclose(fid);
         if COCOSIM_DEV_DEBUG
-            display_msg(Lustrecode, MsgType.DEBUG, ...
+            display_msg(strrep(Lustrecode, '%', '%%'), MsgType.DEBUG, ...
                 'lustre_multiclocks_compiler', '');
         end
     catch me
@@ -247,7 +247,7 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, abstractedBlo
     %% check lustre syntax
     if ~LusBackendType.isPRELUDE(lus_backend) 
         if LusBackendType.isKIND2(lus_backend)
-            [syntax_status, output] = Kind2Utils2.checkSyntaxError(lustre_file_path, KIND2, Z3);
+            [syntax_status, output] = Kind2Utils2.checkSyntaxError(lustre_file_path, KIND2);
         elseif LusBackendType.isLUSTREC(lus_backend)
             [~, syntax_status, output] = LustrecUtils.generate_lusi(lustre_file_path, LUSTREC );
         elseif LusBackendType.isJKIND(lus_backend)

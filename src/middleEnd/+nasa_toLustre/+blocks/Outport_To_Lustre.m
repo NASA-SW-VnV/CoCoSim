@@ -11,13 +11,13 @@ classdef Outport_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     
     methods
         
-        function  write_code(obj, parent, blk, varargin)
+        function  write_code(obj, parent, blk, lus_backend, varargin)
             L = nasa_toLustre.ToLustreImport.L;
             import(L{:})
             [outputs, ~] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk);
             [inputs] =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk);
             isInsideContract =nasa_toLustre.utils.SLX2LusUtils.isContractBlk(parent);
-            if isInsideContract
+            if isInsideContract && LusBackendType.isKIND2(lus_backend)
                 % ignore output "valid" in contract
                 return;
             end
