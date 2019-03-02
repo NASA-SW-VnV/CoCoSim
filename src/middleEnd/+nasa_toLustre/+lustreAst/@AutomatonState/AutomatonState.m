@@ -70,7 +70,7 @@ classdef AutomatonState < nasa_toLustre.lustreAst.LustreExpr
         nb_occ = nbOccuranceVar(varargin)
 
         %% substituteVars ignored in Automaton
-        new_obj = substituteVars(obj, varargin)
+        substituteVars(obj, varargin)
 
         function all_obj = getAllLustreExpr(obj)
             all_obj = {};

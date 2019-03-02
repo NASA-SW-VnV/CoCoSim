@@ -134,7 +134,7 @@ classdef LustreContract < nasa_toLustre.lustreAst.LustreAst
         end
         
          %% substituteVars 
-        function new_obj = substituteVars(obj)
+        function obj = substituteVars(obj)
             new_obj = nasa_toLustre.lustreAst.LustreNode.contractNode_substituteVars(obj);
         end
         

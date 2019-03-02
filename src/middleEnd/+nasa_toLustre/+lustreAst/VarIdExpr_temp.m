@@ -57,7 +57,7 @@ classdef VarIdExpr < nasa_toLustre.lustreAst.LustreExpr
             end
         end
         %% substituteVars
-        function new_obj = substituteVars(obj, var, newVar)
+        function obj = substituteVars(obj, var, newVar)
             if isequal(obj.getId(), var.getId())
                 new_obj =  newVar;
             else

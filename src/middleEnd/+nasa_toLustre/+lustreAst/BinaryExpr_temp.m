@@ -85,7 +85,7 @@ classdef BinaryExpr < nasa_toLustre.lustreAst.LustreExpr
                 obj.withPar, obj.addEpsilon, obj.epsilon);
         end
         %% substituteVars
-        function new_obj = substituteVars(obj, oldVar, newVar)
+        function obj = substituteVars(obj, oldVar, newVar)
             import nasa_toLustre.lustreAst.BinaryExpr
             new_obj = nasa_toLustre.lustreAst.BinaryExpr(obj.op,...
                 obj.left.substituteVars( oldVar, newVar),...

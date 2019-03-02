@@ -26,47 +26,22 @@ classdef AutomatonTransExpr < nasa_toLustre.lustreAst.LustreExpr
             end
         end
         %% deepCopy
-        function new_obj = deepCopy(obj)
-            if obj.is_restart
-                state_name = obj.restart_state;
-            else
-                state_name = obj.resume_state;
-            end
-            new_obj = nasa_toLustre.lustreAst.AutomatonTransExpr(...
-                obj.condition.deepCopy(), ...
-                obj.is_restart, state_name);
-        end
+        new_obj = deepCopy(obj)
         %% simplify expression
-        function new_obj = simplify(obj)
-            if obj.is_restart
-                state_name = obj.restart_state;
-            else
-                state_name = obj.resume_state;
-            end
-            new_obj = nasa_toLustre.lustreAst.AutomatonTransExpr(...
-                obj.condition.simplify(), ...
-                obj.is_restart, state_name);
-        end
+        new_obj = simplify(obj)
          %% nbOccuranceVar ignored in Automaton
         function nb_occ = nbOccuranceVar(varargin)
             nb_occ = 0;
         end
         %% substituteVars ignored in Automaton
-        function new_obj = substituteVars(obj, varargin)
-            new_obj = obj;
-        end
+        new_obj = substituteVars(obj, varargin)
         
         function all_obj = getAllLustreExpr(obj)
             all_obj = [{obj.condition}; obj.condition.getAllLustreExpr()];
         end
         %% This functions are used for ForIterator block
-        function [new_obj, varIds] = changePre2Var(obj)
-            new_obj = obj;
-            varIds = {};
-        end
-        function new_obj = changeArrowExp(obj, ~)
-            new_obj = obj;
-        end
+        [new_obj, varIds] = changePre2Var(obj)
+        new_obj = changeArrowExp(obj, ~)
         
         %% This function is used by KIND2 LustreProgram.print()
         function nodesCalled = getNodesCalled(obj)
@@ -75,41 +50,16 @@ classdef AutomatonTransExpr < nasa_toLustre.lustreAst.LustreExpr
         
         %% This function is used in Stateflow compiler to change from imperative
         % code to Lustre
-        function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft)
-            %TODO: Not done for this class yet, as it is not used by stateflow.
-            new_obj = obj;
-        end
+        [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft)
         
         
         %%
-        function code = print(obj, backend)
-            %TODO: check if lustrec syntax is OK for jkind and prelude.
-            code = obj.print_lustrec(backend);
-        end
-        function code = print_lustrec(obj, backend)
-            if obj.is_restart
-                code = sprintf('%s restart %s\n',...
-                    obj.condition.print(backend), ...
-                    obj.restart_state);
-            else
-                code = sprintf('%s resume %s\n',...
-                    obj.condition.print(backend), ...
-                    obj.resume_state);
-            end
-        end
-        
-        function code = print_kind2(obj)
-            code = obj.print_lustrec(LusBackendType.KIND2);
-        end
-        function code = print_zustre(obj)
-            code = obj.print_lustrec(LusBackendType.ZUSTRE);
-        end
-        function code = print_jkind(obj)
-            code = obj.print_lustrec(LusBackendType.JKIND);
-        end
-        function code = print_prelude(obj)
-            code = obj.print_lustrec(LusBackendType.PRELUDE);
-        end
+        code = print(obj, backend)
+        code = print_lustrec(obj, backend)
+        code = print_kind2(obj)
+        code = print_zustre(obj)
+        code = print_jkind(obj)
+        code = print_prelude(obj)
 
     end
 

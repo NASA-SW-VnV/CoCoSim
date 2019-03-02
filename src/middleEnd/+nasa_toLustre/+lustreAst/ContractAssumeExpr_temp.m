@@ -37,7 +37,7 @@ classdef ContractAssumeExpr < nasa_toLustre.lustreAst.LustreExpr
             nb_occ = obj.exp.nbOccuranceVar(var);
         end
         %% substituteVars 
-        function new_obj = substituteVars(obj, oldVar, newVar)
+        function obj = substituteVars(obj, oldVar, newVar)
             new_obj = nasa_toLustre.lustreAst.ContractAssumeExpr(obj.id, ...
                 obj.exp.substituteVars(oldVar, newVar));
         end

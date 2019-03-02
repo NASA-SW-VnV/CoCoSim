@@ -45,7 +45,7 @@ classdef EveryExpr < nasa_toLustre.lustreAst.LustreExpr
         end
         
         %% substituteVars 
-        function new_obj = substituteVars(obj, oldVar, newVar)
+        function obj = substituteVars(obj, oldVar, newVar)
             new_args = cellfun(@(x) x.substituteVars(oldVar, newVar), obj.nodeArgs, 'UniformOutput', 0);
             new_obj = nasa_toLustre.lustreAst.EveryExpr(obj.nodeName, ...
                 new_args, obj.cond);

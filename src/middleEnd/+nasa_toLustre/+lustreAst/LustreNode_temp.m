@@ -177,7 +177,7 @@ classdef LustreNode < nasa_toLustre.lustreAst.LustreAst
             nb_occ = sum(nb_occ_perEq);
         end
         %
-        function new_obj = substituteVars(obj)
+        function obj = substituteVars(obj)
             new_obj = nasa_toLustre.lustreAst.LustreNode.contractNode_substituteVars(obj);
         end
         %

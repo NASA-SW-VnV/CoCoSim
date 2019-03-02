@@ -47,7 +47,7 @@ classdef ConcurrentAssignments < nasa_toLustre.lustreAst.LustreExpr
             nb_occ = sum(nb_occ_perEq);
         end
         %% substituteVars
-        function new_obj = substituteVars(obj, oldVar, newVar)
+        function obj = substituteVars(obj, oldVar, newVar)
             new_assignments = cellfun(@(x) x.substituteVars(oldVar, newVar), obj.assignments, 'UniformOutput', 0);
             new_obj = nasa_toLustre.lustreAst.ConcurrentAssignments(new_assignments);
         end

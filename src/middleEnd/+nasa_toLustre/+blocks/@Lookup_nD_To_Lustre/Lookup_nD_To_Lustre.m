@@ -153,7 +153,7 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 lus_backend)
         
         [body,vars,table_elem] = ...
-                nasa_toLustre.blocks.Lookup_nD_To_Lustre.addTableCode(Table,blk_name,lusInport_dt,isLookupTableDynamic,inputs)
+                addTableCode(Table,blk_name,lusInport_dt,isLookupTableDynamic,inputs)
 
         ep = calculate_eps(BP, j)
 

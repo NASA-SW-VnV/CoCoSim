@@ -48,43 +48,16 @@ classdef IteExpr < nasa_toLustre.lustreAst.LustreExpr
         end
         
         %%
-        function new_obj = deepCopy(obj)
-            new_obj = nasa_toLustre.lustreAst.IteExpr(...
-                obj.condition.deepCopy(),...
-                obj.thenExpr.deepCopy(),...
-                obj.ElseExpr.deepCopy(),...
-                obj.OneLine);
-        end
+        new_obj = deepCopy(obj)
+            
         
         %% simplify expression
-        function new_obj = simplify(obj)
-            import nasa_toLustre.lustreAst.*
-            new_cond = obj.condition.simplify();
-            new_then = obj.thenExpr.simplify();
-            new_else = obj.ElseExpr.simplify();
-            % simplify trivial if-and-else
-            % if true then x else y => x
-            if isa(obj.condition, 'BooleanExpr')
-                if obj.condition.getValue()
-                    new_obj = new_then;
-                else
-                    new_obj = new_else;
-                end
-                return;
-                
-            end
-            new_obj = nasa_toLustre.lustreAst.IteExpr(new_cond, new_then, new_else, obj.OneLine);
+        new_obj = simplify(obj)
             
-        end
         
          %% substituteVars 
-        function new_obj = substituteVars(obj, oldVar, newVar)
-            new_obj = nasa_toLustre.lustreAst.IteExpr(...
-                obj.condition.substituteVars(oldVar, newVar),...
-                obj.thenExpr.substituteVars(oldVar, newVar),...
-                obj.ElseExpr.substituteVars(oldVar, newVar),...
-                obj.OneLine);
-        end
+        new_obj = substituteVars(obj, oldVar, newVar)
+            
         %% This function is used in substitute vars in LustreNode
         function all_obj = getAllLustreExpr(obj)
             all_obj = [...
@@ -94,26 +67,11 @@ classdef IteExpr < nasa_toLustre.lustreAst.LustreExpr
         end
         
         %% nbOccurance
-        function nb_occ = nbOccuranceVar(obj, var)
-            nb_occ = obj.condition.nbOccuranceVar(var) ...
-                + obj.thenExpr.nbOccuranceVar(var)...
-                + obj.ElseExpr.nbOccuranceVar(var);
-        end
+        nb_occ = nbOccuranceVar(obj, var)
         
         %% This functions are used for ForIterator block
-        function [new_obj, varIds] = changePre2Var(obj)
-            [cond, vcondId] = obj.condition.changePre2Var();
-            [then, thenCondId] = obj.thenExpr.changePre2Var();
-            [elseE, elseCondId] = obj.ElseExpr.changePre2Var();
-            varIds = [vcondId, thenCondId, elseCondId];
-            new_obj = nasa_toLustre.lustreAst.IteExpr(cond, then, elseE, obj.OneLine);
-        end
-        function new_obj = changeArrowExp(obj, cond)
-            new_obj = nasa_toLustre.lustreAst.IteExpr(obj.condition.changeArrowExp(cond),...
-                obj.thenExpr.changeArrowExp(cond),...
-                obj.ElseExpr.changeArrowExp(cond),...
-                obj.OneLine);
-        end
+       [new_obj, varIds] = changePre2Var(obj)
+         new_obj = changeArrowExp(obj, cond)
         %% This function is used by Stateflow function SF_To_LustreNode.getPseudoLusAction
         function varIds = GetVarIds(obj)
             vcondId = obj.condition.GetVarIds();
@@ -123,18 +81,9 @@ classdef IteExpr < nasa_toLustre.lustreAst.LustreExpr
         end
         % This function is used in Stateflow compiler to change from imperative
         % code to Lustre
-        function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft)
-            new_obj = nasa_toLustre.lustreAst.IteExpr(obj.condition.pseudoCode2Lustre(outputs_map, false),...
-                obj.thenExpr.pseudoCode2Lustre(outputs_map, false),...
-                obj.ElseExpr.pseudoCode2Lustre(outputs_map, false),...
-                obj.OneLine);
-        end
-        function [new_obj, outputs_map] = pseudoCode2Lustre_OnlyElseExp(obj, outputs_map, old_outputs_map)
-            new_obj = nasa_toLustre.lustreAst.IteExpr(obj.condition.pseudoCode2Lustre(old_outputs_map, false),...
-                obj.thenExpr.pseudoCode2Lustre(old_outputs_map, false),...
-                obj.ElseExpr.pseudoCode2Lustre(outputs_map, false),...
-                obj.OneLine);
-        end
+         [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft)
+         
+        [new_obj, outputs_map] = pseudoCode2Lustre_OnlyElseExp(obj, outputs_map, old_outputs_map)
         %% This function is used by KIND2 LustreProgram.print()
         function nodesCalled = getNodesCalled(obj)
             nodesCalled = {};
@@ -149,39 +98,15 @@ classdef IteExpr < nasa_toLustre.lustreAst.LustreExpr
         
         
         %%
-        function code = print(obj, backend)
-            %TODO: check if LUSTREC syntax is OK for the other backends.
-            code = obj.print_lustrec(backend);
-        end
+        code = print(obj, backend)
         
         
-        function code = print_lustrec(obj, backend)
-            if obj.OneLine
-                code = sprintf('(if %s then %s else %s)', ...
-                    obj.condition.print(backend),...
-                    obj.thenExpr.print(backend), ...
-                    obj.ElseExpr.print(backend));
-            else
-                code = sprintf('if %s then\n\t\t%s\n\t    else %s', ...
-                    obj.condition.print(backend),...
-                    obj.thenExpr.print(backend), ...
-                    obj.ElseExpr.print(backend));
-            end
-            
-        end
+        code = print_lustrec(obj, backend)
         
-        function code = print_kind2(obj)
-            code = obj.print_lustrec(LusBackendType.KIND2);
-        end
-        function code = print_zustre(obj)
-            code = obj.print_lustrec(LusBackendType.ZUSTRE);
-        end
-        function code = print_jkind(obj)
-            code = obj.print_lustrec(LusBackendType.JKIND);
-        end
-        function code = print_prelude(obj)
-            code = obj.print_lustrec(LusBackendType.PRELUDE);
-        end
+        code = print_kind2(obj)
+        code = print_zustre(obj)
+        code = print_jkind(obj)
+        code = print_prelude(obj)
     end
     methods(Static)
         % This function return the IteExpr object

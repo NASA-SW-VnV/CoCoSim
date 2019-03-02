@@ -30,7 +30,7 @@ classdef EnumValueExpr < nasa_toLustre.lustreAst.LustreExpr
             nb_occ = 0;
         end
         %% substituteVars 
-        function new_obj = substituteVars(obj, varargin)
+        function obj = substituteVars(obj, varargin)
             new_obj = obj;
         end
         %% This function is used in substitute vars in LustreNode

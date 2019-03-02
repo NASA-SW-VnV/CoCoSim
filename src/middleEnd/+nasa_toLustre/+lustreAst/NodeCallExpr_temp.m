@@ -61,7 +61,7 @@ classdef NodeCallExpr < nasa_toLustre.lustreAst.LustreExpr
             nb_occ = sum(nb_occ_perEq);
         end
         %% substituteVars
-        function new_obj = substituteVars(obj, var, newVar)
+        function obj = substituteVars(obj, var, newVar)
             new_args = cellfun(@(x) x.substituteVars(var, newVar), obj.args, 'UniformOutput', 0);
             new_obj = nasa_toLustre.lustreAst.NodeCallExpr(obj.nodeName, new_args);
         end

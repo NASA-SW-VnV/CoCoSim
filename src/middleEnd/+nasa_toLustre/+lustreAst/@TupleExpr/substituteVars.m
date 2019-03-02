@@ -1,4 +1,4 @@
-function new_obj = substituteVars(obj, var, newVar)
+function obj = substituteVars(obj, var, newVar)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -6,6 +6,5 @@ function new_obj = substituteVars(obj, var, newVar)
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  
-    new_args = cellfun(@(x) x.substituteVars(var, newVar), obj.args, 'UniformOutput', 0);
-    new_obj = nasa_toLustre.lustreAst.TupleExpr(new_args);
+    obj.args = cellfun(@(x) x.substituteVars(var, newVar), obj.args, 'UniformOutput', 0);
 end

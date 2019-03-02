@@ -1,4 +1,4 @@
-function new_obj = substituteVars(obj)
+function obj = substituteVars(obj)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -6,5 +6,5 @@ function new_obj = substituteVars(obj)
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  
-    new_obj = nasa_toLustre.lustreAst.LustreNode.contractNode_substituteVars(obj);
+    obj = nasa_toLustre.lustreAst.LustreNode.contractNode_substituteVars(obj);
 end

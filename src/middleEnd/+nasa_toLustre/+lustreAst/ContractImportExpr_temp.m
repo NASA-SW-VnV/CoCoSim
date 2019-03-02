@@ -47,7 +47,7 @@ classdef ContractImportExpr < nasa_toLustre.lustreAst.LustreExpr
         end
         
         %% substituteVars 
-        function new_obj = substituteVars(obj, oldVar, newVar)
+        function obj = substituteVars(obj, oldVar, newVar)
             new_inputs = cellfun(@(x) x.substituteVars(oldVar, newVar), obj.inputs, 'UniformOutput', 0);
             new_outputs = cellfun(@(x) x.substituteVars(oldVar, newVar), obj.outputs, 'UniformOutput', 0);
             new_obj = nasa_toLustre.lustreAst.ContractImportExpr(obj.name, ...

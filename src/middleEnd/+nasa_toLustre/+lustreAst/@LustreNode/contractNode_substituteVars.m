@@ -5,24 +5,23 @@
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function new_obj = contractNode_substituteVars(obj)
-   import nasa_toLustre.lustreAst.*
-    new_obj = obj.deepCopy();
-    if length(new_obj.bodyEqs) > 500
+function obj = contractNode_substituteVars(obj)
+    import nasa_toLustre.lustreAst.*
+    if length(obj.bodyEqs) > 500
         %Ignore optimization for Big Nodes (Like Lookup Table)
         display_msg(sprintf('Optimization ignored for node "%d" as the number of equations exceeds 500 Eqs.',...
-            obj.getName()), MsgType.INFO, 'substituteVars', '');
+            obj.getName()), MsgType.INFO, 'contractNode_substituteVars', '');
         return;
     end
-    new_localVars = new_obj.localVars;
+    new_localVars = obj.localVars;
     % include ConcurrentAssignments as normal Eqts
     new_bodyEqs = {};
-    for i=1:numel(new_obj.bodyEqs)
-        if isa(new_obj.bodyEqs{i}, 'ConcurrentAssignments')
+    for i=1:numel(obj.bodyEqs)
+        if isa(obj.bodyEqs{i}, 'ConcurrentAssignments')
             new_bodyEqs = MatlabUtils.concat(new_bodyEqs, ...
-                new_obj.bodyEqs{i}.getAssignments());
+                obj.bodyEqs{i}.getAssignments());
         else
-            new_bodyEqs{end+1} = new_obj.bodyEqs{i};
+            new_bodyEqs{end+1} = obj.bodyEqs{i};
         end
     end
     %ignore simplification if there is automaton
@@ -35,13 +34,13 @@ function new_obj = contractNode_substituteVars(obj)
     %get EveryExpr Conditions
     EveryExprObjects = all_body_obj(strcmp(all_objClass, 'nasa_toLustre.lustreAst.EveryExpr'));
     EveryConds = cellfun(@(x) x.getCond(), EveryExprObjects, 'UniformOutput', false);
-
+    
     %get all VarIdExpr objects
     VarIdExprObjects = all_body_obj(strcmp(all_objClass, 'nasa_toLustre.lustreAst.VarIdExpr'));
     varIDs = cellfun(@(x) x.getId(), VarIdExprObjects, 'UniformOutput', false);
     % go over Assignments
     for i=1:numel(new_bodyEqs)
-        % e.g. y = f(x); 
+        % e.g. y = f(x);
         
         if isa(new_bodyEqs{i}, 'LustreEq')...
                 && isa(new_bodyEqs{i}.getLhs(), 'VarIdExpr')...
@@ -49,7 +48,7 @@ function new_obj = contractNode_substituteVars(obj)
             var = new_bodyEqs{i}.getLhs();
             rhs = new_bodyEqs{i}.getRhs();
             new_var = nasa_toLustre.lustreAst.ParenthesesExpr(rhs.deepCopy());
-
+            
             % if rhs class is IteExpr, skip it. To hep debugging.
             if isa(rhs, 'IteExpr')
                 continue;
@@ -59,20 +58,20 @@ function new_obj = contractNode_substituteVars(obj)
             if rhs.nbOccuranceVar(var) >= 1
                 continue;
             end
-            % skip var if it is never used or used more than once. 
+            % skip var if it is never used or used more than once.
             % For code readability and CEX debugging.
             nb_occ = sum(strcmp(var.getId(), varIDs)) - 1;%minus itself
             if nb_occ ~= 1
                 continue;
             end
-
+            
             % check the variable is not used in EveryExpr condition.
             nb_occ_perEveryCond = cellfun(@(x) x.nbOccuranceVar(var), EveryConds, 'UniformOutput', true);
             if ~isempty(nb_occ_perEveryCond) && sum(nb_occ_perEveryCond) >= 1
                 continue;
             end
-
-
+            
+            
             %delete the current Eqts
             new_bodyEqs{i} = nasa_toLustre.lustreAst.DummyExpr();
             %remove it from variables
@@ -84,6 +83,6 @@ function new_obj = contractNode_substituteVars(obj)
     % remove dummyExpr
     eqsClass = cellfun(@(x) class(x), new_bodyEqs, 'UniformOutput', false);
     new_bodyEqs = new_bodyEqs(~strcmp(eqsClass, 'nasa_toLustre.lustreAst.DummyExpr'));
-    new_obj.setBodyEqs(new_bodyEqs);
-    new_obj.setLocalVars(new_localVars);
-end 
+    obj.setBodyEqs(new_bodyEqs);
+    obj.setLocalVars(new_localVars);
+end

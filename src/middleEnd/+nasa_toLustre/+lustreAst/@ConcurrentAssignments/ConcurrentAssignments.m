@@ -41,7 +41,7 @@ classdef ConcurrentAssignments < nasa_toLustre.lustreAst.LustreExpr
         nb_occ = nbOccuranceVar(obj, var)
 
         %% substituteVars
-        new_obj = substituteVars(obj, oldVar, newVar)
+        substituteVars(obj, oldVar, newVar)
 
         function all_obj = getAllLustreExpr(obj)
             all_obj = {};

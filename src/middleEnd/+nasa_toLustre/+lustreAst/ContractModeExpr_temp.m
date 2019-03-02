@@ -52,7 +52,7 @@ classdef ContractModeExpr < nasa_toLustre.lustreAst.LustreExpr
             nb_occ = sum(occ_requires) + sum(occ_ensures);
         end
         %% substituteVars 
-        function new_obj = substituteVars(obj, oldVar, newVar)
+        function obj = substituteVars(obj, oldVar, newVar)
             new_requires = cellfun(@(x) x.substituteVars(oldVar, newVar), obj.requires, ...
                 'UniformOutput', 0);
             new_ensures = cellfun(@(x) x.substituteVars(oldVar, newVar), obj.ensures, ...

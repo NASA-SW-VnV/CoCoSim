@@ -222,7 +222,7 @@ classdef LustreNode < nasa_toLustre.lustreAst.LustreAst
 
     end
     methods(Static)
-       new_obj = contractNode_substituteVars(obj)
+       obj = contractNode_substituteVars(obj)
 
     end
 end

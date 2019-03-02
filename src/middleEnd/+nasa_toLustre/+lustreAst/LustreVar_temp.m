@@ -51,7 +51,7 @@ classdef LustreVar < nasa_toLustre.lustreAst.LustreExpr
         end
         
          %% substituteVars
-        function new_obj = substituteVars(obj, varargin)
+        function obj = substituteVars(obj, varargin)
             new_obj = obj;
         end
         %% This function is used in substitute vars in LustreNode

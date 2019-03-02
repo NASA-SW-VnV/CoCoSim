@@ -48,7 +48,7 @@ classdef BooleanExpr < nasa_toLustre.lustreAst.LustreExpr
         end
         
         %% substituteVars
-        function new_obj = substituteVars(obj, varargin)
+        function obj = substituteVars(obj, varargin)
             new_obj = obj;
         end
         

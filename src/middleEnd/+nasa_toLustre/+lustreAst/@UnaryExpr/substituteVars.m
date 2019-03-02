@@ -1,4 +1,4 @@
-function new_obj = substituteVars(obj, var, newVar)
+function obj = substituteVars(obj, var, newVar)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -6,6 +6,5 @@ function new_obj = substituteVars(obj, var, newVar)
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  
-    new_expr = obj.expr.substituteVars(var, newVar);
-    new_obj = nasa_toLustre.lustreAst.UnaryExpr(obj.op, new_expr, obj.withPar);
+    obj.expr = obj.expr.substituteVars(var, newVar);
 end

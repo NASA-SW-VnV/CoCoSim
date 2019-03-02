@@ -46,7 +46,7 @@ classdef ParenthesesExpr < nasa_toLustre.lustreAst.LustreExpr
         end
         
         %% substituteVars
-        function new_obj = substituteVars(obj, var, newVar)
+        function obj = substituteVars(obj, var, newVar)
             new_expr = obj.expr.substituteVars(var, newVar);
             new_obj = nasa_toLustre.lustreAst.ParenthesesExpr(new_expr);
         end

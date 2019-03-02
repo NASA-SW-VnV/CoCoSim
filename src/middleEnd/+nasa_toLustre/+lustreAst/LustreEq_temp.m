@@ -57,7 +57,7 @@ classdef LustreEq < nasa_toLustre.lustreAst.LustreExpr
             nb_occ = obj.rhs.nbOccuranceVar(var);
         end
         %% substituteVars
-        function new_obj = substituteVars(obj, oldVar, newVar)
+        function obj = substituteVars(obj, oldVar, newVar)
             new_lhs = obj.lhs.substituteVars(oldVar, newVar);
             new_rhs = obj.rhs.substituteVars(oldVar, newVar);
             new_obj = nasa_toLustre.lustreAst.LustreEq(new_lhs, new_rhs);

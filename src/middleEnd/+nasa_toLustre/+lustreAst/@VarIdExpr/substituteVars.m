@@ -7,7 +7,7 @@ function new_obj = substituteVars(obj, var, newVar)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  
     if isequal(obj.getId(), var.getId())
-        new_obj =  newVar;
+        new_obj = newVar;
     else
         new_obj = obj;
     end

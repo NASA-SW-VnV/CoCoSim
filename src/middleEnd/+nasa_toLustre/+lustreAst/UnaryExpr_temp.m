@@ -60,7 +60,7 @@ classdef UnaryExpr < nasa_toLustre.lustreAst.LustreExpr
             nb_occ = obj.expr.nbOccuranceVar(var);
         end
         %% substituteVars
-        function new_obj = substituteVars(obj, var, newVar)
+        function obj = substituteVars(obj, var, newVar)
             new_expr = obj.expr.substituteVars(var, newVar);
             new_obj = nasa_toLustre.lustreAst.UnaryExpr(obj.op, new_expr, obj.withPar);
         end

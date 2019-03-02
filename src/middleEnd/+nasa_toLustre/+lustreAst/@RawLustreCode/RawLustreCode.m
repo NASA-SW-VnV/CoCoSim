@@ -29,7 +29,7 @@ classdef RawLustreCode < nasa_toLustre.lustreAst.LustreAst
         %% nbOccuranceVar
         nb_occ = nbOccuranceVar(varargin)
         %% substituteVars
-        new_obj = substituteVars(obj, varargin)
+        substituteVars(obj, varargin)
         %% This function is used in substitute vars in LustreNode
         function all_obj = getAllLustreExpr(obj)
             all_obj = {};

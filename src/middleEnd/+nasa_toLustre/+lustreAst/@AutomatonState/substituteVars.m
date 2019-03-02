@@ -1,4 +1,4 @@
-function new_obj = substituteVars(obj, varargin)
+function obj = substituteVars(obj, varargin)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -7,5 +7,4 @@ function new_obj = substituteVars(obj, varargin)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %% substituteVars ignored in Automaton
 
-    new_obj = obj;
 end

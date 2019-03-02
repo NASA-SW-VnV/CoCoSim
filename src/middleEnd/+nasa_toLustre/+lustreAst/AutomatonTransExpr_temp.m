@@ -52,7 +52,7 @@ classdef AutomatonTransExpr < nasa_toLustre.lustreAst.LustreExpr
             nb_occ = 0;
         end
         %% substituteVars ignored in Automaton
-        function new_obj = substituteVars(obj, varargin)
+        function obj = substituteVars(obj, varargin)
             new_obj = obj;
         end
         

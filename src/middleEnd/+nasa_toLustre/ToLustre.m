@@ -35,7 +35,7 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, abstractedBlo
     DED_PROP_MAP = containers.Map('KeyType', 'char', 'ValueType', 'any');
     CoCoSimPreferences = cocosim_menu.CoCoSimPreferences.load();
     try
-        COCOSIM_DEV_DEBUG = evalin('base','cocosim_debug');
+        COCOSIM_DEV_DEBUG = evalin('base','cocosim_debug_dev');
     catch
         COCOSIM_DEV_DEBUG  = false;
     end

@@ -35,7 +35,7 @@ classdef RawLustreCode < nasa_toLustre.lustreAst.LustreAst
             nb_occ = 0;
         end
         %% substituteVars
-        function new_obj = substituteVars(obj, varargin)
+        function obj = substituteVars(obj, varargin)
             new_obj = obj;
         end
         %% This function is used in substitute vars in LustreNode

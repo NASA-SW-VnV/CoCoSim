@@ -6,7 +6,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% substituteVars
-function new_obj = substituteVars(obj, oldVar, newVar)
-    new_obj = nasa_toLustre.lustreAst.AssertExpr(...
-        obj.exp.substituteVars(oldVar, newVar));
+function obj = substituteVars(obj, oldVar, newVar)
+    obj.exp = obj.exp.substituteVars(oldVar, newVar);
 end
