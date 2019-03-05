@@ -13,8 +13,8 @@ classdef Demux_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     methods
         
         function  write_code(obj, parent, blk, xml_trace, varargin)
-            L = nasa_toLustre.ToLustreImport.L;
-            import(L{:})
+            %L = nasa_toLustre.ToLustreImport.L;
+            %import(L{:})
             if strcmp(blk.BusSelectionMode, 'on')
                 display_msg(sprintf('BusSelectionMode on is not supported in block %s',...
                     HtmlItem.addOpenCmd(blk.Origin_path)), ...

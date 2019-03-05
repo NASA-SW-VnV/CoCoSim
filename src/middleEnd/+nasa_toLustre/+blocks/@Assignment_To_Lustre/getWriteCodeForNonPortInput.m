@@ -5,8 +5,8 @@ function [codes] = getWriteCodeForNonPortInput(~, in_matrix_dimension,inputs,out
     % All Rights Reserved.
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    L = nasa_toLustre.ToLustreImport.L;
-    import(L{:})
+    %L = nasa_toLustre.ToLustreImport.L;
+    %import(L{:})
     %% function get code for noPortInput
     
     % initialization

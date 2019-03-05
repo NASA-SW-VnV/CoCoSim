@@ -6,8 +6,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Chart Node
 function [main_node, external_nodes]  = write_ChartNode(parent, blk, chart, dataAndEvents, events)
-    L = nasa_toLustre.ToLustreImport.L;
-    import(L{:})
+    %L = nasa_toLustre.ToLustreImport.L;
+    %import(L{:})
     global SF_STATES_NODESAST_MAP;
     external_nodes = {};
     Scopes = cellfun(@(x) x.Scope, ...

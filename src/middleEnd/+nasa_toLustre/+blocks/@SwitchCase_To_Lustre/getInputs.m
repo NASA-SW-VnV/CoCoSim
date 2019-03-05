@@ -6,8 +6,8 @@ function [inputs, inports_dt] = getInputs(obj, parent, blk)
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    L = nasa_toLustre.ToLustreImport.L;
-    import(L{:})
+    %L = nasa_toLustre.ToLustreImport.L;
+    %import(L{:})
      % take the list of the inputs width, in the previous example,
     % "In1" has a width of 3 and "In2" has a width of 1.
     % So width = [3, 1].

@@ -47,13 +47,21 @@ if not(isempty(Gain_list))
             elseif strcmp(Multiplication, 'Matrix(u*K)')
                 pp_name = 'gain_U_K';
             end
+            
+            % replace block
             PPUtils.replace_one_block(Gain_list{i},fullfile('pp_lib',pp_name));
-            set_param(Gain_list{i}, 'LinkStatus', 'inactive');
+            
+            % set parameters to constant block
             set_param(strcat(Gain_list{i},'/K'),...
                 'Value',gain);
             set_param(strcat(Gain_list{i},'/K'),...
                 'OutDataTypeStr','Inherit: Inherit via back propagation');
- 
+            if strcmp(Multiplication, 'Element-wise(K.*u)')
+                set_param(strcat(Gain_list{i},'/K'),...
+                'VectorParams1D','on');
+            end
+            
+            % set parameters to product block
             if isequal(outputDataType, 'Inherit: Same as input')
                 outputDataType = 'Inherit: Same as first input';
             end

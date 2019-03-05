@@ -15,8 +15,8 @@ classdef StateflowTruthTable_To_Lustre
         
         function  [main_node, external_nodes, external_libraries ] = ...
                 write_code(table, chart_data, varargin)
-            L = nasa_toLustre.ToLustreImport.L;
-            import(L{:})
+            %L = nasa_toLustre.ToLustreImport.L;
+            %import(L{:})
             %% create Junctions
             tablePath = table.Path;
             INIT_action = '';

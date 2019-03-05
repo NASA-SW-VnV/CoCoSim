@@ -5,8 +5,8 @@ function code = getAssumptionExpr(blk, inputs, inport_lus_dt)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    L = nasa_toLustre.ToLustreImport.L;
-    import(L{:})
+    %L = nasa_toLustre.ToLustreImport.L;
+    %import(L{:})
     %change inputs{1} to cell for code simplicity.
     code = {};
     if ~iscell(inputs{1})

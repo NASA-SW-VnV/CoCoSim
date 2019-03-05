@@ -7,8 +7,8 @@ function [script, failed] = getAllRequiredFunctionsInOneScript(blk)
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    %L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
-    %import(L{:})
+    %%L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
+    %%import(L{:})
     failed = false;
     script = blk.Script;
     blk_name = nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);

@@ -13,8 +13,8 @@ classdef FunctionCallFeedbackLatch_To_Lustre < nasa_toLustre.frontEnd.Block_To_L
     methods
         
         function  write_code(obj, parent, blk, xml_trace, varargin)
-            L = nasa_toLustre.ToLustreImport.L;
-            import(L{:})
+            %L = nasa_toLustre.ToLustreImport.L;
+            %import(L{:})
             [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             obj.addVariable(outputs_dt);
             slx_dt = blk.CompiledPortDataTypes.Outport{1};
@@ -32,7 +32,7 @@ classdef FunctionCallFeedbackLatch_To_Lustre < nasa_toLustre.frontEnd.Block_To_L
                 nasa_toLustre.lustreAst.IteExpr(...
                 nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.EQ, nasa_toLustre.lustreAst.VarIdExpr(nasa_toLustre.utils.SLX2LusUtils.nbStepStr()), nasa_toLustre.lustreAst.IntExpr(0)), ...
                 nasa_toLustre.utils.SLX2LusUtils.num2LusExp(Value(i),lus_outputDataType, slx_dt),...
-                nasa_toLustre.lustreAst.UnaryExpr(UnaryExpr.PRE, inputs{i}))), ...
+                nasa_toLustre.lustreAst.UnaryExpr(nasa_toLustre.lustreAst.UnaryExpr.PRE, inputs{i}))), ...
                 (1:numel(outputs)), 'un', 0);
             obj.setCode( codes );
             

@@ -9,8 +9,8 @@
 function [body, outputs, inputs, variables, external_libraries, validDestination_cond, Termination_cond] = ...
         evaluate_Transition(t, data_map, isDefaultTrans, parentPath, ...
         validDestination_cond, Termination_cond, cond_prefix, fullPathT, variables)
-    L = nasa_toLustre.ToLustreImport.L;
-    import(L{:})
+    %L = nasa_toLustre.ToLustreImport.L;
+    %import(L{:})
     global SF_STATES_NODESAST_MAP SF_JUNCTIONS_PATH_MAP;
     body = {};
     outputs = {};
@@ -77,9 +77,9 @@ function [body, outputs, inputs, variables, external_libraries, validDestination
     if ~isempty(Termination_cond)
         if ~isempty(trans_cond)
             trans_cond_with_termination = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.AND, ...
-                nasa_toLustre.lustreAst.UnaryExpr(UnaryExpr.NOT, Termination_cond), trans_cond);
+                nasa_toLustre.lustreAst.UnaryExpr(nasa_toLustre.lustreAst.UnaryExpr.NOT, Termination_cond), trans_cond);
         else
-            trans_cond_with_termination = nasa_toLustre.lustreAst.UnaryExpr(UnaryExpr.NOT, Termination_cond);
+            trans_cond_with_termination = nasa_toLustre.lustreAst.UnaryExpr(nasa_toLustre.lustreAst.UnaryExpr.NOT, Termination_cond);
         end
     else
         trans_cond_with_termination = trans_cond;

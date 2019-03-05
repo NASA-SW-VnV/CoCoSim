@@ -9,8 +9,8 @@
 
 function  [main_node, external_nodes, external_libraries ] = ...
         write_Action_Node(action, data_map, t_act_node_name, transitionPath)
-    L = nasa_toLustre.ToLustreImport.L;
-    import(L{:})
+    %L = nasa_toLustre.ToLustreImport.L;
+    %import(L{:})
     global SF_STATES_NODESAST_MAP;
     main_node = {};
     external_nodes = {};

@@ -6,8 +6,8 @@ function [blkParams,in_matrix_dimension] = readBlkParams(blk)
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    L = nasa_toLustre.ToLustreImport.L;
-    import(L{:})
+    %L = nasa_toLustre.ToLustreImport.L;
+    %import(L{:})
     blkParams = struct;
     blkParams.isVector = strcmp(blk.Mode,'Vector');
     in_matrix_dimension = ...

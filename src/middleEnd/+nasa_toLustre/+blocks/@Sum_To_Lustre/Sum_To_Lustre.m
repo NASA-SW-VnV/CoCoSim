@@ -19,8 +19,8 @@ classdef Sum_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     methods
         
         function  write_code(obj, parent, blk, xml_trace, lus_backend, varargin)
-            L = nasa_toLustre.ToLustreImport.L;
-            import(L{:})
+            %L = nasa_toLustre.ToLustreImport.L;
+            %import(L{:})
             OutputDataTypeStr = blk.CompiledPortDataTypes.Outport{1};
             AccumDataTypeStr = blk.AccumDataTypeStr;
             if strcmp(AccumDataTypeStr, 'Inherit: Inherit via internal rule')

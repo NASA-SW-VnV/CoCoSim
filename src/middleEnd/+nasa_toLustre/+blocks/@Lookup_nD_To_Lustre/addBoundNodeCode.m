@@ -13,8 +13,8 @@ function [body, vars,numBoundNodes,u_node,N_shape_node,coords_node,index_node] =
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    L = nasa_toLustre.ToLustreImport.L;
-    import(L{:})
+    %L = nasa_toLustre.ToLustreImport.L;
+    %import(L{:})
     %  This function finds the bounding polytop which is required to define
     %  the shape functions.  For each dimension, there will be 2
     %  breakpoints that surround the coordinate of the interpolation
@@ -78,12 +78,12 @@ function [body, vars,numBoundNodes,u_node,N_shape_node,coords_node,index_node] =
 
                     numberOfBreakPoint_cond = numberOfBreakPoint_cond + 1;
                     if blkParams.isLookupTableDynamic
-                        cond_index{end+1} =  nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend));
-                        cond_coords{end+1} = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend));
+                        cond_index{end+1} =  nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend));
+                        cond_coords{end+1} = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend));
                     else
                         epsilon = nasa_toLustre.blocks.Lookup_nD_To_Lustre.calculate_eps(BreakpointsForDimension{i}, j);
-                        cond_index{end+1} =  nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
-                        cond_coords{end+1} = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
+                        cond_index{end+1} =  nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
+                        cond_coords{end+1} = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
                     end
                     then_index{end+1} = nasa_toLustre.lustreAst.IntExpr(j-1);
                     then_coords{end+1} = Breakpoints{i}{j-1};
@@ -91,12 +91,12 @@ function [body, vars,numBoundNodes,u_node,N_shape_node,coords_node,index_node] =
                     % for "flat" we want lower node to be last node
                     numberOfBreakPoint_cond = numberOfBreakPoint_cond + 1;
                     if blkParams.isLookupTableDynamic
-                        cond_index{end+1} = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend));
-                        cond_coords{end+1} = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend));
+                        cond_index{end+1} = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend));
+                        cond_coords{end+1} = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend));
                     else
                         epsilon = nasa_toLustre.blocks.Lookup_nD_To_Lustre.calculate_eps(BreakpointsForDimension{i}, j);
-                        cond_index{end+1} = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
-                        cond_coords{end+1} = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
+                        cond_index{end+1} = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
+                        cond_coords{end+1} = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
                     end
                     then_index{end+1} = nasa_toLustre.lustreAst.IntExpr(j);
                     then_coords{end+1} = Breakpoints{i}{j-1};
@@ -104,12 +104,12 @@ function [body, vars,numBoundNodes,u_node,N_shape_node,coords_node,index_node] =
             else
                 numberOfBreakPoint_cond = numberOfBreakPoint_cond + 1;
                 if blkParams.isLookupTableDynamic
-                    cond_index{end+1} = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend));
-                    cond_coords{end+1} = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend));
+                    cond_index{end+1} = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend));
+                    cond_coords{end+1} = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend));
                 else
                     epsilon = nasa_toLustre.blocks.Lookup_nD_To_Lustre.calculate_eps(BreakpointsForDimension{i}, j);
-                    cond_index{end+1} = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
-                    cond_coords{end+1} = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
+                    cond_index{end+1} = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
+                    cond_coords{end+1} = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
                 end
                 then_index{end+1} = nasa_toLustre.lustreAst.IntExpr(j);
                 then_coords{end+1} = Breakpoints{i}{j};                        
@@ -134,24 +134,24 @@ function [body, vars,numBoundNodes,u_node,N_shape_node,coords_node,index_node] =
         for j=numel(BreakpointsForDimension{i}):-1:1
             if j==numel(BreakpointsForDimension{i})
                 if blkParams.isLookupTableDynamic
-                    cond_index{end+1} = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend));
-                    cond_coords{end+1} = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend));
+                    cond_index{end+1} = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend));
+                    cond_coords{end+1} = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend));
                 else
                     epsilon = nasa_toLustre.blocks.Lookup_nD_To_Lustre.calculate_eps(BreakpointsForDimension{i}, j);
-                    cond_index{end+1} = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
-                    cond_coords{end+1} = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
+                    cond_index{end+1} = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
+                    cond_coords{end+1} = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
                 end
                 then_index{end+1} = nasa_toLustre.lustreAst.IntExpr((j));
                 then_coords{end+1} = Breakpoints{i}{j};
 
             else
                 if blkParams.isLookupTableDynamic
-                    cond_index{end+1} = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend));
-                    cond_coords{end+1} = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend));
+                    cond_index{end+1} = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend));
+                    cond_coords{end+1} = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend));
                 else
                     epsilon = nasa_toLustre.blocks.Lookup_nD_To_Lustre.calculate_eps(BreakpointsForDimension{i}, j);
-                    cond_index{end+1} = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
-                    cond_coords{end+1} = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
+                    cond_index{end+1} = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
+                    cond_coords{end+1} = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.GTE, inputs{i}{1},Breakpoints{i}{j}, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
                 end
                 then_index{end+1} = nasa_toLustre.lustreAst.IntExpr(j+1);
                 then_coords{end+1} = Breakpoints{i}{j+1};

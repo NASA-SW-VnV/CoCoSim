@@ -74,7 +74,6 @@ function [status, errors_msg] = DiscreteStateSpace_pp(model)
                 end
                 % replacing
                 PPUtils.replace_one_block(dss_list{i},'pp_lib/DSS');
-                set_param(dss_list{i}, 'LinkStatus', 'inactive');
                 % restoring info
                 set_param(strcat(dss_list{i},'/A'),...
                     'Value',A);

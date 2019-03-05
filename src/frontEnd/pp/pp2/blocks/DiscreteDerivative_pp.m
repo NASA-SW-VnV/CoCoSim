@@ -46,7 +46,6 @@ function [status, errors_msg] = DiscreteDerivative_pp(model)
 
                 % replacing
                 PPUtils.replace_one_block(dDerivative_list{i},'pp_lib/DiscreteDerivative');
-                set_param(dDerivative_list{i}, 'LinkStatus', 'inactive');
 
                 blkName = dDerivative_list{i};
 

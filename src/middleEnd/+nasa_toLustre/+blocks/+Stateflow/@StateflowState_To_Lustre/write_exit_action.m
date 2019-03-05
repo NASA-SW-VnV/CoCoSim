@@ -7,8 +7,8 @@
 %% EXIT ACTION
 function [main_node, external_libraries] = ...
         write_exit_action(state, data_map)
-    L = nasa_toLustre.ToLustreImport.L;
-    import(L{:})
+    %L = nasa_toLustre.ToLustreImport.L;
+    %import(L{:})
     import nasa_toLustre.blocks.Stateflow.utils.*
     global SF_STATES_NODESAST_MAP SF_STATES_PATH_MAP;
     external_libraries = {};
@@ -88,7 +88,7 @@ function [main_node, external_libraries] = ...
     body{end + 1} = nasa_toLustre.lustreAst.LustreComment('set state as inactive');
     % idParentName = if (not isInner) then 0 else idParentName;
     body{end + 1} = nasa_toLustre.lustreAst.LustreEq(nasa_toLustre.lustreAst.VarIdExpr(idParentName), ...
-        nasa_toLustre.lustreAst.IteExpr(nasa_toLustre.lustreAst.UnaryExpr(UnaryExpr.NOT, isInner), ...
+        nasa_toLustre.lustreAst.IteExpr(nasa_toLustre.lustreAst.UnaryExpr(nasa_toLustre.lustreAst.UnaryExpr.NOT, isInner), ...
         parentInactive, nasa_toLustre.lustreAst.VarIdExpr(idParentName)));
     outputs{end + 1} = nasa_toLustre.lustreAst.LustreVar(idParentName, parentEnumType);
     inputs{end + 1} = nasa_toLustre.lustreAst.LustreVar(idParentName, parentEnumType);

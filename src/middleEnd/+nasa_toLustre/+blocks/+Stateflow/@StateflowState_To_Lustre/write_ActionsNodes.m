@@ -10,8 +10,8 @@
 %% State Actions and DefaultTransitions Nodes
 function  [external_nodes, external_libraries ] = ...
         write_ActionsNodes(state, data_map)
-    L = nasa_toLustre.ToLustreImport.L;
-    import(L{:})
+    %L = nasa_toLustre.ToLustreImport.L;
+    %import(L{:})
     external_nodes = {};
     external_libraries = {};
     % Create transitions actions as external nodes that will be called by the states nodes.

@@ -6,8 +6,8 @@ function code = addValue(a, code, outLusDT)
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    L = nasa_toLustre.ToLustreImport.L;
-    import(L{:})
+    %L = nasa_toLustre.ToLustreImport.L;
+    %import(L{:})
     if strcmp(outLusDT, 'int')
         v = nasa_toLustre.lustreAst.IntExpr(int32(a));
     elseif strcmp(outLusDT, 'bool')
@@ -15,9 +15,9 @@ function code = addValue(a, code, outLusDT)
     else
         v = nasa_toLustre.lustreAst.RealExpr(a);
     end
-    code = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.ARROW, ...
+    code = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.ARROW, ...
             v, ...
-            nasa_toLustre.lustreAst.UnaryExpr(UnaryExpr.PRE, code));
+            nasa_toLustre.lustreAst.UnaryExpr(nasa_toLustre.lustreAst.UnaryExpr.PRE, code));
 end
 
 

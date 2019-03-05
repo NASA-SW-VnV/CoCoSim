@@ -36,7 +36,6 @@ function [status, errors_msg] = TransportDelay_pp(model)
             end
             % replace it
             PPUtils.replace_one_block(tdlyBlk_list{i},'simulink/Discrete/Delay');
-            set_param(tdlyBlk_list{i}, 'LinkStatus', 'inactive');
             %restore information
             set_param(tdlyBlk_list{i} ,'InitialCondition', InitialOutput);
             set_param(tdlyBlk_list{i} ,'DelayLength', num2str(int32(delayTime/main_sampleTime)));

@@ -18,7 +18,7 @@ classdef SLX2LusUtils
         time_step = nbStepStr()
         it = iterationVariable()
         res = isContractBlk(ss_ir)
-
+        [lus_path, mat_file] = getLusOutputPath(output_dir, model_name, lus_backend)
         %% adapt blocks names to be a valid lustre names.
         str_out = name_format(str)
         
@@ -50,7 +50,7 @@ classdef SLX2LusUtils
                 srcPort, xml_trace)
    
     	[names, names_dt] = blockOutputs(portNumber)
-                %L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
+                %%L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
 
         [lus_dt] = SignalHierarchyLusDT(blk, SignalHierarchy)
 
@@ -118,6 +118,7 @@ classdef SLX2LusUtils
         %% check model compatibility: Variable size signals, Fixed Data types, 
         % main_sample time. ...
         htmlItemMsg = modelCompatibilityCheck(model_name, main_sampleTime)
+        
         
     end
     

@@ -14,8 +14,8 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, abstractedBlo
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
-    %import(L{:})
+    %%L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
+    %%import(L{:})
     
     %% global variables
     global TOLUSTRE_ENUMS_MAP TOLUSTRE_ENUMS_CONV_NODES ...
@@ -98,26 +98,35 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, abstractedBlo
     %% skip translation if no modification has been made to the model.
     persistent ToLustre_datenum_map;
     if isempty(ToLustre_datenum_map)
-        ToLustre_datenum_map = containers.Map('KeyType', 'char', 'ValueType', 'char');
+        ToLustre_datenum_map = containers.Map('KeyType', 'char', ...
+            'ValueType', 'char');
     end
     if ~forceGeneration && isKey(ToLustre_datenum_map, model_path)
         lustre_file_path = ToLustre_datenum_map(model_path);
-        if BUtils.isLastModified(model_path, lustre_file_path)
-            mat_file = regexprep(lustre_file_path, '.lus$', '.mat');
-            if exist(mat_file, 'file')
+        % get the name of lustre file with the given backend
+        [output_dir, lus_fname, ~] = fileparts(lustre_file_path);
+        [lustre_file_path, mat_file] = ...
+            nasa_toLustre.utils.SLX2LusUtils.getLusOutputPath(output_dir, ...
+            MatlabUtils.fileBase(lus_fname), lus_backend);
+        if exist(lustre_file_path, 'file') ...
+                && BUtils.isLastModified(model_path, lustre_file_path) ...
+                && exist(mat_file, 'file')
                 M = load(mat_file);
                 if exist(M.pp_model_full_path, 'file') ...
-                        && BUtils.isLastModified(M.pp_model_full_path, lustre_file_path)
+                        && BUtils.isLastModified(M.pp_model_full_path, ...
+                        lustre_file_path)
                     xml_trace = M.xml_trace;
                     failed = M.failed;
                     unsupportedOptions = M.unsupportedOptions;
                     abstractedBlocks = M.abstractedBlocks;
                     pp_model_full_path = M.pp_model_full_path;
-                    display_msg('Skipping Lustre generation step. Using previously generated code, no modifications have been made to the model.',...
+                    display_msg(['Skipping Lustre generation step. ', ...
+                        'Using previously generated code, no modifications '..., 
+                        'have been made to the model.'],...
                         MsgType.RESULT, 'ToLustre', '');
                     return;
                 end
-            end
+            
         end
     end
     
@@ -139,10 +148,8 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, abstractedBlo
     end
     [~, file_name, ~] = fileparts(pp_model_full_path);
     %% Definition of the generated output files names
-    lustre_file_base = strcat(file_name,'.', lus_backend, '.lus');
-    lustre_file_path = fullfile(output_dir, lustre_file_base);
-    mat_file = fullfile(output_dir, strcat(file_name,'.', lus_backend, '.mat'));
-    
+    [lustre_file_path, mat_file] = ...
+        nasa_toLustre.utils.SLX2LusUtils.getLusOutputPath(output_dir, file_name, lus_backend);
     %% Create Meta informations
     create_file_meta_info(lustre_file_path);
     
@@ -258,6 +265,7 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, abstractedBlo
         end
         if syntax_status && ~isempty(output)
             display_msg('Simulink To Lustre Syntax check has failed. The parsing error is the following:', MsgType.ERROR, 'TOLUSTRE', '');
+            [~, lustre_file_base, ~] = fileparts(lustre_file_path);
             output = regexprep(output, lustre_file_path, HtmlItem.addOpenFileCmd(lustre_file_path, lustre_file_base));
             display_msg(output, MsgType.ERROR, 'TOLUSTRE', '');
             failed = syntax_status;

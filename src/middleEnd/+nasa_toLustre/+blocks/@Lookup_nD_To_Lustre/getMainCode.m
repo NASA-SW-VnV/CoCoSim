@@ -7,8 +7,8 @@ function codes = getMainCode(outputs,inputs,ext_node_name,...
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    L = nasa_toLustre.ToLustreImport.L;
-    import(L{:})
+    %L = nasa_toLustre.ToLustreImport.L;
+    %import(L{:})
     codes = cell(1, numel(outputs));
     for outIdx=1:numel(outputs)
         nodeCall_inputs = {};

@@ -10,8 +10,8 @@
 function [body, outputs, inputs] = ...
         full_tran_trans_actions(transitions, trans_cond)
     global SF_STATES_NODESAST_MAP;
-    L = nasa_toLustre.ToLustreImport.L;
-    import(L{:})
+    %L = nasa_toLustre.ToLustreImport.L;
+    %import(L{:})
     body = {};
     outputs = {};
     inputs = {};

@@ -5,8 +5,8 @@ function [codes] = getWriteCodeForPortInput(obj, in_matrix_dimension,inputs,outp
     % All Rights Reserved.
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    L = nasa_toLustre.ToLustreImport.L;
-    import(L{:})
+    %L = nasa_toLustre.ToLustreImport.L;
+    %import(L{:})
     %% function get code for noPortInput
     % initialization
     blk_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);

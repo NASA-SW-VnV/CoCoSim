@@ -5,8 +5,8 @@ function [SignalsInputsMap, AssignedSignals] = getSignalMap(obj, blk, inputs)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    L = nasa_toLustre.ToLustreImport.L;
-    import(L{:})
+    %L = nasa_toLustre.ToLustreImport.L;
+    %import(L{:})
     % everything is inlined
     InportDimensions = blk.CompiledPortDimensions.Inport;
     InputSignals = blk.InputSignals;

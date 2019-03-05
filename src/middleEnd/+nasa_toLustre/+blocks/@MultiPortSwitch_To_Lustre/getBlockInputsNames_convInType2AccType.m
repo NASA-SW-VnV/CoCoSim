@@ -6,8 +6,8 @@ function [inputs] = getBlockInputsNames_convInType2AccType(obj, parent, blk)
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    L = nasa_toLustre.ToLustreImport.L;
-    import(L{:})
+    %L = nasa_toLustre.ToLustreImport.L;
+    %import(L{:})
     widths = blk.CompiledPortWidths.Inport;
     nbInputs = numel(widths);
     max_width = max(widths);

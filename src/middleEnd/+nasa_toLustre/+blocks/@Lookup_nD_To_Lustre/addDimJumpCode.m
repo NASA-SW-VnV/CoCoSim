@@ -8,8 +8,8 @@ function [body, vars,Ast_dimJump] = ...
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    L = nasa_toLustre.ToLustreImport.L;
-    import(L{:})
+    %L = nasa_toLustre.ToLustreImport.L;
+    %import(L{:})
     %  This function defines dimJump.  table breakpoints and values are inline in Lustre, the
     %  interpolation formulation uses index for each dimension.  We
     %  need to get the inline data from the dimension subscript.

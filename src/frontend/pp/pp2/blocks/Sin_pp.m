@@ -54,7 +54,6 @@ function [status, errors_msg] = Sin_pp(model)
                 end
                 
                 PPUtils.replace_one_block(Sin_list{i},fullfile('pp_lib', 'SineWaveFunction'));
-                set_param(Sin_list{i}, 'LinkStatus', 'inactive');
                 
                 set_param(strcat(Sin_list{i},'/Freq'),...
                     'Value',Frequency);

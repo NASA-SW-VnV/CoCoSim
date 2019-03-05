@@ -20,7 +20,8 @@ if not(isempty(ssys_list))
             set_param(ssys_list{i},'TreatAsAtomicUnit','on');
             set_param(ssys_list{i},'MinAlgLoopOccurrences','off');
             
-        catch
+        catch me
+            display_msg(me.message, MsgType.DEBUG, 'AtomicSubsystems_pp', '');
             status = 1;
             errors_msg{end + 1} = sprintf('AtomicSubsystems pre-process has failed for block %s', ssys_list{i});
             continue;            

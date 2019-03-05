@@ -60,8 +60,8 @@ else
 end
 
     function [names, names_dt] = blockOutputs(portNumber)
-        %L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
-        %import(L{:})
+        %%L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
+        %%import(L{:})
         names = {};
         names_dt = {};
         if strcmp(type, 'Inports')
@@ -147,8 +147,9 @@ end
     end
 isInsideContract = nasa_toLustre.utils.SLX2LusUtils.isContractBlk(parent);
 IsNotInSimulink = false;
-if nargin >= 3 && ~isempty(srcPort)...
-        && ~strcmp(blk.CompiledPortDataTypes.Outport{srcPort + 1}, 'auto')
+if nargin >= 3 && ~isempty(srcPort) ...
+        && ~strcmp(type, 'Inports') % e.g.: BusCreator as source block case
+         
     port = srcPort + 1;% srcPort starts by zero
     [names, names_dt] = blockOutputs(port);
     % traceability

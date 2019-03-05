@@ -15,8 +15,8 @@ classdef DesignVerifierProofObjective_To_Lustre < nasa_toLustre.frontEnd.Block_T
             obj.ContentNeedToBeTranslated = 0;
         end
         function  write_code(obj, parent, blk, xml_trace, varargin)
-            L = nasa_toLustre.ToLustreImport.L;
-            import(L{:})
+            %L = nasa_toLustre.ToLustreImport.L;
+            %import(L{:})
             [inputs] =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk);
             inport_dt = blk.CompiledPortDataTypes.Inport{1};
             inport_lus_dt =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(inport_dt);

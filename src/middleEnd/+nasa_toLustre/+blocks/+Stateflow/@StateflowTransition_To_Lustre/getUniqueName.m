@@ -8,8 +8,8 @@
 
 %% Get unique short name
 function unique_name = getUniqueName(object, src, isDefaultTrans)
-    L = nasa_toLustre.ToLustreImport.L;
-    import(L{:})
+    %L = nasa_toLustre.ToLustreImport.L;
+    %import(L{:})
     if nargin < 2
         src = T.Source;
     end

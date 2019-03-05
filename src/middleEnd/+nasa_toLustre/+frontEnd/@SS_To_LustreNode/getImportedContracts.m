@@ -8,8 +8,8 @@ function imported_contracts = getImportedContracts(...
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    %L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
-    %import(L{:})
+    %%L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
+    %%import(L{:})
     % contracts may have differents signature of the node imported
     % in. This function is trying to make the use of contract the most
     % flexible possible. For example having only specific inputs

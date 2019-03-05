@@ -25,7 +25,6 @@ function [status, errors_msg] = Bias_pp(model)
                 SaturateOnIntegerOverflow = get_param(Bias_list{i},'SaturateOnIntegerOverflow');
                 pp_name = 'bias';
                 PPUtils.replace_one_block(Bias_list{i},fullfile('pp_lib',pp_name));
-                set_param(Bias_list{i}, 'LinkStatus', 'inactive');
                 set_param(strcat(Bias_list{i},'/bias'),...
                     'Value',bias);
                 set_param(strcat(Bias_list{i},'/Sum'),...

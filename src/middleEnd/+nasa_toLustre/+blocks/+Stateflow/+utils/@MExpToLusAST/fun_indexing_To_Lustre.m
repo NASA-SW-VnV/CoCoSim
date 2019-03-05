@@ -66,8 +66,8 @@ end
 
 function code = parseOtherFunc(obj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun)
     global SF_MF_FUNCTIONS_MAP;
-    L = nasa_toLustre.ToLustreImport.L;
-    import(L{:})
+    %L = nasa_toLustre.ToLustreImport.L;
+    %import(L{:})
     import nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST
     if (isStateFlow || isMatlabFun) && data_map.isKey(tree.ID)
         %Array Access

@@ -18,8 +18,8 @@ classdef SineandCosine_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             % No need for code for SineandCosine_To_Lustre as 
             % it is generated as masked subsystem
             
-            L = nasa_toLustre.ToLustreImport.L;
-            import(L{:})
+            %L = nasa_toLustre.ToLustreImport.L;
+            %import(L{:})
             %% We add assumptions on the inport values interval 
             % To obtain meaningful block output, the block input values 
             % should fall within the range [0, 1). For input values that 

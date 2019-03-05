@@ -8,8 +8,8 @@ function [code, exp_dt] = arrayAccess_To_Lustre(obj, tree, parent, blk, data_map
     
     % This function should be only called from fun_indexing_To_Lustre.m
     %Array access
-    L = nasa_toLustre.ToLustreImport.L;
-    import(L{:})
+    %L = nasa_toLustre.ToLustreImport.L;
+    %import(L{:})
     exp_dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.expression_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
     d = data_map(tree.ID);
     if isfield(d, 'CompiledSize')

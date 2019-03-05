@@ -13,8 +13,8 @@ classdef Switch_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     methods
         
         function  write_code(obj, parent, blk, xml_trace, varargin)
-            L = nasa_toLustre.ToLustreImport.L;
-            import(L{:})
+            %L = nasa_toLustre.ToLustreImport.L;
+            %import(L{:})
             
             [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             
@@ -121,10 +121,7 @@ classdef Switch_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         end
         %%
         function options = getUnsupportedOptions(obj, ~, blk, varargin)
-            if ~strcmp(blk.OutMax, '[]') || ~strcmp(blk.OutMin, '[]')
-                obj.addUnsupported_options(...
-                    sprintf('The minimum/maximum value is not support in block %s', HtmlItem.addOpenCmd(blk.Origin_path)));
-            end
+            
             if strcmp(blk.AllowDiffInputSizes, 'on')
                 obj.addUnsupported_options(...
                     sprintf('The Allow different data input sizes option is not support in block %s', HtmlItem.addOpenCmd(blk.Origin_path)));

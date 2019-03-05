@@ -7,8 +7,8 @@ function [external_nodes, failed] = getMFunctionCode(blkObj, parent,  blk, Input
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    %L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
-    %import(L{:})
+    %%L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
+    %%import(L{:})
     global SF_MF_FUNCTIONS_MAP
     external_nodes ={};
     % get all user functions needed in one script

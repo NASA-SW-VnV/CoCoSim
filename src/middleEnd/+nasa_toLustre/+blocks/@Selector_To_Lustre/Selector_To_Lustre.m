@@ -22,8 +22,8 @@ classdef Selector_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         
         function  write_code(obj, parent, blk, xml_trace, ~, coco_backend, varargin)
             global CoCoSimPreferences;
-            L = nasa_toLustre.ToLustreImport.L;
-            import(L{:})
+            %L = nasa_toLustre.ToLustreImport.L;
+            %import(L{:})
             % share code with Assignment_To_Lustre
             isSelector = 1;
             % getBlockInputsOutputs
@@ -88,8 +88,8 @@ classdef Selector_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         end
         
         function options = getUnsupportedOptions(obj, parent, blk, varargin)
-            L = nasa_toLustre.ToLustreImport.L;
-            import(L{:})
+            %L = nasa_toLustre.ToLustreImport.L;
+            %import(L{:})
             obj.unsupported_options = {};
             [numOutDims, ~, ~] = ...
                 nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(parent, blk, blk.NumberOfDimensions);

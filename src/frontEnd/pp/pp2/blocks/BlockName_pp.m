@@ -11,7 +11,7 @@ function [status, errors_msg] = BlockName_pp(model)
     
     % Processing all blocks
     %do not use findAll, on , that includes lines and ports.
-    block_list = find_system(model,'LookUnderMasks', 'all', 'Regexp','on','Name','\W');
+    block_list = find_system(model,'LookUnderMasks', 'all', 'Regexp','on','Name','\W', 'LinkStatus', 'none');
     block_handles = get_param(block_list, 'Handle');
     if not(isempty(block_handles))
         display_msg('Processing special characters in block names...', Constants.INFO, ...

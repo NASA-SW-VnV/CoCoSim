@@ -9,8 +9,8 @@ function [body, vars] = addFinalCode_with_interpolation(outputs,inputs,...
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    L = nasa_toLustre.ToLustreImport.L;
-    import(L{:})
+    %L = nasa_toLustre.ToLustreImport.L;
+    %import(L{:})
     % This function carries out the interpolation depending on algorithm
     % option.  For the flat option, the value at the lower bounding
     % breakpoint is used. For the nearest option, the closest
@@ -38,13 +38,13 @@ function [body, vars] = addFinalCode_with_interpolation(outputs,inputs,...
         vars{end+1} = nasa_toLustre.lustreAst.LustreVar(clipped_inputs{i},lusInport_dt);
         if strcmp(ExtrapMethod,'Clip')
             if blkParams.isLookupTableDynamic
-                conds{1} = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.LT,inputs{i}{1}, coords_node{i,1}, [], LusBackendType.isLUSTREC(lus_backend));
-                conds{2} = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.GT,inputs{i}{1}, coords_node{i,2}, [], LusBackendType.isLUSTREC(lus_backend));                        
+                conds{1} = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.LT,inputs{i}{1}, coords_node{i,1}, [], LusBackendType.isLUSTREC(lus_backend));
+                conds{2} = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.GT,inputs{i}{1}, coords_node{i,2}, [], LusBackendType.isLUSTREC(lus_backend));                        
             else
                 epsilon = nasa_toLustre.blocks.Lookup_nD_To_Lustre.calculate_eps(BreakpointsForDimension{i}, 1);
-                conds{1} = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.LT,inputs{i}{1}, coords_node{i,1}, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
+                conds{1} = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.LT,inputs{i}{1}, coords_node{i,1}, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
                 epsilon = nasa_toLustre.blocks.Lookup_nD_To_Lustre.calculate_eps(BreakpointsForDimension{i}, 2);
-                conds{2} = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.GT,inputs{i}{1}, coords_node{i,2}, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
+                conds{2} = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.GT,inputs{i}{1}, coords_node{i,2}, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
             end
             thens{1} = coords_node{i,1};
             thens{2} = coords_node{i,2};
@@ -62,7 +62,7 @@ function [body, vars] = addFinalCode_with_interpolation(outputs,inputs,...
         denom_terms = cell(1,NumberOfTableDimensions);
         for i=1:NumberOfTableDimensions
             %denom = sprintf('%s*(%s-%s)',denom,coords_node{i,2},coords_node{i,1});
-            denom_terms{i} = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.MINUS,coords_node{i,2},coords_node{i,1});
+            denom_terms{i} = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.MINUS,coords_node{i,2},coords_node{i,1});
         end
         denom = nasa_toLustre.lustreAst.BinaryExpr.BinaryMultiArgs(nasa_toLustre.lustreAst.BinaryExpr.MULTIPLY,denom_terms);
 
@@ -71,15 +71,15 @@ function [body, vars] = addFinalCode_with_interpolation(outputs,inputs,...
             for j=1:NumberOfTableDimensions
                 if shapeNodeSign(i,j)==-1
                     %code = sprintf('%s*(%s-%s)',code,coords_node{j,2},clipped_inputs{j});
-                    numerator_terms{j} = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.MINUS,coords_node{j,2},clipped_inputs{j});
+                    numerator_terms{j} = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.MINUS,coords_node{j,2},clipped_inputs{j});
                 else
                     %code = sprintf('%s*(%s-%s)',code,clipped_inputs{j},coords_node{j,1});
-                    numerator_terms{j} = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.MINUS,clipped_inputs{j},coords_node{j,1});
+                    numerator_terms{j} = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.MINUS,clipped_inputs{j},coords_node{j,1});
                 end
             end
             %body = sprintf('%s%s = (%s)/%s ;\n\t', body,N_shape_node{i}, code,denom);
             numerator = nasa_toLustre.lustreAst.BinaryExpr.BinaryMultiArgs(nasa_toLustre.lustreAst.BinaryExpr.MULTIPLY,numerator_terms);
-            body{end+1} = nasa_toLustre.lustreAst.LustreEq(N_shape_node{i},nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.DIVIDE,numerator,denom));
+            body{end+1} = nasa_toLustre.lustreAst.LustreEq(N_shape_node{i},nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.DIVIDE,numerator,denom));
         end
     else  % Cubic spline  % not yet
         display_msg(sprintf('Cubic spline is not yet supported  in block %s',...
@@ -90,7 +90,7 @@ function [body, vars] = addFinalCode_with_interpolation(outputs,inputs,...
     terms = cell(1,numBoundNodes);
     for i=1:numBoundNodes
         %code = sprintf('%s+%s*%s ',code,N_shape_node{i},u_node{i});
-        terms{i} = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.MULTIPLY,N_shape_node{i},u_node{i});
+        terms{i} = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.MULTIPLY,N_shape_node{i},u_node{i});
     end
 
     %body = sprintf('%s%s =  %s ;\n\t', body, outputs{1}, code);

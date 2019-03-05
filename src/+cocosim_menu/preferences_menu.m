@@ -61,7 +61,7 @@ end
 %% Lustre Backend
 function schema = getLustreBackend(callbackInfo)
     schema = sl_container_schema;
-    schema.label = 'Lustre Verification Backend';
+    schema.label = 'Verification Backend';
     schema.statustip = 'Lustre backend';
     schema.autoDisableWhen = 'Busy';
     CoCoSimPreferences = callbackInfo.userdata;

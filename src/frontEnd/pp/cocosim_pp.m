@@ -145,7 +145,7 @@ function [new_file_path, status] = cocosim_pp(model_path, varargin)
             if nargout(fh) == 2
                 [~, errors_msg] = fh(new_model_base);
                 for j=1:numel(errors_msg)
-                    display_msg(errors_msg{j}, MsgType.ERROR, func2str(fh), '');
+                    display_msg(errors_msg{j}, MsgType.WARNING, func2str(fh), '');
                 end
             else
                 fh(new_model_base);

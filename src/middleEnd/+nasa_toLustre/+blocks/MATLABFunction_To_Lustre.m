@@ -13,8 +13,8 @@ classdef MATLABFunction_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     methods
         
         function  write_code(obj, parent, blk, xml_trace, lus_backend, coco_backend, main_sampletime, varargin)
-            L = nasa_toLustre.ToLustreImport.L;
-            import(L{:})
+            %L = nasa_toLustre.ToLustreImport.L;
+            %import(L{:})
             %% add Matlab Function node
             [main_node, external_nodes ] = ...
                     nasa_toLustre.frontEnd.MF_To_LustreNode.mfunction2node(obj, parent,  blk,  xml_trace, lus_backend, coco_backend, main_sampletime);

@@ -10,8 +10,8 @@
 %value is also given as a string.
 function [ Lustre_type, zero, one, isBus, isEnum, hasEnum] = ...
         get_lustre_dt( slx_dt)
-    %L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
-    %import(L{:})
+    %%L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
+    %%import(L{:})
     global TOLUSTRE_ENUMS_MAP;
     if isempty(TOLUSTRE_ENUMS_MAP)
         TOLUSTRE_ENUMS_MAP = containers.Map;

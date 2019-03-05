@@ -1,11 +1,11 @@
 function [node, external_nodes_i, opens, abstractedNodes] = get_inverse_code(lus_backend,n)
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Copyright (c) 2017 United States Government as represented by the
-% Administrator of the National Aeronautics and Space Administration.
-% All Rights Reserved.
-% Author: Khanh Tringh <khanh.v.trinh@nasa.gov>
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Copyright (c) 2017 United States Government as represented by the
+    % Administrator of the National Aeronautics and Space Administration.
+    % All Rights Reserved.
+    % Author: Khanh Tringh <khanh.v.trinh@nasa.gov>
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
     % support 2x2 matrix inversion
     % support 3x3 matrix inversion
     % support 4x4 matrix inversion
@@ -52,42 +52,35 @@ function [node, external_nodes_i, opens, abstractedNodes] = get_inverse_code(lus
         node.setLocalContract(contract);
     end
     % inversion and contract
-    if  n > 4
+    if  n > 4 || LusBackendType.isKIND2(lus_backend)
         node.setIsImported(true);
         abstractedNodes = {sprintf('Inverse Matrix of dimension %d', n)};
-    elseif n==4 && LusBackendType.isKIND2(lus_backend)
-        node.setIsImported(true);
+    elseif n <= 4
+        vars = cell(1,n*n+1);
+        det = nasa_toLustre.lustreAst.VarIdExpr('det');
+        vars{1} = nasa_toLustre.lustreAst.LustreVar(det,'real');
+        % adj: adjugate
+        adj = cell(n,n);
+        for i=1:n
+            for j=1:n
+                adj{i,j} = nasa_toLustre.lustreAst.VarIdExpr(sprintf('adj%d%d',i,j));
+                vars{(i-1)*n+j+1} = nasa_toLustre.lustreAst.LustreVar(adj{i,j},'real');
+            end
+        end
+        
+        body = get_Det_Adjugate_Code(n,det,a,adj);
+        
+        % define inverse
+        for i=1:n
+            for j=1:n
+                body{end+1} = nasa_toLustre.lustreAst.LustreEq(ai{i,j},nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.DIVIDE,adj{i,j},det));
+            end
+        end
     else
-        Lustre_inversion = 0;
-        if n == 2 || n == 3 || n ==4
-            Lustre_inversion = 1;
-        end
-        if Lustre_inversion == 1
-            vars = cell(1,n*n+1);
-            det = nasa_toLustre.lustreAst.VarIdExpr('det');
-            vars{1} = nasa_toLustre.lustreAst.LustreVar(det,'real');
-            % adj: adjugate
-            adj = cell(n,n);
-            for i=1:n
-                for j=1:n
-                    adj{i,j} = nasa_toLustre.lustreAst.VarIdExpr(sprintf('adj%d%d',i,j));
-                    vars{(i-1)*n+j+1} = nasa_toLustre.lustreAst.LustreVar(adj{i,j},'real');
-                end
-            end
-            
-            body = get_Det_Adjugate_Code(n,det,a,adj);
-            
-            % define inverse
-            for i=1:n
-                for j=1:n
-                    body{end+1} = nasa_toLustre.lustreAst.LustreEq(ai{i,j},nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.DIVIDE,adj{i,j},det));
-                end
-            end
-        else
-            display_msg(...
-                sprintf('Matrix inversion for higher than 4x4 matrix is not supported in LustMathLib'), ...
-                MsgType.ERROR, 'LustMathLib', '');
-        end
+        display_msg(...
+            sprintf('Matrix inversion for higher than 4x4 matrix is not supported in LustMathLib'), ...
+            MsgType.ERROR, 'LustMathLib', '');
+        
     end
     
     % set node

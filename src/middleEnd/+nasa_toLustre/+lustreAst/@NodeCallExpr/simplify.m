@@ -12,7 +12,7 @@ function new_obj = simplify(obj)
     for i=1:numel(new_args)
         if isa(new_args{i}, 'ParenthesesExpr')
             new_args{i} = new_args{i}.getExp();
-        elseif isa(new_args{i}, 'BinaryExpr') || isa(new_args{i}, 'UnaryExpr')
+        elseif isa(new_args{i}, 'nasa_toLustre.lustreAst.BinaryExpr') || isa(new_args{i}, 'nasa_toLustre.lustreAst.UnaryExpr')
             new_args{i}.setPar(false);
         end
     end

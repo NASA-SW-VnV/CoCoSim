@@ -15,8 +15,8 @@ classdef Inport_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             % No need for code for Inport as it is generated in the node
             % header
             
-            L = nasa_toLustre.ToLustreImport.L;
-            import(L{:})
+            %L = nasa_toLustre.ToLustreImport.L;
+            %import(L{:})
             %% We add assumptions on the inport values interval if it is
             % mentioned by the user in OutMin/OutMax in Inport dialog box.
             [outputs, ~] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk);
@@ -32,8 +32,8 @@ classdef Inport_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         
         function options = getUnsupportedOptions(obj, parent, blk, ...
                 lus_backend, coco_backend, varargin)
-            L = nasa_toLustre.ToLustreImport.L;
-            import(L{:})
+            %L = nasa_toLustre.ToLustreImport.L;
+            %import(L{:})
             % Outport in first level should not be of type enumeration in
             % case of Validation backend with Lustrec.
             if CoCoBackendType.isVALIDATION(coco_backend) ...

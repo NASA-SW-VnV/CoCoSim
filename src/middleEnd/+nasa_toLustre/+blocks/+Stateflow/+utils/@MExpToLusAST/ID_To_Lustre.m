@@ -7,8 +7,8 @@ function [code, dt] = ID_To_Lustre(~, tree, parent, blk, data_map, ...
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    L = nasa_toLustre.ToLustreImport.L;
-    import(L{:})
+    %L = nasa_toLustre.ToLustreImport.L;
+    %import(L{:})
     import nasa_toLustre.blocks.Stateflow.utils.*
     if ischar(tree)
         id = tree;

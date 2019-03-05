@@ -14,8 +14,8 @@ classdef Logic_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     methods
         
         function  write_code(obj, parent, blk, xml_trace, varargin)
-            L = nasa_toLustre.ToLustreImport.L;
-            import(L{:})
+            %L = nasa_toLustre.ToLustreImport.L;
+            %import(L{:})
             [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             
             
@@ -74,15 +74,15 @@ classdef Logic_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 elseif strcmp(blk.Operator, 'XOR')
                     rhs = nasa_toLustre.lustreAst.BinaryExpr.BinaryMultiArgs(nasa_toLustre.lustreAst.BinaryExpr.XOR, scalars);
                 elseif strcmp(blk.Operator, 'NOT')
-                    rhs = nasa_toLustre.lustreAst.UnaryExpr(UnaryExpr.NOT, inputs{1}{i});
+                    rhs = nasa_toLustre.lustreAst.UnaryExpr(nasa_toLustre.lustreAst.UnaryExpr.NOT, inputs{1}{i});
                 elseif strcmp(blk.Operator, 'NAND')
-                    rhs = nasa_toLustre.lustreAst.UnaryExpr(UnaryExpr.NOT, ...
+                    rhs = nasa_toLustre.lustreAst.UnaryExpr(nasa_toLustre.lustreAst.UnaryExpr.NOT, ...
                         nasa_toLustre.lustreAst.BinaryExpr.BinaryMultiArgs(nasa_toLustre.lustreAst.BinaryExpr.AND, scalars));
                 elseif strcmp(blk.Operator, 'NOR')
-                    rhs = nasa_toLustre.lustreAst.UnaryExpr(UnaryExpr.NOT, ...
+                    rhs = nasa_toLustre.lustreAst.UnaryExpr(nasa_toLustre.lustreAst.UnaryExpr.NOT, ...
                         nasa_toLustre.lustreAst.BinaryExpr.BinaryMultiArgs(nasa_toLustre.lustreAst.BinaryExpr.OR, scalars));
                 elseif strcmp(blk.Operator, 'NXOR')
-                    rhs = nasa_toLustre.lustreAst.UnaryExpr(UnaryExpr.NOT, ...
+                    rhs = nasa_toLustre.lustreAst.UnaryExpr(nasa_toLustre.lustreAst.UnaryExpr.NOT, ...
                         nasa_toLustre.lustreAst.BinaryExpr.BinaryMultiArgs(nasa_toLustre.lustreAst.BinaryExpr.XOR, scalars));
                 end
                 if ~isempty(out_conv_format)

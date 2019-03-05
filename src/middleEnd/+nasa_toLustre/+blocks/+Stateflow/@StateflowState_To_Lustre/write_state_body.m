@@ -7,8 +7,8 @@
 %% state body
 function [outputs, inputs, body, variables] = write_state_body(state)
     global SF_STATES_NODESAST_MAP ;%SF_STATES_PATH_MAP;
-    L = nasa_toLustre.ToLustreImport.L;
-    import(L{:})
+    %L = nasa_toLustre.ToLustreImport.L;
+    %import(L{:})
     outputs = {};
     inputs = {};
     variables = {};
@@ -41,7 +41,7 @@ function [outputs, inputs, body, variables] = write_state_body(state)
             if nasa_toLustre.lustreAst.VarIdExpr.ismemberVar(cond_name, oututs_Ids)
                 outputs = nasa_toLustre.lustreAst.LustreVar.removeVar(outputs, cond_name);
                 variables{end+1} = nasa_toLustre.lustreAst.LustreVar(cond_name, 'bool');
-                cond_prefix = nasa_toLustre.lustreAst.UnaryExpr(UnaryExpr.NOT,...
+                cond_prefix = nasa_toLustre.lustreAst.UnaryExpr(nasa_toLustre.lustreAst.UnaryExpr.NOT,...
                     nasa_toLustre.lustreAst.VarIdExpr(cond_name));
             end
         end
@@ -83,7 +83,7 @@ function [outputs, inputs, body, variables] = write_state_body(state)
                 body{end+1} = nasa_toLustre.lustreAst.LustreEq(oututs_Ids, call);
                 if nasa_toLustre.lustreAst.VarIdExpr.ismemberVar(cond_name, oututs_Ids)
                     variables{end+1} = nasa_toLustre.lustreAst.LustreVar(cond_name, 'bool');
-                    cond_prefix = nasa_toLustre.lustreAst.UnaryExpr(UnaryExpr.NOT,...
+                    cond_prefix = nasa_toLustre.lustreAst.UnaryExpr(nasa_toLustre.lustreAst.UnaryExpr.NOT,...
                         nasa_toLustre.lustreAst.VarIdExpr(cond_name));
                 end
             else
@@ -101,7 +101,7 @@ function [outputs, inputs, body, variables] = write_state_body(state)
                     inputs = [inputs, nodeAst.getOutputs()];
                     inputs = nasa_toLustre.lustreAst.LustreVar.removeVar(inputs, cond_name);
                     %add Inner termination condition
-                    cond_prefix = nasa_toLustre.lustreAst.UnaryExpr(UnaryExpr.NOT,...
+                    cond_prefix = nasa_toLustre.lustreAst.UnaryExpr(nasa_toLustre.lustreAst.UnaryExpr.NOT,...
                         nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.OR, ...
                         nasa_toLustre.lustreAst.VarIdExpr(cond_name), nasa_toLustre.lustreAst.VarIdExpr(new_cond_name)));
                 else

@@ -10,8 +10,8 @@ function [codes] = getWriteCodeForNonPortInput(~, numOutDims,...
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     % initialization
-    L = nasa_toLustre.ToLustreImport.L;
-    import(L{:})
+    %L = nasa_toLustre.ToLustreImport.L;
+    %import(L{:})
     codes = {};
     if numOutDims > 7
         display_msg(sprintf('More than 7 dimensions is not supported in block %s',...

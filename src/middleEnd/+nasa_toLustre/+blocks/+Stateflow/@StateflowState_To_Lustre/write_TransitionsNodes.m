@@ -7,8 +7,8 @@
 %% InnerTransitions and  OuterTransitions Nodes
 function  [external_nodes, external_libraries ] = ...
         write_TransitionsNodes(state, data_map)
-    L = nasa_toLustre.ToLustreImport.L;
-    import(L{:})
+    %L = nasa_toLustre.ToLustreImport.L;
+    %import(L{:})
     external_nodes = {};
     [node, external_libraries] = ...
         nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.get_InnerTransitionsNode(state, data_map);

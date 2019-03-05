@@ -15,8 +15,8 @@ classdef block_diagram_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         end
         
         function options = getUnsupportedOptions(obj, ~, blk, varargin)
-            L = nasa_toLustre.ToLustreImport.L;
-            import(L{:})
+            %L = nasa_toLustre.ToLustreImport.L;
+            %import(L{:})
             if nasa_toLustre.blocks.SubSystem_To_Lustre.hasEnablePort(blk) ...
                     || nasa_toLustre.blocks.SubSystem_To_Lustre.hasTriggerPort(blk) ...
                     || nasa_toLustre.blocks.SubSystem_To_Lustre.hasResetPort(blk)

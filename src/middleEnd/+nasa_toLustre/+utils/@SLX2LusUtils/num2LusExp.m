@@ -8,8 +8,8 @@
 
 %% change numerical value to Lustre Expr string based on DataType dt.
 function lustreExp = num2LusExp(v, lus_dt, slx_dt)
-    %L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
-    %import(L{:})
+    %%L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
+    %%import(L{:})
     global TOLUSTRE_ENUMS_MAP;
     if nargin < 3
         slx_dt = lus_dt;

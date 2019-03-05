@@ -10,21 +10,23 @@ status = 0;
 errors_msg = {};
 
 ssys_list = find_system(new_model_base,'LookUnderMasks','all', 'BlockType','SubSystem');
-if not(isempty(ssys_list))
+ssys_list_handles= get_param(ssys_list, 'Handle');
+if not(isempty(ssys_list_handles))
     
-    for i=1:length(ssys_list)
+    for i=1:length(ssys_list_handles)
         try
-            atomic = get_param(ssys_list{i},'TreatAsAtomicUnit');
+            atomic = get_param(ssys_list_handles{i},'TreatAsAtomicUnit');
             try
-                mask = get_param(ssys_list{i},'Mask');
+                mask = get_param(ssys_list_handles{i},'Mask');
             catch
                 mask = 'off';
             end
             if strcmp(atomic, 'off') && ~isequal(mask, 'on')
                 display_msg(['Expanding ' ssys_list{i}], MsgType.INFO, 'PP', '');
-                Simulink.BlockDiagram.expandSubsystem(ssys_list{i});
+                Simulink.BlockDiagram.expandSubsystem(ssys_list_handles{i});
             end
-        catch
+        catch me
+            display_msg(me.message, MsgType.DEBUG, 'ExpandNonAtomicSubsystems_pp', '');
             status = 1;
             errors_msg{end + 1} = sprintf('ExpandNonAtomicSubsystems pre-process has failed for block %s', ssys_list{i});
             continue;            

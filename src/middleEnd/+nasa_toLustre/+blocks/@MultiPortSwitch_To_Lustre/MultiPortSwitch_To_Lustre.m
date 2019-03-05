@@ -13,8 +13,8 @@ classdef MultiPortSwitch_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     methods
         
         function  write_code(obj, parent, blk, xml_trace, varargin)
-            L = nasa_toLustre.ToLustreImport.L;
-            import(L{:})
+            %L = nasa_toLustre.ToLustreImport.L;
+            %import(L{:})
             [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             obj.addVariable(outputs_dt);
             [inputs] = getBlockInputsNames_convInType2AccType(obj, parent, blk);
@@ -39,7 +39,7 @@ classdef MultiPortSwitch_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             
             codes = cell(1, numel(outputs) + 1); 
             codes{1} = nasa_toLustre.lustreAst.LustreEq(portIndex, ...
-                nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.PLUS, ...
+                nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.PLUS, ...
                             inputs{1}{1},...
                             nasa_toLustre.lustreAst.IntExpr(indexShift)));
             %sprintf('%s = %s + %d; \n\t', portIndex, inputs{1}{1},indexShift);
@@ -49,7 +49,7 @@ classdef MultiPortSwitch_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 conds = cell(1, numInputs);
                 thens = cell(1, numInputs + 1);
                 for j=1:numInputs
-                    conds{j} = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.EQ, portIndex, nasa_toLustre.lustreAst.IntExpr(j));
+                    conds{j} = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.EQ, portIndex, nasa_toLustre.lustreAst.IntExpr(j));
                     thens{j} = inputs{j+1}{i};
                     %code = sprintf('%s  if(%s = %d) then %s\n\t', code, portIndex,j,inputs{j+1}{i});   % 1st port is control port
                 end

@@ -19,8 +19,8 @@ classdef Product_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     methods
         
         function  write_code(obj, parent, blk, xml_trace, lus_backend, varargin)
-            L = nasa_toLustre.ToLustreImport.L;
-            import(L{:})
+            %L = nasa_toLustre.ToLustreImport.L;
+            %import(L{:})
             OutputDataTypeStr = blk.CompiledPortDataTypes.Outport{1};
             isSumBlock = false;
             [codes, outputs_dt, additionalVars] = ...
@@ -35,8 +35,8 @@ classdef Product_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         
         %%
         function options = getUnsupportedOptions(obj, parent, blk, lus_backend, varargin)
-            L = nasa_toLustre.ToLustreImport.L;
-            import(L{:})
+            %L = nasa_toLustre.ToLustreImport.L;
+            %import(L{:})
             % add your unsuported options list here
             if (strcmp(blk.Multiplication, 'Matrix(*)')...
                     && MatlabUtils.contains(blk.Inputs, '/') )
@@ -45,7 +45,8 @@ classdef Product_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                         if LusBackendType.isKIND2(lus_backend)
                             if blk.CompiledPortWidths.Inport(i) > 49
                                 obj.addUnsupported_options(...
-                                    sprintf('Option Matrix(*) with division is not supported in block %s in inport %d. Only less than 8x8 Matrix inversion is supported.', ...
+                                    sprintf(['Option Matrix(*) with division is not supported in block %s in inport %d. ', ...
+                                    'Only less than 8x8 Matrix inversion is supported for Lustre backend KIND2.'], ...
                                     HtmlItem.addOpenCmd(blk.Origin_path), i));
                             end
                         else

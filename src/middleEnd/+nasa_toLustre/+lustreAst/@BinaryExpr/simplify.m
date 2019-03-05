@@ -11,7 +11,7 @@ function new_obj = simplify(obj)
     left_exp = obj.left.simplify();
     right_exp = obj.right.simplify();
     % x + (-y) => x - y, x - (-y) => x+y
-    if isa(right_exp, 'UnaryExpr') ...
+    if isa(right_exp, 'nasa_toLustre.lustreAst.UnaryExpr') ...
             && isequal(right_exp.op, nasa_toLustre.lustreAst.UnaryExpr.NEG) 
         if isequal(new_op, nasa_toLustre.lustreAst.BinaryExpr.PLUS)
             right_exp = right_exp.expr;

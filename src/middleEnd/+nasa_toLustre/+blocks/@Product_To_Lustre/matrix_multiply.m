@@ -6,8 +6,8 @@ function [codes, AdditionalVars] = matrix_multiply(obj, exp, blk, inputs, output
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    L = nasa_toLustre.ToLustreImport.L;
-    import(L{:})
+    %L = nasa_toLustre.ToLustreImport.L;
+    %import(L{:})
     % check that the number of columns of 1st input matrix is equalled
     % to the number of rows of the 2nd matrix
     % matrix C(mxl) = A(mxn)*B(nxl)

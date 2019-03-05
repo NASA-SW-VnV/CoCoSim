@@ -8,8 +8,8 @@ function [codes, ResetCondVar] = ResettableSSCall(parent, blk, ...
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    L = nasa_toLustre.ToLustreImport.L;
-    import(L{:})
+    %L = nasa_toLustre.ToLustreImport.L;
+    %import(L{:})
     ResetCondName = sprintf('ResetCond_of_%s', blk_name);
     ResetCondVar = nasa_toLustre.lustreAst.LustreVar(ResetCondName, 'bool');
     resetportDataType = blk.CompiledPortDataTypes.Reset{1};

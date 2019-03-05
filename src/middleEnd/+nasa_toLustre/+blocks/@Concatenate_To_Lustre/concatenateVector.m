@@ -6,8 +6,8 @@ function [codes] = concatenateVector(nb_inputs, inputs, outputs)
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    L = nasa_toLustre.ToLustreImport.L;
-    import(L{:})
+    %L = nasa_toLustre.ToLustreImport.L;
+    %import(L{:})
     codes = cell(1, numel(outputs));
     outputIndex = 0;
     for i=1:nb_inputs

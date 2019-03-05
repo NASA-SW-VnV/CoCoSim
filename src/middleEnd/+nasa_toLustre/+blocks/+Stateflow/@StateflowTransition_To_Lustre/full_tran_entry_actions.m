@@ -9,8 +9,8 @@
 % Entry actions
 function [body, outputs, inputs, antiCondition] = ...
         full_tran_entry_actions(transitions, parentPath, trans_cond, isHJ)
-    L = nasa_toLustre.ToLustreImport.L;
-    import(L{:})
+    %L = nasa_toLustre.ToLustreImport.L;
+    %import(L{:})
     global SF_STATES_NODESAST_MAP SF_STATES_PATH_MAP;
     body = {};
     outputs = {};

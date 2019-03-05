@@ -11,8 +11,8 @@ function [ external_nodes] = condExecSS_To_LusMerge( parent_ir, ss_ir, lus_backe
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
-    %import(L{:})
+    %%L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
+    %%import(L{:})
     
     
     % Adding lustre comments tracking the original path
@@ -100,8 +100,8 @@ function [body, variables_cell] =...
         write_enabled_OR_triggered_OR_action_SS(subsys, lus_backend,...
         node_outputs_withoutDT, hasEnablePort, hasActionPort, hasTriggerPort, ...
         activate_cond, original_node_call)
-    %L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
-    %import(L{:})
+    %%L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
+    %%import(L{:})
     
     fields = fieldnames(subsys.Content);
     

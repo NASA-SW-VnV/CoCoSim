@@ -6,8 +6,8 @@ function exp  = outputsValues(outputsNumber, outputIdx)
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    L = nasa_toLustre.ToLustreImport.L;
-    import(L{:})
+    %L = nasa_toLustre.ToLustreImport.L;
+    %import(L{:})
     values = arrayfun(@(x) nasa_toLustre.lustreAst.BooleanExpr('false'), (1:outputsNumber),...
         'UniformOutput', 0);
     if outputIdx > 0 && outputIdx <= outputsNumber

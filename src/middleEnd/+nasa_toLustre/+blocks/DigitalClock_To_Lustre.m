@@ -13,8 +13,8 @@ classdef DigitalClock_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     methods
         
         function  write_code(obj, parent, blk, xml_trace, ~, ~, main_sampleTime, varargin)
-            L = nasa_toLustre.ToLustreImport.L;
-            import(L{:})
+            %L = nasa_toLustre.ToLustreImport.L;
+            %import(L{:})
             [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             obj.addVariable(outputs_dt);
             
@@ -39,7 +39,7 @@ classdef DigitalClock_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 nasa_toLustre.lustreAst.VarIdExpr(nasa_toLustre.utils.SLX2LusUtils.nbStepStr()),...
                 nasa_toLustre.lustreAst.IntExpr(0)), ...
                 nasa_toLustre.lustreAst.RealExpr('0.0'), ...
-                nasa_toLustre.lustreAst.UnaryExpr(UnaryExpr.PRE, outputs{1}));
+                nasa_toLustre.lustreAst.UnaryExpr(nasa_toLustre.lustreAst.UnaryExpr.PRE, outputs{1}));
             codes = nasa_toLustre.lustreAst.LustreEq(outputs{1}, ...
                 nasa_toLustre.lustreAst.IteExpr(cond2, ...
                 realTime, ...

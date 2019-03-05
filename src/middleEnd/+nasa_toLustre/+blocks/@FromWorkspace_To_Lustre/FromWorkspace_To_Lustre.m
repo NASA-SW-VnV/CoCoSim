@@ -13,8 +13,8 @@ classdef FromWorkspace_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     methods
         
         function  write_code(obj, parent, blk, xml_trace, lus_backend, varargin)
-            L = nasa_toLustre.ToLustreImport.L;
-            import(L{:})
+            %L = nasa_toLustre.ToLustreImport.L;
+            %import(L{:})
             model_name = strsplit(blk.Origin_path, '/');
             model_name = model_name{1};
             SampleTime = SLXUtils.getModelCompiledSampleTime(model_name);
@@ -140,8 +140,8 @@ classdef FromWorkspace_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         end
         %%
         function options = getUnsupportedOptions(obj, parent, blk, varargin)
-            L = nasa_toLustre.ToLustreImport.L;
-            import(L{:})
+            %L = nasa_toLustre.ToLustreImport.L;
+            %import(L{:})
             obj.unsupported_options = {};
             VariableName = blk.VariableName;
             [variable, ~, status] = ...

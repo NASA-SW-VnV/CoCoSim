@@ -10,8 +10,8 @@
 function new_callObj = setArgInConvFormat(callObj, arg)
     % this function goes with dataType_conversion funciton to set 
     % the missing argument in conv_format.
-    %L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
-    %import(L{:})
+    %%L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
+    %%import(L{:})
     if isempty(callObj)
         new_callObj = arg;
         return;
@@ -22,10 +22,11 @@ function new_callObj = setArgInConvFormat(callObj, arg)
         new_args = args{1};
     else
         new_args = args;
+        
     end
     if isempty(new_args)
         new_callObj.setArgs(arg);
-    elseif isa(new_args, 'NodeCallExpr')
+    elseif isa(new_args, 'nasa_toLustre.lustreAst.NodeCallExpr')
         new_callObj.setArgs(...
             nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(new_args, arg));
     end

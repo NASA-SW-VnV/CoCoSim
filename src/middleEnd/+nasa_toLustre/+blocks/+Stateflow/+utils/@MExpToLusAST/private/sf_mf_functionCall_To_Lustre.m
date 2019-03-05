@@ -7,8 +7,8 @@ function code = sf_mf_functionCall_To_Lustre(BlkObj, tree, parent, ...
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         
-    L = nasa_toLustre.ToLustreImport.L;
-    import(L{:})
+    %L = nasa_toLustre.ToLustreImport.L;
+    %import(L{:})
     global SF_MF_FUNCTIONS_MAP ;
     
     if isa(tree.parameters, 'struct')

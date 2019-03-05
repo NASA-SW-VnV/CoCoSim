@@ -12,8 +12,8 @@ classdef Assertion_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     
     methods
         function  write_code(obj, parent, blk, xml_trace, varargin)
-            L = nasa_toLustre.ToLustreImport.L;
-            import(L{:})
+            %L = nasa_toLustre.ToLustreImport.L;
+            %import(L{:})
             if isfield(blk, 'Enabled') && isequal(blk.Enabled, 'off')
                 return;
             end

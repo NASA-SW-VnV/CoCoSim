@@ -5,17 +5,14 @@ function [SignalsInputsMap, OutputSignals] = getSignalMap(obj, blk, inputs)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    L = nasa_toLustre.ToLustreImport.L;
-    import(L{:})
+    %%L = nasa_toLustre.ToLustreImport.L;
+    %%import(L{:})
     % everything is inlined
     InportDimensions = blk.CompiledPortDimensions.Inport;
     OutportWidths = blk.CompiledPortWidths.Outport;
     InputSignals = blk.InputSignals;
     OutputSignals = regexp(blk.OutputSignals, ',', 'split');
-    OutputSignals_Width_Map = containers.Map('KeyType', 'char', 'ValueType', 'int32');
-    for i=1:numel(OutputSignals)
-        OutputSignals_Width_Map(OutputSignals{i}) = OutportWidths(i);
-    end
+    
     inputSignalsInlined = nasa_toLustre.blocks.BusSelector_To_Lustre.inlineInputSignals(InputSignals);
     if InportDimensions(1) == -2
         % case of virtual bus
@@ -45,7 +42,19 @@ function [SignalsInputsMap, OutputSignals] = getSignalMap(obj, blk, inputs)
             throw(ME);
         end
     end
+    % fill information about each signal with its width.
+    Signals_Width_Map = containers.Map('KeyType', 'char', 'ValueType', 'int32');
+    for i=1:length(OutputSignals)
+        Signals_Width_Map(OutputSignals{i}) = OutportWidths(i);
+    end
+    if length(inputSignalsInlined) == length(inport_cell_dimension)
+        for i=1:length(inport_cell_dimension)
+            if ~isKey(Signals_Width_Map, inputSignalsInlined{i})
+                Signals_Width_Map(inputSignalsInlined{i}) = inport_cell_dimension{i}.width;
+            end
+        end
+    end
     SignalsInputsMap = nasa_toLustre.blocks.BusSelector_To_Lustre.signalInputsUsingDimensions(...
-        blk, inport_cell_dimension, inputSignalsInlined, inputs, OutputSignals_Width_Map);
-
+        blk, inport_cell_dimension, inputSignalsInlined, inputs, Signals_Width_Map);
+    
 end

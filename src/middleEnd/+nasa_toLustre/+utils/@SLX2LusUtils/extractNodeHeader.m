@@ -12,8 +12,8 @@ function [node_name,  node_inputs_cell, node_outputs_cell,...
         extractNodeHeader(parent_ir, blk, is_main_node, ...
         isEnableORAction, isEnableAndTrigger, isContractBlk, isMatlabFunction, ...
         main_sampleTime, xml_trace)
-    %L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
-    %import(L{:})
+    %%L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
+    %%import(L{:})
     % this function is used to get the Lustre node inputs and
     % outputs.
 

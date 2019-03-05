@@ -8,8 +8,8 @@
 
 %% Utils functions
 function full_path_trace = get_full_path_trace(transitions, isDefaultTrans)
-    L = nasa_toLustre.ToLustreImport.L;
-    import(L{:})
+    %L = nasa_toLustre.ToLustreImport.L;
+    %import(L{:})
     transition_name = cell(numel(transitions), 1);
     for i=1:numel(transitions)
         transition = transitions{i};

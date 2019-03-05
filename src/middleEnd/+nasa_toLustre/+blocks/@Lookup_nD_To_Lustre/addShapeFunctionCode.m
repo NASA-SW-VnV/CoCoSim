@@ -8,8 +8,8 @@ function [body, vars] = addShapeFunctionCode(numBoundNodes,...
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    L = nasa_toLustre.ToLustreImport.L;
-    import(L{:})
+    %L = nasa_toLustre.ToLustreImport.L;
+    %import(L{:})
     % This function defines and calculating shape function values for the
     % interpolation point
     body = {};   % body may grow if ~skipInterpolation
@@ -35,11 +35,11 @@ function [body, vars] = addShapeFunctionCode(numBoundNodes,...
             end
             if j==1
                 %value = sprintf('%s + %s*%d',value,curIndex, dimJump(j));
-                terms{j} = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.MULTIPLY,curIndex,Ast_dimJump{j});
+                terms{j} = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.MULTIPLY,curIndex,Ast_dimJump{j});
             else
                 %value = sprintf('%s + (%s-1)*%d',value,curIndex, dimJump(j));
-                terms{j} = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.MULTIPLY,...
-                    nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.MINUS,...
+                terms{j} = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.MULTIPLY,...
+                    nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.MINUS,...
                                 curIndex, ...
                                 nasa_toLustre.lustreAst.IntExpr(1)),...
                     Ast_dimJump{j});
@@ -61,11 +61,11 @@ function [body, vars] = addShapeFunctionCode(numBoundNodes,...
             for j=1:numel(table_elem)-1
 %                        if j==1
                     %code = sprintf('%s  if(%s = %d) then %s\n\t', code, boundingi{i},j,table_elem{j});
-                    conds{j} = nasa_toLustre.lustreAst.BinaryExpr(BinaryExpr.EQ,boundingi{i},nasa_toLustre.lustreAst.IntExpr(j));
+                    conds{j} = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.EQ,boundingi{i},nasa_toLustre.lustreAst.IntExpr(j));
                     thens{j} = table_elem{j};
 %                         else
 %                             %code = sprintf('%s  else if(%s = %d) then %s\n\t', code, boundingi{i},j,table_elem{j});
-%                             conds{j} = BinaryExpr(BinaryExpr.EQ,boundingi{i},IntExpr(j));
+%                             conds{j} = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.EQ,boundingi{i},IntExpr(j));
 %                             thens{j} = table_elem{j};                            
 %                        end
             end

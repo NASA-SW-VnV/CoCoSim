@@ -13,8 +13,8 @@ classdef UnaryMinus_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     methods
         
         function  write_code(obj, parent, blk, xml_trace, varargin)
-            L = nasa_toLustre.ToLustreImport.L;
-            import(L{:})
+            %L = nasa_toLustre.ToLustreImport.L;
+            %import(L{:})
             %% Step 1: Get the block outputs names,
             [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             
@@ -85,7 +85,7 @@ classdef UnaryMinus_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                                            inputs{1}{j}, ...
                                            vmin), ...
                                  vmax, ...
-                                 nasa_toLustre.lustreAst.UnaryExpr(UnaryExpr.NEG, inputs{1}{j})));
+                                 nasa_toLustre.lustreAst.UnaryExpr(nasa_toLustre.lustreAst.UnaryExpr.NEG, inputs{1}{j})));
                     
                 end
             else
@@ -93,7 +93,7 @@ classdef UnaryMinus_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 for j=1:numel(outputs)
                     % example of lement wise product block.
                     codes{j} = nasa_toLustre.lustreAst.LustreEq(outputs{j}, ...
-                         nasa_toLustre.lustreAst.UnaryExpr(UnaryExpr.NEG, inputs{1}{j}));
+                         nasa_toLustre.lustreAst.UnaryExpr(nasa_toLustre.lustreAst.UnaryExpr.NEG, inputs{1}{j}));
                 end
             end
             

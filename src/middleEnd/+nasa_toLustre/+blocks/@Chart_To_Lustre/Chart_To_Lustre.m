@@ -16,8 +16,8 @@ classdef Chart_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     methods
         
         function  write_code(obj, parent, blk, xml_trace, lus_backend, coco_backend, main_sampleTime, varargin)
-            L = nasa_toLustre.ToLustreImport.L;
-            import(L{:})
+            %L = nasa_toLustre.ToLustreImport.L;
+            %import(L{:})
             %% add Chart Node
             [main_node, external_nodes, external_libraries_i] = ...
                 nasa_toLustre.blocks.Chart_To_Lustre.getChartNodes(parent, blk, main_sampleTime, lus_backend, coco_backend, xml_trace);
@@ -74,8 +74,8 @@ classdef Chart_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         end
         
         function options = getUnsupportedOptions(obj,parent, blk, varargin)
-            L = nasa_toLustre.ToLustreImport.L;
-            import(L{:})
+            %L = nasa_toLustre.ToLustreImport.L;
+            %import(L{:})
             [triggerInputs] =nasa_toLustre.utils.SLX2LusUtils.getSubsystemTriggerInputsNames(parent, blk);
             SFContent = blk.StateflowContent;
             %% Check chart properties

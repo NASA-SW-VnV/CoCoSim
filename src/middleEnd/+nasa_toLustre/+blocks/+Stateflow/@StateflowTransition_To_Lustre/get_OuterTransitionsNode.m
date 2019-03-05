@@ -9,8 +9,8 @@
 %get_OuterTransitionsNode
 function [transitionNode, external_libraries] = ...
         get_OuterTransitionsNode(state, data_map)
-    L = nasa_toLustre.ToLustreImport.L;
-    import(L{:})
+    %L = nasa_toLustre.ToLustreImport.L;
+    %import(L{:})
     transitionNode = {};
     external_libraries = {};
     parentPath = fileparts(state.Path);
