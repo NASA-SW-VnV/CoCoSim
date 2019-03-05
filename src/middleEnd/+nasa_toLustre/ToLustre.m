@@ -290,7 +290,7 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, abstractedBlo
     if ~isempty(abstractedBlocks)
         f_base = strcat(file_name, '_abstracted_blocks.html');
         html_path = fullfile(output_dir, f_base);
-        HtmlItem.displayWarningMessages(html_path, 'The following Blocks/Nodes are abstracted:', abstractedBlocks, mode_display);
+        HtmlItem.displayWarningMessages(html_path, 'The following Blocks/Nodes are abstracted', abstractedBlocks, mode_display);
         if mode_display
             msg = sprintf('Abstracted blocks report is in : %s', HtmlItem.addOpenFileCmd(html_path, f_base));
             display_msg(msg, MsgType.RESULT, 'ToLustre', '');

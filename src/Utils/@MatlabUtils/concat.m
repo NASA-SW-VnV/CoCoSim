@@ -8,7 +8,10 @@
 
 %% concatenate 1-D vectors
 function r = concat(varargin)
-    if numel(varargin) == 1
+    if isempty(varargin)
+        r = varargin;
+        return;
+    elseif numel(varargin) == 1
         r = varargin{1};
         return;
     elseif numel(varargin) > 2
