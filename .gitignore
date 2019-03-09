@@ -50,6 +50,7 @@ src/miscellaneous/
 src/preferences/
 src/+cocosim_menu/preferences.mat
 src/middleEnd/iowa_toLustre/
+src/external/cocosim_iowa
 tools/build/
 tools/verifiers/
 test
