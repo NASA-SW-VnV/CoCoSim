@@ -6,7 +6,7 @@ function [new_obj, varIds] = changePre2Var(obj)
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    import nasa_toLustre.lustreAst.BinaryExpr
+    
     varIds = {};
     [leftExp, varIdLeft] = obj.left.changePre2Var();
     varIds = [varIds, varIdLeft];

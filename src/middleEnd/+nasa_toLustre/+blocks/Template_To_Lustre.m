@@ -15,8 +15,7 @@ classdef Template_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         
         function  write_code(obj, parent, blk, xml_trace, lus_backend, coco_backend, main_sampletime, varargin)
             %% Step 0: Import all functions in nasa_toLustre package
-            %L = nasa_toLustre.ToLustreImport.L;
-            %import(L{:})
+            
             %% Step 1: Get the block outputs names, If a block is called X
             % and has one outport with width 3 and datatype double,
             % then outputs = {'X_1', 'X_2', 'X_3'}

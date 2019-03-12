@@ -7,10 +7,8 @@
 %% EXIT ACTION
 function [main_node, external_libraries] = ...
         write_exit_action(state, data_map)
-    %L = nasa_toLustre.ToLustreImport.L;
-    %import(L{:})
-    import nasa_toLustre.blocks.Stateflow.utils.*
-    global SF_STATES_NODESAST_MAP SF_STATES_PATH_MAP;
+    
+        global SF_STATES_NODESAST_MAP SF_STATES_PATH_MAP;
     external_libraries = {};
     main_node = {};
     body = {};

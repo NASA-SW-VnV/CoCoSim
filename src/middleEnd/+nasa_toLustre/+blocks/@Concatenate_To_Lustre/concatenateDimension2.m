@@ -6,8 +6,7 @@ function [codes] = concatenateDimension2(inputs, outputs,in_matrix_dimension)
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    %L = nasa_toLustre.ToLustreImport.L;
-    %import(L{:})
+    
     codes = cell(1, numel(outputs));
     index = 0;
     for i=1:numel(in_matrix_dimension)       %loop over number of inports

@@ -6,8 +6,7 @@ function [isPortIndex,ind,selectorOutputDimsArray] = ...
     % All Rights Reserved.
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
-    %L = nasa_toLustre.ToLustreImport.L;
-    %import(L{:})
+    
     % if isSelector then U_expanded_dims should be in_matrix_dimension{1}
     indexPortNumber = 0;
     isPortIndex = false;

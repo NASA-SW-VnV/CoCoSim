@@ -58,8 +58,7 @@ classdef IteExpr < nasa_toLustre.lustreAst.LustreExpr
         
         %% simplify expression
         function new_obj = simplify(obj)
-            import nasa_toLustre.lustreAst.*
-            new_cond = obj.condition.simplify();
+                        new_cond = obj.condition.simplify();
             new_then = obj.thenExpr.simplify();
             new_else = obj.ElseExpr.simplify();
             % simplify trivial if-and-else
@@ -211,8 +210,7 @@ classdef IteExpr < nasa_toLustre.lustreAst.LustreExpr
         end
         
         function [conds, thens] = getCondsThens(exp)
-            import nasa_toLustre.lustreAst.*
-            conds = {};
+                        conds = {};
             thens = {};
             if isa(exp, 'ParenthesesExpr')
                 exp = exp.getExp();

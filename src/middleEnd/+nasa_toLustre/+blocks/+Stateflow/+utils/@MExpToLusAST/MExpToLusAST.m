@@ -11,10 +11,9 @@ classdef MExpToLusAST
     end
     methods(Static)
         function [lusCode, status] = translate(BlkObj, exp, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun)
-            import nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST
+            
             global SF_MF_FUNCTIONS_MAP ;
-            %L = nasa_toLustre.ToLustreImport.L;
-            %import(L{:})
+            
             
             narginchk(2, 10);
             if isempty(BlkObj), BlkObj = nasa_toLustre.blocks.DummyBlock_To_Lustre; end

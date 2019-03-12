@@ -6,23 +6,22 @@ function [outputs, inputs] = getInOutputsFromAction(lus_action, isCondition, dat
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    import nasa_toLustre.lustreAst.*
-    outputs = {};
+        outputs = {};
     inputs = {};
     
-    if numel(lus_action) == 1 && isa(lus_action{1}, 'ConcurrentAssignments')
+    if numel(lus_action) == 1 && isa(lus_action{1}, 'nasa_toLustre.lustreAst.ConcurrentAssignments')
         assignments = lus_action{1}.getAssignments();
     else
         assignments = lus_action;
     end
     for act_idx=1:numel(assignments)
         if ~isCondition
-            if isa(assignments{act_idx}, 'ConcurrentAssignments')
+            if isa(assignments{act_idx}, 'nasa_toLustre.lustreAst.ConcurrentAssignments')
                 [outputs_i, inputs_i] = nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getInOutputsFromAction(assignments(act_idx));
                 outputs = MatlabUtils.concat(outputs, outputs_i);
                 inputs = MatlabUtils.concat(inputs, inputs_i);
                 continue;
-            elseif~isa(assignments{act_idx}, 'LustreEq')
+            elseif~isa(assignments{act_idx}, 'nasa_toLustre.lustreAst.LustreEq')
                 ME = MException('COCOSIM:STATEFLOW', ...
                     'Action "%s" in "%s" should be an assignement (e.g. outputs = f(inputs))', ...
                     expreession, action_parentPath);

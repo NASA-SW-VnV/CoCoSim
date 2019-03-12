@@ -13,8 +13,7 @@ classdef FromWorkspace_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     methods
         
         function  write_code(obj, parent, blk, xml_trace, lus_backend, varargin)
-            %L = nasa_toLustre.ToLustreImport.L;
-            %import(L{:})
+            
             model_name = strsplit(blk.Origin_path, '/');
             model_name = model_name{1};
             SampleTime = SLXUtils.getModelCompiledSampleTime(model_name);
@@ -63,7 +62,7 @@ classdef FromWorkspace_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             blk_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);
             codeAst_all = {};
             vars_all = {};   
-            simTime = VarIdExpr(SLX2LusUtils.timeStepStr());    % modify to do cyclic repetition?
+            simTime = nasa_toLustre.lustreAst.VarIdExpr(nasa_toLustre.utils.SLX2LusUtils.timeStepStr());    % modify to do cyclic repetition?
             for i=1:dims  
 
                 time_array = t';
@@ -140,8 +139,7 @@ classdef FromWorkspace_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         end
         %%
         function options = getUnsupportedOptions(obj, parent, blk, varargin)
-            %L = nasa_toLustre.ToLustreImport.L;
-            %import(L{:})
+            
             obj.unsupported_options = {};
             VariableName = blk.VariableName;
             [variable, ~, status] = ...

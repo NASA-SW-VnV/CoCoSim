@@ -7,8 +7,7 @@ function TriggerinputExp = getTriggerValue(Cond, triggerInput, TriggerType, Trig
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    %L = nasa_toLustre.ToLustreImport.L;
-    %import(L{:})
+    
     if strcmp(TriggerBlockDt, 'real')
         %suffix = '.0';
         zero = nasa_toLustre.lustreAst.RealExpr('0.0');

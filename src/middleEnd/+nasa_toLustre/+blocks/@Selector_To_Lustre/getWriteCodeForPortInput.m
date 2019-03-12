@@ -6,8 +6,7 @@ function [codes] = getWriteCodeForPortInput(obj,blk,numOutDims,inputs,outputs,in
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    %L = nasa_toLustre.ToLustreImport.L;
-    %import(L{:})
+    
         if numOutDims>7
             display_msg(sprintf('More than 7 dimensions is not supported in block %s',...
                 indexBlock.Origin_path), ...

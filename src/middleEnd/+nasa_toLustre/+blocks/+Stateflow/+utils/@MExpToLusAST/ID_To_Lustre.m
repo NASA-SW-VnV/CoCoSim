@@ -7,10 +7,8 @@ function [code, dt] = ID_To_Lustre(~, tree, parent, blk, data_map, ...
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    %L = nasa_toLustre.ToLustreImport.L;
-    %import(L{:})
-    import nasa_toLustre.blocks.Stateflow.utils.*
-    if ischar(tree)
+    
+        if ischar(tree)
         id = tree;
     else
         id = tree.name;
@@ -63,7 +61,7 @@ function [code, dt] = ID_To_Lustre(~, tree, parent, blk, data_map, ...
                 end
             end
         catch me
-            %code = VarIdExpr(var_name);
+            %code = nasa_toLustre.lustreAst.VarIdExpr(var_name);
             ME = MException('COCOSIM:TREE2CODE', ...
                 'Not found Variable "%s" in block "%s"', ...
                 id, blk.Origin_path);

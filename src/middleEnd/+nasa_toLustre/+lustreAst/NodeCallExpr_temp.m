@@ -42,8 +42,7 @@ classdef NodeCallExpr < nasa_toLustre.lustreAst.LustreExpr
         end
         %% simplify expression
         function new_obj = simplify(obj)
-            import nasa_toLustre.lustreAst.*
-            new_args = cellfun(@(x) x.simplify(), obj.args, 'UniformOutput', 0);
+                        new_args = cellfun(@(x) x.simplify(), obj.args, 'UniformOutput', 0);
             % remove parentheses from arguments.
             for i=1:numel(new_args)
                 if isa(new_args{i}, 'ParenthesesExpr')

@@ -6,15 +6,14 @@ function new_assignements = addInnerCond(lus_eqts, isInnerLusVar, orig_exp, stat
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    import nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils
-    import nasa_toLustre.lustreAst.*
-    new_assignements = cell(numel(lus_eqts), 1);
+    
+        new_assignements = cell(numel(lus_eqts), 1);
     for i=1:numel(lus_eqts)
-        if isa(lus_eqts{i}, 'ConcurrentAssignments')
+        if isa(lus_eqts{i}, 'nasa_toLustre.lustreAst.ConcurrentAssignments')
             assignments = lus_eqts{i}.getAssignments();
             new_assignements_i = nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.addInnerCond(assignments, isInnerLusVar, orig_exp, state);
             new_assignements{i} = nasa_toLustre.lustreAst.ConcurrentAssignments(new_assignements_i);
-        elseif isa(lus_eqts{i}, 'LustreEq')
+        elseif isa(lus_eqts{i}, 'nasa_toLustre.lustreAst.LustreEq')
             new_assignements{i} = nasa_toLustre.lustreAst.LustreEq(lus_eqts{i}.getLhs(), ...
                 nasa_toLustre.lustreAst.IteExpr(nasa_toLustre.lustreAst.UnaryExpr(nasa_toLustre.lustreAst.UnaryExpr.NOT, isInnerLusVar), ...
                 lus_eqts{i}.getRhs(), lus_eqts{i}.getLhs()));

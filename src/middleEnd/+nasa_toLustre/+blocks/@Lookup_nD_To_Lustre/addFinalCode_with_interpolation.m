@@ -9,8 +9,7 @@ function [body, vars] = addFinalCode_with_interpolation(outputs,inputs,...
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    %L = nasa_toLustre.ToLustreImport.L;
-    %import(L{:})
+    
     % This function carries out the interpolation depending on algorithm
     % option.  For the flat option, the value at the lower bounding
     % breakpoint is used. For the nearest option, the closest

@@ -7,8 +7,7 @@
 %% state body
 function [outputs, inputs, body, variables] = write_state_body(state)
     global SF_STATES_NODESAST_MAP ;%SF_STATES_PATH_MAP;
-    %L = nasa_toLustre.ToLustreImport.L;
-    %import(L{:})
+    
     outputs = {};
     inputs = {};
     variables = {};

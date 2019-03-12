@@ -14,8 +14,7 @@ classdef StateflowGraphicalFunction_To_Lustre
         
         function  [main_node, external_nodes, external_libraries ] = ...
                 write_code(sfunc, chart_data)
-            %L = nasa_toLustre.ToLustreImport.L;
-            %import(L{:})
+            
             global SF_MF_FUNCTIONS_MAP SF_JUNCTIONS_PATH_MAP SF_STATES_NODESAST_MAP;
             external_nodes = {};
             external_libraries = {};
@@ -108,7 +107,7 @@ classdef StateflowGraphicalFunction_To_Lustre
                             var = nasa_toLustre.lustreAst.VarIdExpr(computed_inputs{i}.getId());
                             var_dt = computed_inputs{i}.getDT();
                             for j=1:numel(bodyEqs)
-                                if isa(bodyEqs{j}, 'LustreEq')
+                                if isa(bodyEqs{j}, 'nasa_toLustre.lustreAst.LustreEq')
                                     lhs = bodyEqs{j}.getLhs();
                                     rhs = bodyEqs{j}.getRhs();
                                     nb_occ = rhs.nbOccuranceVar(var);

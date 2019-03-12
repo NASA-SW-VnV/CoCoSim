@@ -6,7 +6,7 @@ function dt = ID_DT(tree, data_map, inputs, isSimulink, varargin)
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    import nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT
+    
     if ischar(tree)
         id = tree;
     else

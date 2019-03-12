@@ -6,8 +6,8 @@ function [fun_node,failed ]  = getFuncCode(func, data_map, blkObj, parent, blk)
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    %%L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
-    %%import(L{:})
+    %
+    %
     
     statements = func.statements;
     expected_dt = '';

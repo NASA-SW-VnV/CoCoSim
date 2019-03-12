@@ -7,8 +7,7 @@ function [codeAst_all, vars_all, external_lib] = getSigBuilderCode(...
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    %L = nasa_toLustre.ToLustreImport.L;
-    %import(L{:})
+    
     % time is nx1 cell if there is more than 1 signal, time is
     % array of 1xm where m is the number of time index in the time
     % series

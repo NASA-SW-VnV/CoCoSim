@@ -6,8 +6,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function [node, external_nodes_i, opens, abstractedNodes] = get_int_div_Ceiling(lus_backend, varargin)
-    import nasa_toLustre.lustreAst.*
-    opens = {};
+        opens = {};
     abstractedNodes = {};
     if LusBackendType.isJKIND(lus_backend)
         %Jkind does not support mod operator between variables

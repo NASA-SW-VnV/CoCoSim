@@ -6,8 +6,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [resetCode, status] = getResetCode(...
         resetType, resetDT, resetInput, zero )
-    %%L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
-    %%import(L{:})
+    %
+    %
     status = 0;
     if strcmp(resetDT, 'bool')
         b = resetInput;

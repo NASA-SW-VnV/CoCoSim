@@ -7,8 +7,7 @@ function [inputs] = ...
     % All Rights Reserved.
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %L = nasa_toLustre.ToLustreImport.L;
-    %import(L{:})
+    
     if isSelector
         inputIdToConvertToInt = 1;
     else

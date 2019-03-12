@@ -6,8 +6,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%      
 %% State Node
 function main_node  = write_StateNode(state)
-    %L = nasa_toLustre.ToLustreImport.L;
-    %import(L{:})
+    
     global SF_STATES_NODESAST_MAP;
     main_node = {};
 

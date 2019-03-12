@@ -9,8 +9,7 @@ function inputSignalsInlined = inlineInputSignals(InputSignals, main_cell, prefi
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %L = nasa_toLustre.ToLustreImport.L;
-    %import(L{:})
+    
     if nargin < 2
         main_cell = 1;
     end

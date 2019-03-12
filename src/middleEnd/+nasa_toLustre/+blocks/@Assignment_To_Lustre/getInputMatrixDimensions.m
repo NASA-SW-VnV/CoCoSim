@@ -5,8 +5,7 @@ function in_matrix_dimension = getInputMatrixDimensions(inport_dimensions)
     % All Rights Reserved.
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %L = nasa_toLustre.ToLustreImport.L;
-    %import(L{:})
+    
     if inport_dimensions(1) == -2
         % bus case, the first 2 elements should be ignored
         inport_dimensions = inport_dimensions(3:end);

@@ -8,8 +8,7 @@ function [body, vars] = addShapeFunctionCode(numBoundNodes,...
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    %L = nasa_toLustre.ToLustreImport.L;
-    %import(L{:})
+    
     % This function defines and calculating shape function values for the
     % interpolation point
     body = {};   % body may grow if ~skipInterpolation
@@ -65,7 +64,7 @@ function [body, vars] = addShapeFunctionCode(numBoundNodes,...
                     thens{j} = table_elem{j};
 %                         else
 %                             %code = sprintf('%s  else if(%s = %d) then %s\n\t', code, boundingi{i},j,table_elem{j});
-%                             conds{j} = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.EQ,boundingi{i},IntExpr(j));
+%                             conds{j} = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.EQ,boundingi{i},nasa_toLustre.lustreAst.IntExpr(j));
 %                             thens{j} = table_elem{j};                            
 %                        end
             end

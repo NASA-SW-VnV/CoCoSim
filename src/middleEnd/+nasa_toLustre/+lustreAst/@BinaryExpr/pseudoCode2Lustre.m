@@ -6,7 +6,7 @@ function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, ~)
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    import nasa_toLustre.lustreAst.BinaryExpr
+    
     %BinaryExpr is always on the right of an Equation
     [leftExp, ~] = obj.left.pseudoCode2Lustre(outputs_map, false);
     [rightExp, ~] = obj.right.pseudoCode2Lustre(outputs_map, false);

@@ -6,13 +6,12 @@ function new_obj = simplify(obj)
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  
-    import nasa_toLustre.lustreAst.*
-    new_cond = obj.condition.simplify();
+        new_cond = obj.condition.simplify();
     new_then = obj.thenExpr.simplify();
     new_else = obj.ElseExpr.simplify();
     % simplify trivial if-and-else
     % if true then x else y => x
-    if isa(obj.condition, 'BooleanExpr')
+    if isa(obj.condition, 'nasa_toLustre.lustreAst.BooleanExpr')
         if obj.condition.getValue()
             new_obj = new_then;
         else

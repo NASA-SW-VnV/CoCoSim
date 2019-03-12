@@ -6,8 +6,8 @@ function new_obj = changeArrowExp(obj, cond)
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    import nasa_toLustre.lustreAst.BinaryExpr
-    import nasa_toLustre.lustreAst.IteExpr
+    
+    
     if isequal(obj.op, nasa_toLustre.lustreAst.BinaryExpr.ARROW)
         new_obj = nasa_toLustre.lustreAst.IteExpr(cond, ...
             obj.left.changeArrowExp(cond),...

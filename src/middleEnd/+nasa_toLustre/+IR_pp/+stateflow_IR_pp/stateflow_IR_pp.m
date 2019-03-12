@@ -10,8 +10,6 @@ function [new_ir, status] = stateflow_IR_pp(old_ir, print_in_file, output_dir)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    import nasa_toLustre.IR_pp.stateflow_IR_pp.stateflow_fields.* 
-    import nasa_toLustre.IR_pp.stateflow_IR_pp.*
     status = 0;
     if nargin < 3 || isempty(output_dir)
         output_dir = pwd;
@@ -33,22 +31,20 @@ function [new_ir, status] = stateflow_IR_pp(old_ir, print_in_file, output_dir)
     %% Order functions
     global ordered_sfIR_pp_functions;
     if isempty(ordered_sfIR_pp_functions)
-        SFIR_PP_config;
+        nasa_toLustre.IR_pp.stateflow_IR_pp.SFIR_PP_config;
     end
 
     % transform Program to struct
     %% sort functions calls
-    oldDir = pwd;
     for i=1:numel(ordered_sfIR_pp_functions)
         [dirname, func_name, ~] = fileparts(ordered_sfIR_pp_functions{i});
-        cd(dirname);
-        fh = str2func(func_name);
+        package_prefix = MatlabUtils.getPackagePrefix(dirname, func_name);
+        fh = str2func(sprintf('%s.%s', package_prefix, func_name));
         try
             display_msg(['runing ' func2str(fh)], MsgType.INFO, 'Stateflow_IRPP', '');
             [new_ir, status] = fh(new_ir);
             if status
                  display_msg('Stateflow_IR_PP has been interrupted', MsgType.ERROR, 'Stateflow_IRPP', '');
-                 cd(oldDir);
                  return;
             end
         catch me
@@ -57,7 +53,6 @@ function [new_ir, status] = stateflow_IR_pp(old_ir, print_in_file, output_dir)
         end
 
     end
-    cd(oldDir);
     %%  Exporting the IR
 
     if print_in_file

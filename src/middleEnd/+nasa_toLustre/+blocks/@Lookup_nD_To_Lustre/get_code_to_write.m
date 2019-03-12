@@ -7,8 +7,7 @@ function [ mainCode, main_vars, extNode, external_lib] =  ...
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    %L = nasa_toLustre.ToLustreImport.L;
-    %import(L{:})
+    
     % initialize
     indexDataType = 'int';
     blk_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);

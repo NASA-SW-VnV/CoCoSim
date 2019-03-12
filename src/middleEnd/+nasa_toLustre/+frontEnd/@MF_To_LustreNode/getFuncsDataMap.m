@@ -8,8 +8,8 @@ function [fun_data_map, failed] = getFuncsDataMap(blk, script, ...
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         
-    %%L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
-    %%import(L{:})
+    %
+    %
     fun_data_map = containers.Map('KeyType', 'char', 'ValueType', 'any');
     failed = false;
     %% create matlab file to execute it and get all its workspace

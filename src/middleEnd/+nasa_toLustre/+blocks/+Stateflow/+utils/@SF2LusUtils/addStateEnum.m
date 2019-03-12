@@ -7,8 +7,7 @@
 function [stateEnumType, childAst] = ...
         addStateEnum(state, child, isInner, isJunction, inactive)
     global SF_STATES_ENUMS_MAP;
-    %L = nasa_toLustre.ToLustreImport.L;
-    %import(L{:})
+    
     stateEnumType = nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getStateEnumType(state);
     state_name = upper(...
         nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getUniqueName(state));

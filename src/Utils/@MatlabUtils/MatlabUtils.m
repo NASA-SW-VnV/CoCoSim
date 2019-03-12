@@ -35,6 +35,9 @@ classdef MatlabUtils
         vector = construct_random_integers(nb_iterations, IMIN, IMAX, dt, dim)
         vector = construct_random_booleans(nb_iterations, IMIN, IMAX, dim)
         vector = construct_random_doubles(nb_iterations, IMIN, IMAX,dim)
+        
+        %% get package prefix
+        path_prefix = getPackagePrefix(f_parent, f_name)
         %% This function for developers
         % open all files that contains a String
         whoUse(folder, str)

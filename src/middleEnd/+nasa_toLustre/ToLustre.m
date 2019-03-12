@@ -14,8 +14,8 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, abstractedBlo
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %%L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
-    %%import(L{:})
+    %
+    %
     
     %% global variables
     global TOLUSTRE_ENUMS_MAP TOLUSTRE_ENUMS_CONV_NODES ...
@@ -311,8 +311,7 @@ end
 function [nodes_ast, contracts_ast, external_libraries, error_status] = ...
         recursiveGeneration(parent, blk, main_sampleTime, is_main_node,...
         lus_backend, coco_backend, xml_trace)
-    import nasa_toLustre.frontEnd.*
-    nodes_ast = {};
+        nodes_ast = {};
     contracts_ast = {};
     external_libraries = {};
     error_status = false;

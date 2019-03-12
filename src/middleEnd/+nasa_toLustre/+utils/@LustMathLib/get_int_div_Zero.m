@@ -6,8 +6,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  
 function [node, external_nodes_i, opens, abstractedNodes] = get_int_div_Zero(varargin)
-    import nasa_toLustre.lustreAst.*
-    opens = {};
+        opens = {};
     abstractedNodes = {};
     external_nodes_i = {strcat('LustMathLib_', 'abs_int')};
     % format = '--Rounds positive and negative numbers toward positive infinity\n ';

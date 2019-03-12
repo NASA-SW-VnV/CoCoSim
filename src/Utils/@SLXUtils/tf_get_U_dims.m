@@ -30,7 +30,7 @@ function U_dims = tf_get_U_dims(model, pp_name, blkList)
                 continue;
             end
             CompiledPortDimensions = get_param(blkList{i}, 'CompiledPortDimensions');
-            in_matrix_dimension = Assignment_To_Lustre.getInputMatrixDimensions(CompiledPortDimensions.Inport);
+            in_matrix_dimension = nasa_toLustre.blocks.Assignment_To_Lustre.getInputMatrixDimensions(CompiledPortDimensions.Inport);
             if numel(in_matrix_dimension) > 1
                 display_msg(sprintf('block %s has external reset signal not supported',...
                     blkList{i}), ...

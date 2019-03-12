@@ -12,8 +12,7 @@ classdef Outport_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     methods
         
         function  write_code(obj, parent, blk, ~, lus_backend, varargin)
-            %L = nasa_toLustre.ToLustreImport.L;
-            %import(L{:})
+            
             [outputs, ~] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk);
             [inputs] =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk);
             isInsideContract =nasa_toLustre.utils.SLX2LusUtils.isContractBlk(parent);
@@ -44,8 +43,7 @@ classdef Outport_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         
         function options = getUnsupportedOptions(obj, parent, blk, ...
                 lus_backend, coco_backend, varargin)
-            %L = nasa_toLustre.ToLustreImport.L;
-            %import(L{:})
+            
             % Outport in first level should not be of type enumeration in 
             % case of Validation backend with Lustrec.
             if CoCoBackendType.isVALIDATION(coco_backend) ...

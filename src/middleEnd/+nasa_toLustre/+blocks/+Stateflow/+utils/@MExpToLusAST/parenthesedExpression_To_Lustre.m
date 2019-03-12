@@ -7,8 +7,7 @@ function [code, exp_dt] = parenthesedExpression_To_Lustre(BlkObj, tree, ...
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    import nasa_toLustre.lustreAst.*
-    import nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST
+        
     
     [exp, exp_dt] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(BlkObj, tree.expression, parent,...
         blk, data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun);

@@ -8,7 +8,7 @@ function [ new_ir, status ] = transitionLabel_SFIR_pp( new_ir )
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    import nasa_toLustre.IR_pp.stateflow_IR_pp.stateflow_fields.transitionLabel_SFIR_pp
+    
     status = false;
     if isfield(new_ir, 'States')
         for i=1:numel(new_ir.States)

@@ -7,8 +7,8 @@ function [ new_ir, status ] = DT_SFIR_PP( new_ir )
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    import nasa_toLustre.utils.SLX2LusUtils
-    import nasa_toLustre.IR_pp.stateflow_IR_pp.stateflow_fields.DT_SFIR_PP
+    
+    
     status = 0;
     if isfield(new_ir, 'Data')
         for i=1:numel(new_ir.Data)

@@ -12,8 +12,7 @@ classdef RateTransition_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     methods
         
         function  write_code(obj, parent, blk, xml_trace, lus_backend, ~, main_sampleTime, varargin)
-            %L = nasa_toLustre.ToLustreImport.L;
-            %import(L{:})
+            
             [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             obj.addVariable(outputs_dt);
             [inputs] =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk);
@@ -29,7 +28,7 @@ classdef RateTransition_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             
             % detect Rate type (see documentation
             
-            [type, error_msg] = nasa_toLustre.blocks.getRateTransferType(blk, inTs, inTsOffset, outTs, outTsOffset );
+            [type, error_msg] = nasa_toLustre.blocks.RateTransition_To_Lustre.getRateTransferType(blk, inTs, inTsOffset, outTs, outTsOffset );
             if ~isempty(error_msg)
                 display_msg(error_msg, MsgType.ERROR, 'RateTransition_To_Lustre', '');
                 return;
@@ -117,7 +116,7 @@ classdef RateTransition_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             obj.setCode( codes );
         end
         %%
-        function options = getUnsupportedOptions(obj, ~, blk, ~, varargin)
+        function options = getUnsupportedOptions(obj, ~, blk, lus_backend, varargin)
             %% calculated by rateTransition_ir_pp
             InportCompiledSampleTime = blk.InportCompiledSampleTime;
             OutportCompiledSampleTime = blk.OutportCompiledSampleTime;
@@ -125,7 +124,7 @@ classdef RateTransition_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             outTs = OutportCompiledSampleTime(1);
             inTsOffset = InportCompiledSampleTime(2);
             outTsOffset = OutportCompiledSampleTime(2);
-            [type, error_msg] = nasa_toLustre.blocks.getRateTransferType(blk, inTs, inTsOffset, outTs, outTsOffset );
+            [type, error_msg] = nasa_toLustre.blocks.RateTransition_To_Lustre.getRateTransferType(blk, inTs, inTsOffset, outTs, outTsOffset );
             if ~isempty(error_msg)
                 obj.addUnsupported_options(error_msg);
             end

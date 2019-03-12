@@ -7,8 +7,7 @@ function [delay_node] = getDelayNode(node_name, ...
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    %L = nasa_toLustre.ToLustreImport.L;
-    %import(L{:})
+    
     %node header
     [ u_DT, zero ] =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt( u_DT);
     node_inputs{1} = nasa_toLustre.lustreAst.LustreVar('u', u_DT);

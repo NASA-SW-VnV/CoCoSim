@@ -12,8 +12,7 @@ function [transitionNode, external_libraries] = ...
         isDefaultTrans, ...
         node_name, comment)
     global SF_STATES_NODESAST_MAP;
-    %L = nasa_toLustre.ToLustreImport.L;
-    %import(L{:})
+    
     transitionNode = {};
     external_libraries = {};
     if isempty(parentPath)

@@ -6,8 +6,7 @@ function node = randomNode(blk_name, r, lus_backend)
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    %L = nasa_toLustre.ToLustreImport.L;
-    %import(L{:})
+    
     node = nasa_toLustre.lustreAst.LustreNode();
     node.setName(blk_name);
     node.setInputs(nasa_toLustre.lustreAst.LustreVar('b', 'bool'));

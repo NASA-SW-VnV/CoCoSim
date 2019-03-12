@@ -7,8 +7,7 @@
 function [codes, outputs_dt, AdditionalVars] = getSumProductCodes(...
         obj, parent, blk, OutputDataTypeStr,isSumBlock, ...
         AccumDataTypeStr, xml_trace, lus_backend)
-    %L = nasa_toLustre.ToLustreImport.L;
-    %import(L{:})
+    
     AdditionalVars = {};
     codes = {};
     [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);

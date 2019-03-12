@@ -7,9 +7,7 @@ function [code, assignment_dt] = assignment_To_Lustre(BlkObj, tree, parent, blk,
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         
-    import nasa_toLustre.lustreAst.*
-    import nasa_toLustre.blocks.Stateflow.utils.*
-    
+            
     assignment_dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.expression_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
     left = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(BlkObj, tree.leftExp, ...
         parent, blk, data_map, inputs, assignment_dt,...
@@ -53,9 +51,7 @@ function [code, status] = ArrayIndexNotConstant(left, right, tree)
     %e.g. u(index) = exp
     % u_1 = if index = 1 then exp else u_1;
     % u_2 = if index = 2 then exp else u_2;
-    import nasa_toLustre.lustreAst.*
-    import nasa_toLustre.blocks.Stateflow.utils.*
-    status = 0;
+            status = 0;
     code = {};
     [left, right] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.inlineOperands(left, right, tree);
     eqts = {};
@@ -85,12 +81,11 @@ function [code, status] = ArrayIndexNotConstant(left, right, tree)
 end
 
 function [varId, status] = getVarID(then)
-    import nasa_toLustre.lustreAst.*
     status = 0;
     varId = {};
-    if isa(then, 'ParenthesesExpr')
+    if isa(then, 'nasa_toLustre.lustreAst.ParenthesesExpr')
         [varId, status] = getVarID(then.getExp());
-    elseif isa(then, 'VarIdExpr')
+    elseif isa(then, 'nasa_toLustre.lustreAst.VarIdExpr')
         varId = then;
     else
         status = 1;

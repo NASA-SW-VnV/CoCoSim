@@ -13,8 +13,7 @@ function [body, vars,numBoundNodes,u_node,N_shape_node,coords_node,index_node] =
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    %L = nasa_toLustre.ToLustreImport.L;
-    %import(L{:})
+    
     %  This function finds the bounding polytop which is required to define
     %  the shape functions.  For each dimension, there will be 2
     %  breakpoints that surround the coordinate of the interpolation

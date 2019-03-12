@@ -8,8 +8,7 @@ function [node, external_nodes, opens, abstractedNodes] = get__Convergent(vararg
     %Rounds number to the nearest representable value.
     %If a tie occurs, rounds to the nearest even integer.
     %Equivalent to the Fixed-Point Designer? convergent function.
-    import nasa_toLustre.lustreAst.*
-    opens = {};
+        opens = {};
     abstractedNodes = {};
     node_name = '_Convergent';
     % y = floor(x+1/2) + ceiling((x-0.5)/2) - floor((x-0.5)/2) - 1

@@ -6,8 +6,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Chart Node
 function [main_node, external_nodes]  = write_ChartNode(parent, blk, chart, dataAndEvents, events)
-    %L = nasa_toLustre.ToLustreImport.L;
-    %import(L{:})
+    
     global SF_STATES_NODESAST_MAP;
     external_nodes = {};
     Scopes = cellfun(@(x) x.Scope, ...
@@ -29,7 +28,7 @@ function [main_node, external_nodes]  = write_ChartNode(parent, blk, chart, data
        nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);
     main_node = nasa_toLustre.lustreAst.LustreNode();
     main_node.setName(node_name);
-    comment = LustreComment(sprintf('Chart Node: %s', chart.Origin_path),...
+    comment = nasa_toLustre.lustreAst.LustreComment(sprintf('Chart Node: %s', chart.Origin_path),...
         true);
     main_node.setMetaInfo(comment);
     main_node.setBodyEqs(body);            

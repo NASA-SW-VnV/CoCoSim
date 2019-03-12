@@ -6,8 +6,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function obj = contractNode_substituteVars(obj)
-    import nasa_toLustre.lustreAst.*
-    if length(obj.bodyEqs) > 500
+        if length(obj.bodyEqs) > 500
         %Ignore optimization for Big Nodes (Like Lookup Table)
         display_msg(sprintf('Optimization ignored for node "%d" as the number of equations exceeds 500 Eqs.',...
             obj.getName()), MsgType.INFO, 'contractNode_substituteVars', '');
@@ -17,7 +16,7 @@ function obj = contractNode_substituteVars(obj)
     % include ConcurrentAssignments as normal Eqts
     new_bodyEqs = {};
     for i=1:numel(obj.bodyEqs)
-        if isa(obj.bodyEqs{i}, 'ConcurrentAssignments')
+        if isa(obj.bodyEqs{i}, 'nasa_toLustre.lustreAst.ConcurrentAssignments')
             new_bodyEqs = MatlabUtils.concat(new_bodyEqs, ...
                 obj.bodyEqs{i}.getAssignments());
         else
@@ -42,15 +41,15 @@ function obj = contractNode_substituteVars(obj)
     for i=1:numel(new_bodyEqs)
         % e.g. y = f(x);
         
-        if isa(new_bodyEqs{i}, 'LustreEq')...
-                && isa(new_bodyEqs{i}.getLhs(), 'VarIdExpr')...
+        if isa(new_bodyEqs{i}, 'nasa_toLustre.lustreAst.LustreEq')...
+                && isa(new_bodyEqs{i}.getLhs(), 'nasa_toLustre.lustreAst.VarIdExpr')...
                 && nasa_toLustre.lustreAst.VarIdExpr.ismemberVar(new_bodyEqs{i}.getLhs(), new_localVars)
             var = new_bodyEqs{i}.getLhs();
             rhs = new_bodyEqs{i}.getRhs();
             new_var = nasa_toLustre.lustreAst.ParenthesesExpr(rhs.deepCopy());
             
             % if rhs class is IteExpr, skip it. To hep debugging.
-            if isa(rhs, 'IteExpr')
+            if isa(rhs, 'nasa_toLustre.lustreAst.IteExpr')
                 continue;
             end
             % if used on its definition, skip it

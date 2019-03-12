@@ -7,7 +7,6 @@ function [ new_ir, ir_handle_struct_map ] = internalRep_pp( new_ir, json_export,
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    import nasa_toLustre.IR_pp.lib.*
     if ~exist('json_export', 'var')
         json_export = 0;
     end
@@ -23,7 +22,8 @@ function [ new_ir, ir_handle_struct_map ] = internalRep_pp( new_ir, json_export,
         cd(lib_dir);
         for i=1:numel(functions)
             display_msg(['runing ' functions(i).name(1:end-2)], MsgType.INFO, 'internalRep_pp', '');
-            fh = str2func(functions(i).name(1:end-2));
+            fun_name = sprintf('nasa_toLustre.IR_pp.lib.%s', functions(i).name(1:end-2));
+            fh = str2func(fun_name);
             new_ir = fh(new_ir);
         end
         cd(oldDir);

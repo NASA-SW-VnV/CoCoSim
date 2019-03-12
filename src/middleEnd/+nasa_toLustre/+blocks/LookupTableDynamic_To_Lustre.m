@@ -15,8 +15,7 @@ classdef LookupTableDynamic_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             obj.ContentNeedToBeTranslated = 0;
         end
         function  write_code(obj, parent, blk, xml_trace, lus_backend, varargin)
-            %L = nasa_toLustre.ToLustreImport.L;
-            %import(L{:})
+            
             isLookupTableDynamic = 1;
             [mainCode, main_vars, extNode, external_lib] =  ...
                 nasa_toLustre.blocks.Lookup_nD_To_Lustre.get_code_to_write(parent, blk, xml_trace, isLookupTableDynamic,lus_backend);

@@ -50,8 +50,7 @@ classdef LustDTLib
         function [node, external_nodes, opens, abstractedNodes] = get__floor(lus_backend, varargin)
             if LusBackendType.isKIND2(lus_backend)
                 abstractedNodes = {};
-                import nasa_toLustre.lustreAst.*
-                opens = {};
+                                opens = {};
                 external_nodes = {};
                 % y  <= x < y + 1.0
                 contractElts{1} = nasa_toLustre.lustreAst.ContractGuaranteeExpr('', ...
@@ -92,8 +91,7 @@ classdef LustDTLib
         % returning a real instead of int.
         function [node, external_nodes, opens, abstractedNodes] = get__ceil(lus_backend, varargin)
             if LusBackendType.isKIND2(lus_backend)
-                import nasa_toLustre.lustreAst.*
-                opens = {};
+                                opens = {};
                 abstractedNodes = {};
                 external_nodes = {'LustDTLib__Ceiling'};
                 
@@ -136,8 +134,7 @@ classdef LustDTLib
         % returning a real instead of int.
         function [node, external_nodes, opens, abstractedNodes] = get__round(lus_backend, varargin)
             if LusBackendType.isKIND2(lus_backend)
-                import nasa_toLustre.lustreAst.*
-                opens = {};
+                                opens = {};
                 abstractedNodes = {};
                 external_nodes = {'LustMathLib_abs_real', 'LustDTLib_Round'};
                 % abs(x - y) < 1.0
@@ -173,8 +170,7 @@ classdef LustDTLib
         % this one for "Rounding" block, it is different from Fix by
         % returning a real instead of int.
         function [node, external_nodes, opens, abstractedNodes] = get__fix(varargin)
-            import nasa_toLustre.lustreAst.*
-            opens = {};
+                        opens = {};
             abstractedNodes = {};
             % format = '--Rounds number to the nearest integer towards zero.\n';
             % format = [ format ,'node _fix (x: real)\nreturns(y:real);\nlet\n\t'];

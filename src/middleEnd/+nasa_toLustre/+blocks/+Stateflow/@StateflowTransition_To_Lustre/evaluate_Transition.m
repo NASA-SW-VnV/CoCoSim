@@ -9,8 +9,7 @@
 function [body, outputs, inputs, variables, external_libraries, validDestination_cond, Termination_cond] = ...
         evaluate_Transition(t, data_map, isDefaultTrans, parentPath, ...
         validDestination_cond, Termination_cond, cond_prefix, fullPathT, variables)
-    %L = nasa_toLustre.ToLustreImport.L;
-    %import(L{:})
+    
     global SF_STATES_NODESAST_MAP SF_JUNCTIONS_PATH_MAP;
     body = {};
     outputs = {};

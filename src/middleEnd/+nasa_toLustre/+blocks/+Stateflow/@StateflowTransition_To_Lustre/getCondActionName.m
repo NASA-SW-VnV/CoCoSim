@@ -7,7 +7,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function node_name = getCondActionName(T)
-    import nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre
+    
     src = T.Source;
     if isempty(src)
         isDefaultTrans = true;

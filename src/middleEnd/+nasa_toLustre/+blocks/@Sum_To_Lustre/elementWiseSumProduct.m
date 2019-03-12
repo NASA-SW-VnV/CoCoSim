@@ -5,8 +5,7 @@
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [codes] = elementWiseSumProduct(exp, inputs, outputs, widths, initCode, conv_format, int_divFun)
-    %L = nasa_toLustre.ToLustreImport.L;
-    %import(L{:})
+    
     codes = cell(1, numel(outputs));
     for i=1:numel(outputs)
         code = initCode;

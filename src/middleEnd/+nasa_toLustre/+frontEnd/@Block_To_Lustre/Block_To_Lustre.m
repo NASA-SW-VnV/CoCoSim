@@ -10,7 +10,7 @@ classdef Block_To_Lustre < handle
     
     properties
         
-        % the code of the block, e.g. a list of LustreEq;
+        % the code of the block, e.g. a list of nasa_toLustre.lustreAst.LustreEq;
         lustre_code = {};
         
         %The list of variables to be added to node variables list.

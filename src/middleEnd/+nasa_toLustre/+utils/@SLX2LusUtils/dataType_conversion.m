@@ -7,8 +7,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function [external_lib, conv_format] = dataType_conversion(inport_dt, outport_dt, RndMeth, SaturateOnIntegerOverflow)
-    %%L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
-    %%import(L{:})
+    %
+    %
     [lus_in_dt, ~, ~, ~, InIsEnum] = nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt( inport_dt);
     [lus_out_dt, ~, ~, ~, OutIsEnum] = nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt( outport_dt);
     if nargin < 3 || isempty(RndMeth)

@@ -6,8 +6,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  
 function [node, external_nodes_i, opens, abstractedNodes] = get_abs_real(varargin)
-    import nasa_toLustre.lustreAst.*
-    opens = {};
+        opens = {};
     abstractedNodes = {};
     external_nodes_i = {};
     bodyElts{1} = nasa_toLustre.lustreAst.LustreEq(...

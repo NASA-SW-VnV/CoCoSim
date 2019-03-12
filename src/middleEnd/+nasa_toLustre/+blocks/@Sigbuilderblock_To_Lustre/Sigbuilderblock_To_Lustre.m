@@ -11,8 +11,7 @@ classdef Sigbuilderblock_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     
     methods
         function  write_code(obj, parent, blk, xml_trace, lus_backend, varargin)
-            %L = nasa_toLustre.ToLustreImport.L;
-            %import(L{:})
+            
             [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             obj.addVariable(outputs_dt);
             [time,data,~] = signalbuilder(blk.Origin_path);
@@ -27,7 +26,7 @@ classdef Sigbuilderblock_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
 %                 codes = cell(1, numel(outputs));
 %                 for i=1:numel(outputs)
 %                     codeAst = getSigBuilderCode(obj, time{i}, data{i},i,blk_name);
-%                     codes{i} = LustreEq(outputs{i}, codeAst);
+%                     codes{i} = nasa_toLustre.lustreAst.LustreEq(outputs{i}, codeAst);
 %                 end
 %                 obj.setCode( codes );
 %             elseif  numel(outputs) == 1

@@ -8,8 +8,7 @@
 
 
 function main_node  = write_ChartNodeWithEvents(chart, inputEvents)
-    %L = nasa_toLustre.ToLustreImport.L;
-    %import(L{:})
+    
     global SF_STATES_NODESAST_MAP;
     main_node = {};
 

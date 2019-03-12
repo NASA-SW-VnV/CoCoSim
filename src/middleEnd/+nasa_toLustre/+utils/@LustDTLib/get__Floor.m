@@ -8,8 +8,7 @@ function [node, external_nodes, opens, abstractedNodes] = get__Floor(lus_backend
 
     if LusBackendType.isKIND2(lus_backend)
         abstractedNodes = {};
-        import nasa_toLustre.lustreAst.*
-        opens = {};
+                opens = {};
         external_nodes = {};
         node = nasa_toLustre.lustreAst.LustreNode();
         node.setName('_Floor');

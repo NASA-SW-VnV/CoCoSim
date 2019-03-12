@@ -6,8 +6,7 @@ function [node, external_nodes, opens, abstractedNodes] = getBitwiseSigned(op, n
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    import nasa_toLustre.lustreAst.*
-    opens = {};
+        opens = {};
     abstractedNodes = {};
     extNode = sprintf('int_to_int%d',n);
     UnsignedNode =  sprintf('_%s_Bitwise_Unsigned_%d',op, n);

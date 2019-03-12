@@ -7,9 +7,7 @@ function [code, exp_dt] = fun_indexing_To_Lustre(BlkObj, tree, parent, blk,...
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         
-    import nasa_toLustre.lustreAst.*
-    import nasa_toLustre.blocks.Stateflow.utils.*
-    import nasa_toLustre.utils.SLX2LusUtils
+            
     % Do not forget to update exp_dt in each switch case if needed
     exp_dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.expression_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
     tree_ID = tree.ID;
@@ -66,9 +64,8 @@ end
 
 function code = parseOtherFunc(obj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun)
     global SF_MF_FUNCTIONS_MAP;
-    %L = nasa_toLustre.ToLustreImport.L;
-    %import(L{:})
-    import nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST
+    
+    
     if (isStateFlow || isMatlabFun) && data_map.isKey(tree.ID)
         %Array Access
         code = arrayAccess_To_Lustre(obj, tree, parent, blk, ...

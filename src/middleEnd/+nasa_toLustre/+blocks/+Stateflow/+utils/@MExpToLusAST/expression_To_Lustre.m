@@ -10,9 +10,8 @@ function [code, exp_dt] = expression_To_Lustre(BlkObj, tree, parent, blk,...
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         
-    %L = nasa_toLustre.ToLustreImport.L;
-    %import(L{:})
-    import nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST
+    
+    
     
     narginchk(1, 10);
     if isempty(BlkObj), BlkObj = nasa_toLustre.blocks.DummyBlock_To_Lustre; end
@@ -57,7 +56,7 @@ function [code, exp_dt] = expression_To_Lustre(BlkObj, tree, parent, blk,...
         otherwise
             % we use the name of tree_type to call the associated function
             func_name = strcat(tree_type, '_To_Lustre');
-            func_handle = str2func(strcat('MExpToLusAST.', func_name));
+            func_handle = str2func(strcat('nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.', func_name));
             try
                 [code, exp_dt] = func_handle(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun);
             catch me

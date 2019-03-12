@@ -6,11 +6,10 @@ function new_obj = simplify(obj)
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  
-    import nasa_toLustre.lustreAst.*
-    new_args = cellfun(@(x) x.simplify(), obj.args, 'UniformOutput', 0);
+        new_args = cellfun(@(x) x.simplify(), obj.args, 'UniformOutput', 0);
     % remove parentheses from arguments.
     for i=1:numel(new_args)
-        if isa(new_args{i}, 'ParenthesesExpr')
+        if isa(new_args{i}, 'nasa_toLustre.lustreAst.ParenthesesExpr')
             new_args{i} = new_args{i}.getExp();
         elseif isa(new_args{i}, 'nasa_toLustre.lustreAst.BinaryExpr') || isa(new_args{i}, 'nasa_toLustre.lustreAst.UnaryExpr')
             new_args{i}.setPar(false);

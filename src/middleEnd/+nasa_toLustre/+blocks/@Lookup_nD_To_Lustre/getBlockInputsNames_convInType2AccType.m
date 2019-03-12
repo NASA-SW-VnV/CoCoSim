@@ -7,8 +7,7 @@ function [inputs,lusInport_dt,zero,one, external_lib] = ...
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    %L = nasa_toLustre.ToLustreImport.L;
-    %import(L{:})
+    
     widths = blk.CompiledPortWidths.Inport;
     RndMeth = blk.RndMeth;
     max_width = max(widths);

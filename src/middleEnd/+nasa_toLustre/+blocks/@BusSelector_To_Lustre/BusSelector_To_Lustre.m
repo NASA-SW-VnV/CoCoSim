@@ -14,8 +14,7 @@ classdef BusSelector_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     methods
         
         function  write_code(obj, parent, blk, xml_trace, varargin)
-            %L = nasa_toLustre.ToLustreImport.L;
-            %import(L{:})
+            
             [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             obj.addVariable(outputs_dt);
             [inputs] =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk);
@@ -48,8 +47,7 @@ classdef BusSelector_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         end
         
         function options = getUnsupportedOptions(obj, parent, blk, varargin)
-            %L = nasa_toLustre.ToLustreImport.L;
-            %import(L{:})
+            
             [inputs] =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk);
             try
                 [SignalsInputsMap, OutputSignals] = obj.getSignalMap( blk, inputs);

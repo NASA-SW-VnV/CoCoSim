@@ -15,8 +15,7 @@ classdef TappedDelayLine_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             obj.ContentNeedToBeTranslated = 0;
         end
         function  write_code(obj, parent, blk, xml_trace, varargin)
-            %L = nasa_toLustre.ToLustreImport.L;
-            %import(L{:})
+            
             %% Step 1: Get the block outputs names,
             [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             

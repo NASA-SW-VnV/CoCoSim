@@ -6,8 +6,7 @@ function [node, external_nodes, opens, abstractedNodes] = getIntToInt(dt)
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    import nasa_toLustre.lustreAst.*
-    opens = {};
+        opens = {};
     abstractedNodes = {};
     v_max = double(intmax(dt));% we need v_max as double variable
     v_min = double(intmin(dt));% we need v_min as double variable

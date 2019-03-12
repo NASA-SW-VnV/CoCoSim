@@ -90,8 +90,7 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         end
         %%
         function options = getUnsupportedOptions(obj, parent, blk, varargin)
-            %L = nasa_toLustre.ToLustreImport.L;
-            %import(L{:})
+            
             [NumberOfTableDimensions, ~, ~] = ...
                 nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(parent, blk, blk.NumberOfTableDimensions);
             if NumberOfTableDimensions >= 7

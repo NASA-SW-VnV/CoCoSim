@@ -6,8 +6,7 @@ function [node, external_nodes, opens, abstractedNodes] = getNOTBitwiseSigned()
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    import nasa_toLustre.lustreAst.*
-    opens = {};
+        opens = {};
     abstractedNodes = {};
     external_nodes = {};
     node_name = strcat('_NOT_Bitwise_Signed');

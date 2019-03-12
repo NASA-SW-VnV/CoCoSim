@@ -7,8 +7,7 @@ function [body,vars,table_elem] = ...
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    %L = nasa_toLustre.ToLustreImport.L;
-    %import(L{:})
+    
     % This function defines the table values defined by users.
     table_elem = cell(1, numel(Table));
     body = cell(1, numel(Table));

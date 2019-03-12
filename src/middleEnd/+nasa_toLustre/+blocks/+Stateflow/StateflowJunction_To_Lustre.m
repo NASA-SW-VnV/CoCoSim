@@ -14,8 +14,7 @@ classdef StateflowJunction_To_Lustre
         
         function  [external_nodes, external_libraries ] = ...
                 write_code(junction, data_map)
-            %L = nasa_toLustre.ToLustreImport.L;
-            %import(L{:})
+            
             external_nodes = {};
             external_libraries = {};
             T = junction.OuterTransitions;

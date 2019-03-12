@@ -9,8 +9,7 @@
 
 function  [main_node, external_nodes, external_libraries ] = ...
         write_Action(T, data_map, source_state, type, isDefaultTrans)
-    %L = nasa_toLustre.ToLustreImport.L;
-    %import(L{:})
+    
     main_node = {};
     external_nodes = {};
     external_libraries = {};

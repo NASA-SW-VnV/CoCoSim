@@ -11,8 +11,7 @@ function [codes, node_name, inputs, ExecutionCondVar] = ...
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    %L = nasa_toLustre.ToLustreImport.L;
-    %import(L{:})
+    
     codes = {};
     node_name = strcat(node_name, '_condExecSS');
     %node_name = strcat(node_name, '_automaton');

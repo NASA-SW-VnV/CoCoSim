@@ -13,8 +13,7 @@ classdef ZeroOrderHold_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     methods
         
         function  write_code(obj, parent, blk, xml_trace, ~, ~, main_sampleTime, varargin)
-            %L = nasa_toLustre.ToLustreImport.L;
-            %import(L{:})
+            
             [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             obj.addVariable(outputs_dt);
             [inputs] =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk);
@@ -23,7 +22,7 @@ classdef ZeroOrderHold_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             outTs = OutportCompiledSampleTime(1);
             outTsOffset = OutportCompiledSampleTime(2);
             period = outTs/main_sampleTime(1);
-            phase = outTsOffset/main_opsampleTime(1);
+            phase = outTsOffset/main_sampleTime(1);
             if nasa_toLustre.utils.SLX2LusUtils.isIgnoredSampleTime(period, phase)
                 codes = arrayfun(@(i) nasa_toLustre.lustreAst.LustreEq(outputs{i}, inputs{i}), ...
                     (1:numel(outputs)), 'UniformOutput', 0);

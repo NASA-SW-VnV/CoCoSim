@@ -31,8 +31,7 @@ classdef ExtLib
         
         %% Clocks
         function [node, external_nodes_i, opens, abstractedNodes] = get__make_clock(varargin)
-            import nasa_toLustre.lustreAst.*
-            opens = {};
+                        opens = {};
             abstractedNodes = {};
             external_nodes_i = {};
             % format = 'node _make_clock(period: int; phase: int)\nreturns( clk: bool );\nvar count: int;\n';

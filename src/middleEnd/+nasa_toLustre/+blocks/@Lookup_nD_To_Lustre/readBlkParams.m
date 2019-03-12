@@ -6,8 +6,7 @@ function blkParams = readBlkParams(parent,blk,isLookupTableDynamic,inputs)
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    %L = nasa_toLustre.ToLustreImport.L;
-    %import(L{:})
+    
     blkParams = struct;
     blkParams.BreakpointsForDimension = {};
     blkParams.skipInterpolation = 0;

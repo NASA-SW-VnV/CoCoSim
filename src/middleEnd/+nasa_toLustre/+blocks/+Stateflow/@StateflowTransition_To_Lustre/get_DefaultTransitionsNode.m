@@ -9,8 +9,7 @@
 %get_DefaultTransitionsNode
 function [transitionNode, external_libraries] = ...
         get_DefaultTransitionsNode(state, data_map)
-    %L = nasa_toLustre.ToLustreImport.L;
-    %import(L{:})
+    
     parentPath = state.Path;
     T = nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.orderObjects(...
         state.Composition.DefaultTransitions, 'ExecutionOrder');

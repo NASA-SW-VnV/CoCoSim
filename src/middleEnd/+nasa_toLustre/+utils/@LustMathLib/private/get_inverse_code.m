@@ -10,8 +10,7 @@ function [node, external_nodes_i, opens, abstractedNodes] = get_inverse_code(lus
     % support 3x3 matrix inversion
     % support 4x4 matrix inversion
     % contract for 2x2 to 7x7 matrix inversion
-    import nasa_toLustre.lustreAst.*
-    opens = {};
+        opens = {};
     abstractedNodes = {};
     external_nodes_i ={};
     node_name = sprintf('_inv_M_%dx%d',n,n);

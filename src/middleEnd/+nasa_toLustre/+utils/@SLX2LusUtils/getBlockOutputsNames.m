@@ -60,8 +60,8 @@ else
 end
 
     function [names, names_dt] = blockOutputs(portNumber)
-        %%L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
-        %%import(L{:})
+        %
+        %
         names = {};
         names_dt = {};
         if strcmp(type, 'Inports')

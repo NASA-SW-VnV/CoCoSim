@@ -9,8 +9,8 @@ function [new_ir, status] = chart_name_SFIR_pp(new_ir, isSF)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    import nasa_toLustre.IR_pp.stateflow_IR_pp.SFIRPPUtils
-    import nasa_toLustre.IR_pp.stateflow_IR_pp.stateflow_fields.chart_name_SFIR_pp
+    
+    
     status = 0;
     if nargin < 2
         isSF = 0;

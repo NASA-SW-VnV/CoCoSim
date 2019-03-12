@@ -13,8 +13,7 @@ classdef Delay_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     methods
         
         function  write_code(obj, parent, blk, xml_trace, varargin)
-            %L = nasa_toLustre.ToLustreImport.L;
-            %import(L{:})
+            
             [DelayLength, ~, status] = ...
                 nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(parent, blk, blk.DelayLength);
             if status
@@ -44,8 +43,7 @@ classdef Delay_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         end
         %%
         function options = getUnsupportedOptions(obj, parent, blk, varargin)
-            %L = nasa_toLustre.ToLustreImport.L;
-            %import(L{:})
+            
             [DelayLength, ~, status] = ...
                 nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(parent, blk, blk.DelayLength);
             if status

@@ -9,8 +9,7 @@
 %% State actions
 function [action_nodes,  external_libraries] = ...
         get_state_actions(state, data_map)
-    %L = nasa_toLustre.ToLustreImport.L;
-    %import(L{:})
+    
     action_nodes = {};
     %write_entry_action
     [entry_action_node, external_libraries] = ...

@@ -6,8 +6,7 @@ function [inputs, inports_dt] = getInputs(parent, blk)
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    %L = nasa_toLustre.ToLustreImport.L;
-    %import(L{:})
+    
     widths = blk.CompiledPortWidths.Inport;
     inputs = cell(1, numel(widths));
     inports_dt = cell(1, numel(widths));

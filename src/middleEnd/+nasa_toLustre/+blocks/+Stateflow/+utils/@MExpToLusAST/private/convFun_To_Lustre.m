@@ -7,9 +7,7 @@ function [code, exp_dt] = convFun_To_Lustre(BlkObj, tree, parent, blk,...
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         
-    import nasa_toLustre.lustreAst.*
-    import nasa_toLustre.blocks.Stateflow.utils.*
-    import nasa_toLustre.utils.SLX2LusUtils
+            
     % Do not forget to update exp_dt in each switch case if needed
     tree_ID = tree.ID;
     

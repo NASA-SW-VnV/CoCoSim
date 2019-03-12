@@ -6,8 +6,7 @@ function code = addValue(a, code, outLusDT)
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    %L = nasa_toLustre.ToLustreImport.L;
-    %import(L{:})
+    
     if strcmp(outLusDT, 'int')
         v = nasa_toLustre.lustreAst.IntExpr(int32(a));
     elseif strcmp(outLusDT, 'bool')

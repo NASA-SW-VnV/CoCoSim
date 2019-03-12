@@ -8,7 +8,7 @@ function notSupportedActions = actionToLustreTest()
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    import nasa_toLustre.blocks.Stateflow.utils.getPseudoLusAction
+    
     notSupportedActions = {};
     P = fileparts(mfilename('fullpath'));
     mat_file = fullfile(P, 'scripts', 'sfdemosActions.mat');

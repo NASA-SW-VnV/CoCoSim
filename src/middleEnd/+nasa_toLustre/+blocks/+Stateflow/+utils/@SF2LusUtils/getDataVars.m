@@ -6,8 +6,7 @@ function vars = getDataVars(d_list)
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    %L = nasa_toLustre.ToLustreImport.L;
-    %import(L{:})
+    
     vars = {};
     for i=1:numel(d_list)
         names = nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getDataName(d_list{i});

@@ -7,8 +7,7 @@ function [b, status, type, masktype, sfblockType, isIgnored] = getWriteType(sub_
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    import nasa_toLustre.blocks.*
-    import nasa_toLustre.frontEnd.Block_To_Lustre
+        
     status = 0;
     isIgnored = 0;
     masktype = '';
@@ -27,6 +26,7 @@ function [b, status, type, masktype, sfblockType, isIgnored] = getWriteType(sub_
     if isfield(sub_blk, 'Mask') && strcmp(sub_blk.Mask, 'on')
         masktype = sub_blk.MaskType;
         fun_name = [nasa_toLustre.frontEnd.Block_To_Lustre.blkTypeFormat(masktype) '_To_Lustre'];
+        fun_name = sprintf('nasa_toLustre.blocks.%s', fun_name);
         try
             h = str2func(fun_name);
             b = h();
@@ -34,10 +34,12 @@ function [b, status, type, masktype, sfblockType, isIgnored] = getWriteType(sub_
         catch
             type = sub_blk.BlockType;
             fun_name = [nasa_toLustre.frontEnd.Block_To_Lustre.blkTypeFormat(type) '_To_Lustre'];
+            fun_name = sprintf('nasa_toLustre.blocks.%s', fun_name);
         end
     elseif isfield(sub_blk, 'SFBlockType')
         sfblockType = sub_blk.SFBlockType;
         fun_name = [nasa_toLustre.frontEnd.Block_To_Lustre.blkTypeFormat(sfblockType) '_To_Lustre'];
+        fun_name = sprintf('nasa_toLustre.blocks.%s', fun_name);
         try
             h = str2func(fun_name);
             b = h();
@@ -45,10 +47,12 @@ function [b, status, type, masktype, sfblockType, isIgnored] = getWriteType(sub_
         catch
             type = sub_blk.BlockType;
             fun_name = [nasa_toLustre.frontEnd.Block_To_Lustre.blkTypeFormat(type) '_To_Lustre'];
+            fun_name = sprintf('nasa_toLustre.blocks.%s', fun_name);
         end
     else
         type = sub_blk.BlockType;
         fun_name = [nasa_toLustre.frontEnd.Block_To_Lustre.blkTypeFormat(type) '_To_Lustre'];
+        fun_name = sprintf('nasa_toLustre.blocks.%s', fun_name);
     end
     try
         h = str2func(fun_name);

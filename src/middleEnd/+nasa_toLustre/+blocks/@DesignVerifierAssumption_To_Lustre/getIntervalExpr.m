@@ -6,8 +6,7 @@ function exp = getIntervalExpr(x, xDT, interval)
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    %L = nasa_toLustre.ToLustreImport.L;
-    %import(L{:})
+    
     if interval.lowIncluded
         op1 = nasa_toLustre.lustreAst.BinaryExpr.LTE;
     else

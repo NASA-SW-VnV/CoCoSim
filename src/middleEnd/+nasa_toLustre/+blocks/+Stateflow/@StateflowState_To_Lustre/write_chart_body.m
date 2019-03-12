@@ -10,8 +10,7 @@
 function [outputs, inputs, variables, body] = write_chart_body(...
         parent, blk, chart, dataAndEvents, inputEvents)
     global SF_STATES_NODESAST_MAP;
-    %L = nasa_toLustre.ToLustreImport.L;
-    %import(L{:})
+    
     body = {};
     variables = {};
 

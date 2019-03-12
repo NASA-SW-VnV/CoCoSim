@@ -9,8 +9,7 @@
 function [outputs, inputs, body] = ...
         write_ChartNodeWithEvents_body(chart, events)
     global SF_STATES_NODESAST_MAP;
-    %L = nasa_toLustre.ToLustreImport.L;
-    %import(L{:})
+    
     outputs = {};
     inputs = {};
     body = {};
@@ -38,11 +37,11 @@ function [outputs, inputs, body] = ...
                 nasa_toLustre.lustreAst.IteExpr(cond_prefix, call, nasa_toLustre.lustreAst.TupleExpr(oututs_Ids)));
         end
         %NOT CORRECT
-        % body{end+1} = LustreComment('If no event occured, time step wakes up the chart');
+        % body{end+1} = nasa_toLustre.lustreAst.LustreComment('If no event occured, time step wakes up the chart');
         % allEventsCond = nasa_toLustre.lustreAst.UnaryExpr(nasa_toLustre.lustreAst.UnaryExpr.NOT, ...
         %     nasa_toLustre.lustreAst.BinaryExpr.BinaryMultiArgs(nasa_toLustre.lustreAst.BinaryExpr.OR, inputEventsVars));
-        % body{end+1} = LustreEq(oututs_Ids, ...
-        %     IteExpr(allEventsCond, orig_call, TupleExpr(oututs_Ids)));
+        % body{end+1} = nasa_toLustre.lustreAst.LustreEq(oututs_Ids, ...
+        %     nasa_toLustre.lustreAst.IteExpr(allEventsCond, orig_call, nasa_toLustre.lustreAst.TupleExpr(oututs_Ids)));
     else
         display_msg(...
             sprintf('%s not found in SF_STATES_NODESAST_MAP',...

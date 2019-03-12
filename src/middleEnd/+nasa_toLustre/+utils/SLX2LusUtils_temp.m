@@ -82,8 +82,8 @@ classdef SLX2LusUtils
                 extractNodeHeader(parent_ir, blk, is_main_node, ...
                 isEnableORAction, isEnableAndTrigger, isContractBlk, isMatlabFunction, ...
                 main_sampleTime, xml_trace)
-            %%L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
-            %%import(L{:})
+            %
+            %
             % this function is used to get the Lustre node inputs and
             % outputs.
             
@@ -117,20 +117,20 @@ classdef SLX2LusUtils
                     nasa_toLustre.utils.SLX2LusUtils.isEnabledStr() , 'bool');
                 % we don't include them in node_inputs_withoutDT_cell, see
                 % condExecSS_To_LusAutomaton
-                %node_inputs_withoutDT_cell{end + 1} = VarIdExpr(...
+                %node_inputs_withoutDT_cell{end + 1} = nasa_toLustre.lustreAst.VarIdExpr(...
                 %    nasa_toLustre.utils.SLX2LusUtils.isEnabledStr());
             elseif isEnableAndTrigger
                 node_inputs_cell{end + 1} = nasa_toLustre.lustreAst.LustreVar(...
                     nasa_toLustre.utils.SLX2LusUtils.isEnabledStr() , 'bool');
                 % we don't include them in node_inputs_withoutDT_cell, see
                 % condExecSS_To_LusAutomaton
-                %node_inputs_withoutDT_cell{end + 1} = VarIdExpr(...
+                %node_inputs_withoutDT_cell{end + 1} = nasa_toLustre.lustreAst.VarIdExpr(...
                 %    nasa_toLustre.utils.SLX2LusUtils.isEnabledStr());
                 node_inputs_cell{end + 1} = nasa_toLustre.lustreAst.LustreVar(...
                     nasa_toLustre.utils.SLX2LusUtils.isTriggeredStr() , 'bool');
                 % we don't include them in node_inputs_withoutDT_cell, see
                 % condExecSS_To_LusAutomaton
-                %node_inputs_withoutDT_cell{end + 1} = VarIdExpr(...
+                %node_inputs_withoutDT_cell{end + 1} = nasa_toLustre.lustreAst.VarIdExpr(...
                 %    nasa_toLustre.utils.SLX2LusUtils.isTriggeredStr());
             end
             %add simulation time input and clocks
@@ -232,8 +232,8 @@ classdef SLX2LusUtils
         end
         function [node_inputs_cell, node_inputs_withoutDT_cell] = ...
                 getTimeClocksInputs(blk, main_sampleTime, node_inputs_cell, node_inputs_withoutDT_cell)
-            import nasa_toLustre.lustreAst.LustreVar 
-            import nasa_toLustre.lustreAst.VarIdExpr
+             
+            
             node_inputs_cell{end + 1} = nasa_toLustre.lustreAst.LustreVar(...
                 nasa_toLustre.utils.SLX2LusUtils.timeStepStr(), 'real');
             node_inputs_withoutDT_cell{end+1} = ...
@@ -450,8 +450,8 @@ classdef SLX2LusUtils
             end
             
             function [names, names_dt] = blockOutputs(portNumber)
-                %%L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
-                %%import(L{:})
+                %
+                %
                 names = {};
                 names_dt = {};
                 if strcmp(type, 'Inports')
@@ -781,8 +781,8 @@ classdef SLX2LusUtils
         %value is also given as a string.
         function [ Lustre_type, zero, one, isBus, isEnum, hasEnum] = ...
                 get_lustre_dt( slx_dt)
-            %%L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
-            %%import(L{:})
+            %
+            %
             global TOLUSTRE_ENUMS_MAP;
             if isempty(TOLUSTRE_ENUMS_MAP)
                 TOLUSTRE_ENUMS_MAP = containers.Map;
@@ -919,7 +919,7 @@ classdef SLX2LusUtils
         % the function returns a list of LustreExp objects: IntExpr,
         % RealExpr or BooleanExpr
         function InitialOutput_cell = getInitialOutput(parent, blk, InitialOutput, slx_dt, max_width)
-            import nasa_toLustre.blocks.Constant_To_Lustre
+            
             [lus_outputDataType] = nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(slx_dt);
             if strcmp(InitialOutput, '[]')
                 InitialOutput = '0';
@@ -955,8 +955,8 @@ classdef SLX2LusUtils
         
         %% change numerical value to Lustre Expr string based on DataType dt.
         function lustreExp = num2LusExp(v, lus_dt, slx_dt)
-            %%L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
-            %%import(L{:})
+            %
+            %
             global TOLUSTRE_ENUMS_MAP;
             if nargin < 3
                 slx_dt = lus_dt;
@@ -991,8 +991,8 @@ classdef SLX2LusUtils
         function new_callObj = setArgInConvFormat(callObj, arg)
             % this function goes with dataType_conversion funciton to set 
             % the missing argument in conv_format.
-            %%L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
-            %%import(L{:})
+            %
+            %
             if isempty(callObj)
                 new_callObj = arg;
                 return;
@@ -1012,8 +1012,8 @@ classdef SLX2LusUtils
             end
         end
         function [external_lib, conv_format] = dataType_conversion(inport_dt, outport_dt, RndMeth, SaturateOnIntegerOverflow)
-            %%L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
-            %%import(L{:})
+            %
+            %
             [lus_in_dt, ~, ~, ~, InIsEnum] = nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt( inport_dt);
             [lus_out_dt, ~, ~, ~, OutIsEnum] = nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt( outport_dt);
             if nargin < 3 || isempty(RndMeth)
@@ -1133,8 +1133,8 @@ classdef SLX2LusUtils
         end
         function [resetCode, status] = getResetCode(...
                 resetType, resetDT, resetInput, zero )
-            %%L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
-            %%import(L{:})
+            %
+            %
             status = 0;
             if strcmp(resetDT, 'bool')
                 b = resetInput;

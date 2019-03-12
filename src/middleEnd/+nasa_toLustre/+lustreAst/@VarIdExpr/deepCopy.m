@@ -6,6 +6,6 @@ function new_obj = deepCopy(obj)
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  
-    import nasa_toLustre.lustreAst.VarIdExpr
+    
     new_obj = nasa_toLustre.lustreAst.VarIdExpr(obj.id);
 end

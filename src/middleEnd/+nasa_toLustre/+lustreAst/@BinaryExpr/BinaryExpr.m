@@ -135,8 +135,8 @@ classdef BinaryExpr < nasa_toLustre.lustreAst.LustreExpr
         % Given many args, this function return the binary operation
         % applied on all arguments.
         function exp = BinaryMultiArgs(op, args, isFirstTime)
-            import nasa_toLustre.lustreAst.BinaryExpr
-            import nasa_toLustre.lustreAst.ParenthesesExpr
+            
+            
             if nargin < 3
                 isFirstTime = 1;
             end

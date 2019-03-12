@@ -7,8 +7,7 @@ function [node, external_nodes, opens, abstractedNodes] = get_int_to_real(lus_ba
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     if LusBackendType.isKIND2(lus_backend)
-        import nasa_toLustre.lustreAst.*
-        opens = {};
+                opens = {};
         abstractedNodes = {};
         external_nodes = {};
         node = nasa_toLustre.lustreAst.LustreNode();

@@ -10,8 +10,7 @@
 %% Main functions
 function [action_nodes, external_libraries ] = ...
         get_Actions(T, data_map, source_state, isDefaultTrans)
-    %L = nasa_toLustre.ToLustreImport.L;
-    %import(L{:})
+    
     action_nodes = {};
     [ConditionAction_node, ConditionAction_external_nodes, ConditionActionext_ernal_libraries ] = ...
         nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.write_ConditionAction(T, data_map, source_state, isDefaultTrans);

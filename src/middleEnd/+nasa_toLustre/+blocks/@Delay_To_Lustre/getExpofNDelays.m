@@ -6,8 +6,7 @@ function code = getExpofNDelays(x0, u, d)
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    %L = nasa_toLustre.ToLustreImport.L;
-    %import(L{:})
+    
     if d == 0
         code = u;
         %sprintf(' %s ' , u);

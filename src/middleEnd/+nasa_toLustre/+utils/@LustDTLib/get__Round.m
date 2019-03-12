@@ -11,8 +11,7 @@ function [node, external_nodes, opens, abstractedNodes] = get__Round(lus_backend
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     if LusBackendType.isKIND2(lus_backend)
-        import nasa_toLustre.lustreAst.*
-        opens = {};
+                opens = {};
         abstractedNodes = {};
         external_nodes = {'LustDTLib__Floor', 'LustDTLib__Ceiling'};
         node = nasa_toLustre.lustreAst.LustreNode();

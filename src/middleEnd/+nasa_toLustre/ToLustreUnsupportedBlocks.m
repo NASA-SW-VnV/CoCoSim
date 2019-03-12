@@ -18,9 +18,7 @@ function [unsupportedOptions, ...
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     global TOLUSTRE_ENUMS_MAP
-    import nasa_toLustre.*
-    import nasa_toLustre.utils.*
-    import nasa_toLustre.IR_pp.internalRep_pp
+            
     %% inputs treatment
     
     narginchk(1, inf);
@@ -266,8 +264,7 @@ function add_IR_Enum(ir)
     end
 end
 function node = get_Enum2Int_conv_node(name, members)
-    import nasa_toLustre.lustreAst.*
-    conds = cell(numel(members), 1);
+        conds = cell(numel(members), 1);
     thens = cell(numel(members) + 1, 1);
     for i=1:numel(members)
         conds{i} = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.EQ, nasa_toLustre.lustreAst.VarIdExpr('x'), ...
@@ -286,8 +283,7 @@ function node = get_Enum2Int_conv_node(name, members)
     node.setIsMain(false);
 end
 function node = get_Int2Enum_conv_node(name, members)
-    import nasa_toLustre.lustreAst.*
-    conds = cell(numel(members)-1, 1);
+        conds = cell(numel(members)-1, 1);
     thens = cell(numel(members), 1);
     for i=1:numel(members)-1
         conds{i} = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.EQ, nasa_toLustre.lustreAst.VarIdExpr('x'), ...

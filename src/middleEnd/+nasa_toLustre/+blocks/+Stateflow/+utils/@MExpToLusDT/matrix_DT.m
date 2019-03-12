@@ -6,7 +6,7 @@ function dt = matrix_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatla
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    import nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT
+    
     if isempty(tree.rows)
         dt = '';
         return;

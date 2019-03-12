@@ -17,7 +17,6 @@ function [new_file_path, status] = cocosim_pp(model_path, varargin)
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    import nasa_toLustre.utils.ToLustreOptions
     global cocosim_pp_gen_verif  cocosim_pp_gen_verif_dir;
 
     nodisplay = 0;
@@ -33,15 +32,18 @@ function [new_file_path, status] = cocosim_pp(model_path, varargin)
         skip_pp = 0;
     end
     use_backup = 0 ;
+    force_pp = 0;
     for i=1:numel(varargin)
     %     disp(varargin{i})
-        if strcmp(varargin{i}, ToLustreOptions.NODISPLAY)
+        if strcmp(varargin{i}, nasa_toLustre.utils.ToLustreOptions.NODISPLAY)
             nodisplay = 1;
-        elseif strcmp(varargin{i}, ToLustreOptions.GEN_PP_VERIF)
+        elseif strcmp(varargin{i}, nasa_toLustre.utils.ToLustreOptions.GEN_PP_VERIF)
             cocosim_pp_gen_verif = 1;
-        elseif strcmp(varargin{i}, ToLustreOptions.SKIP_PP)
+        elseif strcmp(varargin{i}, nasa_toLustre.utils.ToLustreOptions.SKIP_PP)
             skip_pp = 1;
-        elseif strcmp(varargin{i}, ToLustreOptions.SKIP_DEFECTED_PP)
+        elseif strcmp(varargin{i}, nasa_toLustre.utils.ToLustreOptions.FORCE_CODE_GEN)
+            force_pp = 1;
+        elseif strcmp(varargin{i}, nasa_toLustre.utils.ToLustreOptions.SKIP_DEFECTED_PP)
             % use backup model, if a pp function failed, skip it.
             use_backup = 1;
         end
@@ -84,7 +86,7 @@ function [new_file_path, status] = cocosim_pp(model_path, varargin)
         return;
     end
     %% check if there is no need for pre-processing if the model was not changed from the last pp.
-    if already_pp
+    if already_pp && ~force_pp
         if isKey(pp_datenum_map, new_file_path)
             FileInfo = dir(new_file_path);
             pp_datenum = pp_datenum_map(new_file_path);

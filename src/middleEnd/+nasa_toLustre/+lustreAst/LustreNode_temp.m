@@ -212,7 +212,7 @@ classdef LustreNode < nasa_toLustre.lustreAst.LustreAst
         end
         %% This function is used for Stateflow
         function [call, oututs_Ids] = nodeCall(obj, isInner, InnerValue)
-            import nasa_toLustre.frontEnd.SF_To_LustreNode
+            
             if ~exist('isInner', 'var')
                 isInner = false;
             end
@@ -234,8 +234,7 @@ classdef LustreNode < nasa_toLustre.lustreAst.LustreAst
             call = nasa_toLustre.lustreAst.NodeCallExpr(obj.name, inputs_Ids);
         end
         function [new_obj, varIds] = pseudoCode2Lustre(obj)
-            import nasa_toLustre.lustreAst.*
-            varIds = {};
+                        varIds = {};
             outputs_map = containers.Map('KeyType', 'char', 'ValueType', 'int32');
             
             %initialize outputs_map
@@ -372,8 +371,7 @@ classdef LustreNode < nasa_toLustre.lustreAst.LustreAst
     end
     methods(Static)
        function new_obj = contractNode_substituteVars(obj)
-           import nasa_toLustre.lustreAst.*
-            new_obj = obj.deepCopy();
+                       new_obj = obj.deepCopy();
             new_localVars = new_obj.localVars;
             outputs = new_obj.getOutputs();
             % include ConcurrentAssignments as normal Eqts
@@ -401,7 +399,7 @@ classdef LustreNode < nasa_toLustre.lustreAst.LustreAst
             for i=1:numel(new_bodyEqs)
                 % e.g. y = f(x); 
                 if isa(new_bodyEqs{i}, 'LustreEq')...
-                        && isa(new_bodyEqs{i}.getLhs(), 'VarIdExpr')...
+                        && isa(new_bodyEqs{i}.getLhs(), 'nasa_toLustre.lustreAst.VarIdExpr')...
                         && nasa_toLustre.lustreAst.VarIdExpr.ismemberVar(new_bodyEqs{i}.getLhs(), new_localVars)
                     var = new_bodyEqs{i}.getLhs();
                     rhs = new_bodyEqs{i}.getRhs();

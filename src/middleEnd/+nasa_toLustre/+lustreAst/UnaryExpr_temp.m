@@ -44,8 +44,7 @@ classdef UnaryExpr < nasa_toLustre.lustreAst.LustreExpr
         
         %% simplify expression
         function new_obj = simplify(obj)
-            import nasa_toLustre.lustreAst.*
-            new_expr = obj.expr.simplify();
+                        new_expr = obj.expr.simplify();
             if isa(new_expr, 'UnaryExpr') ...
                     && isequal(new_expr.op, obj.op) ...
                     && (isequal(obj.op, nasa_toLustre.lustreAst.UnaryExpr.NOT) || isequal(obj.op, nasa_toLustre.lustreAst.UnaryExpr.NEG))
@@ -71,9 +70,8 @@ classdef UnaryExpr < nasa_toLustre.lustreAst.LustreExpr
         
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
-            import nasa_toLustre.lustreAst.*
-            v = obj.expr;
-            if isequal(obj.op, nasa_toLustre.lustreAst.UnaryExpr.PRE) && isa(v, 'VarIdExpr')
+                        v = obj.expr;
+            if isequal(obj.op, nasa_toLustre.lustreAst.UnaryExpr.PRE) && isa(v, 'nasa_toLustre.lustreAst.VarIdExpr')
                 varIds{1} = v;
                 new_obj = nasa_toLustre.lustreAst.VarIdExpr(strcat('_pre_', v.getId()));
             else

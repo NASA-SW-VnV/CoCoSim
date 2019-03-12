@@ -7,7 +7,7 @@
 
 %% This function is used for Stateflow
 function [call, oututs_Ids] = nodeCall(obj, isInner, InnerValue)
-    import nasa_toLustre.frontEnd.SF_To_LustreNode
+    
     if ~exist('isInner', 'var')
         isInner = false;
     end

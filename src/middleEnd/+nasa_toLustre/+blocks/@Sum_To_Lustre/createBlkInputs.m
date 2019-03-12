@@ -5,8 +5,7 @@
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function inputs = createBlkInputs(obj, parent, blk, widths, AccumDataTypeStr, isSumBlock)
-    %L = nasa_toLustre.ToLustreImport.L;
-    %import(L{:})
+    
     max_width = max(widths);
 
     RndMeth = blk.RndMeth;

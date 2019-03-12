@@ -10,8 +10,7 @@ function [body, vars] = addFinalCode_without_interpolation(...
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    %L = nasa_toLustre.ToLustreImport.L;
-    %import(L{:})
+    
     % This function carries out the interpolation depending on algorithm
     % option.  For the flat option, the value at the lower bounding
     % breakpoint is used. For the nearest option, the closest
@@ -33,7 +32,7 @@ function [body, vars] = addFinalCode_without_interpolation(...
     if strcmp(InterpMethod,'Flat')
         % defining returnTableIndex{1}
         %value = '0';
-        %value_n = IntExpr(0);
+        %value_n = nasa_toLustre.lustreAst.IntExpr(0);
         for j=1:NumberOfTableDimensions
             curIndex =  index_node{j,1};
             if j==1

@@ -78,7 +78,7 @@ classdef BinaryExpr < nasa_toLustre.lustreAst.LustreExpr
         end
         %% deepCopy
         function new_obj = deepCopy(obj)
-            import nasa_toLustre.lustreAst.BinaryExpr
+            
             new_obj = nasa_toLustre.lustreAst.BinaryExpr(obj.op,...
                 obj.left.deepCopy(),...
                 obj.right.deepCopy(), ...
@@ -86,7 +86,7 @@ classdef BinaryExpr < nasa_toLustre.lustreAst.LustreExpr
         end
         %% substituteVars
         function obj = substituteVars(obj, oldVar, newVar)
-            import nasa_toLustre.lustreAst.BinaryExpr
+            
             new_obj = nasa_toLustre.lustreAst.BinaryExpr(obj.op,...
                 obj.left.substituteVars( oldVar, newVar),...
                 obj.right.substituteVars( oldVar, newVar), ...
@@ -99,8 +99,7 @@ classdef BinaryExpr < nasa_toLustre.lustreAst.LustreExpr
         end
          %% simplify expression
         function new_obj = simplify(obj)
-            import nasa_toLustre.lustreAst.*
-            new_op = obj.op;
+                        new_op = obj.op;
             left_exp = obj.left.simplify();
             right_exp = obj.right.simplify();
             % x + (-y) => x - y, x - (-y) => x+y
@@ -118,12 +117,12 @@ classdef BinaryExpr < nasa_toLustre.lustreAst.LustreExpr
             if (isequal(new_op, nasa_toLustre.lustreAst.BinaryExpr.MINUS) ...
                     || isequal(new_op, nasa_toLustre.lustreAst.BinaryExpr.PLUS) )
                 if isequal(new_op, nasa_toLustre.lustreAst.BinaryExpr.PLUS) ...
-                        && (isa(left_exp, 'IntExpr') || isa(left_exp, 'RealExpr'))...
+                        && (isa(left_exp, 'IntExpr') || isa(left_exp, 'nasa_toLustre.lustreAst.RealExpr'))...
                         && left_exp.getValue() == 0
                     new_obj = right_exp;
                     return;
                 end
-                if (isa(right_exp, 'IntExpr') || isa(right_exp, 'RealExpr'))...
+                if (isa(right_exp, 'IntExpr') || isa(right_exp, 'nasa_toLustre.lustreAst.RealExpr'))...
                         && right_exp.getValue() == 0
                     new_obj = left_exp;
                     return;
@@ -140,7 +139,7 @@ classdef BinaryExpr < nasa_toLustre.lustreAst.LustreExpr
         end
         %% This functions are used for ForIterator block
         function [new_obj, varIds] = changePre2Var(obj)
-            import nasa_toLustre.lustreAst.BinaryExpr
+            
             varIds = {};
             [leftExp, varIdLeft] = obj.left.changePre2Var();
             varIds = [varIds, varIdLeft];
@@ -152,8 +151,8 @@ classdef BinaryExpr < nasa_toLustre.lustreAst.LustreExpr
                 obj.withPar, obj.addEpsilon, obj.epsilon);
         end
         function new_obj = changeArrowExp(obj, cond)
-            import nasa_toLustre.lustreAst.BinaryExpr
-            import nasa_toLustre.lustreAst.IteExpr
+            
+            
             if isequal(obj.op, nasa_toLustre.lustreAst.BinaryExpr.ARROW)
                 new_obj = nasa_toLustre.lustreAst.IteExpr(cond, ...
                     obj.left.changeArrowExp(cond),...
@@ -174,7 +173,7 @@ classdef BinaryExpr < nasa_toLustre.lustreAst.LustreExpr
         % This function is used in Stateflow compiler to change from imperative
         % code to Lustre
         function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, ~)
-            import nasa_toLustre.lustreAst.BinaryExpr
+            
             %BinaryExpr is always on the right of an Equation
             [leftExp, ~] = obj.left.pseudoCode2Lustre(outputs_map, false);
             [rightExp, ~] = obj.right.pseudoCode2Lustre(outputs_map, false);
@@ -200,8 +199,7 @@ classdef BinaryExpr < nasa_toLustre.lustreAst.LustreExpr
             code = obj.print_lustrec(backend);
         end
         function code = print_lustrec(obj, backend)
-            import nasa_toLustre.lustreAst.*
-            if obj.addEpsilon ...
+                        if obj.addEpsilon ...
                     && (isequal(obj.op, '>=') || isequal(obj.op, '>') ...
                     || isequal(obj.op, '<=') || isequal(obj.op, '<'))
                 if isequal(obj.op, '>=') || isequal(obj.op, '<=')
@@ -212,9 +210,9 @@ classdef BinaryExpr < nasa_toLustre.lustreAst.LustreExpr
                     and_or = 'and';
                 end
                 if isempty(obj.epsilon)
-                    if isa(obj.left, 'RealExpr')
+                    if isa(obj.left, 'nasa_toLustre.lustreAst.RealExpr')
                         obj.epsilon = eps(obj.left.getValue());
-                    elseif isa(obj.right, 'RealExpr')
+                    elseif isa(obj.right, 'nasa_toLustre.lustreAst.RealExpr')
                         obj.epsilon = eps(obj.right.getValue());
                     else
                         obj.epsilon = 1e-15;
@@ -259,8 +257,8 @@ classdef BinaryExpr < nasa_toLustre.lustreAst.LustreExpr
         % Given many args, this function return the binary operation
         % applied on all arguments.
         function exp = BinaryMultiArgs(op, args, isFirstTime)
-            import nasa_toLustre.lustreAst.BinaryExpr
-            import nasa_toLustre.lustreAst.ParenthesesExpr
+            
+            
             if nargin < 3
                 isFirstTime = 1;
             end

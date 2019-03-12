@@ -12,8 +12,7 @@ classdef Sqrt_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     
     methods
         function  write_code(obj, parent, blk, xml_trace, varargin)
-            %L = nasa_toLustre.ToLustreImport.L;
-            %import(L{:})
+            
             [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             
             if ~strcmp(blk.OutMax, '[]') || ~strcmp(blk.OutMin, '[]')

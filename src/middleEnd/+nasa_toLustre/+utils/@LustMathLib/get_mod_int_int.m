@@ -6,8 +6,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  
 function [node, external_nodes_i, opens, abstractedNodes] = get_mod_int_int(varargin)
-    import nasa_toLustre.lustreAst.*
-    opens = {};
+        opens = {};
     abstractedNodes = {};
     external_nodes_i = {strcat('LustMathLib_', 'abs_int')};
     % format = 'node mod_int_int (x, y: int)\nreturns(z:int);\nlet\n\t';

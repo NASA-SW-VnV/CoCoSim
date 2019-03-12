@@ -50,7 +50,7 @@ classdef SLX2LusUtils
                 srcPort, xml_trace)
    
     	[names, names_dt] = blockOutputs(portNumber)
-                %%L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
+                %
 
         [lus_dt] = SignalHierarchyLusDT(blk, SignalHierarchy)
 

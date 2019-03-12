@@ -6,8 +6,7 @@ function [node, external_nodes_i, opens, abstractedNodes] = getToBool(dt)
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    import nasa_toLustre.lustreAst.*
-    opens = {};
+        opens = {};
     abstractedNodes = {};
     external_nodes_i = {};
     node_name = strcat(dt, '_to_bool');

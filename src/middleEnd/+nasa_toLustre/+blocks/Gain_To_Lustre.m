@@ -14,8 +14,7 @@ classdef Gain_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     methods
         
         function  write_code(obj, parent, blk, xml_trace, varargin)
-            %L = nasa_toLustre.ToLustreImport.L;
-            %import(L{:})
+            
             %This function support scalar Gain. Matrix/Vector gains
             %are supported by Gain_pp in the pre-processing step.
             [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
@@ -76,8 +75,7 @@ classdef Gain_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         end
         
         function options = getUnsupportedOptions(obj, parent, blk, varargin)
-            %L = nasa_toLustre.ToLustreImport.L;
-            %import(L{:})
+            
             obj.unsupported_options = {};
             if ~strcmp(blk.OutMax, '[]') || ~strcmp(blk.OutMin, '[]')
                 obj.addUnsupported_options(...

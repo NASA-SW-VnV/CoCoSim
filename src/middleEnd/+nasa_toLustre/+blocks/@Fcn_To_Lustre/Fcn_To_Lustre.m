@@ -14,8 +14,7 @@ classdef Fcn_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         
         
         function  status = write_code(obj, parent, blk, xml_trace, varargin)
-            %L = nasa_toLustre.ToLustreImport.L;
-            %import(L{:})
+            
             if isempty(xml_trace)
                 %comming from getUnsupportedOptions
                 [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk);

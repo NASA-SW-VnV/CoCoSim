@@ -11,8 +11,8 @@ function [ main_node] = condExecSS_To_LusAutomaton( parent_ir, ss_ir, ...
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %%L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
-    %%import(L{:})
+    %
+    %
     
     
     % Adding lustre comments tracking the original path
@@ -68,8 +68,8 @@ end
 function [body, variables_cell] =...
         write_enabled_OR_triggered_OR_action_SS(subsys, blk_name, ...
         node_inputs_withoutDT, node_outputs_withoutDT, hasEnablePort, hasActionPort, hasTriggerPort, original_node_call)
-    %%L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
-    %%import(L{:})
+    %
+    %
     % get the original node call
     if ~exist('original_node_call', 'var')
         original_node_call = nasa_toLustre.lustreAst.LustreEq(node_outputs_withoutDT, ...
@@ -177,8 +177,8 @@ end
 function [body, variables_cell] = write_enabled_AND_triggered_action_SS(subsys, blk_name, ...
         node_inputs_withoutDT, node_outputs_withoutDT)
     
-    %%L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
-    %%import(L{:})
+    %
+    %
     % get the original node call
     original_node_call = nasa_toLustre.lustreAst.LustreEq(node_outputs_withoutDT, ...
         nasa_toLustre.lustreAst.NodeCallExpr(blk_name, node_inputs_withoutDT));

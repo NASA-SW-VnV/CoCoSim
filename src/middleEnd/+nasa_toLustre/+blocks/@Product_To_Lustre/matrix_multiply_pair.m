@@ -7,8 +7,7 @@ function [codes, product_out, addVars] = matrix_multiply_pair(m1_dim, m2_dim, ..
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
-    %L = nasa_toLustre.ToLustreImport.L;
-    %import(L{:})
+    
     % adding additional variables for inside matrices.  For
     % AxBxCxD, B and C are inside matrices and needs additional
     % variables

@@ -7,7 +7,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function node_name = getCondActionNodeName(T, src, isDefaultTrans)
-    import nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre
+    
     if nargin < 2
         src = T.Source;
     end

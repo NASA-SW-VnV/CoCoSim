@@ -7,7 +7,7 @@ function [ new_ir, status ] = confirm_actions_SFIR_pp( new_ir )
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    import nasa_toLustre.IR_pp.stateflow_IR_pp.stateflow_fields.confirm_actions_SFIR_pp
+    
     global CHECK_SF_ACTIONS;
     status = 0;
     if ~isempty(CHECK_SF_ACTIONS) && CHECK_SF_ACTIONS == 0

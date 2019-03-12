@@ -7,8 +7,7 @@
 %% DURING ACTION
 function [main_node, external_libraries] = ...
         write_during_action(state, data_map)
-    %L = nasa_toLustre.ToLustreImport.L;
-    %import(L{:})
+    
     global SF_STATES_NODESAST_MAP;
     external_libraries = {};
     main_node = {};

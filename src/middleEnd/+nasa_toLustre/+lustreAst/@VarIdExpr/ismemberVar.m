@@ -6,13 +6,13 @@ function r = ismemberVar(v, vars)
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  
-    import nasa_toLustre.lustreAst.VarIdExpr
-    import nasa_toLustre.lustreAst.LustreVar
+    
+    
     if iscell(v)
         r = cellfun(@(x) nasa_toLustre.lustreAst.VarIdExpr.ismemberVar(x, vars), v);
         return;
     end
-    if isa(v, 'VarIdExpr') || isa(v, 'LustreVar')
+    if isa(v, 'nasa_toLustre.lustreAst.VarIdExpr') || isa(v, 'nasa_toLustre.lustreAst.LustreVar')
         v = v.getId();
     end
     Ids = cellfun(@(x) x.getId(), ...

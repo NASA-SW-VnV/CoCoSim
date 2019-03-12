@@ -6,8 +6,7 @@ function inputs = useOneInputPortForAllInputData(blk,isLookupTableDynamic,inputs
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    %L = nasa_toLustre.ToLustreImport.L;
-    %import(L{:})
+    
     if ~isLookupTableDynamic
         p_inputs = {};
         if strcmp(blk.UseOneInputPortForAllInputData, 'on')

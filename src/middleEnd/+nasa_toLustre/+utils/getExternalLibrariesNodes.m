@@ -18,8 +18,7 @@ end
 function [ lustre_nodes, open_list, abstractedNodes ] = recursive_call( external_libraries, already_handled, lus_backend )
     %GETEXTERNALLIBRARIESNODES returns the lustre nodes and libraries to be add
     %to the head of lustre code.
-    import nasa_toLustre.utils.*
-    import nasa_toLustre.lustreAst.RawLustreCode
+        
     lustre_nodes = {};
     open_list = {};
     abstractedNodes = {};
@@ -31,25 +30,27 @@ function [ lustre_nodes, open_list, abstractedNodes ] = recursive_call( external
     additional_nodes = {};
     for i=1:numel(external_libraries)
         lib = external_libraries{i};
-        if strncmp(lib, 'KIND2MathLib', 12)
-            lib = strrep(lib, 'KIND2MathLib_', '');
-            fun_name = sprintf('KIND2MathLib.get_%s',lib);
-        elseif strncmp(lib, 'LustMathLib', 11)
+        %if strncmp(lib, 'KIND2MathLib', 12)
+        %    lib = strrep(lib, 'KIND2MathLib_', '');
+        %    fun_name = sprintf('nasa_toLustre.utils.KIND2MathLib.get_%s',lib);
+        %else
+        if strncmp(lib, 'LustMathLib', 11)
             lib = strrep(lib, 'LustMathLib_', '');
-            fun_name = sprintf('LustMathLib.get_%s',lib);
+            fun_name = sprintf('nasa_toLustre.utils.LustMathLib.get_%s',lib);
         elseif strncmp(lib, 'LustDTLib', 9)
             lib = strrep(lib, 'LustDTLib_', '');
-            fun_name = sprintf('LustDTLib.get_%s',lib);
+            fun_name = sprintf('nasa_toLustre.utils.LustDTLib.get_%s',lib);
         elseif strncmp(lib, 'BlocksLib', 9)
             lib = strrep(lib, 'BlocksLib_', '');
-            fun_name = sprintf('BlocksLib.get_%s',lib);
+            fun_name = sprintf('nasa_toLustre.utils.BlocksLib.get_%s',lib);
         else
-            fun_name = sprintf('ExtLib.get_%s',lib);
+            fun_name = sprintf('nasa_toLustre.utils.ExtLib.get_%s',lib);
         end
         try
             fun_handle = str2func(fun_name);
             [node, external_nodes_i, opens, abstracts] = fun_handle(lus_backend);
-        catch
+        catch me
+            display_msg(me.getReport(), MsgType.DEBUG, 'getExternalLibrariesNodes', '');
             display_msg(sprintf('Library %s not supported', lib),...
                 MsgType.ERROR, 'getExternalLibrariesNodes','');
             continue;

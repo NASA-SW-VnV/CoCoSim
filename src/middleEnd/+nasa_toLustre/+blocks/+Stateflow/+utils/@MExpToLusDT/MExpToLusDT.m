@@ -43,7 +43,7 @@ classdef MExpToLusDT
         end
         
         function code = convertDT(obj, code, input_dt, output_dt)
-            import nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST
+            
             if isempty(code) || ...
                     isempty(input_dt) || isempty(output_dt) 
                 return;

@@ -9,7 +9,7 @@ function dt = binaryExpression_DT(tree, data_map, inputs, isSimulink, ...
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         
-    import nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT
+    
     tree_type = tree.type;
     switch tree_type
         case {'relopAND', 'relopelAND',...

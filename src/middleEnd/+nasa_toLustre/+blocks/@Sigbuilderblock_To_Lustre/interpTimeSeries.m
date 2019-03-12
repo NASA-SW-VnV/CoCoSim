@@ -7,8 +7,7 @@ function [codeAst, vars] = interpTimeSeries(output,time_array, ...
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    %L = nasa_toLustre.ToLustreImport.L;
-    %import(L{:})
+    
     % This function write code to interpolate a piecewise linear
     % time data series.  Time and data must be 1xm array where m is
     % number of data points in the time series.

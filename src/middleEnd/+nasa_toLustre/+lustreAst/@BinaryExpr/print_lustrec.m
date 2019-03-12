@@ -6,8 +6,7 @@ function code = print_lustrec(obj, backend)
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    import nasa_toLustre.lustreAst.*
-    if obj.addEpsilon ...
+        if obj.addEpsilon ...
             && (isequal(obj.op, '>=') || isequal(obj.op, '>') ...
             || isequal(obj.op, '<=') || isequal(obj.op, '<'))
         if isequal(obj.op, '>=') || isequal(obj.op, '<=')
@@ -18,9 +17,9 @@ function code = print_lustrec(obj, backend)
             and_or = 'and';
         end
         if isempty(obj.epsilon)
-            if isa(obj.left, 'RealExpr')
+            if isa(obj.left, 'nasa_toLustre.lustreAst.RealExpr')
                 obj.epsilon = eps(obj.left.getValue());
-            elseif isa(obj.right, 'RealExpr')
+            elseif isa(obj.right, 'nasa_toLustre.lustreAst.RealExpr')
                 obj.epsilon = eps(obj.right.getValue());
             else
                 obj.epsilon = 1e-15;

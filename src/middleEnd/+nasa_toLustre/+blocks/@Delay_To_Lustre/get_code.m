@@ -7,8 +7,7 @@ function [lustre_code, delay_node_code, variables, external_libraries] = ...
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
-    %L = nasa_toLustre.ToLustreImport.L;
-    %import(L{:})
+    
     %initialize outputs
     external_libraries = {};
     lustre_code = {};

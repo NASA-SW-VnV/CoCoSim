@@ -6,8 +6,7 @@ function SignalsInputsMap = signalInputsUsingDimensions(...
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
-    %L = nasa_toLustre.ToLustreImport.L;
-    %import(L{:})
+    
     SignalsInputsMap = containers.Map('KeyType', 'char', 'ValueType', 'any');
     if numel(inport_cell_dimension) ~= numel(inputSignalsInlined) ...
             && numel(inport_cell_dimension) ~= 1

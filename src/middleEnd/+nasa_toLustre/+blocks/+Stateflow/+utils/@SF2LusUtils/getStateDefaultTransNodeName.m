@@ -7,8 +7,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function name = getStateDefaultTransNodeName(state)
-    %L = nasa_toLustre.ToLustreImport.L;
-    %import(L{:})
+    
     state_name = nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getUniqueName(state);
     name = strcat(state_name, '_DefaultTrans_Node');
 end

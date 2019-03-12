@@ -19,8 +19,7 @@ classdef Product_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     methods
         
         function  write_code(obj, parent, blk, xml_trace, lus_backend, varargin)
-            %L = nasa_toLustre.ToLustreImport.L;
-            %import(L{:})
+            
             OutputDataTypeStr = blk.CompiledPortDataTypes.Outport{1};
             isSumBlock = false;
             [codes, outputs_dt, additionalVars] = ...
@@ -35,8 +34,7 @@ classdef Product_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         
         %%
         function options = getUnsupportedOptions(obj, parent, blk, lus_backend, varargin)
-            %L = nasa_toLustre.ToLustreImport.L;
-            %import(L{:})
+            
             % add your unsuported options list here
             if (strcmp(blk.Multiplication, 'Matrix(*)')...
                     && MatlabUtils.contains(blk.Inputs, '/') )

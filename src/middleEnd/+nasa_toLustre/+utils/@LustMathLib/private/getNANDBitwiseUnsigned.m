@@ -6,8 +6,7 @@ function [node, external_nodes, opens, abstractedNodes] = getNANDBitwiseUnsigned
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    import nasa_toLustre.lustreAst.*
-    opens = {};
+        opens = {};
     abstractedNodes = {};
     notNode = sprintf('_NOT_Bitwise_Unsigned_%d', n);
     UnsignedNode =  sprintf('_AND_Bitwise_Unsigned_%d', n);

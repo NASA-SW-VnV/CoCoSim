@@ -7,8 +7,7 @@
 %% write_children_actions
 function [actions, outputs, inputs] = ...
         write_children_actions(state, actionType)
-    %L = nasa_toLustre.ToLustreImport.L;
-    %import(L{:})
+    
     actions = {};
     outputs = {};
     inputs = {};

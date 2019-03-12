@@ -6,7 +6,7 @@ function dt = fun_indexing_DT(tree, data_map, inputs, isSimulink, isStateFlow, i
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    import nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT
+    
     tree_ID = tree.ID;
     switch tree_ID
         case {'abs', 'sgn'}
@@ -30,7 +30,7 @@ end
 
 function dt = simulinkStateflow_Fun_Indexing_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun)
     global SF_MF_FUNCTIONS_MAP SF_STATES_NODESAST_MAP;
-    import nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT
+    
     dt = '';
     
     if (isStateFlow || isMatlabFun) && data_map.isKey(tree.ID)

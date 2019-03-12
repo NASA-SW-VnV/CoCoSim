@@ -10,7 +10,7 @@
 % the function returns a list of LustreExp objects: IntExpr,
 % RealExpr or BooleanExpr
 function InitialOutput_cell = getInitialOutput(parent, blk, InitialOutput, slx_dt, max_width)
-    import nasa_toLustre.blocks.Constant_To_Lustre
+    
     [lus_outputDataType] = nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(slx_dt);
     if strcmp(InitialOutput, '[]')
         InitialOutput = '0';

@@ -6,8 +6,7 @@ function new_obj = simplify(obj)
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    import nasa_toLustre.lustreAst.*
-    new_op = obj.op;
+        new_op = obj.op;
     left_exp = obj.left.simplify();
     right_exp = obj.right.simplify();
     % x + (-y) => x - y, x - (-y) => x+y
@@ -25,12 +24,12 @@ function new_obj = simplify(obj)
     if (isequal(new_op, nasa_toLustre.lustreAst.BinaryExpr.MINUS) ...
             || isequal(new_op, nasa_toLustre.lustreAst.BinaryExpr.PLUS) )
         if isequal(new_op, nasa_toLustre.lustreAst.BinaryExpr.PLUS) ...
-                && (isa(left_exp, 'IntExpr') || isa(left_exp, 'RealExpr'))...
+                && (isa(left_exp, 'nasa_toLustre.lustreAst.IntExpr') || isa(left_exp, 'nasa_toLustre.lustreAst.RealExpr'))...
                 && left_exp.getValue() == 0
             new_obj = right_exp;
             return;
         end
-        if (isa(right_exp, 'IntExpr') || isa(right_exp, 'RealExpr'))...
+        if (isa(right_exp, 'nasa_toLustre.lustreAst.IntExpr') || isa(right_exp, 'nasa_toLustre.lustreAst.RealExpr'))...
                 && right_exp.getValue() == 0
             new_obj = left_exp;
             return;

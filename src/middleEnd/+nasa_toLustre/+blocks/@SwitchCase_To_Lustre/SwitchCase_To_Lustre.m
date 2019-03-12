@@ -14,8 +14,7 @@ classdef SwitchCase_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     methods
         
         function  write_code(obj, parent, blk, xml_trace, varargin)
-            %L = nasa_toLustre.ToLustreImport.L;
-            %import(L{:})
+            
             %% Step 1: Get the block outputs names, If a block is called X
             % and has one outport with width 3 and datatype double,
             % then outputs = {'X_1', 'X_2', 'X_3'}
@@ -45,8 +44,7 @@ classdef SwitchCase_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         end
         %%
         function options = getUnsupportedOptions(obj, parent, blk, varargin)
-            %L = nasa_toLustre.ToLustreImport.L;
-            %import(L{:})
+            
             [inputs, inports_dt] = obj.getInputs( parent, blk);
             data_map = nasa_toLustre.blocks.Fcn_To_Lustre.createDataMap(inputs, inports_dt);
             IfExp = obj.getIfExp(blk);

@@ -9,8 +9,7 @@
 %exit actions
 function [body, outputs, inputs] = ...
         full_tran_exit_actions(transitions, parentPath, trans_cond)
-    %L = nasa_toLustre.ToLustreImport.L;
-    %import(L{:})
+    
     global SF_STATES_NODESAST_MAP SF_STATES_PATH_MAP;
 
     body = {};

@@ -7,8 +7,7 @@ function [exp, status] = formatConditionToLustre(obj, cond, inputs_cell, data_ma
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    %L = nasa_toLustre.ToLustreImport.L;
-    %import(L{:})
+    
     %display_msg(cond, MsgType.DEBUG, 'If_To_Lustre', '');
     expected_dt = 'bool';
     [exp, status] = ...

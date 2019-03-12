@@ -6,8 +6,7 @@ function [node, external_nodes, opens, abstractedNodes] = get__Fix(varargin)
 % All Rights Reserved.
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    import nasa_toLustre.lustreAst.*
-    opens = {};
+        opens = {};
     abstractedNodes = {};
     % format = '--Rounds number to the nearest integer towards zero.\n';
     % format = [ format ,'node _Fix (x: real)\nreturns(y:int);\nlet\n\t'];

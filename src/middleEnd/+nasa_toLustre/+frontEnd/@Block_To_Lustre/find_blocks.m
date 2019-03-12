@@ -8,7 +8,7 @@ function blks = find_blocks(ss, varargin)
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    import nasa_toLustre.frontEnd.Block_To_Lustre
+    
     blks = {};
     doesMatch = true;
     for i=1:2:numel(varargin)

@@ -6,13 +6,12 @@ function [conds, thens] = getCondsThens(exp)
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  
-    import nasa_toLustre.lustreAst.*
-    conds = {};
+        conds = {};
     thens = {};
-    if isa(exp, 'ParenthesesExpr')
+    if isa(exp, 'nasa_toLustre.lustreAst.ParenthesesExpr')
         exp = exp.getExp();
     end
-    if ~isa(exp, 'IteExpr')
+    if ~isa(exp, 'nasa_toLustre.lustreAst.IteExpr')
         thens{1} = exp;
         return;
     end

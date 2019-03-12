@@ -6,7 +6,7 @@ function y_interp = interp2points_2D(x1, y1, x2, y2, x_interp)
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    import nasa_toLustre.lustreAst.BinaryExpr
+    
     % This function perform linear interpolation/extrapolation for
     % 2D from 2 points (x1,y1) and (x2, y2).
     % All parameters need to be LustreAst objects

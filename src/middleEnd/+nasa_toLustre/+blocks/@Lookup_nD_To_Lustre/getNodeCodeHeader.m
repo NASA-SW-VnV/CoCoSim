@@ -6,8 +6,7 @@ function node_header = getNodeCodeHeader(isLookupTableDynamic,inputs,outputs,ext
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    %L = nasa_toLustre.ToLustreImport.L;
-    %import(L{:})
+    
     if ~isLookupTableDynamic
         node_inputs = cell(1, numel(inputs));
         for i=1:numel(inputs)

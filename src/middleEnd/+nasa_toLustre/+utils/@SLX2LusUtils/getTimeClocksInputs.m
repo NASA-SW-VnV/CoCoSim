@@ -8,8 +8,8 @@
 
 function [node_inputs_cell, node_inputs_withoutDT_cell] = ...
         getTimeClocksInputs(blk, main_sampleTime, node_inputs_cell, node_inputs_withoutDT_cell)
-    import nasa_toLustre.lustreAst.LustreVar 
-    import nasa_toLustre.lustreAst.VarIdExpr
+     
+    
     node_inputs_cell{end + 1} = nasa_toLustre.lustreAst.LustreVar(...
         nasa_toLustre.utils.SLX2LusUtils.timeStepStr(), 'real');
     node_inputs_withoutDT_cell{end+1} = ...

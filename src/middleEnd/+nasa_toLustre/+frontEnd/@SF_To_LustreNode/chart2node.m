@@ -8,8 +8,8 @@ function [main_node, external_nodes, external_libraries ] = ...
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    %%L = nasa_toLustre.ToLustreImport.L;% Avoiding importing functions. Use direct indexing instead for safe call
-    %%import(L{:})
+    %
+    %
     % global varibale mapping between states and their nodes AST.
     global SF_STATES_NODESAST_MAP SF_STATES_PATH_MAP ...
         SF_JUNCTIONS_PATH_MAP SF_STATES_ENUMS_MAP ...

@@ -6,7 +6,7 @@ function dt = expression_DT(tree, data_map, inputs, isSimulink, isStateFlow, isM
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    import nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT
+    
     %this function is extended to be used by If-Block,
     %SwitchCase and Fcn blocks. Also it is used by Stateflow
     %actions
@@ -39,7 +39,7 @@ function dt = expression_DT(tree, data_map, inputs, isSimulink, isStateFlow, isM
         otherwise
             % we use the name of tree_type to call the associated function
             func_name = strcat(tree_type, '_DT');
-            func_handle = str2func(strcat('MExpToLusDT.', func_name));
+            func_handle = str2func(strcat('nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.', func_name));
             try
                 dt = func_handle(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
             catch me

@@ -6,8 +6,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function [new_obj, varIds] = pseudoCode2Lustre(obj)
-    import nasa_toLustre.lustreAst.*
-    varIds = {};
+        varIds = {};
     outputs_map = containers.Map('KeyType', 'char', 'ValueType', 'int32');
 
     %initialize outputs_map
@@ -20,8 +19,8 @@ function [new_obj, varIds] = pseudoCode2Lustre(obj)
     isLeft = false;
     I = [];
     for i=1:numel(obj.bodyEqs)
-        if ~isa(obj.bodyEqs{i}, 'LustreEq') ...
-                && ~isa(obj.bodyEqs{i}, 'ConcurrentAssignments')
+        if ~isa(obj.bodyEqs{i}, 'nasa_toLustre.lustreAst.LustreEq') ...
+                && ~isa(obj.bodyEqs{i}, 'nasa_toLustre.lustreAst.ConcurrentAssignments')
             %Keep Assertions, localProperties till the end to use
             %the last occurance.
             I = [I i];

@@ -46,7 +46,11 @@ function [valid,...
         end
     else
         st = SLXUtils.getModelCompiledSampleTime(slx_file_name);
-        time = (0:st:100)';
+        if st > 0
+            time = (0:st:100)';
+        else
+            time = (0:0.1:100)';
+        end
     end
     nb_steps = numel(time);
     if nb_steps >= 2

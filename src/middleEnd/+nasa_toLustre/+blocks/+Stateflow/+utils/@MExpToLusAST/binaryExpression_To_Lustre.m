@@ -7,9 +7,8 @@ function [code, exp_dt] = binaryExpression_To_Lustre(BlkObj, tree, parent,...
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         
-    import nasa_toLustre.lustreAst.*
-    import nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST
-    import nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT
+        
+    
     tree_type = tree.type;
     
     % get Operands DataType
@@ -67,8 +66,7 @@ function [code, exp_dt] = binaryExpression_To_Lustre(BlkObj, tree, parent,...
 end
 
 function [code, exp_dt] = getPowerCode(BlkObj, tree, parent, blk, data_map, inputs, isSimulink, isStateFlow, isMatlabFun)
-    import nasa_toLustre.lustreAst.*
-    import nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST
+        
     exp_dt = 'real';
     tree_type = tree.type;
     BlkObj.addExternal_libraries('LustMathLib_lustrec_math');

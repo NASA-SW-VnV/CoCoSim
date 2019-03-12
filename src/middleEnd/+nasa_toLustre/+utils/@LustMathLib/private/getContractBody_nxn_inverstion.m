@@ -6,8 +6,7 @@ function contractBody = getContractBody_nxn_inverstion(n,inputs,outputs)
 % Author: Khanh Tringh <khanh.v.trinh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    import nasa_toLustre.lustreAst.*
-    % guarantee code     A*A_inv = I
+        % guarantee code     A*A_inv = I
     % A*A_inv(ij) = 1.0 if i==j, = 0.0 if i!=j
     contractBody = cell(1, n*n);
     codeIndex = 0;

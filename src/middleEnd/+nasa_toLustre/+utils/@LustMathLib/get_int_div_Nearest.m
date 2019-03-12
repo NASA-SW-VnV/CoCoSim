@@ -6,8 +6,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  
 function [node, external_nodes_i, opens, abstractedNodes] = get_int_div_Nearest(varargin)
-    import nasa_toLustre.lustreAst.*
-    opens = {};
+        opens = {};
     abstractedNodes = {};
     external_nodes_i = {'LustMathLib_int_div_Ceiling'};
     conds = {};

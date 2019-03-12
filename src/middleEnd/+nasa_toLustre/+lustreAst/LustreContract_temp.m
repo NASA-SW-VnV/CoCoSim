@@ -228,8 +228,7 @@ classdef LustreContract < nasa_toLustre.lustreAst.LustreAst
         
         %% utils
         function lines = getLustreEq(obj, lines, backend)
-            import nasa_toLustre.lustreAst.*
-            for i=1:numel(obj.bodyEqs)
+                        for i=1:numel(obj.bodyEqs)
                 eq = obj.bodyEqs{i};
                 if ~isa(eq, 'LustreEq')
                     % assumptions, guarantees, modes...
@@ -242,10 +241,10 @@ classdef LustreContract < nasa_toLustre.lustreAst.LustreAst
                 else
                     var = eq.lhs;
                 end
-                if ~isa(var, 'LustreVar') && ~isa(var, 'VarIdExpr')
+                if ~isa(var, 'nasa_toLustre.lustreAst.LustreVar') && ~isa(var, 'nasa_toLustre.lustreAst.VarIdExpr')
                     continue;
                 end
-                if isa(var, 'LustreVar')
+                if isa(var, 'nasa_toLustre.lustreAst.LustreVar')
                     varDT = var.getDT();
                 else
                     varDT = obj.getDT(obj.localVars, var.getId());

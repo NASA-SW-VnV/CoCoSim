@@ -7,7 +7,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function params = changeVar(params, oldName, newName)
-    import nasa_toLustre.lustreAst.VarIdExpr
+    
     for i=1:numel(params)
         if isequal(params{i}.getId(), oldName)
             params{i} = nasa_toLustre.lustreAst.VarIdExpr(newName);

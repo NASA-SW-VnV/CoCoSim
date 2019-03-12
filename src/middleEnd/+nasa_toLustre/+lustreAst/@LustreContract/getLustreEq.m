@@ -6,10 +6,9 @@ function lines = getLustreEq(obj, lines, backend)
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  
-    import nasa_toLustre.lustreAst.*
-    for i=1:numel(obj.bodyEqs)
+        for i=1:numel(obj.bodyEqs)
         eq = obj.bodyEqs{i};
-        if ~isa(eq, 'LustreEq')
+        if ~isa(eq, 'nasa_toLustre.lustreAst.LustreEq')
             % assumptions, guarantees, modes...
             lines{end+1} = sprintf('\t%s\n', ...
                 eq.print(backend));
@@ -20,10 +19,10 @@ function lines = getLustreEq(obj, lines, backend)
         else
             var = eq.lhs;
         end
-        if ~isa(var, 'LustreVar') && ~isa(var, 'VarIdExpr')
+        if ~isa(var, 'nasa_toLustre.lustreAst.LustreVar') && ~isa(var, 'nasa_toLustre.lustreAst.VarIdExpr')
             continue;
         end
-        if isa(var, 'LustreVar')
+        if isa(var, 'nasa_toLustre.lustreAst.LustreVar')
             varDT = var.getDT();
         else
             varDT = obj.getDT(obj.localVars, var.getId());
