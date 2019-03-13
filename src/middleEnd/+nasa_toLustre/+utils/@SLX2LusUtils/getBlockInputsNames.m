@@ -28,6 +28,8 @@ function [inputs] = getBlockInputsNames(parent, blk, Port)
             continue;
         end
         n_i = nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, src, srcPort);
+        %TODO: use inputs{i} = ... But make sure all functions calling this
+        %function use the same convention: inputs is a cell array of cell arrays.
         inputs = [inputs, n_i];
     end
 end
