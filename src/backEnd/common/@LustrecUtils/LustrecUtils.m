@@ -111,12 +111,11 @@ classdef LustrecUtils < handle
         
         %% transform input struct to lustre format (inlining values)
         [lustre_input_values, status] = getLustreInputValuesFormat(...
-                input_dataSet, ...
-                time)
+                input_dataSet, time, node_struct)
             
-        number_of_inputs = getNumberOfInputs(ds, nb_steps)
+        number_of_inputs = getNumberOfInputsInlinedFromDataSet(ds, nb_steps)
 
-        signal_values = getSignalValuesUsingTime(ds, t)
+        signal_values = getSignalValuesInlinedUsingTime(ds, t)
 
         width = getSignalWidth(ds)
 

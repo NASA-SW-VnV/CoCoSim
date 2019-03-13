@@ -29,7 +29,7 @@ if ~exist('min_max_constraints', 'var') || isempty(min_max_constraints)
 end
 
 if ~exist('deep_CEX', 'var') || isempty(deep_CEX)
-    deep_CEX = 0;
+    deep_CEX = 10;
 end
 if ~exist('tests_method', 'var') || isempty(tests_method)
     tests_method = 1;
@@ -58,7 +58,7 @@ try
     f_msg = sprintf('Compiling model "%s" to Lustre\n',file_name);
     display_msg(f_msg, MsgType.RESULT, 'validation', '');
     %GUIUtils.update_status('Runing CocoSim');
-    [lus_file_path, ~, is_unsupported, ~, ~, pp_model_full_path] = ...
+    [lus_file_path, xml_trace, is_unsupported, ~, ~, pp_model_full_path] = ...
         nasa_toLustre.ToLustre(model_full_path, [], LusBackendType.LUSTREC, ...
         CoCoBackendType.VALIDATION, options{:});
     if is_unsupported
@@ -99,12 +99,12 @@ catch ME
 end
 
 
-if ~lustrec_failed && ~sim_failed && ~lustrec_binary_failed && valid~=1 && (deep_CEX > 0)
-    validate_componentsV2(model_full_path, file_name, file_name, output_dir, ...
-        deep_CEX, tests_method, model_checker, show_model, min_max_constraints, options);
-    %     validate_components(model_full_path, file_name, file_name, ...
-    % lus_file_path, xml_trace, output_dir, deep_CEX, 1, tests_method,...
-    %     model_checker, show_model, min_max_constraints);
+if valid~=1 && lustrec_failed~=1 && sim_failed~=1 && lustrec_binary_failed~=1 &&  (deep_CEX > 0)
+%     validate_componentsV2(model_full_path, file_name, file_name, output_dir, ...
+%         deep_CEX, tests_method, model_checker, show_model, min_max_constraints, options);
+        validate_components(model_full_path, file_name, file_name, ...
+    lus_file_path, xml_trace, output_dir, deep_CEX, 1, tests_method,...
+        model_checker, show_model, min_max_constraints, options);
 end
 
 
@@ -118,7 +118,55 @@ else
 end
 end
 
+
 %%
+function validate_components(file_path,file_name,block_path,  lus_file_path,...
+        xml_trace, output_dir, deep_CEX, deep_current, tests_method, ...
+        model_checker, show_model, min_max_constraints, options)
+ss = find_system(block_path, 'SearchDepth',1, 'BlockType','SubSystem');
+if ~exist('deep_current', 'var')
+    deep_current = 1;
+end
+for i=1:numel(ss)
+    if strcmp(ss{i}, block_path)
+        continue;
+    end
+    display_msg(['Validating SubSystem ' ss{i}], MsgType.INFO, 'validation', '');
+    node_name = nasa_toLustre.utils.SLX2Lus_Trace.get_lustre_node_from_Simulink_block_name(xml_trace, ss{i});
+    if ~strcmp(node_name, '')
+        [new_model_path, ~, status] = SLXUtils.crete_model_from_subsystem(file_name, ss{i}, output_dir );
+        if status
+            continue;
+        end
+        try
+            [valid, ~, ~, ~] = compare_slx_lus(new_model_path, lus_file_path,...
+                node_name, output_dir, tests_method, model_checker, ...
+                show_model, min_max_constraints, options);
+            if ~valid
+                display_msg(['SubSystem ' ss{i} ' is not valid (see Counter example above)'], MsgType.RESULT, 'validation', '');
+                load_system(file_path);
+                validate_components(file_path, file_name, ss{i}, lus_file_path,...
+                    xml_trace, output_dir, deep_CEX, deep_current+1,...
+                    tests_method, model_checker, show_model,...
+                    min_max_constraints, options);
+                if deep_current > deep_CEX; return;end
+            else
+                display_msg(['SubSystem ' ss{i} ' is valid'], MsgType.RESULT, 'validation', '');
+            end
+        catch ME
+            display_msg(ME.message, MsgType.ERROR, 'validation', '');
+            display_msg(ME.getReport(), MsgType.DEBUG, 'validation', '');
+            rethrow(ME);
+        end
+    else
+        display_msg(['No node for subsytem ' ss{i} ' is found'], MsgType.INFO, 'validation', '');
+    end
+end
+
+end
+
+
+%% This version creates a new model from subsystem and start validation process again.
 function validate_componentsV2(file_path, file_name, block_path, output_dir, ...
     deep_CEX, tests_method, model_checker, show_model, min_max_constraints, options)
 % This version re-translate the subsystem to Lustre and does not take
@@ -160,44 +208,3 @@ for i=1:numel(ss)
 end
 
 end
-
-%%
-function validate_components(file_path,file_name,block_path,  lus_file_path, xml_trace, output_dir, deep_CEX, deep_current, tests_method, model_checker, show_model, min_max_constraints)
-ss = find_system(block_path, 'SearchDepth',1, 'BlockType','SubSystem');
-if ~exist('deep_current', 'var')
-    deep_current = 1;
-end
-for i=1:numel(ss)
-    if strcmp(ss{i}, block_path)
-        continue;
-    end
-    display_msg(['Validating SubSystem ' ss{i}], MsgType.INFO, 'validation', '');
-    node_name = SLX2Lus_Trace.get_lustre_node_from_Simulink_block_name(xml_trace.getTraceRootNode(), ss{i});
-    if ~strcmp(node_name, '')
-        [new_model_path, ~, status] = SLXUtils.crete_model_from_subsystem(file_name, ss{i}, output_dir );
-        if status
-            continue;
-        end
-        try
-            [valid, ~, ~, ~] = compare_slx_lus(new_model_path, lus_file_path, node_name, output_dir, tests_method, model_checker, show_model, min_max_constraints);
-            if ~valid
-                display_msg(['SubSystem ' ss{i} ' is not valid (see Counter example above)'], MsgType.RESULT, 'validation', '');
-                load_system(file_path);
-                validate_components(file_path, file_name, ss{i}, lus_file_path, xml_trace, output_dir, deep_CEX, deep_current+1, tests_method, model_checker, show_model, min_max_constraints);
-                if deep_current > deep_CEX; return;end
-            else
-                display_msg(['SubSystem ' ss{i} ' is valid'], MsgType.RESULT, 'validation', '');
-            end
-        catch ME
-            display_msg(ME.message, MsgType.ERROR, 'validation', '');
-            display_msg(ME.getReport(), MsgType.DEBUG, 'validation', '');
-            rethrow(ME);
-        end
-    else
-        display_msg(['No node for subsytem ' ss{i} ' is found'], MsgType.INFO, 'validation', '');
-    end
-end
-
-end
-
-

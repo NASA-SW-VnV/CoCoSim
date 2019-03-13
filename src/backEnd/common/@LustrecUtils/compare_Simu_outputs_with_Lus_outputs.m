@@ -29,7 +29,7 @@ function [valid, cex_msg, diff_name, diff] = ...
         cex_msg{end+1} = sprintf('*****time : %f**********\n',time(i));
         cex_msg{end+1} = sprintf('*****inputs: \n');
         for j=1:numberOfInports
-            in = LustrecUtils.getSignalValuesUsingTime(input_dataset{j}.Values, time(i));
+            in = LustrecUtils.getSignalValuesInlinedUsingTime(input_dataset{j}.Values, time(i));
             in_width = numel(in);
             name = input_dataset{j}.Name;
             for jk=1:in_width
@@ -39,7 +39,7 @@ function [valid, cex_msg, diff_name, diff] = ...
         cex_msg{end+1} = sprintf('*****outputs: \n');
         found_output = false;
         for k=1:numberOfOutputs
-            yout_values = LustrecUtils.getSignalValuesUsingTime(yout{k}.Values, time(i));
+            yout_values = LustrecUtils.getSignalValuesInlinedUsingTime(yout{k}.Values, time(i));
             if isempty(yout_values)
                 % signal is not defined in the current timestep
                 index_out = index_out + out_width(k);
