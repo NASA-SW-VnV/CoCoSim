@@ -15,15 +15,16 @@ end
 
 function UnsupportedFunctionCallback(callbackInfo)
 model_full_path = MenuUtils.get_file_name(gcs);
-CoCoSimPreferences = load_coco_preferences();
-if CoCoSimPreferences.lustreCompiler ~= 1
+CoCoSimPreferences = cocosim_menu.CoCoSimPreferences.load();
+if ~isequal(CoCoSimPreferences.lustreCompiler, 'NASA') 
     msgbox(...
         sprintf('Check Compatibiity is only supported by the NASA Lustre compiler.\n Go to Tools -> Preferences -> Lustre Compiler -> NASA Compiler'), 'CoCoSim');
 else
     try
-        ToLustreUnsupportedBlocks(model_full_path);
+        MenuUtils.add_pp_warning(model_full_path);
+        nasa_toLustre.ToLustreUnsupportedBlocks(model_full_path);
     catch me
-        display_msg(me.getReport(), MsgType.DEBUG, '', '');
+        MenuUtils.handleExceptionMessage(me, 'Check Compatibility');
     end
 end
 end
@@ -41,12 +42,12 @@ end
 % model_full_path = MenuUtils.get_file_name(gcs);
 % if ~isSubsystem
 %     try
-%         ToLustreUnsupportedBlocks(model_full_path);
+%         nasa_toLustre.ToLustreUnsupportedBlocks(model_full_path);
 %     catch me
 %         display_msg(me.getReport(), MsgType.DEBUG, '', '');
 %     end
 % else
-%     %     unsupportedOptions= ToLustreUnsupportedBlocks(model_full_path, SubsystemName);
+%     %     unsupportedOptions= nasa_toLustre.ToLustreUnsupportedBlocks(model_full_path, SubsystemName);
 %     msgbox(sprintf('I am running %s', SubsystemPath));
 % end
 % 

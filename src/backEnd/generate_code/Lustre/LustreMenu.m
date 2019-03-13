@@ -4,27 +4,40 @@
 % All Rights Reserved.
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function schema = LustreMenu(callbackInfo)
-schema = sl_action_schema;
-schema.label = 'Lustre';
-schema.callback = @LusCompilerCallback;
+function schema = LustreMenu(~)
+    schema = sl_container_schema;
+    schema.label = 'Lustre';
+    schema.statustip = 'Generate Lustre Code';
+    schema.autoDisableWhen = 'Busy';
+    schema.childrenFcns = {@getCodeForVerification, @getLustrec};
 end
 
+function schema = getCodeForVerification(varargin)
+    schema = sl_action_schema;
+    schema.label = 'For Verification';
+    CoCoSimPreferences = cocosim_menu.CoCoSimPreferences.load();
+    schema.callback =  @(x) LusCompilerCallback(CoCoSimPreferences.lustreBackend, x);
+end
 
-function LusCompilerCallback(callbackInfo)
-try
-    mdl_full_path = MenuUtils.get_file_name(gcs);
-    CoCoSimPreferences = load_coco_preferences();
-    if CoCoSimPreferences.lustreCompiler == 1
-        ToLustre(mdl_full_path);
-    elseif CoCoSimPreferences.lustreCompiler == 2
-        cocoSpecCompiler(mdl_full_path);
-    else
-        lustre_compiler(mdl_full_path);
+function schema = getLustrec(varargin)
+    schema = sl_action_schema;
+    schema.label = 'For C code generation';
+    schema.callback =  @(x) LusCompilerCallback(LusBackendType.LUSTREC, x);
+end
+
+function LusCompilerCallback(bckend, ~)
+    try
+        mdl_full_path = MenuUtils.get_file_name(gcs);
+        MenuUtils.add_pp_warning(mdl_full_path);
+        CoCoSimPreferences = cocosim_menu.CoCoSimPreferences.load();
+        if isequal(CoCoSimPreferences.lustreCompiler, 'IOWA') 
+            cocoSpecCompiler(mdl_full_path);
+        else
+            nasa_toLustre.ToLustre(mdl_full_path, [], bckend);
+        end
+    catch ME
+        display_msg(ME.getReport(), Constants.DEBUG,'LusCompilerCallback','');
+        display_msg(ME.message, Constants.ERROR,'LusCompilerCallback','');
     end
-catch ME
-    display_msg(ME.getReport(), Constants.DEBUG,'LusCompilerCallback','');
-    display_msg(ME.message, Constants.ERROR,'LusCompilerCallback','');
-end
 end
 

@@ -1,0 +1,36 @@
+node  abs_real(x : real;)
+returns(y : real;);
+let
+y = if (x >= 0.0) then
+    x
+    else (- x);
+tel
+node imported rem_real(x : real;
+     	y : real;)
+returns(z : real;);
+(*@contract
+    guarantee ((x = 0.0) => (z = 0.0));
+    guarantee ((y = 0.0) => (z = x));
+    guarantee ((abs_real(x) < abs_real(y)) => (z = x));
+    guarantee (abs_real(z) < abs_real(y));
+    --sign(z) = sign(x)
+    guarantee ((x > 0.0) => (z >= 0.0));
+    guarantee ((x < 0.0) => (z <= 0.0));
+*)
+
+node imported mod_real(x : real;
+     	y : real;)
+returns(z : real;);
+(*@contract
+    guarantee ((x = 0.0) => (z = 0.0));
+    guarantee ((y = 0.0) => (z = x));
+    --sign(x) = sign(y) and abs(x) < abs(y)
+    guarantee (((0.0 < x) and (x < y)) => (z = x));
+    guarantee (((y < x) and (x < 0.0)) => (z = x));
+    --sign(x) <> sign(y) and abs(x) < abs(y)
+    guarantee (((0.0 < x) and (x < (- y))) => (z = (x + y)));
+    guarantee ((((- y) < x) and (x < 0.0)) => (z = (x + y)));
+    --sign(z) = sign(y) and abs(z) < abs(y)
+    guarantee ((y > 0.0) => ((0.0 <= z) and (z < y)));
+    guarantee ((y < 0.0) => ((y < z) and (z <= 0.0)));
+*)

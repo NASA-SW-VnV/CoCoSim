@@ -1,9 +1,14 @@
 package cocosim.matlab2IR;
 
+import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.charset.StandardCharsets;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -16,6 +21,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import cocosim.emgrammar.EMBaseListener;
 import cocosim.emgrammar.EMLexer;
 import cocosim.emgrammar.EMParser;
+import cocosim.matlab2Lustre.EM2Lustre.LusEmitter;
 
 /*################################################################################
 #
@@ -72,7 +78,7 @@ public class EM2JSON {
 			buf.append(Quotes("type")+":"+Quotes("script"));
 			buf.append(",\n");
 
-			buf.append(Quotes("statements")+":["+getJSON(ctx.body()));
+			buf.append(Quotes("statements")+":["+getJSON(ctx.script_body()));
 			buf.append("\n]");
 			setJSON(ctx, buf.toString());
 		}
@@ -98,6 +104,12 @@ public class EM2JSON {
 			buf.append(Quotes("input_params")+":"+inputs);
 			buf.append(",\n");
 
+			if(ctx.END() == null)
+				buf.append(Quotes("has_END")+":false");
+			else
+				buf.append(Quotes("has_END")+":true");
+			buf.append(",\n");
+			
 			buf.append(Quotes("statements")+":["+getJSON(ctx.body()));
 			buf.append("\n]\n}");
 			setJSON(ctx, buf.toString());
@@ -129,6 +141,18 @@ public class EM2JSON {
 		}
 
 
+		@Override public void exitScript_body(EMParser.Script_bodyContext ctx) {
+			if (ctx.script_body() != null){
+				StringBuilder buf = new StringBuilder();
+				buf.append(getJSON(ctx.script_body()));
+				buf.append(",\n");
+				buf.append(getJSON(ctx.script_body_item()));
+				setJSON(ctx, buf.toString());
+			}
+			else
+				setJSON(ctx,getJSON(ctx.script_body_item()));
+		}
+		
 		@Override public void exitBody(EMParser.BodyContext ctx) {
 			if (ctx.body() != null){
 				StringBuilder buf = new StringBuilder();
@@ -141,6 +165,11 @@ public class EM2JSON {
 				setJSON(ctx,getJSON(ctx.body_item()));
 		}
 
+		
+		@Override public void exitScript_body_item(EMParser.Script_body_itemContext ctx) { 
+			setJSON(ctx,getJSON(ctx.getChild(0)));
+		}
+		
 		@Override public void exitBody_item(EMParser.Body_itemContext ctx) { 
 			setJSON(ctx,getJSON(ctx.getChild(0)));
 
@@ -186,38 +215,32 @@ public class EM2JSON {
 			setJSON(ctx,getJSON(ctx.getChild(0)));
 		}
 
-		@Override public void exitExpressionList(EMParser.ExpressionListContext ctx) {
-			setJSON(ctx,getJSON(ctx.expression()));
-		}
+		
 
 		@Override public void exitExpression(EMParser.ExpressionContext ctx) {
-			if (ctx.expression() != null){
-				StringBuilder buf = new StringBuilder();
-				buf.append(getJSON(ctx.expression()));
-				buf.append(",\n");
-				buf.append(getJSON(ctx.assignment()));
-				setJSON(ctx, buf.toString());
+			if (ctx.notAssignment()	 != null){
+				setJSON(ctx,getJSON(ctx.notAssignment()));
 			}
 			else
 				setJSON(ctx,getJSON(ctx.assignment()));
 		}
 
 		@Override public void exitAssignment(EMParser.AssignmentContext ctx) {
-			if (ctx.notAssignment() == null){
-				StringBuilder buf = new StringBuilder();
-				buf.append("{");
-				buf.append("\n");
-				buf.append(Quotes("type")+":"+Quotes("assignment"));
-				buf.append(",\n");
-				buf.append(Quotes("operator")+":"+Quotes(ctx.assignmentOperator().getText()));
-				buf.append(",\n");
-				buf.append(Quotes("leftExp")+":"+getJSON(ctx.unaryExpression()));
-				buf.append(",\n");
-				buf.append(Quotes("rightExp")+":"+getJSON(ctx.assignment()));
-				buf.append("\n}");
-				setJSON(ctx, buf.toString());
-			}else
-				setJSON(ctx, getJSON(ctx.notAssignment()));
+			StringBuilder buf = new StringBuilder();
+			buf.append("{");
+			buf.append("\n");
+			buf.append(Quotes("type")+":"+Quotes("assignment"));
+			buf.append(",\n");
+			buf.append(Quotes("operator")+":"+Quotes(ctx.assignmentOperator().getText()));
+			buf.append(",\n");
+			buf.append(Quotes("leftExp")+":"+getJSON(ctx.unaryExpression()));
+			buf.append(",\n");
+			buf.append(Quotes("rightExp")+":"+getJSON(ctx.notAssignment()));
+			buf.append(",\n");
+			buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
+			buf.append("\n}");
+			setJSON(ctx, buf.toString());
+
 
 		}
 
@@ -305,9 +328,12 @@ public class EM2JSON {
 
 				String operator = ctx.TRANSPOSE().getText();
 				buf.append(Quotes("operator")+":"+Quotes(operator));
+				
 				buf.append(",\n");
-
 				buf.append(Quotes("leftExp")+":"+getJSON(ctx.postfixExpression()));
+				
+				buf.append(",\n");
+				buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
 				buf.append("\n}");
 
 				setJSON(ctx, buf.toString());
@@ -323,15 +349,20 @@ public class EM2JSON {
 				buf.append(Quotes("type")+":"+Quotes("parenthesedExpression"));
 				buf.append(",\n");
 				buf.append(Quotes("expression")+":"+getJSON(ctx.expression()));
+				buf.append(",\n");
+				buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
 				buf.append("\n}");
 				setJSON(ctx, buf.toString());
-			}else if(ctx.ID() != null){
+			}
+			else if(ctx.ID() != null && ctx.indexing() == null){
 				StringBuilder buf = new StringBuilder();
 				buf.append("{");
 				buf.append("\n");
 				buf.append(Quotes("type")+":"+Quotes("ID"));
 				buf.append(",\n");
 				buf.append(Quotes("name")+":"+Quotes(ctx.ID().getText()));
+				buf.append(",\n");
+				buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
 				buf.append("\n}");
 				setJSON(ctx, buf.toString());
 			}
@@ -348,6 +379,8 @@ public class EM2JSON {
 			buf.append(Quotes("type")+":"+Quotes("ignore_value"));
 			buf.append(",\n");
 			buf.append(Quotes("value")+":"+Quotes(ctx.getText()));
+			buf.append(",\n");
+			buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
 		}
@@ -365,6 +398,8 @@ public class EM2JSON {
 				buf.append(Quotes("dataType")+":"+Quotes(dataType));
 				buf.append(",\n");
 				buf.append(Quotes("value")+":"+Quotes(ctx.getText()));
+				buf.append(",\n");
+				buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
 				buf.append("\n}");
 				setJSON(ctx, buf.toString());
 			}
@@ -390,9 +425,11 @@ public class EM2JSON {
 				buf.append(",\n");
 				buf.append(Quotes("input_params")+":"+ getJSON(ctx.func_input()));
 				if (ctx.expression() != null){
-					buf.append(Quotes("expression")+":"+ getJSON(ctx.expression()));
 					buf.append(",\n");
+					buf.append(Quotes("expression")+":"+ getJSON(ctx.expression()));
 				}
+				buf.append(",\n");
+				buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
 				buf.append("\n}");
 				setJSON(ctx, buf.toString());
 			}else{
@@ -402,16 +439,39 @@ public class EM2JSON {
 				buf.append(Quotes("type")+":"+Quotes("function_handle"));
 				buf.append(",\n");
 				buf.append(Quotes("ID")+":"+Quotes(ctx.ID().getText()));
+				buf.append(",\n");
+				buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
 				buf.append("\n}");
 				setJSON(ctx, buf.toString());
 			}
 		}
-
 		@Override public void exitIndexing(EMParser.IndexingContext ctx) { 
+			setJSON(ctx, getJSON(ctx.getChild(0)));
+		}
+		@Override public void exitFun_indexing(EMParser.Fun_indexingContext ctx) { 
 			StringBuilder buf = new StringBuilder();
 			buf.append("{");
 			buf.append("\n");
-			buf.append(Quotes("type")+":"+Quotes("indexing"));
+			buf.append(Quotes("type")+":"+Quotes("fun_indexing"));
+			buf.append(",\n");
+			buf.append(Quotes("ID")+":"+Quotes(ctx.getChild(0).getText()));
+			buf.append(",\n");
+			if (ctx.getChild(2).getText().equals(")"))
+				buf.append(Quotes("parameters")+":"+"[]");
+			else
+				buf.append(Quotes("parameters")+":"+getJSON(ctx.getChild(2)));
+			
+			buf.append(",\n");
+			buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
+			
+			buf.append("\n}");
+			setJSON(ctx, buf.toString());
+		}
+		@Override public void exitCell_indexing(EMParser.Cell_indexingContext ctx) { 
+			StringBuilder buf = new StringBuilder();
+			buf.append("{");
+			buf.append("\n");
+			buf.append(Quotes("type")+":"+Quotes("cell_indexing"));
 			buf.append(",\n");
 			buf.append(Quotes("ID")+":"+Quotes(ctx.getChild(0).getText()));
 			buf.append(",\n");
@@ -419,58 +479,64 @@ public class EM2JSON {
 			int child = 1;
 			int n =  ctx.children.size();
 			while(i<n){
-				String type = ctx.getChild(i++).getText();
-				if (type.equals(".")){
-					buf.append(Quotes("child"+(child++))+":");
-					if(ctx.getChild(i).getText().equals("(")){
-						i++;
-						buf.append("{");
-						buf.append("\n");
-						buf.append(Quotes("type")+":"+Quotes("DotPARENIndex"));
-						buf.append(",\n");
-						buf.append(Quotes("expression")+":"+getJSON(ctx.getChild(i++)));
-						buf.append("\n}");
-						i++;//consume ")"
-						if (i<n-1) buf.append(",\n");
-					}else{
-						buf.append("{");
-						buf.append("\n");
-						buf.append(Quotes("type")+":"+Quotes("DotID"));
-						buf.append(",\n");
-						buf.append(Quotes("name")+":"+Quotes(ctx.getChild(i++).getText()));
-						buf.append("\n}");
-						if (i<n-1) buf.append(",\n");
-					}
-				}else if (type.equals("(")){
-					buf.append(Quotes("child"+(child++))+":");
-					buf.append("{");
-					buf.append("\n");
-					buf.append(Quotes("type")+":"+Quotes("PARENIndex"));
-					buf.append(",\n");
-					if (ctx.getChild(i).getText().equals(")"))
-						buf.append(Quotes("parameter_list")+":"+"[]");
-					else
-						buf.append(Quotes("parameter_list")+":"+getJSON(ctx.getChild(i++)));
-					buf.append("\n}");
-					i++;//consume ")"
-					if (i<n-1) buf.append(",\n");
-				}
-				else if (type.equals("{")){
-					buf.append(Quotes("child"+(child++))+":");
-					buf.append("{");
-					buf.append("\n");
-					buf.append(Quotes("type")+":"+Quotes("BRACEIndex"));
-					buf.append(",\n");
-					if (ctx.getChild(i).getText().equals("}"))
-						buf.append(Quotes("parameter_list")+":"+"[]");
-					else
-						buf.append(Quotes("parameter_list")+":"+getJSON(ctx.getChild(i++)));
-					buf.append("\n}");
-					i++;//consume "}"
-					if (i<n-1) buf.append(",\n");
-				}
+				buf.append(Quotes("BRACE"+(child++))+":");
+				buf.append("{");
+				buf.append("\n");
+				if (ctx.getChild(i).getText().equals("}"))
+					buf.append(Quotes("parameters")+":"+"[]");
+				else
+					buf.append(Quotes("parameters")+":"+getJSON(ctx.getChild(i++)));
+				buf.append("\n}");
+				i++;//consume "}"
+				if (i<n-1) buf.append(",\n");
 			}
 
+			buf.append(",\n");
+			buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
+			
+			buf.append("\n}");
+			setJSON(ctx, buf.toString());
+		}
+		@Override public void exitStruct_indexing(EMParser.Struct_indexingContext ctx){ 
+			StringBuilder buf = new StringBuilder();
+			buf.append("{");
+			buf.append("\n");
+			buf.append(Quotes("type")+":"+Quotes("struct_indexing"));
+			buf.append(",\n");
+			buf.append(Quotes("ID")+":"+Quotes(ctx.getChild(0).getText()));
+			buf.append(",\n");
+			int i = 1;
+			int child = 1;
+			int n =  ctx.children.size();
+			while(i<n){
+
+				buf.append(Quotes("child"+(child++))+":"+getJSON(ctx.getChild(i++)));
+				if (i<n) buf.append(",\n");
+//				if(ctx.getChild(i).getText().equals("(")){
+//					i++;
+//					buf.append("{");
+//					buf.append("\n");
+//					buf.append(Quotes("type")+":"+Quotes("DotPARENIndex"));
+//					buf.append(",\n");
+//					buf.append(Quotes("expression")+":"+getJSON(ctx.getChild(i++)));
+//					buf.append("\n}");
+//					i++;//consume ")"
+//					if (i<n-1) buf.append(",\n");
+//				}else{
+//					buf.append("{");
+//					buf.append("\n");
+//					buf.append(Quotes("type")+":"+Quotes("DotID"));
+//					buf.append(",\n");
+//					buf.append(Quotes("name")+":"+Quotes(ctx.getChild(i++).getText()));
+//					buf.append("\n}");
+//					if (i<n-1) buf.append(",\n");
+//				}
+				
+			}
+
+			buf.append(",\n");
+			buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
+			
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
 		}
@@ -498,6 +564,8 @@ public class EM2JSON {
 				buf.append(Quotes("type")+":"+Quotes("COLON"));
 				buf.append(",\n");
 				buf.append(Quotes("value")+":"+Quotes(ctx.COLON().getText()));
+				buf.append(",\n");
+				buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
 				buf.append("\n}");
 				setJSON(ctx, buf.toString());
 			}
@@ -517,7 +585,10 @@ public class EM2JSON {
 				buf.append(getJSON(vctx));
 				if(i < n-1) buf.append(",");
 			}
-			buf.append("]\n}");
+			buf.append("]");
+			buf.append(",\n");
+			buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
+			buf.append("\n}");
 			setJSON(ctx, buf.toString());
 		}
 
@@ -547,7 +618,10 @@ public class EM2JSON {
 				buf.append(getJSON(vctx));
 				if(i < n-1) buf.append(",");
 			}
-			buf.append("]\n}");
+			buf.append("]");
+			buf.append(",\n");
+			buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
+			buf.append("\n}");
 			setJSON(ctx, buf.toString());
 		}
 
@@ -573,6 +647,10 @@ public class EM2JSON {
 				buf.append(Quotes("else_block")+":{}");
 			else 
 				buf.append(Quotes("else_block")+":"+getJSON(ctx.else_block()));
+			
+			buf.append(",\n");
+			buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
+			
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
 		}
@@ -587,6 +665,8 @@ public class EM2JSON {
 			buf.append(",\n");
 			buf.append(Quotes("statements")+":["+getJSON(ctx.body()));
 			buf.append("\n]");
+			buf.append(",\n");
+			buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
 		}
@@ -598,6 +678,8 @@ public class EM2JSON {
 			buf.append(",\n");
 			buf.append(Quotes("statements")+":["+getJSON(ctx.body()));
 			buf.append("\n]");
+			buf.append(",\n");
+			buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
 		}
@@ -622,6 +704,10 @@ public class EM2JSON {
 				buf.append(Quotes("otherwise_block")+":{}");
 			else 
 				buf.append(Quotes("otherwise_block")+":"+getJSON(ctx.otherwise_block()));
+			
+			buf.append(",\n");
+			buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
+			
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
 		}
@@ -636,6 +722,10 @@ public class EM2JSON {
 			buf.append(",\n");
 			buf.append(Quotes("statements")+":["+getJSON(ctx.body()));
 			buf.append("\n]");
+			
+			buf.append(",\n");
+			buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
+			
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
 		}
@@ -644,10 +734,14 @@ public class EM2JSON {
 			StringBuilder buf = new StringBuilder();
 			buf.append("{");
 			buf.append("\n");
-			buf.append(Quotes("type")+":"+Quotes("else_block"));
+			buf.append(Quotes("type")+":"+Quotes("otherwise_block"));
 			buf.append(",\n");
 			buf.append(Quotes("statements")+":["+getJSON(ctx.body()));
 			buf.append("\n]");
+			
+			buf.append(",\n");
+			buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
+			
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
 		}
@@ -664,6 +758,10 @@ public class EM2JSON {
 			buf.append(",\n");
 			buf.append(Quotes("statements")+":["+getJSON(ctx.body()));
 			buf.append("\n]");
+			
+			buf.append(",\n");
+			buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
+			
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
 		}
@@ -678,6 +776,10 @@ public class EM2JSON {
 			buf.append(",\n");
 			buf.append(Quotes("statements")+":["+getJSON(ctx.body()));
 			buf.append("\n]");
+			
+			buf.append(",\n");
+			buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
+			
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
 		}
@@ -694,6 +796,11 @@ public class EM2JSON {
 				buf.append(Quotes("catch_block")+":{}");
 			else 
 				buf.append(Quotes("catch_block")+":"+getJSON(ctx.catch_block()));
+			
+			buf.append(",\n");
+			buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
+			
+			
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
 		}
@@ -711,6 +818,9 @@ public class EM2JSON {
 			buf.append(Quotes("statements")+":["+getJSON(ctx.body()));
 			buf.append("\n]");
 
+			buf.append(",\n");
+			buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
+			
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
 		}
@@ -719,6 +829,10 @@ public class EM2JSON {
 			buf.append("{");
 			buf.append("\n");
 			buf.append(Quotes("type")+":"+Quotes("return_exp"));
+			
+			buf.append(",\n");
+			buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
+			
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
 		}
@@ -727,6 +841,10 @@ public class EM2JSON {
 			buf.append("{");
 			buf.append("\n");
 			buf.append(Quotes("type")+":"+Quotes("break_exp"));
+			
+			buf.append(",\n");
+			buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
+			
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
 		}
@@ -735,6 +853,10 @@ public class EM2JSON {
 			buf.append("{");
 			buf.append("\n");
 			buf.append(Quotes("type")+":"+Quotes("continue_exp"));
+			
+			buf.append(",\n");
+			buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
+			
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
 		}
@@ -751,6 +873,10 @@ public class EM2JSON {
 				if(i < ctx.ID().size()-1) buf.append(",");
 			}
 			buf.append("]");
+			
+			buf.append(",\n");
+			buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
+			
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
 		}
@@ -767,6 +893,10 @@ public class EM2JSON {
 				if(i < ctx.ID().size()-1) buf.append(",");
 			}
 			buf.append("]");
+			
+			buf.append(",\n");
+			buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
+			
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
 		}
@@ -783,6 +913,11 @@ public class EM2JSON {
 				if(i < ctx.ID().size()-1) buf.append(",");
 			}
 			buf.append("]");
+			
+			buf.append(",\n");
+			buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
+			
+			
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
 		}
@@ -830,6 +965,10 @@ public class EM2JSON {
 					}
 					else 
 						buf.append(Quotes("rightExp")+":"+getJSON((ParseTree) method1.invoke(ctx)));
+					
+					buf.append(",\n");
+					buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
+					
 					buf.append("\n}");
 					setJSON(ctx, buf.toString());
 				}else
@@ -862,6 +1001,8 @@ public class EM2JSON {
 			buf.append(",\n");
 			String tokenName = ctx.getText().replaceAll("\\n", "\\\\n");
 			buf.append(Quotes("name")+":"+Quotes(tokenName));
+			buf.append(",\n");
+			buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
 		}
@@ -873,43 +1014,82 @@ public class EM2JSON {
 
 	}
 
-	public static void main(String[] args) throws Exception {
-		String inputFile = null;
-		String file_name = null;
-		if ( args.length>0 ) {
-			inputFile = args[0];
-			if ( args.length> 1 )
-				file_name = args[1];
-			else
-				file_name = args[0]+".json";
-		}else
-			file_name = "output.json";
-		InputStream is = System.in;
-		if ( inputFile!=null ) {
-			is = new FileInputStream(inputFile);
+	// Main Functions
+	
+	
+	public static String InputStreamToIR(InputStream stream) {
+		ANTLRInputStream input = null;
+		try {
+			input = new ANTLRInputStream(stream);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
 		}
-		ANTLRInputStream input = new ANTLRInputStream(is);
-		EMLexer lexer = new EMLexer(input);
+		EMLexer lexer = new EMLexer( input);
 		CommonTokenStream tokens = new CommonTokenStream(lexer);
 		EMParser parser = new EMParser(tokens);
 		parser.setBuildParseTree(true);
 		ParseTree tree = parser.emfile();
-		// show tree in text form
-		//System.out.println(tree.toStringTree(parser));
-
 		ParseTreeWalker walker = new ParseTreeWalker();
 		JSONEmitter converter = new JSONEmitter();
-		walker.walk(converter, tree);
+		walker.walk(converter, tree);	
 		String result = converter.getJSON(tree);
-		System.out.println(result);
+		
+		return result;
 
+	}
+	public static String StringToIR(String matlabCode) {
 		try {
-			PrintWriter out = new PrintWriter(file_name);
-			out.println(result);
-		}catch (Exception e) {
-			// TODO: handle exception
+			InputStream stream = new ByteArrayInputStream(matlabCode.getBytes(StandardCharsets.UTF_8.name()));
+			return InputStreamToIR(stream);
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		 
+
+		return null;
+	}
+	
+	public static void MFileToIR(String inputFilePath, String outputFilePath) {
+		try {
+			InputStream stream = new FileInputStream(inputFilePath);
+			String result = InputStreamToIR(stream);
+			try {
+				PrintWriter out = new PrintWriter(outputFilePath);
+				out.println(result);
+				out.close();
+			}catch (Exception e) {
+				// TODO: handle exception
+				e.printStackTrace();
+			}
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+	public static void main(String[] args) throws Exception {
+		String inputFile = null;
+		if (args.length > 0) 
+			inputFile = args[0];
+		InputStream is = System.in;
+		if (inputFile != null) {
+			try {
+				is = new FileInputStream(inputFile);
+				String result = InputStreamToIR(is);
+				System.out.println(result);
+			}catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				System.out.println("File '"+ inputFile+"' Not Found.");
+			}
+		}else {
+			StringBuilder buf = new StringBuilder();
+			buf.append("f(x)");
+			String result = StringToIR(buf.toString());
+			System.out.println(result);
+		}
+		
+
 	}
 }

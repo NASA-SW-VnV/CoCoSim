@@ -1,4 +1,4 @@
-function [] = ForEach_pp(model)
+function [status, errors_msg] = ForEach_pp(model)
 % ForEach_process Searches for ForEach blocks and replaces them by a
 %  equivalent subsystem.
 %   model is a string containing the name of the model to search in
@@ -8,14 +8,22 @@ function [] = ForEach_pp(model)
 % All Rights Reserved.
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+status = 0;
+errors_msg = {};
+
 ForEach_list = find_system(model,...
     'LookUnderMasks', 'all', 'BlockType','ForEach');
 if not(isempty(ForEach_list))
     display_msg('Processing ForEach blocks...', MsgType.INFO, 'ForEach_process', '');
     for i=1:length(ForEach_list)
-        
+        try
         display_msg(ForEach_list{i}, MsgType.INFO, 'ForEach_process', '');
         expand_ForEach(model, ForEach_list{i});
+        catch
+            status = 1;
+            errors_msg{end + 1} = sprintf('ForEach pre-process has failed for block %s', ForEach_list{i});
+            continue;            
+        end
     end
     display_msg('Done\n\n', MsgType.INFO, 'ForEach_process', '');
 end

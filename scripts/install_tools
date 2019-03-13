@@ -498,6 +498,7 @@ progress "Installing OCaml $ocaml_required_version, ocamlfind, ocamlbuild, cmdli
 progress_run opam init -y --comp=$ocaml_required_version || error_install opam
 progress_run opam switch -y $ocaml_required_version
 progress_run eval `opam config env` || error_install opam
+progress_run opam update
 progress_run opam install -y  ocamlfind ocamlbuild ocamlgraph fmt logs topkg cmdliner num yojson|| error_install ocaml
 
 

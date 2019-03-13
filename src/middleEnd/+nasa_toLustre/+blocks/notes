@@ -1,0 +1,113 @@
+Ktrinh: Assignment,
+        Bias (pp),
+        Concatenate,
+        DataTypeConversion 
+        DataTypeDuplicate (ignored),
+        Demux,
+        Discrete Derivative (check pp in article)
+        Derivative
+        DiscretePulseGenerator, 
+        DiscreteTransferFcn (pp),
+        DiscreteStateSpace (pp),
+        DiscreteFilter(pp),
+        DiscreteFir(pp),
+        DotProduct(pp),
+        FromWorkspace,
+        Gain (pp), 
+        Goto,
+        Logic,
+        Lookup\_n-D (Khanh)
+        LookupTableDynamic,
+        Math,
+        MultiPortSwitch
+        Mux,
+        Product,
+        Reshape,
+        Rounding,
+        Selector,
+        SignalBuilder(pp),
+        Switch,
+        Sqrt, 
+        Trigonomery, 
+        ZeroPole(pp),
+        
+       
+
+Hamza:  Abs,
+        ActionPort,
+        BitwiseOperator,
+        BusAssignment,
+        BusCreator, 
+        BusSelector, 
+        Constant,
+        Clock,
+        CombinatorialLogic,
+        CompareTo (Masked Subsystem), 
+        CompareToConstant (Masked Subsystem),
+        Dead Zone (pp)
+        Dead Zone Dynamic (pp),
+        Delay,
+        DigitalClock,
+        DiscreteIntegrator (pp),
+        Display (ignored)
+        EnablePort,
+        Fcn (full support to Lustre directly)
+        ForEach (pp),
+        ForIterator (Limited support),
+        From,
+        Ground,
+        If,
+        InportShadow(pp),
+        Integrator (pp),
+        ManualSwitch,
+        Memory (pp)
+        Merge,
+        MinMax,
+        ModelReference (pp),
+        Outport,
+        Quantizer (pp),
+        RandomNumber,
+        RateTransition,
+        RelationalOperator, 
+        Relay (pp),
+        ResetPort, 
+        SampleTimeMath (pp)
+        Scope(ignored)
+        Sum,
+        Subsystem,
+        Saturation (pp), 
+        Saturation dynamic (pp), 
+        Sigbuilder block (pp),
+        SignalConversion,
+        Signum,
+        Step, 
+        SwitchCase,
+        TappedDelayLine,
+        Terminator (ignored),
+        ToWorkspace (pp),
+        TransferFcn (pp),
+        TransportDelay (pp),
+        TriggerPort, 
+        UnaryMinus, 
+        UnitDelay,
+        ZeroOrderHold,
+        
+
+   
+Not supported yet:
+    
+    Rate Limiter
+    InitialCondition
+    UniformRandomNumber ( see RandomNumber)
+
+
+Blocks difficult to support:
+    WhileIterator: executes a subsystem many times in the same 
+                time step. Impossible to support in Lustre if the number of iterations is not known.
+    S-Function: If it is C or Matlab code, it's hard to support.
+                many basic blocks in Simulink has S-Function BlockType, we 
+                support them using their MaskType (such as 'Bitwise Operator', 
+                and 'Tapped Delay Line').
+
+    
+    

@@ -1,4 +1,4 @@
-function [] = DiscreteZeroPole_pp(model)
+function [status, errors_msg] = DiscreteZeroPole_pp(model)
 % DiscreteZeroPole_pp searches for DiscreteZeroPole blocks and replaces them by a
 % PP-friendly equivalent.
 %   model is a string containing the name of the model to search in
@@ -9,47 +9,62 @@ function [] = DiscreteZeroPole_pp(model)
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Processing Gain blocks
+status = 0;
+errors_msg = {};
+
 dzp_list = find_system(model,...
     'LookUnderMasks', 'all', 'BlockType','DiscreteZeroPole');
 dzp_list = [dzp_list; find_system(model,'BlockType','ZeroPole')];
 if not(isempty(dzp_list))
     display_msg('Replacing DiscreteTransferFcn blocks...', MsgType.INFO,...
-        'DiscreteZeroPole', '');
+        'DiscreteZeroPole_pp', '');
     
-   
+    
     
     %% pre-processing blocks
     for i=1:length(dzp_list)
         display_msg(dzp_list{i}, MsgType.INFO, ...
-            'DiscreteZeroPole', '');
-
+            'DiscreteZeroPole_pp', '');
         
+        try
         
         % Obtaining z-expression parameters
         Zeros_str = get_param(dzp_list{i}, 'Zeros');
-        [Zeros, status] = SLXUtils.evalParam(model, Zeros_str);
+        [Zeros, ~, status] = SLXUtils.evalParam(...
+            model, ...
+            get_param(dzp_list{i}, 'Parent'), ...
+            dzp_list{i}, ...
+            Zeros_str);
         if status
             display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
                 Zeros_str, dzp_list{i}), ...
-                MsgType.ERROR, 'DiscreteZeroPole', '');
+                MsgType.ERROR, 'DiscreteZeroPole_pp', '');
             continue;
         end
         
         Poles_str = get_param(dzp_list{i}, 'Poles');
-        [Poles, status] = SLXUtils.evalParam(model, Poles_str);
+        [Poles, ~, status] = SLXUtils.evalParam(...
+            model, ...
+            get_param(dzp_list{i}, 'Parent'), ...
+            dzp_list{i}, ...
+            Poles_str);
         if status
             display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
                 Poles_str, dzp_list{i}), ...
-                MsgType.ERROR, 'DiscreteZeroPole', '');
+                MsgType.ERROR, 'DiscreteZeroPole_pp', '');
             continue;
         end
         
         Gain_str = get_param(dzp_list{i}, 'Gain');
-        [Gain, status] = SLXUtils.evalParam(model, Gain_str);
+        [Gain, ~, status] = SLXUtils.evalParam(...
+            model, ...
+            get_param(dzp_list{i}, 'Parent'), ...
+            dzp_list{i}, ...
+            Gain_str);
         if status
             display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
                 Gain_str, dzp_list{i}), ...
-                MsgType.ERROR, 'DiscreteZeroPole', '');
+                MsgType.ERROR, 'DiscreteZeroPole_pp', '');
             continue;
         end
         
@@ -60,7 +75,7 @@ if not(isempty(dzp_list))
             end
         end
         blocktype= get_param(dzp_list{i}, 'BlockType');
-
+        
         % Computing state space representation
         [A,B,C,D]=zp2ss(Zeros,Poles,Gain);
         if strcmp(blocktype, 'ZeroPole')
@@ -76,8 +91,7 @@ if not(isempty(dzp_list))
         D = mat2str(D);
         
         % replacing
-        replace_one_block(dzp_list{i},'pp_lib/DZP');
-        
+        PPUtils.replace_one_block(dzp_list{i},'pp_lib/DZP');
         %restoring info
         set_param(strcat(dzp_list{i},'/A'),...
             'Value',A);
@@ -88,9 +102,14 @@ if not(isempty(dzp_list))
         set_param(strcat(dzp_list{i},'/D'),...
             'Value',D);
         set_param(strcat(dzp_list{i},'/X0'),...
-                'SampleTime',ST);
+            'SampleTime',ST);
+        catch
+            status = 1;
+            errors_msg{end + 1} = sprintf('DiscreteZeroPole_pp pre-process has failed for block %s', dzp_list{i});
+            continue;
+        end        
     end
-    display_msg('Done\n\n', MsgType.INFO, 'DiscreteZeroPole', '');
+    display_msg('Done\n\n', MsgType.INFO, 'DiscreteZeroPole_pp', '');
 end
 end
 

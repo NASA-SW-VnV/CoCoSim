@@ -1,47 +1,53 @@
 function varargout = mcdc_test_gui(varargin)
-% MCDC_TEST_GUI MATLAB code for mcdc_test_gui.fig
-%      MCDC_TEST_GUI, by itself, creates a new MCDC_TEST_GUI or raises the existing
-%      singleton*.
-%
-%      H = MCDC_TEST_GUI returns the handle to a new MCDC_TEST_GUI or the handle to
-%      the existing singleton*.
-%
-%      MCDC_TEST_GUI('CALLBACK',hObject,eventData,handles,...) calls the local
-%      function named CALLBACK in MCDC_TEST_GUI.M with the given input arguments.
-%
-%      MCDC_TEST_GUI('Property','Value',...) creates a new MCDC_TEST_GUI or raises the
-%      existing singleton*.  Starting from the left, property value pairs are
-%      applied to the GUI before mcdc_test_gui_OpeningFcn gets called.  An
-%      unrecognized property name or invalid value makes property application
-%      stop.  All inputs are passed to mcdc_test_gui_OpeningFcn via varargin.
-%
-%      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
-%      instance to run (singleton)".
-%
-% See also: GUIDE, GUIDATA, GUIHANDLES
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Copyright (c) 2017 United States Government as represented by the
+    % Administrator of the National Aeronautics and Space Administration.
+    % All Rights Reserved.
+    % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % MCDC_TEST_GUI MATLAB code for mcdc_test_gui.fig
+    %      MCDC_TEST_GUI, by itself, creates a new MCDC_TEST_GUI or raises the existing
+    %      singleton*.
+    %
+    %      H = MCDC_TEST_GUI returns the handle to a new MCDC_TEST_GUI or the handle to
+    %      the existing singleton*.
+    %
+    %      MCDC_TEST_GUI('CALLBACK',hObject,eventData,handles,...) calls the local
+    %      function named CALLBACK in MCDC_TEST_GUI.M with the given input arguments.
+    %
+    %      MCDC_TEST_GUI('Property','Value',...) creates a new MCDC_TEST_GUI or raises the
+    %      existing singleton*.  Starting from the left, property value pairs are
+    %      applied to the GUI before mcdc_test_gui_OpeningFcn gets called.  An
+    %      unrecognized property name or invalid value makes property application
+    %      stop.  All inputs are passed to mcdc_test_gui_OpeningFcn via varargin.
+    %
+    %      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
+    %      instance to run (singleton)".
+    %
+    % See also: GUIDE, GUIDATA, GUIHANDLES
 
-% Edit the above text to modify the response to help mcdc_test_gui
+    % Edit the above text to modify the response to help mcdc_test_gui
 
-% Last Modified by GUIDE v2.5 18-Jan-2018 15:30:17
+    % Last Modified by GUIDE v2.5 18-Jan-2018 15:30:17
 
-% Begin initialization code - DO NOT EDIT
-gui_Singleton = 1;
-gui_State = struct('gui_Name',       mfilename, ...
-    'gui_Singleton',  gui_Singleton, ...
-    'gui_OpeningFcn', @mcdc_test_gui_OpeningFcn, ...
-    'gui_OutputFcn',  @mcdc_test_gui_OutputFcn, ...
-    'gui_LayoutFcn',  [] , ...
-    'gui_Callback',   []);
-if nargin && ischar(varargin{1})
-    gui_State.gui_Callback = str2func(varargin{1});
-end
+    % Begin initialization code - DO NOT EDIT
+    gui_Singleton = 1;
+    gui_State = struct('gui_Name',       mfilename, ...
+        'gui_Singleton',  gui_Singleton, ...
+        'gui_OpeningFcn', @mcdc_test_gui_OpeningFcn, ...
+        'gui_OutputFcn',  @mcdc_test_gui_OutputFcn, ...
+        'gui_LayoutFcn',  [] , ...
+        'gui_Callback',   []);
+    if nargin && ischar(varargin{1})
+        gui_State.gui_Callback = str2func(varargin{1});
+    end
 
-if nargout
-    [varargout{1:nargout}] = gui_mainfcn(gui_State, varargin{:});
-else
-    gui_mainfcn(gui_State, varargin{:});
-end
-% End initialization code - DO NOT EDIT
+    if nargout
+        [varargout{1:nargout}] = gui_mainfcn(gui_State, varargin{:});
+    else
+        gui_mainfcn(gui_State, varargin{:});
+    end
+    % End initialization code - DO NOT EDIT
 end
 % --- Executes just before mcdc_test_gui is made visible.
 function mcdc_test_gui_OpeningFcn(hObject, eventdata, handles, varargin)

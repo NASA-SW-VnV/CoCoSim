@@ -1,7 +1,7 @@
 grammar EM;
 
 
-nlosoc	: ( NL |SEMI | COMMA )+;
+nlosoc	: ( NL |SEMI | COMMA)+;
 nloc	: ( NL |COMMA )+; 
 nlos	: ( NL | SEMI )+; 
 soc     : ( SEMI | COMMA )+;
@@ -14,11 +14,11 @@ emfile
 script
 	: contract?
 	  nlosoc?
-	  body
+	  script_body
       nlosoc?
     ;
 function
-	: FUNCTION func_output? ID func_input? nloc
+	: NL* FUNCTION func_output? ID func_input? nloc
 	  contract?
 	  body?
 	  END? 
@@ -33,10 +33,17 @@ func_output
 	: ID EQ                             
 	| LSBRACE (ID COMMA?)*? RSBRACE EQ  
 	;
-
+script_body
+	:   script_body_item (nlosoc | EOF)
+    |   script_body  script_body_item (nlosoc | EOF)
+    ;
+script_body_item
+    :  statement 			
+    |  annotation 		
+    ;
 body
-    :   body_item nlosoc?
-    |   body  body_item  nlosoc
+    :   body_item (nlosoc | EOF)
+    |   body  body_item (nlosoc | EOF)
     ;
 
 body_item
@@ -112,7 +119,7 @@ LUS_NEQ : '<>';
 LUS_AND_OR : 'and'|'or';
 
 statement
-    : expressionList   
+    : expression   
     | if_block
     | switch_block
 	| for_block
@@ -128,22 +135,20 @@ statement
     ;
 
 // *****************************************************************************************   expressionList       ***********************************************
-expressionList
-    :   expression 
-    ;
+
+    
 
 expression
-    :   assignment nlosoc?
-    |   expression soc assignment nlosoc
+    :   assignment 
+    |   notAssignment
     ;
 
 assignment
-    :   notAssignment
-    |   unaryExpression assignmentOperator assignment
+    :   unaryExpression assignmentOperator notAssignment
     ;
 
 assignmentOperator
-    :   '=' 
+    :   '=' 		
     ;
 notAssignment
     :   relopOR
@@ -250,7 +255,7 @@ TRANSPOSE :   ( '\'' | '.\'')
 
 primaryExpression
     :   ID
-    |   indexing
+	|	indexing
     |   constant
     |   '(' expression ')'  
     |   cell
@@ -258,6 +263,30 @@ primaryExpression
     |   ignore_value
     ;
 
+indexing
+	:	fun_indexing
+    |   cell_indexing
+    |   struct_indexing
+    ;
+fun_indexing
+	:	ID LPAREN function_parameter_list? RPAREN
+	;
+
+cell_indexing
+	:	ID (LBRACE function_parameter_list RBRACE)+
+	;	
+	
+struct_indexing
+	:	ID 
+    ( 
+        DOT indexing
+	)+
+	;
+
+function_parameter_list
+	: function_parameter ( COMMA function_parameter )*
+	;
+function_parameter : notAssignment	| COLON	| ignore_value;
 //**************************************************************
 ignore_value : '~';
 constant
@@ -311,20 +340,7 @@ UNICODE_ESC
 fragment
 HEX_DIGIT
 	: ('0'..'9'|'a'..'f'|'A'..'F') ;
-//**************************************************************
-indexing
-	:	ID 
-    ( 
-        DOT (ID | LPAREN notAssignment RPAREN )
-        | LPAREN function_parameter_list? RPAREN
-		| LBRACE function_parameter_list RBRACE
-	)+
-	;
 
-function_parameter_list
-	: function_parameter ( COMMA function_parameter )*
-	;
-function_parameter : notAssignment	| COLON	| ignore_value;
 
 //**************************************************************
 cell	: LBRACE horzcat? ( nlos horzcat )* RBRACE ;

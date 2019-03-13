@@ -1,0 +1,26 @@
+digraph {
+	graph [rankdir=LR, ranksep="100.0", nodesep="40.0"];
+	node [shape=record];
+In1 [label="{{<i1>1}|In1|{<o1>1}}", width="30.0", height="14.0", fixedsize=true];
+In2 [label="{{<i1>1}|In2|{<o1>1}}", width="30.0", height="14.0", fixedsize=true];
+Integrator [label="{{<i1>1}|Integrator|{<o1>1}}", width="30", height="31", fixedsize=true];
+Integrator1 [label="{{<i1>1}|Integrator1|{<o1>1}}", width="30", height="31", fixedsize=true];
+Out1 [label="{{<i1>1}|Out1|{<o1>1}}", width="30.0", height="14.0", fixedsize=true];
+Out2 [label="{{<i1>1}|Out2|{<o1>1}}", width="30.0", height="14.0", fixedsize=true];
+Out3 [label="{{<i1>1}|Out3|{<o1>1}}", width="30.0", height="14.0", fixedsize=true];
+Out4 [label="{{<i1>1}|Out4|{<o1>1}}", width="30.0", height="14.0", fixedsize=true];
+Out5 [label="{{<i1>1}|Out5|{<o1>1}}", width="30.0", height="14.0", fixedsize=true];
+Subsystem[label="{{<i1>1|<i2>2}|Subsystem|{<o1>1|<o2>2}}", width="40.0", height="60", fixedsize=true];
+Subsystem1[label="{{<i1>1|<i2>2}|Subsystem1|{<o1>1|<o2>2|<o3>3|<o4>4|<o5>5}}", width="40.0", height="100", fixedsize=true];
+Subsystem:o1 -> Integrator:i1
+Subsystem:o2 -> Integrator1:i1
+Subsystem1:o1 -> Out1:i1
+Subsystem1:o2 -> Out2:i1
+Subsystem1:o3 -> Out3:i1
+Subsystem1:o4 -> Out4:i1
+Subsystem1:o5 -> Out5:i1
+In1:o1 -> Subsystem:i1
+In2:o1 -> Subsystem:i2
+Integrator:o1 -> Subsystem1:i1
+Integrator1:o1 -> Subsystem1:i2
+}

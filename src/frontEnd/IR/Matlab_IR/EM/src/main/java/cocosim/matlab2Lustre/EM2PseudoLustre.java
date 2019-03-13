@@ -241,10 +241,10 @@ public class EM2PseudoLustre {
 			
 
 			buf.append("let\n");
-			buf.append(getLus(ctx.body()));
+			buf.append(getLus(ctx.script_body()));
 			buf.append("tel\n");
 			
-			setLus_body(getLus(ctx.body()));
+			setLus_body(getLus(ctx.script_body()));
 			setLus(ctx, buf.toString());
 		}
  
@@ -340,6 +340,22 @@ public class EM2PseudoLustre {
 		}
 
 		@Override
+		public void exitScript_body(EMParser.Script_bodyContext ctx) {
+			if (ctx.script_body() != null) {
+				StringBuilder buf = new StringBuilder();
+				buf.append(getLus(ctx.script_body()));
+				
+				buf.append(getLus(ctx.script_body_item()));
+				
+				setLus(ctx, buf.toString());
+			} else {
+				setLus(ctx, getLus(ctx.script_body_item()));
+
+			}
+
+		}
+		
+		@Override
 		public void exitBody(EMParser.BodyContext ctx) {
 			if (ctx.body() != null) {
 				StringBuilder buf = new StringBuilder();
@@ -355,6 +371,10 @@ public class EM2PseudoLustre {
 
 		}
 
+		@Override
+		public void exitScript_body_item(EMParser.Script_body_itemContext ctx) {
+			setLus(ctx, getLus(ctx.getChild(0)));
+		}
 		@Override
 		public void exitBody_item(EMParser.Body_itemContext ctx) {
 			setLus(ctx, getLus(ctx.getChild(0)));
@@ -411,22 +431,16 @@ public class EM2PseudoLustre {
 
 		}
 
-		@Override
-		public void exitExpressionList(EMParser.ExpressionListContext ctx) {
-			setLus(ctx, getLus(ctx.expression()));
-
-		}
+		
 
 		@Override
 		public void exitExpression(EMParser.ExpressionContext ctx) {
-			if (ctx.expression() != null) {
+			if (ctx.notAssignment() != null) {
 				StringBuilder buf = new StringBuilder();
-				buf.append(getLus(ctx.expression()));
-				buf.append(getLus(ctx.assignment()));
+				buf.append(getLus(ctx.notAssignment()));
 				buf.append(";");
-				setLus(ctx, buf.toString());
-				setDataType(ctx, getDataType(ctx.assignment()));// it will be
-				// called by low level contexts
+				setLus(ctx,  buf.toString());
+				setDataType(ctx, getDataType(ctx.notAssignment()));
 
 			} else {
 				StringBuilder buf = new StringBuilder();
@@ -461,75 +475,68 @@ public class EM2PseudoLustre {
 			}
 			EMParser.IndexingContext ictx = primary_ctx.indexing();
 			if ( ictx != null)
-				return ictx.ID(0).getText();
+				return ictx.getChild(0).getChild(0).getText();
 						
 			return null;
 		}
 		@Override
 		public void enterAssignment(EMParser.AssignmentContext ctx) {
-			if (ctx.notAssignment() == null) {
-				setCtx_positionAllChildren(ctx.unaryExpression(), true);
-				setCtx_positionAllChildren(ctx.assignment(), false);
-			}else {
-				setCtx_positionAllChildren(ctx.notAssignment(), false);
-			}
+			setCtx_positionAllChildren(ctx.unaryExpression(), true);
+			setCtx_positionAllChildren(ctx.notAssignment(), false);
+
 		}
 		@Override
 		public void exitAssignment(EMParser.AssignmentContext ctx) {
-			if (ctx.notAssignment() == null) {
-				StringBuilder buf = new StringBuilder();
-
-				
-				DataType unaryExpression_dt = getDataType(ctx.unaryExpression());
-				DataType assignment_dt = getDataType(ctx.assignment());
-				String leftExp = getLus(ctx.unaryExpression());
-				String rightExp = getLus(ctx.assignment());
-				String conversion_fun = "";
-				if (unaryExpression_dt == null)
-					if (assignment_dt != null)
-						unaryExpression_dt = assignment_dt;
-					else
-						unaryExpression_dt = new DataType("real");
-				else {
-					if (assignment_dt != null)
-						if (!unaryExpression_dt.equals(assignment_dt)) {
-							conversion_fun = getConvFun(unaryExpression_dt, assignment_dt);
-							if (isNumeric(rightExp) && !conversion_fun.equals("")) {
-								rightExp = fixConstant(unaryExpression_dt.getBaseType(), rightExp);
-								conversion_fun = "";
-							}else
-								if (!conversion_fun.equals(""))
-									this.addExternal_fun(conversion_fun);
-						}
-				}
+			StringBuilder buf = new StringBuilder();
 
 
-
-				if (!conversion_fun.equals("")){
-					buf.append(leftExp);
-					buf.append(" " + ctx.assignmentOperator().getText() + " ");
-					buf.append(conversion_fun + "(" + rightExp+ ")");
-				}
-				else {
-					buf.append(leftExp);
-					buf.append(" " + ctx.assignmentOperator().getText() + " ");
-					buf.append(rightExp);
-				}
-
-				setLus(ctx, buf.toString());
-				
-				//increment variable occurance
-				String ID = getUnaryExpressionID(ctx.unaryExpression());
-				if (ID != null) {
-					Variable v = getVar(ID);
-					if (v == null)
-						setVar(ID, new Variable(ID, unaryExpression_dt, true, 0));
-				}
-					
-			} else {
-				setLus(ctx, getLus(ctx.notAssignment()));
-				setDataType(ctx, getDataType(ctx.notAssignment()));
+			DataType unaryExpression_dt = getDataType(ctx.unaryExpression());
+			DataType assignment_dt = getDataType(ctx.notAssignment());
+			String leftExp = getLus(ctx.unaryExpression());
+			String rightExp = getLus(ctx.notAssignment());
+			String conversion_fun = "";
+			if (unaryExpression_dt == null)
+				if (assignment_dt != null)
+					unaryExpression_dt = assignment_dt;
+				else
+					unaryExpression_dt = new DataType("real");
+			else {
+				if (assignment_dt != null)
+					if (!unaryExpression_dt.equals(assignment_dt)) {
+						conversion_fun = getConvFun(unaryExpression_dt, assignment_dt);
+						if (isNumeric(rightExp) && !conversion_fun.equals("")) {
+							rightExp = fixConstant(unaryExpression_dt.getBaseType(), rightExp);
+							conversion_fun = "";
+						}else
+							if (!conversion_fun.equals(""))
+								this.addExternal_fun(conversion_fun);
+					}
 			}
+
+
+
+			if (!conversion_fun.equals("")){
+				buf.append(leftExp);
+				buf.append(" " + ctx.assignmentOperator().getText() + " ");
+				buf.append(conversion_fun + "(" + rightExp+ ")");
+			}
+			else {
+				buf.append(leftExp);
+				buf.append(" " + ctx.assignmentOperator().getText() + " ");
+				buf.append(rightExp);
+			}
+
+			setLus(ctx, buf.toString());
+
+			//increment variable occurance
+			String ID = getUnaryExpressionID(ctx.unaryExpression());
+			if (ID != null) {
+				Variable v = getVar(ID);
+				if (v == null)
+					setVar(ID, new Variable(ID, unaryExpression_dt, true, 0));
+			}
+
+
 
 		}
 
@@ -768,59 +775,22 @@ public class EM2PseudoLustre {
 			this.addUnsupported_ctx(ctx);
 		}
 
-		public boolean isArrayAccess(EMParser.IndexingContext ctx, Boolean left) {
-			if (!getVars().containsKey(ctx.ID(0).getText()) && !left)
-				return false;
-			if (ctx.function_parameter_list(0) == null)
-				return false;
-			EMParser.Function_parameter_listContext fpl = ctx.function_parameter_list(0);
-			if (fpl.function_parameter() != null)
-				for (EMParser.Function_parameterContext fp : fpl.function_parameter()) {
-					if ( !isNumeric(fp.getText()))
-						return false;
-				}
-			return true;
-		}
+//		public boolean isArrayAccess(EMParser.IndexingContext ctx, Boolean left) {
+//			if (!getVars().containsKey(ctx.ID(0).getText()) && !left)
+//				return false;
+//			if (ctx.function_parameter_list(0) == null)
+//				return false;
+//			EMParser.Function_parameter_listContext fpl = ctx.function_parameter_list(0);
+//			if (fpl.function_parameter() != null)
+//				for (EMParser.Function_parameterContext fp : fpl.function_parameter()) {
+//					if ( !isNumeric(fp.getText()))
+//						return false;
+//				}
+//			return true;
+//		}
 		@Override
 		public void exitIndexing(EMParser.IndexingContext ctx) {
-			if ( ctx.LPAREN().size() > 1 || ctx.DOT(0) != null || ctx.LBRACE(0) != null) {
-				this.addUnsupported_ctx(ctx);
-				return;
-			}
-			Boolean ctx_position = getCtx_position(ctx);
-			String IDText = getIDText(ctx.ID(0).getText(), ctx_position, "");
-			String parameterDT = getIDParametersDataType(ctx.ID(0).getText(), 
-					getParametersDataType(ctx.function_parameter_list(0)));
-			StringBuilder postfix = new StringBuilder();
-			String lparen = "(";
-			String rparen = ")";
-			String sep = ", ";
-			if (isArrayAccess(ctx, ctx_position)) {
-				lparen = "_";
-				rparen = "";
-				sep = "_";
-			}
-			postfix.append(lparen);
-			if (ctx.function_parameter_list(0) != null)
-				postfix.append(getFunction_parameter_list( ctx.function_parameter_list(0), parameterDT, sep));
-			postfix.append(rparen);
-			
-			
-			
-			
-			if (isArrayAccess(ctx, ctx_position)) 
-				IDText = getIDText(ctx.ID(0).getText(), 
-						ctx_position, postfix.toString());
-			
-			StringBuilder buf = new StringBuilder();
-			buf.append(IDText);
-			if (!isArrayAccess(ctx, ctx_position)) 
-				buf.append(postfix);
-			
-			
-			setLus(ctx, buf.toString());
-			setDataType(ctx, getIDDataType(ctx.getChild(0).getText(), getParametersDataType(ctx.function_parameter_list(0))));
-//			System.out.println("DataType of "+ctx.getText()+" is " + getDataType(ctx));
+			this.addUnsupported_ctx(ctx);
 		}
 		public ArrayList<String> getParametersDataType(EMParser.Function_parameter_listContext ctx){
 			ArrayList<String> params = new ArrayList<String>();

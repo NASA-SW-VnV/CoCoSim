@@ -7,9 +7,9 @@
 
 
 function schema = ppMenu(callbackInfo)
-schema = sl_action_schema;
-schema.label = 'Pre-process this model';
-schema.callback = @PPCallback;
+    schema = sl_action_schema;
+    schema.label = 'Pre-process this model';
+    schema.callback = @PPCallback;
 end
 
 

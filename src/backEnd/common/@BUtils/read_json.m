@@ -1,0 +1,27 @@
+function data = read_json(contract_path)
+    % read json file
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Copyright (c) 2017 United States Government as represented by the
+    % Administrator of the National Aeronautics and Space Administration.
+    % All Rights Reserved.
+    % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
+    
+    try
+        filetext = fileread(contract_path);
+    catch ME
+        display_msg('No Contract file', Constants.ERROR, 'Zustre ', '');
+        rethrow(ME);
+    end
+
+    % encode json file
+    filetext = regexprep(filetext,'"__','"xx');
+
+    %parse the data
+    if strcmp(filetext, '')
+        warndlg('No cocospec contracts were generated','CoCoSim: Warning');
+        return;
+    end
+    data = json_decode(filetext);
+end
+

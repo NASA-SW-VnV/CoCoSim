@@ -18,31 +18,32 @@ schema.callback = @LusCompilerCallback;
 end
 
 
-function schema = LusCompiler(callbackInfo)
-schema = sl_action_schema;
-schema.label = 'Lustre compiler';
-schema.callback = @LusCompilerCallback;
-end
+% function schema = LusCompiler(callbackInfo)
+% schema = sl_action_schema;
+% schema.label = 'Lustre compiler';
+% schema.callback = @LusCompilerCallback;
+% end
 
 function LusCompilerCallback(callbackInfo)
 model_full_path = MenuUtils.get_file_name(gcs);
-
-lus_full_path = ToLustre(model_full_path);
+MenuUtils.add_pp_warning(model_full_path);
+[lus_full_path, ~, status, ~] = ...
+    nasa_toLustre.ToLustre(model_full_path, [], LusBackendType.LUSTREC);
+if status 
+    return;
+end
 output_dir = fullfile(fileparts(lus_full_path), 'C');
 lustrec_C_code(lus_full_path, output_dir);
 
 end
-
-function schema = SimulinkCompiler(callbackInfo)
-schema = sl_action_schema;
-schema.label = 'Simulink Coder';
-schema.callback = @SimulinkCompilerCallback;
-end
-
-function SimulinkCompilerCallback(callbackInfo)
-model_full_path = MenuUtils.get_file_name(gcs);
-lus_full_path = lustre_compiler(model_full_path);
-output_dir = fullfile(fileparts(lus_full_path), 'C');
-rtwbuild_C_code(model_full_path, output_dir);
-
-end
+% 
+% function schema = SimulinkCompiler(callbackInfo)
+% schema = sl_action_schema;
+% schema.label = 'Simulink Coder';
+% schema.callback = @SimulinkCompilerCallback;
+% end
+% 
+% function SimulinkCompilerCallback(callbackInfo)
+% model_full_path = MenuUtils.get_file_name(gcs);
+% rtwbuild_C_code(model_full_path);
+% end
