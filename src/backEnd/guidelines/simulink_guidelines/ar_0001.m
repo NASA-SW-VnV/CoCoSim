@@ -55,7 +55,7 @@ function [results, passed, priority] = ar_0001(model)
     subtitles = cell(length(item_titles)+1, 1);
     for i=1:length(item_titles)
         item_title = item_titles{i};
-        if(isempty(regexp(searchStr{i},regexp_str{i}, 'once')))
+        if(~isempty(regexp(searchStr{i},regexp_str{i}, 'once')))
             fsList = {model};
         else
             fsList = {};
