@@ -26,8 +26,12 @@ classdef HtmlItem < handle
             if nargin <= 5
                 removeHtmlKeywords = false;
             end
-            obj.title = regexprep(title, '\n', '<br>');
-            if removeHtmlKeywords
+            if isBlkPath
+                obj.title = regexprep(title, '\n', ' ');
+            else
+                obj.title = regexprep(title, '\n', '<br>');
+            end
+            if ~isBlkPath && removeHtmlKeywords
                 obj.title = HtmlItem.removeHtmlKeywords(obj.title);
             end
             if isBlkPath

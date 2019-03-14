@@ -1,4 +1,4 @@
-function [results, passed, priority] = na_0005(model)
+function [results, passed, priority] = cocosim_guidelines_na_0005(model)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -29,7 +29,7 @@ function [results, passed, priority] = na_0005(model)
     end    
     title = 'na_0005: Port block name visibility in Simulink model';
     description_text = ...
-        'The name of an Inport or Outportshould not be hidden';    
+        'The name of an Inport or Outport should not be hidden';    
     
     description = HtmlItem(description_text, {}, 'black', 'black');
     results{end+1} = HtmlItem(title, ...

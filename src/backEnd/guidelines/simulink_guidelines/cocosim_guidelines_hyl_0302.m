@@ -1,4 +1,4 @@
-function [results, passed, priority] = hyl_0302(model)
+function [results, passed, priority] = cocosim_guidelines_hyl_0302(model)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -44,7 +44,7 @@ function [results, passed, priority] = hyl_0302(model)
         end
         [subtitles{i+1}, numFail] = ...
             GuidelinesUtils.process_find_system_results(fsList,item_title,...
-            false);
+            true);
         totalFail = totalFail + numFail;
     end      
     

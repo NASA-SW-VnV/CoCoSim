@@ -1,4 +1,4 @@
-function [results, passed, priority] = bn_0002(model)
+function [results, passed, priority] = cocosim_guidelines_bn_0002(model)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.

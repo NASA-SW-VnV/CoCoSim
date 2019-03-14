@@ -1,4 +1,4 @@
-function [results, passed, priority] = jc_0211(model)
+function [results, passed, priority] = cocosim_guidelines_jc_0211(model)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
