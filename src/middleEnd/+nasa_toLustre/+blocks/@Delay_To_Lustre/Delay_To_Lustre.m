@@ -38,7 +38,7 @@ classdef Delay_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             obj.addVariable(variables);
             obj.addExternal_libraries(external_libraries);
             obj.addExtenal_node(delay_node_code);
-            obj.setCode(lustre_code);
+            obj.addCode(lustre_code);
             
             
         end

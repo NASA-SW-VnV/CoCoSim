@@ -113,7 +113,7 @@ classdef RateTransition_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 end
             end
             
-            obj.setCode( codes );
+            obj.addCode( codes );
         end
         %%
         function options = getUnsupportedOptions(obj, ~, blk, lus_backend, varargin)

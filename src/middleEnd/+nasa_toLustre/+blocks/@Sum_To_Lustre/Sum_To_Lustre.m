@@ -34,7 +34,7 @@ classdef Sum_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 nasa_toLustre.blocks.Sum_To_Lustre.getSumProductCodes(obj, parent, blk, ...
                 OutputDataTypeStr,isSumBlock,AccumDataTypeStr, xml_trace, lus_backend);
             
-            obj.setCode( codes );
+            obj.addCode( codes );
             obj.addVariable(outputs_dt);
             obj.addVariable(additionalVars);
         end

@@ -115,7 +115,7 @@ classdef Switch_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     nasa_toLustre.lustreAst.IteExpr(cond, inputs{1}{i}, inputs{3}{i}));
             end
             
-            obj.setCode( codes );
+            obj.addCode( codes );
             obj.addVariable(outputs_dt);
         end
         %%

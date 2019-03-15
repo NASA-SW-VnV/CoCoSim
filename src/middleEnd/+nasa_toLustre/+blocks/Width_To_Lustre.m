@@ -27,7 +27,7 @@ classdef Width_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             codes{1} = nasa_toLustre.lustreAst.LustreEq(outputs{1}, ...
                 nasa_toLustre.utils.SLX2LusUtils.num2LusExp(width, lus_dt, slx_dt));
             
-            obj.setCode( codes );
+            obj.addCode( codes );
             
         end
         

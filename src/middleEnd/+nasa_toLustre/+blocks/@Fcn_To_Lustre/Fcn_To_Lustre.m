@@ -41,7 +41,7 @@ classdef Fcn_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             end
             
            
-            obj.setCode(nasa_toLustre.lustreAst.LustreEq(outputs{1}, lusCode{1}));
+            obj.addCode(nasa_toLustre.lustreAst.LustreEq(outputs{1}, lusCode{1}));
             obj.addVariable(outputs_dt);
             
         end

@@ -28,7 +28,7 @@ classdef DesignVerifierProofObjective_To_Lustre < nasa_toLustre.frontEnd.Block_T
                 for i=1:numel(outputs)
                     codes{i} = nasa_toLustre.lustreAst.LustreEq(outputs{i}, inputs{i});
                 end
-                obj.setCode( codes );
+                obj.addCode( codes );
             end
             if isequal(blk.enabled, 'off') ...
                     || isequal(blk.customAVTBlockType, 'Test Condition')

@@ -84,7 +84,7 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             end
              
             obj.addExtenal_node(extNode);            
-            obj.setCode(mainCode);
+            obj.addCode(mainCode);
             obj.addVariable(main_vars);
 
         end

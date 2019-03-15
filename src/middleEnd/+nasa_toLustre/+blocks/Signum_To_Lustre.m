@@ -46,7 +46,7 @@ classdef Signum_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 end
             end
             
-            obj.setCode( codes );
+            obj.addCode( codes );
             
         end
         

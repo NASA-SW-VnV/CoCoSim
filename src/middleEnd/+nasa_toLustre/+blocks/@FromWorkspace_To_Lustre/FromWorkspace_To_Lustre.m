@@ -133,7 +133,7 @@ classdef FromWorkspace_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             end
             external_lib = {'LustMathLib_abs_real'};
             obj.addExternal_libraries(external_lib);
-            obj.setCode( codeAst_all );      
+            obj.addCode( codeAst_all );      
             obj.addVariable(outputs_dt);
             obj.addVariable(vars_all);       
         end

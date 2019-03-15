@@ -28,10 +28,10 @@ classdef Sigbuilderblock_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
 %                     codeAst = getSigBuilderCode(obj, time{i}, data{i},i,blk_name);
 %                     codes{i} = nasa_toLustre.lustreAst.LustreEq(outputs{i}, codeAst);
 %                 end
-%                 obj.setCode( codes );
+%                 obj.addCode( codes );
 %             elseif  numel(outputs) == 1
 %                 codeAst = getSigBuilderCode(obj, time, data,1,blk_name);
-%                 obj.setCode(codeAst);
+%                 obj.addCode(codeAst);
 %             end
             [codeAst, vars, external_lib] = getSigBuilderCode(obj, outputs,...
                 time, data,SampleTime,blkParams,lus_backend);
@@ -39,7 +39,7 @@ classdef Sigbuilderblock_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 obj.addExternal_libraries(external_lib);
             end            
             obj.addVariable(vars);
-            obj.setCode(codeAst);
+            obj.addCode(codeAst);
         end
         
         function options = getUnsupportedOptions(obj, parent, blk, varargin)

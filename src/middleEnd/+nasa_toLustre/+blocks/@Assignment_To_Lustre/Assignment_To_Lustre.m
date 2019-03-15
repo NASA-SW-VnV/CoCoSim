@@ -160,7 +160,7 @@ classdef Assignment_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 [codes] = getWriteCodeForNonPortInput(obj,in_matrix_dimension,inputs,outputs,numOutDims,U_expanded_dims,ind);                
             end
             
-            obj.setCode( codes );
+            obj.addCode( codes );
             obj.addVariable(outputs_dt);
         end
         function options = getUnsupportedOptions(obj, ~, blk, varargin)

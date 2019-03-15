@@ -59,7 +59,7 @@ classdef MinMax_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     codes{j} = nasa_toLustre.lustreAst.LustreEq(outputs{j}, code);
                 end
             end
-            obj.setCode( codes );
+            obj.addCode( codes );
             obj.addVariable(outputs_dt);
         end
         

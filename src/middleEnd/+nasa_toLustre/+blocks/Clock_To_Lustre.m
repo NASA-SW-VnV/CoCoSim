@@ -17,7 +17,7 @@ classdef Clock_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             obj.addVariable(outputs_dt);
             code = nasa_toLustre.lustreAst.LustreEq( outputs{1},...
                 nasa_toLustre.lustreAst.VarIdExpr(nasa_toLustre.utils.SLX2LusUtils.timeStepStr()));
-            obj.setCode( code);
+            obj.addCode( code);
         end
         
         function options = getUnsupportedOptions(obj,  varargin)

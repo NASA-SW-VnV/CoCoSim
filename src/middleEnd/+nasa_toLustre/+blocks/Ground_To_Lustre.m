@@ -30,7 +30,7 @@ classdef Ground_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 codes{j} = nasa_toLustre.lustreAst.LustreEq(outputs{j}, v);
             end
             
-            obj.setCode( codes );
+            obj.addCode( codes );
             
         end
         %%

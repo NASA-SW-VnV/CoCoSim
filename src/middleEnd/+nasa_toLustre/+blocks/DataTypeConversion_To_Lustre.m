@@ -44,7 +44,7 @@ classdef DataTypeConversion_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 codes{i} = nasa_toLustre.lustreAst.LustreEq(outputs{i}, inputs{1}{i});
             end
             
-            obj.setCode(codes);
+            obj.addCode(codes);
             obj.addVariable(outputs_dt);
         end
         

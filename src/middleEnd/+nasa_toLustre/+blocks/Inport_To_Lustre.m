@@ -21,12 +21,9 @@ classdef Inport_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             [outputs, ~] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk);
             outputDataType = blk.CompiledPortDataTypes.Outport{1};
             lus_dt =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(outputDataType);
+            addAsAssertExpr = true;
+            DEDUtils.OutMinMaxCheckCode(obj, parent, blk, outputs, lus_dt, addAsAssertExpr);
             
-            prop = DEDUtils.OutMinMaxCheck(parent, blk, outputs, lus_dt);
-            if ~isempty(prop)
-                codes{1} = nasa_toLustre.lustreAst.AssertExpr(prop);
-                obj.setCode(codes);
-            end
         end
         
         function options = getUnsupportedOptions(obj, parent, blk, ...

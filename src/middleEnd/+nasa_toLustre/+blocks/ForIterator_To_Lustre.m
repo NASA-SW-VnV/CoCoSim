@@ -17,7 +17,7 @@ classdef ForIterator_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             obj.addVariable(outputs_dt);
             % join the lines and set the block code.
-            obj.setCode( nasa_toLustre.lustreAst.LustreEq(outputs{1},nasa_toLustre.utils.SLX2LusUtils.iterationVariable()));
+            obj.addCode( nasa_toLustre.lustreAst.LustreEq(outputs{1},nasa_toLustre.utils.SLX2LusUtils.iterationVariable()));
         end
         %%
         function options = getUnsupportedOptions(obj, parent, blk, varargin)

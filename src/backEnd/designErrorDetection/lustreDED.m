@@ -68,11 +68,13 @@ function [ ] = lustreDED(model_full_path,  const_files, lus_backend, varargin)
     end
     
     try
-        status = cocoSpecKind2(nom_lustre_file, mapping_file, kind2_out, false);
+        [status, verificationResults] = cocoSpecKind2(nom_lustre_file, mapping_file, kind2_out, false);
         if status
             return;
         end
-        VerificationMenu.displayHtmlVerificationResultsCallbackCode(model)
+        if ~isempty(verificationResults)
+            VerificationMenu.displayHtmlVerificationResultsCallbackCode(model, verificationResults);
+        end
     catch me
         display_msg(me.getReport(), MsgType.DEBUG, 'toLustreVerify', '');
         display_msg('Something went wrong in Verification.', MsgType.ERROR, 'toLustreVerify', '');
@@ -81,5 +83,6 @@ function [ ] = lustreDED(model_full_path,  const_files, lus_backend, varargin)
     
     
     t_finish = toc(t_start);
+    display_msg('Design Error Detection completed', Constants.RESULT, 'lustreDED', '');
     display_msg(sprintf('Total verification time: %f seconds', t_finish), Constants.RESULT, 'Time', '');
 end

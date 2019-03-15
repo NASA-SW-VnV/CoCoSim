@@ -129,7 +129,7 @@ classdef DiscretePulseGenerator_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lust
             end
             
             
-            obj.setCode( codes );
+            obj.addCode( codes );
             
         end
         %%

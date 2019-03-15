@@ -36,7 +36,7 @@ classdef ZeroOrderHold_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     (1:numel(outputs)), 'UniformOutput', 0);
             end
             
-            obj.setCode( codes );
+            obj.addCode( codes );
         end
         %%
         function options = getUnsupportedOptions(obj,~, blk, lus_backend, varargin)

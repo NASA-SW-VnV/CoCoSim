@@ -21,7 +21,7 @@ classdef FunctionCallSplit_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             % pass inputs variables
             codes = arrayfun(@(i) nasa_toLustre.lustreAst.LustreEq(outputs{i}, inputs{1}), ...
                 (1:numel(outputs)), 'un', 0);
-            obj.setCode( codes );
+            obj.addCode( codes );
             obj.addVariable(outputs_dt);
         end
         

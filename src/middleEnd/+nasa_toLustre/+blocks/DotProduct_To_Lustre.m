@@ -48,7 +48,7 @@ classdef DotProduct_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             end
             code = nasa_toLustre.lustreAst.LustreEq(outputs{1}, ...
                 nasa_toLustre.lustreAst.BinaryExpr.BinaryMultiArgs(nasa_toLustre.lustreAst.BinaryExpr.PLUS, right));
-            obj.setCode( code );
+            obj.addCode( code );
             obj.addVariable(outputs_dt);
         end
         %%
