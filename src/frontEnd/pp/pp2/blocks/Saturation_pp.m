@@ -22,7 +22,8 @@ if ~ ( isempty( saturation_list ) )
             lower_limit = get_param(saturation_list{i},'LowerLimit');
             upper_limit = get_param(saturation_list{i},'UpperLimit');
             outputDataType = get_param(saturation_list{i}, 'OutDataTypeStr');
-            
+            OutMin = get_param(saturation_list{i}, 'OutMin');
+            OutMax = get_param(saturation_list{i}, 'OutMax');
             try
                 l = evalin('base', lower_limit);
                 u = evalin('base', upper_limit);
@@ -78,6 +79,8 @@ if ~ ( isempty( saturation_list ) )
                         'OutDataTypeStr',outputDataType);
                 end
             end
+            set_param(strcat(saturation_list{i},'/Out'), 'OutMin', OutMin);
+            set_param(strcat(saturation_list{i},'/Out'), 'OutMax', OutMax);
         catch
             status = 1;
             errors_msg{end + 1} = sprintf('saturation pre-process has failed for block %s', saturation_list{i});

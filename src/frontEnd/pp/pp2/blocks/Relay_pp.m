@@ -22,6 +22,8 @@ function [status, errors_msg] = Relay_pp(model)
             OffSwitchValue = get_param(Relay_list{i},'OffSwitchValue' );
             OnOutputValue = get_param(Relay_list{i},'OnOutputValue' );
             OffOutputValue = get_param(Relay_list{i},'OffOutputValue' );
+            OutMin = get_param(Relay_list{i},'OutMin' );
+            OutMax = get_param(Relay_list{i},'OutMax' );
             %check for Enumeration
             outputDT = get_param(Relay_list{i},'OutDataTypeStr' );
             isEnum = false;
@@ -35,6 +37,8 @@ function [status, errors_msg] = Relay_pp(model)
             set_param(strcat(Relay_list{i},'/OffSwitchValue'),'Value', OffSwitchValue);
             set_param(strcat(Relay_list{i},'/OnOutputValue'),'Value', OnOutputValue);
             set_param(strcat(Relay_list{i},'/OffOutputValue'),'Value', OffOutputValue);
+            set_param(strcat(Relay_list{i},'/Out1'),'OutMin', OutMin);
+            set_param(strcat(Relay_list{i},'/Out1'),'OutMax', OutMax);
             if isEnum
                 try
                     set_param(strcat(Relay_list{i},'/Unit Delay'),'InitialCondition', InitialOutput);

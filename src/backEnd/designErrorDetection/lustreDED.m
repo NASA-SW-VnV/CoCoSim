@@ -73,6 +73,8 @@ function [ ] = lustreDED(model_full_path,  const_files, lus_backend, varargin)
             return;
         end
         if ~isempty(verificationResults)
+            % load model if not already loaded
+            try load_system(pp_model_full_path);catch, end
             VerificationMenu.displayHtmlVerificationResultsCallbackCode(model, verificationResults);
         end
     catch me

@@ -34,6 +34,8 @@ else
     
     [tools_root, ~, ~] = fileparts(which('tools_config')); %fileparts(mfilename('fullpath'));
     cocoSim_root = fileparts(tools_root);
+    % for MatlabUtils
+    addpath(fullfile(cocoSim_root, 'src', 'utils'));
     if ~exist('solvers_path', 'var')
         verifiers_path = fullfile(cocoSim_root, 'tools', 'verifiers');
         solvers_path = verifiers_path;
