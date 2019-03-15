@@ -45,7 +45,7 @@ end
 %% update repo
 function updateRepo(cocosim_path)
 cd(cocosim_path);
-[status, sys_out] = system('git pull', '-echo'); 
+[status, sys_out] = system('git pull origin $(git rev-parse --abbrev-ref HEAD)', '-echo'); 
 if status
     fprintf('Can not run git:\n%s \n', sys_out) ;
     return;
