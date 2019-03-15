@@ -14,7 +14,7 @@ classdef Gain_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     methods
         
         function  write_code(obj, parent, blk, xml_trace, ~, coco_backend, varargin)
-            global  CoCoSimPreferences;% remember to move this line to top-level statement
+            global  CoCoSimPreferences;
             %This function support scalar Gain. Matrix/Vector gains
             %are supported by Gain_pp in the pre-processing step.
             [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);

@@ -30,37 +30,12 @@ function [] = DiscreteFIRFilter_pp(model)
                     'DiscreteFIRFilter_pp', '');
 
                 Filter_structure = get_param(dFir_list{i}, 'FilterStructure');
-                if strcmp(Filter_structure, 'Direct form symmetric')
+                if ~strcmp(Filter_structure, 'Direct form')
                     display_msg(sprintf('Filter_structure %s in block %s is not supported',...
                         Filter_structure, blk), ...
                         MsgType.ERROR, 'DiscreteFIRFilter_pp', '');
                     continue;
                 end
-
-                Filter_structure = get_param(dFir_list{i}, 'FilterStructure');
-                if strcmp(Filter_structure, 'Direct form antisymmetric')
-                    display_msg(sprintf('Filter_structure %s in block %s is not supported',...
-                        Filter_structure, blk), ...
-                        MsgType.ERROR, 'DiscreteFIRFilter_pp', '');
-                    continue;
-                end
-
-                Filter_structure = get_param(dFir_list{i}, 'FilterStructure');
-                if strcmp(Filter_structure, 'Direct form transposed')
-                    display_msg(sprintf('Filter_structure %s in block %s is not supported',...
-                        Filter_structure, blk), ...
-                        MsgType.ERROR, 'DiscreteFIRFilter_pp', '');
-                    continue;
-                end
-
-                Filter_structure = get_param(dFir_list{i}, 'FilterStructure');
-                if strcmp(Filter_structure, 'Lattice MA')
-                    display_msg(sprintf('Filter_structure %s in block %s is not supported',...
-                        Filter_structure, blk), ...
-                        MsgType.ERROR, 'DiscreteFIRFilter_pp', '');
-                    continue;
-                end
-
                 % Obtaining z-expression parameters
                 % get numerator
                 [num, status] = PPUtils.getTfNumerator(model,dFir_list{i}, 'Coefficients','DiscreteFIRFilter_pp');

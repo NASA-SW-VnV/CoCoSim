@@ -11,18 +11,18 @@ function [status, errors_msg] = DiscreteTransferFcn_pp(model)
     % Processing DiscreteTransferFcn blocks
     status = 0;
     errors_msg = {};
-
+    
     dtf_list = find_system(model,...
         'LookUnderMasks', 'all', 'BlockType','DiscreteTransferFcn');
     dtf_list = [dtf_list; find_system(model,'BlockType','TransferFcn')];
-
+    
     if not(isempty(dtf_list))
         display_msg('Replacing DiscreteTransferFcn blocks...', MsgType.INFO,...
             'DiscreteTransferFcn_pp', '');
-        try
-
+        
+        
         U_dims = SLXUtils.tf_get_U_dims(model, 'DiscreteTransferFcn_pp', dtf_list);
-
+        
         %% pre-processing blocks
         for i=1:length(dtf_list)
             try
@@ -31,7 +31,7 @@ function [status, errors_msg] = DiscreteTransferFcn_pp(model)
                 end
                 display_msg(dtf_list{i}, MsgType.INFO, ...
                     'DiscreteTransferFcn_pp', '');
-
+                
                 % Obtaining z-expression parameters
                 % get denominator
                 [denum, status] = PPUtils.getTfDenum(model,dtf_list{i}, 'DiscreteTransferFcn_pp');
@@ -43,7 +43,7 @@ function [status, errors_msg] = DiscreteTransferFcn_pp(model)
                 if status
                     continue;
                 end
-
+                
                 blocktype= get_param(dtf_list{i}, 'BlockType');
                 if strcmp(blocktype, 'TransferFcn')
                     try
@@ -59,7 +59,7 @@ function [status, errors_msg] = DiscreteTransferFcn_pp(model)
                         continue
                     end
                 end
-
+                
                 PPUtils.replace_DTF_block(dtf_list{i}, U_dims{i},num,denum);
                 set_param(dtf_list{i}, 'LinkStatus', 'inactive');
             catch

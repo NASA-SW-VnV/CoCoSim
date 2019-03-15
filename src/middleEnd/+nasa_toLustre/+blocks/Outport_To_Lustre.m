@@ -11,8 +11,8 @@ classdef Outport_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     
     methods
         
-        function  write_code(obj, parent, blk, ~, lus_backend, varargin)
-            
+        function  write_code(obj, parent, blk, xml_trace, lus_backend, coco_backend, varargin)
+            global  CoCoSimPreferences;
             [outputs, ~] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk);
             [inputs] =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk);
             isInsideContract =nasa_toLustre.utils.SLX2LusUtils.isContractBlk(parent);
@@ -20,13 +20,14 @@ classdef Outport_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 % ignore output "valid" in contract
                 return;
             end
-            %% the case of non connected outport block.
+            
+            if isempty(blk.CompiledPortDataTypes)
+                lus_outputDataType = 'real';
+            else
+                lus_outputDataType =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Inport{1});
+            end
+            % the case of non connected outport block.
             if isempty(inputs)
-                if isempty(blk.CompiledPortDataTypes)
-                    lus_outputDataType = 'real';
-                else
-                    lus_outputDataType =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Inport{1});
-                end
                 zero =nasa_toLustre.utils.SLX2LusUtils.num2LusExp(...
                     0, lus_outputDataType);
                 inputs = arrayfun(@(x) {zero}, (1:numel(outputs)));
@@ -39,12 +40,20 @@ classdef Outport_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             end
             
             obj.addCode( codes);
+            
+            %% Design Error Detection Backend code:
+            if CoCoBackendType.isDED(coco_backend)
+                if ismember(CoCoBackendType.DED_OUTMINMAX, ...
+                        CoCoSimPreferences.dedChecks)
+                    DEDUtils.OutMinMaxCheckCode(obj, parent, blk, outputs, lus_outputDataType, xml_trace);
+                end
+            end
         end
         
         function options = getUnsupportedOptions(obj, parent, blk, ...
                 lus_backend, coco_backend, varargin)
             
-            % Outport in first level should not be of type enumeration in 
+            % Outport in first level should not be of type enumeration in
             % case of Validation backend with Lustrec.
             if CoCoBackendType.isVALIDATION(coco_backend) ...
                     && LusBackendType.isLUSTREC(lus_backend) ...
@@ -53,7 +62,7 @@ classdef Outport_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     hasEnum = false;
                 else
                     [~, ~, ~, ~, ~, hasEnum] = ...
-                       nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Inport{1});
+                        nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Inport{1});
                 end
                 if hasEnum
                     obj.addUnsupported_options(sprintf('Outport %s with Type %s has/is Enumeration type is not supported in root level for Validation with Lustrec.', ...

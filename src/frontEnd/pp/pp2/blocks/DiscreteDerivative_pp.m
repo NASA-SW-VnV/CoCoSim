@@ -42,7 +42,8 @@ function [status, errors_msg] = DiscreteDerivative_pp(model)
                 end
 
                 ICPrevScaledInput = get_param(dDerivative_list{i}, 'ICPrevScaledInput');
-
+                OutMin = get_param(dDerivative_list{i}, 'OutMin');
+                OutMax = get_param(dDerivative_list{i}, 'OutMax');
 
                 % replacing
                 PPUtils.replace_one_block(dDerivative_list{i},'pp_lib/DiscreteDerivative');
@@ -81,6 +82,9 @@ function [status, errors_msg] = DiscreteDerivative_pp(model)
                 set_param([blkName,'/UD'], ...
                     'InitialCondition',ICPrevScaledInput);
 
+                
+                set_param(strcat(dDerivative_list{i},'/Y'), 'OutMin', OutMin);
+                set_param(strcat(dDerivative_list{i},'/Y'), 'OutMax', OutMax);
             catch
                 status = 1;
                 errors_msg{end + 1} = sprintf('DiscreteDerivative pre-process has failed for block %s', dDerivative_list{i});

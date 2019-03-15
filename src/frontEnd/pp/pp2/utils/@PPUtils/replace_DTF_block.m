@@ -3,7 +3,7 @@ function [] = replace_DTF_block(blk, U_dims_blk,num,denum )
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
-    % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+    % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
     if numel(denum) < numel(num)
@@ -49,7 +49,9 @@ function [] = replace_DTF_block(blk, U_dims_blk,num,denum )
     RndMeth = get_param(blk, 'RndMeth');
     ST = get_param(blk,'SampleTime');
     SaturateOnIntegerOverflow = get_param(blk,'SaturateOnIntegerOverflow');
-
+    OutMin = get_param(blk, 'OutMin');
+    OutMax = get_param(blk, 'OutMax');
+    
     % replacing
     PPUtils.replace_one_block(blk,'pp_lib/DTF');
     %restoring info
@@ -89,5 +91,7 @@ function [] = replace_DTF_block(blk, U_dims_blk,num,denum )
     end
     set_param(strcat(blk,'/DTFScalar/X0'),...
         'SampleTime',ST);
+    set_param(strcat(blk,'/Y'), 'OutMin', OutMin);
+    set_param(strcat(blk,'/Y'), 'OutMax', OutMax);
 end
 
