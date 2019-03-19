@@ -23,7 +23,10 @@ function [Value, valueDataType, status] = evalParam(modelObj, parent, blk, param
         if ischar(blk)
             blk = get_param(blk, 'Object');
         end
-        if isempty(regexp(param, '[a-zA-Z]', 'match'))
+        if isnumeric(param)
+            % comes from a struct field
+            Value = param;
+        elseif isempty(regexp(param, '[a-zA-Z]', 'match'))
             % do not use str2double
             Value = str2num(param);
             if MatlabUtils.contains(param, '.')
@@ -86,6 +89,24 @@ function [Value, valueDataType, status] = evalParam(modelObj, parent, blk, param
                     return;
                 end
                 valueDataType =  class(Value);
+                
+                if isstruct(Value)
+                    fields = fieldnames(Value);
+                    newValue = [];
+                    for i=1:length(fields)
+                        [Value_i, ~, status] = ...
+                            SLXUtils.evalParam(modelObj, parent, blk, Value.(fields{i}));
+                        if status
+                            display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
+                                Value.(fields{i}), blk), ...
+                                MsgType.ERROR, 'SLXUtils.evalParam', '');
+                            return;
+                        end
+                        newValue = MatlabUtils.concat(newValue, double(Value_i));
+                    end
+                    Value = newValue;
+                end
+                
             catch me
                 if isequal(me.identifier, 'MATLAB:UndefinedFunction')
                     % Case of e.g. param = 2*f and f is a mask parameter
