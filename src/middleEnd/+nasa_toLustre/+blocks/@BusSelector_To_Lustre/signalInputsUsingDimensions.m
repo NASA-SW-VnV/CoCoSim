@@ -17,14 +17,14 @@ function SignalsInputsMap = signalInputsUsingDimensions(...
     if numel(inport_cell_dimension) == 1
         % the case of Busselector with a vector input instead of
         % a bus
-        if inport_cell_dimension{1}.width ~= ...
-                sum( cellfun(@(x) x, Signals_Width_Map.values))
-           % we can not do mapping between inputs and outpus if all
-           % of the inputs are not used.
-            ME = MException('COCOSIM:BusSelector_To_Lustre', ...
-                'Block %s is not supported. All inputs are not selected.', HtmlItem.addOpenCmd(blk.Origin_path));
-            throw(ME);
-        end
+%         if inport_cell_dimension{1}.width ~= ...
+%                 sum( cellfun(@(x) x, Signals_Width_Map.values))
+%            % we can not do mapping between inputs and outpus if all
+%            % of the inputs are not used.
+%             ME = MException('COCOSIM:BusSelector_To_Lustre', ...
+%                 'Block %s is not supported. All inputs are not selected.', HtmlItem.addOpenCmd(blk.Origin_path));
+%             throw(ME);
+%         end
         inputIdx = 1;
         for i=1:numel(inputSignalsInlined)
             inputSignal = inputSignalsInlined{i};
