@@ -18,8 +18,8 @@ classdef Sum_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     
     methods
         
-        function  write_code(obj, parent, blk, xml_trace, lus_backend, varargin)
-            
+        function  write_code(obj, parent, blk, xml_trace, lus_backend, coco_backend, varargin)
+            global  CoCoSimPreferences;
             OutputDataTypeStr = blk.CompiledPortDataTypes.Outport{1};
             AccumDataTypeStr = blk.AccumDataTypeStr;
             if strcmp(AccumDataTypeStr, 'Inherit: Inherit via internal rule')
@@ -30,13 +30,22 @@ classdef Sum_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             
            
             isSumBlock = true;
-            [codes, outputs_dt, additionalVars] = ...
+            [codes, outputs_dt, additionalVars, outputs] = ...
                 nasa_toLustre.blocks.Sum_To_Lustre.getSumProductCodes(obj, parent, blk, ...
                 OutputDataTypeStr,isSumBlock,AccumDataTypeStr, xml_trace, lus_backend);
             
             obj.addCode( codes );
             obj.addVariable(outputs_dt);
             obj.addVariable(additionalVars);
+            
+            %% Design Error Detection Backend code:
+            if CoCoBackendType.isDED(coco_backend)
+                if ismember(CoCoBackendType.DED_OUTMINMAX, ...
+                        CoCoSimPreferences.dedChecks)
+                    lusOutDT =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(OutputDataTypeStr);
+                    DEDUtils.OutMinMaxCheckCode(obj, parent, blk, outputs, lusOutDT, xml_trace);
+                end
+            end
         end
         
         
@@ -59,7 +68,7 @@ classdef Sum_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     end
     
     methods(Static)
-        [codes, outputs_dt, AdditionalVars] = getSumProductCodes(...
+        [codes, outputs_dt, AdditionalVars, outputs] = getSumProductCodes(...
                 obj, parent, blk, OutputDataTypeStr,isSumBlock, ...
                 AccumDataTypeStr, xml_trace, lus_backend)
 

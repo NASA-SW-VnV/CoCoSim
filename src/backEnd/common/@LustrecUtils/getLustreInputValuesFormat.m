@@ -11,7 +11,7 @@ function [lustre_input_values, status] = getLustreInputValuesFormat(...
         input_dataSet, time, node_struct)
     nb_steps = length(time);
     %number_of_inputs_For_AllSimulation = LustrecUtils.getNumberOfInputsInlinedFromDataSet(input_dataSet, nb_steps);
-    number_of_inputs  = input_dataSet.numElements;
+    number_of_inputs  = LustrecUtils.getNumberOfInputsInlinedFromDataSet(input_dataSet, 1);
     status = 0;
     lustre_input_values = [];
     addTimeStep = false;

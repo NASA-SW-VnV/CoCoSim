@@ -12,14 +12,14 @@ classdef MinMax_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     
     methods
         
-        function  write_code(obj, parent, blk, xml_trace, varargin)
-            
+        function  write_code(obj, parent, blk, xml_trace, ~, coco_backend, varargin)
+            global  CoCoSimPreferences;
             [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             
             widths = blk.CompiledPortWidths.Inport;
             numInputs = numel(widths);
             max_width = max(widths);
-            LusoutputDataType =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Outport{1});
+            lusOutDT =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Outport{1});
             RndMeth = blk.RndMeth;
             SaturateOnIntegerOverflow = blk.SaturateOnIntegerOverflow;
             inputs = cell(1, numInputs);
@@ -31,9 +31,9 @@ classdef MinMax_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 end
                 %converts the input data type(s) to
                 %its output data type
-                if ~strcmp(Lusinport_dt, LusoutputDataType)
+                if ~strcmp(Lusinport_dt, lusOutDT)
                     [external_lib, conv_format] = ...
-                       nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(Lusinport_dt, LusoutputDataType, RndMeth, SaturateOnIntegerOverflow);
+                       nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(Lusinport_dt, lusOutDT, RndMeth, SaturateOnIntegerOverflow);
                     if ~isempty(conv_format)
                         obj.addExternal_libraries(external_lib);
                         inputs{i} = cellfun(@(x) ...
@@ -43,7 +43,7 @@ classdef MinMax_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 end
             end
             
-            op = strcat('_', blk.Function, '_', LusoutputDataType);
+            op = strcat('_', blk.Function, '_', lusOutDT);
             obj.addExternal_libraries(strcat('LustMathLib_', op));
             if numInputs == 1
                 code = nasa_toLustre.blocks.MinMax_To_Lustre.recursiveMinMax(op, inputs{1} );
@@ -61,6 +61,14 @@ classdef MinMax_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             end
             obj.addCode( codes );
             obj.addVariable(outputs_dt);
+            
+            %% Design Error Detection Backend code:
+            if CoCoBackendType.isDED(coco_backend)
+                if ismember(CoCoBackendType.DED_OUTMINMAX, ...
+                        CoCoSimPreferences.dedChecks)
+                    DEDUtils.OutMinMaxCheckCode(obj, parent, blk, outputs, lusOutDT, xml_trace);
+                end
+            end
         end
         
         function options = getUnsupportedOptions(obj, varargin)

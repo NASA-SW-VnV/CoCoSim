@@ -12,7 +12,8 @@ classdef Abs_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     
     methods
         
-        function  write_code(obj, parent, blk, xml_trace, varargin)
+        function  write_code(obj, parent, blk, xml_trace, ~, coco_backend, varargin)
+            global  CoCoSimPreferences;
             [outputs, outputs_dt] = nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             obj.addVariable(outputs_dt);
             outputDataType = blk.CompiledPortDataTypes.Outport{1};
@@ -32,7 +33,7 @@ classdef Abs_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 conv_format = {};
             end
             
-            [~, zero] =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(outputDataType);
+            [lusOutDT, zero] =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(outputDataType);
             
             
             if MatlabUtils.startsWith(inport_dt, 'int')
@@ -66,6 +67,13 @@ classdef Abs_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             end
             
             obj.addCode(codes);
+            %% Design Error Detection Backend code:
+            if CoCoBackendType.isDED(coco_backend)
+                if ismember(CoCoBackendType.DED_OUTMINMAX, ...
+                        CoCoSimPreferences.dedChecks)
+                    DEDUtils.OutMinMaxCheckCode(obj, parent, blk, outputs, lusOutDT, xml_trace);
+                end
+            end
         end
         
         function options = getUnsupportedOptions(obj, ~, blk, varargin)

@@ -47,7 +47,8 @@ if not(isempty(Gain_list))
             elseif strcmp(Multiplication, 'Matrix(u*K)')
                 pp_name = 'gain_U_K';
             end
-            
+            OutMin = get_param(Gain_list{i}, 'OutMin');
+            OutMax = get_param(Gain_list{i}, 'OutMax');
             % replace block
             PPUtils.replace_one_block(Gain_list{i},fullfile('pp_lib',pp_name));
             
@@ -69,6 +70,9 @@ if not(isempty(Gain_list))
                 'OutDataTypeStr',outputDataType);
             set_param(strcat(Gain_list{i},'/Product'),...
                 'SaturateOnIntegerOverflow',SaturateOnIntegerOverflow);
+            
+            set_param(strcat(Gain_list{i},'/Out1'), 'OutMin', OutMin);
+            set_param(strcat(Gain_list{i},'/Out1'), 'OutMax', OutMax);
         catch me
             display_msg(me.getReport(), MsgType.DEBUG, 'Gain_pp', '');
             status = 1;
