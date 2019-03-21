@@ -593,12 +593,12 @@ else
     fi
 fi
 if (( ! spacer_failed )); then
-    prepend_path "$install_dir/spacer/bin"
+    #prepend_path "$install_dir/spacer/bin" # do not prepend_path for z3 binary of spacer. We'll use the one of z3 as default one.
     prepend_python_path "$install_dir/spacer/lib/python"*"/dist-packages"
-    command_exists z3 || {
-        error_msg "spacer is not properly installed";
-        spacer_failed=1;
-    }
+    if [[ -x "$install_dir/spacer/bin/z3" ]]; then
+        error_msg "spacer is not properly installed"
+        spacer_failed=1
+    fi
     if (( ! spacer_failed )); then
         version=$(spacer_parse_version z3) || {
             error_parse_version spacer;
