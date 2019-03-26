@@ -29,7 +29,7 @@ if ~exist('organize_blocks', 'var') || isempty(organize_blocks)
     organize_blocks = false;
 end
 if ~exist('force', 'var') || isempty(force)
-    force = false;
+    force = true;
 end
 base_name = regexp(cocospec_name,'\.','split');
 if ~exist('new_model_name', 'var') || isempty(new_model_name)

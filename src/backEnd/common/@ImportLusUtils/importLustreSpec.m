@@ -43,7 +43,7 @@ function [new_model_path, status] = importLustreSpec(...
 
         if createNewFile
             % we add a Postfix to differentiate it with the original Simulink model
-            new_model_name = strcat(base_name,'_with_cocospec');
+            new_model_name = strcat(base_name,'_with_contracts');
             new_name = fullfile(model_dir,strcat(new_model_name,'.slx'));
 
             display_msg(['Cocospec path: ' new_name ], MsgType.INFO, 'generate_invariants_Zustre', '');
@@ -57,8 +57,8 @@ function [new_model_path, status] = importLustreSpec(...
 
             %we load the original model
             load_system(model_path);
+            try close_system(new_name,0), catch, end
             %we save it as the output model
-            close_system(new_name,0)
             save_system(model_path,new_name, 'OverwriteIfChangedOnDisk', true);
         else
             new_model_name = base_name;
@@ -82,65 +82,49 @@ function [new_model_path, status] = importLustreSpec(...
         load_system(new_name);
         nodes = data.nodes;
         for node = fieldnames(nodes)'
-            original_name = nodes.(node{1}).original_name;
+            node_name = node{1};
+            node_struct = nodes.(node_name);
+            original_name = node_struct.original_name;
+            if ~(isfield(node_struct, 'contract') ...
+                    && strcmp(node_struct.contract, 'true'))
+                %Support only contracts
+                continue;
+            end
             if no_traceability 
-                if MatlabUtils.endsWith(original_name, 'Spec')
-                    % Give the current opened Subsystem
-                    simulink_block_name = gcs;
-                else
-                    % Not considered Spec node
-                    continue;
-                end
+                % Give the current opened Subsystem
+                simulink_block_name = gcs;
             else
                 simulink_block_name = SLX2Lus_Trace.get_Simulink_block_from_lustre_node_name(xRoot, ...
                     original_name, base_name, new_model_name);
             end
             if strcmp(simulink_block_name, '')
                 continue;
-            elseif strcmp(simulink_block_name,base_name)
-                isBaseName = true;
+            end
+            isBdRoot = strcmp(get_param(simulink_block_name, 'Type'), 'block_diagram');
+            if isBdRoot
                 simulink_block_name = strcat(new_model_name,'/',base_name);
-            else
-                try
-                    maskType =  get_param(simulink_block_name,'MaskType');
-                    if strcmp(maskType, 'Observer')
-                        continue;
-                    end
-                catch ME
-                    display_msg(ME.getReport(), MsgType.DEBUG, 'generate_invariants_Zustre', '');
-                    continue;
-                end
-                isBaseName = false;
             end
             parent_block_name = fileparts(simulink_block_name);
             %for having a good order of blocks
-            try
-                if isBaseName
-                    position  = BUtils.get_obs_position(new_model_name);
-                else
-                    position  = get_param(simulink_block_name,'Position');
-                end
-            catch ME
-                msg = sprintf('There is no block called %s in your model\n', simulink_block_name);
-                msg1 = [msg, sprintf('if the block %s exists, make sure it is atomic', simulink_block_name)];
-                msg2 = sprintf('%s\n%s\n', msg1, ME.getReport());
-                warndlg(msg1,'CoCoSim: Warning');
-                fprintf(msg2);
-                continue;
+            
+            if isBdRoot
+                position  = BUtils.get_obs_position(new_model_name);
+            else
+                position  = get_param(simulink_block_name,'Position');
             end
             x = position(1);
             y = position(2)+250;
 
             %Adding the cocospec subsystem related with the Simulink subsystem
             %"simulink_block_name"
-            cocospec_block_path = strcat(simulink_block_name,'_cocospec');
+            cocospec_block_path = strcat(simulink_block_name,'_', original_name);
             n = 1;
             while getSimulinkBlockHandle(cocospec_block_path) ~= -1
                 cocospec_block_path = strcat(cocospec_block_path, num2str(n));
                 n = n + 1;
                 y = y+250;
             end
-            node_subsystem = strcat(translated_nodes, '/', BUtils.adapt_block_name(node{1}));
+            node_subsystem = strcat(translated_nodes, '/', BUtils.adapt_block_name(node_name));
             add_block(node_subsystem,...
                 cocospec_block_path,...
                 'Position',[(x+100) y (x+250) (y+50)]);
@@ -148,26 +132,27 @@ function [new_model_path, status] = importLustreSpec(...
             nb_coco = nb_coco + 1;
 
             %we plot the invariant of the block
-            scope_block_path = strcat(simulink_block_name,'_scope',num2str(n));
-            add_block('simulink/Commonly Used Blocks/Scope',...
-                scope_block_path,...
-                'Position',[(x+300) y (x+350) (y+50)]);
-
-            %we link the Scope with cocospec block
-            SrcBlkH = get_param(strcat(cocospec_block_path),'PortHandles');
-            DstBlkH = get_param(scope_block_path, 'PortHandles');
-            add_line(parent_block_name, SrcBlkH.Outport(1), DstBlkH.Inport(1), 'autorouting', 'on');
-            if no_traceability 
-                % Do Not Link contract, keep it for the user
-            else
-                blk_inputs = nodes.(node{1}).inputs;
-                %link inputs to the subsystem.
-                for index=1:numel(blk_inputs)
-                    var_name = BUtils.adapt_block_name(blk_inputs(index).original_name);
-                    input_block_name = ImportLusUtils.get_input_block_name_from_variable(xRoot, original_name, var_name, base_name,new_model_name);
-                    ImportLusUtils.link_block_with_its_cocospec(cocospec_block_path,  input_block_name, simulink_block_name, parent_block_name, index, isBaseName);
-                end
-            end
+%             scope_block_path = strcat(simulink_block_name,'_scope',num2str(n));
+%             scopeHandle = add_block('simulink/Commonly Used Blocks/Scope',...
+%                 scope_block_path,...
+%                 'MakeNameUnique', 'on', ...
+%                 'Position',[(x+300) y (x+350) (y+50)]);
+% 
+%             %we link the Scope with cocospec block
+%             SrcBlkH = get_param(cocospec_block_path, 'PortHandles');
+%             DstBlkH = get_param(scopeHandle, 'PortHandles');
+%             add_line(parent_block_name, SrcBlkH.Outport(1), DstBlkH.Inport(1), 'autorouting', 'on');
+%             if no_traceability 
+%                 % Do Not Link contract, keep it for the user to do it.
+%             else
+%                 blk_inputs = node_struct.inputs;
+%                 %link inputs to the subsystem.
+%                 for index=1:numel(blk_inputs)
+%                     var_name = BUtils.adapt_block_name(blk_inputs(index).original_name);
+%                     input_block_name = ImportLusUtils.get_input_block_name_from_variable(xRoot, original_name, var_name, base_name,new_model_name);
+%                     ImportLusUtils.link_block_with_its_cocospec(cocospec_block_path,  input_block_name, simulink_block_name, parent_block_name, index, isBdRoot);
+%                 end
+%             end
         end
 
         if nb_coco == 0

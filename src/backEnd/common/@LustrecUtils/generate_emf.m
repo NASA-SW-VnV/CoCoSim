@@ -43,6 +43,7 @@ function [emf_path, status] = ...
     if status
         err = sprintf('generation of emf failed for file "%s" ',lus_fname);
         display_msg(err, MsgType.WARNING, 'generate_emf', '');
+        LustrecUtils.parseLustrecErrorMessage(emf_out, MsgType.WARNING);
         display_msg(err, MsgType.DEBUG, 'generate_emf', '');
         display_msg(emf_out, MsgType.DEBUG, 'generate_emf', '');
 
