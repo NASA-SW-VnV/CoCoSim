@@ -22,12 +22,19 @@ function specInstrs_process(node_block_path, blk_spec, node_name)
 
     % remove connected blocks to validator that are added by its callback
     SLXUtils.removeBlocksLinkedToMe(vHandle, false);
-    %
+    % add validator output
+    output_path = BUtils.get_unique_block_name(fullfile(node_block_path,'valid'));
+    outHandle = add_block('simulink/Ports & Subsystems/Out1',...
+        output_path);
+    SrcBlkH = get_param(vHandle,'PortHandles');
+    DstBlkH = get_param(outHandle, 'PortHandles');
+    add_line(node_block_path, SrcBlkH.Outport(1), DstBlkH.Inport(1), 'autorouting', 'on');
     
+    % link assumptions and guarantees and modes
     vport = 1;
     for i=1:length(assumes)
         % add assume block
-        assumePath = BUtils.get_unique_block_name(fullfile(node_block_path,'g'));
+        assumePath = BUtils.get_unique_block_name(fullfile(node_block_path,'assume'));
         aHandle = add_block('CoCoSimSpecification/assume', ...
             assumePath, ...
             'MakeNameUnique', 'on');
@@ -37,7 +44,7 @@ function specInstrs_process(node_block_path, blk_spec, node_name)
     end
     for i=1:length(guarantees)
         % add guarantee block
-        gPath = BUtils.get_unique_block_name(fullfile(node_block_path,'g'));
+        gPath = BUtils.get_unique_block_name(fullfile(node_block_path,'guarantee'));
         gHandle = add_block('CoCoSimSpecification/guarantee', ...
             gPath, ...
             'MakeNameUnique', 'on');

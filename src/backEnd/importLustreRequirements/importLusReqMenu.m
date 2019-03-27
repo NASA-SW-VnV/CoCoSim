@@ -42,18 +42,9 @@ function schema = importReqMenu(callbackInfo)
 end
 
 
-function lustreReqCallback(callbackInfo)
-    model_name = gcs;
-    model_full_path = MenuUtils.get_file_name(model_name);
-    
+function lustreReqCallback(callbackInfo)    
     try
-        [file, p] = uigetfile({'*.lus', '*.lusi'});
-        if ischar(file) && ~isempty(file)
-            lus_file_path = fullfile(p, file);
-            importLusReq(model_full_path, lus_file_path);
-        else
-            warndlg('No Lustre File has been selected');
-        end
+        importLusReqFig('gcs', gcs);
     catch ME
         display_msg(ME.getReport(),Constants.DEBUG,'importLusReqMenu','');
         msg = sprintf('Failed to import Requirements for %s', model_name);
