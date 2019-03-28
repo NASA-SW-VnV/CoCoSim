@@ -18,7 +18,9 @@ function [lustre_input_values, status] = getLustreInputValuesFormat(...
     addnbStep = false;
     if nargin >= 3
         node_inputs = node_struct.inputs;
-        if length(node_inputs) > number_of_inputs
+        if (number_of_inputs == 0) && (length(node_inputs) == 1) 
+            %ignore it's "_virtual" input for Lustrec
+        elseif length(node_inputs) > number_of_inputs
             % lustrec node_struct replace "__" in the begining of variable name to 'xx'
             time_stepVarName  = regexprep(nasa_toLustre.utils.SLX2LusUtils.timeStepStr(), ...
                 '^__', 'xx');
