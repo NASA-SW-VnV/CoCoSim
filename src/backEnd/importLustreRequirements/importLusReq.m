@@ -23,8 +23,8 @@ function new_model_path = importLusReq(current_openedSS, lusFilePath, mappingPat
         return;
     end
     
-    if  nargin >= 3 && ~exist(mappingPath, 'file')
-        errordlg(sprintf('Mapping file %s between contract variables and Simulink can not be found', lusFilePath));
+    if  nargin >= 3 && ~isempty(mappingPath) && ~exist(mappingPath, 'file')
+        errordlg(sprintf('Mapping file %s between contract variables and Simulink can not be found', mappingPath));
         mappingPath = '';
     elseif nargin < 3
         mappingPath = '';

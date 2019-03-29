@@ -95,23 +95,19 @@ function [new_model_path, status] = importLustreSpec(...
                     && isfield(mapping_json, original_name) ...
                     && isfield(mapping_json.(original_name), 'model_path')
                 simulink_block_name = mapping_json.(original_name).model_path;
-                if MatlabUtils.contains(simulink_block_name, '/')
-                    simulink_block_name = regexprep(simulink_block_name, strcat('^',base_name,'/(\w)'),strcat(new_model_name,'/$1'));
-                    if getSimulinkBlockHandle(simulink_block_name) == -1
-                        % model_path in traceability file does not exist.
-                        simulink_block_name = current_openedSS;
-                        skip_linking = true;
-                        display_msg(...
-                            sprintf('Model path "%s" for contract %s can not be found. Linking Should be done manually.', ...
-                            mapping_json.(original_name).model_path, original_name), MsgType.WARNING, 'importLustreSpec', '');
-                        
-                    end
-                else
-                    simulink_block_name = new_model_name;
+                simulink_block_name = renamePath(simulink_block_name, base_name, new_model_name);
+                if getSimulinkBlockHandle(simulink_block_name) == -1
+                    % model_path in traceability file does not exist.
+                    simulink_block_name = renamePath(current_openedSS, base_name, new_model_name);
+                    skip_linking = true;
+                    display_msg(...
+                        sprintf('Model path "%s" for contract %s can not be found. Linking Should be done manually.', ...
+                        mapping_json.(original_name).model_path, original_name), MsgType.WARNING, 'importLustreSpec', '');
+                    
                 end
             else
                 % Give the current opened Subsystem
-                simulink_block_name = current_openedSS;
+                simulink_block_name = renamePath(current_openedSS, base_name, new_model_name);
                 skip_linking = true;
             end
             if strcmp(simulink_block_name, '')
@@ -162,30 +158,29 @@ function [new_model_path, status] = importLustreSpec(...
             if use_traceability && ~skip_linking
                 try
                     node_inputs = node_struct.inputs;
-                    blk_inputs = mapping_json.(original_name).Inputs;
-                    blk_inputs_names = arrayfun(@(x) x.variable_name, blk_inputs, 'UniformOutput', 0);
+                    mapping_inputs = mapping_json.(original_name).Inputs;
+                    mapping_inputs_names = arrayfun(@(x) x.variable_name, mapping_inputs, 'UniformOutput', 0);
                     %link inputs to the subsystem.
                     for node_idx=1:numel(node_inputs)
-                        json_index = find(strcmp(node_inputs(node_idx).original_name, blk_inputs_names), 1);
+                        json_index = find(strcmp(node_inputs(node_idx).original_name, mapping_inputs_names), 1);
                         if isempty(json_index)
                             continue;
                         end
-                        input_block_name = blk_inputs(json_index).variable_path;
-                        input_block_name = regexprep(input_block_name,...
-                            strcat('^',base_name,'/(\w)'),strcat(new_model_name,'/$1'));
+                        input_block_name = mapping_inputs(json_index).variable_path;
+                        input_block_name = renamePath(input_block_name, base_name, new_model_name);
                         ImportLusUtils.link_block_with_its_cocospec(cocospec_block_path, ...
                             input_block_name, simulink_block_name, ...
                             parent_block_name, node_idx, isBdRoot);
                     end
-                    blk_outputs = mapping_json.(original_name).Outputs;
-                    blk_outputs_names = arrayfun(@(x) x.variable_name, blk_outputs, 'UniformOutput', 0);
+                    mapping_outputs = mapping_json.(original_name).Outputs;
+                    mapping_outputs_names = arrayfun(@(x) x.variable_name, mapping_outputs, 'UniformOutput', 0);
                     node_outputs = node_struct.outputs;
                     %link outputs to the subsystem.
-                    for node_idx=1:numel(blk_outputs)
-                        json_index = find(strcmp(node_outputs(node_idx).original_name, blk_outputs_names), 1);
-                        output_block_name = blk_outputs(json_index).variable_path;
-                        output_block_name = regexprep(output_block_name,...
-                            strcat('^',base_name,'/(\w)'),strcat(new_model_name,'/$1'));
+                    for node_idx=1:numel(mapping_outputs)
+                        json_index = find(strcmp(node_outputs(node_idx).original_name, mapping_outputs_names), 1);
+                        output_block_name = renamePath(...
+                            mapping_outputs(json_index).variable_path,...
+                            base_name, new_model_name);
                         ImportLusUtils.link_block_with_its_cocospec(cocospec_block_path, ...
                             output_block_name, simulink_block_name, ...
                             parent_block_name, node_idx + length(node_inputs), isBdRoot);
@@ -216,5 +211,11 @@ function [new_model_path, status] = importLustreSpec(...
     end
 end
 
-
+function new_blockPath = renamePath(blkPath, oldModelName, NewModelName)
+    if MatlabUtils.contains(blkPath, '/')
+        new_blockPath = regexprep(blkPath, strcat('^',oldModelName,'/(\w)'),strcat(NewModelName,'/$1'));
+    else
+        new_blockPath = NewModelName;
+    end
+end
 

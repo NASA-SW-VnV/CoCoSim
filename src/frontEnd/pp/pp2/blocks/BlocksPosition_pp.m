@@ -18,11 +18,14 @@ function [status, errors_msg] = BlocksPosition_pp( model, depth )
     end
     %Take the list of all blocks that has no outport so they can be at one
     %level. Blocks such Outports, displays ...
-    allBlocks = find_system(model,  'SearchDepth', 1);
+    allBlocks = find_system(model,'LookUnderMasks', 'all', 'SearchDepth', 1);
     levels_map =  [];
     
     try
         % Methode 1: call Auto Layout
+        display_msg(...
+            sprintf('organizing block "%s" positions. This process may take few seconds.',model),...
+            MsgType.INFO, 'BlocksPosition_pp', '');
         external_lib.AutoLayout.AutoLayout(model)
     catch
         % If Method 1 failed: Use my version of Auto Layout.
@@ -67,7 +70,7 @@ function levels_map = organize(block_handle, level, levels_map)
     elseif ~ismember(block_handle, alreadyProcessed)
         alreadyProcessed(numel(alreadyProcessed) + 1) = block_handle;
     else
-        disp('***************')
+        %disp('***************')
         return;
     end
     if isempty(levels_map)
