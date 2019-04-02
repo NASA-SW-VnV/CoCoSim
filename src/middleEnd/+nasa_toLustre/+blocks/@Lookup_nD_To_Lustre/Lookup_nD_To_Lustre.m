@@ -1,4 +1,5 @@
-classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
+classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
+        & nasa_toLustre.blocks.BaseLookup
     % Lookup_nD_To_Lustre
     % This class will do linear interpolation for up to 7 dimensions.  For
     % some options like flat and nearest, values at the breakpoints are
@@ -8,16 +9,18 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     % "Multi-Linear Interpolation" by Rick Wagner (Beach Cities Robotics,
     % First team 294).
     % http://bmia.bmt.tue.nl/people/BRomeny/Courses/8C080/Interpolation.pdf.
-    % We are looking for y = f(u1,u2,...u7)   where u1, u2 are values of dimension 1 and
-    % dimension 2 respectively.
+    % We are looking for y = f(u1,u2,...u7) where u1, u2 are coordinate 
+    % values of dimension 1 and dimension 2 respectively for the point of interest.
     % We can obtain y from the interpolation equation
-    % y(u1,u2,u3,...) = u1*N1(u1) + u2*N2(u2) + u3*N3(u3) + ... + u7*N7(u7)
-    % N1,N2 are shape functions for dimension 1 and 2.  The shape functions
+    % y(u1,u2,u3,...) = u1*N1(u1,u2,...) + u2*N2(u1,u2,...) + ...
+    % u3*N3(u1,u2,...) + ... + u7*N7(u1,u2,...)
+    % N1,N2 are shape functions for the 2 bounding nodes of dimension 1.  
+    % N3, N4 are shape functions for the 2 bounding nodes of dimension 2.The shape functions
     % are defined by coordinates of the polytope with nodes (breakpoints in
     % simulink dialog) surrounding the point of interest.
-    % The interpolation code are done on the Lustre side.  In this
-    % implementation, we do the main interpolation in an Lustre external
-    % node.  The main node just call the external node passing in the coordinates
+    % The interpolation codes are done on the Lustre side.  In this
+    % implementation, we do the main interpolation in Lustre external
+    % nodes.  The main node just call the external node passing in the coordinates
     % of the point to be interpolated.  Table data is stored in the
     % external node.  The major steps for writing the external node are:
     %         1. define the breakpoints and table values defined by users (function
@@ -42,7 +45,7 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     %         4. defining and calculating shape function values for the
     %         interpolation point (addShapeFunctionCode).
     %         5. carrying out the interpolation depending on algorithm
-    %         option (addFinalInterpCode).  For the flat option, the value at the lower bounding
+    %         option.  For the flat option, the value at the lower bounding
     %         breakpoint is used. For the nearest option, the closest
     %         bounding node for each dimension is used.  We are not
     %         calculating the distance from the interpolated point to each
@@ -72,41 +75,66 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     
     methods
         
-        function  write_code(obj, parent, blk, xml_trace, lus_backend, varargin)
+        function  write_code(obj, parent, blk, xml_trace, ...
+                lus_backend, varargin)
                     
-            % codes are shared between Lookup_nD_To_Lustre and LookupTableDynamic
-            isLookupTableDynamic = 0;
-            [mainCode, main_vars, extNode, external_lib] =  ...
-                nasa_toLustre.blocks.Lookup_nD_To_Lustre.get_code_to_write(...
-                parent, blk, xml_trace, isLookupTableDynamic,lus_backend);
-            if ~isempty(external_lib)
-                obj.addExternal_libraries(external_lib);
+            % codes are shared between Lookup_nD_To_Lustre and LookupTableDynamic 
+            blkParams = ...
+                nasa_toLustre.blocks.Lookup_nD_To_Lustre.getInitBlkParams(blk);
+            
+            blkParams = obj.readBlkParams(parent,blk,blkParams);
+
+            % get block outputs
+            [outputs, ~] = ...
+                nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(...
+                parent, blk, [], xml_trace);
+            
+            % get block inputs and cast them to real
+            [inputs,~] = ...
+                nasa_toLustre.blocks.Lookup_nD_To_Lustre.getBlockInputsNames_convInType2AccType(...
+                obj, parent,blk);
+                        
+            % For n-D Lookup Table, if UseOneInputPortForAllInputData is
+            % selected, Combine all input data to one input port
+            if LookupType.isLookup_nD(blkParams.lookupTableType)
+                inputs = ...
+                    nasa_toLustre.blocks.Lookup_nD_To_Lustre.useOneInputPortForAllInputData(...
+                    blk,inputs,blkParams.NumberOfTableDimensions);
             end
-             
-            obj.addExtenal_node(extNode);            
-            obj.setCode(mainCode);
-            obj.addVariable(main_vars);
+          
+            obj.addExternal_libraries({'LustMathLib_abs_real'});
+            obj.create_lookup_nodes(blk,lus_backend,blkParams,outputs,inputs);
 
         end
         %%
         function options = getUnsupportedOptions(obj, parent, blk, varargin)
-            
+            L = nasa_toLustre.ToLustreImport.L;
+            import(L{:})
             [NumberOfTableDimensions, ~, ~] = ...
-                nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(parent, blk, blk.NumberOfTableDimensions);
+                Constant_To_Lustre.getValueFromParameter(parent, ...
+                blk, blk.NumberOfTableDimensions);
             if NumberOfTableDimensions >= 7
-                obj.addUnsupported_options(sprintf('More than 7 dimensions is not supported in block %s', HtmlItem.addOpenCmd(blk.Origin_path)));
+                obj.addUnsupported_options(sprintf(...
+                    'More than 7 dimensions is not supported in block %s',...
+                    HtmlItem.addOpenCmd(blk.Origin_path)));
             end
             if strcmp(blk.InterpMethod, 'Cubic spline')
-                obj.addUnsupported_options(sprintf('Cubic spline interpolation is not support in block %s', HtmlItem.addOpenCmd(blk.Origin_path)));
+                obj.addUnsupported_options(sprintf(...
+                    'Cubic spline interpolation is not support in block %s',...
+                    HtmlItem.addOpenCmd(blk.Origin_path)));
             end            	
             if strcmp(blk.DataSpecification, 'Lookup table object')
-                obj.addUnsupported_options(sprintf('Lookup table object option for DataSpecification is not support in block %s', HtmlItem.addOpenCmd(blk.Origin_path)));
+                obj.addUnsupported_options(sprintf(...
+                    'Lookup table object option for DataSpecification is not support in block %s',...
+                    HtmlItem.addOpenCmd(blk.Origin_path)));
             end                
             if NumberOfTableDimensions >= 3 ...
                     && isequal(blk.TableDataTypeStr, 'Inherit: Same as output') ...
                     && ~isequal(blk.CompiledPortDataTypes.Outport{1}, 'double') ...
                     && ~isequal(blk.CompiledPortDataTypes.Outport{1}, 'single')
-                obj.addUnsupported_options(sprintf('Lookup table "%s" has a Table DataType set different from double/Single which is not supported for dimension greater than 2.', HtmlItem.addOpenCmd(blk.Origin_path)));
+                obj.addUnsupported_options(sprintf(...
+                    'Lookup table "%s" has a Table DataType set different from double/Single which is not supported for dimension greater than 2.', ...
+                    HtmlItem.addOpenCmd(blk.Origin_path)));
             end
 
             options = obj.unsupported_options;
@@ -115,68 +143,80 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         function is_Abstracted = isAbstracted(varargin)
             is_Abstracted = false;
         end
+                
+        blkParams = readBlkParams(obj,parent,blk,blkParams)
+        
+        create_lookup_nodes(obj,blk,lus_backend,blkParams,outputs,inputs)
+
+        extNode =  get_wrapper_node(obj,blk,blkParams,inputs,...
+            outputs,preLookUpExtNode,interpolationExtNode)        
+        
+        [mainCode, main_vars] = getMainCode(obj, blk,outputs,inputs,...
+            lookupWrapperExtNode,blkParams)
         
     end
     
     methods(Static)
-        
-        [ mainCode, main_vars, extNode, external_lib] =  ...
-                get_code_to_write(parent, blk, xml_trace,isLookupTableDynamic,lus_backend)
 
-        [body, vars] = addFinalCode_with_interpolation(outputs,inputs,...
-                blk_name,blkParams,blk,N_shape_node,...
-                coords_node,lusInport_dt,shapeNodeSign,...
-                u_node, lus_backend)
+        inputs = useOneInputPortForAllInputData(blk,lookupTableType,...
+            inputs,NumberOfTableDimensions)
+        
+        [inputs,zero,one, external_lib] = ...
+            getBlockInputsNames_convInType2AccType(parent, blk,...
+            lookupTableType)
    
-        [body, vars] = addFinalCode_without_interpolation(...
-                outputs,inputs,indexDataType,blk_name,...
-                blkParams,...
-                coords_node,lusInport_dt,...
-                index_node,Ast_dimJump,table_elem, lus_backend)
-   
-        [body, vars] = addShapeFunctionCode(numBoundNodes,...
-                shapeNodeSign,blk_name,indexDataType,table_elem,...
-                NumberOfTableDimensions,index_node,Ast_dimJump,skipInterpolation,u_node)
+        extNode = get_pre_lookup_node(lus_backend,blkParams)
 
-        [body, vars,Ast_dimJump] = ...
-                addDimJumpCode(NumberOfTableDimensions,blk_name,...
-                indexDataType,BreakpointsForDimension)
-
-        [body, vars,numBoundNodes,u_node,N_shape_node,coords_node,index_node] = ...
-                addBoundNodeCode(blkParams,...
-                blk_name,...
-                Breakpoints,...
-                lusInport_dt,...
-                indexDataType, ...
-                inputs,...
-                lus_backend)
+        extNode = get_interp_using_pre_node(blkParams, inputs)
+ 
+        [body, vars,Ast_dimJump] = addDimJumpCode(...
+            NumberOfTableDimensions,blk_name,indexDataType,blkParams)
+       
+        [body,vars,Breakpoints] = addBreakpointCode(blkParams,node_header)        
         
-        [body,vars,table_elem] = ...
-                addTableCode(Table,blk_name,lusInport_dt,isLookupTableDynamic,inputs)
-
-        ep = calculate_eps(BP, j)
-
-        [body,vars,Breakpoints] = ...
-                addBreakpointCode(BreakpointsForDimension,blk_name,...
-                lusInport_dt,isLookupTableDynamic,inputs,NumberOfTableDimensions)
-
-        node_header = getNodeCodeHeader(isLookupTableDynamic,inputs,outputs,ext_node_name)
-  
-        codes = getMainCode(outputs,inputs,ext_node_name,...
-                isLookupTableDynamic,output_conv_format)
-
-        inputs = useOneInputPortForAllInputData(blk,isLookupTableDynamic,inputs,NumberOfTableDimensions)
+        [body, vars,coords_node,index_node] = addBoundNodeCode(...
+            blkParams,Breakpoints,node_header,lus_backend)
+      
+        [body, vars, boundingi] = ...
+            addBoundNodeInlineIndexCode(index_node,Ast_dimJump,blkParams)
         
-        blkParams = readBlkParams(parent,blk,isLookupTableDynamic,inputs)
+        [body,vars,table_elem] = addTableCode(blkParams,node_header,inputs)
         
-        contractBody = getContractBody(blkParams,inputs,outputs)
-
+        [body, vars, retrieval_node] = addDirectLookupNodeCode(...
+            blkParams,index_node,coords_node, coords_input ,...
+            Ast_dimJump,lus_backend)
+        
         shapeNodeSign = getShapeBoundingNodeSign(dims)
 
-        [inputs,lusInport_dt,zero,one, external_lib] = ...
-                getBlockInputsNames_convInType2AccType(parent, blk,isLookupTableDynamic)
+        [body, vars, boundingi] = addInlineIndexFromArrayIndicesCode(blkParams,...
+            Breakpoints,node_header,lus_backend)
+
+        body = addInlineIndexFromArrayIndices(...
+            inline_list,element,index)
+        
+        [body, vars, N_shape_node] = addNodeWeightsCode(node_inputs,...
+            coords_node,blkParams,lus_backend)
+        
+        [body, vars,u_node] = addUnodeCode(numBoundNodes,...
+            boundingi,table_elem,blkParams)
+
+        contractBody = getContractBody(blkParams,inputs,outputs)
+        
+        ep = calculate_eps(BP, j)
         
         y_interp = interp2points_2D(x1, y1, x2, y2, x_interp)
+        
+        function blkParams = getInitBlkParams(blk)
+            blkParams = struct;
+            blkParams.BreakpointsForDimension = {};
+            blkParams.directLookup = 0;
+            blkParams.yIsBounded = 0;
+            blkParams.blk_name = ...
+                nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);
+            blkParams.RndMeth = 'Round';
+            blkParams.SaturateOnIntegerOverflow = 'off';
+        end
+
 
     end
     
