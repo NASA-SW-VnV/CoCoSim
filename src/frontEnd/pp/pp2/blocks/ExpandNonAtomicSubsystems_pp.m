@@ -22,7 +22,7 @@ if not(isempty(ssys_list_handles))
                 mask = 'off';
             end
             if strcmp(atomic, 'off') && ~isequal(mask, 'on')
-                display_msg(['Expanding ' ssys_list{i}], MsgType.INFO, 'PP', '');
+                display_msg(['Expanding ' ssys_list{i}], MsgType.INFO, 'ExpandNonAtomicSubsystems_pp', '');
                 Simulink.BlockDiagram.expandSubsystem(ssys_list_handles{i});
             end
         catch me
