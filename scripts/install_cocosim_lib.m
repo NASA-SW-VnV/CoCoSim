@@ -54,6 +54,9 @@ end
 
 %%
 function copyCoCoFiles(force, cocosim_path)
+    % add utils to the path. Some function as MatlabUtils is used here
+    addpath(fullfile(cocosim_path,'src', 'utils'))
+    
     build_dir = fullfile(cocosim_path, 'tools', 'build');
     coco_git_dir = fullfile(build_dir, 'github', 'cocosim');
     cocosim_url = 'https://github.com/coco-team/cocoSim2.git';

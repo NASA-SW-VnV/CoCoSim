@@ -11,7 +11,7 @@ classdef Inport_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     
     methods
         
-        function  write_code(obj, parent, blk, varargin)
+        function  write_code(obj, parent, blk, xml_trace, varargin)
             % No need for code for Inport as it is generated in the node
             % header
             
@@ -22,7 +22,7 @@ classdef Inport_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             outputDataType = blk.CompiledPortDataTypes.Outport{1};
             lus_dt =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(outputDataType);
             addAsAssertExpr = true;
-            DEDUtils.OutMinMaxCheckCode(obj, parent, blk, outputs, lus_dt, addAsAssertExpr);
+            DEDUtils.OutMinMaxCheckCode(obj, parent, blk, outputs, lus_dt, xml_trace, addAsAssertExpr);
             
         end
         
