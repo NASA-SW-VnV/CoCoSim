@@ -90,18 +90,37 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
                 parent, blk, [], xml_trace);
             
             % get block inputs and cast them to real
-            [inputs,~] = ...
-                nasa_toLustre.blocks.Lookup_nD_To_Lustre.getBlockInputsNames_convInType2AccType(...
-                obj, parent,blk);
+            widths = blk.CompiledPortWidths.Inport;
+            numInputs = numel(widths);
+            max_width = max(widths);
+            RndMeth = blkParams.RndMeth;
+            SaturateOnIntegerOverflow = blkParams.SaturateOnIntegerOverflow;          
+            inputs = cell(1, numInputs);
+            for i=1:numInputs
+                inputs{i} =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk, i);
+                Lusinport_dt =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Inport{i});
+                if numel(inputs{i}) < max_width
+                    inputs{i} = arrayfun(@(x) {inputs{i}{1}}, (1:max_width));
+                end
+                %converts the input data type(s) to real if not real
+                if ~strcmp(Lusinport_dt, 'real')
+                    [external_lib, conv_format] = ...
+                       nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(Lusinport_dt, 'real', RndMeth, SaturateOnIntegerOverflow);
+                    if ~isempty(conv_format)
+                        obj.addExternal_libraries(external_lib);
+                        inputs{i} = cellfun(@(x) ...
+                           nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(conv_format,x),...
+                            inputs{i}, 'un', 0);
+                    end
+                end
+            end  
                         
             % For n-D Lookup Table, if UseOneInputPortForAllInputData is
             % selected, Combine all input data to one input port
-            if LookupType.isLookup_nD(blkParams.lookupTableType)
-                inputs = ...
-                    nasa_toLustre.blocks.Lookup_nD_To_Lustre.useOneInputPortForAllInputData(...
-                    blk,inputs,blkParams.NumberOfTableDimensions);
-            end
-          
+            inputs = ...
+                nasa_toLustre.blocks.Lookup_nD_To_Lustre.useOneInputPortForAllInputData(...
+                blk,inputs,blkParams.NumberOfTableDimensions);
+            
             obj.addExternal_libraries({'LustMathLib_abs_real'});
             obj.create_lookup_nodes(blk,lus_backend,blkParams,outputs,inputs);
 

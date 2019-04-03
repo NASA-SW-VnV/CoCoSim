@@ -23,12 +23,50 @@ classdef Interpolation_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
                 nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, ...
                 blk, [], xml_trace);
             
-            % get block inputs
-            inputs =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk);
-
-%                 nasa_toLustre.blocks.Lookup_nD_To_Lustre.getBlockInputsNames_convInType2AccType(...
-%                 obj, parent,...
-%                 blk);
+            % get block inputs and cast index to int and fraction to real
+            widths = blk.CompiledPortWidths.Inport;
+            numInputs = numel(widths);
+            max_width = max(widths);
+            RndMeth = blkParams.RndMeth;
+            SaturateOnIntegerOverflow = blkParams.SaturateOnIntegerOverflow;          
+            inputs = cell(1, numInputs);
+            for i=1:numInputs
+                inputs{i} =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk, i);
+                Lusinport_dt =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Inport{i});
+                if numel(inputs{i}) < max_width
+                    inputs{i} = arrayfun(@(x) {inputs{i}{1}}, (1:max_width));
+                end                
+                
+                if mod(i,2)
+                    %for odd i, converts the input data type(s) to real if not real
+                    if ~strcmp(Lusinport_dt, 'int')
+                        [external_lib, conv_format] = ...
+                            nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(...
+                            Lusinport_dt, 'int', RndMeth, ...
+                            SaturateOnIntegerOverflow);
+                        if ~isempty(conv_format)
+                            obj.addExternal_libraries(external_lib);
+                            inputs{i} = cellfun(@(x) ...
+                                nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(...
+                                conv_format,x),inputs{i}, 'un', 0);
+                        end
+                    end                    
+                else
+                    %for even i, converts the input data type(s) to int
+                    if ~strcmp(Lusinport_dt, 'real')
+                        [external_lib, conv_format] = ...
+                            nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(...
+                            Lusinport_dt, 'real', RndMeth, ...
+                            SaturateOnIntegerOverflow);
+                        if ~isempty(conv_format)
+                            obj.addExternal_libraries(external_lib);
+                            inputs{i} = cellfun(@(x) ...
+                                nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(...
+                                conv_format,x),inputs{i}, 'un', 0);
+                        end
+                    end
+                end
+            end  
             
             obj.addExternal_libraries({'LustMathLib_abs_real'});
             obj.create_lookup_nodes(blk,lus_backend,blkParams,outputs,inputs);
