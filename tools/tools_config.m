@@ -31,9 +31,11 @@ end
 if tools_config_already_run && ~isempty(LUSTREC) && ~isempty(KIND2) && ~isempty(Z3)
     %already run
 else
-    
     [tools_root, ~, ~] = fileparts(which('tools_config')); %fileparts(mfilename('fullpath'));
     cocoSim_root = fileparts(tools_root);
+    % for MatlabUtils
+    addpath(fullfile(cocoSim_root, 'src', 'utils'));
+    addpath(fullfile(cocoSim_root, 'src', 'external', 'cocosim_iowa', 'utils'));
     if ~exist('solvers_path', 'var')
         verifiers_path = fullfile(cocoSim_root, 'tools', 'verifiers');
         solvers_path = verifiers_path;
@@ -78,20 +80,32 @@ else
     
     if ~tools_config_already_run
         if ~exist(LUSTREC,'file')
-            warning('LUSTREC is not found in %s, configure your path in tools_config.m', LUSTREC);
-            warning('Please Ignore the previous warning if you are not going to use Zustre or Compiler Validation');
+            display_msg(...
+                sprintf('LUSTREC is not found in %s, configure your path in tools_config.m', LUSTREC), ...
+                MsgType.WARNING, 'tools_config', '');
+            display_msg('You can ignore the previous warning if you are not going to use Zustre or Compiler Validation', ...
+                MsgType.WARNING, 'tools_config', '');
         end
         if ~exist(ZUSTRE,'file')
-            warning('Zustre is not found in %s, configure your path in tools_config.m', ZUSTRE);
-            warning('Please Ignore the previous warning if you are not going to use Zustre for verification');
+            display_msg(...
+                sprintf('Zustre is not found in %s, configure your path in tools_config.m', ZUSTRE), ...
+                MsgType.WARNING, 'tools_config', '');
+            display_msg('You can ignore the previous warning if you are not going to use Zustre for verification', ...
+                MsgType.WARNING, 'tools_config', '');
         end
         if ~exist(Z3,'file')
-            warning('Z3 is not found in %s, configure your path in tools_config.m', Z3);
-            warning('Please Ignore the previous warning if you are not going to use Zustre ');
+            display_msg(...
+                sprintf('Z3 is not found in %s, configure your path in tools_config.m', Z3), ...
+                MsgType.WARNING, 'tools_config', '');
+            display_msg('You can ignore the previous warning if you are not going to use Zustre ', ...
+                MsgType.WARNING, 'tools_config', '');
         end
         if ~exist(KIND2,'file')
-            warning('KIND2 is not found in %s, configure your path in tools_config.m', KIND2);
-            warning('Please Ignore the previous warning if you are not going to use Kind2 for verification');
+            display_msg(...
+                sprintf('KIND2 is not found in %s, configure your path in tools_config.m', KIND2), ...
+                MsgType.WARNING, 'tools_config', '');
+            display_msg('You can ignore the previous warning if you are not going to use Kind2 for verification', ...
+                MsgType.WARNING, 'tools_config', '');
         end
         
     end
@@ -128,20 +142,32 @@ else
     
     if ~tools_config_already_run
         if ~exist(WLLVM,'file')
-            warning('WLLVM is not found in %s, configure your path in config.m', WLLVM);
-            warning('Please Ignore the previous warning if you are not going to use IKOS for analyzing C code');
+            display_msg(...
+                sprintf('WLLVM is not found in %s, configure your path in config.m', WLLVM), ...
+                MsgType.WARNING, 'tools_config', '');
+            display_msg('You can ignore the previous warning if you are not going to use IKOS for analyzing C code', ...
+                MsgType.WARNING, 'tools_config', '');
         end
         if ~exist(WLLVMPP,'file')
-            warning('WLLVMPP is not found in %s, configure your path in config.m', WLLVMPP);
-            warning('Please Ignore the previous warning if you are not going to use IKOS for analyzing C code');
+            display_msg(...
+                sprintf('WLLVMPP is not found in %s, configure your path in config.m', WLLVMPP), ...
+                MsgType.WARNING, 'tools_config', '');
+            display_msg('You can ignore the previous warning if you are not going to use IKOS for analyzing C code', ...
+                MsgType.WARNING, 'tools_config', '');
         end
         if ~exist(EXTRACT_BC,'file')
-            warning('EXTRACT_BC is not found in %s, configure your path in config.m', EXTRACT_BC);
-            warning('Please Ignore the previous warning if you are not going to use IKOS for analyzing C code');
+            display_msg(...
+                sprintf('EXTRACT_BC is not found in %s, configure your path in config.m', EXTRACT_BC), ...
+                MsgType.WARNING, 'tools_config', '');
+            display_msg('You can ignore the previous warning if you are not going to use IKOS for analyzing C code', ...
+                MsgType.WARNING, 'tools_config', '');
         end
         if ~exist(IKOS,'file')
-            warning('IKOS is not found in %s, configure your path in config.m', IKOS);
-            warning('Please Ignore the previous warning if you are not going to use IKOS for analyzing C code');
+            display_msg(...
+                sprintf('IKOS is not found in %s, configure your path in config.m', IKOS), ...
+                MsgType.WARNING, 'tools_config', '');
+            display_msg('You can ignore the previous warning if you are not going to use IKOS for analyzing C code', ...
+                MsgType.WARNING, 'tools_config', '');
         end
     end
     %%

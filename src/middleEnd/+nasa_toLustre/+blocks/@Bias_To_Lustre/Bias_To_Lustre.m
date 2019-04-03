@@ -34,7 +34,7 @@ classdef Bias_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                                 inputs{1}{j}, ...
                                 bias));
             end
-            obj.setCode(codes);
+            obj.addCode(codes);
             obj.addVariable(outputs_dt);
         end
         

@@ -30,12 +30,12 @@ src/backEnd/common/Kind2Utils.m
 src/backEnd/common/plotting.m
 src/backEnd/html_templates/tmp/
 src/backEnd/templates/
-src/backEnd/verification/cocoSpecVerify/cocoSpecVerify.m
-src/backEnd/verification/cocoSpecVerify/utils/
+src/backEnd/verification/iowaToLustreVerify/cocoSpecVerify.m
+src/backEnd/verification/iowaToLustreVerify/utils/
 src/backEnd/verification/lustreVerify/lustre_verify.m
 src/backEnd/verification/lustreVerify/utils/
 src/backEnd/verification/VerificationMenu.m
-src/backEnd/verification/cocoSpecVerify/README.txt
+src/backEnd/verification/iowaToLustreVerify/README.txt
 src/frontEnd/IR/std_IR/IR_config.m
 src/frontEnd/IR/std_IR/blocks/
 src/frontEnd/IR/std_IR/cocosim_IR.m

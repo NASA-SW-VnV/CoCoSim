@@ -26,7 +26,7 @@ classdef FunctionCallGenerator_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustr
                 nasa_toLustre.lustreAst.IntExpr(digitalsampleTime)), ...
                 nasa_toLustre.lustreAst.IntExpr(0))), ...
                 (1:numel(outputs)), 'un', 0);
-            obj.setCode( codes );
+            obj.addCode( codes );
             
         end
         

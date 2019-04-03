@@ -56,7 +56,7 @@ classdef RandomNumber_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     nasa_toLustre.lustreAst.EveryExpr(blk_name, nasa_toLustre.lustreAst.BooleanExpr('true'), clk_var));
             end
             
-            obj.setCode( codes );
+            obj.addCode( codes );
         end
         
         function options = getUnsupportedOptions(obj, parent, blk, lus_backend, varargin)

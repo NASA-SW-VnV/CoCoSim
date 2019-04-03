@@ -85,14 +85,15 @@ function [x2, y2] = process_branch(nodes, new_model_name, node_block_path, blk_e
             'Position',[x3 y3 (x3+50) (y3+50)]);
         %     set_param(guard_path, 'OutDataTypeStr','Inherit: Inherit via back propagation');
         dt = blk_exprs.(var{1}).guard.datatype;
+        if isstruct(dt) && isfield(dt, 'kind')
+            dt = dt.kind;
+        end
         if strcmp(dt, 'bool')
             set_param(guard_path, 'OutDataTypeStr', 'boolean');
         elseif strcmp(dt, 'int')
             set_param(guard_path, 'OutDataTypeStr', 'int32');
         elseif strcmp(dt, 'real')
             set_param(guard_path, 'OutDataTypeStr', 'double');
-        else
-            set_param(guard_path, 'OutDataTypeStr', dt);
         end
     else
         add_block('simulink/Signal Routing/From',...

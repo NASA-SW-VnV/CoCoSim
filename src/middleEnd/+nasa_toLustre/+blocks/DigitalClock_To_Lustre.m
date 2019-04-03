@@ -44,7 +44,7 @@ classdef DigitalClock_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 realTime, ...
                 else2));
             
-            obj.setCode( codes);
+            obj.addCode( codes);
         end
         
         function options = getUnsupportedOptions(obj, parent, blk, ...

@@ -16,6 +16,9 @@ function [x2, y2] = process_operator(node_block_path, blk_exprs, var, node_name,
     operator = blk_exprs.(var{1}).name;
 
     dt = blk_exprs.(var{1}).args(1).datatype;
+    if isstruct(dt) && isfield(dt, 'kind')
+        dt = dt.kind;
+    end
     if strcmp(dt, 'bool')
         dt =  'boolean';
     elseif strcmp(dt, 'int')
@@ -46,14 +49,15 @@ function [x2, y2] = process_operator(node_block_path, blk_exprs, var, node_name,
                 'Position',[x2 y2 (x2+50) (y2+50)]);
             %         set_param(input_path, 'OutDataTypeStr','Inherit: Inherit via back propagation');
             dt = blk_exprs.(var{1}).args(inport_number).datatype;
+            if isstruct(dt) && isfield(dt, 'kind')
+                dt = dt.kind;
+            end
             if strcmp(dt, 'bool')
                 set_param(input_path, 'OutDataTypeStr', 'boolean');
             elseif strcmp(dt, 'int')
                 set_param(input_path, 'OutDataTypeStr', 'int32');
             elseif strcmp(dt, 'real')
                 set_param(input_path, 'OutDataTypeStr', 'double');
-            else
-                set_param(input_path, 'OutDataTypeStr', dt);
             end
         else
             add_block('simulink/Signal Routing/From',...

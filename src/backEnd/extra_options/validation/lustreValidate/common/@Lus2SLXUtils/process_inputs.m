@@ -17,14 +17,15 @@ function [x2, y2] = process_inputs(node_block_path, blk_inputs, ID, x2, y2)
             inport_path,...
             'Position',[x2 y2 (x2+50) (y2+50)]);
         dt = blk_inputs(i).datatype;
+        if isstruct(dt) && isfield(dt, 'kind')
+            dt = dt.kind;
+        end
         if strcmp(dt, 'bool')
             set_param(inport_path, 'OutDataTypeStr', 'boolean');
         elseif strcmp(dt, 'int')
             set_param(inport_path, 'OutDataTypeStr', 'int32');
         elseif strcmp(dt, 'real')
             set_param(inport_path, 'OutDataTypeStr', 'double');
-        else
-            set_param(inport_path, 'OutDataTypeStr', dt);
         end
 
         %we create a GoTo block for this input

@@ -53,37 +53,35 @@ classdef Selector_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 
             end
             
-            %% If the lus_backend is Design Error Detection (DED).
+           
+            obj.addCode( codes );
+            obj.addVariable(outputs_dt);
+            
+            %% Design Error Detection Backend code:
             if isPortIndex && CoCoBackendType.isDED(coco_backend)
                 blk_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);
                 
                 if ismember(CoCoBackendType.DED_OUTOFBOUND, ...
                         CoCoSimPreferences.dedChecks)
                     % Add properties related to Out of bound array access.
-                    % Ignore the check if it is not related to the block in
-                    % question.
-                    
-                    % example:
-                    % detect which input plays the index port.
                     U_dim = in_matrix_dimension{1}.dims;
-                    parent_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(parent);
+                    port_idx = 2;
                     for i=1:numel(blk.IndexOptionArray)
                         if MatlabUtils.contains(blk.IndexOptionArray{i}, '(port)')
-                            prop = DEDUtils.OutOfBoundCheck(inputs{i+1}, U_dim(i));
                             propID = sprintf('%s_OUTOFBOUND_%d',...
                                 blk_name, i);
-                            codes{end+1} = nasa_toLustre.lustreAst.LocalPropertyExpr(propID, prop);
-                            % add traceability:
-                            xml_trace.add_Property(blk.Origin_path, ...
-                                parent_name, propID, i, ...
-                                CoCoBackendType.DED_OUTOFBOUND);
+                            if strcmp(blk.IndexMode, 'Zero-based')
+                                isZeroBased = true;
+                            else
+                                isZeroBased = false;
+                            end
+                            DEDUtils.OutOfBoundCheckCode(obj, parent, blk, xml_trace, ...
+                                inputs{port_idx}, U_dim(i), isZeroBased, propID, i);
+                            port_idx = port_idx + 1;
                         end
                     end
                 end
             end
-            %%
-            obj.setCode( codes );
-            obj.addVariable(outputs_dt);
         end
         
         function options = getUnsupportedOptions(obj, parent, blk, varargin)

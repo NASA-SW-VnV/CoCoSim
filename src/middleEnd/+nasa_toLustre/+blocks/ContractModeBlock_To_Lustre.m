@@ -58,7 +58,7 @@ classdef ContractModeBlock_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             
             blk_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);
             code = nasa_toLustre.lustreAst.ContractModeExpr(blk_name, inputs{1}, inputs{2});
-            obj.setCode( code );
+            obj.addCode( code );
             
         end
         

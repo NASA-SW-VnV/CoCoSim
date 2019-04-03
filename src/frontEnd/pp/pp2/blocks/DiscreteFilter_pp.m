@@ -30,23 +30,9 @@ function [status, errors_msg] = DiscreteFilter_pp(model)
 
 
                 Filter_structure = get_param(dFilter_list{i}, 'FilterStructure');
-                if strcmp(Filter_structure, 'Direct form I')
-                    display_msg(sprintf('Filter_structure %s in block %s is not supported',...
-                        Filter_structure, blk), ...
-                        MsgType.ERROR, 'DiscreteFilter_pp', '');
-                    continue;
-                end
-
-                Filter_structure = get_param(dFilter_list{i}, 'FilterStructure');
-                if strcmp(Filter_structure, 'Direct form I transposed')
-                    display_msg(sprintf('Filter_structure %s in block %s is not supported',...
-                        Filter_structure, blk), ...
-                        MsgType.ERROR, 'DiscreteFilter_pp', '');
-                    continue;
-                end
-
-                Filter_structure = get_param(dFilter_list{i}, 'FilterStructure');
-                if strcmp(Filter_structure, 'Direct form II transposed')
+                if strcmp(Filter_structure, 'Direct form I') ...
+                        || strcmp(Filter_structure, 'Direct form I transposed') ...
+                        || strcmp(Filter_structure, 'Direct form II transposed')
                     display_msg(sprintf('Filter_structure %s in block %s is not supported',...
                         Filter_structure, blk), ...
                         MsgType.ERROR, 'DiscreteFilter_pp', '');

@@ -1,4 +1,4 @@
-function [results, passed, priority] = na_0004(model)
+function [results, passed, priority] = cocosim_guidelines_na_0004(model)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -81,7 +81,7 @@ function [results, passed, priority] = na_0004(model)
     for i=1:length(item_titles)
         item_title = item_titles{i};
         param = get_param(gcs, param_names{i});
-        if strcmp(param, param_values{i})
+        if ~strcmp(param, param_values{i})
             fsList = {model};
         else
             fsList = {};

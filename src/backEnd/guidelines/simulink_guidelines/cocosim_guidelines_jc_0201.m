@@ -1,4 +1,4 @@
-function [results, passed, priority] = jc_0201(model)
+function [results, passed, priority] = cocosim_guidelines_jc_0201(model)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -37,14 +37,14 @@ function [results, passed, priority] = jc_0201(model)
     for i=1:length(item_titles)
         item_title = item_titles{i};
         if i==4
-            fsList = GuidelinesUtils.allowedChars(model,{});           
+            fsList = GuidelinesUtils.allowedChars(model,{'blocktype','SubSystem'});           
         else
             fsList = find_system(model,'Regexp', 'on',...
                 'blocktype','SubSystem', 'Name',regexp_str{i});
         end
         [subtitles{i+1}, numFail] = ...
             GuidelinesUtils.process_find_system_results(fsList,item_title,...
-            false);
+            true);
         totalFail = totalFail + numFail;
     end        
     

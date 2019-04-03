@@ -19,6 +19,8 @@ classdef LustrecUtils < handle
         new_mcdc_file = adapt_lustre_file(mcdc_file, dest)
 
         %%
+        report = parseLustrecErrorMessage(message)
+        %%
         [lusi_path, status, lusi_out] = generate_lusi(lus_file_path, LUSTREC )
         %%
         [emf_path, status] = ...
@@ -111,12 +113,11 @@ classdef LustrecUtils < handle
         
         %% transform input struct to lustre format (inlining values)
         [lustre_input_values, status] = getLustreInputValuesFormat(...
-                input_dataSet, ...
-                time)
+                input_dataSet, time, node_struct)
             
-        number_of_inputs = getNumberOfInputs(ds, nb_steps)
+        number_of_inputs = getNumberOfInputsInlinedFromDataSet(ds, nb_steps)
 
-        signal_values = getSignalValuesUsingTime(ds, t)
+        signal_values = getSignalValuesInlinedUsingTime(ds, t)
 
         width = getSignalWidth(ds)
 

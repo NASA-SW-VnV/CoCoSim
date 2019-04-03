@@ -11,8 +11,8 @@ classdef Sqrt_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     end
     
     methods
-        function  write_code(obj, parent, blk, xml_trace, varargin)
-            
+        function  write_code(obj, parent, blk, xml_trace, ~, coco_backend, varargin)
+            global  CoCoSimPreferences;
             [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             
             if ~strcmp(blk.OutMax, '[]') || ~strcmp(blk.OutMin, '[]')
@@ -84,8 +84,16 @@ classdef Sqrt_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 codes{j} = nasa_toLustre.lustreAst.LustreEq( outputs{j}, code);
             end
             
-            obj.setCode( codes );
+            obj.addCode( codes );
             obj.addVariable(outputs_dt);
+            
+            %% Design Error Detection Backend code:
+            if CoCoBackendType.isDED(coco_backend)
+                if ismember(CoCoBackendType.DED_OUTMINMAX, ...
+                        CoCoSimPreferences.dedChecks)
+                    DEDUtils.OutMinMaxCheckCode(obj, parent, blk, outputs, outLusDT, xml_trace);
+                end
+            end
         end
         
         function options = getUnsupportedOptions(obj, ~, blk, varargin)

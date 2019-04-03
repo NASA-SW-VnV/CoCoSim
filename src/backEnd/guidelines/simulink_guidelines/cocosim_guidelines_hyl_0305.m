@@ -1,4 +1,4 @@
-function [results, passed, priority] = hyl_0305(model)
+function [results, passed, priority] = cocosim_guidelines_hyl_0305(model)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -14,12 +14,16 @@ function [results, passed, priority] = hyl_0305(model)
     totalFail = 0;
     
     % Should not start with a number
-    title = 'Block names shall not be made unique by using case.';
     blockList = find_system(model);
+    
     % get names from handles
-    Names = get_param(blockList, 'Name');
+    % We should use Path and not Name. Blocks in different levels may have same
+    % name.
+    %Names = get_param(blockList, 'Name');
+    Names = blockList;
+    
     description_text = ...
-        'Block names shall not be made unique by using case';
+        'Block names shall not be made unique by using case.';
     description = HtmlItem(description_text, {}, 'black', 'black');      
     
     uniqueUsingCase = {description};

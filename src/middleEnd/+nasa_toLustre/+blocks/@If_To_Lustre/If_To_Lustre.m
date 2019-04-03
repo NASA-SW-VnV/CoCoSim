@@ -24,7 +24,7 @@ classdef If_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             %% Step 4: start filling the definition of each output
             code = nasa_toLustre.blocks.If_To_Lustre.ifElseCode(obj, parent, blk, outputs, ...
                 inputs, inports_dt, IfExp);
-            obj.setCode(code);
+            obj.addCode(code);
             
         end
         %%

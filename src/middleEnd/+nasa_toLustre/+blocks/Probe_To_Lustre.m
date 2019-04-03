@@ -70,7 +70,7 @@ classdef Probe_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     outputs_idx = outputs_idx + 1;
                 end                
             end
-            obj.setCode( codes );
+            obj.addCode( codes );
             
         end
         

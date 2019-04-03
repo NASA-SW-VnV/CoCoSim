@@ -17,6 +17,7 @@ classdef Lus2SLXUtils
         node_process(new_model_name, nodes, node, node_block_path, block_pos, xml_trace)
         %%
         [x2, y2] = instrs_process(nodes, new_model_name, node_block_path, blk_exprs, node_name,  x2, y2, xml_trace)
+        specInstrs_process(node_block_path, blk_spec, node_name)
         %%
         [x2, y2] = process_outputs(node_block_path, blk_outputs, ID, x2, y2, isBranch)
         %%

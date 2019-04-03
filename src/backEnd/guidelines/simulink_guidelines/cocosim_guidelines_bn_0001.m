@@ -1,4 +1,4 @@
-function [results, passed, priority] = bn_0001(model)
+function [results, passed, priority] = cocosim_guidelines_bn_0001(model)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -25,7 +25,8 @@ function [results, passed, priority] = bn_0001(model)
 %         
 %     end
 
-    lengths = cellfun(@(x) length(x), SussystemList);
+    Names = get_param(SussystemList, 'Name');
+    lengths = cellfun(@(x) length(x), Names);
     % remove names less than
     failedList = SussystemList(lengths > 32);
     %add parent
@@ -42,7 +43,7 @@ function [results, passed, priority] = bn_0001(model)
         color = 'green';
     end
     
-    title = 'bn_0001: Sussystem name length limit';    
+    title = 'bn_0001: Subsystem name length limit';    
     description_text = ...
         '32 characters is the maximum limit for subsystem name length';
     description = HtmlItem(description_text, {}, 'black', 'black');

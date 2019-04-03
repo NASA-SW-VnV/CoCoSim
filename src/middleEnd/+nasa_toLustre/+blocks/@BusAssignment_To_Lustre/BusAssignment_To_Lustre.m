@@ -49,7 +49,7 @@ classdef BusAssignment_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             for i=1:numel(outputs)
                 codes{i} = nasa_toLustre.lustreAst.LustreEq(outputs{i}, modifiedInputs{i});
             end
-            obj.setCode( codes );
+            obj.addCode( codes );
         end
         %%
         function options = getUnsupportedOptions(obj, parent, blk, varargin)

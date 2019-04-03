@@ -26,7 +26,7 @@ function [emf_path, status] = ...
     end
 
     if ~exist(output_dir, 'dir'); mkdir(output_dir); end
-    emf_path = fullfile(output_dir,strcat(lus_fname, '.emf'));
+    emf_path = fullfile(output_dir,strcat(lus_fname, '.json'));
     if BUtils.isLastModified(lus_file_path, emf_path)
         status = 0;
         msg = sprintf('emf file "%s" already generated. It will be used.\n',emf_path);
@@ -43,6 +43,7 @@ function [emf_path, status] = ...
     if status
         err = sprintf('generation of emf failed for file "%s" ',lus_fname);
         display_msg(err, MsgType.WARNING, 'generate_emf', '');
+        LustrecUtils.parseLustrecErrorMessage(emf_out, MsgType.WARNING);
         display_msg(err, MsgType.DEBUG, 'generate_emf', '');
         display_msg(emf_out, MsgType.DEBUG, 'generate_emf', '');
 

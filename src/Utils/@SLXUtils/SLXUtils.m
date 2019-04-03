@@ -60,6 +60,8 @@ classdef SLXUtils
         %%
         status = createSubsystemFromBlk(blk_path)
         
+        %%
+        removeBlocksLinkedToMe(bHandle, removeMe)
     end
     
 end

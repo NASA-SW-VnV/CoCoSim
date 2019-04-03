@@ -30,7 +30,6 @@ else
     
     %% First configuration, Zustre, Kind2 and Lustrec
     % Go to tools/tools_config and follow instructions
-    install_cocosim_lib();
     tools_config;
     
     

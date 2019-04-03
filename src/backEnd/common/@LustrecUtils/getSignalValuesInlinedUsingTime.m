@@ -6,7 +6,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  
 
-function signal_values = getSignalValuesUsingTime(ds, t)
+function signal_values = getSignalValuesInlinedUsingTime(ds, t)
     signal_values = [];
     if isa(ds, 'timeseries')
         signal_values = double(ds.getsampleusingtime(t).Data);
@@ -15,7 +15,7 @@ function signal_values = getSignalValuesUsingTime(ds, t)
         fields = fieldnames(ds);
         for i=1:numel(fields)
             signal_values = [signal_values ; ...
-                LustrecUtils.getSignalValuesUsingTime(ds.(fields{i}), t)];
+                LustrecUtils.getSignalValuesInlinedUsingTime(ds.(fields{i}), t)];
         end
     end
 end

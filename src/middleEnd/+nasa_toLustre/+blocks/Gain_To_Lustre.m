@@ -13,8 +13,8 @@ classdef Gain_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     
     methods
         
-        function  write_code(obj, parent, blk, xml_trace, varargin)
-            
+        function  write_code(obj, parent, blk, xml_trace, ~, coco_backend, varargin)
+            global  CoCoSimPreferences;
             %This function support scalar Gain. Matrix/Vector gains
             %are supported by Gain_pp in the pre-processing step.
             [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
@@ -33,7 +33,7 @@ classdef Gain_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 if ~isempty(conv_format)
                     obj.addExternal_libraries(external_lib);
                     inputs{1} = cellfun(@(x) ...
-                       nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(conv_format,x),...
+                        nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(conv_format,x),...
                         inputs{1}, 'un', 0);
                 end
             end
@@ -71,16 +71,20 @@ classdef Gain_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 codes{j} = nasa_toLustre.lustreAst.LustreEq(outputs{j}, code);
             end
             
-            obj.setCode(codes);
+            obj.addCode(codes);
+            
+            %% Design Error Detection Backend code:
+            if CoCoBackendType.isDED(coco_backend)
+                if ismember(CoCoBackendType.DED_OUTMINMAX, ...
+                        CoCoSimPreferences.dedChecks)
+                    DEDUtils.OutMinMaxCheckCode(obj, parent, blk, outputs, lusOutDT, xml_trace);
+                end
+            end
         end
         
         function options = getUnsupportedOptions(obj, parent, blk, varargin)
             
             obj.unsupported_options = {};
-            if ~strcmp(blk.OutMax, '[]') || ~strcmp(blk.OutMin, '[]')
-                obj.addUnsupported_options(...
-                    sprintf('The minimum/maximum value is not supported in block %s', HtmlItem.addOpenCmd(blk.Origin_path)));
-            end
             [gain, ~, status] = ...
                 nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(parent, blk, blk.Gain);
             if status

@@ -24,7 +24,7 @@ classdef SignalConversion_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 codes{i} = nasa_toLustre.lustreAst.LustreEq(outputs{i}, inputs{i});
             end
             
-            obj.setCode( codes );
+            obj.addCode( codes );
         end
         
         function options = getUnsupportedOptions(obj, varargin)

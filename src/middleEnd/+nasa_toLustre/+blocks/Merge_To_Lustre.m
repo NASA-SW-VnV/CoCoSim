@@ -106,7 +106,7 @@ classdef Merge_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     nasa_toLustre.lustreAst.IteExpr.nestedIteExpr(conds, thens));
             end
             % join the lines and set the block code.
-            obj.setCode( codes );
+            obj.addCode( codes );
             
         end
         %%

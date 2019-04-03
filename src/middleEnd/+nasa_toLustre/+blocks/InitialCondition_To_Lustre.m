@@ -40,7 +40,7 @@ classdef InitialCondition_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 nasa_toLustre.utils.SLX2LusUtils.num2LusExp(Value(i),lus_outputDataType, slx_dt),...
                 inputs{i})), ...
                 (1:numel(outputs)), 'un', 0);
-            obj.setCode( codes );
+            obj.addCode( codes );
             
         end
         

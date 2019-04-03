@@ -79,8 +79,16 @@ function [valid,...
     end
 
     % transform input_struct to Lustre format
+    [node_struct, status] = LustrecUtils.extract_node_struct(lus_file_path,...
+                nasa_toLustre.utils.SLX2LusUtils.name_format(node_name), ...
+                LUSTREC,...
+                LUCTREC_INCLUDE_DIR);
+    if status
+        lustrec_failed = 1;
+        return
+    end
     [lustre_input_values, status] = ...
-        LustrecUtils.getLustreInputValuesFormat(input_dataSet, time);
+        LustrecUtils.getLustreInputValuesFormat(input_dataSet, time, node_struct);
     if status
         lustrec_failed = 1;
         return

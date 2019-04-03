@@ -12,8 +12,8 @@ classdef DotProduct_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     
     methods
         
-        function  write_code(obj, parent, blk, xml_trace, varargin)
-            
+        function  write_code(obj, parent, blk, xml_trace, ~, coco_backend, varargin)
+            global  CoCoSimPreferences;
             [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             
             
@@ -48,8 +48,17 @@ classdef DotProduct_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             end
             code = nasa_toLustre.lustreAst.LustreEq(outputs{1}, ...
                 nasa_toLustre.lustreAst.BinaryExpr.BinaryMultiArgs(nasa_toLustre.lustreAst.BinaryExpr.PLUS, right));
-            obj.setCode( code );
+            obj.addCode( code );
             obj.addVariable(outputs_dt);
+            
+            %% Design Error Detection Backend code:
+            if CoCoBackendType.isDED(coco_backend)
+                if ismember(CoCoBackendType.DED_OUTMINMAX, ...
+                        CoCoSimPreferences.dedChecks)
+                    lusOutDT =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(outputDataType);
+                    DEDUtils.OutMinMaxCheckCode(obj, parent, blk, outputs, lusOutDT, xml_trace);
+                end
+            end
         end
         %%
         function options = getUnsupportedOptions(obj, ~, blk, varargin)

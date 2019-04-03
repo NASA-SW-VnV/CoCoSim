@@ -1,4 +1,4 @@
-function [results, passed, priority] = ar_0001(model)
+function [results, passed, priority] = cocosim_guidelines_ar_0001(model)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -55,7 +55,7 @@ function [results, passed, priority] = ar_0001(model)
     subtitles = cell(length(item_titles)+1, 1);
     for i=1:length(item_titles)
         item_title = item_titles{i};
-        if(isempty(regexp(searchStr{i},regexp_str{i}, 'once')))
+        if(~isempty(regexp(searchStr{i},regexp_str{i}, 'once')))
             fsList = {model};
         else
             fsList = {};

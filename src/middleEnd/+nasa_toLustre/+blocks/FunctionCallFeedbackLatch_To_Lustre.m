@@ -33,7 +33,7 @@ classdef FunctionCallFeedbackLatch_To_Lustre < nasa_toLustre.frontEnd.Block_To_L
                 nasa_toLustre.utils.SLX2LusUtils.num2LusExp(Value(i),lus_outputDataType, slx_dt),...
                 nasa_toLustre.lustreAst.UnaryExpr(nasa_toLustre.lustreAst.UnaryExpr.PRE, inputs{i}))), ...
                 (1:numel(outputs)), 'un', 0);
-            obj.setCode( codes );
+            obj.addCode( codes );
             
         end
         

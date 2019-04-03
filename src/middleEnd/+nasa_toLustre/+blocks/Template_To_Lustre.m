@@ -184,13 +184,8 @@ classdef Template_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     % question.
                     % example:
                     propID = sprintf('%s_OUTOFBOUND',blk_name);
-                    prop = DEDUtils.OutOfBoundCheck(inputs{2}, widths(2));
-                    codes{end+1} = nasa_toLustre.lustreAst.LocalPropertyExpr(propID, prop);
-                    % add traceability:
-                    parent_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(parent);
-                    xml_trace.add_Property(blk.Origin_path, ...
-                        parent_name, propID, 1, ...
-                        CoCoBackendType.DED_OUTOFBOUND);
+                    DEDUtils.OutOfBoundCheckCode(obj, parent, blk, xml_trace, ...
+                                inputs{2}, widths(2), propID, 1);
                 end
                 if ismember(CoCoBackendType.DED_OUTMINMAX, ...
                         CoCoSimPreferences.dedChecks)
@@ -198,20 +193,11 @@ classdef Template_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     % Ignore the check if it is not related to the block in
                     % question.
                     lus_dt =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(outputDataType);
-                    prop = DEDUtils.OutMinMaxCheck(parent, blk, outputs, lus_dt);
-                    if ~isempty(prop)
-                        propID = sprintf('%s_OUTMINMAX',blk_name);
-                        codes{end+1} = nasa_toLustre.lustreAst.LocalPropertyExpr(propID, prop);
-                        % add traceability:
-                        parent_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(parent);
-                        xml_trace.add_Property(blk.Origin_path, ...
-                            parent_name, propID, 1, ...
-                            CoCoBackendType.DED_OUTMINMAX);
-                    end
+                    DEDUtils.OutMinMaxCheckCode(obj, parent, blk, outputs, lus_dt, xml_trace);
                 end
             end
-            %% Step 6: set the block code.
-            obj.setCode( codes );
+            %% Step 6: add the block code.
+            obj.addCode( codes );
             
         end
         %%

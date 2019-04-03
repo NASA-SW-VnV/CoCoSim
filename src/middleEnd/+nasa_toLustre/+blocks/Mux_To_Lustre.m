@@ -47,7 +47,7 @@ classdef Mux_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             
             
             
-            obj.setCode( codes );
+            obj.addCode( codes );
             obj.addVariable(outputs_dt);
         end
         

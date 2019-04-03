@@ -12,40 +12,45 @@ classdef DataTypeConversion_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     
     methods
         
-        function  write_code(obj, parent, blk, xml_trace, varargin)
-            
+        function  write_code(obj, parent, blk, xml_trace, ~, coco_backend, varargin)
+            global  CoCoSimPreferences;
             [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
-            inputs = {};
-            
-            widths = blk.CompiledPortWidths.Inport;
+
             outputDataType = blk.CompiledPortDataTypes.Outport{1};
             RndMeth = blk.RndMeth;
             SaturateOnIntegerOverflow = blk.SaturateOnIntegerOverflow;
 
-            for i=1:numel(widths)
-                inputs{i} =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk, i);
-                inport_dt = blk.CompiledPortDataTypes.Inport(i);
-                %converts the input data type(s) to
-                %its outputDataType
-                if ~strcmp(inport_dt, outputDataType)
-                    [external_lib, conv_format] =nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(inport_dt, outputDataType, RndMeth, SaturateOnIntegerOverflow);
-                    if ~isempty(conv_format)
-                        obj.addExternal_libraries(external_lib);
-                        inputs{i} = cellfun(@(x) ...
-                           nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(conv_format,x),...
-                            inputs{i}, 'un', 0);
-                    end
+            inputs =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk);
+            inport_dt = blk.CompiledPortDataTypes.Inport{1};
+            %converts the input data type(s) to
+            %its outputDataType
+            if ~strcmp(inport_dt, outputDataType)
+                [external_lib, conv_format] =nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(inport_dt, outputDataType, RndMeth, SaturateOnIntegerOverflow);
+                if ~isempty(conv_format)
+                    obj.addExternal_libraries(external_lib);
+                    inputs= cellfun(@(x) ...
+                        nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(conv_format,x),...
+                        inputs, 'un', 0);
                 end
             end
             
             % Just pass inputs to outputs.
-            codes = cell(1, numel(outputs));
-            for i=1:numel(outputs)
-                codes{i} = nasa_toLustre.lustreAst.LustreEq(outputs{i}, inputs{1}{i});
+            codes = arrayfun(@(i) nasa_toLustre.lustreAst.LustreEq(outputs{i}, inputs{i}), ...
+                (1:numel(outputs)), 'UniformOutput', false);
+            
+            obj.addCode(codes);
+            obj.addVariable(outputs_dt);
+            
+            
+            %% Design Error Detection Backend code:
+            if CoCoBackendType.isDED(coco_backend)
+                if ismember(CoCoBackendType.DED_OUTMINMAX, ...
+                        CoCoSimPreferences.dedChecks)
+                    lusOutDT = nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(outputDataType);
+                    DEDUtils.OutMinMaxCheckCode(obj, parent, blk, outputs, lusOutDT, xml_trace);
+                end
             end
             
-            obj.setCode(codes);
-            obj.addVariable(outputs_dt);
         end
         
         function options = getUnsupportedOptions(obj, varargin)

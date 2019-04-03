@@ -142,10 +142,11 @@ function [unsupportedOptions, ...
             else
                 msgbox('Your model is compatible with CoCoSim!');
             end
-        else
-            display_msg('Your model is compatible with CoCoSim!', ...
-                MsgType.RESULT, 'ToLustreUnsupportedBlocks', '');
         end
+        % display it too in command window.
+        display_msg('Your model is compatible with CoCoSim!', ...
+            MsgType.RESULT, 'ToLustreUnsupportedBlocks', '');
+        
     elseif mode_display == 1
         try
             output_dir = fullfile(model_dir, 'cocosim_output', file_name);

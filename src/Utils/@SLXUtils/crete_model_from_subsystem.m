@@ -4,10 +4,10 @@
 % All Rights Reserved.
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
- 
+
 
 function [new_model_path, new_model_name, status] = ...
-    crete_model_from_subsystem(file_name, ss_path, output_dir )
+        crete_model_from_subsystem(file_name, ss_path, output_dir )
     block_name_adapted = ...
         BUtils.adapt_block_name(MatlabUtils.naming(nasa_toLustre.utils.SLX2LusUtils.name_format(ss_path)));
     new_model_name = strcat(file_name,'_', block_name_adapted);
@@ -21,6 +21,7 @@ function [new_model_path, new_model_name, status] = ...
     end
     close_system(new_model_name,0);
     model_handle = new_system(new_model_name);
+    CompiledPortDataTypes = SLXUtils.getCompiledParam(ss_path, 'CompiledPortDataTypes');
     blk_name = get_param(ss_path, 'Name');
     new_blkH = add_block(ss_path, ...
         strcat(new_model_name, '/', blk_name));
@@ -28,19 +29,24 @@ function [new_model_path, new_model_name, status] = ...
     %Inports
     status = 0;
     for i=1:numel(newBlokPortHandles.Enable)
-        status = status + addInport(newBlokPortHandles.Enable(i));
+        status = status + addInport(newBlokPortHandles.Enable(i),...
+            CompiledPortDataTypes.Enable{i});
     end
     for i=1:numel(newBlokPortHandles.Ifaction)
-        status = status + addInport(newBlokPortHandles.Ifaction(i));
+        status = status + addInport(newBlokPortHandles.Ifaction(i), ...
+            CompiledPortDataTypes.Ifaction{i});
     end
     for i=1:numel(newBlokPortHandles.Inport)
-        status = status + addInport(newBlokPortHandles.Inport(i));
+        status = status + addInport(newBlokPortHandles.Inport(i), ...
+            CompiledPortDataTypes.Inport{i});
     end
     for i=1:numel(newBlokPortHandles.Reset)
-        status = status + addInport(newBlokPortHandles.Reset(i));
+        status = status + addInport(newBlokPortHandles.Reset(i), ...
+            CompiledPortDataTypes.Reset{i});
     end
     for i=1:numel(newBlokPortHandles.Trigger)
-        status = status + addInport(newBlokPortHandles.Trigger(i));
+        status = status + addInport(newBlokPortHandles.Trigger(i), ...
+            CompiledPortDataTypes.Trigger{i});
     end
     %Outport
     for i=1:numel(newBlokPortHandles.Outport)
@@ -52,40 +58,47 @@ function [new_model_path, new_model_name, status] = ...
     end
     %% Save system
     save_system(model_handle,new_model_path,'OverwriteIfChangedOnDisk',true);
-        function status = addInport(newBlkPort)
-            try
-                status = 0;
-                inport_name = fullfile(new_model_name, 'In1');
-                inport_handle = add_block('simulink/Ports & Subsystems/In1',...
-                    inport_name,...
-                    'MakeNameUnique', 'on');
-                inportPortHandles = get_param(inport_handle, 'PortHandles');
-                add_line(new_model_name,...
-                    inportPortHandles.Outport(1), newBlkPort,...
-                    'autorouting', 'on');
-            catch Me
-                display_msg(Me.getReport(), ...
-                    MsgType.DEBUG, 'SLXUtils.createSubsystemFromBlk', '');
-                status = 1;
+    function status = addInport(newBlkPort, portDT)
+        try
+            status = 0;
+            inport_name = fullfile(new_model_name, 'In1');
+            inport_handle = add_block('simulink/Ports & Subsystems/In1',...
+                inport_name,...
+                'MakeNameUnique', 'on');
+            if isValidDT(portDT)
+                set_param(inport_handle, 'OutDataTypeStr', portDT);
             end
+            inportPortHandles = get_param(inport_handle, 'PortHandles');
+            add_line(new_model_name,...
+                inportPortHandles.Outport(1), newBlkPort,...
+                'autorouting', 'on');
+        catch Me
+            display_msg(Me.getReport(), ...
+                MsgType.DEBUG, 'SLXUtils.createSubsystemFromBlk', '');
+            status = 1;
         end
-        function status = addOutport(newBlkPort)
-            try
-                status = 0;
-                outport_name = fullfile(new_model_name, 'Out1');
-                outport_handle = add_block('simulink/Ports & Subsystems/Out1',...
-                    outport_name,...
-                    'MakeNameUnique', 'on');
-                outportPortHandles = get_param(outport_handle, 'PortHandles');
-                add_line(new_model_name,...
-                    newBlkPort, outportPortHandles.Inport(1),...
-                    'autorouting', 'on');
-            catch Me
-                display_msg(Me.getReport(), ...
-                    MsgType.DEBUG, 'SLXUtils.createSubsystemFromBlk', '');
-                status = 1;
-            end
+    end
+    function status = addOutport(newBlkPort)
+        try
+            status = 0;
+            outport_name = fullfile(new_model_name, 'Out1');
+            outport_handle = add_block('simulink/Ports & Subsystems/Out1',...
+                outport_name,...
+                'MakeNameUnique', 'on');
+            outportPortHandles = get_param(outport_handle, 'PortHandles');
+            add_line(new_model_name,...
+                newBlkPort, outportPortHandles.Inport(1),...
+                'autorouting', 'on');
+        catch Me
+            display_msg(Me.getReport(), ...
+                MsgType.DEBUG, 'SLXUtils.createSubsystemFromBlk', '');
+            status = 1;
         end
-
+    end
+    function res = isValidDT(dt)
+        res = ~isempty(regexp(dt, '^u?int\d+', 'match')) ...
+            || strcmp(dt, 'double') || strcmp(dt, 'single')...
+            || strcmp(dt, 'boolean');
+    end
 end
 

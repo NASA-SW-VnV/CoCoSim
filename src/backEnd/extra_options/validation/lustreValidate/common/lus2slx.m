@@ -29,7 +29,7 @@ if ~exist('organize_blocks', 'var') || isempty(organize_blocks)
     organize_blocks = false;
 end
 if ~exist('force', 'var') || isempty(force)
-    force = false;
+    force = true;
 end
 base_name = regexp(cocospec_name,'\.','split');
 if ~exist('new_model_name', 'var') || isempty(new_model_name)
@@ -104,9 +104,10 @@ if onlyMainNode
     block_pos = [(x+100) y (x+250) (y+50)];
     Lus2SLXUtils.node_process(new_model_name, nodes, node_name, node_block_path, block_pos, xml_trace);
 else
-    for node = emf_fieldnames
+    for i = 1:length(emf_fieldnames)
+        node = emf_fieldnames{i};
         try
-            node_name = BUtils.adapt_block_name(node{1});
+            node_name = BUtils.adapt_block_name(node);
             display_msg(...
                 sprintf('Processing node "%s" ',node_name),...
                 MsgType.INFO, 'lus2slx', '');
@@ -114,10 +115,10 @@ else
 
             block_pos = [(x+100) y (x+250) (y+50)];
             node_block_path = fullfile(new_model_name,node_name);
-            Lus2SLXUtils.node_process(new_model_name, nodes, node{1}, node_block_path, block_pos, []);
+            Lus2SLXUtils.node_process(new_model_name, nodes, node, node_block_path, block_pos, []);
             
         catch ME
-            display_msg(['couldn''t translate node ' node{1} ' to Simulink'], MsgType.ERROR, 'LUS2SLX', '');
+            display_msg(['couldn''t translate node ' node ' to Simulink'], MsgType.ERROR, 'LUS2SLX', '');
             display_msg(ME.getReport(), MsgType.DEBUG, 'LUS2SLX', '');
             %         continue;
             status = 1;

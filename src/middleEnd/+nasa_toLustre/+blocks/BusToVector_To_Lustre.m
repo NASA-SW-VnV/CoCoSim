@@ -21,7 +21,7 @@ classdef BusToVector_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             % As we inline following columns, we just pass inputs to outputs
             codes = arrayfun(@(i) nasa_toLustre.lustreAst.LustreEq(outputs{i}, inputs{i}), ...
                 (1:numel(outputs)), 'un', 0);
-            obj.setCode( codes );
+            obj.addCode( codes );
             
         end
         

@@ -89,7 +89,7 @@ classdef Logic_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 end
                 codes{i} = nasa_toLustre.lustreAst.LustreEq(outputs{i}, rhs);
             end
-            obj.setCode( codes );
+            obj.addCode( codes );
             obj.addVariable(outputs_dt);
         end
         

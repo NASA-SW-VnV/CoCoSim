@@ -25,7 +25,7 @@ classdef MATLABFunction_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             codes = {};
             node_name = main_node.getName();
             codes{end+1} = nasa_toLustre.lustreAst.LustreEq(outputs, nasa_toLustre.lustreAst.NodeCallExpr(node_name, inputs));
-            obj.setCode( codes );
+            obj.addCode( codes );
             obj.addVariable(outputs_dt);
         end
         %%

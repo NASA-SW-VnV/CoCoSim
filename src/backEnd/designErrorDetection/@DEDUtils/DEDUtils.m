@@ -11,10 +11,8 @@ classdef DEDUtils
     end
     
     methods(Static)
-        prop = OutOfBoundCheck(indexPortNames, width)
-
-        prop = OutMinMaxCheck(parent, blk, outputs, lus_dt)
-
+        OutOfBoundCheckCode(blk2LusObj, parent, blk, xml_trace, indexPortNames, width, isZeroBased, propID, propIndex)
+        OutMinMaxCheckCode(blk2LusObj, parent, blk, outputs, lus_dt, xml_trace, addAsAssertExpr)
     end
 end
 

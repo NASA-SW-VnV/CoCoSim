@@ -125,7 +125,7 @@ classdef BitwiseOperator_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 obj.addExternal_libraries(strcat('LustMathLib_', fun));
             end
             % join the lines and set the block code.
-            obj.setCode( codes );
+            obj.addCode( codes );
             
         end
         

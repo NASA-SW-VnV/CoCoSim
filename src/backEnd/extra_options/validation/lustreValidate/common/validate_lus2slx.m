@@ -86,13 +86,14 @@ for node_idx =0:numel(nodes_names)
         if ismember(main_node, orig_names)
             idx = ismember(orig_names, main_node);
             node_name = BUtils.adapt_block_name(nodes_names{idx});
+            original_node_name = orig_names{idx};
         else
             continue;
         end
     else
-        original_name = nodes.(nodes_names{node_idx}).original_name;
+        original_node_name = nodes.(nodes_names{node_idx}).original_name;
         node_name = BUtils.adapt_block_name(nodes_names{node_idx});
-        if strcmp(original_name, main_node)
+        if strcmp(original_node_name, main_node)
             continue;
         end
     end
@@ -159,12 +160,12 @@ for node_idx =0:numel(nodes_names)
             lustrec_binary_failed,...
             sim_failed] = compare_slx_lus(new_name, ...
             lus_file_path, ...
-            node_name, ...
+            original_node_name, ...
             output_dir,...
             tests_method,...
             model_checker);
         if ~valid
-            display_msg(['Node ' node_name ' is not valid (see Counter example above)'], MsgType.RESULT, 'validation', '');
+            display_msg(['Node ' original_node_name ' is not valid (see Counter example above)'], MsgType.RESULT, 'validation', '');
             if deep_CEX
                 break;
             end
