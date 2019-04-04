@@ -151,17 +151,14 @@ function addRequireEnsureConditions(node_block_path, node_name, rPath, rHandle, 
         DstBlkH = get_param(rHandle, 'PortHandles');
         add_line(node_block_path, SrcBlkH.Outport(1), DstBlkH.Inport(1), 'autorouting', 'on');
     else
-        op_path = BUtils.get_unique_block_name(fullfile(node_block_path, ...
-            strcat(rPath, '_cond')));
-        try
+        op_path = BUtils.get_unique_block_name(strcat(rPath, '_cond'));
+        
         opHandle = add_block('simulink/Logic and Bit Operations/Logical Operator',...
             op_path, ...
             'MakeNameUnique', 'on',...
             'Operator', 'AND',...
             'Inputs', num2str(length(requires)));
-        catch me
-            me
-        end
+        
         %add link to mode block
         SrcBlkH = get_param(opHandle,'PortHandles');
         DstBlkH = get_param(rHandle, 'PortHandles');
