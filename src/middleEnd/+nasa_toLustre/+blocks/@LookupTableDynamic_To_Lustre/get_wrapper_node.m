@@ -6,7 +6,7 @@ function extNode =  get_wrapper_node(obj,blk,...
     % All Rights Reserved.
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Lookup_nD
+    % LookupTableDynamic
     
     % if outputDataType is not real, we need to cast outputs
     outputDataType = blk.CompiledPortDataTypes.Outport{1};
@@ -47,8 +47,8 @@ function extNode =  get_wrapper_node(obj,blk,...
     % Pre look up out
     if blkParams.directLookup
         solution_name{1} = nasa_toLustre.lustreAst.VarIdExpr(...
-            preLookUpExtNode.outputs{1});
-        vars{1} = nasa_toLustre.lustreAst.LustreVar(solution_name{1}, 'int');
+            preLookUpExtNode.outputs{1}.name);
+        vars{1} = nasa_toLustre.lustreAst.LustreVar(solution_name{1}, 'real');
     else
         numBoundNodes = 2^blkParams.NumberOfAdjustedTableDimensions;
         vars = cell(1,2*numBoundNodes);
@@ -69,17 +69,24 @@ function extNode =  get_wrapper_node(obj,blk,...
                 prelookup_out{(i-1)*2+2},'real');
         end
     end
-       
+    
+    
     % body, for each interpolation, make a call to prelookup and a call to
     % interpolation_using_prelookup
     body = cell(1, 2*numel(outputs));
     for outIdx=1:numel(outputs)
         nodeCall_inputs = {};
-        nodeCall_inputs{end+1} = inputs{1}{outIdx};
-        for i=2:numel(inputs)
-            nodeCall_inputs = [nodeCall_inputs, inputs{i}];
+        if LookupType.isLookupDynamic(blkParams.lookupTableType)
+            nodeCall_inputs{end+1} = inputs{1}{outIdx};
+            for i=2:numel(inputs)
+                nodeCall_inputs = [nodeCall_inputs, inputs{i}];
+            end
+        else
+            nodeCall_inputs = cell(1, numel(inputs));
+            for i=1:numel(inputs)
+                nodeCall_inputs{i} = inputs{i}{outIdx};
+            end
         end
-
         if blkParams.directLookup
             % call prelookup
             body{(outIdx-1)*2+outIdx} = nasa_toLustre.lustreAst.LustreEq(solution_name{1}, ...

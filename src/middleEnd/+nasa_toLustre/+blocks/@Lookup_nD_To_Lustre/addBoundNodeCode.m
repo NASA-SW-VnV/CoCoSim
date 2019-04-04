@@ -25,8 +25,8 @@ function [body, vars,coords_node,index_node] = ...
     % dim2_low, dim2_high,... dimn_low, dimn_high)
 
     % finding nodes bounding element
-    coords_node = {};
-    index_node = {};
+    coords_node = cell(2*NumberOfTableDimensions,2);
+    index_node = cell(2*NumberOfTableDimensions,2);
 
     for i=1:NumberOfTableDimensions
 

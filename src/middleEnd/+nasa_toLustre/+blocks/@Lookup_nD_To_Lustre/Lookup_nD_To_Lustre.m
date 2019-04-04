@@ -181,9 +181,9 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
         inputs = useOneInputPortForAllInputData(blk,lookupTableType,...
             inputs,NumberOfTableDimensions)
         
-        [inputs,zero,one, external_lib] = ...
-            getBlockInputsNames_convInType2AccType(parent, blk,...
-            lookupTableType)
+%         [inputs,zero,one, external_lib] = ...
+%             getBlockInputsNames_convInType2AccType(parent, blk,...
+%             lookupTableType)
    
         extNode = get_pre_lookup_node(lus_backend,blkParams)
 
@@ -210,9 +210,6 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
 
         [body, vars, boundingi] = addInlineIndexFromArrayIndicesCode(blkParams,...
             Breakpoints,node_header,lus_backend)
-
-        body = addInlineIndexFromArrayIndices(...
-            inline_list,element,index)
         
         [body, vars, N_shape_node] = addNodeWeightsCode(node_inputs,...
             coords_node,blkParams,lus_backend)
@@ -236,8 +233,38 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
             blkParams.RndMeth = 'Round';
             blkParams.SaturateOnIntegerOverflow = 'off';
         end
-
-
+        
+        function com_create_nodes_code(obj,lus_backend,blkParams,inputs,...
+            outputs,preLookUpExtNode,interpolationExtNode,...
+            wrapperNode,blk)
+                        
+            if LusBackendType.isKIND2(lus_backend) ...
+                    && blkParams.NumberOfTableDimensions <= 3
+                contractBody = Lookup_nD_To_Lustre.getContractBody(...
+                    blkParams,inputs,outputs);
+                contract = LustreContract();
+                contract.setBodyEqs(contractBody);
+                interpolationExtNode.setLocalContract(contract);
+                if blkParams.NumberOfTableDimensions == 3
+                    %complicated to prove
+                    interpolationExtNode.setIsImported(true);
+                end
+            end
+            
+            [mainCode, main_vars] = obj.getMainCode(blk,outputs,inputs,...
+                wrapperNode,blkParams);
+            
+            if ~isempty(preLookUpExtNode)
+                obj.addExtenal_node(preLookUpExtNode);
+            end
+            if ~isempty(interpolationExtNode)
+                obj.addExtenal_node(interpolationExtNode);
+            end            
+            obj.addExtenal_node(wrapperNode);
+            obj.setCode(mainCode);
+            obj.addVariable(main_vars);
+        end
+        
     end
     
 end

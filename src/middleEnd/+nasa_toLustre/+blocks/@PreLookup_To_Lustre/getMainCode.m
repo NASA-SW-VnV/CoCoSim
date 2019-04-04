@@ -1,5 +1,5 @@
-function [mainCode, main_vars] = getMainCode(inputs,...
-    preLookupWrapperExtNode,blkParams)
+function [mainCode, main_vars] = getMainCode(~, ~,~,inputs,...
+    wrapperExtNode,blkParams)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -8,8 +8,7 @@ function [mainCode, main_vars] = getMainCode(inputs,...
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Pre_Lookup
 
-    main_vars = preLookupWrapperExtNode.outputs;
-    %vars{1} = nasa_toLustre.lustreAst.VarIdExpr(main_vars{1}.name);
+    main_vars = wrapperExtNode.outputs;
     vars{1} = nasa_toLustre.lustreAst.VarIdExpr(main_vars{1});
     
     
@@ -17,8 +16,7 @@ function [mainCode, main_vars] = getMainCode(inputs,...
         vars{2} = nasa_toLustre.lustreAst.VarIdExpr(main_vars{2});
     end
     
-    %numberOfActiveDimensions = blkParams.NumberOfTableDimensions;
     mainCode{1} = nasa_toLustre.lustreAst.LustreEq(vars, ...
-        nasa_toLustre.lustreAst.NodeCallExpr(preLookupWrapperExtNode.name, inputs{1}));
+        nasa_toLustre.lustreAst.NodeCallExpr(wrapperExtNode.name, inputs{1}));
 
 end

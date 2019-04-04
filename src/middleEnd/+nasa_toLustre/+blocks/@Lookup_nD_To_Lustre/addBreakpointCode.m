@@ -11,6 +11,7 @@ function [body,vars,Breakpoints] = ...
     % users.
     body = {};
     vars = {};    
+    Breakpoints = cell(1,blkParams.NumberOfAdjustedTableDimensions);
     % TODO allow for different type.
     for j = 1:blkParams.NumberOfAdjustedTableDimensions
         Breakpoints{j} = {};

@@ -43,9 +43,7 @@ function [mainCode, main_vars] = getMainCode(...
             obj.addExternal_libraries(external_lib);
         end
     end 
-    
-  
-    
+
     NumberOfAdjustedTableDimensions = ...
         blkParams.NumberOfAdjustedTableDimensions;
 

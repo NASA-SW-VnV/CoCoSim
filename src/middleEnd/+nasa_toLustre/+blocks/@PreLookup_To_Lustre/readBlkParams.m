@@ -74,8 +74,6 @@ function blkParams = readBlkParams(~,parent,blk,blkParams)
     end
     
     blkParams.RndMeth = blk.RndMeth;
-    blkParams.SaturateOnIntegerOverflow = 'off';
     
-
 end
 

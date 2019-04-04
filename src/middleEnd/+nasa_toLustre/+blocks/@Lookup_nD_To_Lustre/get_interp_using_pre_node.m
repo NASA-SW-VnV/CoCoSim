@@ -87,7 +87,7 @@ function extNode = get_interp_using_pre_node(...
     extNode = nasa_toLustre.lustreAst.LustreNode();
     extNode.setName(node_header.NodeName)
     extNode.setInputs(node_header.inputs);
-    extNode.setOutputs( node_header.outputs);
+    extNode.setOutputs(node_header.outputs);
     extNode.setLocalVars(vars_all);
     extNode.setBodyEqs(body_all);
     extNode.setMetaInfo('external node code for doing Interpolation Using PreLookup');

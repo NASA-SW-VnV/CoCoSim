@@ -6,7 +6,7 @@ function [mainCode, main_vars] = getMainCode(~, blk,outputs,inputs,...
     % All Rights Reserved.
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Lookup_nD
+    % LookupTableDynamic_To_Lustre
     
     outputDataType = blk.CompiledPortDataTypes.Outport{1};
     lus_out_type =...
@@ -20,15 +20,17 @@ function [mainCode, main_vars] = getMainCode(~, blk,outputs,inputs,...
         main_vars{outIdx} = ...
             nasa_toLustre.lustreAst.LustreVar(outputs{outIdx}, lus_out_type);
         
-        nodeCall_inputs = cell(1, numel(inputs));
-        for i=1:numel(inputs)
-            nodeCall_inputs{i} = inputs{i}{outIdx};
+        nodeCall_inputs = {};
+
+        nodeCall_inputs{end+1} = inputs{1}{outIdx};
+        for i=2:numel(inputs)
+            nodeCall_inputs = [nodeCall_inputs, inputs{i}];
         end
-        
+
         mainCode{outIdx} = nasa_toLustre.lustreAst.LustreEq(...
             outputs{outIdx}, nasa_toLustre.lustreAst.NodeCallExpr(...
             wrapperExtNode.name, nodeCall_inputs));
         
-    end
+    end  
     
 end

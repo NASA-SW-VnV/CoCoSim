@@ -1,5 +1,5 @@
 function extNode =  get_wrapper_node(...
-    ~,blk,inputs,outputs,preLookUpExtNode,blkParams)
+    ~,blk,~,outputs,preLookUpExtNode,blkParams)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
