@@ -22,7 +22,7 @@ function varargout = importLusReqFig(varargin)
 
 % Edit the above text to modify the response to help importLusReqFig
 
-% Last Modified by GUIDE v2.5 26-Mar-2019 19:08:28
+% Last Modified by GUIDE v2.5 03-Apr-2019 18:33:12
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -65,7 +65,8 @@ else
 end
 data = struct('gcs', gcs_path,...
     'lusPath', '', ...
-    'mappingPath', '');
+    'mappingPath', '', ...
+    'createNewFile','1');
 set(handles.figure1, 'UserData', data);
 % Update handles structure
 guidata(hObject, handles);
@@ -172,9 +173,21 @@ function importReqButton_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 try
     data = get(handles.figure1,'UserData');
-    importLusReq(data.gcs, data.lusPath, data.mappingPath);
+    importLusReq(data.gcs, data.lusPath, data.mappingPath, str2num(data.createNewFile));
 catch me
     display_msg(me.message, MsgType.ERROR, 'importLusReqFig', '');
     display_msg(me.getReport(), MsgType.DEBUG, 'importLusReqFig', '');
 end
 close(handles.figure1)
+
+
+% --- Executes on button press in radiobutton1.
+function radiobutton1_Callback(hObject, eventdata, handles)
+% hObject    handle to radiobutton1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of radiobutton1
+data = get(handles.figure1,'UserData');
+data.createNewFile = get(hObject,'String');
+set(handles.figure1,'UserData',data);

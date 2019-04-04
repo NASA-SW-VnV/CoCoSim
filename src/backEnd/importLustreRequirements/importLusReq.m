@@ -5,7 +5,7 @@
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function new_model_path = importLusReq(current_openedSS, lusFilePath, mappingPath)
+function new_model_path = importLusReq(current_openedSS, lusFilePath, mappingPath, createNewFile)
     %IMPORTLUSREQ takes a Simulink model and Lustre file to import it as
     %requirement attached to the simulink model
     global LUSTREC;
@@ -28,6 +28,10 @@ function new_model_path = importLusReq(current_openedSS, lusFilePath, mappingPat
         mappingPath = '';
     elseif nargin < 3
         mappingPath = '';
+    end
+    
+    if nargin < 4 
+        createNewFile = true;
     end
     
     
@@ -57,7 +61,7 @@ function new_model_path = importLusReq(current_openedSS, lusFilePath, mappingPat
         current_openedSS,...
         lus_IR_path,...
         mappingPath, ...
-        1);
+        createNewFile);
     if status
         return;
     end
