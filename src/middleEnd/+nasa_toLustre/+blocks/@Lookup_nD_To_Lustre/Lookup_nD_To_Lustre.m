@@ -169,7 +169,7 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
         create_lookup_nodes(obj,blk,lus_backend,blkParams,outputs,inputs)
 
         extNode =  get_wrapper_node(obj,blk,blkParams,inputs,...
-            outputs,preLookUpExtNode,interpolationExtNode)        
+            preLookUpExtNode,interpolationExtNode)        
         
         [mainCode, main_vars] = getMainCode(obj, blk,outputs,inputs,...
             lookupWrapperExtNode,blkParams)
@@ -185,7 +185,7 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
 %             getBlockInputsNames_convInType2AccType(parent, blk,...
 %             lookupTableType)
    
-        extNode = get_pre_lookup_node(lus_backend,blkParams)
+        extNode = get_pre_lookup_node(lus_backend,blkParams,inputs)
 
         extNode = get_interp_using_pre_node(blkParams, inputs)
  
@@ -204,7 +204,7 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
         
         [body, vars, retrieval_node] = addDirectLookupNodeCode(...
             blkParams,index_node,coords_node, coords_input ,...
-            Ast_dimJump,lus_backend)
+            Ast_dimJump,lus_backend,Breakpoints)
         
         shapeNodeSign = getShapeBoundingNodeSign(dims)
 
@@ -265,6 +265,27 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
             obj.addVariable(main_vars);
         end
         
+        function [output_conv_format, external_lib]  = ...
+                get_output_conv_format(blk,blkParams)
+            outputDataType = blk.CompiledPortDataTypes.Outport{1};
+            lus_out_type =...
+                nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(outputDataType);
+
+            if ~strcmp(lus_out_type,'real')
+                RndMeth = blkParams.RndMeth;
+                SaturateOnIntegerOverflow = blkParams.SaturateOnIntegerOverflow;
+                [external_lib, output_conv_format] =...
+                    nasa_toLustre.utils.SLX2LusUtils.dataType_conversion('real', ...
+                    lus_out_type, RndMeth, SaturateOnIntegerOverflow);
+            else
+                output_conv_format = {};
+                external_lib = {};                
+            end            
+        end
+        
+        extNode = get_Lookup_nD_Dynamic_wrapper(blkParams,inputs,...
+            preLookUpExtNode,interpolationExtNode)
+            
     end
     
 end

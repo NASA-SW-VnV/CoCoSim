@@ -18,28 +18,56 @@ function extNode = get_interp_using_pre_node(...
         node_header.outputs_name{1}, 'real'); 
     
     body_all = {};
-    vars_all = {};      
-    if blkParams.directLookup  
-        % node header inputs
+    vars_all = {};    
+    
+    % number of inputs to this node depends on both if it is dynamic and
+    % directLookup
+    if LookupType.isLookupDynamic(blkParams.lookupTableType)
+        if blkParams.directLookup
+            node_header.inputs_name = cell(1,1+numel(inputs{3}));
+            numDataBeforeTable = 1;
+        else
+            node_header.inputs_name = ...
+                cell(1,2*numBoundNodes+numel(inputs{3}));
+            numDataBeforeTable = 2*numBoundNodes;
+        end
+        node_header.inputs = ...
+            cell(1,numel(node_header.inputs_name));
+        % add in table data
+        for i=1:numel(inputs{3})
+            node_header.inputs_name{numDataBeforeTable+i} = ...
+                nasa_toLustre.lustreAst.VarIdExpr(sprintf('ydat_%d',i));
+            node_header.inputs{numDataBeforeTable+i} = ...
+                nasa_toLustre.lustreAst.LustreVar(...
+                node_header.inputs_name{numDataBeforeTable+i},'real');
+        end
+    else
+        if blkParams.directLookup
+            node_header.inputs_name = cell(1,1);
+        else
+            node_header.inputs_name = cell(1,2*numBoundNodes);
+        end
+        
+    end
+
+    [body, vars,table_elem] = ...
+        nasa_toLustre.blocks.Lookup_nD_To_Lustre.addTableCode(blkParams,...
+        node_header, inputs);
+    body_all = [body_all  body];
+    vars_all = [vars_all  vars];
+    
+    if blkParams.directLookup    
         node_header.inputs_name{1} = ...
-            nasa_toLustre.lustreAst.VarIdExpr('Inline_index_retrieval_node');
-        node_header.inputs{1} = nasa_toLustre.lustreAst.LustreVar(...
-            node_header.inputs_name{1}, 'int');   
-     
-        % declaring and defining table values
-        [body, vars,table_elem] = ...
-            nasa_toLustre.blocks.Lookup_nD_To_Lustre.addTableCode(blkParams,...
-            node_header, inputs);
-        body_all = [body_all  body];
-        vars_all = [vars_all  vars];        
+            nasa_toLustre.lustreAst.VarIdExpr('inline_index_solution');
+        node_header.inputs{1} = ...
+            nasa_toLustre.lustreAst.LustreVar(...
+            node_header.inputs_name{1},'int');
         bodyf = ...
             nasa_toLustre.blocks.Lookup_nD_To_Lustre.addInlineIndexFromArrayIndicesCode(...
             table_elem,node_header.outputs_name{1}, node_header.inputs_name{1});
         body_all = [body_all  bodyf];
     else
         % node header inputs
-        node_header.inputs = cell(1,2*numBoundNodes);
-        node_header.inputs_name = cell(1,2*numBoundNodes);        
         boundingi = cell(1, numBoundNodes);
         N_shape_node = cell(1, numBoundNodes);        
         for i=1:numBoundNodes
@@ -54,13 +82,6 @@ function extNode = get_interp_using_pre_node(...
             node_header.inputs_name{(i-1)*2+1} = boundingi{i};
             node_header.inputs_name{(i-1)*2+2} = N_shape_node{i};            
         end
-        
-        % declaring and defining table values
-        [body, vars,table_elem] = ...
-            nasa_toLustre.blocks.Lookup_nD_To_Lustre.addTableCode(blkParams,...
-            node_header,inputs);
-        body_all = [body_all  body];
-        vars_all = [vars_all  vars];
         
         [body, vars,u_node] = ...
             nasa_toLustre.blocks.Lookup_nD_To_Lustre.addUnodeCode(...
@@ -80,9 +101,6 @@ function extNode = get_interp_using_pre_node(...
         body_all{end+1} = nasa_toLustre.lustreAst.LustreEq(...
             node_header.outputs_name{1},rhs);
     end
-  
-        
-
 
     extNode = nasa_toLustre.lustreAst.LustreNode();
     extNode.setName(node_header.NodeName)

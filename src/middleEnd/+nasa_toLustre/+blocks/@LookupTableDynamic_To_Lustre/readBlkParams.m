@@ -15,6 +15,7 @@ function blkParams = readBlkParams(~,blk,inputs,blkParams)
     blkParams.BreakpointsForDimension{1} = inputs{2};
     % table
     blkParams.Table = inputs{3};
+    blkParams.numberTableData=numel(blkParams.Table);  
     % look up method
     if strcmp(blk.LookUpMeth, 'Interpolation-Extrapolation')
         blkParams.InterpMethod = 'Linear';

@@ -75,6 +75,7 @@ function blkParams = readBlkParams(~,parent,blk,blkParams)
                 parent, blk, blk.(sprintf('BreakpointsForDimension%d',i)));
         end
     end
+    blkParams.numberTableData = size(T);
     %cast breakpoints
     for i=1:blkParams.NumberOfTableDimensions
         T = blkParams.BreakpointsForDimension{i};

@@ -73,13 +73,7 @@ classdef PreLookup_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
             lookupWrapperExtNode,blkParams)     
         
     end
-    
-    methods(Static)
-        
-        extNode =  get_wrapper_ext_node(...
-            blk,inputs,outputs,preLookUpExtNode,blkParams)
 
-    end
     
 end
 

@@ -35,10 +35,16 @@ function [body,vars,table_elem] = addTableCode(blkParams,...
         %         % error:  we don't support more than 7
         %     end
     else
-        table_elem = cell(1, numel(blkParams.Table));
-        body = cell(1, numel(blkParams.Table));
-        vars = cell(1, numel(blkParams.Table));
-        for i=1:numel(blkParams.Table)
+        numBoundNodes = 2^blkParams.NumberOfAdjustedTableDimensions;
+        if LookupType.isLookupDynamic(blkParams.lookupTableType)
+            numberTableData = blkParams.numberTableData;  
+        else
+            numberTableData = numel(blkParams.Table);    
+        end
+        table_elem = cell(1, numberTableData);
+        body = cell(1, numel(numberTableData));
+        vars = cell(1, numel(numberTableData));
+        for i=1:numberTableData
             table_elem{i} = nasa_toLustre.lustreAst.VarIdExpr(...
                 sprintf('table_elem_%d',i));
             vars{i} = nasa_toLustre.lustreAst.LustreVar(...
@@ -47,11 +53,15 @@ function [body,vars,table_elem] = addTableCode(blkParams,...
                 body{i} = nasa_toLustre.lustreAst.LustreEq(table_elem{i}, ...
                     nasa_toLustre.lustreAst.RealExpr(blkParams.Table(i)));
             else
-                body{i} = nasa_toLustre.lustreAst.LustreEq(table_elem{i}, ...
-                    node_header.inputs_name{3}{i});
+                if blkParams.directLookup
+                    body{i} = nasa_toLustre.lustreAst.LustreEq(table_elem{i}, ...
+                        node_header.inputs_name{1+i});
+                else
+                    body{i} = nasa_toLustre.lustreAst.LustreEq(table_elem{i}, ...
+                        node_header.inputs_name{2*numBoundNodes+i});
+                end
             end
-
-
         end
+        
     end
 end

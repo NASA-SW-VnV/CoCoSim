@@ -1,4 +1,4 @@
-function extNode =  get_pre_lookup_node(lus_backend,blkParams)
+function extNode =  get_pre_lookup_node(lus_backend,blkParams,inputs)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -13,16 +13,35 @@ function extNode =  get_pre_lookup_node(lus_backend,blkParams)
         blkParams.blk_name);  
   
     % node_header inputs
-    node_header.inputs = cell(1, NumberOfAdjustedTableDimensions);
-    node_header.inputs_name = cell(1, NumberOfAdjustedTableDimensions);    
-    for i=1:NumberOfAdjustedTableDimensions
-        node_header.inputs_name{i} = nasa_toLustre.lustreAst.VarIdExpr(...
-            sprintf('dim%d_coord_in',i));
-        node_header.inputs{i} = ...
-            nasa_toLustre.lustreAst.LustreVar(...
-            node_header.inputs_name{i}, 'real');       
-    end    
- 
+    if LookupType.isLookupDynamic(blkParams.lookupTableType)
+        % if lookup table dynamic, inputs{1} is x, inputs{2} is xdat
+        % inputs{3} is ydat and not needed     
+        node_header.inputs = cell(1, 1+numel(inputs{2}));
+        node_header.inputs_name = cell(1, 1+numel(inputs{2}));
+        node_header.inputs_name{1} = ...
+            nasa_toLustre.lustreAst.VarIdExpr('x_in');
+        node_header.inputs{1} = nasa_toLustre.lustreAst.LustreVar(...
+            node_header.inputs_name{1}, 'real');
+        for i=1:numel(inputs{2})
+            node_header.inputs_name{1+i} = ...
+                nasa_toLustre.lustreAst.VarIdExpr(sprintf('xdat_%d',i));            
+            node_header.inputs{1+i} = nasa_toLustre.lustreAst.LustreVar(...
+                node_header.inputs_name{1+i}, 'real');
+        end
+    else
+        % if not lookup table dynamic, number of inputs equal number of
+        % dimensions
+        node_header.inputs = cell(1, NumberOfAdjustedTableDimensions);
+        node_header.inputs_name = cell(1, NumberOfAdjustedTableDimensions);
+        for i=1:NumberOfAdjustedTableDimensions
+            node_header.inputs_name{i} = nasa_toLustre.lustreAst.VarIdExpr(...
+                sprintf('dim%d_coord_in',i));
+            node_header.inputs{i} = ...
+                nasa_toLustre.lustreAst.LustreVar(...
+                node_header.inputs_name{i}, 'real');
+        end
+    end
+    
     body_all = {};
     vars_all = {};    
     % doing subscripts to index in Lustre.  Need subscripts, and
@@ -72,7 +91,7 @@ function extNode =  get_pre_lookup_node(lus_backend,blkParams)
         [body, vars, direct_lookup_node] = ...
             nasa_toLustre.blocks.Lookup_nD_To_Lustre.addDirectLookupNodeCode(...
             blkParams,index_node,coords_node, node_header.inputs_name,...
-            Ast_dimJump,lus_backend);
+            Ast_dimJump,lus_backend,Breakpoints);
         
         body{end+1} = nasa_toLustre.lustreAst.LustreEq(...
             nh_out_name{1}, direct_lookup_node);
