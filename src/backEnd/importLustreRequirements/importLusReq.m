@@ -65,6 +65,6 @@ function new_model_path = importLusReq(current_openedSS, lusFilePath, mappingPat
     if status
         return;
     end
-    
+    display_msg('Generating Req Completed', MsgType.RESULT, 'importLusReq', '');
 end
 
