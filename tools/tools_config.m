@@ -117,59 +117,59 @@ else
     % $ pip install wllvm
     % ```
     
-    % put Clang path here
-    [status, CLANG_PATH] = system('which clang');
-    if isempty(status) || status~=0 || isempty(CLANG_PATH) || isnumeric(CLANG_PATH)
-        CLANG_PATH = 'Path_to_llvm/bin/clang';
-    end
-    setenv('PATH',[CLANG_PATH ':' getenv('PATH')  ])
-    
-    % wllvm path should contains wllvm wllvm++ and extract-bc
-    [status, WLLVM_PATH] = system('which wllvm');
-    if isempty(status) || status~=0 || isempty(WLLVM_PATH) || isnumeric(WLLVM_PATH)
-        % put your wllvm path here instead of mine
-        WLLVM_PATH = 'path_to_WLLVM';
-    end
-    
-    WLLVM = fullfile(WLLVM_PATH,'wllvm');
-    WLLVMPP = fullfile(WLLVM_PATH,'wllvm++');
-    EXTRACT_BC = fullfile(WLLVM_PATH,'extract-bc');
-    [status, IKOS] = system('which ikos');
-    if isempty(status) || status~=0 || isempty(IKOS) || isnumeric(IKOS)
-        IKOS = 'path_to_IKOS';
-    end
-    
-    
-    if ~tools_config_already_run
-        if ~exist(WLLVM,'file')
-            display_msg(...
-                sprintf('WLLVM is not found in %s, configure your path in config.m', WLLVM), ...
-                MsgType.WARNING, 'tools_config', '');
-            display_msg('You can ignore the previous warning if you are not going to use IKOS for analyzing C code', ...
-                MsgType.WARNING, 'tools_config', '');
-        end
-        if ~exist(WLLVMPP,'file')
-            display_msg(...
-                sprintf('WLLVMPP is not found in %s, configure your path in config.m', WLLVMPP), ...
-                MsgType.WARNING, 'tools_config', '');
-            display_msg('You can ignore the previous warning if you are not going to use IKOS for analyzing C code', ...
-                MsgType.WARNING, 'tools_config', '');
-        end
-        if ~exist(EXTRACT_BC,'file')
-            display_msg(...
-                sprintf('EXTRACT_BC is not found in %s, configure your path in config.m', EXTRACT_BC), ...
-                MsgType.WARNING, 'tools_config', '');
-            display_msg('You can ignore the previous warning if you are not going to use IKOS for analyzing C code', ...
-                MsgType.WARNING, 'tools_config', '');
-        end
-        if ~exist(IKOS,'file')
-            display_msg(...
-                sprintf('IKOS is not found in %s, configure your path in config.m', IKOS), ...
-                MsgType.WARNING, 'tools_config', '');
-            display_msg('You can ignore the previous warning if you are not going to use IKOS for analyzing C code', ...
-                MsgType.WARNING, 'tools_config', '');
-        end
-    end
+%     % put Clang path here
+%     [status, CLANG_PATH] = system('which clang');
+%     if isempty(status) || status~=0 || isempty(CLANG_PATH) || isnumeric(CLANG_PATH)
+%         CLANG_PATH = 'Path_to_llvm/bin/clang';
+%     end
+%     setenv('PATH',[CLANG_PATH ':' getenv('PATH')  ])
+%     
+%     % wllvm path should contains wllvm wllvm++ and extract-bc
+%     [status, WLLVM_PATH] = system('which wllvm');
+%     if isempty(status) || status~=0 || isempty(WLLVM_PATH) || isnumeric(WLLVM_PATH)
+%         % put your wllvm path here instead of mine
+%         WLLVM_PATH = 'path_to_WLLVM';
+%     end
+%     
+%     WLLVM = fullfile(WLLVM_PATH,'wllvm');
+%     WLLVMPP = fullfile(WLLVM_PATH,'wllvm++');
+%     EXTRACT_BC = fullfile(WLLVM_PATH,'extract-bc');
+%     [status, IKOS] = system('which ikos');
+%     if isempty(status) || status~=0 || isempty(IKOS) || isnumeric(IKOS)
+%         IKOS = 'path_to_IKOS';
+%     end
+%     
+%     
+%     if ~tools_config_already_run
+%         if ~exist(WLLVM,'file')
+%             display_msg(...
+%                 sprintf('WLLVM is not found in %s, configure your path in config.m', WLLVM), ...
+%                 MsgType.WARNING, 'tools_config', '');
+%             display_msg('You can ignore the previous warning if you are not going to use IKOS for analyzing C code', ...
+%                 MsgType.WARNING, 'tools_config', '');
+%         end
+%         if ~exist(WLLVMPP,'file')
+%             display_msg(...
+%                 sprintf('WLLVMPP is not found in %s, configure your path in config.m', WLLVMPP), ...
+%                 MsgType.WARNING, 'tools_config', '');
+%             display_msg('You can ignore the previous warning if you are not going to use IKOS for analyzing C code', ...
+%                 MsgType.WARNING, 'tools_config', '');
+%         end
+%         if ~exist(EXTRACT_BC,'file')
+%             display_msg(...
+%                 sprintf('EXTRACT_BC is not found in %s, configure your path in config.m', EXTRACT_BC), ...
+%                 MsgType.WARNING, 'tools_config', '');
+%             display_msg('You can ignore the previous warning if you are not going to use IKOS for analyzing C code', ...
+%                 MsgType.WARNING, 'tools_config', '');
+%         end
+%         if ~exist(IKOS,'file')
+%             display_msg(...
+%                 sprintf('IKOS is not found in %s, configure your path in config.m', IKOS), ...
+%                 MsgType.WARNING, 'tools_config', '');
+%             display_msg('You can ignore the previous warning if you are not going to use IKOS for analyzing C code', ...
+%                 MsgType.WARNING, 'tools_config', '');
+%         end
+%     end
     %%
     cocosim_version = 'v0.1';
     tools_config_already_run = true;
