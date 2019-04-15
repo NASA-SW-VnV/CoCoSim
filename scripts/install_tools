@@ -55,9 +55,6 @@ kind2_url="https://github.com/kind2-mc/kind2.git"
 kind2_branch="develop"
 
 
-
-
-
 ################
 # Main program #
 ################
@@ -599,6 +596,7 @@ if (( ! spacer_failed )); then
         error_msg "spacer is not properly installed"
         spacer_failed=1
     fi
+
     if (( ! spacer_failed )); then
         version=$(spacer_parse_version z3) || {
             error_parse_version spacer;

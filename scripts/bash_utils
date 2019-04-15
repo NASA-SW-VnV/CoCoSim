@@ -278,7 +278,10 @@ function git_clone() {
     if [[ -d "$dirname" ]]; then
         progress "Using already downloaded $dirname from $url branch $branch"
         cd "$dirname"
+<<<<<<< HEAD
         git pull
+=======
+>>>>>>> 3d28930fb4630c7aab05a51f94f572d0cea6a78b
         git checkout $branch
     else
         progress "Downloading $url branch $branch"
