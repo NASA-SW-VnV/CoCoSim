@@ -6,6 +6,27 @@ function extNode = get_interp_using_pre_node(...
     % All Rights Reserved.
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % This function generate Lustre external node that will return y value
+    % (solution).  
+    % There are 2 very different solution methods: 
+    % 1.  the direct lookup method in which the
+    % y value at a breakpoint is the solution.  This is just an element of
+    % the table defined by the user.  For this method, the input is the
+    % inline index of the solution. This function then just return the
+    % corresponding table element.
+    % 2.  the interpolation method in which the solution is interpolated
+    % from the polytop that surround the input point.
+    % The inputs to this function are the inline indices and the weights of
+    % the polytop (nodes surrounding the input point).  4 inputs are
+    % required for each dimention.  Inline index of the lower bounding
+    % node, weight of the lower bounding node, inline index of the
+    % upper bounding node, and weight of the upper bounding node.  The y
+    % solution is then just sumation of y(node i)*weight(node i) where i
+    % is all nodes in the polytop.  The number of nodes in the polytop is
+    % numBoundNodes.  
+    % For Dynamic lookup the table values are also input
+    % after the solution index for direct lookup or node indices and 
+    % weights for interpolated method.
 
     numBoundNodes = 2^blkParams.NumberOfAdjustedTableDimensions;
     
