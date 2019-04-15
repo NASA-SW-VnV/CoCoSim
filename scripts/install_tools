@@ -857,8 +857,11 @@ if command_exists source; then
 else
     source_cmd="."
 fi
-
-success "Cocosim dependencies have been successfully installed"
+if [ $lustrec_failed -eq 1 -o $kind2_failed -eq 1 ]; then
+    error_msg "Some of the dependencies has failed, check error messages above."
+else
+    success "Main cocosim dependencies have been successfully installed"
+fi
 info "To use cocosim dependencies lustrec, zustre, kind2. first run:"
 info "$ $source_cmd $install_dir/activate"
 info "You should consider adding this in your .bashrc"

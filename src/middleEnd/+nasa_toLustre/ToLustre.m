@@ -21,13 +21,14 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, abstractedBlo
     global TOLUSTRE_ENUMS_MAP TOLUSTRE_ENUMS_CONV_NODES ...
         KIND2 Z3 JLUSTRE2KIND LUSTREC CHECK_SF_ACTIONS ...
         ERROR_MSG WARNING_MSG DEBUG_MSG COCOSIM_DEV_DEBUG...
-        DED_PROP_MAP CoCoSimPreferences;
+        DED_PROP_MAP CoCoSimPreferences ir_handle_struct_map;
     ERROR_MSG = {};
     WARNING_MSG = {};
     DEBUG_MSG = {};
     if isempty(LUSTREC) || isempty(KIND2)
         tools_config;
     end
+    ir_handle_struct_map = containers.Map('KeyType','double', 'ValueType','any');
     TOLUSTRE_ENUMS_MAP = containers.Map('KeyType', 'char', 'ValueType', 'any');
     TOLUSTRE_ENUMS_CONV_NODES = {};
     % This map takes as keys the Properties ID and as value the type of check

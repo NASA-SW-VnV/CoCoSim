@@ -6,6 +6,10 @@ function [SignalsInputsMap, OutputSignals] = getSignalMap(obj, blk, inputs)
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %
+    persistent Signals_Width_Map_Log;
+    if isempty(Signals_Width_Map_Log)
+        Signals_Width_Map_Log = containers.Map('KeyType', 'char', 'ValueType', 'int32');
+    end
     % everything is inlined
     InportDimensions = blk.CompiledPortDimensions.Inport;
     OutportWidths = blk.CompiledPortWidths.Outport;
@@ -51,6 +55,30 @@ function [SignalsInputsMap, OutputSignals] = getSignalMap(obj, blk, inputs)
             if ~isKey(Signals_Width_Map, inputSignalsInlined{i})
                 Signals_Width_Map(inputSignalsInlined{i}) = inport_cell_dimension{i}.width;
             end
+        end
+    else
+        % TODO: this solution should be improved.
+        try
+            mdl_name = bdroot(blk.Origin_path);
+            for i=1:length(inputSignalsInlined)
+                if ~isKey(Signals_Width_Map, inputSignalsInlined{i})
+                    if isKey(Signals_Width_Map_Log, fullfile(mdl_name, inputSignalsInlined{i}))
+                        % use previously computed value
+                        Signals_Width_Map(inputSignalsInlined{i}) = Signals_Width_Map_Log(fullfile(mdl_name, inputSignalsInlined{i}));
+                    else
+                        l = find_system(mdl_name,'FindAll','on','type','line', 'Name', inputSignalsInlined{i});
+                        if ~isempty(l)
+                            SrcHandle = get_param(l(1), 'SrcPortHandle');
+                            w = SLXUtils.getCompiledParam(SrcHandle, 'CompiledPortWidth');
+                            Signals_Width_Map(inputSignalsInlined{i}) = w;
+                            % to make name unique to a model use mdl_name as prefix.
+                            Signals_Width_Map_Log(fullfile(mdl_name, inputSignalsInlined{i})) = w;
+                        end
+                    end
+                end
+            end
+        catch
+            %ignore if not succeeded
         end
     end
     SignalsInputsMap = nasa_toLustre.blocks.BusSelector_To_Lustre.signalInputsUsingDimensions(...
