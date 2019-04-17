@@ -1,5 +1,5 @@
 function [unsupportedOptions, ...
-        status,...
+        failed,...
         model_full_path, ...
         ir_struct, ...
         output_dir, ...
@@ -50,7 +50,7 @@ function [unsupportedOptions, ...
     
     %% initialize result
     unsupportedOptions = {};
-    status = 0;
+    failed = 0;
     ir_struct = {};
     output_dir = '';
     abstractedBlocks = {};
@@ -64,7 +64,7 @@ function [unsupportedOptions, ...
         model_full_path = model_path;
     end
     if ~exist(model_full_path, 'file')
-        status = 1;
+        failed = 1;
         error('Model "%s" Does not exist', model_path);
     end
     %% Save current path
@@ -77,8 +77,8 @@ function [unsupportedOptions, ...
     %% Pre-process model
     display_msg('Pre-processing', MsgType.INFO, 'ToLustreUnsupportedBlocks', '');
     varargin{end+1} = nasa_toLustre.utils.ToLustreOptions.SKIP_DEFECTED_PP;
-    [new_file_name, status] = cocosim_pp(model_full_path , varargin{:});
-    if status
+    [new_file_name, failed] = cocosim_pp(model_full_path , varargin{:});
+    if failed
         return;
     end
     %% Update model path with the pre-processed model
@@ -89,7 +89,7 @@ function [unsupportedOptions, ...
             open(model_full_path);
         end
     else
-        status = 1;
+        failed = 1;
         display_msg('Pre-processing has failed', MsgType.ERROR, 'ToLustreUnsupportedBlocks', '');
         return;
     end

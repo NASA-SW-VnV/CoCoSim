@@ -140,11 +140,17 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, abstractedBlo
         
         if ~forceGeneration && (failed || ~isempty(unsupportedOptions))
             failed = true;
+            display_msg('Model is not supported. See errors above.', MsgType.ERROR, 'ToLustre', '');
             return;
         end
     catch me
         display_msg(me.getReport(), MsgType.DEBUG, 'ToLustre', '');
         failed = 1;
+        display_msg('Model is not supported. See errors above.', MsgType.ERROR, 'ToLustre', '');
+        return;
+    end
+    if failed
+        display_msg('Model is not supported. See errors above.', MsgType.ERROR, 'ToLustre', '');
         return;
     end
     [~, file_name, ~] = fileparts(pp_model_full_path);
@@ -168,7 +174,15 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, abstractedBlo
     % add enumeration nodes
     % Lustre code
     global model_struct
-    model_struct = ir_struct.(IRUtils.name_format(file_name));
+    main_fieldName = IRUtils.name_format(file_name);
+    if ~isfield(ir_struct, main_fieldName)
+        display_msg(...
+            sprintf('Internal structure of the model has no field called "%s". Translation will be terminated.', main_fieldName),...
+            MsgType.ERROR, 'ToLustre', '');
+        failed = 1;
+        return;
+    end
+    model_struct = ir_struct.(main_fieldName);
     main_sampleTime = model_struct.CompiledSampleTime;
     is_main_node = 1;
     [nodes_ast, contracts_ast, external_libraries, failed] = recursiveGeneration(...

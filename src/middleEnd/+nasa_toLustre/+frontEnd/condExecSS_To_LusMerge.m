@@ -173,16 +173,28 @@ function [body, variables_cell] =...
             isEnabledVar =...
                 nasa_toLustre.lustreAst.VarIdExpr(activate_cond);
         else
-            clock_var_name = strcat(activate_cond, '_clock');
-            variables_cell{end + 1} = nasa_toLustre.lustreAst.LustreVar(clock_var_name, 'bool clock');
-            isEnabledVar = nasa_toLustre.lustreAst.VarIdExpr(clock_var_name);
+            enabled_clock_var_name = strcat(activate_cond, '_clock');
+            variables_cell{end + 1} = nasa_toLustre.lustreAst.LustreVar(...
+                enabled_clock_var_name, 'bool clock');
+            isEnabledVar = nasa_toLustre.lustreAst.VarIdExpr(enabled_clock_var_name);
             body{end+1} = nasa_toLustre.lustreAst.LustreEq(isEnabledVar, ...
                 nasa_toLustre.lustreAst.VarIdExpr(activate_cond));
         end
         
         if is_restart
-            restart_cond = nasa_toLustre.utils.SLX2LusUtils.getResetCode(...
+            reset_cond = nasa_toLustre.utils.SLX2LusUtils.getResetCode(...
                 'rising', 'bool', isEnabledVar );
+            if LusBackendType.isKIND2(lus_backend)
+                restart_cond = reset_cond;
+            else
+                reset_clock_var_name = strcat(activate_cond, '_reset_clock');
+                variables_cell{end + 1} = nasa_toLustre.lustreAst.LustreVar(...
+                    reset_clock_var_name, 'bool clock');
+                restart_cond = nasa_toLustre.lustreAst.VarIdExpr(...
+                    reset_clock_var_name);
+                body{end+1} = nasa_toLustre.lustreAst.LustreEq(restart_cond, ...
+                    reset_cond);
+            end
         else
             restart_cond = {};
         end

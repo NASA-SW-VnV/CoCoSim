@@ -17,7 +17,13 @@ function reg_delete(basedir, reg_exp)
         files_path = {};
     end
     for i=1:numel(files_path)
-        delete(files_path{i});
+        display(files_path{i})
+        if exist(files_path{i}, 'dir')
+            rmdir(files_path{i}, 's');
+        elseif exist(files_path{i}, 'file')
+            delete(files_path{i});
+        end
+            
     end
 end
 

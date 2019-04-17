@@ -1,4 +1,4 @@
-function [new_file_path, status] = cocosim_pp(model_path, varargin)
+function [new_file_path, failed] = cocosim_pp(model_path, varargin)
     % COCOSIM_PP pre-process complexe blocks in Simulink model into basic ones. 
     % This is a generic function that use pp_config as a configuration file that decides
     % which libraries to use and in which order to call the blocks functions.
@@ -48,7 +48,7 @@ function [new_file_path, status] = cocosim_pp(model_path, varargin)
             use_backup = 1;
         end
     end
-    status = 0;
+    failed = 0;
     if skip_pp
         display_msg('SKIP_PP flag is given, the pre-processing will be skipped.', MsgType.INFO, 'PP', '');
         new_file_path = model_path;
@@ -81,8 +81,10 @@ function [new_file_path, status] = cocosim_pp(model_path, varargin)
     %BreakUserLinks
     save_system(new_model_base,[],'BreakUserLinks',true)
     %% Make sure model compile
-    status = CompileModelCheck_pp( new_model_base );
-    if status
+    failed = CompileModelCheck_pp( new_model_base );
+    if failed
+        msg = sprintf('Make sure model "%s" can be compiled', new_model_base);
+        errordlg(msg, 'CoCoSim_PP') ;
         return;
     end
     %% check if there is no need for pre-processing if the model was not changed from the last pp.
@@ -187,8 +189,8 @@ function [new_file_path, status] = cocosim_pp(model_path, varargin)
         open(new_file_path);
     end
     %% Make sure model compile
-    status = CompileModelCheck_pp( new_model_base );
-    if status
+    failed = CompileModelCheck_pp( new_model_base );
+    if failed
         return;
     end
     % Exporting the model to the mdl CoCoSim compatible file format
