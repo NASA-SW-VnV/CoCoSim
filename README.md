@@ -1,11 +1,5 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Copyright (c) 2017 United States Government as represented by the
-% Administrator of the National Aeronautics and Space Administration.
-% All Rights Reserved.
-% Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
- 
-# CoCoSim
+CoCoSim
+=======
 
 CoCoSim is an automated analysis and code generation framework for
 Simulink and Stateflow models. Specifically, CoCoSim can be used to
@@ -14,7 +8,26 @@ CoCoSim can be used to generate C and/or Rust code.
 CoCoSim uses various model checkers for verification (Zustre, Kind2, JKind).
 CoCoSim is currently under development. We welcome any feedback and bug report.
 
-[![ScreenCast of CoCoSim](http://i.imgur.com/itLte0X.png)](https://youtu.be/dcs8GOeFI9c)
+License
+-------
+
+IKOS has been released under the NASA Open Source Agreement.
+
+Contact
+-------
+
+hamza.bourbouh@nasa.gov
+
+Release notes
+-------------
+
+See [RELEASE_NOTES.md](RELEASE_NOTES.md)
+
+Troubleshooting
+---------------
+
+See [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
+
 
 ## Installation
 

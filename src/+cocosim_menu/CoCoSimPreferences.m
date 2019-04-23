@@ -17,8 +17,9 @@ classdef CoCoSimPreferences < handle
         verificationTimeout = 1200; % In seconds
         lustreCompiler = 'NASA';% possible values are {'NASA', 'IOWA'}
         lustreBackend = LusBackendType.KIND2; % see LusBackendType for possible values
-        dedChecks = {CoCoBackendType.DED_DIVBYZER,CoCoBackendType.DED_INTOVERFLOW ,...
-            CoCoBackendType.DED_OUTOFBOUND, CoCoBackendType.DED_OUTMINMAX }; % check CoCoBackendType for Design Error Detection values
+        dedChecks = {CoCoBackendType.DED_OUTMINMAX}; 
+        %{CoCoBackendType.DED_DIVBYZER,CoCoBackendType.DED_INTOVERFLOW ,...
+         %   CoCoBackendType.DED_OUTOFBOUND, CoCoBackendType.DED_OUTMINMAX }; % check CoCoBackendType for Design Error Detection values
         DED_OUTOFBOUND = 'Out of Bound Array Access';
     end
     
@@ -66,6 +67,10 @@ classdef CoCoSimPreferences < handle
             save(preferencesFile, 'CoCoSimPreferences');
         end
         
+        function delete()
+            preferencesFile = cocosim_menu.CoCoSimPreferences.getPreferencesMatPath();
+            delete(preferencesFile); 
+        end
         function msg = getChangeModelCheckerMsg()
             msg = 'To change the default model checker go to "tools -> CoCoSim -> Preferences -> Lustre Verification Backend".';
         end

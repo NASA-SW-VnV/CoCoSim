@@ -19,7 +19,8 @@ function schema = preferences_menu(callbackInfo)
         {@getLustreBackend, CoCoSimPreferences}, ...
         {@getKind2Options, CoCoSimPreferences}, ...
         {@PreferencesMenu.getVerificationTimeout, CoCoSimPreferences}, ...
-        {@getDEDChecks, CoCoSimPreferences}...
+        {@getDEDChecks, CoCoSimPreferences}, ...
+        @resetSettings ...
         };
 end
 
@@ -79,12 +80,18 @@ end
 function schema = lustreBackendCallback(backendName, CoCoSimPreferences, varargin)
     schema = sl_toggle_schema;
     schema.label = backendName;
-    
+    if ~strcmp(backendName, LusBackendType.KIND2)
+        schema.state = 'Disabled';
+        schema.label = strcat(backendName, ' (Currently unsupported)');
+    else
+        schema.label = backendName;
+    end
     if isequal(backendName, CoCoSimPreferences.lustreBackend)
         schema.checked = 'checked';
     else
         schema.checked = 'unchecked';
     end
+    
     schema.callback = @(x) setBackendOption(backendName, ...
         CoCoSimPreferences, x);
 end
@@ -127,8 +134,12 @@ end
 
 function schema = checkNameCallback(checkName, CoCoSimPreferences, varargin)
     schema = sl_toggle_schema;
-    schema.label = checkName;
-    
+    if ~strcmp(checkName, CoCoBackendType.DED_OUTMINMAX)
+        schema.state = 'Disabled';
+        schema.label = strcat(checkName, ' (Work in progress)');
+    else
+        schema.label = checkName;
+    end
     if ismember(checkName, CoCoSimPreferences.dedChecks)
         schema.checked = 'checked';
     else
@@ -146,4 +157,13 @@ function setCheckOption(checkName, CoCoSimPreferences, varargin)
         CoCoSimPreferences.dedChecks{end+1} = checkName;
     end
     cocosim_menu.CoCoSimPreferences.save(CoCoSimPreferences);
+end
+
+%% Reset Settings
+function schema = resetSettings(varargin)
+    schema = sl_action_schema;
+    schema.label = 'Reset preferences';
+    schema.statustip = 'Reset preferences';
+    schema.autoDisableWhen = 'Busy';
+    schema.callback = @(x) cocosim_menu.CoCoSimPreferences.delete();
 end
