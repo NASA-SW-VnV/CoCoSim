@@ -97,6 +97,7 @@ function blkParams = readBlkParams(~,parent,blk,blkParams)
             end
         end
     end
+
     blkParams.InterpMethod = blk.InterpMethod;
     blkParams.ExtrapMethod = blk.ExtrapMethod;
     blkParams.directLookup = 0;
@@ -114,6 +115,11 @@ function blkParams = readBlkParams(~,parent,blk,blkParams)
     
     blkParams.RndMeth = blk.RndMeth;
     blkParams.SaturateOnIntegerOverflow = blk.SaturateOnIntegerOverflow;
+    
+    % calculate dimJump and boundNodeOrder
+    blkParams = ...
+        nasa_toLustre.blocks.Lookup_nD_To_Lustre.addCommonData2BlkParams(...
+        blkParams);
 
 end
 
