@@ -20,7 +20,10 @@ function [new_model_name, status] = makeharness(T, subsys_path, output_dir, post
                 MsgType.ERROR, 'makeharness', '');
             return;
         end
-        if ~isfield(T(1), 'time') || ~isfield(T(1), 'signals')
+        TisDataSet = false;
+        if isa(T, 'Simulink.SimulationData.Dataset')
+            TisDataSet = true;
+        elseif ~isfield(T(1), 'time') || ~isfield(T(1), 'signals')
             display_msg('Tests struct should have "signals" and "time" field"',...
                 MsgType.ERROR, 'makeharness', '');
             return;
@@ -152,22 +155,65 @@ function [new_model_name, status] = makeharness(T, subsys_path, output_dir, post
         % add signal builder signal
         try
             % for tests with one step should be adapted
-            for i=1:numel(T)
-                if numel(T(i).time) == 1
-                    T(i).time(2) = sampleTime(1);
-                    for j=1:numel( T(i).signals)
-                        T(i).signals(j).values(2) = T(i).signals(j).values(1);
+            if TisDataSet
+                % case of Simulink dataset
+                for i=1:length(T)
+                    ds = T(i);
+                    nbSignals = length(ds.getElementNames);
+                    for j=1:nbSignals
+                        if length(ds{j}.Values.Time) == 1
+                            ds{j}.Values.Time(2) = sampleTime(1);
+                            ds{j}.Values.Data(2) = ds{j}.Values.Data(1);
+                        end
+                    end
+                    T(i) = ds;
+                end
+            else
+                % case of struct with signals and time.
+                for i=1:numel(T)
+                    if numel(T(i).time) == 1
+                        T(i).time(2) = sampleTime(1);
+                        for j=1:numel( T(i).signals)
+                            T(i).signals(j).values(2) = T(i).signals(j).values(1);
+                        end
                     end
                 end
             end
             signalBuilderName = fullfile(newBaseName, 'Inputs');
-            signalbuilder(signalBuilderName, 'create', T(1).time, arrayfun(@(x) {double(x.values)}, T(1).signals)');
-            stopTime = T(1).time(end) + 0.0000000000001;
+            if TisDataSet
+                ds = T(1);
+                nbSignals = length(ds.getElementNames);
+                signalbuilder(signalBuilderName, 'create', ds{1}.Values.Time,...
+                    arrayfun(@(j) {double(ds{j}.Values.Data)}, (1:nbSignals))');
+            else
+                signalbuilder(signalBuilderName, 'create', T(1).time,...
+                    arrayfun(@(x) {double(x.values)}, T(1).signals)');
+            end
+            if TisDataSet
+                % we assume all signals in the same dataset have the same Time.
+                ds = T(1);
+                stopTime = ds{1}.Values.Time(end) + 0.0000000000001;
+            else
+                stopTime = T(1).time(end) + 0.0000000000001;
+            end
             for i=2:numel(T)
                 try
-                    signalbuilder(signalBuilderName, 'appendgroup', T(i).time, arrayfun(@(x) {double(x.values)}, T(i).signals)');
-                    if T(i).time(end) > stopTime
-                        stopTime = T(i).time(end) + 0.0000000000001;
+                    if TisDataSet
+                        ds = T(i);
+                        nbSignals = length(ds.getElementNames);
+                        signalbuilder(signalBuilderName, 'appendgroup', ...
+                            ds{1}.Values.Time, ...
+                            arrayfun(@(j) {double(ds{j}.Values.Data)}, (1:nbSignals))');
+                        if ds{1}.Values.Time(end) > stopTime
+                            stopTime = ds{1}.Values.Time(end) + 0.0000000000001;
+                        end
+                    else
+                        signalbuilder(signalBuilderName, 'appendgroup', ...
+                            T(i).time, ...
+                            arrayfun(@(x) {double(x.values)}, T(i).signals)');
+                        if T(i).time(end) > stopTime
+                            stopTime = T(i).time(end) + 0.0000000000001;
+                        end
                     end
                 catch me
                     display_msg(me.getReport(), MsgType.DEBUG, 'makeharness', '');

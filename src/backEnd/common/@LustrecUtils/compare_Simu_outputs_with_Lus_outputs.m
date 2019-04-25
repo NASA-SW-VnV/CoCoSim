@@ -16,8 +16,8 @@ function [valid, cex_msg, diff_name, diff] = ...
         time)
     diff_name = '';
     diff = 0;
-    numberOfOutputs = numel(yout.getElementNames);
-    numberOfInports = numel(input_dataset.getElementNames);
+    numberOfOutputs = length(yout.getElementNames);
+    numberOfInports = length(input_dataset.getElementNames);
     valid = true;
     cex_msg = {};
     index_out = 0;
