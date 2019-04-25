@@ -24,7 +24,7 @@ function RandomCallback(varargin)
     try
         model_full_path = MenuUtils.get_file_name(gcs);
         MenuUtils.add_pp_warning(model_full_path);
-        random_test_gui('model_full_path',model_full_path);
+        randomTestGui('model_full_path',model_full_path);
     catch ME
         MenuUtils.handleExceptionMessage(ME, 'Test-case generation');
     end
@@ -33,7 +33,8 @@ end
 %%
 function schema = Mutation(varargin)
     schema = sl_action_schema;
-    schema.label = 'Mutation based testing';
+    schema.label = 'Mutation based testing (Work in progress)';
+    schema.state = 'Disabled';
     schema.callback = @MutationCallback;
 end
 
@@ -50,7 +51,8 @@ end
 %%
 function schema = MCDC(varargin)
     schema = sl_action_schema;
-    schema.label = 'MC-DC coverage';
+    schema.label = 'MC-DC coverage (Work in progress)';
+    schema.state = 'Disabled';
     schema.callback = @MCDCCallback;
 end
 

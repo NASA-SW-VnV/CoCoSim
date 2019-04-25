@@ -1,4 +1,4 @@
-function [ ] = lustreDED(model_full_path,  const_files, lus_backend, varargin)
+function [ failed ] = lustreDED(model_full_path,  const_files, lus_backend, varargin)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -12,6 +12,18 @@ function [ ] = lustreDED(model_full_path,  const_files, lus_backend, varargin)
     if nargin < 3 || isempty(lus_backend)
         lus_backend = LusBackendType.KIND2;
     end
+    
+    if isempty(KIND2)
+        tools_config;
+    end
+    if LusBackendType.isKIND2(lus_backend) && ~exist(KIND2,'file')
+        errordlg('KIND2 model checker is not found in %s. Please set KIND2 path in tools_config.m', KIND2);
+        return;
+    elseif ~LusBackendType.isKIND2(lus_backend)
+        errordlg('Only KIND2 currently is supported for Design Error Detection. To change Lustre model checker go to Tools -> CoCoSim -> Preferences');
+        return;
+    end
+    
     coco_backend = CoCoBackendType.DED;
     
     if ~LusBackendType.isKIND2(lus_backend)
@@ -23,12 +35,12 @@ function [ ] = lustreDED(model_full_path,  const_files, lus_backend, varargin)
     % Get start time
     t_start = tic;
     %% run ToLustre
-    [nom_lustre_file, xml_trace, status, ~, ...
+    [nom_lustre_file, xml_trace, failed, ~, ...
         ~, pp_model_full_path] = ...
         nasa_toLustre.ToLustre(model_full_path, const_files,...
         lus_backend, coco_backend, varargin);
     
-    if status
+    if failed
         return;
     end
     
@@ -59,17 +71,17 @@ function [ ] = lustreDED(model_full_path,  const_files, lus_backend, varargin)
     timeout_analysis = timeout / nb_properties;
     [~, model, ~] = fileparts(pp_model_full_path);
     top_node_name = model;
-    [status, kind2_out] = Kind2Utils2.runKIND2(...
+    [failed, kind2_out] = Kind2Utils2.runKIND2(...
         nom_lustre_file,...
         top_node_name, ...
         OPTS, KIND2, Z3, timeout, timeout_analysis);
-    if status
+    if failed
         return;
     end
     
     try
-        [status, verificationResults] = cocoSpecKind2(nom_lustre_file, mapping_file, kind2_out, false);
-        if status
+        [failed, verificationResults] = cocoSpecKind2(nom_lustre_file, mapping_file, kind2_out, false);
+        if failed
             return;
         end
         if ~isempty(verificationResults)

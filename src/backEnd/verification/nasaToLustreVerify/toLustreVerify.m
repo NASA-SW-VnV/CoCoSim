@@ -1,4 +1,4 @@
-function [ ] = toLustreVerify(model_full_path,  const_files, lus_backend, varargin)
+function [ failed ] = toLustreVerify(model_full_path,  const_files, lus_backend, varargin)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -6,6 +6,16 @@ function [ ] = toLustreVerify(model_full_path,  const_files, lus_backend, vararg
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     global KIND2 Z3;
+    if isempty(KIND2)
+        tools_config;
+    end
+    if LusBackendType.isKIND2(lus_backend) && ~exist(KIND2,'file')
+        errordlg('KIND2 model checker is not found in %s. Please set KIND2 path in tools_config.m', KIND2);
+        return;
+    elseif ~LusBackendType.isKIND2(lus_backend)
+        errordlg('Only KIND2 currently is supported for NASA compiler. To change compiler or Lustre model checker go to Tools -> CoCoSim -> Preferences');
+        return;
+    end
     if nargin < 2 || isempty(const_files)
         const_files = {};
     end
@@ -16,12 +26,12 @@ function [ ] = toLustreVerify(model_full_path,  const_files, lus_backend, vararg
     % Get start time
     t_start = tic;
     %% run ToLustre
-    [nom_lustre_file, xml_trace, status, ~, ...
+    [nom_lustre_file, xml_trace, failed, ~, ...
         ~, pp_model_full_path] = ...
         nasa_toLustre.ToLustre(model_full_path, const_files,...
         lus_backend, CoCoBackendType.VERIFICATION, varargin);
 
-    if status 
+    if failed 
         return;
     end
 
@@ -73,17 +83,17 @@ function [ ] = toLustreVerify(model_full_path,  const_files, lus_backend, vararg
             display_msg('No Property to check.', MsgType.RESULT, 'toLustreVerify', '');
             return;
         end
-        [status, kind2_out] = Kind2Utils2.runKIND2(...
+        [failed, kind2_out] = Kind2Utils2.runKIND2(...
             nom_lustre_file,...
             top_node_name, ...
             OPTS, KIND2, Z3, timeout, timeout_analysis);
-        if status
+        if failed
             return;
         end
         mapping_file = xml_trace.json_file_path;
         try
-            status = cocoSpecKind2(nom_lustre_file, mapping_file, kind2_out);
-            if status
+            failed = cocoSpecKind2(nom_lustre_file, mapping_file, kind2_out);
+            if failed
                 return;
             end
             VerificationMenu.displayHtmlVerificationResultsCallbackCode(model)

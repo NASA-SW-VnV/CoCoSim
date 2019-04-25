@@ -58,11 +58,11 @@ function [answer, CEX_XML] = extract_answer(...
         else
             msg = sprintf('Could not parse counter example from %s', ...
                 solver_output);
-            display_msg(msg, Constants.ERROR, 'Property Checking', '');
+            display_msg(msg, MsgType.ERROR, 'Property Checking', '');
         end
     end
     msg = sprintf('Solver Result for file %s of property %s is %s', ...
         file_name, node_name, answer);
-    display_msg(msg, Constants.RESULT, 'LustrecUtils.extract_answer', '');
+    display_msg(msg, MsgType.INFO, 'LustrecUtils.extract_answer', '');
 end
 

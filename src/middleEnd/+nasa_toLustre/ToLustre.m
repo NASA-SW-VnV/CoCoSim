@@ -1,6 +1,6 @@
 function [lustre_file_path, xml_trace, failed, unsupportedOptions, abstractedBlocks, pp_model_full_path]= ...
         ToLustre(model_path, const_files, lus_backend, coco_backend, varargin)
-    %lustre_multiclocks_compiler translate Simulink models to Lustre. It is based on
+    %ToLustre translate Simulink models to Lustre. It is based on
     %article :
     %INPUTS:
     %   MODEL_PATH: The full path of the Simulink model.
@@ -161,7 +161,7 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, abstractedBlo
     create_file_meta_info(lustre_file_path);
     
     %% Create traceability informations in XML format
-    display_msg('Start tracebility', MsgType.INFO, 'lustre_multiclocks_compiler', '');
+    display_msg('Start tracebility', MsgType.INFO, 'ToLustre', '');
     xml_trace_file_name = fullfile(output_dir, strcat(file_name, '.toLustre.trace.xml'));
     json_trace_file_name = fullfile(output_dir, strcat(file_name, '_mapping.json'));
     xml_trace = nasa_toLustre.utils.SLX2Lus_Trace(pp_model_full_path,...
@@ -170,7 +170,7 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, abstractedBlo
     
     
     %% Lustre generation
-    display_msg('Lustre generation', Constants.INFO, 'lustre_multiclocks_compiler', '');
+    display_msg('Lustre generation', Constants.INFO, 'ToLustre', '');
     % add enumeration nodes
     % Lustre code
     global model_struct
@@ -235,12 +235,17 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, abstractedBlo
                 '+lib', 'simulink_math_fcn.lus');
             copyfile(lib_path, output_dir);
         end
+        if ismember('conv', open_list)
+            lib_path = fullfile(fileparts(mfilename('fullpath')),...
+                '+lib', 'conv.lus');
+            copyfile(lib_path, output_dir);
+        end
     end
     %% writing code
     fid = fopen(lustre_file_path, 'a');
     if fid==-1
         msg = sprintf('Opening file "%s" is not possible', lustre_file_path);
-        display_msg(msg, MsgType.ERROR, 'lustre_multiclocks_compiler', '');
+        display_msg(msg, MsgType.ERROR, 'ToLustre', '');
     end
     try
         Lustrecode = program.print(lus_backend);
@@ -248,7 +253,7 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, abstractedBlo
         fclose(fid);
         if COCOSIM_DEV_DEBUG
             display_msg(strrep(Lustrecode, '%', '%%'), MsgType.DEBUG, ...
-                'lustre_multiclocks_compiler', '');
+                'ToLustre', '');
         end
     catch me
         display_msg('Printing Lustre AST to file failed',...
@@ -315,9 +320,9 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, abstractedBlo
     t_finish = toc(t_start);
     
     msg = sprintf('Lustre File generated:%s', lustre_file_path);
-    display_msg(msg, MsgType.RESULT, 'lustre_multiclocks_compiler', '');
+    display_msg(msg, MsgType.RESULT, 'ToLustre', '');
     msg = sprintf('Lustre generation finished in %f seconds', t_finish);
-    display_msg(msg, MsgType.RESULT, 'lustre_multiclocks_compiler', '');
+    display_msg(msg, MsgType.RESULT, 'ToLustre', '');
     
     
 end

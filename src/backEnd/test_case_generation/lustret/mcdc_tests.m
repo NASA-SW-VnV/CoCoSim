@@ -8,6 +8,16 @@ function [ new_model_path, status ] = mcdc_tests(...
     model_full_path, exportToWs, mkHarnessMdl )
     %MCDCTOSIMULINK try to bring back the MC-DC conditions to simulink level.
 
+    global KIND2 Z3;
+    if isempty(KIND2)
+        tools_config;
+    end
+    if ~exist(KIND2,'file')
+        errordlg('KIND2 model checker is not found in %s. Please set KIND2 path in tools_config.m', KIND2);
+        status = 1;
+        return;
+    end
+    
     if ~exist(model_full_path, 'file')
         display_msg(['File not foudn: ' model_full_path],...
             MsgType.ERROR, 'mutation_tests', '');
@@ -25,12 +35,12 @@ function [ new_model_path, status ] = mcdc_tests(...
     display_msg(['Generating mc-dc coverage Model for : ' slx_file_name],...
         MsgType.INFO, 'mutation_tests', '');
     status = 0;
-
+    new_model_path = model_full_path;
 
     % Compile model
     try
         [lus_full_path, xml_trace, is_unsupported, ~, ~, pp_model_full_path] = ...
-            nasa_toLustre.ToLustre(model_full_path);
+            nasa_toLustre.ToLustre(model_full_path, [], LusBackendType.LUSTREC);
         if is_unsupported
             display_msg('Model is not supported', MsgType.ERROR, 'validation', '');
             return;
@@ -43,7 +53,7 @@ function [ new_model_path, status ] = mcdc_tests(...
             MsgType.ERROR, 'mcdcToSimulink', '');
         display_msg(ME.getReport(), MsgType.DEBUG, 'mcdcToSimulink', '');
         status = 1;
-        rethrow(ME);
+        return;
     end
 
     % Generate MCDC lustre file from Simulink model Lustre file
@@ -59,7 +69,14 @@ function [ new_model_path, status ] = mcdc_tests(...
 
     try
         % generate test cases that covers the MC-DC conditions
-        new_mcdc_file = LustrecUtils.adapt_lustre_file(mcdc_file, 'Kind2');
+        new_mcdc_file = LustrecUtils.adapt_lustre_file(mcdc_file, LusBackendType.KIND2);
+        [syntax_status, output] = Kind2Utils2.checkSyntaxError(new_mcdc_file, KIND2, Z3);
+        if syntax_status
+            display_msg(output, MsgType.DEBUG, 'mcdc_tests', '');
+            display_msg('This model is not compatible for MC-DC generation.', MsgType.RESULT, 'mcdcToSimulink', '');
+            status = 1;
+            return;
+        end
         [~, T] = Kind2Utils2.extractKind2CEX(new_mcdc_file, output_dir, main_node, ...
             ' --slice_nodes false --check_subproperties true ');
 
@@ -68,24 +85,30 @@ function [ new_model_path, status ] = mcdc_tests(...
             return;
         end
         % add random test scenario with 100 steps, to compare the coverage.
-        [ input_struct ] = random_tests( model_full_path, 100);
-        input_struct.node_name = main_node;
-        T = [input_struct, T];
+        %TODO change input_struct from dataset to signals/time struct.
+        %[ input_struct ] = random_tests( model_full_path, 100);
+        %input_struct.node_name = main_node;
+        %T = [input_struct, T];
         if exportToWs
             assignin('base', strcat(slx_file_name, '_mcdc_tests'), T);
             display_msg(['Generated test suite is saved in workspace under name: ' strcat(slx_file_name, '_mcdc_tests')],...
                 MsgType.RESULT, 'mutation_tests', '');
         end
     catch ME
-        display_msg(['MCDC coverage generation failed for lustre file ' new_mcdc_file],...
+        display_msg(['MCDC coverage generation failed for lustre file ' mcdc_file],...
             MsgType.ERROR, 'mcdcToSimulink', '');
         display_msg(ME.getReport(), MsgType.DEBUG, 'mcdcToSimulink', '');
         status = 1;
-        rethrow(ME);
+        return;
     end
 
     % Create harness model
     if ~mkHarnessMdl
+        return;
+    else
+        %% TODO Work in progress. Remove this when fixing the MC-DC importer.
+        display_msg('Adding MC-DC conditions to Simulink is not currently supported. Work in progress!',...
+            MsgType.RESULT, 'mcdc_tests', '');
         return;
     end
 
@@ -131,7 +154,7 @@ function [ new_model_path, status ] = mcdc_tests(...
         display_msg('MCDC to Simulink generation failed', MsgType.ERROR, 'mcdcToSimulink', '');
         display_msg(ME.getReport(), MsgType.DEBUG, 'mcdcToSimulink', '');
         status = 1;
-        rethrow(ME);
+        return;
     end
 
     % add mcdc blocks to Simulink model
@@ -230,7 +253,7 @@ function [ new_model_path, status ] = mcdc_tests(...
         display_msg(ME.message, MsgType.ERROR, 'mcdcToSimulink', '');
         display_msg(ME.getReport(), MsgType.DEBUG, 'mcdcToSimulink', '');
         status = 1;
-        rethrow(ME);
+        return;
     end
 end
 

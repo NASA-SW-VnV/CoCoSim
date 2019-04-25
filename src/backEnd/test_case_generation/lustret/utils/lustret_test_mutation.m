@@ -17,6 +17,11 @@ function [ T, coverage_percentage, status ] = lustret_test_mutation( model_full_
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    global KIND2 ZUSTRE Z3;
+    if isempty(KIND2) || isempty(ZUSTRE)
+        tools_config;
+    end
+    
     T = [];
     coverage_percentage = 0;
     status = 0;
@@ -48,14 +53,32 @@ function [ T, coverage_percentage, status ] = lustret_test_mutation( model_full_
         Min_coverage = 100;
     end
     if ~exist('model_checker', 'var') || isempty(model_checker)
-        model_checker = 'KIND2';
+        model_checker = LusBackendType.KIND2;
     end
     if ~exist('nb_mutants_max', 'var')|| isempty(nb_mutants_max)
         nb_mutants_max = 500;
     end
     Pwd = pwd;
 
-    % get traceability Simulin -> Lustre
+    %% check lustre syntax is supported by lustrec and Kind2/Zustre
+    if strcmp(model_checker, LusBackendType.KIND2)
+        if ~exist(KIND2,'file')
+            errordlg('KIND2 model checker is not found in %s. Please set KIND2 path in tools_config.m', KIND2);
+            status = 1;
+            return;
+        end
+        [syntax_status, output] = Kind2Utils2.checkSyntaxError(lus_full_path, KIND2, Z3);
+        if syntax_status
+            display_msg(output, MsgType.DEBUG, 'lustret_test_mutation', '');
+            display_msg('This model is not compatible for Mutation based test generation. Work in progress!',...
+                MsgType.RESULT, 'lustret_test_mutation', '');
+            status = 1;
+            return;
+        end
+    else
+    end
+    
+    %% get traceability Simulin -> Lustre
     if  nargin < 3 || isempty(xml_trace) || ischar(xml_trace)
         if nargin >= 3 && ischar(xml_trace)
             xml_trace_file = xml_trace;
@@ -82,7 +105,7 @@ function [ T, coverage_percentage, status ] = lustret_test_mutation( model_full_
             status = 1;
             return;
         end
-    elseif isa(xml_trace, 'SLX2Lus_Trace')
+    elseif isa(xml_trace, 'nasa_toLustre.utils.SLX2Lus_Trace')
         traceRootNode = xml_trace.traceRootNode;
     else
         display_msg(...
@@ -142,7 +165,7 @@ function [ T, coverage_percentage, status ] = lustret_test_mutation( model_full_
                 simulink_block_name = node_map(node_id);
             else
                 simulink_block_name =...
-                    SLX2Lus_Trace.get_Simulink_block_from_lustre_node_name(...
+                    nasa_toLustre.utils.SLX2Lus_Trace.get_Simulink_block_from_lustre_node_name(...
                     traceRootNode, ...
                     node_id, ...
                     slx_file_name);
@@ -181,7 +204,7 @@ function [ T, coverage_percentage, status ] = lustret_test_mutation( model_full_
         mutant_file_path = mutants_paths{i};
         try
             verif_lus_path = LustrecUtils.create_mutant_verif_file(...
-                lus_full_path, mutant_file_path, main_node_struct, node_name, node_name_mutant);
+                lus_full_path, mutant_file_path, main_node_struct, node_name, node_name_mutant, model_checker);
         catch
             continue;
         end

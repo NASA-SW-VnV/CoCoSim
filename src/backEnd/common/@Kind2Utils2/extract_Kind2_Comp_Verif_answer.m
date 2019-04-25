@@ -60,7 +60,10 @@ function [valid, IN_struct] = extract_Kind2_Comp_Verif_answer(...
     nbUnsafe = 0;
     for idx_analys=0:xAnalysis.getLength-1
         node_name = char(xAnalysis.item(idx_analys).getAttribute('top'));
-        main_node_struct = LustrecUtils.extract_node_struct(lus_full_path, node_name);
+        [main_node_struct, status] = LustrecUtils.extract_node_struct(lus_full_path, node_name);
+        if status
+            return;
+        end
         xProperties = xAnalysis.item(idx_analys).getElementsByTagName('Property');
         for idx_prop=0:xProperties.getLength-1
             property = xProperties.item(idx_prop);
@@ -101,14 +104,14 @@ function [valid, IN_struct] = extract_Kind2_Comp_Verif_answer(...
             end
             msg = sprintf('Solver Result for node %s of property %s is %s', ...
                 node_name, prop_name, answer);
-            display_msg(msg, MsgType.RESULT, 'Kind2Utils2.extract_answer', '');
+            display_msg(msg, MsgType.INFO, 'Kind2Utils2.extract_answer', '');
         end
     end
     msg = sprintf('Number of properties SAFE are %d', ...
         nbSafe);
-    display_msg(msg, MsgType.RESULT, 'Kind2Utils2.extract_answer', '');
+    display_msg(msg, MsgType.INFO, 'Kind2Utils2.extract_answer', '');
     msg = sprintf('Number of properties UNSAFE are %d', ...
         nbUnsafe);
-    display_msg(msg, MsgType.RESULT, 'Kind2Utils2.extract_answer', '');
+    display_msg(msg, MsgType.INFO, 'Kind2Utils2.extract_answer', '');
 end
 

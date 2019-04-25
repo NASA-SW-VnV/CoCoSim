@@ -11,6 +11,18 @@ function [node_struct,...
         node_name,...
         LUSTREC,...
         LUCTREC_INCLUDE_DIR)
+    
+    % Using lustre file
+    try
+        [node_struct, status] = LustrecUtils.extract_node_struct_using_lusFile(lus_file_path, node_name);
+    catch
+        status = 1;
+    end
+    if status==0
+        return;
+    end
+    
+    
     if nargin < 3
         tools_config;
         status = BUtils.check_files_exist(LUSTREC, LUCTREC_INCLUDE_DIR);
@@ -20,6 +32,8 @@ function [node_struct,...
             return;
         end
     end
+    
+    % Using emf file
     try
         [node_struct, status] = ...
             LustrecUtils.extract_node_struct_using_emf(...
@@ -31,6 +45,8 @@ function [node_struct,...
         return;
     end
 
+    
+    % Using lusi file
     try
         [node_struct, status] = ...
             LustrecUtils.extract_node_struct_using_lusi(...
@@ -38,5 +54,9 @@ function [node_struct,...
     catch
         status = 1;
     end
+    if status==0
+        return;
+    end
+    
 end
 

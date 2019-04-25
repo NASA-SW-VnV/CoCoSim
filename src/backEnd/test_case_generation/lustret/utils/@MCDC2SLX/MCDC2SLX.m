@@ -1,5 +1,5 @@
 classdef MCDC2SLX
-%MCDC2SLX translate MC-DC conditions an EMF json file to Simulink blocks.
+%MCDC2SLX translate MC-DC conditions in EMF json file to Simulink blocks.
 %Every node is translated to a subsystem. If OnlyMainNode is true than only
 %the main node specified
 %in main_node argument will be kept in the final simulink model.
