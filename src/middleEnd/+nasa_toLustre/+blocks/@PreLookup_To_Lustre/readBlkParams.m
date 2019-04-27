@@ -74,6 +74,11 @@ function blkParams = readBlkParams(~,parent,blk,blkParams)
     end
     
     blkParams.RndMeth = blk.RndMeth;
+     
+    % calculate dimJump and boundNodeOrder
+    blkParams = ...
+        nasa_toLustre.blocks.Lookup_nD_To_Lustre.addCommonData2BlkParams(...
+        blkParams);    
     
 end
 
