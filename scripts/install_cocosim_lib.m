@@ -36,6 +36,8 @@ function install_cocosim_lib(force)
     updateRepo(cocosim_path)
     %% copy files from cocosim in github
     copyCoCoFiles(force, cocosim_path);
+    %% copy file from external libraries : Autolayout, cmd_timeout, html_lib
+    copyExternalLibFiles(force, cocosim_path);
     %% install binaries: Zustre, Kind2, Lustrec, Z3 ...
     install_tools(cocosim_path);
     
@@ -51,28 +53,20 @@ function updateRepo(cocosim_path)
         return;
     end
 end
-
-%%
-function copyCoCoFiles(force, cocosim_path)
-    % add utils to the path. Some function as MatlabUtils is used here
-    addpath(fullfile(cocosim_path,'src', 'utils'))
-    
-    build_dir = fullfile(cocosim_path, 'tools', 'build');
-    coco_git_dir = fullfile(build_dir, 'github', 'cocosim');
-    cocosim_url = 'https://github.com/coco-team/cocoSim2.git';
-    cocosim_branch = 'cocosim_nasa';
-    
-    if exist(coco_git_dir, 'dir')
-        cd(coco_git_dir);
-        commands = {sprintf('git pull; git checkout %s', cocosim_branch), ...
-            sprintf('git pull origin %s', cocosim_branch)};
+%% clone and pull
+function isAlreadyUpToDate = cloneOrPull(git_dir, git_url, git_branch)
+    isAlreadyUpToDate = false;
+    if exist(git_dir, 'dir')
+        cd(git_dir);
+        commands = {sprintf('git pull; git checkout %s', git_branch), ...
+            sprintf('git pull origin %s', git_branch)};
         pull_idex = 1;
     else
-        MatlabUtils.mkdir(coco_git_dir);
-        cd(coco_git_dir)
+        MatlabUtils.mkdir(git_dir);
+        cd(git_dir)
         commands = {' git init; touch .gitconfig; git config --local http.sslverify false', ...
-            sprintf('git remote add -f origin %s', cocosim_url), ...
-            sprintf('git pull origin %s', cocosim_branch)};
+            sprintf('git remote add -f origin %s', git_url), ...
+            sprintf('git pull origin %s', git_branch)};
         pull_idex = 3;
     end
     sys_out = cell(numel(commands), 1);
@@ -83,10 +77,24 @@ function copyCoCoFiles(force, cocosim_path)
             return;
         end
     end
-    if ~force && contains(sys_out{pull_idex}, 'Already up to date.')
+    isAlreadyUpToDate = contains(sys_out{pull_idex}, 'Already up to date.');
+end
+%%
+function copyCoCoFiles(force, cocosim_path)
+    % add utils to the path. Some function as MatlabUtils is used here
+    addpath(fullfile(cocosim_path,'src', 'utils'))
+    
+    build_dir = fullfile(cocosim_path, 'tools', 'build');
+    coco_git_dir = fullfile(build_dir, 'github', 'cocosim');
+    cocosim_url = 'https://github.com/coco-team/cocoSim2.git';
+    cocosim_branch = 'cocosim_nasa';
+    
+    isAlreadyUpToDate = cloneOrPull(coco_git_dir, cocosim_url, cocosim_branch);
+    if ~force && isAlreadyUpToDate
         %no need to copy files, nothing new from github
         return;
     end
+    
     fprintf('Copying files from cocosim2 in tools/build\n');
     sources = {...
         fullfile('doc', 'installation.md'), ...
@@ -148,6 +156,49 @@ function copyCoCoFiles(force, cocosim_path)
     addpath(fullfile(cocosim_path, 'tools'));
     
     
+end
+%%
+function copyExternalLibFiles(force, cocosim_path)
+    % add utils to the path. Some function as MatlabUtils is used here
+    addpath(fullfile(cocosim_path,'src', 'utils'))
+    
+    build_dir = fullfile(cocosim_path, 'tools', 'build');
+    externalLibs_git_dir = fullfile(build_dir, 'github', 'externalLib');
+    externalLibs_url = 'https://github.com/hbourbouh/cocosim-external-libs.git';
+    externalLib_branch = 'master';
+    
+    isAlreadyUpToDate = cloneOrPull(externalLibs_git_dir, externalLibs_url, externalLib_branch);
+    if ~force &&isAlreadyUpToDate
+        %no need to copy files, nothing new from github
+        return;
+    end
+    fprintf('Copying files from external libraries in tools/build/externalLib\n');
+    sources = {...
+        '+AutoLayout', ...
+        '+cmd_timeout', ...
+        'html_lib', ...
+        'jkind'};
+    destinations = {...
+        fullfile('src', 'external', '+external_lib', '+AutoLayout'), ...
+        fullfile('src', 'external', '+external_lib', '+cmd_timeout'), ...
+        fullfile('src', 'external', 'html_lib'), ...
+        fullfile('tools', 'verifiers', 'jkind')};
+    for i=1:numel(sources)
+        
+        fprintf('Copying files from tools/build/github/externalLib/%s to %s\n', sources{i}, destinations{i}) ;
+        dst_path = fullfile(cocosim_path, destinations{i});
+        if ~exist(dst_path, 'file') && ~exist(dst_path, 'dir')
+            if MatlabUtils.endsWith(dst_path, '.m')
+                MatlabUtils.mkdir(fileparts(dst_path));
+            else
+                MatlabUtils.mkdir(dst_path);
+            end
+        end
+        [SUCCESS,MESSAGE,~] = copyfile(fullfile(externalLibs_git_dir, sources{i}), dst_path);
+        if ~SUCCESS
+            fprintf('copyfile failed:\n%s \n', MESSAGE);
+        end
+    end
 end
 %%
 function install_tools(cocosim_path)
