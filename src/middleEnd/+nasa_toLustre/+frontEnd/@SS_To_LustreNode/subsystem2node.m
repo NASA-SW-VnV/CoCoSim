@@ -33,7 +33,7 @@ function [ main_node, isContractBlk, external_nodes, external_libraries ] = ...
     end
     if TOLUSTRE_SF_COMPILER == 1
         %Old Compiler. The new compiler is handling SF Chart in SF_To_LustreNode
-        if isfield(ss_ir, 'SFBlockType') && isequal(ss_ir.SFBlockType, 'Chart')
+        if isfield(ss_ir, 'SFBlockType') && strcmp(ss_ir.SFBlockType, 'Chart')
             [main_node, external_nodes, external_libraries] = ...
                 nasa_toLustre.frontEnd.SS_To_LustreNode.stateflowCode(ss_ir, xml_trace);
             return;
@@ -159,7 +159,7 @@ function [ main_node, isContractBlk, external_nodes, external_libraries ] = ...
     % output
     if isempty(node_outputs) ...
             && isfield(ss_ir, 'MaskType') ...
-            && isequal(ss_ir.MaskType, 'VerificationSubsystem')
+            && strcmp(ss_ir.MaskType, 'VerificationSubsystem')
         node_outputs{end+1} = nasa_toLustre.lustreAst.LustreVar('VerificationSubsystem_virtual', 'bool');
         body{end+1} = nasa_toLustre.lustreAst.LustreEq(nasa_toLustre.lustreAst.VarIdExpr('VerificationSubsystem_virtual'),  nasa_toLustre.lustreAst.BooleanExpr(true));
     end

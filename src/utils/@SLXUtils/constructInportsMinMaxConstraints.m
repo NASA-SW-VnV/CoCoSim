@@ -20,8 +20,8 @@ function min_max_constraints = constructInportsMinMaxConstraints(model_full_path
         min_max_constraints{i}{1} = get_param(block, 'Name');
         outMin = get_param(block, 'OutMin');
         outMax = get_param(block, 'OutMax');
-        if isequal(outMin, '[]') ...
-                || isequal(outMax, '[]')
+        if strcmp(outMin, '[]') ...
+                || strcmp(outMax, '[]')
             min_max_constraints{i}{2} = IMIN_DEFAULT;
             min_max_constraints{i}{3} = IMAX_DEFAULT;
         else

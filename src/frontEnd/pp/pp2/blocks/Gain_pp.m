@@ -31,7 +31,7 @@ if not(isempty(Gain_list))
                 continue;
             end
             CompiledPortDataTypes = SLXUtils.getCompiledParam(Gain_list{i}, 'CompiledPortDataTypes');
-            if isequal(CompiledPortDataTypes.Inport{1}, 'boolean') ...
+            if strcmp(CompiledPortDataTypes.Inport{1}, 'boolean') ...
                     && ~MatlabUtils.contains(CompiledPortDataTypes.Outport{1}, 'fix')
                 outputDataType = CompiledPortDataTypes.Outport{1};
             else
@@ -63,7 +63,7 @@ if not(isempty(Gain_list))
             end
             
             % set parameters to product block
-            if isequal(outputDataType, 'Inherit: Same as input')
+            if strcmp(outputDataType, 'Inherit: Same as input')
                 outputDataType = 'Inherit: Same as first input';
             end
             set_param(strcat(Gain_list{i},'/Product'),...

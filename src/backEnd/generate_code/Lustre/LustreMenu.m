@@ -30,7 +30,7 @@ function LusCompilerCallback(bckend, ~)
         mdl_full_path = MenuUtils.get_file_name(gcs);
         MenuUtils.add_pp_warning(mdl_full_path);
         CoCoSimPreferences = cocosim_menu.CoCoSimPreferences.load();
-        if isequal(CoCoSimPreferences.lustreCompiler, 'IOWA') 
+        if strcmp(CoCoSimPreferences.lustreCompiler, 'IOWA') 
             cocoSpecCompiler(mdl_full_path);
         else
             nasa_toLustre.ToLustre(mdl_full_path, [], bckend);

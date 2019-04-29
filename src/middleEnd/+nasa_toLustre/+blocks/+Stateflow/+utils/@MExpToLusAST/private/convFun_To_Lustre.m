@@ -17,7 +17,7 @@ function [code, exp_dt] = convFun_To_Lustre(BlkObj, tree, parent, blk,...
             if ismember(tree_ID, {'ceil', 'floor', 'round'})
                 fun_name = strcat('_', tree_ID);
                 lib_name = strcat('LustDTLib_', fun_name);
-            elseif isequal(tree_ID, 'fabs')
+            elseif strcmp(tree_ID, 'fabs')
                 fun_name = tree_ID;
                 lib_name = strcat('LustMathLib_', fun_name);
             end
@@ -35,7 +35,7 @@ function [code, exp_dt] = convFun_To_Lustre(BlkObj, tree, parent, blk,...
                 'double', 'single', 'boolean'}
             
             param = tree.parameters(1);
-            if isequal(param.type, 'constant')
+            if strcmp(param.type, 'constant')
                 % cast of constant
                 v = eval(tree.value);
                 exp_dt = nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(tree_ID);

@@ -108,7 +108,7 @@ function [Value, valueDataType, status] = evalParam(modelObj, parent, blk, param
                 end
                 
             catch me
-                if isequal(me.identifier, 'MATLAB:UndefinedFunction')
+                if strcmp(me.identifier, 'MATLAB:UndefinedFunction')
                     % Case of e.g. param = 2*f and f is a mask parameter
                     tokens = ...
                         regexp(me.message, '''(\w+)''', 'tokens', 'once');

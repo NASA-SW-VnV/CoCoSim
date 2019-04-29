@@ -123,7 +123,7 @@ classdef Template_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     % choose the correct zero: Int or Real
                     inport_dt = blk.CompiledPortDataTypes.Inport(2);
                     lus_dt =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(inport_dt);
-                    if isequal(lus_dt, 'int')
+                    if strcmp(lus_dt, 'int')
                         zero = nasa_toLustre.lustreAst.IntExpr(0);
                     else
                         zero = nasa_toLustre.lustreAst.RealExpr(0);
@@ -153,7 +153,7 @@ classdef Template_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     % detect the right output datatype : int8, int16,
                     % int32...
                     lus_dt =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(outputDataType);
-                    if isequal(lus_dt, 'int')
+                    if strcmp(lus_dt, 'int')
                         % calculate intMin intMax
                         intMin = nasa_toLustre.lustreAst.IntExpr(intmin(outputDataType));
                         intMax = nasa_toLustre.lustreAst.IntExpr(intmax(outputDataType));

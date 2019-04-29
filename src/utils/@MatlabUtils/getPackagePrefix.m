@@ -6,7 +6,7 @@ function path_prefix = getPackagePrefix(f_parent, f_name)
     % remove package and class folder prefix
     prefix_parts = regexprep(path_partsWithPlusAndAT, '^(+|@)', '');
     if startsWith(path_partsWithPlusAndAT{end}, '@') ...
-            && isequal(prefix_parts{end}, f_name)
+            && strcmp(prefix_parts{end}, f_name)
         % case of class folder @ClassName
         path_prefix = MatlabUtils.strjoin(prefix_parts(1:end-1), '.');
     else

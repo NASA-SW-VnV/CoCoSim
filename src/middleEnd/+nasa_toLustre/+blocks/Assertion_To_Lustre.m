@@ -13,7 +13,7 @@ classdef Assertion_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     methods
         function  write_code(obj, parent, blk, xml_trace, varargin)
             
-            if isfield(blk, 'Enabled') && isequal(blk.Enabled, 'off')
+            if isfield(blk, 'Enabled') && strcmp(blk.Enabled, 'off')
                 return;
             end
             inputs{1} =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk, 1);

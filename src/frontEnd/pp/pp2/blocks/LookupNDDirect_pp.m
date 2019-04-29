@@ -32,7 +32,7 @@ if not(isempty(LookupNDDirect_list))
             
             % add pp subsystem
             tmp_block_path = strcat(LookupNDDirect_list{i}, '__tmp');
-            if isequal(TableIsInput, 'on')
+            if strcmp(TableIsInput, 'on')
                 pp_name = 'DirectLookupTableAsInput';
             else
                 pp_name = 'DirectLookup';
@@ -46,17 +46,17 @@ if not(isempty(LookupNDDirect_list))
             selector_path = fullfile(tmp_block_path, 'Selector');
             IndexOptionArray = arrayfun(@(x) 'Index vector (port)', ...
                 (1:str2double(NumberOfTableDimensions)), 'UniformOutput', 0);
-            if isequal(InputsSelectThisObjectFromTable, 'Vector') ||...
-                isequal(InputsSelectThisObjectFromTable, 'Column')
+            if strcmp(InputsSelectThisObjectFromTable, 'Vector') ||...
+                strcmp(InputsSelectThisObjectFromTable, 'Column')
                 IndexOptionArray{1} = 'Select all';
-            elseif isequal(InputsSelectThisObjectFromTable, '2-D Matrix')
+            elseif strcmp(InputsSelectThisObjectFromTable, '2-D Matrix')
                 IndexOptionArray{1} = 'Select all';
                 IndexOptionArray{2} = 'Select all';
-            elseif ~isequal(InputsSelectThisObjectFromTable, 'Element')
+            elseif ~strcmp(InputsSelectThisObjectFromTable, 'Element')
                 % New name
                 table_ports = get_param(LookupNDDirect_list{i},'PortHandles');
                 nb_inputs = length(table_ports.Inport);
-                if isequal(TableIsInput, 'on')
+                if strcmp(TableIsInput, 'on')
                     nb_inputs = nb_inputs - 1;
                 end
                 nb_dimensionSelectAll = ...
@@ -83,15 +83,15 @@ if not(isempty(LookupNDDirect_list))
             U_path = fullfile(tmp_block_path, 'U');
             set_param(U_path, 'OutMin', TableMin);
             set_param(U_path, 'OutMax', TableMax);
-            if isequal(TableDataTypeStr, 'Inherit: Inherit from ''Table data''')
-                if isequal(TableIsInput, 'off')
+            if strcmp(TableDataTypeStr, 'Inherit: Inherit from ''Table data''')
+                if strcmp(TableIsInput, 'off')
                     TableDataTypeStr = 'Inherit: Inherit from ''Constant value''';
                 else
                     TableDataTypeStr = 'Inherit: auto';
                 end
             end
             set_param(U_path, 'OutDataTypeStr', TableDataTypeStr);
-            if isequal(TableIsInput, 'off')
+            if strcmp(TableIsInput, 'off')
                 % U is constant
                 set_param(U_path, 'Value', Table);
             end

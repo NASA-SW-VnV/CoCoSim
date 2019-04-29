@@ -6,6 +6,6 @@ function res = isVERIFICATION(b)
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    res = isequal(b, CoCoBackendType.VERIFICATION);
+    res = strcmp(b, CoCoBackendType.VERIFICATION);
 end
 

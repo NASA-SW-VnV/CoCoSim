@@ -7,9 +7,9 @@ function code = print_lustrec(obj, backend)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
         if obj.addEpsilon ...
-            && (isequal(obj.op, '>=') || isequal(obj.op, '>') ...
-            || isequal(obj.op, '<=') || isequal(obj.op, '<'))
-        if isequal(obj.op, '>=') || isequal(obj.op, '<=')
+            && (strcmp(obj.op, '>=') || strcmp(obj.op, '>') ...
+            || strcmp(obj.op, '<=') || strcmp(obj.op, '<'))
+        if strcmp(obj.op, '>=') || strcmp(obj.op, '<=')
             epsilonOp = nasa_toLustre.lustreAst.BinaryExpr.LTE;
             and_or = 'or';
         else
@@ -39,7 +39,7 @@ function code = print_lustrec(obj, backend)
             obj.left.print(backend),...
             obj.op, ...
             obj.right.print(backend));
-        if obj.withPar || isequal(obj.op, '->')
+        if obj.withPar || strcmp(obj.op, '->')
             code = sprintf('(%s)', code);
         end
     end

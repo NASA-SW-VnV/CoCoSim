@@ -44,7 +44,7 @@ function schema = lustreCompilerCallback(compilerName, compilerIndex, CoCoSimPre
     schema = sl_toggle_schema;
     schema.label = compilerName;
     compilerNameValues = {'NASA', 'IOWA'};
-    if isequal(CoCoSimPreferences.lustreCompiler, compilerNameValues{compilerIndex})
+    if strcmp(CoCoSimPreferences.lustreCompiler, compilerNameValues{compilerIndex})
         schema.checked = 'checked';
     else
         schema.checked = 'unchecked';
@@ -55,7 +55,7 @@ end
 
 function setCompilerOption(compilerNameValue, CoCoSimPreferences, varargin)
     CoCoSimPreferences.lustreCompiler = compilerNameValue;
-    CoCoSimPreferences.irToLustreCompiler = isequal(compilerNameValue, 'IOWA');
+    CoCoSimPreferences.irToLustreCompiler = strcmp(compilerNameValue, 'IOWA');
     cocosim_menu.CoCoSimPreferences.save(CoCoSimPreferences);
 end
 
@@ -86,7 +86,7 @@ function schema = lustreBackendCallback(backendName, CoCoSimPreferences, varargi
     else
         schema.label = backendName;
     end
-    if isequal(backendName, CoCoSimPreferences.lustreBackend)
+    if strcmp(backendName, CoCoSimPreferences.lustreBackend)
         schema.checked = 'checked';
     else
         schema.checked = 'unchecked';

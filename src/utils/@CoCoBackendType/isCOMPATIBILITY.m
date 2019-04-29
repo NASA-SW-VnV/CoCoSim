@@ -6,5 +6,5 @@ function res = isCOMPATIBILITY(b)
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    res = isequal(b, CoCoBackendType.COMPATIBILITY);
+    res = strcmp(b, CoCoBackendType.COMPATIBILITY);
 end

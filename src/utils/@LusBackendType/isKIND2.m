@@ -6,6 +6,6 @@ function res = isKIND2(b)
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    res = isequal(b, LusBackendType.KIND2);
+    res = strcmp(b, LusBackendType.KIND2);
 end
 

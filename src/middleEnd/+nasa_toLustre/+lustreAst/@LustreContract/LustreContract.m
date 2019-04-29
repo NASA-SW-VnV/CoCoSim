@@ -93,7 +93,7 @@ classdef LustreContract < nasa_toLustre.lustreAst.LustreAst
         function dt = getDT(obj, localVars, varID)
             dt = '';
             for i=1:numel(localVars)
-                if isequal(localVars{i}.getId(), varID)
+                if strcmp(localVars{i}.getId(), varID)
                     dt = localVars{i}.type;
                     break;
                 end

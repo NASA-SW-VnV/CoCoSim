@@ -6,5 +6,5 @@ function res = isLUSTREC(b)
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    res = isequal(b, LusBackendType.LUSTREC);
+    res = strcmp(b, LusBackendType.LUSTREC);
 end

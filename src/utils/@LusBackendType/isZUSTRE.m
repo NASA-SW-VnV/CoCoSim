@@ -6,5 +6,5 @@ function res = isZUSTRE(b)
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    res = isequal(b, LusBackendType.ZUSTRE);
+    res = strcmp(b, LusBackendType.ZUSTRE);
 end

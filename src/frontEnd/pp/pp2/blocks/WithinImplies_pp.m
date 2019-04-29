@@ -22,7 +22,7 @@ function [status, errors_msg] = WithinImplies_pp(model)
                 display_msg(wimplies_list{i}, MsgType.INFO, ...
                     'WithinImplies_pp', '');
                 reset = get_param(wimplies_list{i},'reset');
-                if isequal(reset, 'off')
+                if strcmp(reset, 'off')
                     pp_name = 'WithinImpliesResetFalse';
                 else
                     pp_name = 'WithinImpliesResetTrue';

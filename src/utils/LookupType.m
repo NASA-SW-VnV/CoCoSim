@@ -16,16 +16,16 @@ classdef LookupType < handle
     
     methods(Static)
         function res = isLookup_nD(b)
-            res = isequal(b, LookupType.Lookup_nD);
+            res = strcmp(b, LookupType.Lookup_nD);
         end
         function res = isLookupDynamic(b)
-            res = isequal(b, LookupType.LookupDynamic);
+            res = strcmp(b, LookupType.LookupDynamic);
         end
         function res = isPreLookup(b)
-            res = isequal(b, LookupType.PreLookup);
+            res = strcmp(b, LookupType.PreLookup);
         end
         function res = isInterpolation_nD(b)
-            res = isequal(b, LookupType.Interpolation_nD);
+            res = strcmp(b, LookupType.Interpolation_nD);
         end
     end
 end

@@ -29,7 +29,7 @@ function [status, errors_msg] = Sin_pp(model)
                 Phase = get_param(Sin_list{i},'Phase');
                 SampleTime = get_param(Sin_list{i},'SampleTime');
                 
-                if isequal(SineType, 'Sample based')
+                if strcmp(SineType, 'Sample based')
                     [Samples, ~, status] = SLXUtils.evalParam(...
                         model, ...
                         get_param(Sin_list{i}, 'Parent'), ...
@@ -64,7 +64,7 @@ function [status, errors_msg] = Sin_pp(model)
                 set_param(strcat(Sin_list{i},'/Bias'),...
                     'Value',Bias);
                 
-                if isequal(TimeSource, 'Use simulation time')
+                if strcmp(TimeSource, 'Use simulation time')
                     if str2num(SampleTime) == 0
                         PPUtils.replace_one_block(strcat(Sin_list{i},'/In1'),...
                             'simulink/Sources/Clock');

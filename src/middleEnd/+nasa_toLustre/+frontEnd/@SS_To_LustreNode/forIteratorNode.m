@@ -26,7 +26,7 @@ function [main_node, iterator_node] = forIteratorNode(main_node, variables,...
 
     %changeArrowExp
     [~, ForBlk] = nasa_toLustre.blocks.SubSystem_To_Lustre.hasForIterator(ss_ir);
-    ShowIterationPort = isequal(ForBlk.ShowIterationPort, 'on');
+    ShowIterationPort = strcmp(ForBlk.ShowIterationPort, 'on');
     if ShowIterationPort
         iteration_dt = ForBlk.IterationVariableDataType;
         iteration_dt =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(iteration_dt);
@@ -37,14 +37,14 @@ function [main_node, iterator_node] = forIteratorNode(main_node, variables,...
     additionalInputs{end+1} = nasa_toLustre.lustreAst.LustreVar(...
        nasa_toLustre.utils.SLX2LusUtils.iterationVariable(),  iteration_dt);
     IndexMode = ForBlk.IndexMode;
-    if isequal(IndexMode, 'Zero-based')
+    if strcmp(IndexMode, 'Zero-based')
         iterationValue = 0;
     else
         iterationValue = 1;
     end
-    if isequal(iteration_dt, 'int')
+    if strcmp(iteration_dt, 'int')
         v = nasa_toLustre.lustreAst.IntExpr(iterationValue);
-    elseif isequal(iteration_dt, 'bool')
+    elseif strcmp(iteration_dt, 'bool')
         v = nasa_toLustre.lustreAst.BooleanExpr(iterationValue);
     else
         v = nasa_toLustre.lustreAst.RealExpr(iterationValue);
@@ -83,13 +83,13 @@ function [main_node, iterator_node] = forIteratorNode(main_node, variables,...
         iterator_body, ...
         false);
     ResetStates = ForBlk.ResetStates;
-    isHeld = isequal(ResetStates, 'held');
+    isHeld = strcmp(ResetStates, 'held');
     IterationSource = ForBlk.IterationSource;
-    if isequal(IterationSource, 'external')
+    if strcmp(IterationSource, 'external')
         return;
     end
     ExternalIncrement = ForBlk.ExternalIncrement;
-    if isequal(ExternalIncrement, 'on')
+    if strcmp(ExternalIncrement, 'on')
         return;
     end
 
@@ -197,9 +197,9 @@ function [main_node, iterator_node] = forIteratorNode(main_node, variables,...
             end
         end
         input_names = [fixed_inputs, additionalInputs_names];
-        if isequal(iteration_dt, 'int')
+        if strcmp(iteration_dt, 'int')
             input_names{end} = nasa_toLustre.lustreAst.IntExpr(iterationValue);
-        elseif isequal(iteration_dt, 'bool')
+        elseif strcmp(iteration_dt, 'bool')
             input_names{end} = nasa_toLustre.lustreAst.BooleanExpr(iterationValue);
         else
             input_names{end} = nasa_toLustre.lustreAst.RealExpr(iterationValue);

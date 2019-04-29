@@ -16,7 +16,7 @@ end
 function UnsupportedFunctionCallback(callbackInfo)
 model_full_path = MenuUtils.get_file_name(gcs);
 CoCoSimPreferences = cocosim_menu.CoCoSimPreferences.load();
-if ~isequal(CoCoSimPreferences.lustreCompiler, 'NASA') 
+if ~strcmp(CoCoSimPreferences.lustreCompiler, 'NASA') 
     msgbox(...
         sprintf('Check Compatibiity is only supported by the NASA Lustre compiler.\n Go to Tools -> Preferences -> Lustre Compiler -> NASA Compiler'), 'CoCoSim');
 else

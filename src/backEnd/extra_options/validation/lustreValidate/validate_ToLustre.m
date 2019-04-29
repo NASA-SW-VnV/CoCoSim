@@ -104,7 +104,7 @@ function [valid, validation_compute,lustrec_failed, ...
             prompt = 'The model is not valid. Do you want to check which subsystem is not valid? Y/N [N]: ';
             display_msg(prompt, MsgType.RESULT, 'validate_ToLustre', '');
             str = input('Type "Y" or "y" for yes or "N"|"n" for no: ','s');
-            if ~isempty(str) && isequal(upper(str), 'Y')
+            if ~isempty(str) && strcmp(upper(str), 'Y')
                 prompt = 'Provide us with an integer that constrains the validation to a specific depth (1 for first depth only, n for up to n depth):';
                 deep_CEX  = input(prompt);
                 if ~isnumeric(deep_CEX)

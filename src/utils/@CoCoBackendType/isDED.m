@@ -6,5 +6,5 @@ function res = isDED(b)
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    res = isequal(b, CoCoBackendType.DED);
+    res = strcmp(b, CoCoBackendType.DED);
 end

@@ -9,11 +9,11 @@ function OutMinMaxCheckCode(blk2LusObj, parent, blk, outputs, lus_dt, xml_trace,
     if nargin < 7
         addAsAssertExpr = false;% it will be added as local property expression
     end
-    if isequal(blk.OutMin, '[]') && isequal(blk.OutMax, '[]')
+    if strcmp(blk.OutMin, '[]') && strcmp(blk.OutMax, '[]')
         % no need for the assertion.
         return;
     end
-    if ~isequal(lus_dt, 'int') && ~isequal(lus_dt, 'real')
+    if ~strcmp(lus_dt, 'int') && ~strcmp(lus_dt, 'real')
         % only important for 'int' and 'real' DataType
         return;
     end

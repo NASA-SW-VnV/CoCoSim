@@ -12,7 +12,7 @@ function [new_inputs, invertCodes, AdditionalVars] = invertInputs(obj, exp, inpu
     invertCodes = {};
     AdditionalVars = {};
     for i=1:numel(exp)
-        if isequal(exp(i), '/')
+        if strcmp(exp(i), '/')
             %create new variables
             for j=1:numel(inputs{i})
                 if iscell(inputs{i}{j})

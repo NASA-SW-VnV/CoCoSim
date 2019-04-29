@@ -6,6 +6,6 @@ function res = isGUIDELINES(b)
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    res = isequal(b, CoCoBackendType.GUIDELINES);
+    res = strcmp(b, CoCoBackendType.GUIDELINES);
 end
 

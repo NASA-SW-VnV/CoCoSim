@@ -51,7 +51,7 @@ if ~ ( isempty( saturation_list ) )
                 set_param(strcat(saturation_list{i},'/upper_limit'),...
                     'Value',upper_limit);
             end
-            if isequal(outputDataType, 'Inherit: Same as input')
+            if strcmp(outputDataType, 'Inherit: Same as input')
                 %Inherit: Inherit via back propagation
                 if ~UpperIsInf
                     set_param(strcat(saturation_list{i},'/upper'),...

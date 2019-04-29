@@ -19,7 +19,7 @@ classdef Bias_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             outputDataType = blk.CompiledPortDataTypes.Outport{1};
 
             [outLusDT] =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(outputDataType);
-            if isequal(outLusDT, 'int')
+            if strcmp(outLusDT, 'int')
                 bias = nasa_toLustre.lustreAst.IntExpr(blk.Bias);
             else
                 bias = nasa_toLustre.lustreAst.RealExpr(blk.Bias);

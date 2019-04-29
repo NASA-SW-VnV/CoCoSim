@@ -6,6 +6,6 @@ function res = isJKIND(b)
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    res = isequal(b, LusBackendType.JKIND);
+    res = strcmp(b, LusBackendType.JKIND);
 end
 

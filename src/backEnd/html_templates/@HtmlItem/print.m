@@ -15,9 +15,9 @@ function res = print(obj, level)
         Textcolor = obj.text_color;
     end
 
-    if isequal(obj.icon_color, 'red')
+    if strcmp(obj.icon_color, 'red')
             iconCode = sprintf('<i class="material-icons red-text"><h%d>do_not_disturb_on<h%d></i>', level, level);
-    elseif isequal(obj.icon_color, 'green')
+    elseif strcmp(obj.icon_color, 'green')
         iconCode = sprintf('<i class="material-icons green-text"><h%d>check_circle<h%d></i>', level, level);
     else
         iconCode = '';

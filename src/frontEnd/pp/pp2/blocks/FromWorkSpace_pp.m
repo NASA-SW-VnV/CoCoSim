@@ -29,7 +29,7 @@ function [status, errors_msg] = FromWorkSpace_pp(model)
                     % checking if the parent is not signal Builder.
                     parent = get_param(fromWorkSpace_list{i}, 'Parent');
                     parent_msktype = get_param(parent, 'MaskType');
-                    if isequal(parent_msktype, 'Sigbuilder block')
+                    if strcmp(parent_msktype, 'Sigbuilder block')
                         continue;
                     end
                 catch

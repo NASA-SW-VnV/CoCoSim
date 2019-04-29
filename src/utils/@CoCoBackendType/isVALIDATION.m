@@ -6,6 +6,6 @@ function res = isVALIDATION(b)
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    res = isequal(b, CoCoBackendType.VALIDATION);
+    res = strcmp(b, CoCoBackendType.VALIDATION);
 end
 

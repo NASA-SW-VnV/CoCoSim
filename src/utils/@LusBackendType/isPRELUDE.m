@@ -6,5 +6,5 @@ function res = isPRELUDE(b)
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    res = isequal(b, LusBackendType.PRELUDE);
+    res = strcmp(b, LusBackendType.PRELUDE);
 end

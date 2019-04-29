@@ -126,9 +126,9 @@ classdef SLX2Lus_Trace < handle
                 isInsideContract = 0;
             end
             element = obj.create_Data_Trace_Element(type, var_name, originPath, port, width, index, isInsideContract, IsNotInSimulink);
-            if isequal(type, 'Inport')
+            if strcmp(type, 'Inport')
                 obj.current_inputs.appendChild(element);
-            elseif isequal(type, 'Outport')
+            elseif strcmp(type, 'Outport')
                 obj.current_outputs.appendChild(element);
             else
                 obj.current_variables.appendChild(element);
