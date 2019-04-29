@@ -34,12 +34,12 @@ function [status, errors_msg] = DiscreteTransferFcn_pp(model)
                 
                 % Obtaining z-expression parameters
                 % get denominator
-                [denum, status] = PPUtils.getTfDenum(model,dtf_list{i}, 'DiscreteTransferFcn_pp');
+                [denum, status] = PP2Utils.getTfDenum(model,dtf_list{i}, 'DiscreteTransferFcn_pp');
                 if status
                     continue;
                 end
                 % get numerator
-                [num, status] = PPUtils.getTfNumerator(model,dtf_list{i}, 'Numerator','DiscreteTransferFcn_pp');
+                [num, status] = PP2Utils.getTfNumerator(model,dtf_list{i}, 'Numerator','DiscreteTransferFcn_pp');
                 if status
                     continue;
                 end
@@ -60,7 +60,7 @@ function [status, errors_msg] = DiscreteTransferFcn_pp(model)
                     end
                 end
                 
-                PPUtils.replace_DTF_block(dtf_list{i}, U_dims{i},num,denum);
+                PP2Utils.replace_DTF_block(dtf_list{i}, U_dims{i},num,denum);
                 set_param(dtf_list{i}, 'LinkStatus', 'inactive');
             catch
                 status = 1;

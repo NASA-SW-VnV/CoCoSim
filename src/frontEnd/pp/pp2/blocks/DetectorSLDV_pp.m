@@ -37,7 +37,7 @@ if not(isempty(detector_list))
                 pp_name = strcat('Detector_Synchronized', suffix);
             end
             
-            PPUtils.replace_one_block(detector_list{i},fullfile('pp_lib',pp_name));
+            PP2Utils.replace_one_block(detector_list{i},fullfile('pp_lib',pp_name));
             set_param(detector_list{i},'in_hold', in_hold);
             if strcmp(typ, 'Delayed Fixed Duration')
                 set_param(detector_list{i},'delay', delay);

@@ -27,7 +27,7 @@ function [status, errors_msg] = RateLimiter_pp(model)
                 FallingSlewLimit = get_param(rateLimiter_list{i},'FallingSlewLimit' );
                 Init = get_param(rateLimiter_list{i},'InitialCondition');
                 % replace it
-                PPUtils.replace_one_block(rateLimiter_list{i},'pp_lib/RateLimiter');
+                PP2Utils.replace_one_block(rateLimiter_list{i},'pp_lib/RateLimiter');
                 %restore information
                 set_param(strcat(...
                     rateLimiter_list{i} ,'/R'),...

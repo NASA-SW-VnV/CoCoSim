@@ -32,7 +32,7 @@ function [status, errors_msg] = Relay_pp(model)
                 InitialOutput = OffOutputValue;
             end
             % replace
-            PPUtils.replace_one_block(Relay_list{i},'pp_lib/relay');
+            PP2Utils.replace_one_block(Relay_list{i},'pp_lib/relay');
             set_param(strcat(Relay_list{i},'/OnSwitchValue'),'Value', OnSwitchValue);
             set_param(strcat(Relay_list{i},'/OffSwitchValue'),'Value', OffSwitchValue);
             set_param(strcat(Relay_list{i},'/OnOutputValue'),'Value', OnOutputValue);

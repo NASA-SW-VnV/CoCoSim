@@ -80,7 +80,7 @@ if not(isempty(dzp_list))
         [A,B,C,D]=zp2ss(Zeros,Poles,Gain);
         if strcmp(blocktype, 'ZeroPole')
             ST = SLXUtils.getModelCompiledSampleTime(model);
-            [A, B] = PPUtils.c2d(A, B ,ST);
+            [A, B] = PP2Utils.c2d(A, B ,ST);
             ST = '-1';
         else
             ST = get_param(dzp_list{i},'SampleTime');
@@ -91,7 +91,7 @@ if not(isempty(dzp_list))
         D = mat2str(D);
         
         % replacing
-        PPUtils.replace_one_block(dzp_list{i},'pp_lib/DZP');
+        PP2Utils.replace_one_block(dzp_list{i},'pp_lib/DZP');
         %restoring info
         set_param(strcat(dzp_list{i},'/A'),...
             'Value',A);

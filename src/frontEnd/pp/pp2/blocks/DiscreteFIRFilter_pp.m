@@ -38,7 +38,7 @@ function [] = DiscreteFIRFilter_pp(model)
                 end
                 % Obtaining z-expression parameters
                 % get numerator
-                [num, status] = PPUtils.getTfNumerator(model,dFir_list{i}, 'Coefficients','DiscreteFIRFilter_pp');
+                [num, status] = PP2Utils.getTfNumerator(model,dFir_list{i}, 'Coefficients','DiscreteFIRFilter_pp');
                 if status
                     continue;
                 end
@@ -47,7 +47,7 @@ function [] = DiscreteFIRFilter_pp(model)
                 denum = zeros(1,length(num));
                 denum(1) = 1;
 
-                PPUtils.replace_DTF_block(dFir_list{i}, U_dims{i},num,denum);
+                PP2Utils.replace_DTF_block(dFir_list{i}, U_dims{i},num,denum);
                 set_param(dFir_list{i}, 'LinkStatus', 'inactive');
             catch
                 status = 1;

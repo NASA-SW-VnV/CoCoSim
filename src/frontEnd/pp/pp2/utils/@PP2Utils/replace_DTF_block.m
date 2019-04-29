@@ -53,7 +53,7 @@ function [] = replace_DTF_block(blk, U_dims_blk,num,denum )
     OutMax = get_param(blk, 'OutMax');
     
     % replacing
-    PPUtils.replace_one_block(blk,'pp_lib/DTF');
+    PP2Utils.replace_one_block(blk,'pp_lib/DTF');
     %restoring info
     set_param(strcat(blk,'/DTFScalar/A'),...
         'Value',A);

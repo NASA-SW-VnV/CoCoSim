@@ -11,23 +11,22 @@ global cocosim_config_already_run;
 if isempty(cocosim_config_already_run)
     cocosim_config_already_run = false;
 end
+%% add paths
+[cocoSim_root, ~, ~] = fileparts(mfilename('fullpath'));
+warning off
+%add all folders except tools sub-folders
+addpath(genpath(cocoSim_root));
+rmpath(genpath(fullfile(cocoSim_root, 'tools')));
+%add only tools not its sub-folders
+addpath(fullfile(cocoSim_root, 'tools'));
+% addpath(genpath(fullfile(cocoSim_root, 'libs')));
+% addpath(genpath(fullfile(cocoSim_root, 'scripts')));
+% addpath(genpath(fullfile(cocoSim_root, 'src')));
+% addpath(fullfile(cocoSim_root, 'tools'));
 if cocosim_config_already_run
     % only tools_config is needed from old compiler
     tools_config;
 else
-    %% add paths
-    [cocoSim_root, ~, ~] = fileparts(mfilename('fullpath'));
-    warning off
-    %add all folders except tools sub-folders
-    addpath(genpath(cocoSim_root)); 
-    rmpath(genpath(fullfile(cocoSim_root, 'tools')));
-    %add only tools not its sub-folders
-    addpath(fullfile(cocoSim_root, 'tools'));
-    % addpath(genpath(fullfile(cocoSim_root, 'libs')));
-    % addpath(genpath(fullfile(cocoSim_root, 'scripts')));
-    % addpath(genpath(fullfile(cocoSim_root, 'src')));
-    % addpath(fullfile(cocoSim_root, 'tools'));
-    
     %% First configuration, Zustre, Kind2 and Lustrec
     % Go to tools/tools_config and follow instructions
     tools_config;
