@@ -13,7 +13,7 @@ function  user_config_update( fcts_map, export )
     end
     global ordered_pp_functions priority_pp_map;
     priority_pp_map = fcts_map;
-    ordered_pp_functions = PP_Utils.get_ordered_functions(priority_pp_map);
+    ordered_pp_functions = PPConfigUtils.get_ordered_functions(priority_pp_map);
 
     if export
         mat_path = fullfile(fileparts(fileparts(mfilename('fullpath'))), ...

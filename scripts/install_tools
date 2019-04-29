@@ -598,7 +598,7 @@ if (( ! spacer_failed )); then
     fi
 
     if (( ! spacer_failed )); then
-        version=$(spacer_parse_version z3) || {
+        version=$(spacer_parse_version "$install_dir/spacer/bin/z3") || {
             error_parse_version spacer;
             spacer_failed=1;
         }
@@ -651,7 +651,7 @@ if (( ! z3_failed )); then
         z3_failed=1;
     }
     if (( ! z3_failed )); then
-        version=$(spacer_parse_version z3) || {
+        version=$(spacer_parse_version "$install_dir/z3/bin/z3") || {
             error_parse_version z3;
             z3_failed=1;
         }
