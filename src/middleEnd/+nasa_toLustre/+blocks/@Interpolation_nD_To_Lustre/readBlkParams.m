@@ -7,7 +7,7 @@ function blkParams = readBlkParams(~,parent,blk,blkParams)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Interpolation_nD_To_Lustre
 
-    blkParams.lookupTableType = LookupType.Interpolation_nD;
+    blkParams.lookupTableType = nasa_toLustre.utils.LookupType.Interpolation_nD;
 
     if strcmp(blk.TableSpecification, 'Lookup table object')
         display_msg(sprintf('Lookup table object for DataSpecification in block %s is not supported',...

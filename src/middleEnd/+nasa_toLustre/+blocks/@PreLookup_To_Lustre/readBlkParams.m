@@ -7,7 +7,7 @@ function blkParams = readBlkParams(~,parent,blk,blkParams)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % PreLookup_To_Lustre
 
-    blkParams.lookupTableType = LookupType.PreLookup;
+    blkParams.lookupTableType = nasa_toLustre.utils.LookupType.PreLookup;
     blkParams.OutputIndexOnly = 0;
 
     % read blk
