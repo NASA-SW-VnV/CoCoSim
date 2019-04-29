@@ -13,7 +13,7 @@ function extNode = get_Lookup_nD_Dynamic_wrapper(blkParams,inputs,...
         blkParams.blk_name);
     % node header inputs
     wrapper_header.inputs = preLookUpExtNode.inputs;
-    if LookupType.isLookupDynamic(blkParams.lookupTableType)
+    if nasa_toLustre.utils.LookupType.isLookupDynamic(blkParams.lookupTableType)
         numTableData = numel(inputs{3});
         for i=1:numTableData
             wrapper_header.inputs{end+1} = interpolationExtNode.inputs{...

@@ -6,9 +6,9 @@ function dt = constant_DT(tree, varargin)
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    if isequal(tree.dataType, 'Integer')
+    if strcmp(tree.dataType, 'Integer')
         dt = 'int';
-    elseif isequal(tree.dataType, 'Float')
+    elseif strcmp(tree.dataType, 'Float')
         dt = 'real';
     else
         dt = '';

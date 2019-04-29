@@ -171,7 +171,7 @@ classdef Assignment_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     HtmlItem.addOpenCmd(blk.Origin_path));
                 obj.addUnsupported_options(msg);
             end
-            if isequal(blk.OutputInitialize, 'Specify size for each dimension in table')
+            if strcmp(blk.OutputInitialize, 'Specify size for each dimension in table')
                 msg = sprintf('OutputInitialize Parameter in block %s is not supported. It should be set to "Initialize using input port <Y0>"',...
                     HtmlItem.addOpenCmd(blk.Origin_path));
                 obj.addUnsupported_options(msg);

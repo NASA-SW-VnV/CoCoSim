@@ -9,7 +9,7 @@
 function params = changeVar(params, oldName, newName)
     
     for i=1:numel(params)
-        if isequal(params{i}.getId(), oldName)
+        if strcmp(params{i}.getId(), oldName)
             params{i} = nasa_toLustre.lustreAst.VarIdExpr(newName);
         end
     end

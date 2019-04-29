@@ -29,9 +29,9 @@ classdef StateflowGraphicalFunction_To_Lustre
             for i=1:numel(sfunc.Data)
                 x = sfunc.Data{i};
                 data_map(sfunc.Data{i}.Name) = x;
-                if isequal(x.Scope, 'Input')
+                if strcmp(x.Scope, 'Input')
                     func_inputs{end+1} = nasa_toLustre.lustreAst.LustreVar(x.Name, x.LusDatatype);
-                elseif isequal(x.Scope, 'Output')
+                elseif strcmp(x.Scope, 'Output')
                     func_outputs{end+1} = nasa_toLustre.lustreAst.LustreVar(x.Name, x.LusDatatype);
                 end
             end

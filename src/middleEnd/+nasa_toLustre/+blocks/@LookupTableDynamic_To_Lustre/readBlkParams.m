@@ -7,7 +7,7 @@ function blkParams = readBlkParams(~,blk,inputs,blkParams)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % LookupTableDynamic_To_Lustre
     
-    blkParams.lookupTableType = LookupType.LookupDynamic;
+    blkParams.lookupTableType = nasa_toLustre.utils.LookupType.LookupDynamic;
 
     % read blk
     blkParams.NumberOfTableDimensions = 1;

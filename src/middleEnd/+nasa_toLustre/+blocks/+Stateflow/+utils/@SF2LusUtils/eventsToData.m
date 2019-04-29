@@ -10,7 +10,7 @@ function data = eventsToData(event_s)
     data = cell(numel(event_s), 1);
     for i=1:numel(event_s)
         data{i} = event_s{i};
-        if isequal(data{i}.Scope, 'Input')
+        if strcmp(data{i}.Scope, 'Input')
             data{i}.Port = data{i}.Port - numel(event_s);%for ordering reasons
         end
         data{i}.LusDatatype = 'bool';

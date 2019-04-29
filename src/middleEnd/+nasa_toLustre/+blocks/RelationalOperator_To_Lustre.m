@@ -65,7 +65,7 @@ classdef RelationalOperator_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             codes = cell(1, numel(outputs));
             for j=1:numel(outputs)
                 code = nasa_toLustre.lustreAst.BinaryExpr(op, inputs{1}{j}, inputs{2}{j});
-                if isequal(lus_outputDT, 'bool')
+                if strcmp(lus_outputDT, 'bool')
                     codes{j} = nasa_toLustre.lustreAst.LustreEq(outputs{j}, code);
                 else
                     codes{j} = nasa_toLustre.lustreAst.LustreEq(outputs{j}, ...

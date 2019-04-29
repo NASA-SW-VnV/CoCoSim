@@ -55,7 +55,7 @@ function [lus_dt] = SignalHierarchyLusDT(blk, SignalHierarchy)
             for i=1:numel(p)
                 p_parent=  get_param(p(i), 'Parent');
                 p_parentObj = get_param(p_parent, 'Object');
-                if isequal(p_parentObj.BlockType, 'BusCreator')
+                if strcmp(p_parentObj.BlockType, 'BusCreator')
                     BusCreatorFound = true;
                     break;
                 end

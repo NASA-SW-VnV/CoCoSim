@@ -103,7 +103,7 @@ function nb_steps_CreateFcn(hObject, eventdata, handles)
 
     % Hint: edit controls usually have a white background on Windows.
     %       See ISPC and COMPUTER.
-    if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    if ispc && strcmp(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
         set(hObject,'BackgroundColor','white');
     end
 
@@ -145,7 +145,7 @@ function min_CreateFcn(hObject, eventdata, handles)
 
     % Hint: edit controls usually have a white background on Windows.
     %       See ISPC and COMPUTER.
-    if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    if ispc && strcmp(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
         set(hObject,'BackgroundColor','white');
     end
 end
@@ -170,7 +170,7 @@ function max_CreateFcn(hObject, eventdata, handles)
 
     % Hint: edit controls usually have a white background on Windows.
     %       See ISPC and COMPUTER.
-    if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    if ispc && strcmp(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
         set(hObject,'BackgroundColor','white');
     end
 end
@@ -195,7 +195,7 @@ function max_nb_test_CreateFcn(hObject, eventdata, handles)
 
     % Hint: edit controls usually have a white background on Windows.
     %       See ISPC and COMPUTER.
-    if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    if ispc && strcmp(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
         set(hObject,'BackgroundColor','white');
     end
 end
@@ -221,7 +221,7 @@ function coverage_percentage_CreateFcn(hObject, eventdata, handles)
 
     % Hint: edit controls usually have a white background on Windows.
     %       See ISPC and COMPUTER.
-    if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    if ispc && strcmp(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
         set(hObject,'BackgroundColor','white');
     end
 end

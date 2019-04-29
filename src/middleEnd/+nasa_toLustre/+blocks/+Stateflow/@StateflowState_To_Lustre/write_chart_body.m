@@ -52,7 +52,7 @@ function [outputs, inputs, variables, body] = write_chart_body(...
     %local variables
     for i=1:numel(dataAndEvents)
         d = dataAndEvents{i};
-        if isequal(d.Scope, 'Input')
+        if strcmp(d.Scope, 'Input')
             continue;
         end
         d_names = nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getDataName(d);
@@ -71,7 +71,7 @@ function [outputs, inputs, variables, body] = write_chart_body(...
                     MsgType.ERROR, 'Outport_To_Lustre', '');
                 v = 0;
             end
-            if isequal(d.Scope, 'Parameter')
+            if strcmp(d.Scope, 'Parameter')
                 if isstruct(v) && isfield(v,'Value')
                     v = v.Value;
                 elseif isa(v, 'Simulink.Parameter')
@@ -85,10 +85,10 @@ function [outputs, inputs, variables, body] = write_chart_body(...
             end
             IC_Var =nasa_toLustre.utils.SLX2LusUtils.num2LusExp(v, d.LusDatatype);
 
-            if ~isequal(d.Scope, 'Output')
+            if ~strcmp(d.Scope, 'Output')
                 variables{end+1} = nasa_toLustre.lustreAst.LustreVar(d_name, d.LusDatatype);
             end
-            if isequal(d.Scope, 'Output')
+            if strcmp(d.Scope, 'Output')
                 d_firstName = strcat(d_name, '__1');
                 if ismember(d_name, nodeCall_inputs_Names)
                     body{end+1} = nasa_toLustre.lustreAst.LustreEq(...
@@ -100,7 +100,7 @@ function [outputs, inputs, variables, body] = write_chart_body(...
                         nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.changeVar(...
                         nodeCall_inputs_Ids, d_name, d_firstName);
                 end
-            elseif isequal(d.Scope, 'Local')
+            elseif strcmp(d.Scope, 'Local')
                 d_lastName = strcat(d_name, '__2');
                 if ismember(d_name, nodeCall_outputs_Names)
                     body{end+1} = nasa_toLustre.lustreAst.LustreEq(...
@@ -115,9 +115,9 @@ function [outputs, inputs, variables, body] = write_chart_body(...
                     %local variable that was not modified in the chart
                     body{end+1} = nasa_toLustre.lustreAst.LustreEq(nasa_toLustre.lustreAst.VarIdExpr(d_name), IC_Var);
                 end
-            elseif isequal(d.Scope, 'Constant')
+            elseif strcmp(d.Scope, 'Constant')
                 body{end+1} = nasa_toLustre.lustreAst.LustreEq(nasa_toLustre.lustreAst.VarIdExpr(d_name), IC_Var);
-            elseif isequal(d.Scope, 'Parameter')
+            elseif strcmp(d.Scope, 'Parameter')
                 body{end+1} = nasa_toLustre.lustreAst.LustreEq(nasa_toLustre.lustreAst.VarIdExpr(d_name), IC_Var);
             end
         end

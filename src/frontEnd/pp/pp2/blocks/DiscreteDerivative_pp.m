@@ -59,7 +59,7 @@ function [status, errors_msg] = DiscreteDerivative_pp(model)
                 set_param([blkName,'/TSamp'], ...
                     'weightValue',num2str(inverseGainval));
 
-                if isequal(OutDataTypeStr, 'Inherit: Inherit via internal rule')
+                if strcmp(OutDataTypeStr, 'Inherit: Inherit via internal rule')
                     diffDT   = 'Inherit: Inherit via back propagation';
                     tsampDT  = 'Inherit: Inherit via internal rule';
                     tsampImp = 'Offline Scaling Adjustment';

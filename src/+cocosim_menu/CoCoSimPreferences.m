@@ -46,7 +46,7 @@ classdef CoCoSimPreferences < handle
                 c_fields = fieldnames(struct(c));
                 cocoPrefs_fields = fieldnames(CoCoSimPreferences);% Ignore warning
                 if length(c_fields) ~= length(cocoPrefs_fields) ...
-                        || ~isequal(sort(cocoPrefs_fields), sort(c_fields))
+                        || ~strcmp(sort(cocoPrefs_fields), sort(c_fields))
                     fields_diff = c_fields(cellfun(@(x) ~ismember(x, cocoPrefs_fields), c_fields));
                     for i=1:length(fields_diff)
                         CoCoSimPreferences.(fields_diff{i}) = c.(fields_diff{i});

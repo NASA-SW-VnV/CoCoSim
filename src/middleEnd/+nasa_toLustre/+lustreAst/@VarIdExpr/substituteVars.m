@@ -6,7 +6,7 @@ function new_obj = substituteVars(obj, var, newVar)
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  
-    if isequal(obj.getId(), var.getId())
+    if strcmp(obj.getId(), var.getId())
         new_obj = newVar;
     else
         new_obj = obj;

@@ -10,7 +10,7 @@ function call = changeEvents(call, EventsNames, E)
     inputs_Ids = cellfun(@(x) nasa_toLustre.lustreAst.VarIdExpr(x.getId()), ...
         args, 'UniformOutput', false);
     for i=1:numel(inputs_Ids)
-        if isequal(inputs_Ids{i}.getId(), E)
+        if strcmp(inputs_Ids{i}.getId(), E)
             inputs_Ids{i} = nasa_toLustre.lustreAst.BooleanExpr(true);
         elseif ismember(inputs_Ids{i}.getId(), EventsNames)
             inputs_Ids{i} = nasa_toLustre.lustreAst.BooleanExpr(false);

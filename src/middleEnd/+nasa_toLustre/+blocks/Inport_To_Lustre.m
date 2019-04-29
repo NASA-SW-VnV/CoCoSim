@@ -33,7 +33,7 @@ classdef Inport_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             % case of Validation backend with Lustrec.
             if CoCoBackendType.isVALIDATION(coco_backend) ...
                     && LusBackendType.isLUSTREC(lus_backend) ...
-                    && isequal(parent.BlockType, 'block_diagram')
+                    && strcmp(parent.BlockType, 'block_diagram')
                 if isempty(blk.CompiledPortDataTypes)
                     isEnum = false;
                 else

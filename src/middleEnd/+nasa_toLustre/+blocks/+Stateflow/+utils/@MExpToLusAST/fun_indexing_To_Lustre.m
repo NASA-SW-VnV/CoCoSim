@@ -44,7 +44,7 @@ function [code, exp_dt] = fun_indexing_To_Lustre(BlkObj, tree, parent, blk,...
                 [code, exp_dt] = func_handle(BlkObj, tree, parent, blk, ...
                     data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun);
             catch me
-                if isequal(me.identifier, 'MATLAB:UndefinedFunction')
+                if strcmp(me.identifier, 'MATLAB:UndefinedFunction')
                     code = parseOtherFunc(BlkObj, tree, ...
                         parent, blk, data_map, inputs, ...
                         expected_dt, isSimulink, isStateFlow, isMatlabFun);
@@ -76,10 +76,10 @@ function code = parseOtherFunc(obj, tree, parent, blk, data_map, inputs, expecte
         code = sf_mf_functionCall_To_Lustre(obj, tree, parent, blk, ...
             data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun);
         
-    elseif isSimulink && isequal(tree.ID, 'u')
+    elseif isSimulink && strcmp(tree.ID, 'u')
         %"u" refers to an input in IF, Switch and Fcn
         %blocks
-        if isequal(tree.parameters(1).type, 'constant')
+        if strcmp(tree.parameters(1).type, 'constant')
             %the case of u(1), u(2) ...
             input_idx = str2double(tree.parameters(1).value);
             code = inputs{1}{input_idx};
@@ -93,7 +93,7 @@ function code = parseOtherFunc(obj, tree, parent, blk, data_map, inputs, expecte
     elseif isSimulink &&  ~isempty(regexp(tree.ID, 'u\d+', 'match'))
         % case of u1, u2 ...
         input_number = str2double(regexp(tree.ID, 'u(\d+)', 'tokens', 'once'));
-        if isequal(tree.parameters(1).type, 'constant')
+        if strcmp(tree.parameters(1).type, 'constant')
             arrayIndex = str2double(tree.parameters(1).value);
             code = inputs{input_number}{arrayIndex};
         else

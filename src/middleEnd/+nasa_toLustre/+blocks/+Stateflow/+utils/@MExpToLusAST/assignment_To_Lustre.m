@@ -15,8 +15,8 @@ function [code, assignment_dt] = assignment_To_Lustre(BlkObj, tree, parent, blk,
     
     right = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(BlkObj, tree.rightExp, parent, blk,...
         data_map, inputs, assignment_dt, isSimulink, isStateFlow, isMatlabFun);
-    if isequal(tree.leftExp.type, 'fun_indexing') ...
-            && ~isequal(tree.leftExp.parameters.type, 'constant')
+    if strcmp(tree.leftExp.type, 'fun_indexing') ...
+            && ~strcmp(tree.leftExp.parameters.type, 'constant')
         [code, status] = ArrayIndexNotConstant(left, right, tree);
         if status
             ME = MException('COCOSIM:TREE2CODE', ...
@@ -26,7 +26,7 @@ function [code, assignment_dt] = assignment_To_Lustre(BlkObj, tree, parent, blk,
         end
         return;
     end
-    if isequal(tree.leftExp.type, 'matrix') && numel(right) == 1
+    if strcmp(tree.leftExp.type, 'matrix') && numel(right) == 1
         %e.g. [z,y] = f(x)
         left{1} = nasa_toLustre.lustreAst.TupleExpr(left);
     elseif  numel(left) ~= numel(right)
