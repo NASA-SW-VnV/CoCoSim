@@ -27,7 +27,7 @@ function    add_pp_functions( files )
        end
        fcts_map(full_path) = lowest_priority;
     end
-    ordered_functions = PP_Utils.get_ordered_functions(fcts_map);
+    ordered_functions = PPConfigUtils.get_ordered_functions(fcts_map);
     pp_user_config(fcts_map, ordered_functions);
 end
 

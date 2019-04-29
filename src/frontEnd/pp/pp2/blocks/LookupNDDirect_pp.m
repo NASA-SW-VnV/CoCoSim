@@ -99,7 +99,7 @@ if not(isempty(LookupNDDirect_list))
             % organize blocks
             try BlocksPosition_pp(tmp_block_path); catch, end
             
-            PPUtils.replace_one_block(LookupNDDirect_list{i},tmp_block_path);
+            PP2Utils.replace_one_block(LookupNDDirect_list{i},tmp_block_path);
             delete_block(tmp_block_path);
         catch me
             display_msg(me.getReport(), MsgType.DEBUG, 'LookupNDDirect_pp', '');

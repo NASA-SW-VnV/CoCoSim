@@ -24,10 +24,10 @@ function [ordered_functions, fcts_map]  = ...
     % fct -> priority
     fcts_map = containers.Map('KeyType', 'char', 'ValueType', 'int32');
 
-    fcts_map = PP_Utils.update_priority(fcts_map, pp_order_map);
-    fcts_map = PP_Utils.extract_fcts(fcts_map, pp_handled_blocks, lowest_priority);
-    fcts_map = PP_Utils.extract_fcts(fcts_map, pp_unhandled_blocks, -1);
-    ordered_functions = PP_Utils.get_ordered_functions(fcts_map);
+    fcts_map = PPConfigUtils.update_priority(fcts_map, pp_order_map);
+    fcts_map = PPConfigUtils.extract_fcts(fcts_map, pp_handled_blocks, lowest_priority);
+    fcts_map = PPConfigUtils.extract_fcts(fcts_map, pp_unhandled_blocks, -1);
+    ordered_functions = PPConfigUtils.get_ordered_functions(fcts_map);
 
 end
         

@@ -46,7 +46,7 @@ function [status, errors_msg] = DiscreteDerivative_pp(model)
                 OutMax = get_param(dDerivative_list{i}, 'OutMax');
 
                 % replacing
-                PPUtils.replace_one_block(dDerivative_list{i},'pp_lib/DiscreteDerivative');
+                PP2Utils.replace_one_block(dDerivative_list{i},'pp_lib/DiscreteDerivative');
 
                 blkName = dDerivative_list{i};
 

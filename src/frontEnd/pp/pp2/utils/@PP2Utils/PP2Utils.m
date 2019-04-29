@@ -1,5 +1,5 @@
-classdef PPUtils
-    %PPUTILS Summary of this class goes here
+classdef PP2Utils
+    %PP2Utils Summary of this class goes here
     %   Detailed explanation goes here
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the

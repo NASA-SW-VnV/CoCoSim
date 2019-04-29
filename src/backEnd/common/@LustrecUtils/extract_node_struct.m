@@ -15,7 +15,8 @@ function [node_struct,...
     % Using lustre file
     try
         [node_struct, status] = LustrecUtils.extract_node_struct_using_lusFile(lus_file_path, node_name);
-    catch
+    catch me
+        display_msg(me.getReport(), MsgType.DEBUG, 'extract_node_struct', '');
         status = 1;
     end
     if status==0
@@ -33,6 +34,18 @@ function [node_struct,...
         end
     end
     
+    % Using lusi file
+    try
+        [node_struct, status] = ...
+            LustrecUtils.extract_node_struct_using_lusi(...
+            lus_file_path, node_name, LUSTREC);
+    catch
+        status = 1;
+    end
+    if status==0
+        return;
+    end
+    
     % Using emf file
     try
         [node_struct, status] = ...
@@ -46,17 +59,7 @@ function [node_struct,...
     end
 
     
-    % Using lusi file
-    try
-        [node_struct, status] = ...
-            LustrecUtils.extract_node_struct_using_lusi(...
-            lus_file_path, node_name, LUSTREC);
-    catch
-        status = 1;
-    end
-    if status==0
-        return;
-    end
+    
     
 end
 

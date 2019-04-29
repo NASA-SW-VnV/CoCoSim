@@ -11,7 +11,7 @@ CoCoSim is currently under development. We welcome any feedback and bug report.
 License
 -------
 
-IKOS has been released under the NASA Open Source Agreement.
+CoCoSim has been released under the NASA Open Source Agreement.
 
 Contact
 -------
@@ -29,22 +29,11 @@ Troubleshooting
 See [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
 
 
-## Installation
+Installation
+------------
 
-CoCoSim can be installed and used as follows:
+See [INSTALL.md](INSTALL.md)
 
-### Dependencies
-
-* MATLAB(c) version **R2014b** or newer
-* [Zustre](https://github.com/lememta/zustre)
-* (Optional) [JKind](https://github.com/agacek/jkind) -- Best for Windows OS users
-* (Optional) [Kind2](http://kind2-mc.github.io/kind2/)
-* (Optional) [Ikos](https://ti.arc.nasa.gov/opensource/ikos/)
-* Python2.7
-
-### Configuration
-
-* Follow INSTALL file instructions.
 
 
 ### Launching

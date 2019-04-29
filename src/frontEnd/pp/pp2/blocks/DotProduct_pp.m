@@ -32,7 +32,7 @@ function [status, errors_msg] = DotProduct_pp(model)
             SaturateOnIntegerOverflow = get_param(DotProduct_list{i}, 'SaturateOnIntegerOverflow');
             LockScale = get_param(DotProduct_list{i}, 'LockScale');
 
-            PPUtils.replace_one_block(DotProduct_list{i},fullfile('pp_lib',pp_name));
+            PP2Utils.replace_one_block(DotProduct_list{i},fullfile('pp_lib',pp_name));
             set_param(strcat(DotProduct_list{i},'/Product'),...
                 'OutDataTypeStr',outputDataType);
             set_param(strcat(DotProduct_list{i},'/Product'),...

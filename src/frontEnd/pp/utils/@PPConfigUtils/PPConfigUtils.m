@@ -1,4 +1,4 @@
-classdef PP_Utils
+classdef PPConfigUtils
     
     methods (Static = true)
         [ordered_functions, fcts_map]  = ...

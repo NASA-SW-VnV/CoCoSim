@@ -10,7 +10,7 @@ function data = read_json(contract_path)
     try
         filetext = fileread(contract_path);
     catch ME
-        display_msg('No Contract file', Constants.ERROR, 'Zustre ', '');
+        display_msg(['Could not read file ' contract_path], Constants.ERROR, 'read_json', '');
         rethrow(ME);
     end
 
