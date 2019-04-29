@@ -139,7 +139,7 @@ function [outputs, inputs, body, variables] = write_state_body(state)
     %4th step: execute the active child
     children = nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getSubStatesObjects(state);
     number_children = numel(children);
-    isParallel = isequal(state.Composition.Type, 'PARALLEL_AND');
+    isParallel = strcmp(state.Composition.Type, 'PARALLEL_AND');
     if number_children > 0 && ~isParallel
         inputs{end + 1} = nasa_toLustre.lustreAst.LustreVar(idStateVar, idStateEnumType);
     end

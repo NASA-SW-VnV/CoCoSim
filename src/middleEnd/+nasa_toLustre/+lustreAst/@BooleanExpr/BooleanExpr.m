@@ -19,7 +19,7 @@ classdef BooleanExpr < nasa_toLustre.lustreAst.LustreExpr
             if isnumeric(obj.value) || islogical(obj.value)
                 v = obj.value;
             elseif ischar(obj.value)
-                if isequal(obj.value, 'true') || isequal(obj.value, 'false')
+                if strcmp(obj.value, 'true') || strcmp(obj.value, 'false')
                     v = eval(obj.value);
                 else
                     if str2num(obj.value) ~= 0

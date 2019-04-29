@@ -30,7 +30,7 @@ function [code, exp_dt] = mathFun_To_Lustre(BlkObj, tree, parent, blk,...
         case {'atan2', 'power', 'pow'}
             % two arguments
             BlkObj.addExternal_libraries('LustMathLib_lustrec_math');
-            if isequal(tree_ID, 'power')
+            if strcmp(tree_ID, 'power')
                 fun_name = 'pow';
             else
                 fun_name = tree_ID;
@@ -73,8 +73,8 @@ function [code, exp_dt] = mathFun_To_Lustre(BlkObj, tree, parent, blk,...
             
         case {'abs', 'sgn'}
             expected_param_dt = exp_dt;
-            if isequal(expected_param_dt, 'int') ...
-                    || isequal(expected_param_dt, 'real')
+            if strcmp(expected_param_dt, 'int') ...
+                    || strcmp(expected_param_dt, 'real')
                 fun_name = strcat(tree_ID, '_', expected_param_dt);
             else
                 fun_name = strcat(tree_ID, '_real');
@@ -99,7 +99,7 @@ function [code, exp_dt] = mathFun_To_Lustre(BlkObj, tree, parent, blk,...
                 parent, blk, data_map, inputs, '', ...
                 isSimulink, isStateFlow, isMatlabFun);
             params_Dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.upperDT(param1_dt, param2_dt);
-            if isequal(params_Dt, 'int')
+            if strcmp(params_Dt, 'int')
                 fun_name = strcat(tree_ID, '_int_int');
                 lib_name = strcat('LustMathLib_', fun_name);
                 BlkObj.addExternal_libraries(lib_name);

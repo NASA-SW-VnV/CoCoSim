@@ -29,7 +29,7 @@ classdef SubSystem_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             end
             if isempty(blk.CompiledPortWidths.Outport) ...
                     && isfield(blk, 'MaskType') ...
-                    && isequal(blk.MaskType, 'VerificationSubsystem')
+                    && strcmp(blk.MaskType, 'VerificationSubsystem')
                 outputs{1} = nasa_toLustre.lustreAst.VarIdExpr(strcat(node_name, '_virtual'));
             end
             %% Check Enable, Trigger, Action case

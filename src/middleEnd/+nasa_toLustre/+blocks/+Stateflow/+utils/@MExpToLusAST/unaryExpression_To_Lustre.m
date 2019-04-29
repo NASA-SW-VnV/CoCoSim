@@ -14,11 +14,11 @@ function [code, exp_dt] = unaryExpression_To_Lustre(BlkObj, tree, parent,...
     exp_dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.expression_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
     right = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(BlkObj, tree.rightExp, parent,...
         blk, data_map, inputs, exp_dt, isSimulink, isStateFlow, isMatlabFun);
-    if isequal(tree.operator, '~') || isequal(tree.operator, '!')
+    if strcmp(tree.operator, '~') || strcmp(tree.operator, '!')
         op = nasa_toLustre.lustreAst.UnaryExpr.NOT;
-    elseif isequal(tree.operator, '-')
+    elseif strcmp(tree.operator, '-')
         op = nasa_toLustre.lustreAst.UnaryExpr.NEG;
-    elseif isequal(tree.operator, '+')
+    elseif strcmp(tree.operator, '+')
         code = right;
         return;
     else

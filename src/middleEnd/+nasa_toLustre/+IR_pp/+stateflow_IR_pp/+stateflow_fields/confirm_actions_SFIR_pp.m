@@ -89,7 +89,7 @@ function states = adapt_states(states)
             end
             prompt = 'Are all the above actions correct? Y/N [Y]: ';
             str = input(prompt,'s');
-            if ~isempty(str) && isequal(upper(str), 'N')
+            if ~isempty(str) && strcmp(upper(str), 'N')
                 for j=1:numel(states_fields)
                     f = states_fields{j};
                     if isfield(states{i}.Actions, f) ...
@@ -110,7 +110,7 @@ function transitions = adapt_transitions(transitions, statePath, transitionType)
     for i=1:numel(transitions)
         if isfield(transitions{i}, 'LabelString')...
                 && ~isempty(transitions{i}.LabelString) ...
-                && ~isequal(transitions{i}.LabelString, '?')
+                && ~strcmp(transitions{i}.LabelString, '?')
             display_msg(...
                 sprintf('We need your confirmation on %s transition number %d of the State\n %s:', ...
                 transitionType, transitions{i}.ExecutionOrder, statePath),...
@@ -140,7 +140,7 @@ function transitions = adapt_transitions(transitions, statePath, transitionType)
             end
             prompt = 'Are all the above parts correct? Y/N [Y]: ';
             str = input(prompt,'s');
-            if ~isempty(str) && isequal(upper(str), 'N')
+            if ~isempty(str) && strcmp(upper(str), 'N')
                 for j=1:numel(action_fields)
                     f = action_fields{j};
                     if isfield(transitions{i}, f)

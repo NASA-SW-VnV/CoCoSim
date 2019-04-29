@@ -11,19 +11,19 @@ function new_obj = simplify(obj)
     right_exp = obj.right.simplify();
     % x + (-y) => x - y, x - (-y) => x+y
     if isa(right_exp, 'nasa_toLustre.lustreAst.UnaryExpr') ...
-            && isequal(right_exp.op, nasa_toLustre.lustreAst.UnaryExpr.NEG) 
-        if isequal(new_op, nasa_toLustre.lustreAst.BinaryExpr.PLUS)
+            && strcmp(right_exp.op, nasa_toLustre.lustreAst.UnaryExpr.NEG) 
+        if strcmp(new_op, nasa_toLustre.lustreAst.BinaryExpr.PLUS)
             right_exp = right_exp.expr;
             new_op = nasa_toLustre.lustreAst.BinaryExpr.MINUS;
-        elseif isequal(new_op, nasa_toLustre.lustreAst.BinaryExpr.MINUS)
+        elseif strcmp(new_op, nasa_toLustre.lustreAst.BinaryExpr.MINUS)
             right_exp = right_exp.expr;
             new_op = nasa_toLustre.lustreAst.BinaryExpr.PLUS;
         end
     end
     % x+0 => x, x -0 => x
-    if (isequal(new_op, nasa_toLustre.lustreAst.BinaryExpr.MINUS) ...
-            || isequal(new_op, nasa_toLustre.lustreAst.BinaryExpr.PLUS) )
-        if isequal(new_op, nasa_toLustre.lustreAst.BinaryExpr.PLUS) ...
+    if (strcmp(new_op, nasa_toLustre.lustreAst.BinaryExpr.MINUS) ...
+            || strcmp(new_op, nasa_toLustre.lustreAst.BinaryExpr.PLUS) )
+        if strcmp(new_op, nasa_toLustre.lustreAst.BinaryExpr.PLUS) ...
                 && (isa(left_exp, 'nasa_toLustre.lustreAst.IntExpr') || isa(left_exp, 'nasa_toLustre.lustreAst.RealExpr'))...
                 && left_exp.getValue() == 0
             new_obj = right_exp;

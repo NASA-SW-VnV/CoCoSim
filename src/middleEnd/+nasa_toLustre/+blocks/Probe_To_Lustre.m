@@ -23,7 +23,7 @@ classdef Probe_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             blk_out_idx = 1;
             % refers to current idx of "outputs" variable
             outputs_idx = 1;
-            if isequal(blk.ProbeWidth, 'on')
+            if strcmp(blk.ProbeWidth, 'on')
                 slx_dt = blk.CompiledPortDataTypes.Outport{blk_out_idx};
                 lus_dt = nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(slx_dt);
                 width = blk.CompiledPortWidths.Inport(1);
@@ -33,7 +33,7 @@ classdef Probe_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 outputs_idx = outputs_idx + 1;
             end
             
-            if isequal(blk.ProbeSampleTime, 'on')
+            if strcmp(blk.ProbeSampleTime, 'on')
                 slx_dt = blk.CompiledPortDataTypes.Outport{blk_out_idx};
                 lus_dt = nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(slx_dt);
                 % Sample Time is Inherited from driving block
@@ -47,7 +47,7 @@ classdef Probe_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 blk_out_idx = blk_out_idx + 1;
             end
             
-            if isequal(blk.ProbeComplexSignal, 'on')
+            if strcmp(blk.ProbeComplexSignal, 'on')
                 slx_dt = blk.CompiledPortDataTypes.Outport{blk_out_idx};
                 lus_dt = nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(slx_dt);
                 complexSignal = blk.CompiledPortComplexSignals.Inport(1);
@@ -58,7 +58,7 @@ classdef Probe_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             end
             
             
-            if isequal(blk.ProbeSignalDimensions, 'on')
+            if strcmp(blk.ProbeSignalDimensions, 'on')
                 slx_dt = blk.CompiledPortDataTypes.Outport{blk_out_idx};
                 lus_dt = nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(slx_dt);
                 inport_dimensions = blk.CompiledPortDimensions.Inport;

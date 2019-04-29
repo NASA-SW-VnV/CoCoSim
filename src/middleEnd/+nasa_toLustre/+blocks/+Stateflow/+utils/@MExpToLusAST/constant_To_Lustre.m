@@ -18,10 +18,10 @@ function [code, exp_dt] = constant_To_Lustre(BlkObj, tree, parent, blk, ...
         code{1} = nasa_toLustre.lustreAst.IntExpr(str2double(v));
     else
         %isempty(expected_dt)
-        if isequal(tree.dataType, 'Integer')
+        if strcmp(tree.dataType, 'Integer')
             code{1} = nasa_toLustre.lustreAst.IntExpr(str2double(v));
             exp_dt = 'int';
-        elseif isequal(tree.dataType, 'Float')
+        elseif strcmp(tree.dataType, 'Float')
             code{1} = nasa_toLustre.lustreAst.RealExpr(str2double(v));
             exp_dt = 'real';
         else

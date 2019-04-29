@@ -56,7 +56,7 @@ function [body, outputs, inputs, antiCondition] = ...
             end
 
         end
-        if isequal(dest_parent.Composition.Type,'AND')
+        if strcmp(dest_parent.Composition.Type,'AND')
             %Parallel state Enter.
             parent = ...
                 nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.getParent(dest_parent);

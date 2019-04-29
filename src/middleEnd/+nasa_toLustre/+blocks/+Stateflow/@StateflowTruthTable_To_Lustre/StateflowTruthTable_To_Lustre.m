@@ -23,9 +23,9 @@ classdef StateflowTruthTable_To_Lustre
             actions_index_map = containers.Map('KeyType', 'int32', 'ValueType', 'char');
             for i = 1 : numel(table.Actions)
                 if isfield(table.Actions{i}, 'Label')
-                    if isequal(table.Actions{i}.Label, 'INIT')
+                    if strcmp(table.Actions{i}.Label, 'INIT')
                         INIT_action = table.Actions{i}.Action;
-                    elseif isequal(table.Actions{i}.Label, 'FINAL')
+                    elseif strcmp(table.Actions{i}.Label, 'FINAL')
                         FINAL_action = table.Actions{i}.Action;
                     end
                 end
@@ -45,9 +45,9 @@ classdef StateflowTruthTable_To_Lustre
                 cond = {};
                 for j = 1 : numel(table.Decisions{i}.Conditions)
                     c = table.Decisions{i}.Conditions{j};
-                    if isequal(c.ConditionValue, 'T')
+                    if strcmp(c.ConditionValue, 'T')
                         cond{end+1} = sprintf('(%s)', c.Condition);
-                    elseif isequal(c.ConditionValue, 'F')
+                    elseif strcmp(c.ConditionValue, 'F')
                         cond{end+1} = sprintf('~(%s)', c.Condition);
                     end
                 end
@@ -112,7 +112,7 @@ classdef StateflowTruthTable_To_Lustre
         end
         
         function options = getUnsupportedOptions(table, varargin)
-            if isfield(table, 'Language') && isequal(table.Language, 'C')
+            if isfield(table, 'Language') && strcmp(table.Language, 'C')
                 obj.addUnsupported_options(...
                     sprintf(['Action Language "C" for TrthTable %s is not supported. You need to set Action Language to "Matlab".'],....
                     table.Path));

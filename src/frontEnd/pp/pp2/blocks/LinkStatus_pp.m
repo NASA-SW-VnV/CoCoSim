@@ -25,7 +25,7 @@ if not(isempty(all_blocks))
             catch
                 linkStatus = 'none';
             end
-            if ~(isequal(linkStatus, 'none') || isequal(linkStatus, 'inactive'))
+            if ~(strcmp(linkStatus, 'none') || strcmp(linkStatus, 'inactive'))
                 display_msg(['Disable link of ' all_blocks{i}], MsgType.INFO, 'LinkStatus_pp', '');
                 set_param(all_blocks{i}, 'LinkStatus', 'inactive');
             end
