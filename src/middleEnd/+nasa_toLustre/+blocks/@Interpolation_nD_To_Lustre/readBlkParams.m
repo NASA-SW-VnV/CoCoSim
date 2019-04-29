@@ -72,6 +72,8 @@ function blkParams = readBlkParams(~,parent,blk,blkParams)
     blkParams.tableMin = min(blkParams.Table(:));
     blkParams.tableMax = max(blkParams.Table(:));
     
+    blkParams.ValidIndexMayReachLast = blk.ValidIndexMayReachLast;
+    
     % calculate dimJump and boundNodeOrder
     blkParams = ...
         nasa_toLustre.blocks.Lookup_nD_To_Lustre.addCommonData2BlkParams(...

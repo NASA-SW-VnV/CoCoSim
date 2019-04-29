@@ -80,7 +80,8 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
                     
             % codes are shared between Lookup_nD_To_Lustre and LookupTableDynamic 
             blkParams = ...
-                nasa_toLustre.blocks.Lookup_nD_To_Lustre.getInitBlkParams(blk);
+                nasa_toLustre.blocks.Lookup_nD_To_Lustre.getInitBlkParams(...
+                blk,lus_backend);
             
             blkParams = obj.readBlkParams(parent,blk,blkParams);
 
@@ -223,7 +224,7 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
         
         y_interp = interp2points_2D(x1, y1, x2, y2, x_interp)
         
-        function blkParams = getInitBlkParams(blk)
+        function blkParams = getInitBlkParams(blk,lus_backend)
             blkParams = struct;
             blkParams.BreakpointsForDimension = {};
             blkParams.directLookup = 0;
@@ -232,6 +233,7 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
                 nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);
             blkParams.RndMeth = 'Round';
             blkParams.SaturateOnIntegerOverflow = 'off';
+            blkParams.lus_backend = lus_backend;
         end
         
         function blkParams = addCommonData2BlkParams(blkParams)

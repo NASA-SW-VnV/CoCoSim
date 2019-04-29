@@ -74,6 +74,7 @@ function blkParams = readBlkParams(~,parent,blk,blkParams)
     end
     
     blkParams.RndMeth = blk.RndMeth;
+    blkParams.UseLastBreakpoint = blk.UseLastBreakpoint;
      
     % calculate dimJump and boundNodeOrder
     blkParams = ...
