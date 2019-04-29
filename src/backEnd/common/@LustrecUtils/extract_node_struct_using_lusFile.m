@@ -4,7 +4,7 @@
 % All Rights Reserved.
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
- 
+
 
 function [node_struct,...
         status] = extract_node_struct_using_lusFile(lus_file_path, node_name)
@@ -31,16 +31,30 @@ function [node_struct,...
     tokens = regexp(tokens{1}, vars,'match');
     inputs = regexp(tokens{1}, ';', 'split');
     outputs = regexp(tokens{2}, ';', 'split');
-
+    
     for i=1:numel(inputs)
         tokens = regexp(inputs{i}, '\w+','match');
-        node_struct.inputs(i).name = tokens{1};
-        node_struct.inputs(i).datatype = tokens{2};
+        if isempty(tokens)
+            continue;
+        elseif length(tokens) == 2
+            node_struct.inputs(i).name = tokens{1};
+            node_struct.inputs(i).datatype = tokens{2};
+        else
+            status = 1;
+            return;
+        end
     end
     for i=1:numel(outputs)
         tokens = regexp(outputs{i}, '\w+','match');
-        node_struct.outputs(i).name = tokens{1};
-        node_struct.outputs(i).datatype = tokens{2};
+        if isempty(tokens)
+            continue;
+        elseif length(tokens) == 2
+            node_struct.outputs(i).name = tokens{1};
+            node_struct.outputs(i).datatype = tokens{2};
+        else
+            status = 1;
+            return;
+        end
     end
 end
 
