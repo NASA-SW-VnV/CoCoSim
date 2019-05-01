@@ -15,7 +15,11 @@ function RustCallback(callbackInfo)
     model_full_path = MenuUtils.get_file_name(gcs);
     try
         MenuUtils.add_pp_warning(model_full_path);
-        lus_full_path = cocoSpecCompiler(model_full_path);
+        [lus_full_path, ~, status, ~] = ...
+            nasa_toLustre.ToLustre(model_full_path, [], LusBackendType.KIND2);
+        if status
+            return;
+        end
         output_dir = fullfile(fileparts(lus_full_path), 'Rust');
         generate_rust(lus_full_path, output_dir);
 

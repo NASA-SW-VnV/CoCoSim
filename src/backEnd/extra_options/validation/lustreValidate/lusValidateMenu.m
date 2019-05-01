@@ -6,13 +6,13 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function schema = lusValidateMenu(varargin)
 schema = sl_container_schema;
-schema.label = 'Validate Simulink to Lustre compiler using ...';
+schema.label = 'Validate Simulink to Lustre compiler using ';
 schema.statustip = 'Validate Lustre compiler';
 schema.autoDisableWhen = 'Busy';
 
-validationType = {'Random vector tests', 'Mutation based testing',...
-    'Equivalence Checking using Simulink Design Verifier', ...
-    'Equivalence Checking using Kind2'};
+validationType = {'Random vector tests', 'Mutation based testing (Work In progress)',...
+    'Equivalence Checking using Simulink Design Verifier (Work In progress)', ...
+    'Equivalence Checking using Kind2 (Work In progress)'};
 callbacks = {};
 for i=1:4
     callbacks{end+1} = @(x) ValidateAction(validationType{i}, i, x);
@@ -23,6 +23,9 @@ end
 function schema = ValidateAction(vType, vIndex, varargin)
 schema = sl_action_schema;
 schema.label = vType;
+if vIndex > 1
+    schema.state = 'Disabled';
+end
 schema.callback = @(x) VCallback(vIndex, x);
 end
 
