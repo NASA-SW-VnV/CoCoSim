@@ -29,7 +29,7 @@ function [mainCode, main_vars] = getMainCode(...
             nasa_toLustre.utils.SLX2LusUtils.dataType_conversion('int', ...
             lus_index_type, RndMeth, SaturateOnIntegerOverflow);
         if ~isempty(external_lib_i)
-            obj.addExternal_libraries(external_lib);
+            obj.addExternal_libraries(external_lib_i);
         end
     end   
 

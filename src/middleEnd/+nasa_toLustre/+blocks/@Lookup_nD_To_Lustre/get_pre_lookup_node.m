@@ -66,14 +66,6 @@ function extNode =  get_pre_lookup_node(lus_backend,blkParams,inputs)
         blkParams,Breakpoints,node_header.inputs_name,lus_backend);    
     body_all = [body_all  body];
     vars_all = [vars_all  vars];
-    
-%     [node_header.outputs,body,vars] = ...
-%         nasa_toLustre.blocks.Lookup_nD_To_Lustre.addPreLookupCommonCode(...
-%         lus_backend,blkParams,Ast_dimJump,coords_node,index_node,...
-%         node_header.inputs_name);
-%     body_all = [body_all  body];
-%     vars_all = [vars_all  vars];
-%     node_header.outputs = node_header.outputs;
 
     if blkParams.directLookup
         % node_header
@@ -88,13 +80,13 @@ function extNode =  get_pre_lookup_node(lus_backend,blkParams,inputs)
             nh_out_name{1}, 'int');
 
         % direct method  code
-        [body, vars, direct_lookup_node] = ...
+        [body, vars] = ...
             nasa_toLustre.blocks.Lookup_nD_To_Lustre.addDirectLookupNodeCode(...
             blkParams,index_node,coords_node, node_header.inputs_name,...
-            Ast_dimJump,lus_backend,Breakpoints);
+            Ast_dimJump,lus_backend);
         
         body{end+1} = nasa_toLustre.lustreAst.LustreEq(...
-            nh_out_name{1}, direct_lookup_node);
+            nh_out_name{1}, blkParams.direct_sol_inline_index_VarIdExpr);
 
     else
         % node_header      
