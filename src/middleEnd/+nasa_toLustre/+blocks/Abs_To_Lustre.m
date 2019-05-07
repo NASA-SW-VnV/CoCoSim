@@ -22,9 +22,9 @@ classdef Abs_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             inport_dt = blk.CompiledPortDataTypes.Inport{1};
             %converts the input data type(s) to
             %its accumulator data type
+            RndMeth = blk.RndMeth;
+            SaturateOnIntegerOverflow = blk.SaturateOnIntegerOverflow;
             if ~strcmp(inport_dt, outputDataType)
-                RndMeth = blk.RndMeth;
-                SaturateOnIntegerOverflow = blk.SaturateOnIntegerOverflow;
                 [external_lib, conv_format] =nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(inport_dt, outputDataType, RndMeth, SaturateOnIntegerOverflow);
                 if ~isempty(conv_format)
                     obj.addExternal_libraries(external_lib);
@@ -35,29 +35,26 @@ classdef Abs_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             
             [lusOutDT, zero] =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(outputDataType);
             
-            
-            if MatlabUtils.startsWith(inport_dt, 'int')
-                n = 2;
-            else
-                n =1;
+            % if output in "int": add final result conversion to intXX
+            if strcmp(lusOutDT, 'int') && isempty(conv_format)
+                [external_lib, conv_format] = ...
+                    nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(...
+                    'int', outputDataType, RndMeth, SaturateOnIntegerOverflow);
+                if ~isempty(conv_format)
+                    obj.addExternal_libraries(external_lib);
+                end
             end
+            
             codes = cell(1, numel(inputs{1}));
             for j=1:numel(inputs{1})
-                % if the inport type is int8, int16 ... the absolute value of
-                % -128 for int8 is -128.
-                conds = cell(1, n);
-                thens = cell(1, n+1);
-                if MatlabUtils.startsWith(inport_dt, 'int')
-                    v_min = double(intmin(inport_dt));
-                    conds{1} = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.EQ, ...
-                        inputs{1}{j}, ...
-                         nasa_toLustre.lustreAst.IntExpr(v_min));
-                    thens{1} = nasa_toLustre.lustreAst.IntExpr(v_min);
-                end
-                conds{n} = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.GTE, ...
+                conds = cell(1, 1);
+                thens = cell(1, 2);
+                conds{1} = nasa_toLustre.lustreAst.BinaryExpr(...
+                    nasa_toLustre.lustreAst.BinaryExpr.GTE, ...
                     inputs{1}{j}, zero);
-                thens{n} = inputs{1}{j};
-                thens{n+1} = nasa_toLustre.lustreAst.UnaryExpr(nasa_toLustre.lustreAst.UnaryExpr.NEG, ...
+                thens{1} = inputs{1}{j};
+                thens{2} = nasa_toLustre.lustreAst.UnaryExpr(...
+                    nasa_toLustre.lustreAst.UnaryExpr.NEG, ...
                     inputs{1}{j});
                 code = ...
                    nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(...
