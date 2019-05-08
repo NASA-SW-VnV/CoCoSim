@@ -53,8 +53,15 @@ else
         json_encode_file = fullfile(ir_utils_path, 'json_encode.mexw64');
         json_decode_file = fullfile(ir_utils_path, 'json_decode.mexw64');
     end
-    
-    if ~ exist(json_encode_file, 'file') || ~ exist(json_decode_file, 'file')
+    need_to_compile = true;
+    if  exist(json_encode_file, 'file') && exist(json_decode_file, 'file')
+        try
+            tree = MatlabUtils.getExpTree('u1 (1 ) >x');
+            need_to_compile = false;
+        catch
+        end
+    end
+    if need_to_compile
         if exist(fullfile(ir_utils_path, 'make.m'), 'file')
             PWD = pwd;
             cd(ir_utils_path);
