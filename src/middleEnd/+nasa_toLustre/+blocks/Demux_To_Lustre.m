@@ -20,29 +20,12 @@ classdef Demux_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     MsgType.ERROR, 'Demux_To_Lustre', '');
             end
             [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+
+            inputs{1} =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk, 1);
             
             
-            widths = blk.CompiledPortWidths.Inport;
-            outputDataType = blk.CompiledPortDataTypes.Outport{1};
-            % one input
-            i=1;
-            inputs{i} =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk, i);
-            inport_dt = blk.CompiledPortDataTypes.Inport(i);
-            %converts the input data type(s) to
-            %its accumulator data type
-            if ~strcmp(inport_dt, outputDataType)
-                [external_lib, conv_format] =nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(inport_dt, outputDataType);
-                if ~isempty(conv_format)
-                    obj.addExternal_libraries(external_lib);
-                    inputs{i} = cellfun(@(x) ...
-                       nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(conv_format,x), ...
-                        inputs{i}, 'un', 0);
-                end
-            end
-            
-            
-            codes = cell(1, widths);
-            for i=1:widths
+            codes = cell(1, length(outputs));
+            for i=1:length(outputs)
                 codes{i} = nasa_toLustre.lustreAst.LustreEq(outputs{i}, inputs{1}{i});
                 %sprintf('%s = %s;\n\t', outputs{i}, inputs{1}{i});
             end

@@ -17,12 +17,8 @@ classdef Rounding_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             
             
-            widths = blk.CompiledPortWidths.Inport;
             RndMeth = blk.Operator;
-            inputs = cell(1, numel(widths));
-            for i=1:numel(widths)
-                inputs{i} =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk, i);
-            end
+            inputs{1} =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk, 1);
             % we use _ before the node name. round => _round
             RndMeth = sprintf('_%s', RndMeth);
             
@@ -43,8 +39,8 @@ classdef Rounding_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         end
         
         %%
-        function is_Abstracted = isAbstracted(obj, ~,~, lus_backend, varargin)
-            is_Abstracted = LusBackendType.isKIND2(lus_backend);
+        function is_Abstracted = isAbstracted(varargin)
+            is_Abstracted = false;
         end
     end
     

@@ -46,7 +46,7 @@ classdef Polyval_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             
             if ~strcmp(out_lus_dt, 'real')
                 % transfor first to bool
-                [external_lib, out_conv_format] =nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(out_lus_dt, 'real');
+                [external_lib, out_conv_format] =nasa_toLustre.utils.SLX2LusUtils.dataType_conversion('real', outputDataType);
                 if ~isempty(out_conv_format)
                     obj.addExternal_libraries(external_lib);
                 end

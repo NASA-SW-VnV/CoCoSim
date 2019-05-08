@@ -11,7 +11,8 @@ classdef DotProduct_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     end
     
     methods
-        
+        %% This block is handled by PP (DotProduct_pp.m)
+        %TODO : remove this class, or pp function.
         function  write_code(obj, parent, blk, xml_trace, ~, coco_backend, varargin)
             global  CoCoSimPreferences;
             [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
@@ -21,6 +22,8 @@ classdef DotProduct_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             max_width = max(widths);
             outputDataType = blk.CompiledPortDataTypes.Outport{1};
             inputs = cell(1, numel(widths));
+            RndMeth = blk.RndMeth;
+            SaturateOnIntegerOverflow = blk.SaturateOnIntegerOverflow;
             for i=1:numel(widths)
                 inputs{i} =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk, i);
                 if numel(inputs{i}) < max_width
@@ -28,9 +31,11 @@ classdef DotProduct_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 end
                 inport_dt = blk.CompiledPortDataTypes.Inport(i);
                 %converts the input data type(s) to
-                %its accumulator data type
+                %its outputDataType
                 if ~strcmp(inport_dt, outputDataType)
-                    [external_lib, conv_format] =nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(inport_dt, outputDataType);
+                    [external_lib, conv_format] =...
+                        nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(...
+                        inport_dt, outputDataType, RndMeth, SaturateOnIntegerOverflow);
                     if ~isempty(conv_format)
                         obj.addExternal_libraries(external_lib);
                         inputs{i} = cellfun(@(x) ...
@@ -40,14 +45,31 @@ classdef DotProduct_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 end
             end
             
-                       
+            [lusOutDT, ~] =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(outputDataType);
+            % if output in "int": add final result conversion to intXX
+            if strcmp(lusOutDT, 'int')
+                [external_lib, to_intxx_conv_format] = ...
+                    nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(...
+                    'int', outputDataType, RndMeth, SaturateOnIntegerOverflow);
+                if ~isempty(to_intxx_conv_format)
+                    obj.addExternal_libraries(external_lib);
+                end
+            else
+                to_intxx_conv_format = {};
+            end
+            
             right = cell(1, numel(inputs{1}));
             for j=1:numel(inputs{1})
-                right{j} = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.MULTIPLY, ...
+                right{j} = nasa_toLustre.lustreAst.BinaryExpr(...
+                    nasa_toLustre.lustreAst.BinaryExpr.MULTIPLY, ...
                     inputs{1}{j}, inputs{2}{j});
             end
-            code = nasa_toLustre.lustreAst.LustreEq(outputs{1}, ...
-                nasa_toLustre.lustreAst.BinaryExpr.BinaryMultiArgs(nasa_toLustre.lustreAst.BinaryExpr.PLUS, right));
+            right_exp = nasa_toLustre.lustreAst.BinaryExpr.BinaryMultiArgs(...
+                nasa_toLustre.lustreAst.BinaryExpr.PLUS, right);
+            if ~isempty(to_intxx_conv_format)
+                right_exp = nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(to_intxx_conv_format,right_exp);
+            end
+            code = nasa_toLustre.lustreAst.LustreEq(outputs{1}, right_exp);
             obj.addCode( code );
             obj.addVariable(outputs_dt);
             

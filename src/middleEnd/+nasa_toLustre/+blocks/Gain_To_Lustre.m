@@ -64,12 +64,14 @@ classdef Gain_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             
             % if output in "int": add final result conversion to intXX
             if strcmp(lusOutDT, 'int')
-                [external_lib, conv_format] =nasa_toLustre.utils.SLX2LusUtils.dataType_conversion('int', outputDataType, RndMeth, SaturateOnIntegerOverflow);
-                if ~isempty(conv_format)
+                [external_lib, to_intxx_conv_format] = ...
+                    nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(...
+                    'int', outputDataType, RndMeth, SaturateOnIntegerOverflow);
+                if ~isempty(to_intxx_conv_format)
                     obj.addExternal_libraries(external_lib);
                 end
             else
-                conv_format = {};
+                to_intxx_conv_format = {};
             end
             
             codes = cell(1, numel(inputs{1}));
@@ -79,8 +81,8 @@ classdef Gain_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 else
                     code = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.MULTIPLY, inputs{1}{j}, gainAst);
                 end
-                if ~isempty(conv_format)
-                    code = nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(conv_format,code);
+                if ~isempty(to_intxx_conv_format)
+                    code = nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(to_intxx_conv_format,code);
                 end
                 codes{j} = nasa_toLustre.lustreAst.LustreEq(outputs{j}, code);
             end
