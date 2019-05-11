@@ -34,22 +34,11 @@ classdef UnaryMinus_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             inputs{1} =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk, 1);
             inport_dt = blk.CompiledPortDataTypes.Inport(1);
             SaturateOnIntegerOverflow = blk.SaturateOnIntegerOverflow;
-            %converts the input data type(s) to the output datatype, if
-            %needed. If we have a product of double with int, the
-            %output will be double, so we need to cast the int input to
-            %double.
+            %converts the input data type(s) to the output datatype
             if ~strcmp(inport_dt, outputDataType)
-                % this function return if a casting is needed
-                % "conv_format", a library or the name of casting node
-                % will be stored in "external_lib".
                 [external_lib, conv_format] =nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(inport_dt, outputDataType, [], SaturateOnIntegerOverflow);
                 if ~isempty(conv_format)
-                    % always add the "external_lib" to the object
-                    % external libraries, (so it can be declared in the
-                    % overall lustre code).
                     obj.addExternal_libraries(external_lib);
-                    % cast the input to the conversion format. In our
-                    % example conv_format = 'int_to_real(%s)'.
                     inputs{1} = cellfun(@(x) ...
                        nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(conv_format,x), inputs{1}, 'un', 0);
                 end
@@ -77,7 +66,6 @@ classdef UnaryMinus_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 end
                 % Go over outputs
                 for j=1:numel(outputs)
-                    % example of lement wise product block.
                     codes{j} = nasa_toLustre.lustreAst.LustreEq(outputs{j}, ...
                         nasa_toLustre.lustreAst.IteExpr(...
                                 nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.EQ, ...
@@ -90,7 +78,6 @@ classdef UnaryMinus_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             else
                 % Go over outputs
                 for j=1:numel(outputs)
-                    % example of lement wise product block.
                     codes{j} = nasa_toLustre.lustreAst.LustreEq(outputs{j}, ...
                          nasa_toLustre.lustreAst.UnaryExpr(nasa_toLustre.lustreAst.UnaryExpr.NEG, inputs{1}{j}));
                 end

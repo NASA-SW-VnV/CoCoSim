@@ -92,10 +92,10 @@ classdef DiscretePulseGenerator_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lust
             
             codes = cell(1, numel(outputs));
             for i=1:numel(outputs)
-                if isequal(outputs_dt{i}.getDT(), 'real')
+                if strcmp(outputs_dt{i}.getDT(), 'real')
                     zero = nasa_toLustre.lustreAst.RealExpr('0.0');
                     amp = nasa_toLustre.lustreAst.RealExpr(Amplitude(i));
-                elseif isequal(outputs_dt{i}.getDT(), 'int')
+                elseif strcmp(outputs_dt{i}.getDT(), 'int')
                     zero = nasa_toLustre.lustreAst.IntExpr(0);
                     amp = nasa_toLustre.lustreAst.IntExpr(Amplitude(i));
                 else

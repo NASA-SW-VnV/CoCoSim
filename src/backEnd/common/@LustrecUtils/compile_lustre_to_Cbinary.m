@@ -54,11 +54,22 @@ function err = compile_lustre_to_Cbinary(lus_file_path, ...
     makefile_name = fullfile(output_dir,strcat(file_name,'.makefile'));
     msg = sprintf('start compiling model "%s"\n',file_name);
     display_msg(msg, MsgType.INFO, 'compile_lustre_to_Cbinary', '');
-    makefile_OPTS = sprintf('BINNAME="%s" GCC="gcc -O0 -Wno-all -fbracket-depth=10000"', binary_name);
+    
+    GCC_FLAGS = 'gcc -O0 -Wno-all -fbracket-depth=10000';
+    makefile_OPTS = sprintf('BINNAME="%s" GCC="%s"', binary_name, GCC_FLAGS);
     command = sprintf('make %s -f "%s"',makefile_OPTS, makefile_name);
     msg = sprintf('MAKE_LUSTREC_COMMAND : %s\n',command);
     display_msg(msg, MsgType.INFO, 'compile_lustre_to_Cbinary', '');
     [err, make_out] = system(command);
+    
+    if MatlabUtils.contains(make_out, 'unrecognized command line option ‘-fbracket-depth')
+        GCC_FLAGS = 'gcc -O0 -Wno-all ';
+        makefile_OPTS = sprintf('BINNAME="%s" GCC="%s"', binary_name, GCC_FLAGS);
+        command = sprintf('make %s -f "%s"',makefile_OPTS, makefile_name);
+        msg = sprintf('MAKE_LUSTREC_COMMAND : %s\n',command);
+        display_msg(msg, MsgType.INFO, 'compile_lustre_to_Cbinary', '');
+        [err, make_out] = system(command);
+    end
     if err
         msg = sprintf('Compilation failed for model "%s" ',file_name);
         display_msg(msg, MsgType.ERROR, 'compile_lustre_to_Cbinary', '');

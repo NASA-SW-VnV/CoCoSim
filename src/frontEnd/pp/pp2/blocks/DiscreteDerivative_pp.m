@@ -46,7 +46,7 @@ function [status, errors_msg] = DiscreteDerivative_pp(model)
                 OutMax = get_param(dDerivative_list{i}, 'OutMax');
 
                 % replacing
-                PPUtils.replace_one_block(dDerivative_list{i},'pp_lib/DiscreteDerivative');
+                PP2Utils.replace_one_block(dDerivative_list{i},'pp_lib/DiscreteDerivative');
 
                 blkName = dDerivative_list{i};
 
@@ -59,7 +59,7 @@ function [status, errors_msg] = DiscreteDerivative_pp(model)
                 set_param([blkName,'/TSamp'], ...
                     'weightValue',num2str(inverseGainval));
 
-                if isequal(OutDataTypeStr, 'Inherit: Inherit via internal rule')
+                if strcmp(OutDataTypeStr, 'Inherit: Inherit via internal rule')
                     diffDT   = 'Inherit: Inherit via back propagation';
                     tsampDT  = 'Inherit: Inherit via internal rule';
                     tsampImp = 'Offline Scaling Adjustment';

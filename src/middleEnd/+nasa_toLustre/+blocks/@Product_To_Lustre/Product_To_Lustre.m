@@ -48,7 +48,7 @@ classdef Product_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             if (strcmp(blk.Multiplication, 'Matrix(*)')...
                     && MatlabUtils.contains(blk.Inputs, '/') )
                 for i=1:numel(blk.Inputs)
-                    if isequal(blk.Inputs(i), '/')
+                    if strcmp(blk.Inputs(i), '/')
                         if LusBackendType.isKIND2(lus_backend)
                             if blk.CompiledPortWidths.Inport(i) > 49
                                 obj.addUnsupported_options(...

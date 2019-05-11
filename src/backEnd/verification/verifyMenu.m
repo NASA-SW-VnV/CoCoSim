@@ -20,7 +20,7 @@ function verifCallback(varargin)
         [ CoCoSimPreferences ] = cocosim_menu.CoCoSimPreferences.load();
         warning('off')
         MenuUtils.add_pp_warning(model_full_path);
-        if isequal(CoCoSimPreferences.lustreCompiler, 'NASA')
+        if strcmp(CoCoSimPreferences.lustreCompiler, 'NASA')
             toLustreVerify(model_full_path, [], CoCoSimPreferences.lustreBackend);
             
         else

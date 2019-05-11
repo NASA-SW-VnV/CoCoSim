@@ -7,7 +7,7 @@ function code = print_lustrec(obj, backend)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  
     if LusBackendType.isKIND2(backend) ...
-            && isequal(obj.type, 'bool clock')
+            && strcmp(obj.type, 'bool clock')
         dt = 'bool';
     else
         dt = obj.type;

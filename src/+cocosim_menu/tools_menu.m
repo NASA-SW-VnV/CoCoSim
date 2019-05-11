@@ -21,12 +21,17 @@ function schema = tools_menu(varargin)
     menue_items{end + 1} = fullfile(backEnd_root, 'guidelines','checkGuidelinesMenu.m');
     menue_items{end + 1} = fullfile(backEnd_root, 'verification','verifyMenu.m');
     menue_items{end + 1} = fullfile(backEnd_root, 'designErrorDetection','dedMenu.m');
+    
     %TODO: test case generation should be adapted to new compiler and dataset
     %signals.
     menue_items{end + 1} = fullfile(backEnd_root, 'test_case_generation','TestCaseGenMenu.m');
+    
     %TODO: needs Zustre to support contracts
     %menue_items{end + 1} = fullfile(backEnd_root, 'generate_invariants','generateInvariantsMenu.m');
-    menue_items{end + 1} = fullfile(backEnd_root, 'importLustreRequirements','importLusReqMenu.m');
+    
+    %TODO: add documentation of how to use
+    %menue_items{end + 1} = fullfile(backEnd_root, 'importLustreRequirements','importLusReqMenu.m');
+    
     menue_items{end + 1} = fullfile(backEnd_root, 'generate_code','generateCodeMenu.m');
     menue_items{end + 1} = fullfile(backEnd_root, 'extra_options','extraOptionsMenu.m');
     menue_items{end + 1} = @cocosim_menu.preferences_menu;

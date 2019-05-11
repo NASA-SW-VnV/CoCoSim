@@ -7,7 +7,7 @@ function blkParams = readBlkParams(~,parent,blk,blkParams)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Lookup_nD_To_Lustre
 
-    blkParams.lookupTableType = LookupType.Lookup_nD;
+    blkParams.lookupTableType = nasa_toLustre.utils.LookupType.Lookup_nD;
 
     if strcmp(blk.DataSpecification, 'Lookup table object')
         display_msg(sprintf('Lookup table object for DataSpecification in block %s is not supported',...
@@ -26,7 +26,7 @@ function blkParams = readBlkParams(~,parent,blk,blkParams)
     validDT = {'double', 'single', 'int8', 'int16', ...
         'int32', 'uint8', 'uint16', 'uint32', 'boolean'};
     if ismember(blk.CompiledPortDataTypes.Outport{1}, validDT)
-        if isequal(blk.TableDataTypeStr, 'Inherit: Same as output')
+        if strcmp(blk.TableDataTypeStr, 'Inherit: Same as output')
             % don't cast if double or single and
             % dimensions 3 and above working
             if blkParams.NumberOfTableDimensions >=  3
@@ -35,8 +35,8 @@ function blkParams = readBlkParams(~,parent,blk,blkParams)
                 blkParams.Table = eval(sprintf('%s([%s])',...
                     blk.CompiledPortDataTypes.Outport{1}, mat2str(T)));
             end
-        elseif isequal(blk.TableDataTypeStr, 'double') ...
-                || isequal(blk.TableDataTypeStr, 'single') ...
+        elseif strcmp(blk.TableDataTypeStr, 'double') ...
+                || strcmp(blk.TableDataTypeStr, 'single') ...
                 || MatlabUtils.contains(blk.TableDataTypeStr, 'int')
             blkParams.Table = eval(sprintf('%s([%s])',...
                 blk.TableDataTypeStr, mat2str(T)));
@@ -87,16 +87,17 @@ function blkParams = readBlkParams(~,parent,blk,blkParams)
             compiledDataTypesInporti = blk.CompiledPortDataTypes.Inport{i};
         end
         if ismember(compiledDataTypesInporti, validDT)
-            if isequal(dt, 'Inherit: Same as corresponding input')
+            if strcmp(dt, 'Inherit: Same as corresponding input')
                 blkParams.BreakpointsForDimension{i} = eval(sprintf('%s([%s])',compiledDataTypesInporti, mat2str(T)));
                 %blkParams.BreakpointsForDimension{i} = sprintf('%s([%s])',compiledDataTypesInporti, mat2str(T));
-            elseif isequal(dt, 'double') ...
-                    || isequal(dt, 'single') ...
+            elseif strcmp(dt, 'double') ...
+                    || strcmp(dt, 'single') ...
                     || MatlabUtils.contains(dt, 'int')
                 blkParams.BreakpointsForDimension{i} = eval(sprintf('%s([%s])',dt, mat2str(T)));
             end
         end
     end
+
     blkParams.InterpMethod = blk.InterpMethod;
     blkParams.ExtrapMethod = blk.ExtrapMethod;
     blkParams.directLookup = 0;
@@ -114,6 +115,11 @@ function blkParams = readBlkParams(~,parent,blk,blkParams)
     
     blkParams.RndMeth = blk.RndMeth;
     blkParams.SaturateOnIntegerOverflow = blk.SaturateOnIntegerOverflow;
+    
+    % calculate dimJump and boundNodeOrder
+    blkParams = ...
+        nasa_toLustre.blocks.Lookup_nD_To_Lustre.addCommonData2BlkParams(...
+        blkParams);
 
 end
 

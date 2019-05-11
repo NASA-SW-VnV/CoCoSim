@@ -43,4 +43,4 @@ sfIR_pp_order_map(4) = {fullfile(lib_path,'*.m')};
 
 
 [ordered_sfIR_pp_functions, priority_sfIR_pp_map]  = ...
-    PP_Utils.order_pp_functions(sfIR_pp_order_map, sfIR_pp_handled_functions, sfIR_pp_unhandled_functions);
+    PPConfigUtils.order_pp_functions(sfIR_pp_order_map, sfIR_pp_handled_functions, sfIR_pp_unhandled_functions);

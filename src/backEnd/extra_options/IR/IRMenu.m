@@ -8,7 +8,7 @@
 
 function schema = IRMenu(callbackInfo)
     schema = sl_action_schema;
-    schema.label = 'Export model to JSON format';
+    schema.label = 'Get model internal representation';
     schema.callback = @IRCallback;
 end
 

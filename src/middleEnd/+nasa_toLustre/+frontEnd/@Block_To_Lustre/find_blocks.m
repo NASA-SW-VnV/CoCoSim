@@ -12,7 +12,7 @@ function blks = find_blocks(ss, varargin)
     blks = {};
     doesMatch = true;
     for i=1:2:numel(varargin)
-        if ~(isfield(ss, varargin{i}) && isequal(ss.BlockType, varargin{i+1}))
+        if ~(isfield(ss, varargin{i}) && strcmp(ss.BlockType, varargin{i+1}))
             doesMatch = false;
             break;
         end

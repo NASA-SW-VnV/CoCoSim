@@ -20,7 +20,7 @@ function [status, errors_msg] = NotConnectedPorts_pp( new_model_base )
                 try
                     parent = get_param(all_blocks{i},'Parent');
                     variant = get_param(parent, 'Variant');
-                    if isequal(variant, 'on')
+                    if strcmp(variant, 'on')
                         continue;
                     end
                 catch
@@ -47,13 +47,13 @@ function [status, errors_msg] = NotConnectedPorts_pp( new_model_base )
                             SrcBlkH = get_param(constant_handle, 'PortHandles');
                             DstBlkH = obj.PortHandles;
                             
-                            if isequal(p.Type, 'trigger')
+                            if strcmp(p.Type, 'trigger')
                                 portHandle = DstBlkH.Trigger(1);
-                            elseif isequal(p.Type, 'enable')
+                            elseif strcmp(p.Type, 'enable')
                                 portHandle = DstBlkH.Enable(1);
-                            elseif isequal(p.Type, 'state')
+                            elseif strcmp(p.Type, 'state')
                                 portHandle = DstBlkH.State(1);
-                            elseif isequal(p.Type, 'ifaction')
+                            elseif strcmp(p.Type, 'ifaction')
                                 portHandle = DstBlkH.Ifaction(1);
                             else
                                 type = strrep(p.Type, 'LConn', '');

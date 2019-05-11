@@ -57,7 +57,7 @@ classdef MExpToLusDT
             [code, input_dt] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.inlineOperands(code, input_dt);
             [output_dt, input_dt] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.inlineOperands(output_dt, input_dt);
             for i=1:numel(code)
-                if isequal(input_dt{i}, output_dt{i})
+                if strcmp(input_dt{i}, output_dt{i})
                     return;
                 end
                 conv = strcat(input_dt{i}, '_to_', output_dt{i});
@@ -79,9 +79,9 @@ classdef MExpToLusDT
                 dt = left_dt;
                 return;
             end
-            if isequal(left_dt, 'real') || isequal(right_dt, 'real')
+            if strcmp(left_dt, 'real') || strcmp(right_dt, 'real')
                 dt = 'real';
-            elseif isequal(left_dt, 'int') || isequal(right_dt, 'int')
+            elseif strcmp(left_dt, 'int') || strcmp(right_dt, 'int')
                 dt = 'int';
             else
                 dt = 'bool';

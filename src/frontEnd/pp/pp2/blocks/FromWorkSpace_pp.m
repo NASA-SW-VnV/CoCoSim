@@ -29,7 +29,7 @@ function [status, errors_msg] = FromWorkSpace_pp(model)
                     % checking if the parent is not signal Builder.
                     parent = get_param(fromWorkSpace_list{i}, 'Parent');
                     parent_msktype = get_param(parent, 'MaskType');
-                    if isequal(parent_msktype, 'Sigbuilder block')
+                    if strcmp(parent_msktype, 'Sigbuilder block')
                         continue;
                     end
                 catch
@@ -96,7 +96,7 @@ function [status, errors_msg] = FromWorkSpace_pp(model)
                 Interpolate = get_param(fromWorkSpace_list{i},'Interpolate');
                 OutputAfterFinalValue = get_param(fromWorkSpace_list{i},'OutputAfterFinalValue');
 
-                PPUtils.replace_one_block(fromWorkSpace_list{i},fullfile('pp_lib','FromWorkSpace'));
+                PP2Utils.replace_one_block(fromWorkSpace_list{i},fullfile('pp_lib','FromWorkSpace'));
                 % set digital clock sample time
                 % The block 'FromWorkSpace_1_PP/From Workspace/D' does not permit continuous sample
                 % time (0 or [0,0]) for the parameter 'SampleTime'.

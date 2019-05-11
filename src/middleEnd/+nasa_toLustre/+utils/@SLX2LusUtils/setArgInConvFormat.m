@@ -1,4 +1,3 @@
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Copyright (c) 2017 United States Government as represented by the
 % Administrator of the National Aeronautics and Space Administration.
@@ -8,7 +7,7 @@
 
 %% Data type conversion node name
 function new_callObj = setArgInConvFormat(callObj, arg)
-    % this function goes with dataType_conversion funciton to set 
+    % this function goes with dataType_conversion funciton to set
     % the missing argument in conv_format.
     %
     %

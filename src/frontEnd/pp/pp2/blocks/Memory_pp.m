@@ -30,7 +30,7 @@ if not(isempty(memoryBlk_list))
             StateSignalObject = get_param(memoryBlk_list{i},'StateSignalObject');
             StateStorageClass = get_param(memoryBlk_list{i}, 'StateStorageClass');
             % replace it
-            PPUtils.replace_one_block(memoryBlk_list{i},'simulink/Discrete/Unit Delay');
+            PP2Utils.replace_one_block(memoryBlk_list{i},'simulink/Discrete/Unit Delay');
             %restore information
             set_param(memoryBlk_list{i} ,'InitialCondition', InitialCondition);
             %Statename does not exist in R2015b

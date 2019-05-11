@@ -13,7 +13,7 @@ function  [main_node, external_nodes, external_libraries ] = ...
     main_node = {};
     external_nodes = {};
     external_libraries = {};
-    if isequal(type, 'ConditionAction')
+    if strcmp(type, 'ConditionAction')
         t_act_node_name = nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.getCondActionNodeName(T, source_state, isDefaultTrans);
         action = T.ConditionAction;
     else

@@ -19,7 +19,7 @@ classdef ContractValidatorBlock_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lust
                 % supported in its contract
                 return;
             end
-            % ignore it for other backends as it is not important.
+            % TODO: Validator = sofar(A) => G
             [outputs, outputs_dt] =...
                 nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             obj.addVariable(outputs_dt);

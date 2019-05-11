@@ -22,18 +22,18 @@ function [code, exp_dt] = binaryExpression_To_Lustre(BlkObj, tree, parent,...
     end
     
     % Get Operator
-    if isequal(tree_type, 'plus_minus')
+    if strcmp(tree_type, 'plus_minus')
         op = tree.operator;
-    elseif isequal(tree_type, 'mtimes') ...
-            || isequal(tree_type, 'times')
+    elseif strcmp(tree_type, 'mtimes') ...
+            || strcmp(tree_type, 'times')
         op = nasa_toLustre.lustreAst.BinaryExpr.MULTIPLY;
-    elseif isequal(tree_type, 'mrdivide')...
-            || isequal(tree_type, 'rdivide')
+    elseif strcmp(tree_type, 'mrdivide')...
+            || strcmp(tree_type, 'rdivide')
         op = nasa_toLustre.lustreAst.BinaryExpr.DIVIDE;
-    elseif isequal(tree_type, 'relopGL')
+    elseif strcmp(tree_type, 'relopGL')
         op = tree.operator;
-    elseif isequal(tree_type, 'relopEQ_NE')
-        if isequal(tree.operator, '==')
+    elseif strcmp(tree_type, 'relopEQ_NE')
+        if strcmp(tree.operator, '==')
             op = nasa_toLustre.lustreAst.BinaryExpr.EQ;
         else
             op = nasa_toLustre.lustreAst.BinaryExpr.NEQ;
@@ -74,7 +74,7 @@ function [code, exp_dt] = getPowerCode(BlkObj, tree, parent, blk, data_map, inpu
         blk, data_map, inputs, 'real', isSimulink, isStateFlow, isMatlabFun);
     right = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(BlkObj, tree.rightExp, parent,...
         blk, data_map, inputs, 'real', isSimulink, isStateFlow, isMatlabFun);
-    if numel(left) > 1 && isequal(tree_type, 'mpower')
+    if numel(left) > 1 && strcmp(tree_type, 'mpower')
         ME = MException('COCOSIM:TREE2CODE', ...
             'Expression "%s" has a power of matrix is not supported.',...
             tree.text);

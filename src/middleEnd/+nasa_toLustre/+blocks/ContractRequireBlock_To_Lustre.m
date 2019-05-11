@@ -25,9 +25,8 @@ classdef ContractRequireBlock_To_Lustre < nasa_toLustre.blocks.SubSystem_To_Lust
         
         function options = getUnsupportedOptions(obj, parent, blk,...
                 lus_backend, varargin)
-            getUnsupportedOptions@nasa_toLustre.blocks.SubSystem_To_Lustre(obj,...
+            options = getUnsupportedOptions@nasa_toLustre.blocks.SubSystem_To_Lustre(obj,...
                 parent, blk, lus_backend, varargin{:});
-            options = obj.unsupported_options;
         end
         %%
         function is_Abstracted = isAbstracted(varargin)

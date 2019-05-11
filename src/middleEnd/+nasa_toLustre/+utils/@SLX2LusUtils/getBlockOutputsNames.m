@@ -37,10 +37,10 @@ end
 if numel(blk.CompiledPortDataTypes.Outport) == 1 ...
         && strcmp(blk.CompiledPortDataTypes.Outport{1}, 'auto') ...
         && ~isempty(blk.CompiledPortWidths.Inport)...
-        && ~isequal(blk.BlockType, 'SubSystem')
+        && ~strcmp(blk.BlockType, 'SubSystem')
     
     if numel(blk.CompiledPortWidths.Inport) > 1 ...
-            && isequal(blk.BlockType, 'BusCreator')
+            && strcmp(blk.BlockType, 'BusCreator')
         % e,g BusCreator DT is defined by all its inputs
         width = blk.CompiledPortWidths.Inport;
     else
@@ -87,7 +87,7 @@ end
                     lus_dt = nasa_toLustre.utils.SLX2LusUtils.getpreBlockLusDT(parent, blk, portNumber);
                     isBus = false;
                 end
-            elseif isequal(blk.BlockType, 'SubSystem')
+            elseif strcmp(blk.BlockType, 'SubSystem')
                 %get all blocks names
                 fields = fieldnames(blk.Content);
                 

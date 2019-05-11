@@ -115,7 +115,7 @@ function [body, outputs, inputs, variables, external_libraries, validDestination
         %the destination is a junction
         if isKey(SF_JUNCTIONS_PATH_MAP, destination.Name)
             hobject = SF_JUNCTIONS_PATH_MAP(destination.Name);
-            if isequal(hobject.Type, 'HISTORY')
+            if strcmp(hobject.Type, 'HISTORY')
                 isHJ = true;
             else
                 %Does the junction have any outgoing transitions?

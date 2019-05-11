@@ -39,10 +39,11 @@ classdef Sqrt_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     inputs{i} = arrayfun(@(x) {inputs{i}{1}}, (1:max_width));
                 end
                 inport_dt = blk.CompiledPortDataTypes.Inport(i);
+                [inLusDT] =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(inport_dt);
                 %converts the input data type(s) to
                 %its accumulator data type
-                if ~strcmp(inport_dt, 'double')
-                    [external_lib, conv_format] =nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(inport_dt, 'double', RndMeth, SaturateOnIntegerOverflow);
+                if ~strcmp(inLusDT, 'real')
+                    [external_lib, conv_format] =nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(inport_dt, 'real', RndMeth, SaturateOnIntegerOverflow);
                     if ~isempty(conv_format)
                         obj.addExternal_libraries(external_lib);
                         inputs{i} = cellfun(@(x) ...

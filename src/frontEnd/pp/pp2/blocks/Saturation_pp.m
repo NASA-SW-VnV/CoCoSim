@@ -35,13 +35,13 @@ if ~ ( isempty( saturation_list ) )
                 LowerIsInf = false;
             end
             if UpperIsInf && LowerIsInf
-                PPUtils.replace_one_block(saturation_list{i},'pp_lib/saturation_upper_and_lower_is_Inf');
+                PP2Utils.replace_one_block(saturation_list{i},'pp_lib/saturation_upper_and_lower_is_Inf');
             elseif UpperIsInf
-                PPUtils.replace_one_block(saturation_list{i},'pp_lib/saturation_upper_is_Inf');
+                PP2Utils.replace_one_block(saturation_list{i},'pp_lib/saturation_upper_is_Inf');
             elseif LowerIsInf
-                PPUtils.replace_one_block(saturation_list{i},'pp_lib/saturation_lower_is_Inf');
+                PP2Utils.replace_one_block(saturation_list{i},'pp_lib/saturation_lower_is_Inf');
             else
-                PPUtils.replace_one_block(saturation_list{i},'pp_lib/saturation');
+                PP2Utils.replace_one_block(saturation_list{i},'pp_lib/saturation');
             end
             if ~LowerIsInf
                 set_param(strcat(saturation_list{i},'/lower_limit'),...
@@ -51,7 +51,7 @@ if ~ ( isempty( saturation_list ) )
                 set_param(strcat(saturation_list{i},'/upper_limit'),...
                     'Value',upper_limit);
             end
-            if isequal(outputDataType, 'Inherit: Same as input')
+            if strcmp(outputDataType, 'Inherit: Same as input')
                 %Inherit: Inherit via back propagation
                 if ~UpperIsInf
                     set_param(strcat(saturation_list{i},'/upper'),...

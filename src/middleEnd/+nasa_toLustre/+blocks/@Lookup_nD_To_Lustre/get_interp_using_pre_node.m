@@ -43,7 +43,7 @@ function extNode = get_interp_using_pre_node(...
     
     % number of inputs to this node depends on both if it is dynamic and
     % directLookup
-    if LookupType.isLookupDynamic(blkParams.lookupTableType)
+    if nasa_toLustre.utils.LookupType.isLookupDynamic(blkParams.lookupTableType)
         if blkParams.directLookup
             node_header.inputs_name = cell(1,1+numel(inputs{3}));
             numDataBeforeTable = 1;

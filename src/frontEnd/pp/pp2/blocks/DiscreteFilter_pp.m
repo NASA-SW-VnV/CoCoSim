@@ -40,17 +40,17 @@ function [status, errors_msg] = DiscreteFilter_pp(model)
                 end
 
                 % Obtaining z-expression parameters
-                [denum, status] = PPUtils.getTfDenum(model,dFilter_list{i}, 'DiscreteFilter_pp');
+                [denum, status] = PP2Utils.getTfDenum(model,dFilter_list{i}, 'DiscreteFilter_pp');
                 if status
                     continue;
                 end
                 % get numerator
-                [num, status] = PPUtils.getTfNumerator(model,dFilter_list{i},'Numerator', 'DiscreteFilter_pp');
+                [num, status] = PP2Utils.getTfNumerator(model,dFilter_list{i},'Numerator', 'DiscreteFilter_pp');
                 if status
                     continue;
                 end
 
-                PPUtils.replace_DTF_block(dFilter_list{i}, U_dims{i},num,denum);
+                PP2Utils.replace_DTF_block(dFilter_list{i}, U_dims{i},num,denum);
                 set_param(dFilter_list{i}, 'LinkStatus', 'inactive');
             catch
                 status = 1;

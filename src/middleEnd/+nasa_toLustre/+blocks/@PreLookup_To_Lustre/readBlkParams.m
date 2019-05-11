@@ -7,7 +7,7 @@ function blkParams = readBlkParams(~,parent,blk,blkParams)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % PreLookup_To_Lustre
 
-    blkParams.lookupTableType = LookupType.PreLookup;
+    blkParams.lookupTableType = nasa_toLustre.utils.LookupType.PreLookup;
     blkParams.OutputIndexOnly = 0;
 
     % read blk
@@ -51,11 +51,11 @@ function blkParams = readBlkParams(~,parent,blk,blkParams)
     compiledDataTypesInporti = blk.CompiledPortDataTypes.Inport{1};
     
     if ismember(compiledDataTypesInporti, validDT)
-        if isequal(dt, 'Inherit: Same as corresponding input')
+        if strcmp(dt, 'Inherit: Same as corresponding input')
             blkParams.BreakpointsForDimension{1} = ...
                 eval(sprintf('%s([%s])',compiledDataTypesInporti, mat2str(T)));
-        elseif isequal(dt, 'double') ...
-                || isequal(dt, 'single') ...
+        elseif strcmp(dt, 'double') ...
+                || strcmp(dt, 'single') ...
                 || MatlabUtils.contains(dt, 'int')
             blkParams.BreakpointsForDimension{1} = ...
                 eval(sprintf('%s([%s])',dt, mat2str(T)));
@@ -74,6 +74,12 @@ function blkParams = readBlkParams(~,parent,blk,blkParams)
     end
     
     blkParams.RndMeth = blk.RndMeth;
+    blkParams.UseLastBreakpoint = blk.UseLastBreakpoint;
+     
+    % calculate dimJump and boundNodeOrder
+    blkParams = ...
+        nasa_toLustre.blocks.Lookup_nD_To_Lustre.addCommonData2BlkParams(...
+        blkParams);    
     
 end
 

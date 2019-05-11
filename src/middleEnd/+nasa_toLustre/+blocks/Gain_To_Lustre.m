@@ -26,9 +26,9 @@ classdef Gain_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             lusInDT =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(inport_dt);
             %converts the input data type(s) to
             %its output data type
+            RndMeth = blk.RndMeth;
+            SaturateOnIntegerOverflow = blk.SaturateOnIntegerOverflow;
             if ~strcmp(lusInDT, 'bool') && ~strcmp(inport_dt, outputDataType)
-                RndMeth = blk.RndMeth;
-                SaturateOnIntegerOverflow = blk.SaturateOnIntegerOverflow;
                 [external_lib, conv_format] =nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(inport_dt, outputDataType, RndMeth, SaturateOnIntegerOverflow);
                 if ~isempty(conv_format)
                     obj.addExternal_libraries(external_lib);
@@ -61,12 +61,28 @@ classdef Gain_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             else
                 gainAst = nasa_toLustre.lustreAst.RealExpr(gain);
             end
+            
+            % if output in "int": add final result conversion to intXX
+            if strcmp(lusOutDT, 'int')
+                [external_lib, to_intxx_conv_format] = ...
+                    nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(...
+                    'int', outputDataType, RndMeth, SaturateOnIntegerOverflow);
+                if ~isempty(to_intxx_conv_format)
+                    obj.addExternal_libraries(external_lib);
+                end
+            else
+                to_intxx_conv_format = {};
+            end
+            
             codes = cell(1, numel(inputs{1}));
             for j=1:numel(inputs{1})
                 if strcmp(lusInDT, 'bool')
                     code = nasa_toLustre.lustreAst.IteExpr(inputs{1}{j}, gainAst, zero);
                 else
                     code = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.MULTIPLY, inputs{1}{j}, gainAst);
+                end
+                if ~isempty(to_intxx_conv_format)
+                    code = nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(to_intxx_conv_format,code);
                 end
                 codes{j} = nasa_toLustre.lustreAst.LustreEq(outputs{j}, code);
             end

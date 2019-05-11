@@ -36,7 +36,7 @@ function [body,vars,table_elem] = addTableCode(blkParams,...
         %     end
     else
         numBoundNodes = 2^blkParams.NumberOfAdjustedTableDimensions;
-        if LookupType.isLookupDynamic(blkParams.lookupTableType)
+        if nasa_toLustre.utils.LookupType.isLookupDynamic(blkParams.lookupTableType)
             numberTableData = blkParams.numberTableData;  
         else
             numberTableData = numel(blkParams.Table);    
@@ -49,7 +49,7 @@ function [body,vars,table_elem] = addTableCode(blkParams,...
                 sprintf('table_elem_%d',i));
             vars{i} = nasa_toLustre.lustreAst.LustreVar(...
                 table_elem{i},'real');
-            if ~(LookupType.isLookupDynamic(blkParams.lookupTableType))
+            if ~(nasa_toLustre.utils.LookupType.isLookupDynamic(blkParams.lookupTableType))
                 body{i} = nasa_toLustre.lustreAst.LustreEq(table_elem{i}, ...
                     nasa_toLustre.lustreAst.RealExpr(blkParams.Table(i)));
             else

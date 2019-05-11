@@ -18,7 +18,7 @@ classdef DesignVerifierAssumption_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lu
             [inputs] =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk);
             inport_dt = blk.CompiledPortDataTypes.Inport{1};
             inport_lus_dt =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(inport_dt);
-            if isequal(blk.outEnabled, 'on')
+            if strcmp(blk.outEnabled, 'on')
                 % Assumption block is passing the inputs in case the option
                 % outEnabled is on
                 [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
@@ -29,8 +29,8 @@ classdef DesignVerifierAssumption_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lu
                 end
                 obj.addCode( codes );
             end
-            if isequal(blk.enabled, 'off') ...
-                    || isequal(blk.customAVTBlockType, 'Test Condition')
+            if strcmp(blk.enabled, 'off') ...
+                    || strcmp(blk.customAVTBlockType, 'Test Condition')
                 % block is not activated or not Assumption
                 return;
             end

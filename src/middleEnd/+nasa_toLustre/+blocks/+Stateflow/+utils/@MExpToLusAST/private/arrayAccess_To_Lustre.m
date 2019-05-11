@@ -42,7 +42,7 @@ function [code, exp_dt] = arrayAccess_To_Lustre(obj, tree, parent, blk, data_map
             param = tree.parameters;
         end
         param_type = param.type;
-        if isequal(param_type, 'constant')
+        if strcmp(param_type, 'constant')
             value = str2num(param.value);
             
             if iscell(namesAst) && numel(namesAst) >= value
