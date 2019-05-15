@@ -75,7 +75,7 @@ classdef Interpolation_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
         end
         
         %%
-        function options = getUnsupportedOptions(obj, parent, blk, varargin)
+        function options = getUnsupportedOptions(obj, ~, ~, varargin)
             options = obj.unsupported_options;
         end
         
@@ -88,7 +88,7 @@ classdef Interpolation_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
         
         create_lookup_nodes(obj,blk,lus_backend,blkParams,outputs,inputs)
         
-        extNode =  get_wrapper_node(obj,blk,interpolation_nDExtNode,blkParams)
+        extNode =  get_wrapper_node(obj,interpolation_nDExtNode,blkParams)
         
         extNode =  get_wrapper_retrieval_node(obj,blk,...
             blkParams,inputs,outputs,preLookUpExtNode,interpolationExtNode)
