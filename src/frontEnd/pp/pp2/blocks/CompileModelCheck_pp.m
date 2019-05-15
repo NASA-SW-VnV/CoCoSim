@@ -18,7 +18,8 @@ try
     code_off=sprintf('%s([], [], [], ''term'')', new_model_base);
     evalin('base',code_off);
     %     warning on;
-catch
+catch me
+    display_msg(me.getReport(), MsgType.DEBUG, 'CompileModelCheck_pp', '');
     try
         code_off=sprintf('%s([], [], [], ''term'')', new_model_base);
         evalin('base',code_off);

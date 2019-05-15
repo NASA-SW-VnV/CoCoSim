@@ -13,7 +13,7 @@ function extNode =  get_pre_lookup_node(lus_backend,blkParams,inputs)
         blkParams.blk_name);  
   
     % node_header inputs
-    if nasa_toLustre.utils.LookupType.isLookupDynamic(blkParams.lookupTableType)
+    if nasa_toLustre.blocks.PreLookup_To_Lustre.bpIsInputPort(blkParams)
         % if lookup table dynamic, inputs{1} is x, inputs{2} is xdat
         % inputs{3} is ydat and not needed     
         node_header.inputs = cell(1, 1+numel(inputs{2}));

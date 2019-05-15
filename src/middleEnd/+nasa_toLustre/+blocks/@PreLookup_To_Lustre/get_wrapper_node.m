@@ -1,5 +1,5 @@
 function extNode =  get_wrapper_node(...
-    ~,blk,~,outputs,preLookUpExtNode,blkParams)
+    ~,blk, inputs, outputs,preLookUpExtNode,blkParams)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -14,9 +14,14 @@ function extNode =  get_wrapper_node(...
     % wrapper inputs
     wrapper_header_input_name{1} = ...
         nasa_toLustre.lustreAst.VarIdExpr('coord_input');
-    wrapper_header.Inputs = nasa_toLustre.lustreAst.LustreVar(...
+    wrapper_header.Inputs{1} = nasa_toLustre.lustreAst.LustreVar(...
         wrapper_header_input_name{1}, 'real');
     
+    if blkParams.bpIsInputPort
+        wrapper_header_input_name = [wrapper_header_input_name, inputs{2}];
+        inputs2_dt = cellfun(@(x) nasa_toLustre.lustreAst.LustreVar(x.getId(), 'real'), inputs{2}, 'UniformOutput', false); 
+        wrapper_header.Inputs = [wrapper_header.Inputs, inputs2_dt];
+    end
     % wrapper outputs
 %     output1DataType = blk.CompiledPortDataTypes.Outport{1};
 %     lus_out1_type =...
@@ -65,7 +70,12 @@ function extNode =  get_wrapper_node(...
     % defining k, which is index at node 1 - 1 (0 base)
     % if UseLastBreakpoint, and x_in beyond last breakpoint, then
     % use last breakpoint
+    
+    %TODO : When "~blkParams.OutputIndexOnly" is false, prelookup_out{2}, {3}
+    %and {4} are not defined. But you use them in the following code when "strcmp(blkParams.UseLastBreakpoint, 'on') " is true.
+    % See test "preLookupTestGen11.slx"
     if strcmp(blkParams.UseLastBreakpoint, 'on') 
+        
         epsilon = ...
             nasa_toLustre.blocks.Lookup_nD_To_Lustre.calculate_eps(...
             blkParams.BreakpointsForDimension{1}, 1);

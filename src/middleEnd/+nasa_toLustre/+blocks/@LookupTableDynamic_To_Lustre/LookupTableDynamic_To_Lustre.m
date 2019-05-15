@@ -21,10 +21,11 @@ classdef LookupTableDynamic_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre..
                 nasa_toLustre.blocks.Lookup_nD_To_Lustre.getInitBlkParams(...
                 blk,lus_backend);            
             
-            [outputs, ~] = ...
+            [outputs, outputs_dt] = ...
                 nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, ...
                 blk, [], xml_trace);
-
+            obj.addVariable(outputs_dt);
+            
             widths = blk.CompiledPortWidths.Inport;
             numInputs = numel(widths);
             RndMeth = blk.RndMeth;
