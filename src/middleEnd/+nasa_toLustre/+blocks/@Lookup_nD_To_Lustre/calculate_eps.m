@@ -5,7 +5,10 @@ function ep = calculate_eps(BP, j)
     % All Rights Reserved.
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
+    if ~isnumeric(BP)
+        ep = 1e-5;
+        return;
+    end
     fraction = 1e6;
     if length(BP) == 1
         ep = eps(BP);
