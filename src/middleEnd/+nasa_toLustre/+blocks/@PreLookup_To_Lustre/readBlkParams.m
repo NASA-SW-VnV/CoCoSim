@@ -19,7 +19,9 @@ function blkParams = readBlkParams(~,parent,blk,blkParams, inputs)
     if strcmp(blk.BreakpointsSpecification, 'Breakpoint object')
         try
             bpObject = evalin('base', blk.BreakpointObject);
-            blkParams.BreakpointsForDimension{1} = bpObject.Breakpoints.Value;
+            [blkParams.BreakpointsForDimension{1}, ~, ~] = ...
+                nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(...
+                parent, blk, bpObject.Breakpoints.Value);
         catch
             display_msg(sprintf('Breakpoint object for BreakpointsSpecification in block %s is not supported',...
                 HtmlItem.addOpenCmd(blk.Origin_path)), ...
@@ -43,6 +45,7 @@ function blkParams = readBlkParams(~,parent,blk,blkParams, inputs)
         blkParams.BreakpointsForDimension{1} = curBreakPoint;
         
     else
+        % Explicit values
         if strcmp(blk.BreakpointsDataSource, 'Input port')
             blkParams.BreakpointsForDimension{1} = inputs{2};
             bpIsInputPort = true;
@@ -96,12 +99,14 @@ function blkParams = readBlkParams(~,parent,blk,blkParams, inputs)
     
     blkParams.RndMeth = blk.RndMeth;
     blkParams.UseLastBreakpoint = 'off';
-    if strcmp(blk.ExtrapMethod, 'Clip') && strcmp(blk.OutputSelection,'Index only')
-        blkParams.UseLastBreakpoint = 'on';
+    if strcmp(blk.ExtrapMethod, 'Clip') 
+        if strcmp(blk.OutputSelection,'Index only')
+            blkParams.UseLastBreakpoint = 'on';
+        else
+            blkParams.UseLastBreakpoint = blk.UseLastBreakpoint;
+        end
     end
-    if ~strcmp(blk.OutputSelection,'Index only') && strcmp(blk.ExtrapMethod, 'Clip')
-        blkParams.UseLastBreakpoint = blk.UseLastBreakpoint;
-    end
+    
     
     % calculate dimJump and boundNodeOrder
     blkParams = ...
