@@ -22,10 +22,15 @@ function blkParams = readBlkParams(~,parent,blk,blkParams, inputs)
             [blkParams.BreakpointsForDimension{1}, ~, ~] = ...
                 nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(...
                 parent, blk, bpObject.Breakpoints.Value);
+            bdObject_dt = bpObject.Breakpoints.DataType;
+            if strcmp(bdObject_dt, 'auto')
+                bdObject_dt = 'Inherit: Inherit from ''Breakpoint data''';
+            end
         catch
             display_msg(sprintf('Breakpoint object for BreakpointsSpecification in block %s is not supported',...
                 HtmlItem.addOpenCmd(blk.Origin_path)), ...
                 MsgType.ERROR, 'PreLookup_To_Lustre', '');
+            bdObject_dt = 'Inherit: Inherit from ''Breakpoint data''';
         end
         
     elseif strcmp(blk.BreakpointsSpecification, 'Even spacing')
@@ -63,26 +68,32 @@ function blkParams = readBlkParams(~,parent,blk,blkParams, inputs)
     
     
     T = blkParams.BreakpointsForDimension{1};% Don't remove: it's used in eval function
-    dt = blk.BreakpointDataTypeStr;
+    if strcmp(blk.BreakpointsSpecification, 'Breakpoint object')
+        bp_dt = bdObject_dt;
+    else
+        bp_dt = blk.BreakpointDataTypeStr;
+    end
     compiledDataTypesInporti = blk.CompiledPortDataTypes.Inport{1};
     if bpIsInputPort
         % T is inputs{1} and not numerical values
         % No casting is needed
     else
         % T is numerical
-        if ismember(compiledDataTypesInporti, validDT)
-            if strcmp(dt, 'Inherit: Inherit from ''Breakpoint data''')
-                % No need for casting.
-            elseif strcmp(dt, 'Inherit: Same as corresponding input')
+        
+        if strcmp(bp_dt, 'Inherit: Inherit from ''Breakpoint data''')
+            % No need for casting.
+        elseif strcmp(bp_dt, 'Inherit: Same as corresponding input')
+            if ismember(compiledDataTypesInporti, validDT)
                 blkParams.BreakpointsForDimension{1} = ...
                     eval(sprintf('%s(T)',compiledDataTypesInporti));
-            elseif strcmp(dt, 'double') ...
-                    || strcmp(dt, 'single') ...
-                    || (MatlabUtils.contains(dt, 'int') && numel(dt) <= 6)
-                blkParams.BreakpointsForDimension{1} = ...
-                    eval(sprintf('%s(T)',dt));
             end
+        elseif strcmp(bp_dt, 'double') ...
+                || strcmp(bp_dt, 'single') ...
+                || (MatlabUtils.contains(bp_dt, 'int') && numel(bp_dt) <= 6)
+            blkParams.BreakpointsForDimension{1} = ...
+                eval(sprintf('%s(T)',bp_dt));
         end
+        
     end
     
     blkParams.OutputSelection = blk.OutputSelection;
