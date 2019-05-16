@@ -95,7 +95,13 @@ function blkParams = readBlkParams(~,parent,blk,blkParams, inputs)
     end
     
     blkParams.RndMeth = blk.RndMeth;
-    blkParams.UseLastBreakpoint = blk.UseLastBreakpoint;
+    blkParams.UseLastBreakpoint = 'off';
+    if strcmp(blk.ExtrapMethod, 'Clip') && strcmp(blk.OutputSelection,'Index only')
+        blkParams.UseLastBreakpoint = 'on';
+    end
+    if ~strcmp(blk.OutputSelection,'Index only') && strcmp(blk.ExtrapMethod, 'Clip')
+        blkParams.UseLastBreakpoint = blk.UseLastBreakpoint;
+    end
     
     % calculate dimJump and boundNodeOrder
     blkParams = ...

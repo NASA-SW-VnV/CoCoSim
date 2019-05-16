@@ -74,6 +74,12 @@ function extNode =  get_wrapper_node(...
     %TODO : When "~blkParams.OutputIndexOnly" is false, prelookup_out{2}, {3}
     %and {4} are not defined. But you use them in the following code when "strcmp(blkParams.UseLastBreakpoint, 'on') " is true.
     % See test "preLookupTestGen11.slx"
+    
+    % correct blkParams.UseLastBreakpoint
+%    if strcmp(blkParams., 'on')
+    
+    
+    
     if strcmp(blkParams.UseLastBreakpoint, 'on') && ~blkParams.OutputIndexOnly 
         
         epsilon = ...
