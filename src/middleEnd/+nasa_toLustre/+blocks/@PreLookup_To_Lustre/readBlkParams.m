@@ -76,6 +76,8 @@ function blkParams = readBlkParams(~,parent,blk,blkParams, inputs)
             end
         end
     end
+    
+    blkParams.OutputSelection = blk.OutputSelection;
     if strcmp(blk.OutputSelection,'Index only')
         blkParams.OutputIndexOnly = 1;
         blkParams.directLookup = 1;

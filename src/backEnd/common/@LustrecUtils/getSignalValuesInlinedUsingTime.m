@@ -4,7 +4,7 @@
 % All Rights Reserved.
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
- 
+
 
 function signal_values = getSignalValuesInlinedUsingTime(ds, t)
     signal_values = [];
@@ -13,9 +13,11 @@ function signal_values = getSignalValuesInlinedUsingTime(ds, t)
         signal_values = reshape(signal_values, [numel(signal_values), 1]);
     elseif isa(ds, 'struct')
         fields = fieldnames(ds);
-        for i=1:numel(fields)
-            signal_values = [signal_values ; ...
-                LustrecUtils.getSignalValuesInlinedUsingTime(ds.(fields{i}), t)];
+        for i=1:length(ds)
+            for j=1:numel(fields)
+                signal_values = [signal_values ; ...
+                    LustrecUtils.getSignalValuesInlinedUsingTime(ds(i).(fields{j}), t)];
+            end
         end
     end
 end

@@ -12,9 +12,11 @@ function width = getSignalWidth(ds)
         width = prod(ds.getdatasamplesize);
     elseif isa(ds, 'struct')
         fields = fieldnames(ds);
-        for i=1:numel(fields)
-            width = width + ...
-                LustrecUtils.getSignalWidth(ds.(fields{i}));
+        for i=1:length(ds)
+            for j=1:numel(fields)
+                width = width + ...
+                    LustrecUtils.getSignalWidth(ds(i).(fields{j}));
+            end
         end
     end
 end
