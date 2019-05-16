@@ -17,9 +17,14 @@ function blkParams = readBlkParams(~,parent,blk,blkParams, inputs)
     % read breakpoints
     bpIsInputPort = false;
     if strcmp(blk.BreakpointsSpecification, 'Breakpoint object')
-        display_msg(sprintf('Breakpoint object for BreakpointsSpecification in block %s is not supported',...
-            HtmlItem.addOpenCmd(blk.Origin_path)), ...
-            MsgType.ERROR, 'PreLookup_To_Lustre', '');
+        try
+            bpObject = evalin('base', blk.BreakpointObject);
+            blkParams.BreakpointsForDimension{1} = bpObject.Breakpoints.Value;
+        catch
+            display_msg(sprintf('Breakpoint object for BreakpointsSpecification in block %s is not supported',...
+                HtmlItem.addOpenCmd(blk.Origin_path)), ...
+                MsgType.ERROR, 'PreLookup_To_Lustre', '');
+        end
         
     elseif strcmp(blk.BreakpointsSpecification, 'Even spacing')
         [firstPoint, ~, ~] = ...
