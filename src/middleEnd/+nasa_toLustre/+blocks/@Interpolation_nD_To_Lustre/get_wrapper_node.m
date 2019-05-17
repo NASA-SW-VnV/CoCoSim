@@ -18,13 +18,23 @@ function extNode =  get_wrapper_node(~,interpolationExtNode,blkParams)
        
     body_all = {};
     vars_all = {};
+    numDims = blkParams.NumberOfTableDimensions;
+    numSelDims = blkParams.NumSelectionDims
     numAdjDims = blkParams.NumberOfAdjustedTableDimensions;     
-    wrapper_header.inputs = cell(1,2*numAdjDims); 
-    wrapper_header.inputs_name = cell(1,2*numAdjDims); 
-    fraction_name = cell(1,numAdjDims); 
-    high_clipped_fraction_name = cell(1,numAdjDims); 
-    fraction_in_name = cell(1,numAdjDims); 
-    k_name = cell(1,numAdjDims); 
+    
+    if blkParams.tableIsInputPort
+        numTableInput = 1;
+    else
+        numTableInput = 0;
+    end
+        
+    wrapper_header.inputs = cell(1,2*numAdjDims+numSelDims+numTableInput); 
+    wrapper_header.inputs_name = ...
+        cell(1,2*numAdjDims+numSelDims+numTableInput); 
+    fraction_name = cell(1,numDims); 
+    high_clipped_fraction_name = cell(1,numDims); 
+    fraction_in_name = cell(1,numDims); 
+    k_name = cell(1,numDims); 
     vars = cell(1,2*numAdjDims); 
     body = cell(1,2*numAdjDims);     
     for i=1:numAdjDims
@@ -75,6 +85,14 @@ function extNode =  get_wrapper_node(~,interpolationExtNode,blkParams)
             then_index,else_index);                          
         body{(i-1)*2+2} = nasa_toLustre.lustreAst.LustreEq(...
             fraction_name{i},rhs);          
+    end
+    body_all = [body_all  body];
+    vars_all = [vars_all  vars];    
+    
+    
+    % for subtable selection
+    for i=1:blkParams.NumSelectionDims
+        
     end
     body_all = [body_all  body];
     vars_all = [vars_all  vars];

@@ -8,7 +8,6 @@ function [mainCode, main_vars] = getMainCode(~,blk,outputs,inputs,...
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Pre_Lookup
     
-    %TODO remove it from outputs, no need for it. vars are added in
     main_vars = {};
     nbInputs = length(inputs{1});
     for i=1:nbInputs

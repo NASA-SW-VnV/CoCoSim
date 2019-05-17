@@ -8,12 +8,25 @@ function blkParams = readBlkParams(~,parent,blk,blkParams)
     % Interpolation_nD_To_Lustre
 
     blkParams.lookupTableType = nasa_toLustre.utils.LookupType.Interpolation_nD;
+    
+    tableDataIsInputPort = false;
+    blkParams.TableSource = blk.TableSource;
+    blkParams.TableSpecification = blk.TableSpecification;
+%     if strcmp(blk.TableSpecification, 'Lookup table object')
+%         
+%     elseif
+%         
+%     else
+%         
+%     end
 
     if strcmp(blk.TableSpecification, 'Lookup table object')
         display_msg(sprintf('Lookup table object for DataSpecification in block %s is not supported',...
             HtmlItem.addOpenCmd(blk.Origin_path)), ...
             MsgType.ERROR, 'Interpolation_nD_To_Lustre', '');
     end
+    blkParams.RequireIndexFractionAsBus = blk.RequireIndexFractionAsBus;
+    
 
     % read blk
     [blkParams.NumberOfTableDimensions, ~, ~] = ...

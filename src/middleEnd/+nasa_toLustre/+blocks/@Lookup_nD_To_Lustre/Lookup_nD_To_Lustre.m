@@ -288,7 +288,6 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
             end            
             obj.addExtenal_node(wrapperNode);
             obj.setCode(mainCode);
-%             obj.addVariable(main_vars);
         end
         
         function [output_conv_format, external_lib]  = ...

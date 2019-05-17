@@ -8,9 +8,9 @@ function [mainCode, main_vars] = getMainCode(obj, blk,outputs,inputs,...
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Lookup_nD
 
-    outputDataType = blk.CompiledPortDataTypes.Outport{1};
-    lus_out_type =...
-        nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(outputDataType);    
+%     outputDataType = blk.CompiledPortDataTypes.Outport{1};
+%     lus_out_type =...
+%         nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(outputDataType);    
     % if outputDataType is not real, we need to cast outputs   
     [output_conv_format, external_lib]  = ...
         nasa_toLustre.blocks.Lookup_nD_To_Lustre.get_output_conv_format(...
@@ -19,12 +19,12 @@ function [mainCode, main_vars] = getMainCode(obj, blk,outputs,inputs,...
         obj.addExternal_libraries(external_lib);
     end     
         
-    main_vars = cell(1,numel(outputs));       
+    main_vars = {};
     % mainCode
     mainCode = cell(1, numel(outputs));
     for outIdx=1:numel(outputs)
-        main_vars{outIdx} = ...
-            nasa_toLustre.lustreAst.LustreVar(outputs{outIdx}, lus_out_type);        
+%         main_vars{outIdx} = ...
+%             nasa_toLustre.lustreAst.LustreVar(outputs{outIdx}, lus_out_type);        
         nodeCall_inputs = cell(1, numel(inputs));
         for i=1:numel(inputs)
             nodeCall_inputs{i} = inputs{i}{outIdx};
