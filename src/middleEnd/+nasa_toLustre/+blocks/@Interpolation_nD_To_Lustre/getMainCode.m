@@ -1,5 +1,5 @@
 function [mainCode, main_vars] = getMainCode(...
-    obj,blk,outputs,inputs,interpolation_nDWrapperExtNode,blkParams)
+    obj,blk, outputs, inputs, interpolation_nDWrapperExtNode, blkParams)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
