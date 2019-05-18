@@ -13,10 +13,6 @@ function OutMinMaxCheckCode(blk2LusObj, parent, blk, outputs, lus_dt, xml_trace,
         % no need for the assertion.
         return;
     end
-    if ~strcmp(lus_dt, 'int') && ~strcmp(lus_dt, 'real')
-        % only important for 'int' and 'real' DataType
-        return;
-    end
     
     nb_outputs = numel(outputs);
     [outMin, ~, status] = ...
@@ -40,13 +36,21 @@ function OutMinMaxCheckCode(blk2LusObj, parent, blk, outputs, lus_dt, xml_trace,
         outMax = arrayfun(@(x) outMax(1), (1:nb_outputs));
     end
     
+    if ischar(lus_dt)
+        % to be compatible with Bus signals
+        lus_dt  = arrayfun(@(x) lus_dt, (1:nb_outputs), 'UniformOutput', 0);
+    end
+    
     prop_parts = {};
     for j=1:nb_outputs
+        if ~strcmp(lus_dt{j}, 'int') && ~strcmp(lus_dt{j}, 'real')
+            continue;
+        end
         if ~isempty(outMin)
-            lusMin =nasa_toLustre.utils.SLX2LusUtils.num2LusExp(outMin(j), lus_dt);
+            lusMin =nasa_toLustre.utils.SLX2LusUtils.num2LusExp(outMin(j), lus_dt{j});
         end
         if ~isempty(outMax)
-            lusMax =nasa_toLustre.utils.SLX2LusUtils.num2LusExp(outMax(j), lus_dt);
+            lusMax =nasa_toLustre.utils.SLX2LusUtils.num2LusExp(outMax(j), lus_dt{j});
         end
         if isempty(outMin)
             prop_parts{j} = nasa_toLustre.lustreAst.BinaryExpr(...
