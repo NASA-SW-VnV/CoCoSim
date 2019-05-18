@@ -9,7 +9,7 @@ function blkParams = readBlkParams(~,parent,blk,blkParams)
 
     blkParams.lookupTableType = nasa_toLustre.utils.LookupType.Interpolation_nD;
     
-    tableDataIsInputPort = false;
+    blkParams.tableIsInputPort = false;
     blkParams.TableSource = blk.TableSource;
     blkParams.TableSpecification = blk.TableSpecification;
 %     if strcmp(blk.TableSpecification, 'Lookup table object')
@@ -75,8 +75,6 @@ function blkParams = readBlkParams(~,parent,blk,blkParams)
     [blkParams.NumSelectionDims, ~, ~] = ...
         nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(...
         parent, blk, blk.NumSelectionDims);
-    blkParams.NumberOfAdjustedTableDimensions = ...
-        blkParams.NumberOfTableDimensions - blkParams.NumSelectionDims;
     
     blkParams.RndMeth = blk.RndMeth;
     blkParams.SaturateOnIntegerOverflow = blk.SaturateOnIntegerOverflow;

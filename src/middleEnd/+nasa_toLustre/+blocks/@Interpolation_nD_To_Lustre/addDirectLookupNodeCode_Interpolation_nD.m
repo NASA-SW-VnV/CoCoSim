@@ -20,7 +20,7 @@ function [body, vars] = addDirectLookupNodeCode_Interpolation_nD(...
     % supported
     
     InterpMethod = blkParams.InterpMethod;
-    NumberOfTableDimensions = blkParams.NumberOfAdjustedTableDimensions;          
+    NumberOfTableDimensions = blkParams.NumberOfTableDimensions;          
     body = {};
     vars = {};
     direct_lookup_node = ...

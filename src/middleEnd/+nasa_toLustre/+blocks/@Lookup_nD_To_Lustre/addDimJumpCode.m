@@ -15,7 +15,7 @@ function [body, vars,Ast_dimJump] = addDimJumpCode(blkParams)
     %  spaces in the inline storage.
     
     indexDataType = 'int';
-    NumberOfTableDimensions = blkParams.NumberOfAdjustedTableDimensions;
+    NumberOfTableDimensions = blkParams.NumberOfTableDimensions;
     body = cell(1,NumberOfTableDimensions);
     vars = cell(1,NumberOfTableDimensions);            
     dimJump = ones(1,NumberOfTableDimensions);

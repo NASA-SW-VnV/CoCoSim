@@ -7,8 +7,8 @@ function extNode =  get_pre_lookup_node(lus_backend,blkParams,inputs)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     % header for external node
-    NumberOfAdjustedTableDimensions = ...
-        blkParams.NumberOfAdjustedTableDimensions;
+    NumberOfTableDimensions = ...
+        blkParams.NumberOfTableDimensions;
     node_header.nodeName = sprintf('%s_PreLookup_node',...
         blkParams.blk_name);  
   
@@ -31,9 +31,9 @@ function extNode =  get_pre_lookup_node(lus_backend,blkParams,inputs)
     else
         % if not lookup table dynamic, number of inputs equal number of
         % dimensions
-        node_header.inputs = cell(1, NumberOfAdjustedTableDimensions);
-        node_header.inputs_name = cell(1, NumberOfAdjustedTableDimensions);
-        for i=1:NumberOfAdjustedTableDimensions
+        node_header.inputs = cell(1, NumberOfTableDimensions);
+        node_header.inputs_name = cell(1, NumberOfTableDimensions);
+        for i=1:NumberOfTableDimensions
             node_header.inputs_name{i} = nasa_toLustre.lustreAst.VarIdExpr(...
                 sprintf('dim%d_coord_in',i));
             node_header.inputs{i} = ...
@@ -90,7 +90,7 @@ function extNode =  get_pre_lookup_node(lus_backend,blkParams,inputs)
 
     else
         % node_header      
-        numBoundNodes = 2^blkParams.NumberOfAdjustedTableDimensions;  
+        numBoundNodes = 2^blkParams.NumberOfTableDimensions;  
         node_header.outputs = cell(1, 2*numBoundNodes);
         nh_out_name = cell(1, 2*numBoundNodes);
         for i=1:numBoundNodes

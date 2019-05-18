@@ -9,7 +9,7 @@ function [body,vars,table_elem] = addTableCode(blkParams,...
 
     % This function defines the blkParams.Table values defined by users.
         
-    if blkParams.NumberOfAdjustedTableDimensions < ...
+    if blkParams.NumberOfTableDimensions < ...
         blkParams.NumberOfTableDimensions
         nasa_toLustre.blocks.Interpolation_nD_To_Lustre.get_adjusted_table_node(...
             blkParams,node_header,blk_inputs);
@@ -17,25 +17,25 @@ function [body,vars,table_elem] = addTableCode(blkParams,...
         % of sub-blkParams.Table selection dimension 
 
         %     dims = size(blkParams.Table);
-        %     if blkParams.NumberOfAdjustedTableDimensions==1
+        %     if blkParams.NumberOfTableDimensions==1
         %         blkParams.Table = zeros(dims(1));
-        %     elseif blkParams.NumberOfAdjustedTableDimensions==2
+        %     elseif blkParams.NumberOfTableDimensions==2
         %         blkParams.Table = zeros(dims(1),dims(2));
-        %     elseif blkParams.NumberOfAdjustedTableDimensions==3
+        %     elseif blkParams.NumberOfTableDimensions==3
         %         blkParams.Table = zeros(dims(1),dims(2),dims(3));
-        %     elseif blkParams.NumberOfAdjustedTableDimensions==4
+        %     elseif blkParams.NumberOfTableDimensions==4
         %         blkParams.Table = zeros(dims(1),dims(2),dims(3),dims(4));
-        %     elseif blkParams.NumberOfAdjustedTableDimensions==5
+        %     elseif blkParams.NumberOfTableDimensions==5
         %         blkParams.Table = zeros(dims(1),dims(2),dims(3),dims(4),dims(5));
-        %     elseif blkParams.NumberOfAdjustedTableDimensions==6
+        %     elseif blkParams.NumberOfTableDimensions==6
         %         blkParams.Table = zeros(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6));
-        %     elseif blkParams.NumberOfAdjustedTableDimensions==7
+        %     elseif blkParams.NumberOfTableDimensions==7
         %         blkParams.Table = zeros(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7));
         %     else
         %         % error:  we don't support more than 7
         %     end
     else
-        numBoundNodes = 2^blkParams.NumberOfAdjustedTableDimensions;
+        numBoundNodes = 2^blkParams.NumberOfTableDimensions;
         if nasa_toLustre.utils.LookupType.isLookupDynamic(blkParams.lookupTableType)
             numberTableData = blkParams.numberTableData;  
         else

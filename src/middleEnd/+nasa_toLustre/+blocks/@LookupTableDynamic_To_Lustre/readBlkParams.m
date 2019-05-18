@@ -11,7 +11,7 @@ function blkParams = readBlkParams(~,blk,inputs,blkParams)
 
     % read blk
     blkParams.NumberOfTableDimensions = 1;
-    blkParams.NumberOfAdjustedTableDimensions = blkParams.NumberOfTableDimensions;
+    blkParams.NumberOfTableDimensions = blkParams.NumberOfTableDimensions;
     blkParams.BreakpointsForDimension{1} = inputs{2};
     % table
     blkParams.Table = inputs{3};

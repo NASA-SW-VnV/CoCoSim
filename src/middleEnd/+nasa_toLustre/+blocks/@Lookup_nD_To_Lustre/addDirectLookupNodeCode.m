@@ -20,7 +20,7 @@ function [body, vars] = addDirectLookupNodeCode(blkParams,index_node,...
     % supported
     
     InterpMethod = blkParams.InterpMethod;
-    NumberOfTableDimensions = blkParams.NumberOfAdjustedTableDimensions;          
+    NumberOfTableDimensions = blkParams.NumberOfTableDimensions;          
     body = {};
     vars = {};
     direct_lookup_node = ...

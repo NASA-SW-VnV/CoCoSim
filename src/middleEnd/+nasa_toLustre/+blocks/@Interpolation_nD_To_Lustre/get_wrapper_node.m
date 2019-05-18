@@ -19,8 +19,7 @@ function extNode =  get_wrapper_node(~,interpolationExtNode,blkParams)
     body_all = {};
     vars_all = {};
     numDims = blkParams.NumberOfTableDimensions;
-    numSelDims = blkParams.NumSelectionDims
-    numAdjDims = blkParams.NumberOfAdjustedTableDimensions;     
+    numSelDims = blkParams.NumSelectionDims;   
     
     if blkParams.tableIsInputPort
         numTableInput = 1;
@@ -28,16 +27,16 @@ function extNode =  get_wrapper_node(~,interpolationExtNode,blkParams)
         numTableInput = 0;
     end
         
-    wrapper_header.inputs = cell(1,2*numAdjDims+numSelDims+numTableInput); 
+    wrapper_header.inputs = cell(1,2*numDims+numSelDims+numTableInput); 
     wrapper_header.inputs_name = ...
-        cell(1,2*numAdjDims+numSelDims+numTableInput); 
+        cell(1,2*numDims+numSelDims+numTableInput); 
     fraction_name = cell(1,numDims); 
     high_clipped_fraction_name = cell(1,numDims); 
     fraction_in_name = cell(1,numDims); 
     k_name = cell(1,numDims); 
-    vars = cell(1,2*numAdjDims); 
-    body = cell(1,2*numAdjDims);     
-    for i=1:numAdjDims
+    vars = cell(1,2*numDims); 
+    body = cell(1,2*numDims);     
+    for i=1:numDims
         % wrapper header
         wrapper_header.inputs_name{(i-1)*2+1} = ...
             nasa_toLustre.lustreAst.VarIdExpr(sprintf('k_in_dim_%d',i));
@@ -90,12 +89,12 @@ function extNode =  get_wrapper_node(~,interpolationExtNode,blkParams)
     vars_all = [vars_all  vars];    
     
     
-    % for subtable selection
-    for i=1:blkParams.NumSelectionDims
-        
-    end
-    body_all = [body_all  body];
-    vars_all = [vars_all  vars];
+%     % for subtable selection
+%     for i=1:blkParams.NumSelectionDims
+%         
+%     end
+%     body_all = [body_all  body];
+%     vars_all = [vars_all  vars];
     
     % doing subscripts to index in Lustre.  Need subscripts, and
     % dimension jump.            
@@ -114,14 +113,14 @@ function extNode =  get_wrapper_node(~,interpolationExtNode,blkParams)
     % note that Simulink will allow for ki input to be larger than number
     % of breakpoints, in this case, Simulink just use the highest
     % breakpoint
-    bound_nodes_expression = cell(numAdjDims,2); 
-    high_clipped_bound_nodes_name = cell(numAdjDims,2);
-    unclipped_bound_nodes_name = cell(numAdjDims,2);
-    bound_nodes_name = cell(numAdjDims,2);
-    vars = cell(1,6*numAdjDims); 
-    body = cell(1,6*numAdjDims); 
+    bound_nodes_expression = cell(numDims,2); 
+    high_clipped_bound_nodes_name = cell(numDims,2);
+    unclipped_bound_nodes_name = cell(numDims,2);
+    bound_nodes_name = cell(numDims,2);
+    vars = cell(1,6*numDims); 
+    body = cell(1,6*numDims); 
     tableSize = size(blkParams.Table);
-    for i=1:numAdjDims
+    for i=1:numDims
         curDimNumBreakpoints = tableSize(i);
         if curDimNumBreakpoints == 1 && length(tableSize) == 2
             % for case  of [1,n] vector
@@ -269,14 +268,14 @@ function extNode =  get_wrapper_node(~,interpolationExtNode,blkParams)
     else
         % for interpolation/extrapolation method, inputs are index and
         % weight of each bounding node
-        numAdjDims = blkParams.NumberOfAdjustedTableDimensions;
-        numBoundNodes = 2^blkParams.NumberOfAdjustedTableDimensions;
+        numDims = blkParams.NumberOfTableDimensions;
+        numBoundNodes = 2^blkParams.NumberOfTableDimensions;
         
         % calculating linear shape function value for multidimensional
         % interpolation from fi of each dimension 
         shapeNodeSign = ...
             nasa_toLustre.blocks.Lookup_nD_To_Lustre.getShapeBoundingNodeSign(...
-            numAdjDims);
+            numDims);
         N_shape_node = cell(1,numBoundNodes);
         body = cell(1,numBoundNodes);
         vars = cell(1,numBoundNodes);
@@ -286,8 +285,8 @@ function extNode =  get_wrapper_node(~,interpolationExtNode,blkParams)
                 sprintf('N_shape_%d',i));
             vars{i} = nasa_toLustre.lustreAst.LustreVar(...
                 N_shape_node{i},'real');
-            numerator_terms = cell(1,numAdjDims);
-            for j=1:numAdjDims
+            numerator_terms = cell(1,numDims);
+            for j=1:numDims
                 if shapeNodeSign(i,j)==-1
                     numerator_terms{j} = ...
                         nasa_toLustre.lustreAst.BinaryExpr(...

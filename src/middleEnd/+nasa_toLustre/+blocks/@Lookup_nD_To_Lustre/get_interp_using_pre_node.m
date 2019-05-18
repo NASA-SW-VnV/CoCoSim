@@ -28,7 +28,7 @@ function extNode = get_interp_using_pre_node(...
     % after the solution index for direct lookup or node indices and 
     % weights for interpolated method.
 
-    numBoundNodes = 2^blkParams.NumberOfAdjustedTableDimensions;
+    numBoundNodes = 2^blkParams.NumberOfTableDimensions;
     
     % header for external node
     node_header.NodeName = sprintf('%s_Interp_Using_Pre_ext_node',...

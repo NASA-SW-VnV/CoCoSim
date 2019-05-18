@@ -12,7 +12,7 @@ function blkParams = readBlkParams(~,parent,blk,blkParams, inputs)
     
     % read blk
     blkParams.NumberOfTableDimensions = 1;
-    blkParams.NumberOfAdjustedTableDimensions = 1;
+    blkParams.NumberOfTableDimensions = 1;
     % read blk
     % read breakpoints
     bpIsInputPort = false;

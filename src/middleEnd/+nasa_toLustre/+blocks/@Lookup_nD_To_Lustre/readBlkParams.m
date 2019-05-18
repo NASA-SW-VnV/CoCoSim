@@ -46,10 +46,10 @@ function blkParams = readBlkParams(~,parent,blk,blkParams)
     else
         blkParams.Table = T;
     end
-    % AdjustedTable and NumberOfAdjustedTableDimensions are used in the 
+    % AdjustedTable and NumberOfTableDimensions are used in the 
     % shared code between Lookup_nD and Interpolation_nD. For Lookup_nD,
     % there is no adjustment.
-    blkParams.NumberOfAdjustedTableDimensions = blkParams.NumberOfTableDimensions;
+    blkParams.NumberOfTableDimensions = blkParams.NumberOfTableDimensions;
     % read breakpoints
     tableDims = size(blkParams.Table);
     if strcmp(blk.BreakpointsSpecification, 'Even spacing')

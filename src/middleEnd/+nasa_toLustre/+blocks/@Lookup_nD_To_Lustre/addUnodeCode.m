@@ -13,7 +13,7 @@ function [body, vars,u_node] = addUnodeCode(...
     vars = {};
     u_node = {};
     
-    numBoundNodes = 2^blkParams.NumberOfAdjustedTableDimensions;
+    numBoundNodes = 2^blkParams.NumberOfTableDimensions;
     for i=1:numBoundNodes
         if ~blkParams.directLookup
             u_node{i} = nasa_toLustre.lustreAst.VarIdExpr(...

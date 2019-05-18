@@ -44,22 +44,23 @@ function [mainCode, main_vars] = getMainCode(...
         end
     end 
 
-    NumberOfAdjustedTableDimensions = ...
-        blkParams.NumberOfAdjustedTableDimensions;
+    NumberOfTableDimensions = ...
+        blkParams.NumberOfTableDimensions;
 
-    main_vars = cell(1,numel(outputs));
+    %main_vars = cell(1,numel(outputs));
+    main_vars = {};
        
     % mainCode
     mainCode = cell(1, numel(outputs));
     for outIdx=1:numel(outputs)
-        main_vars{outIdx} = ...
-            nasa_toLustre.lustreAst.LustreVar(outputs{outIdx}, lus_out_type);
+%         main_vars{outIdx} = ...
+%             nasa_toLustre.lustreAst.LustreVar(outputs{outIdx}, lus_out_type);
 
-        nodeCall_inputs = cell(1, 2*NumberOfAdjustedTableDimensions);
-        for i=1:NumberOfAdjustedTableDimensions
+        nodeCall_inputs = cell(1, 2*NumberOfTableDimensions);
+        for i=1:NumberOfTableDimensions
             % index
             if isempty(index_conv_format)
-                nodeCall_inputs{(i-1)*2+1} = inputs{(i-1)*2+1};                
+                nodeCall_inputs{(i-1)*2+1} = inputs{(i-1)*2+1}{outIdx};                
             else
                 nodeCall_inputs{(i-1)*2+1} = ...
                     nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(...
@@ -67,11 +68,12 @@ function [mainCode, main_vars] = getMainCode(...
             end
             % fraction
             if isempty(fraction_conv_format)
-                nodeCall_inputs{(i-1)*2+2} = inputs{(i-1)*2+2};
+                nodeCall_inputs{(i-1)*2+2} = ...
+                    inputs{(i-1)*2+2}{outIdx};
             else
                 nodeCall_inputs{(i-1)*2+2} = ...
                     nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(...
-                    fraction_conv_format,inputs{(i-1)*2+2});
+                    fraction_conv_format,inputs{(i-1)*2+2}{outIdx});
             end
             
             

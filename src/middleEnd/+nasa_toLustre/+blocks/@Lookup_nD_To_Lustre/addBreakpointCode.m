@@ -11,9 +11,9 @@ function [body,vars,Breakpoints] = ...
     % users.
     body = {};
     vars = {};    
-    Breakpoints = cell(1,blkParams.NumberOfAdjustedTableDimensions);
+    Breakpoints = cell(1,blkParams.NumberOfTableDimensions);
     % TODO allow for different type.
-    for j = 1:blkParams.NumberOfAdjustedTableDimensions
+    for j = 1:blkParams.NumberOfTableDimensions
         Breakpoints{j} = {};
         for i=1:numel(blkParams.BreakpointsForDimension{j})
             Breakpoints{j}{i} = nasa_toLustre.lustreAst.VarIdExpr(...
