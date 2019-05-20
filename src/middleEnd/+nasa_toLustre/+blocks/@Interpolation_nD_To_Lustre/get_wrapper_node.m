@@ -27,7 +27,8 @@ function extNode =  get_wrapper_node(~,interpolationExtNode,blkParams)
         numTableInput = 0;
     end
         
-    wrapper_header.inputs = cell(1,2*numDims+numSelDims+numTableInput); 
+    wrapper_header.inputs = cell(1,2*(numDims-numSelDims)+numSelDims+...
+        numTableInput); 
     wrapper_header.inputs_name = ...
         cell(1,2*numDims+numSelDims+numTableInput); 
     fraction_name = cell(1,numDims); 
@@ -87,14 +88,15 @@ function extNode =  get_wrapper_node(~,interpolationExtNode,blkParams)
     end
     body_all = [body_all  body];
     vars_all = [vars_all  vars];    
-    
-    
-%     % for subtable selection
-%     for i=1:blkParams.NumSelectionDims
-%         
-%     end
-%     body_all = [body_all  body];
-%     vars_all = [vars_all  vars];
+        
+    % for subtable selection
+    vars = {};
+    body = {};
+    for i=1:blkParams.NumSelectionDims
+        
+    end
+    body_all = [body_all  body];
+    vars_all = [vars_all  vars];
     
     % doing subscripts to index in Lustre.  Need subscripts, and
     % dimension jump.            
