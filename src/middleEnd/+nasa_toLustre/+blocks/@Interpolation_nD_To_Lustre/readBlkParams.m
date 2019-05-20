@@ -8,56 +8,56 @@ function blkParams = readBlkParams(~,parent,blk,blkParams)
     % Interpolation_nD_To_Lustre
 
     blkParams.lookupTableType = nasa_toLustre.utils.LookupType.Interpolation_nD;
-    
-    blkParams.tableIsInputPort = false;
-    blkParams.TableSource = blk.TableSource;
-    blkParams.TableSpecification = blk.TableSpecification;
-%     if strcmp(blk.TableSpecification, 'Lookup table object')
-%         
-%     elseif
-%         
-%     else
-%         
-%     end
-
-    if strcmp(blk.TableSpecification, 'Lookup table object')
-        display_msg(sprintf('Lookup table object for DataSpecification in block %s is not supported',...
-            HtmlItem.addOpenCmd(blk.Origin_path)), ...
-            MsgType.ERROR, 'Interpolation_nD_To_Lustre', '');
-    end
-    blkParams.RequireIndexFractionAsBus = blk.RequireIndexFractionAsBus;
-    
 
     % read blk
     [blkParams.NumberOfTableDimensions, ~, ~] = ...
         nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(...
         parent, blk, blk.NumberOfTableDimensions);
-    % cast table data
-    [T, ~, ~] = ...
-        nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(...
-        parent, blk, blk.Table);
-    validDT = {'double', 'single', 'int8', 'int16', ...
-        'int32', 'uint8', 'uint16', 'uint32', 'boolean'};
-    if ismember(blk.CompiledPortDataTypes.Outport{1}, validDT)
-        if strcmp(blk.TableDataTypeStr, 'Inherit: Same as output')
-            % don't cast if double or single and
-            % dimensions 3 and above working
-            if blkParams.NumberOfTableDimensions >=  3
-                blkParams.Table = T;
+    blkParams.RequireIndexFractionAsBus = blk.RequireIndexFractionAsBus;
+        
+    blkParams.tableIsInputPort = false;
+    blkParams.TableSource = blk.TableSource;
+    blkParams.TableSpecification = blk.TableSpecification;
+    
+    if strcmp(blk.TableSource, 'Dialog')
+        if strcmp(blk.TableSpecification, 'Explicit values')
+            % cast table data
+            [T, ~, ~] = ...
+                nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(...
+                parent, blk, blk.Table);
+            validDT = {'double', 'single', 'int8', 'int16', ...
+                'int32', 'uint8', 'uint16', 'uint32', 'boolean'};
+            if ismember(blk.CompiledPortDataTypes.Outport{1}, validDT)
+                if strcmp(blk.TableDataTypeStr, 'Inherit: Same as output')
+                    % don't cast if double or single and
+                    % dimensions 3 and above working
+                    if blkParams.NumberOfTableDimensions >=  3
+                        blkParams.Table = T;
+                    else
+                        blkParams.Table = eval(sprintf('%s([%s])',...
+                            blk.CompiledPortDataTypes.Outport{1}, mat2str(T)));
+                    end
+                elseif strcmp(blk.TableDataTypeStr, 'double') ...
+                        || strcmp(blk.TableDataTypeStr, 'single') ...
+                        || MatlabUtils.contains(blk.TableDataTypeStr, 'int')
+                    blkParams.Table = eval(sprintf('%s([%s])',...
+                        blk.TableDataTypeStr, mat2str(T)));
+                else
+                    blkParams.Table = T;
+                end
             else
-                blkParams.Table = eval(sprintf('%s([%s])',...
-                    blk.CompiledPortDataTypes.Outport{1}, mat2str(T)));
+                blkParams.Table = T;
             end
-        elseif strcmp(blk.TableDataTypeStr, 'double') ...
-                || strcmp(blk.TableDataTypeStr, 'single') ...
-                || MatlabUtils.contains(blk.TableDataTypeStr, 'int')
-            blkParams.Table = eval(sprintf('%s([%s])',...
-                blk.TableDataTypeStr, mat2str(T)));
-        else
-            blkParams.Table = T;
+        else % 'Lookup table object'
+            
         end
-    else
-        blkParams.Table = T;
+    else    % Input port
+        blkParams.tableIsInputPort = true;
+        if strcmp(blk.TableSpecification, 'Explicit values')
+            
+        else  % 'Lookup table object'
+            
+        end
     end
 
     blkParams.InterpMethod = blk.InterpMethod;
