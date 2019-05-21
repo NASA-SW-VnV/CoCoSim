@@ -9,7 +9,7 @@ function body = addInlineIndexFromArrayIndicesCode(...
     
     % This function takes a cell array of VarIdExpr, an VarIdExpr for the
     % index and return an VarIdExpr for the array element of that index
-
+    nb_elt =  numel(inline_list);
     conds = cell(1,numel(inline_list)-1);
     thens = cell(1,numel(inline_list));
     for j=1:numel(inline_list)-1
@@ -18,9 +18,9 @@ function body = addInlineIndexFromArrayIndicesCode(...
             nasa_toLustre.lustreAst.IntExpr(j));
         thens{j} = inline_list{j};
     end
-    thens{numel(inline_list)} = inline_list{numel(inline_list)};
-    if numel(inline_list) == 1
-        rhs = nasa_toLustre.lustreAst.IteExpr(conds{1},thens{1},thens{2});
+    thens{nb_elt} = inline_list{nb_elt};
+    if nb_elt == 1
+        rhs = inline_list{1};
     else
         rhs = nasa_toLustre.lustreAst.IteExpr.nestedIteExpr(conds, thens);
     end

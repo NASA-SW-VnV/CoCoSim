@@ -43,19 +43,20 @@ function extNode = get_interp_using_pre_node(...
     
     % number of inputs to this node depends on both if it is dynamic and
     % directLookup
-    if nasa_toLustre.utils.LookupType.isLookupDynamic(blkParams.lookupTableType)
+    if nasa_toLustre.utils.LookupType.isLookupDynamic(blkParams.lookupTableType) ...
+        || blkParams.tableIsInputPort
         if blkParams.directLookup
-            node_header.inputs_name = cell(1,1+numel(inputs{3}));
+            node_header.inputs_name = cell(1,1+numel(inputs{end}));
             numDataBeforeTable = 1;
         else
             node_header.inputs_name = ...
-                cell(1,2*numBoundNodes+numel(inputs{3}));
+                cell(1,2*numBoundNodes+numel(inputs{end}));
             numDataBeforeTable = 2*numBoundNodes;
         end
         node_header.inputs = ...
             cell(1,numel(node_header.inputs_name));
         % add in table data
-        for i=1:numel(inputs{3})
+        for i=1:numel(inputs{end})
             node_header.inputs_name{numDataBeforeTable+i} = ...
                 nasa_toLustre.lustreAst.VarIdExpr(sprintf('ydat_%d',i));
             node_header.inputs{numDataBeforeTable+i} = ...
@@ -71,11 +72,16 @@ function extNode = get_interp_using_pre_node(...
         
     end
 
-    [body, vars,table_elem] = ...
-        nasa_toLustre.blocks.Lookup_nD_To_Lustre.addTableCode(blkParams,...
-        node_header, inputs);
-    body_all = [body_all  body];
-    vars_all = [vars_all  vars];
+    if blkParams.tableIsInputPort
+        % 
+        table_elem = blkParams.Table;
+    else
+        [body, vars,table_elem] = ...
+            nasa_toLustre.blocks.Lookup_nD_To_Lustre.addTableCode(blkParams,...
+            node_header, inputs);
+        body_all = [body_all  body];
+        vars_all = [vars_all  vars];
+    end
     
     if blkParams.directLookup    
         node_header.inputs_name{1} = ...

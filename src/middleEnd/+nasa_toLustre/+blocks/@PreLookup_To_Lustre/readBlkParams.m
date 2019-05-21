@@ -85,13 +85,13 @@ function blkParams = readBlkParams(~,parent,blk,blkParams, inputs)
         elseif strcmp(bp_dt, 'Inherit: Same as corresponding input')
             if ismember(compiledDataTypesInporti, validDT)
                 blkParams.BreakpointsForDimension{1} = ...
-                    eval(sprintf('%s(T)',compiledDataTypesInporti));
+                    cast(T, compiledDataTypesInporti);
             end
         elseif strcmp(bp_dt, 'double') ...
                 || strcmp(bp_dt, 'single') ...
                 || (MatlabUtils.contains(bp_dt, 'int') && numel(bp_dt) <= 6)
             blkParams.BreakpointsForDimension{1} = ...
-                eval(sprintf('%s(T)',bp_dt));
+                cast(T, bp_dt);
         end
         
     end

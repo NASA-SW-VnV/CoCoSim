@@ -19,18 +19,16 @@ function extNode =  get_wrapper_node(~,interpolationExtNode,blkParams)
     body_all = {};
     vars_all = {};
     numDims = blkParams.NumberOfTableDimensions;
-    numSelDims = blkParams.NumSelectionDims;   
     
     if blkParams.tableIsInputPort
-        numTableInput = 1;
+        numTableInput = length(blkParams.Table);
     else
         numTableInput = 0;
     end
         
-    wrapper_header.inputs = cell(1,2*(numDims-numSelDims)+numSelDims+...
-        numTableInput); 
+    wrapper_header.inputs = cell(1,2*numDims +  numTableInput); 
     wrapper_header.inputs_name = ...
-        cell(1,2*numDims+numSelDims+numTableInput); 
+        cell(1,2*numDims+numTableInput); 
     fraction_name = cell(1,numDims); 
     high_clipped_fraction_name = cell(1,numDims); 
     fraction_in_name = cell(1,numDims); 
@@ -86,17 +84,21 @@ function extNode =  get_wrapper_node(~,interpolationExtNode,blkParams)
         body{(i-1)*2+2} = nasa_toLustre.lustreAst.LustreEq(...
             fraction_name{i},rhs);          
     end
+    tableInputsNames = {};
+    if blkParams.tableIsInputPort
+        % add table
+        for i=1:length(blkParams.Table)
+            t = blkParams.Table{end - i + 1};
+            tableInputsNames{end+1} = t;
+            wrapper_header.inputs_name{end - i + 1} = t;
+            wrapper_header.inputs{end - i + 1} = ...
+                nasa_toLustre.lustreAst.LustreVar(t, 'real');
+        end
+    end
     body_all = [body_all  body];
     vars_all = [vars_all  vars];    
         
-    % for subtable selection
-    vars = {};
-    body = {};
-    for i=1:blkParams.NumSelectionDims
-        
-    end
-    body_all = [body_all  body];
-    vars_all = [vars_all  vars];
+
     
     % doing subscripts to index in Lustre.  Need subscripts, and
     % dimension jump.            
@@ -261,11 +263,14 @@ function extNode =  get_wrapper_node(~,interpolationExtNode,blkParams)
         body_all = [body_all  body];
         vars_all = [vars_all  vars];
 
+        nodeCallInputs{1} = blkParams.direct_sol_inline_index_VarIdExpr;
+        nodeCallInputs = [nodeCallInputs, ....
+            tableInputsNames];
         bodyf{1} = nasa_toLustre.lustreAst.LustreEq(...
             wrapper_header.output_name{1}, ...
             nasa_toLustre.lustreAst.NodeCallExpr(...
             interpolationExtNode.name, ...
-            blkParams.direct_sol_inline_index_VarIdExpr));
+            nodeCallInputs));
         body_all = [body_all  bodyf];
     else
         % for interpolation/extrapolation method, inputs are index and
@@ -275,9 +280,9 @@ function extNode =  get_wrapper_node(~,interpolationExtNode,blkParams)
         
         % calculating linear shape function value for multidimensional
         % interpolation from fi of each dimension 
-        shapeNodeSign = ...
-            nasa_toLustre.blocks.Lookup_nD_To_Lustre.getShapeBoundingNodeSign(...
-            numDims);
+%         shapeNodeSign = ...
+%             nasa_toLustre.blocks.Lookup_nD_To_Lustre.getShapeBoundingNodeSign(...
+%             numDims);
         N_shape_node = cell(1,numBoundNodes);
         body = cell(1,numBoundNodes);
         vars = cell(1,numBoundNodes);
@@ -289,7 +294,8 @@ function extNode =  get_wrapper_node(~,interpolationExtNode,blkParams)
                 N_shape_node{i},'real');
             numerator_terms = cell(1,numDims);
             for j=1:numDims
-                if shapeNodeSign(i,j)==-1
+                node2bin = strcat('000000', dec2bin(i-1));
+                if strcmp(node2bin(end-j+1), '0') %shapeNodeSign(i,j)==-1
                     numerator_terms{j} = ...
                         nasa_toLustre.lustreAst.BinaryExpr(...
                         nasa_toLustre.lustreAst.BinaryExpr.MINUS,...
@@ -322,7 +328,8 @@ function extNode =  get_wrapper_node(~,interpolationExtNode,blkParams)
             interpolation_call_inputs_args{(i-1)*2+1} = bounding_nodes{i};
             interpolation_call_inputs_args{(i-1)*2+2} = N_shape_node{i};
         end
-        
+        interpolation_call_inputs_args = [interpolation_call_inputs_args, ....
+            tableInputsNames];
     % call interpolation
         bodyf{1} = nasa_toLustre.lustreAst.LustreEq(...
             wrapper_header.output_name{1}, ...

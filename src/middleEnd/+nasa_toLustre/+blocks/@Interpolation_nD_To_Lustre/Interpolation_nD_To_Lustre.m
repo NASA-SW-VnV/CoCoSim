@@ -14,18 +14,18 @@ classdef Interpolation_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
     methods
   
         function  write_code(obj, parent, blk, xml_trace, lus_backend, varargin)
-            
-            blkParams = ...
-                nasa_toLustre.blocks.Lookup_nD_To_Lustre.getInitBlkParams(...
-                blk,lus_backend);            
-            blkParams = obj.readBlkParams(parent,blk,blkParams);    
-            
             [outputs, outputs_dt] = ...
                 nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, ...
                 blk, [], xml_trace);
             obj.addVariable(outputs_dt);
             
             [inputs] = obj.getInputs(parent, blk);
+            
+            blkParams = ...
+                nasa_toLustre.blocks.Lookup_nD_To_Lustre.getInitBlkParams(...
+                blk,lus_backend);            
+            blkParams = obj.readBlkParams(parent,blk,blkParams, inputs);    
+            
             obj.addExternal_libraries({'LustMathLib_abs_real'});
             obj.create_lookup_nodes(blk,lus_backend,blkParams,outputs,inputs);
 
@@ -43,7 +43,7 @@ classdef Interpolation_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
                
         [inputs] = getInputs(obj, parent, blk)
         
-        blkParams = readBlkParams(obj,parent,blk,blkParams)
+        blkParams = readBlkParams(obj,parent,blk,blkParams, inputs)
         
         create_lookup_nodes(obj,blk,lus_backend,blkParams,outputs,inputs)
         

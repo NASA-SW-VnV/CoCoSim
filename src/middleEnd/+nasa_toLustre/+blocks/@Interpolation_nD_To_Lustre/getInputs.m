@@ -20,6 +20,21 @@ function [inputs] = getInputs(obj, parent, blk)
     if tableIsInputPort
         inputs{end + 1} = nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(...
             parent, blk, nbInpots);
+        
+        Lusinport_dt = ...
+            nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(...
+            blk.CompiledPortDataTypes.Inport{end});
+        if ~strcmp(Lusinport_dt, 'real')
+            [external_lib, conv_format] = ...
+                nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(...
+                Lusinport_dt, 'real');
+            if ~isempty(conv_format)
+                obj.addExternal_libraries(external_lib);
+                inputs{end} = cellfun(@(x) ...
+                    nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(...
+                    conv_format,x),inputs{end}, 'un', 0);
+            end
+        end
         nbInpots = nbInpots - 1;
     end
     
@@ -32,7 +47,7 @@ function [inputs] = getInputs(obj, parent, blk)
             inputs{end + 1} = nasa_toLustre.lustreAst.RealExpr('0.0');
             inputs{end + 1} = nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(...
                 parent, blk, nbInpots);
-            max_width = max(max_width, inputs{end});
+            max_width = max(max_width, length(inputs{end}));
             nbInpots = nbInpots - 1;
         end
     end
@@ -75,7 +90,7 @@ function [inputs] = getInputs(obj, parent, blk)
                     end
                 end
                 
-                max_width = max(max_width, inputs{end});
+                max_width = max(max_width, length(inputs{end}));
             end
         else
             isfraction = true;
@@ -106,7 +121,7 @@ function [inputs] = getInputs(obj, parent, blk)
                 end
                 isfraction = ~isfraction;
                 
-                max_width = max(max_width, inputs{end});
+                max_width = max(max_width, length(inputs{end}));
             end
         end
     end

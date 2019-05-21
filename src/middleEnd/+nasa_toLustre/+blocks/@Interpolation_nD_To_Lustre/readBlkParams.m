@@ -1,4 +1,4 @@
-function blkParams = readBlkParams(~,parent,blk,blkParams)
+function blkParams = readBlkParams(~,parent,blk,blkParams, inputs)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -6,69 +6,74 @@ function blkParams = readBlkParams(~,parent,blk,blkParams)
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Interpolation_nD_To_Lustre
-
+    
     blkParams.lookupTableType = nasa_toLustre.utils.LookupType.Interpolation_nD;
-
+    
     % read blk
-    [blkParams.NumberOfTableDimensions, ~, ~] = ...
-        nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(...
-        parent, blk, blk.NumberOfTableDimensions);
+    blkParams.NumberOfTableDimensions = str2num(blk.NumberOfTableDimensions);
     blkParams.RequireIndexFractionAsBus = blk.RequireIndexFractionAsBus;
-        
-    blkParams.tableIsInputPort = false;
+    
+    blkParams.tableIsInputPort =  strcmp(blk.TableSpecification, 'Explicit values') ...
+        && strcmp(blk.TableSource, 'Input port');
+    
     blkParams.TableSource = blk.TableSource;
     blkParams.TableSpecification = blk.TableSpecification;
     
-    if strcmp(blk.TableSource, 'Dialog')
-        if strcmp(blk.TableSpecification, 'Explicit values')
-            % cast table data
+    % read table
+    if strcmp(blk.TableSpecification, 'Lookup table object')
+        lkObject = evalin('base', blk.LookupTableObject);
+        T = lkObject.Table.Value;
+        T_dt = lkObject.Table.DataType;
+        if strcmp(T_dt, 'auto')
+            T_dt = 'Inherit: Inherit from ''Table data''';
+        end
+        
+    else
+        %'Explicit values'
+        if strcmp(blk.TableSource, 'Dialog')
             [T, ~, ~] = ...
                 nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(...
                 parent, blk, blk.Table);
+            T_dt = blk.TableDataTypeStr;
+        else
+            % input port
+            T = cell(1, length(inputs{end}));
+            for i=1:length(inputs{end})
+                T{i} = nasa_toLustre.lustreAst.VarIdExpr(sprintf('ydat_%d', i));
+            end
+            
+        end
+    end
+    
+    % cast table
+    if ~ blkParams.tableIsInputPort
+            % cast table data
             validDT = {'double', 'single', 'int8', 'int16', ...
                 'int32', 'uint8', 'uint16', 'uint32', 'boolean'};
-            if ismember(blk.CompiledPortDataTypes.Outport{1}, validDT)
-                if strcmp(blk.TableDataTypeStr, 'Inherit: Same as output')
-                    % don't cast if double or single and
-                    % dimensions 3 and above working
-                    if blkParams.NumberOfTableDimensions >=  3
-                        blkParams.Table = T;
-                    else
-                        blkParams.Table = eval(sprintf('%s([%s])',...
-                            blk.CompiledPortDataTypes.Outport{1}, mat2str(T)));
-                    end
-                elseif strcmp(blk.TableDataTypeStr, 'double') ...
-                        || strcmp(blk.TableDataTypeStr, 'single') ...
-                        || MatlabUtils.contains(blk.TableDataTypeStr, 'int')
-                    blkParams.Table = eval(sprintf('%s([%s])',...
-                        blk.TableDataTypeStr, mat2str(T)));
-                else
-                    blkParams.Table = T;
+            if strcmp(T_dt, 'Inherit: Inherit from ''Table data''')
+                % no casting
+            elseif strcmp(T_dt, 'Inherit: Same as output')
+                if ismember(blk.CompiledPortDataTypes.Outport{1}, validDT)
+                    T = cast(T, blk.CompiledPortDataTypes.Outport{1});
                 end
-            else
-                blkParams.Table = T;
+            elseif strcmp(T_dt, 'double') ...
+                    || strcmp(T_dt, 'single') ...
+                    || MatlabUtils.contains(T_dt, 'int')
+                T = cast(T, T_dt);
             end
-        else % 'Lookup table object'
-            
-        end
-    else    % Input port
-        blkParams.tableIsInputPort = true;
-        if strcmp(blk.TableSpecification, 'Explicit values')
-            
-        else  % 'Lookup table object'
-            
-        end
     end
-
+    blkParams.Table = T;
+    
     blkParams.InterpMethod = blk.InterpMethod;
     blkParams.ExtrapMethod = blk.ExtrapMethod;
-    blkParams.directLookup = 0;
+    blkParams.directLookup = false;
+    blkParams.yIsBounded = false;
     if strcmp(blkParams.InterpMethod,'Flat') || strcmp(blkParams.InterpMethod,'Nearest')
-        blkParams.directLookup = 1;
-        blkParams.yIsBounded = 1;
+        blkParams.directLookup = true;
+        blkParams.yIsBounded = true;
     end
     if strcmp(blkParams.ExtrapMethod,'Clip')
-        blkParams.yIsBounded = 1;
+        blkParams.yIsBounded = true;
     end
     
     blkParams.NumSelectionDims = blk.NumSelectionDims;
@@ -80,15 +85,23 @@ function blkParams = readBlkParams(~,parent,blk,blkParams)
     blkParams.SaturateOnIntegerOverflow = blk.SaturateOnIntegerOverflow;
     
     % tableMin, tableMax for contract
-    blkParams.tableMin = min(blkParams.Table(:));
-    blkParams.tableMax = max(blkParams.Table(:));
+    if ~ blkParams.tableIsInputPort
+        blkParams.tableMin = min(blkParams.Table(:));
+        blkParams.tableMax = max(blkParams.Table(:));
+    else
+        blkParams.tableMin = [];
+        blkParams.tableMax = [];
+    end
     
-    blkParams.ValidIndexMayReachLast = blk.ValidIndexMayReachLast;
+    blkParams.ValidIndexMayReachLast = 'off';
+    if strcmp(blkParams.ExtrapMethod,'Clip')
+        blkParams.ValidIndexMayReachLast = blk.ValidIndexMayReachLast;
+    end
     
     % calculate dimJump and boundNodeOrder
     blkParams = ...
         nasa_toLustre.blocks.Lookup_nD_To_Lustre.addCommonData2BlkParams(...
-        blkParams);    
-
+        blkParams);
+    
 end
 
