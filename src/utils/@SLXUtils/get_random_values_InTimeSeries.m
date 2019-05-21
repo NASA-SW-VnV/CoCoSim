@@ -19,19 +19,26 @@ function Values = get_random_values_InTimeSeries(time, min, max, dim, dt)
     end
 end
 
-function values = get_random_bus_values(bus, time, min, max, dim)
-    values = [];
-    if prod(dim) > 1
-        errordlg('Array Bus Signals are not supported for simulation. Work in progress!');
-    end
+function values = get_random_bus_values(bus, time, min, max, busDim)
+    values = struct();
+%     if prod(dim) > 1
+%         errordlg('Array Bus Signals are not supported for simulation. Work in progress!');
+%     end
     try
         elems = bus.getLeafBusElements;
     catch
         return;
     end
-    for i=1:numel(elems)
-        dt = elems(i).DataType;
-        dim = elems(i).Dimensions;
-        values.(elems(i).Name) = SLXUtils.get_random_values_InTimeSeries(time, min, max, dim, dt);
+    width = prod(busDim);
+    for i=1:width
+        for j=1:numel(elems)
+            dt = elems(j).DataType;
+            dim = elems(j).Dimensions;
+            values(i).(elems(j).Name) = SLXUtils.get_random_values_InTimeSeries(time, min, max, dim, dt);
+        end
+    end
+    if width > 1 && length(busDim) > 1
+        % go back to dimension
+        values = reshape(values, busDim);
     end
 end
