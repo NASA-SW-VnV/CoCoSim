@@ -23,8 +23,6 @@ function [mainCode, main_vars] = getMainCode(obj, blk,outputs,inputs,...
     % mainCode
     mainCode = cell(1, numel(outputs));
     for outIdx=1:numel(outputs)
-%         main_vars{outIdx} = ...
-%             nasa_toLustre.lustreAst.LustreVar(outputs{outIdx}, lus_out_type);        
         nodeCall_inputs = cell(1, numel(inputs));
         for i=1:numel(inputs)
             nodeCall_inputs{i} = inputs{i}{outIdx};
