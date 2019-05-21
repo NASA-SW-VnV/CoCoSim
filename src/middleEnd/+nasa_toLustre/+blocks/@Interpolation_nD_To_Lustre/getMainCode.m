@@ -9,8 +9,6 @@ function [mainCode, main_vars] = getMainCode(...
     % Interpolation_nD
     
     NumberOfTableDimensions =  blkParams.NumberOfTableDimensions;
-    
-    %main_vars = cell(1,numel(outputs));
     main_vars = {};
     
     Lusoutport_dt = ...
@@ -28,8 +26,6 @@ function [mainCode, main_vars] = getMainCode(...
     % mainCode
     mainCode = cell(1, numel(outputs));
     for outIdx=1:numel(outputs)
-        %         main_vars{outIdx} = ...
-        %             nasa_toLustre.lustreAst.LustreVar(outputs{outIdx}, lus_out_type);
         
         nodeCall_inputs = {};
         inputIdx = 1;
@@ -44,8 +40,7 @@ function [mainCode, main_vars] = getMainCode(...
         for i=1:length(blkParams.Table)
             nodeCall_inputs{end+1} = inputs{inputIdx}{i};
         end
-        
-        
+
         mainCode{outIdx} = ...
             nasa_toLustre.lustreAst.LustreEq(...
             outputs{outIdx}, nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(...

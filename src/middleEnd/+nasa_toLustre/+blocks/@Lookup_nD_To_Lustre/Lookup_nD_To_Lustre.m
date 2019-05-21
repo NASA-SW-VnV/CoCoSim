@@ -235,13 +235,13 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
             blkParams.RndMeth = 'Round';
             blkParams.SaturateOnIntegerOverflow = 'off';
             blkParams.lus_backend = lus_backend;
+            % inititalize tableIsInputPort and bpIsInputPort to false
+            blkParams.tableIsInputPort =  false;
+            blkParams.bpIsInputPort =  false;            
         end
         
         function blkParams = addCommonData2BlkParams(blkParams)
-            % calculate dimJump and boundNodeOrder
-%             blkParams.boundNodeOrder = ...
-%                 nasa_toLustre.blocks.Lookup_nD_To_Lustre.getShapeBoundingNodeSign(...
-%                 blkParams.NumberOfTableDimensions);
+            % calculate dimJump
             [~, ~,Ast_dimJump] = ...
                 nasa_toLustre.blocks.Lookup_nD_To_Lustre.addDimJumpCode(blkParams);
             blkParams.Ast_dimJump = Ast_dimJump;
@@ -257,7 +257,7 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
                     nasa_toLustre.lustreAst.VarIdExpr(...
                     sprintf('solution_subscript_for_dim_%d',i));
             end
-                
+            
         end
         
         function com_create_nodes_code(obj,lus_backend,blkParams,inputs,...
