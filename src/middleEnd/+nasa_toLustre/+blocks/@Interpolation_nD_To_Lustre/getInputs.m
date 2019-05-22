@@ -4,7 +4,7 @@ function [inputs] = getInputs(obj, parent, blk, blkParams)
     % and fraction) .
     % In the case of input is a dimension selection, it transform it as an index
     % and extend inputs by a fraction equal to zero.
-    %RndMeth = bk.RndMeth;
+    RndMeth = 'Simplest'; %blk.RndMeth; % RndMeth of the block is only for fixed type computations.
     SaturateOnIntegerOverflow = blk.SaturateOnIntegerOverflow;
     
     widths = blk.CompiledPortWidths.Inport;
@@ -49,6 +49,20 @@ function [inputs] = getInputs(obj, parent, blk, blkParams)
         for selDim = 1:numSelectionDims
             selctNames = nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(...
                 parent, blk, nbInpots);
+            Lusinport_dt = nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(...
+                blk.CompiledPortDataTypes.Inport{nbInpots});
+            if ~strcmp(Lusinport_dt, 'int')
+                [external_lib, conv_format] = ...
+                    nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(...
+                    Lusinport_dt, 'int', RndMeth, ...
+                    SaturateOnIntegerOverflow);
+                if ~isempty(conv_format)
+                    obj.addExternal_libraries(external_lib);
+                    selctNames = cellfun(@(x) ...
+                        nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(...
+                        conv_format,x),selctNames, 'un', 0);
+                end
+            end
             selFraction = cell(1, length(selctNames));
             dim_minus_1 = nasa_toLustre.lustreAst.IntExpr(tableDim(selDim) - 1);
             for selIdx = 1: length(selctNames)
@@ -81,10 +95,10 @@ function [inputs] = getInputs(obj, parent, blk, blkParams)
                 
                 % add fraction
                 inputs{end + 1} = tmp_inputs(2:2:end);
-                if ~strcmp(Lusinport_dt, 'real')
+                if ~strcmp(Lusinport_dt{2}, 'real')
                     [external_lib, conv_format] = ...
                         nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(...
-                        Lusinport_dt, 'real');
+                        Lusinport_dt{2}, 'real');
                     if ~isempty(conv_format)
                         obj.addExternal_libraries(external_lib);
                         inputs{end} = cellfun(@(x) ...
@@ -98,7 +112,7 @@ function [inputs] = getInputs(obj, parent, blk, blkParams)
                 if ~strcmp(Lusinport_dt{1}, 'int')
                     [external_lib, conv_format] = ...
                         nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(...
-                        Lusinport_dt{1}, 'int', 'Nearest', ...
+                        Lusinport_dt{1}, 'int', RndMeth, ...
                         SaturateOnIntegerOverflow);
                     if ~isempty(conv_format)
                         obj.addExternal_libraries(external_lib);
@@ -128,7 +142,7 @@ function [inputs] = getInputs(obj, parent, blk, blkParams)
                 if ~strcmp(Lusinport_dt, dt)
                     [external_lib, conv_format] = ...
                         nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(...
-                        Lusinport_dt, dt, 'Nearest', ...
+                        Lusinport_dt, dt, RndMeth, ...
                         SaturateOnIntegerOverflow);
                     if ~isempty(conv_format)
                         obj.addExternal_libraries(external_lib);
@@ -147,7 +161,7 @@ function [inputs] = getInputs(obj, parent, blk, blkParams)
     inputs = inputs(end:-1:1);
     
     % inline inputs
-    nbInpots = numel(widths);
+    nbInpots = length(inputs);
     if tableIsInputPort
         nbInpots = nbInpots - 1;
     end

@@ -214,14 +214,9 @@ function extNode =  get_wrapper_node(~,interpolationExtNode,blkParams)
         
         % calculating linear shape function value for multidimensional
         % interpolation from fi of each dimension
-        %         shapeNodeSign = ...
-        %             nasa_toLustre.blocks.Lookup_nD_To_Lustre.getShapeBoundingNodeSign(...
-        %             numDims);
         N_shape_node = cell(1,numBoundNodes);
         body = cell(1,numBoundNodes);
         vars = cell(1,numBoundNodes);
-        
-        
             
         for i=1:numBoundNodes
             N_shape_node{i} = nasa_toLustre.lustreAst.VarIdExpr(...
@@ -231,22 +226,41 @@ function extNode =  get_wrapper_node(~,interpolationExtNode,blkParams)
             numerator_terms = cell(1,numDims);
             for j=1:numDims
                 node2bin = strcat('000000', dec2bin(i-1));
+                ExtrapCond = [];
                 if  strcmp(blkParams.InterpMethod,'Linear') && strcmp(blkParams.ExtrapMethod,'Clip')
                     % works for not checked
                     % TODO: look at Linear, clip, checked
                     fracName = new_fraction_name{j};
+                    if strcmp(blkParams.ValidIndexMayReachLast, 'on')
+                        ExtrapCond = nasa_toLustre.lustreAst.BinaryExpr(...
+                            nasa_toLustre.lustreAst.BinaryExpr.GTE, ...
+                            oneBased_bound_nodes_name{j},...
+                            nasa_toLustre.lustreAst.IntExpr(curDimNumBreakpoints));
+                    end
                 else
                     fracName = fraction_in_name{j};
                 end
                     
                 if strcmp(node2bin(end-j+1), '0') %shapeNodeSign(i,j)==-1
-                    numerator_terms{j} = ...
-                        nasa_toLustre.lustreAst.BinaryExpr(...
+                    term = nasa_toLustre.lustreAst.BinaryExpr(...
                         nasa_toLustre.lustreAst.BinaryExpr.MINUS,...
                         nasa_toLustre.lustreAst.RealExpr(1.),...
-                        fracName);   % 1-fraction
+                        fracName);
+                    if isempty(ExtrapCond)
+                        numerator_terms{j} = term; % 1-fraction
+                    else
+                        numerator_terms{j} = ...
+                            nasa_toLustre.lustreAst.IteExpr(ExtrapCond, ...
+                            nasa_toLustre.lustreAst.RealExpr('0.0'), term);
+                    end
                 else
-                    numerator_terms{j} = fracName;   % fraction
+                    if isempty(ExtrapCond)
+                        numerator_terms{j} = fracName; % 1-fraction
+                    else
+                        numerator_terms{j} = ...
+                            nasa_toLustre.lustreAst.IteExpr(ExtrapCond, ...
+                            nasa_toLustre.lustreAst.RealExpr('1.0'), fracName);
+                    end
                 end
             end
             numerator = ...
