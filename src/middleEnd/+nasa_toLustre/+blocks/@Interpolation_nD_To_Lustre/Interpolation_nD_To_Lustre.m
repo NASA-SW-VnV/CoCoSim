@@ -19,12 +19,14 @@ classdef Interpolation_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
                 blk, [], xml_trace);
             obj.addVariable(outputs_dt);
             
-            [inputs] = obj.getInputs(parent, blk);
-            
             blkParams = ...
                 nasa_toLustre.blocks.Lookup_nD_To_Lustre.getInitBlkParams(...
                 blk,lus_backend);            
-            blkParams = obj.readBlkParams(parent,blk,blkParams, inputs);    
+            blkParams = obj.readBlkParams(parent,blk,blkParams); 
+            
+            [inputs] = obj.getInputs(parent, blk, blkParams);
+            
+               
             
             obj.addExternal_libraries({'LustMathLib_abs_real'});
             obj.create_lookup_nodes(blk,lus_backend,blkParams,outputs,inputs);
@@ -41,9 +43,9 @@ classdef Interpolation_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
             is_Abstracted = false;
         end
                
-        [inputs] = getInputs(obj, parent, blk)
+        [inputs] = getInputs(obj, parent, blk, blkParams)
         
-        blkParams = readBlkParams(obj,parent,blk,blkParams, inputs)
+        blkParams = readBlkParams(obj,parent,blk,blkParams)
         
         create_lookup_nodes(obj,blk,lus_backend,blkParams,outputs,inputs)
         

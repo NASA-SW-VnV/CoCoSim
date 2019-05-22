@@ -1,4 +1,4 @@
-function blkParams = readBlkParams(~,parent,blk,blkParams, inputs)
+function blkParams = readBlkParams(~,parent,blk,blkParams)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -27,7 +27,7 @@ function blkParams = readBlkParams(~,parent,blk,blkParams, inputs)
         if strcmp(T_dt, 'auto')
             T_dt = 'Inherit: Inherit from ''Table data''';
         end
-        
+        blkParams.TableDim = size(T);
     else
         %'Explicit values'
         if strcmp(blk.TableSource, 'Dialog')
@@ -35,13 +35,16 @@ function blkParams = readBlkParams(~,parent,blk,blkParams, inputs)
                 nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(...
                 parent, blk, blk.Table);
             T_dt = blk.TableDataTypeStr;
+            blkParams.TableDim = size(T);
         else
             % input port
-            T = cell(1, length(inputs{end}));
-            for i=1:length(inputs{end})
+            TableWidth = blk.CompiledPortWidths.Inport(end);
+            T = cell(1, TableWidth);
+            for i=1:TableWidth
                 T{i} = nasa_toLustre.lustreAst.VarIdExpr(sprintf('ydat_%d', i));
             end
-            
+            in_matrix_dimension = nasa_toLustre.blocks.Assignment_To_Lustre.getInputMatrixDimensions(blk.CompiledPortDimensions.Inport);
+            blkParams.TableDim = in_matrix_dimension{end}.dims;
         end
     end
     
@@ -94,7 +97,7 @@ function blkParams = readBlkParams(~,parent,blk,blkParams, inputs)
     end
     
     blkParams.ValidIndexMayReachLast = 'off';
-    if strcmp(blkParams.ExtrapMethod,'Clip')
+    if ~(strcmp(blkParams.InterpMethod,'Linear') && strcmp(blkParams.ExtrapMethod,'Linear'))
         blkParams.ValidIndexMayReachLast = blk.ValidIndexMayReachLast;
     end
     

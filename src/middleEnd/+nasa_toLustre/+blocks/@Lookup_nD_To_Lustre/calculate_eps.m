@@ -6,12 +6,12 @@ function ep = calculate_eps(BP, j)
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     if ~isnumeric(BP)
-        ep = 1e-5;
+        ep = [];
         return;
     end
     fraction = 1e6;
     if length(BP) == 1
-        ep = eps(BP);
+        ep = eps(double(BP));
     elseif j == 1
         ep = abs(BP(2) - BP(1)) / fraction;
     elseif j == numel(BP)

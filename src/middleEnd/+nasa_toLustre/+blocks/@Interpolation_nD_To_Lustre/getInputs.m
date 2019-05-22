@@ -1,4 +1,4 @@
-function [inputs] = getInputs(obj, parent, blk)
+function [inputs] = getInputs(obj, parent, blk, blkParams)
     %GETINPUTS gets and pre-process inputs to k, f format.
     % if the input is using bus, it divide it into two seperated inputs (index
     % and fraction) .
@@ -43,10 +43,28 @@ function [inputs] = getInputs(obj, parent, blk)
     if ~strcmp(blk.NumSelectionDims, '0')
         %
         numSelectionDims = str2num(blk.NumSelectionDims);
-        for selIdx = 1:numSelectionDims
-            inputs{end + 1} = nasa_toLustre.lustreAst.RealExpr('0.0');
-            inputs{end + 1} = nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(...
+        tableDim = blkParams.TableDim;
+        lusOne = nasa_toLustre.lustreAst.RealExpr('1.0');
+        lusZero = nasa_toLustre.lustreAst.RealExpr('0.0');
+        for selDim = 1:numSelectionDims
+            selctNames = nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(...
                 parent, blk, nbInpots);
+            selFraction = cell(1, length(selctNames));
+            dim_minus_1 = nasa_toLustre.lustreAst.IntExpr(tableDim(selDim) - 1);
+            for selIdx = 1: length(selctNames)
+                if strcmp(blk.ValidIndexMayReachLast, 'off')
+                    cond = nasa_toLustre.lustreAst.BinaryExpr(...
+                        nasa_toLustre.lustreAst.BinaryExpr.GTE, ...
+                        selctNames{selIdx}, dim_minus_1);
+                    
+                    selFraction{selIdx} = nasa_toLustre.lustreAst.IteExpr(...
+                        cond, lusOne, lusZero, true);
+                else
+                    selFraction{selIdx} = nasa_toLustre.lustreAst.RealExpr('0.0');
+                end
+            end
+            inputs{end + 1} = selFraction;
+            inputs{end + 1} = selctNames;
             max_width = max(max_width, length(inputs{end}));
             nbInpots = nbInpots - 1;
         end
