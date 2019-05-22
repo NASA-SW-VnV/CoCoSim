@@ -16,7 +16,7 @@ function [body,vars,table_elem] = addTableCode(blkParams,...
         % TODO:  reduce blkParams.Table for Interpolaton_n-D with  positive number 
         % of sub-blkParams.Table selection dimension 
 
-        %     dims = size(blkParams.Table);
+        %     dims = blkParams.TableDim;
         %     if blkParams.NumberOfTableDimensions==1
         %         blkParams.Table = zeros(dims(1));
         %     elseif blkParams.NumberOfTableDimensions==2

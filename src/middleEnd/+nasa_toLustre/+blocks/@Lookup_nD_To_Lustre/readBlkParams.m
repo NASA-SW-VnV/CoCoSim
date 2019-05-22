@@ -51,7 +51,7 @@ function blkParams = readBlkParams(~,parent,blk,blkParams)
     % there is no adjustment.
     blkParams.NumberOfTableDimensions = blkParams.NumberOfTableDimensions;
     % read breakpoints
-    tableDims = size(blkParams.Table);
+    tableDims = blkParams.TableDim;
     if strcmp(blk.BreakpointsSpecification, 'Even spacing')
         for i=1:blkParams.NumberOfTableDimensions
             [firstPoint, ~, ~] = ...

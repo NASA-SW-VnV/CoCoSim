@@ -363,10 +363,7 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
         function code = get_direct_method_flat_using_fraction(blkParams,...
                 index_node,fraction,k_index,dimension,epsilon)            
 
-            tableSize = size(blkParams.Table);
-            if tableSize(1) == 1
-                tableSize = tableSize(2:end);
-            end
+            tableSize = blkParams.TableDim;
             numBreakpoints_minus_1 = tableSize(dimension) -1;  % 1 for 0 based to 1 based
             numBreakpoints_minus_2 = tableSize(dimension) -2;  % another 1 for lower node
             
@@ -419,12 +416,7 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
         function code = get_direct_method_nearest_using_fraction(...
                 blkParams,index_node,fraction,k_index,dimension,epsilon)   
             
-            % 'Nearest' case, the closest bounding node for each dimension
-            % is used.
-            tableSize = size(blkParams.Table);
-            if tableSize(1) == 1
-                tableSize = tableSize(2:end);
-            end
+            tableSize = blkParams.TableDim;
             numBreakpoints_minus_1 = tableSize(dimension) -1;  % 1 for 0 based to 1 based
             numBreakpoints_minus_2 = tableSize(dimension) -2;  % another 1 for lower node
             

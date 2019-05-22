@@ -113,13 +113,9 @@ function extNode =  get_wrapper_node(~,interpolationExtNode,blkParams)
     bound_nodes_name = cell(numDims,2);
     vars = {};
     body = {};
-    tableSize = size(blkParams.Table);
+    tableSize = blkParams.TableDim;
     for i=1:numDims
         curDimNumBreakpoints = tableSize(i);
-        if curDimNumBreakpoints == 1 && length(tableSize) == 2
-            % for case  of [1,n] vector
-            curDimNumBreakpoints = tableSize(2);
-        end
         % correction for zero based (simulink inputs) to one based
         % (_Interp_Using_Pre_ext_node)
         oneBased_bound_nodes_name{i} = ...

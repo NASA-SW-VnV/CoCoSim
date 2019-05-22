@@ -35,7 +35,7 @@ function [body, vars,Ast_dimJump] = addDimJumpCode(blkParams)
             L_dimjump{i},indexDataType);
         for j=1:i-1
             if nasa_toLustre.utils.LookupType.isInterpolation_nD(blkParams.lookupTableType)
-                tableSize = size(blkParams.Table);                
+                tableSize = blkParams.TableDim;                
                 dataPointInDim = tableSize(j);
             else    
                 dataPointInDim = numel(blkParams.BreakpointsForDimension{j});
