@@ -1,4 +1,4 @@
-function create_lookup_nodes(obj,blk,lus_backend,blkParams,outputs,inputs)
+function lookupWrapperExtNode = create_lookup_nodes(obj,blk,lus_backend,blkParams,outputs,inputs)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.

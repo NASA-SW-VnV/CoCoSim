@@ -64,7 +64,7 @@ function [inputs] = getInputs(obj, parent, blk, blkParams)
                 end
             end
             selFraction = cell(1, length(selctNames));
-            dim_minus_1 = nasa_toLustre.lustreAst.IntExpr(tableDim(selDim) - 1);
+            dim_minus_1 = nasa_toLustre.lustreAst.IntExpr(tableDim(end - selDim + 1) - 1);
             for selIdx = 1: length(selctNames)
                 if strcmp(blk.ValidIndexMayReachLast, 'off')
                     cond = nasa_toLustre.lustreAst.BinaryExpr(...

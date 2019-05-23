@@ -224,14 +224,12 @@ function extNode =  get_wrapper_node(~,interpolationExtNode,blkParams)
                 node2bin = strcat('000000', dec2bin(i-1));
                 ExtrapCond = [];
                 if  strcmp(blkParams.InterpMethod,'Linear') && strcmp(blkParams.ExtrapMethod,'Clip')
-                    % works for not checked
-                    % TODO: look at Linear, clip, checked
                     fracName = new_fraction_name{j};
                     if strcmp(blkParams.ValidIndexMayReachLast, 'on')
                         ExtrapCond = nasa_toLustre.lustreAst.BinaryExpr(...
                             nasa_toLustre.lustreAst.BinaryExpr.GTE, ...
                             oneBased_bound_nodes_name{j},...
-                            nasa_toLustre.lustreAst.IntExpr(curDimNumBreakpoints));
+                            nasa_toLustre.lustreAst.IntExpr(tableSize(j)));
                     end
                 else
                     fracName = fraction_in_name{j};
@@ -247,7 +245,7 @@ function extNode =  get_wrapper_node(~,interpolationExtNode,blkParams)
                     else
                         numerator_terms{j} = ...
                             nasa_toLustre.lustreAst.IteExpr(ExtrapCond, ...
-                            nasa_toLustre.lustreAst.RealExpr('0.0'), term);
+                            nasa_toLustre.lustreAst.RealExpr('0.0'), term, true);
                     end
                 else
                     if isempty(ExtrapCond)
@@ -255,7 +253,7 @@ function extNode =  get_wrapper_node(~,interpolationExtNode,blkParams)
                     else
                         numerator_terms{j} = ...
                             nasa_toLustre.lustreAst.IteExpr(ExtrapCond, ...
-                            nasa_toLustre.lustreAst.RealExpr('1.0'), fracName);
+                            nasa_toLustre.lustreAst.RealExpr('1.0'), fracName, true);
                     end
                 end
             end

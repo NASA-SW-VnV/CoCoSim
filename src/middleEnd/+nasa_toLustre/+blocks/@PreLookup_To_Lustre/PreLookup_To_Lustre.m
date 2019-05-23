@@ -47,8 +47,10 @@ classdef PreLookup_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
             
             % binaryExpr use abs_real to compare to epsilon
             obj.addExternal_libraries({'LustMathLib_abs_real'});
-            obj.create_lookup_nodes(blk, lus_backend, blkParams, outputs, inputs);
-
+            wrapperNode = obj.create_lookup_nodes(blk, lus_backend, blkParams, outputs, inputs);
+            mainCode = obj.getMainCode(blk,outputs,inputs,...
+                wrapperNode,blkParams);
+            obj.addCode(mainCode);
         end
         
         %%
@@ -63,7 +65,7 @@ classdef PreLookup_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
         
         blkParams = readBlkParams(obj,parent,blk,blkParams, inputs)
         
-        create_lookup_nodes(obj,blk,lus_backend,blkParams,outputs,inputs)
+        wrapperNode = create_lookup_nodes(obj,blk,lus_backend,blkParams,outputs,inputs)
         
         extNode =  get_wrapper_node(obj,blk,...
             inputs, outputs, preLookUpExtNode, blkParams)

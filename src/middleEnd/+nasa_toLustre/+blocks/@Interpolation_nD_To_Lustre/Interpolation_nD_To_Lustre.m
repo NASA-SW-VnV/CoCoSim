@@ -12,7 +12,7 @@ classdef Interpolation_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
     end
     
     methods
-  
+        
         function  write_code(obj, parent, blk, xml_trace, lus_backend, varargin)
             [outputs, outputs_dt] = ...
                 nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, ...
@@ -21,20 +21,31 @@ classdef Interpolation_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
             
             blkParams = ...
                 nasa_toLustre.blocks.Lookup_nD_To_Lustre.getInitBlkParams(...
-                blk,lus_backend);            
-            blkParams = obj.readBlkParams(parent,blk,blkParams); 
+                blk,lus_backend);
+            blkParams = obj.readBlkParams(parent,blk,blkParams);
             
             [inputs] = obj.getInputs(parent, blk, blkParams);
             
-               
+            
             
             obj.addExternal_libraries({'LustMathLib_abs_real'});
-            obj.create_lookup_nodes(blk,lus_backend,blkParams,outputs,inputs);
-
+            wrapperNode = obj.create_lookup_nodes(blk,lus_backend,blkParams,outputs,inputs);
+            
+            mainCode = obj.getMainCode(blk,outputs,inputs,...
+                wrapperNode,blkParams);
+            obj.addCode(mainCode);
         end
         
         %%
-        function options = getUnsupportedOptions(obj, ~, ~, varargin)
+        function options = getUnsupportedOptions(obj,~, blk, varargin)
+            if strcmp(blk.InterpMethod,'Linear') ...
+                    && ~(strcmp(blk.IntermediateResultsDataTypeStr,'Inherit: Inherit via internal rule')...
+                    ||strcmp(blk.IntermediateResultsDataTypeStr,'single') ...
+                    ||strcmp(blk.IntermediateResultsDataTypeStr,'double'))
+                obj.addUnsupported_options(sprintf(...
+                    'IntermediateResultsDataTypeStr in block "%s" should be double or single',...
+                    HtmlItem.addOpenCmd(blk.Origin_path)));
+            end
             options = obj.unsupported_options;
         end
         
@@ -42,12 +53,12 @@ classdef Interpolation_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
         function is_Abstracted = isAbstracted(varargin)
             is_Abstracted = false;
         end
-               
+        
         [inputs] = getInputs(obj, parent, blk, blkParams)
         
         blkParams = readBlkParams(obj,parent,blk,blkParams)
         
-        create_lookup_nodes(obj,blk,lus_backend,blkParams,outputs,inputs)
+        wrapperNode = create_lookup_nodes(obj,blk,lus_backend,blkParams,outputs,inputs)
         
         extNode =  get_wrapper_node(obj,interpolation_nDExtNode,blkParams)
         
@@ -55,7 +66,7 @@ classdef Interpolation_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
             blkParams,inputs,outputs,preLookUpExtNode,interpolationExtNode)
         
         [mainCode, main_vars] = getMainCode(obj,blk,outputs,...
-            inputs,interpolation_nDWrapperExtNode,blkParams)         
+            inputs,interpolation_nDWrapperExtNode,blkParams)
         
         
         

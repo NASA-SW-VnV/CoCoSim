@@ -47,7 +47,12 @@ function blkParams = readBlkParams(~,parent,blk,blkParams)
             blkParams.TableDim = in_matrix_dimension{end}.dims;
         end
     end
-    
+    if blkParams.TableDim(1) == 1 && length(blkParams.TableDim) > 1
+        blkParams.TableDim = blkParams.TableDim(2:end);
+    end
+    if blkParams.TableDim(end) == 1 && length(blkParams.TableDim) > 1
+        blkParams.TableDim = blkParams.TableDim(1:end-1);
+    end
     % cast table
     if ~ blkParams.tableIsInputPort
             % cast table data
