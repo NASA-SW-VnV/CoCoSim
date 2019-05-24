@@ -95,6 +95,15 @@ classdef Interpolation_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
         
         extNode = get_adjusted_table_node(...
             blkParams,node_header,blk_inputs);
+        
+        function dim = reduceDim(dim)
+            if dim(1) == 1 && length(dim) > 1
+                dim = dim(2:end);
+            end
+            if dim(end) == 1 && length(dim) > 1
+                dim = dim(1:end-1);
+            end
+        end
     end
     
 end

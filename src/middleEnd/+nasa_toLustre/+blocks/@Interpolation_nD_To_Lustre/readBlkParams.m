@@ -21,7 +21,10 @@ function blkParams = readBlkParams(~,parent,blk,blkParams)
     
     % read table
     if strcmp(blk.TableSpecification, 'Lookup table object')
-        lkObject = evalin('base', blk.LookupTableObject);
+        %lkObject = evalin('base', blk.LookupTableObject);
+        [lkObject, ~, ~] = ...
+            nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(...
+            parent, blk, blk.LookupTableObject);
         T = lkObject.Table.Value;
         T_dt = lkObject.Table.DataType;
         if strcmp(T_dt, 'auto')
