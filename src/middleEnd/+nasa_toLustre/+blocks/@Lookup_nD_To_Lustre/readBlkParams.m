@@ -96,7 +96,7 @@ function blkParams = readTableAndBP(parent, blk, blkParams)
                 firstPoint = lkObject.Breakpoints(i).FirstPoint;
                 spacing = lkObject.Breakpoints(i).Spacing;
                 
-                B = zeros(blkParams.TableDim(i));   %[];
+                B = zeros(1,blkParams.TableDim(i));   %[];
                 for j=1:blkParams.TableDim(i)
                     B(j) = firstPoint + (j-1)*spacing;
                 end
