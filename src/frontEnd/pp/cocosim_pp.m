@@ -66,14 +66,14 @@ function [new_file_path, failed] = cocosim_pp(model_path, varargin)
         save_system(model);
     else
         new_model_base = strcat(model,'_PP');
-        new_file_path = fullfile(model_parent,strcat(new_model_base, ext));
+        new_file_path = fullfile(model_parent,strcat(new_model_base, '.slx'));
         %close it without saving it
         close_system(new_model_base,0);
+        if exist(new_file_path, 'file'), delete(new_file_path); end
+        %copyfile(model_path, new_file_path); 
+        save_system(model, new_file_path);
     end
 
-
-    if ~already_pp; delete(new_file_path); end
-    if ~already_pp; copyfile(model_path, new_file_path); end
     display_msg(['Loading ' new_file_path ], MsgType.INFO, 'PP', '');
     load_system(new_file_path);
     
