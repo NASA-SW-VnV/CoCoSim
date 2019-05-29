@@ -14,7 +14,7 @@ function extNode =  get_pre_lookup_node(lus_backend,blkParams,inputs)
   
     % node_header inputs
     if nasa_toLustre.blocks.PreLookup_To_Lustre.bpIsInputPort(blkParams)
-        % if lookup table dynamic, inputs{1} is x, inputs{2} is xdat
+        % if breakpointsIsInputPort, inputs{1} is x, inputs{2} is xdat
         % inputs{3} is ydat and not needed     
         node_header.inputs = cell(1, 1+numel(inputs{2}));
         node_header.inputs_name = cell(1, 1+numel(inputs{2}));
@@ -29,7 +29,7 @@ function extNode =  get_pre_lookup_node(lus_backend,blkParams,inputs)
                 node_header.inputs_name{1+i}, 'real');
         end
     else
-        % if not lookup table dynamic, number of inputs equal number of
+        % if not breakpointsIsInputPort, number of inputs equal number of
         % dimensions
         node_header.inputs = cell(1, NumberOfTableDimensions);
         node_header.inputs_name = cell(1, NumberOfTableDimensions);

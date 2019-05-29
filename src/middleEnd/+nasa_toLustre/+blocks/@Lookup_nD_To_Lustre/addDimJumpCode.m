@@ -1,4 +1,4 @@
-function [body, vars,Ast_dimJump] = addDimJumpCode(blkParams)
+function [body, vars,L_dimjump] = addDimJumpCode(blkParams)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -22,8 +22,8 @@ function [body, vars,Ast_dimJump] = addDimJumpCode(blkParams)
     L_dimjump = cell(1,NumberOfTableDimensions);
     L_dimjump{1} =  nasa_toLustre.lustreAst.VarIdExpr(...
         sprintf('dimJump_%d',1));
-    Ast_dimJump = cell(1,NumberOfTableDimensions);
-    Ast_dimJump{1} = nasa_toLustre.lustreAst.IntExpr(1);
+%     Ast_dimJump = cell(1,NumberOfTableDimensions);
+%     Ast_dimJump{1} = nasa_toLustre.lustreAst.IntExpr(1);
     vars{1} = nasa_toLustre.lustreAst.LustreVar(...
         L_dimjump{1},indexDataType);
     body{1} = nasa_toLustre.lustreAst.LustreEq(...
@@ -44,7 +44,7 @@ function [body, vars,Ast_dimJump] = addDimJumpCode(blkParams)
         end
         body{i} = nasa_toLustre.lustreAst.LustreEq(...
             L_dimjump{i},nasa_toLustre.lustreAst.IntExpr(dimJump(i)));
-        Ast_dimJump{i} = nasa_toLustre.lustreAst.IntExpr(dimJump(i));
+%         Ast_dimJump{i} = nasa_toLustre.lustreAst.IntExpr(dimJump(i));
     end
 end
 

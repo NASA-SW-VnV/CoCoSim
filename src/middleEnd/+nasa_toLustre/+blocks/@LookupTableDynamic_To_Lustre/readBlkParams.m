@@ -8,7 +8,7 @@ function blkParams = readBlkParams(~,blk,inputs,blkParams)
     % LookupTableDynamic_To_Lustre
     
     blkParams.lookupTableType = nasa_toLustre.utils.LookupType.LookupDynamic;
-
+    blkParams.tableIsInputPort = true;
     % read blk
     blkParams.NumberOfTableDimensions = 1;
     blkParams.NumberOfTableDimensions = blkParams.NumberOfTableDimensions;

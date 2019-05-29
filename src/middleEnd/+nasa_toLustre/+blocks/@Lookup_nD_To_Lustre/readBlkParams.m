@@ -8,7 +8,7 @@ function blkParams = readBlkParams(~,parent,blk,blkParams)
     % Lookup_nD_To_Lustre
     
     blkParams.lookupTableType = nasa_toLustre.utils.LookupType.Lookup_nD;
-    
+    blkParams.tableIsInputPort = false;
     % read blk
     [blkParams.NumberOfTableDimensions, ~, ~] = ...
         nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(...
@@ -93,18 +93,21 @@ function blkParams = readTableAndBP(parent, blk, blkParams)
             
         else  % 'Even spacing'
             for i=1:blkParams.NumberOfTableDimensions
+                bp_dt = lkObject.Breakpoints(i).DataType;
                 firstPoint = lkObject.Breakpoints(i).FirstPoint;
                 spacing = lkObject.Breakpoints(i).Spacing;
+                if ismember(bp_dt, validDT)
+                    firstPoint = cast(firstPoint, bp_dt);
+                    spacing = cast(spacing, bp_dt);
+                end
                 
                 B = zeros(1,blkParams.TableDim(i));   %[];
                 for j=1:blkParams.TableDim(i)
                     B(j) = firstPoint + (j-1)*spacing;
                 end
                 
-                bp_dt = lkObject.Breakpoints(i).DataType;
-                if ismember(bp_dt, validDT)
-                    B = cast(B, bp_dt);
-                end
+                
+                
                 blkParams.BreakpointsForDimension{i} = B;
             end
         end
