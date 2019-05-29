@@ -11,7 +11,7 @@ function [inputs,widths] = getBlockInputsNames_convInType2AccType(obj, parent, b
     inputs = cell(1, numel(widths));
     for i=1:numel(widths)
         inputs{i} =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk, i);
-        inport_dt = blk.CompiledPortDataTypes.Inport(i);
+        inport_dt = blk.CompiledPortDataTypes.Inport{i};
         %converts the input data type(s) to
         %its accumulator data type
         if ~strcmp(inport_dt, outputDataType)

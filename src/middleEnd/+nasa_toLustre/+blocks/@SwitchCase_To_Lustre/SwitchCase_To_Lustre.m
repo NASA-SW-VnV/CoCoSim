@@ -15,10 +15,7 @@ classdef SwitchCase_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         
         function  write_code(obj, parent, blk, xml_trace, varargin)
             
-            %% Step 1: Get the block outputs names, If a block is called X
-            % and has one outport with width 3 and datatype double,
-            % then outputs = {'X_1', 'X_2', 'X_3'}
-            % and outputs_dt = {'X_1:real;', 'X_2:real;', 'X_3:real;'}
+            %% Step 1: Get the block outputs names
             [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             
             %% Step 2: add outputs_dt to the list of variables to be declared
@@ -26,12 +23,6 @@ classdef SwitchCase_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             obj.addVariable(outputs_dt);
             
             %% Step 3: construct the inputs names, if a block "X" has two inputs,
-            % ("In1" and "In2")
-            % "In1" is of dimension 3 and "In2" is of dimension 1.
-            % Then inputs{1} = {'In1_1', 'In1_2', 'In1_3'}
-            % and inputs{2} = {'In2_1'}
-            
-            % we initialize the inputs by empty cell.
             
            [inputs, inports_dt] = obj.getInputs( parent, blk);
             % get all conditions expressions

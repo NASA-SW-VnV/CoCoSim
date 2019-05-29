@@ -78,7 +78,7 @@ classdef HitCross_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             % convert bool to output data type
             if ~strcmp(out_lus_dt, 'bool')
                 [external_lib, conv_format] = ...
-                    nasa_toLustre.utils.SLX2LusUtils.dataType_conversion('bool', out_lus_dt);
+                    nasa_toLustre.utils.SLX2LusUtils.dataType_conversion('bool', outputDataType);
                 if ~isempty(conv_format)
                     rhs = rhsVars;
                     obj.addExternal_libraries(external_lib);

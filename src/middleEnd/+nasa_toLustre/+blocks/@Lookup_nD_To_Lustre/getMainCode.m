@@ -8,25 +8,21 @@ function [mainCode, main_vars] = getMainCode(obj, blk,outputs,inputs,...
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Lookup_nD
 
-%     outputDataType = blk.CompiledPortDataTypes.Outport{1};
-%     lus_out_type =...
-%         nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(outputDataType);    
     % if outputDataType is not real, we need to cast outputs   
     
     main_vars = {};
     out_conv_format = {};
     external_lib = {};
-    
+    slx_outport_dt = blk.CompiledPortDataTypes.Outport{1};
     Lusoutport_dt = ...
-        nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(...
-        blk.CompiledPortDataTypes.Outport{1});
+        nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(slx_outport_dt);
     if ~strcmp(Lusoutport_dt, 'real')
         % use 'Nearest' and not blk RndMeth. see Documentation of the block
         %RndMeth = 'Nearest';
         RndMeth = blkParams.RndMeth;
         [external_lib, out_conv_format] = ...
             nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(...
-            'real', Lusoutport_dt, RndMeth, ...
+            'real', slx_outport_dt, RndMeth, ...
             blk.SaturateOnIntegerOverflow);   
         if ~isempty(out_conv_format)
             obj.addExternal_libraries(external_lib);

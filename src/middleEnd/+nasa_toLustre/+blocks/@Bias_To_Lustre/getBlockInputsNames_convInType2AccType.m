@@ -15,7 +15,7 @@ function [inputs,widths] = getBlockInputsNames_convInType2AccType(obj, parent, b
         if numel(inputs{i}) < max_width
             inputs{i} = arrayfun(@(x) {inputs{i}{1}}, (1:max_width));
         end
-        inport_dt = blk.CompiledPortDataTypes.Inport(i);
+        inport_dt = blk.CompiledPortDataTypes.Inport{i};
         %converts the input data type(s) to
         %its accumulator data type
         if ~strcmp(inport_dt, outputDataType)

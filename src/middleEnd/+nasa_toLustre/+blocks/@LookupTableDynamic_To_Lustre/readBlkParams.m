@@ -49,7 +49,7 @@ function blkParams = readBlkParams(~,blk,inputs,blkParams)
     end
     
     blkParams.RndMeth = blk.RndMeth;
-    
+    blkParams.SaturateOnIntegerOverflow = blk.DoSatur;
     
     % calculate dimJump and boundNodeOrder
     blkParams = ...

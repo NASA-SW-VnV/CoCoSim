@@ -48,11 +48,11 @@ classdef Math_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     end
                 end
             end
-            
-            [outLusDT, ~, one] =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Outport{1});
+            outSlxDT = blk.CompiledPortDataTypes.Outport{1};
+            [outLusDT, ~, one] =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(outSlxDT);
             if ismember(operator, needs_real_inputs)...
                     && ~strcmp(outLusDT, 'real')
-                [external_lib, conv_format] =nasa_toLustre.utils.SLX2LusUtils.dataType_conversion( 'real', outLusDT, [], SaturateOnIntegerOverflow);
+                [external_lib, conv_format] =nasa_toLustre.utils.SLX2LusUtils.dataType_conversion( 'real', outSlxDT, [], SaturateOnIntegerOverflow);
                 if ~isempty(conv_format)
                     obj.addExternal_libraries(external_lib);
                 end

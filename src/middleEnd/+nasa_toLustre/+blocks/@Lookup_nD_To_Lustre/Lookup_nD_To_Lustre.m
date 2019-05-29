@@ -100,14 +100,15 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
             inputs = cell(1, numInputs);
             for i=1:numInputs
                 inputs{i} =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk, i);
-                Lusinport_dt =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Inport{i});
+                slx_inport_dt = blk.CompiledPortDataTypes.Inport{i};
+                Lusinport_dt =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(slx_inport_dt);
                 if numel(inputs{i}) < max_width
                     inputs{i} = arrayfun(@(x) {inputs{i}{1}}, (1:max_width));
                 end
                 %converts the input data type(s) to real if not real
                 if ~strcmp(Lusinport_dt, 'real')
                     [external_lib, conv_format] = ...
-                       nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(Lusinport_dt, 'real', RndMeth, SaturateOnIntegerOverflow);
+                       nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(slx_inport_dt, 'real', RndMeth, SaturateOnIntegerOverflow);
                     if ~isempty(conv_format)
                         obj.addExternal_libraries(external_lib);
                         inputs{i} = cellfun(@(x) ...
@@ -295,16 +296,16 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
         
         function [output_conv_format, external_lib]  = ...
                 get_output_conv_format(blk,blkParams)
-            outputDataType = blk.CompiledPortDataTypes.Outport{1};
+            slx_outputDataType = blk.CompiledPortDataTypes.Outport{1};
             lus_out_type =...
-                nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(outputDataType);
+                nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(slx_outputDataType);
 
             if ~strcmp(lus_out_type,'real')
                 RndMeth = blkParams.RndMeth;
                 SaturateOnIntegerOverflow = blkParams.SaturateOnIntegerOverflow;
                 [external_lib, output_conv_format] =...
                     nasa_toLustre.utils.SLX2LusUtils.dataType_conversion('real', ...
-                    lus_out_type, RndMeth, SaturateOnIntegerOverflow);
+                    slx_outputDataType, RndMeth, SaturateOnIntegerOverflow);
             else
                 output_conv_format = {};
                 external_lib = {};                
