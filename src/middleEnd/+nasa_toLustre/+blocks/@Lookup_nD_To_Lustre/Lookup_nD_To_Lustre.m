@@ -271,11 +271,11 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
                         
             if LusBackendType.isKIND2(lus_backend) ...
                     && blkParams.NumberOfTableDimensions <= 3
-%                 contractBody = nasa_toLustre.blocks.Lookup_nD_To_Lustre.getContractBody(...
-%                     blkParams,inputs,outputs);
-%                 contract = nasa_toLustre.lustreAst.LustreContract();
-%                 contract.setBodyEqs(contractBody);
-%                 interpolationExtNode.setLocalContract(contract);
+                contractBody = nasa_toLustre.blocks.Lookup_nD_To_Lustre.getContractBody(...
+                    blkParams,inputs,outputs);
+                contract = nasa_toLustre.lustreAst.LustreContract();
+                contract.setBodyEqs(contractBody);
+                interpolationExtNode.setLocalContract(contract);
                 if blkParams.NumberOfTableDimensions == 3
                     %complicated to prove
                     interpolationExtNode.setIsImported(true);
