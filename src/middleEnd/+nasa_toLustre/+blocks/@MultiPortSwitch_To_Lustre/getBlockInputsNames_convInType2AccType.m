@@ -19,7 +19,7 @@ function [inputs] = getBlockInputsNames_convInType2AccType(obj, parent, blk)
         if numel(inputs{i}) < max_width
             inputs{i} = arrayfun(@(x) {inputs{i}{1}}, (1:max_width));
         end
-        inport_dt = blk.CompiledPortDataTypes.Inport(i);
+        inport_dt = blk.CompiledPortDataTypes.Inport{i};
         [inLusDT] =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(inport_dt);
         %converts the input data type(s) to
         %its accumulator data type

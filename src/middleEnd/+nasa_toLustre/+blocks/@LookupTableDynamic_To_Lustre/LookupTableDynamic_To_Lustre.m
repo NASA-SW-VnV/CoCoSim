@@ -21,10 +21,11 @@ classdef LookupTableDynamic_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre..
                 nasa_toLustre.blocks.Lookup_nD_To_Lustre.getInitBlkParams(...
                 blk,lus_backend);            
             
-            [outputs, ~] = ...
+            [outputs, outputs_dt] = ...
                 nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, ...
                 blk, [], xml_trace);
-
+            obj.addVariable(outputs_dt);
+            
             widths = blk.CompiledPortWidths.Inport;
             numInputs = numel(widths);
             RndMeth = blk.RndMeth;
@@ -50,7 +51,11 @@ classdef LookupTableDynamic_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre..
             
              
             obj.addExternal_libraries({'LustMathLib_abs_real'});
-            obj.create_lookup_nodes(blk,lus_backend,blkParams,outputs,inputs);
+            wrapperNode = obj.create_lookup_nodes(blk,lus_backend,blkParams,outputs,inputs);
+            
+            mainCode = obj.getMainCode(blk,outputs,inputs,...
+                wrapperNode,blkParams);
+            obj.addCode(mainCode);
         end
         
         %%
@@ -65,7 +70,7 @@ classdef LookupTableDynamic_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre..
                 
         blkParams = readBlkParams(obj,parent,blk,blkParams)
         
-        create_lookup_nodes(obj,blk,lus_backend,blkParams,outputs,inputs)
+        wrapperNode = create_lookup_nodes(obj,blk,lus_backend,blkParams,outputs,inputs)
 
         extNode =  get_wrapper_node(obj,blk,blkParams,inputs,...
             preLookUpExtNode,interpolationExtNode)        

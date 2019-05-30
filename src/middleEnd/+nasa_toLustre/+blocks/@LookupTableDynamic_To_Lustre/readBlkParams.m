@@ -8,10 +8,10 @@ function blkParams = readBlkParams(~,blk,inputs,blkParams)
     % LookupTableDynamic_To_Lustre
     
     blkParams.lookupTableType = nasa_toLustre.utils.LookupType.LookupDynamic;
-
+    blkParams.tableIsInputPort = true;
     % read blk
     blkParams.NumberOfTableDimensions = 1;
-    blkParams.NumberOfAdjustedTableDimensions = blkParams.NumberOfTableDimensions;
+    blkParams.NumberOfTableDimensions = blkParams.NumberOfTableDimensions;
     blkParams.BreakpointsForDimension{1} = inputs{2};
     % table
     blkParams.Table = inputs{3};
@@ -49,7 +49,7 @@ function blkParams = readBlkParams(~,blk,inputs,blkParams)
     end
     
     blkParams.RndMeth = blk.RndMeth;
-    
+    blkParams.SaturateOnIntegerOverflow = blk.DoSatur;
     
     % calculate dimJump and boundNodeOrder
     blkParams = ...

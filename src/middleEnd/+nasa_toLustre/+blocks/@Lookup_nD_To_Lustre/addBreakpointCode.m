@@ -11,16 +11,16 @@ function [body,vars,Breakpoints] = ...
     % users.
     body = {};
     vars = {};    
-    Breakpoints = cell(1,blkParams.NumberOfAdjustedTableDimensions);
+    Breakpoints = cell(1,blkParams.NumberOfTableDimensions);
     % TODO allow for different type.
-    for j = 1:blkParams.NumberOfAdjustedTableDimensions
+    for j = 1:blkParams.NumberOfTableDimensions
         Breakpoints{j} = {};
         for i=1:numel(blkParams.BreakpointsForDimension{j})
             Breakpoints{j}{i} = nasa_toLustre.lustreAst.VarIdExpr(...
                 sprintf('Breakpoints_dim%d_%d',j,i));
             vars{end+1} = nasa_toLustre.lustreAst.LustreVar(...
                 Breakpoints{j}{i},'real');
-            if ~(nasa_toLustre.utils.LookupType.isLookupDynamic(blkParams.lookupTableType))
+            if ~(nasa_toLustre.blocks.PreLookup_To_Lustre.bpIsInputPort(blkParams))
                 body{end+1} = nasa_toLustre.lustreAst.LustreEq(...
                     Breakpoints{j}{i}, ...
                     nasa_toLustre.lustreAst.RealExpr(...

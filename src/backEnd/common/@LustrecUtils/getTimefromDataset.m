@@ -16,7 +16,7 @@ function time = getTimefromDataset(ds)
     elseif isa(ds, 'struct')
         fields = fieldnames(ds);
         if numel(fields) >= 1
-            time = LustrecUtils.getTimefromDataset(ds.(fields{1}));
+            time = LustrecUtils.getTimefromDataset(ds(1).(fields{1}));
         end
     end
 end

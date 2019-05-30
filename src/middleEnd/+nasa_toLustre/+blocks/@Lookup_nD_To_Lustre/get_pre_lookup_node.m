@@ -7,14 +7,14 @@ function extNode =  get_pre_lookup_node(lus_backend,blkParams,inputs)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     % header for external node
-    NumberOfAdjustedTableDimensions = ...
-        blkParams.NumberOfAdjustedTableDimensions;
+    NumberOfTableDimensions = ...
+        blkParams.NumberOfTableDimensions;
     node_header.nodeName = sprintf('%s_PreLookup_node',...
         blkParams.blk_name);  
   
     % node_header inputs
-    if nasa_toLustre.utils.LookupType.isLookupDynamic(blkParams.lookupTableType)
-        % if lookup table dynamic, inputs{1} is x, inputs{2} is xdat
+    if nasa_toLustre.blocks.PreLookup_To_Lustre.bpIsInputPort(blkParams)
+        % if breakpointsIsInputPort, inputs{1} is x, inputs{2} is xdat
         % inputs{3} is ydat and not needed     
         node_header.inputs = cell(1, 1+numel(inputs{2}));
         node_header.inputs_name = cell(1, 1+numel(inputs{2}));
@@ -29,11 +29,11 @@ function extNode =  get_pre_lookup_node(lus_backend,blkParams,inputs)
                 node_header.inputs_name{1+i}, 'real');
         end
     else
-        % if not lookup table dynamic, number of inputs equal number of
+        % if not breakpointsIsInputPort, number of inputs equal number of
         % dimensions
-        node_header.inputs = cell(1, NumberOfAdjustedTableDimensions);
-        node_header.inputs_name = cell(1, NumberOfAdjustedTableDimensions);
-        for i=1:NumberOfAdjustedTableDimensions
+        node_header.inputs = cell(1, NumberOfTableDimensions);
+        node_header.inputs_name = cell(1, NumberOfTableDimensions);
+        for i=1:NumberOfTableDimensions
             node_header.inputs_name{i} = nasa_toLustre.lustreAst.VarIdExpr(...
                 sprintf('dim%d_coord_in',i));
             node_header.inputs{i} = ...
@@ -83,14 +83,14 @@ function extNode =  get_pre_lookup_node(lus_backend,blkParams,inputs)
         [body, vars] = ...
             nasa_toLustre.blocks.Lookup_nD_To_Lustre.addDirectLookupNodeCode(...
             blkParams,index_node,coords_node, node_header.inputs_name,...
-            Ast_dimJump,{});
+            Ast_dimJump);
         
         body{end+1} = nasa_toLustre.lustreAst.LustreEq(...
             nh_out_name{1}, blkParams.direct_sol_inline_index_VarIdExpr);
 
     else
         % node_header      
-        numBoundNodes = 2^blkParams.NumberOfAdjustedTableDimensions;  
+        numBoundNodes = 2^blkParams.NumberOfTableDimensions;  
         node_header.outputs = cell(1, 2*numBoundNodes);
         nh_out_name = cell(1, 2*numBoundNodes);
         for i=1:numBoundNodes

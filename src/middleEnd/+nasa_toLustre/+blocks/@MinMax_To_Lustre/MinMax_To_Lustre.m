@@ -19,7 +19,8 @@ classdef MinMax_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             widths = blk.CompiledPortWidths.Inport;
             numInputs = numel(widths);
             max_width = max(widths);
-            lusOutDT =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Outport{1});
+            slxOutDT = blk.CompiledPortDataTypes.Outport{1};
+            lusOutDT =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(slxOutDT);
             RndMeth = blk.RndMeth;
             SaturateOnIntegerOverflow = blk.SaturateOnIntegerOverflow;
             inputs = cell(1, numInputs);
@@ -33,7 +34,7 @@ classdef MinMax_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 %its output data type
                 if ~strcmp(Lusinport_dt, lusOutDT)
                     [external_lib, conv_format] = ...
-                       nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(Lusinport_dt, lusOutDT, RndMeth, SaturateOnIntegerOverflow);
+                       nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(Lusinport_dt, slxOutDT, RndMeth, SaturateOnIntegerOverflow);
                     if ~isempty(conv_format)
                         obj.addExternal_libraries(external_lib);
                         inputs{i} = cellfun(@(x) ...

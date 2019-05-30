@@ -1,4 +1,4 @@
-function create_lookup_nodes(obj,blk,lus_backend,blkParams,outputs,inputs)
+function lookupWrapperExtNode = create_lookup_nodes(obj,blk,lus_backend,blkParams,outputs,inputs)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -8,7 +8,7 @@ function create_lookup_nodes(obj,blk,lus_backend,blkParams,outputs,inputs)
     % Lookup_nD
     
     interpolationExtNode = ...
-        nasa_toLustre.blocks.Lookup_nD_To_Lustre.get_interp_using_pre_node(...
+        nasa_toLustre.blocks.Lookup_nD_To_Lustre.get_interp_using_pre_node(obj,...
         blkParams,inputs);
         
     preLookUpExtNode =  ...

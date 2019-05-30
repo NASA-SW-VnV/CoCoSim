@@ -12,70 +12,40 @@ classdef Interpolation_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
     end
     
     methods
-  
+        
         function  write_code(obj, parent, blk, xml_trace, lus_backend, varargin)
+            [outputs, outputs_dt] = ...
+                nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, ...
+                blk, [], xml_trace);
+            obj.addVariable(outputs_dt);
             
             blkParams = ...
                 nasa_toLustre.blocks.Lookup_nD_To_Lustre.getInitBlkParams(...
-                blk,lus_backend);            
-            blkParams = obj.readBlkParams(parent,blk,blkParams);    
+                blk,lus_backend);
+            blkParams = obj.readBlkParams(parent,blk,blkParams);
             
-            [outputs, ~] = ...
-                nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, ...
-                blk, [], xml_trace);
+            [inputs] = obj.getInputs(parent, blk, blkParams);
             
-            % get block inputs and cast index to int and fraction to real
-            widths = blk.CompiledPortWidths.Inport;
-            numInputs = numel(widths);
-            max_width = max(widths);
-            RndMeth = blkParams.RndMeth;
-            SaturateOnIntegerOverflow = blkParams.SaturateOnIntegerOverflow;          
-            inputs = cell(1, numInputs);
-            for i=1:numInputs
-                inputs{i} =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk, i);
-                Lusinport_dt =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Inport{i});
-                if numel(inputs{i}) < max_width
-                    inputs{i} = arrayfun(@(x) {inputs{i}{1}}, (1:max_width));
-                end                
-                
-                if mod(i,2)
-                    %for odd i, converts the input data type(s) to real if not real
-                    if ~strcmp(Lusinport_dt, 'int')
-                        [external_lib, conv_format] = ...
-                            nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(...
-                            Lusinport_dt, 'int', RndMeth, ...
-                            SaturateOnIntegerOverflow);
-                        if ~isempty(conv_format)
-                            obj.addExternal_libraries(external_lib);
-                            inputs{i} = cellfun(@(x) ...
-                                nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(...
-                                conv_format,x),inputs{i}, 'un', 0);
-                        end
-                    end                    
-                else
-                    %for even i, converts the input data type(s) to int
-                    if ~strcmp(Lusinport_dt, 'real')
-                        [external_lib, conv_format] = ...
-                            nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(...
-                            Lusinport_dt, 'real', RndMeth, ...
-                            SaturateOnIntegerOverflow);
-                        if ~isempty(conv_format)
-                            obj.addExternal_libraries(external_lib);
-                            inputs{i} = cellfun(@(x) ...
-                                nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(...
-                                conv_format,x),inputs{i}, 'un', 0);
-                        end
-                    end
-                end
-            end  
+            
             
             obj.addExternal_libraries({'LustMathLib_abs_real'});
-            obj.create_lookup_nodes(blk,lus_backend,blkParams,outputs,inputs);
-
+            wrapperNode = obj.create_lookup_nodes(blk,lus_backend,blkParams,outputs,inputs);
+            
+            mainCode = obj.getMainCode(blk,outputs,inputs,...
+                wrapperNode,blkParams);
+            obj.addCode(mainCode);
         end
         
         %%
-        function options = getUnsupportedOptions(obj, parent, blk, varargin)
+        function options = getUnsupportedOptions(obj,~, blk, varargin)
+            if strcmp(blk.InterpMethod,'Linear') ...
+                    && ~(strcmp(blk.IntermediateResultsDataTypeStr,'Inherit: Inherit via internal rule')...
+                    ||strcmp(blk.IntermediateResultsDataTypeStr,'single') ...
+                    ||strcmp(blk.IntermediateResultsDataTypeStr,'double'))
+                obj.addUnsupported_options(sprintf(...
+                    'IntermediateResultsDataTypeStr in block "%s" should be double or single',...
+                    HtmlItem.addOpenCmd(blk.Origin_path)));
+            end
             options = obj.unsupported_options;
         end
         
@@ -83,18 +53,20 @@ classdef Interpolation_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
         function is_Abstracted = isAbstracted(varargin)
             is_Abstracted = false;
         end
-               
+        
+        [inputs] = getInputs(obj, parent, blk, blkParams)
+        
         blkParams = readBlkParams(obj,parent,blk,blkParams)
         
-        create_lookup_nodes(obj,blk,lus_backend,blkParams,outputs,inputs)
+        wrapperNode = create_lookup_nodes(obj,blk,lus_backend,blkParams,outputs,inputs)
         
-        extNode =  get_wrapper_node(obj,blk,interpolation_nDExtNode,blkParams)
+        extNode =  get_wrapper_node(obj,interpolation_nDExtNode,blkParams)
         
         extNode =  get_wrapper_retrieval_node(obj,blk,...
             blkParams,inputs,outputs,preLookUpExtNode,interpolationExtNode)
         
         [mainCode, main_vars] = getMainCode(obj,blk,outputs,...
-            inputs,interpolation_nDWrapperExtNode,blkParams)         
+            inputs,interpolation_nDWrapperExtNode,blkParams)
         
         
         
@@ -110,6 +82,11 @@ classdef Interpolation_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
         %         outputs,inputs,indexDataType,blk_name,blkParams,N_shape_node,...
         %         lusInport_dt,index_node, lus_backend)
         
+        [body, vars] = ...
+            addDirectLookupNodeCode_Interpolation_nD(...
+            blkParams,bound_nodes_for_dim_name,...
+            Ast_dimJump,fraction_name,k_name)
+        
         extNode =  get_wrapper_interp_ext_node(...
             blk,outputs,interpolation_nDExtNode,blkParams)
         
@@ -118,6 +95,15 @@ classdef Interpolation_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
         
         extNode = get_adjusted_table_node(...
             blkParams,node_header,blk_inputs);
+        
+        function dim = reduceDim(dim)
+            if dim(1) == 1 && length(dim) > 1
+                dim = dim(2:end);
+            end
+            if dim(end) == 1 && length(dim) > 1
+                dim = dim(1:end-1);
+            end
+        end
     end
     
 end

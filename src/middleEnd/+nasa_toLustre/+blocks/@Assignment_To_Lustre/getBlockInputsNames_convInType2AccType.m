@@ -19,7 +19,7 @@ function [inputs] = ...
     outputDataType = blk.CompiledPortDataTypes.Outport{1};
     for i=1:numel(widths)
         inputs{i} =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk, i);
-        inport_dt = blk.CompiledPortDataTypes.Inport(i);
+        inport_dt = blk.CompiledPortDataTypes.Inport{i};
         [lusInport_dt, ~] =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(inport_dt);
         
         %converts the input data type(s) to

@@ -1,4 +1,4 @@
-function create_lookup_nodes(obj,blk,lus_backend,blkParams,outputs,inputs)
+function wrapperNode = create_lookup_nodes(obj,blk,lus_backend,blkParams,outputs,inputs)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -8,11 +8,11 @@ function create_lookup_nodes(obj,blk,lus_backend,blkParams,outputs,inputs)
     % Interpolation
     
     interpolation_nDExtNode =  ...
-        nasa_toLustre.blocks.Lookup_nD_To_Lustre.get_interp_using_pre_node(...
+        nasa_toLustre.blocks.Lookup_nD_To_Lustre.get_interp_using_pre_node(obj,...
         blkParams, inputs);
 
     wrapperNode = ...
-        obj.get_wrapper_node(blk,interpolation_nDExtNode,blkParams);
+        obj.get_wrapper_node(interpolation_nDExtNode,blkParams);
     
     nasa_toLustre.blocks.Lookup_nD_To_Lustre.com_create_nodes_code(obj,...
         lus_backend,blkParams,inputs,outputs,{},...

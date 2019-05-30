@@ -1,5 +1,5 @@
-function [body, vars] = addDirectLookupNodeCode(blkParams,index_node,...
-    coords_node,coords_input,Ast_dimJump)
+function [body, vars] = addDirectLookupNodeCode_Interpolation_nD(...
+    blkParams,index_node,Ast_dimJump,fraction,k_index)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -30,36 +30,31 @@ function [body, vars] = addDirectLookupNodeCode(blkParams,index_node,...
     for i=1:NumberOfTableDimensions
         vars{end+1} = nasa_toLustre.lustreAst.LustreVar(...
             blkParams.sol_subs_for_dim{i}, 'int');
-        
         epsilon = [];
-        if ~nasa_toLustre.blocks.PreLookup_To_Lustre.bpIsInputPort(blkParams)
+        if isnumeric(blkParams.Table(1,1))
             epsilon = ...
                 nasa_toLustre.blocks.Lookup_nD_To_Lustre.calculate_eps(...
-                blkParams.BreakpointsForDimension{i}, 1);
+                blkParams.Table(1,1));
         end
         
         if strcmp(InterpMethod,'Above')
-
             body{end+1} = ...
-                nasa_toLustre.blocks.Lookup_nD_To_Lustre.get_direct_method_above_using_coords(...
-                index_node,coords_node, coords_input,i, blkParams, epsilon);
+                nasa_toLustre.blocks.Lookup_nD_To_Lustre.get_direct_method_above_using_fraction(...
+                blkParams,index_node,fraction,i);
             
         elseif strcmp(InterpMethod,'Nearest')
-            [vars_c,body_c] = ...
-                nasa_toLustre.blocks.Lookup_nD_To_Lustre.get_direct_method_nearest_using_coords(...
-                index_node,coords_node, coords_input,i, blkParams,epsilon);
-            
-            body = [body  body_c];
-            vars = [vars  vars_c];
-
-        else % default is 'Flat', which is the same as 'Below' and 'Clip'?
-            % if coordinate is greater or equal to higher boundary node then use higher
-            % node, else use lower node         
             
             body{end+1} = ...
-                nasa_toLustre.blocks.Lookup_nD_To_Lustre.get_direct_method_flat_using_coords(...
-                blkParams,index_node,coords_node, coords_input,i,epsilon);
+                nasa_toLustre.blocks.Lookup_nD_To_Lustre.get_direct_method_nearest_using_fraction(...
+                blkParams,index_node,fraction,k_index,i,epsilon);
             
+        else % default is 'Flat', which is the same as 'Below' and 'Clip'?
+            % if coordinate is greater or equal to higher boundary node then use higher
+            % node, else use lower node
+            
+            body{end+1} = ...
+                nasa_toLustre.blocks.Lookup_nD_To_Lustre.get_direct_method_flat_using_fraction(...
+                blkParams,index_node,fraction,k_index,i,epsilon);
         end
     end
     

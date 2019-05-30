@@ -1,4 +1,4 @@
-function extNode = get_interp_using_pre_node(...
+function extNode = get_interp_using_pre_node(obj, ...
     blkParams, inputs)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
@@ -28,7 +28,12 @@ function extNode = get_interp_using_pre_node(...
     % after the solution index for direct lookup or node indices and 
     % weights for interpolated method.
 
-    numBoundNodes = 2^blkParams.NumberOfAdjustedTableDimensions;
+    % create read table node
+    readTableNode = nasa_toLustre.blocks.Lookup_nD_To_Lustre.get_read_table_node(blkParams, inputs);
+    obj.addExtenal_node(readTableNode);
+    readTableNodeName = readTableNode.getName();
+   
+    numBoundNodes = 2^blkParams.NumberOfTableDimensions;
     
     % header for external node
     node_header.NodeName = sprintf('%s_Interp_Using_Pre_ext_node',...
@@ -41,41 +46,37 @@ function extNode = get_interp_using_pre_node(...
     body_all = {};
     vars_all = {};    
     
-    % number of inputs to this node depends on both if it is dynamic and
-    % directLookup
-    if nasa_toLustre.utils.LookupType.isLookupDynamic(blkParams.lookupTableType)
+    % number of inputs to this node depends on both if the table is input port
+    if blkParams.tableIsInputPort
         if blkParams.directLookup
-            node_header.inputs_name = cell(1,1+numel(inputs{3}));
+            node_header.inputs_name = cell(1,1+numel(inputs{end}));
             numDataBeforeTable = 1;
         else
             node_header.inputs_name = ...
-                cell(1,2*numBoundNodes+numel(inputs{3}));
+                cell(1,2*numBoundNodes+numel(inputs{end}));
             numDataBeforeTable = 2*numBoundNodes;
         end
         node_header.inputs = ...
             cell(1,numel(node_header.inputs_name));
         % add in table data
-        for i=1:numel(inputs{3})
+        readTableInputs = cell(1, 1+numel(inputs{end}));
+        for i=1:numel(inputs{end})
+            ydatName = sprintf('ydat_%d',i);
+            readTableInputs{i+1} = nasa_toLustre.lustreAst.VarIdExpr(ydatName);
             node_header.inputs_name{numDataBeforeTable+i} = ...
-                nasa_toLustre.lustreAst.VarIdExpr(sprintf('ydat_%d',i));
+                nasa_toLustre.lustreAst.VarIdExpr(ydatName);
             node_header.inputs{numDataBeforeTable+i} = ...
-                nasa_toLustre.lustreAst.LustreVar(...
-                node_header.inputs_name{numDataBeforeTable+i},'real');
+                nasa_toLustre.lustreAst.LustreVar(ydatName, 'real');
         end
+
     else
+        readTableInputs = {};
         if blkParams.directLookup
             node_header.inputs_name = cell(1,1);
         else
             node_header.inputs_name = cell(1,2*numBoundNodes);
         end
-        
     end
-
-    [body, vars,table_elem] = ...
-        nasa_toLustre.blocks.Lookup_nD_To_Lustre.addTableCode(blkParams,...
-        node_header, inputs);
-    body_all = [body_all  body];
-    vars_all = [vars_all  vars];
     
     if blkParams.directLookup    
         node_header.inputs_name{1} = ...
@@ -83,10 +84,11 @@ function extNode = get_interp_using_pre_node(...
         node_header.inputs{1} = ...
             nasa_toLustre.lustreAst.LustreVar(...
             node_header.inputs_name{1},'int');
-        bodyf = ...
-            nasa_toLustre.blocks.Lookup_nD_To_Lustre.addInlineIndexFromArrayIndicesCode(...
-            table_elem,node_header.outputs_name{1}, node_header.inputs_name{1});
-        body_all = [body_all  bodyf];
+        readTableInputs{1} = node_header.inputs_name{1};
+        body_all{end+1} = nasa_toLustre.lustreAst.LustreEq(...
+            node_header.outputs_name{1}, ...
+            nasa_toLustre.lustreAst.NodeCallExpr(readTableNodeName, readTableInputs));
+        
     else
         % node header inputs
         boundingi = cell(1, numBoundNodes);
@@ -106,7 +108,7 @@ function extNode = get_interp_using_pre_node(...
         
         [body, vars,u_node] = ...
             nasa_toLustre.blocks.Lookup_nD_To_Lustre.addUnodeCode(...
-            boundingi,table_elem,blkParams);
+            boundingi,blkParams, readTableNodeName, readTableInputs);
         body_all = [body_all  body];
         vars_all = [vars_all  vars];
         

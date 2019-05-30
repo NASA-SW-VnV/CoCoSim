@@ -58,9 +58,9 @@ function isAlreadyUpToDate = cloneOrPull(git_dir, git_url, git_branch)
     isAlreadyUpToDate = false;
     if exist(git_dir, 'dir')
         cd(git_dir);
-        commands = {sprintf('git pull; git checkout %s', git_branch), ...
+        commands = {sprintf('git checkout %s', git_branch), ...
             sprintf('git pull origin %s', git_branch)};
-        pull_idex = 1;
+        pull_idex = 2;
     else
         MatlabUtils.mkdir(git_dir);
         cd(git_dir)
@@ -168,7 +168,7 @@ function copyExternalLibFiles(force, cocosim_path)
     externalLib_branch = 'master';
     
     isAlreadyUpToDate = cloneOrPull(externalLibs_git_dir, externalLibs_url, externalLib_branch);
-    if ~force &&isAlreadyUpToDate
+    if ~force && isAlreadyUpToDate
         %no need to copy files, nothing new from github
         return;
     end
