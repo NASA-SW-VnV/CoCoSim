@@ -13,7 +13,8 @@ classdef Interpolation_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
     
     methods
         
-        function  write_code(obj, parent, blk, xml_trace, lus_backend, varargin)
+        function  write_code(obj, parent, blk, xml_trace, lus_backend, coco_backend, varargin)
+            global  CoCoSimPreferences;
             [outputs, outputs_dt] = ...
                 nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, ...
                 blk, [], xml_trace);
@@ -34,6 +35,16 @@ classdef Interpolation_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
             mainCode = obj.getMainCode(blk,outputs,inputs,...
                 wrapperNode,blkParams);
             obj.addCode(mainCode);
+            
+            %% Design Error Detection Backend code:
+            if CoCoBackendType.isDED(coco_backend)
+                if ismember(CoCoBackendType.DED_OUTMINMAX, ...
+                        CoCoSimPreferences.dedChecks)
+                    outputDataType = blk.CompiledPortDataTypes.Outport{1};
+                    lusOutDT =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(outputDataType);
+                    DEDUtils.OutMinMaxCheckCode(obj, parent, blk, outputs, lusOutDT, xml_trace);
+                end
+            end
         end
         
         %%

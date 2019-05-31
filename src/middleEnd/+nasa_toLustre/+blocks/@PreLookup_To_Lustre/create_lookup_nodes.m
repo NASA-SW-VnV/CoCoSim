@@ -11,13 +11,13 @@ function wrapperNode = create_lookup_nodes(obj,blk,lus_backend,blkParams,outputs
         nasa_toLustre.blocks.Lookup_nD_To_Lustre.get_pre_lookup_node(...
         lus_backend,blkParams,inputs);
     
+    obj.addExtenal_node(preLookUpExtNode);
+    
     wrapperNode = ...
         obj.get_wrapper_node(...
         blk,inputs,outputs,preLookUpExtNode,blkParams);
     
-    nasa_toLustre.blocks.Lookup_nD_To_Lustre.com_create_nodes_code(obj,...
-        lus_backend,blkParams,inputs,outputs,preLookUpExtNode,...
-        {},wrapperNode,blk);    
+    obj.addExtenal_node(wrapperNode);
 
 end
 

@@ -6,7 +6,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function obj = contractNode_substituteVars(obj)
-        if length(obj.bodyEqs) > 500
+    if length(obj.bodyEqs) > 500
         %Ignore optimization for Big Nodes (Like Lookup Table)
         display_msg(sprintf('Optimization ignored for node "%d" as the number of equations exceeds 500 Eqs.',...
             obj.getName()), MsgType.INFO, 'contractNode_substituteVars', '');
@@ -19,11 +19,12 @@ function obj = contractNode_substituteVars(obj)
         if isa(obj.bodyEqs{i}, 'nasa_toLustre.lustreAst.ConcurrentAssignments')
             new_bodyEqs = MatlabUtils.concat(new_bodyEqs, ...
                 obj.bodyEqs{i}.getAssignments());
-        else
+        elseif ~isempty(obj.bodyEqs{i})
             new_bodyEqs{end+1} = obj.bodyEqs{i};
         end
     end
     %ignore simplification if there is automaton
+    
     all_body_obj = cellfun(@(x) x.getAllLustreExpr(), new_bodyEqs, 'un',0);
     all_body_obj = MatlabUtils.concat(all_body_obj{:});
     all_objClass = cellfun(@(x) class(x), all_body_obj, 'UniformOutput', false);

@@ -10,7 +10,7 @@ function lookupWrapperExtNode = create_lookup_nodes(obj,blk,lus_backend,blkParam
     interpolationExtNode = ...
         nasa_toLustre.blocks.Lookup_nD_To_Lustre.get_interp_using_pre_node(obj,...
         blkParams,inputs);
-        
+    
     preLookUpExtNode =  ...
         nasa_toLustre.blocks.Lookup_nD_To_Lustre.get_pre_lookup_node(...
         lus_backend,blkParams,inputs);
@@ -20,9 +20,11 @@ function lookupWrapperExtNode = create_lookup_nodes(obj,blk,lus_backend,blkParam
         blk,blkParams,inputs,preLookUpExtNode,...
         interpolationExtNode);
     
-    nasa_toLustre.blocks.Lookup_nD_To_Lustre.com_create_nodes_code(obj,...
-        lus_backend,blkParams,inputs,outputs,preLookUpExtNode,...
-        interpolationExtNode,lookupWrapperExtNode,blk);
+    obj.addExtenal_node(interpolationExtNode);
+    obj.addExtenal_node(preLookUpExtNode);
+    obj.addExtenal_node(lookupWrapperExtNode);
+    
+    
 
 end
 

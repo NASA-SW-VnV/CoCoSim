@@ -33,7 +33,7 @@ function extNode =  get_wrapper_node(~,interpolationExtNode,blkParams)
     fraction_in_name = cell(1,numDims);
     k_name = cell(1,numDims);
     vars = cell(1,numDims);
-    body = cell(1,2*numDims);
+    body = cell(1,numDims);
     for i=1:numDims
         % wrapper header
         wrapper_header.inputs_name{(i-1)*2+1} = ...
@@ -71,7 +71,7 @@ function extNode =  get_wrapper_node(~,interpolationExtNode,blkParams)
         fraction_thens{2} = nasa_toLustre.lustreAst.RealExpr(0.0);
         fraction_thens{3} = fraction_in_name{i};
         rhs = nasa_toLustre.lustreAst.IteExpr.nestedIteExpr(fraction_conds, fraction_thens);
-        body{(i-1)*2+2} = nasa_toLustre.lustreAst.LustreEq(...
+        body{i} = nasa_toLustre.lustreAst.LustreEq(...
             new_fraction_name{i},rhs);
     end
     tableInputsNames = [];

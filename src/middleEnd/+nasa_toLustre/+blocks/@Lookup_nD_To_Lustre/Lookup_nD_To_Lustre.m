@@ -273,35 +273,7 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
             end
             
         end
-        
-        function com_create_nodes_code(obj,lus_backend,blkParams,inputs,...
-                outputs,preLookUpExtNode,interpolationExtNode,...
-                wrapperNode,blk)
-            
-            if LusBackendType.isKIND2(lus_backend) ...
-                    && blkParams.NumberOfTableDimensions <= 3
-                contractBody = nasa_toLustre.blocks.Lookup_nD_To_Lustre.getContractBody(...
-                    blkParams,inputs,outputs);
-                contract = nasa_toLustre.lustreAst.LustreContract();
-                contract.setBodyEqs(contractBody);
-                interpolationExtNode.setLocalContract(contract);
-                if blkParams.NumberOfTableDimensions == 3
-                    %complicated to prove
-                    interpolationExtNode.setIsImported(true);
-                end
-            end
-            
-            
-            
-            if ~isempty(preLookUpExtNode)
-                obj.addExtenal_node(preLookUpExtNode);
-            end
-            if ~isempty(interpolationExtNode)
-                obj.addExtenal_node(interpolationExtNode);
-            end
-            obj.addExtenal_node(wrapperNode);
-            
-        end
+
         
         function [output_conv_format, external_lib]  = ...
                 get_output_conv_format(blk,blkParams)

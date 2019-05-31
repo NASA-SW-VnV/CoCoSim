@@ -10,13 +10,12 @@ function wrapperNode = create_lookup_nodes(obj,blk,lus_backend,blkParams,outputs
     interpolation_nDExtNode =  ...
         nasa_toLustre.blocks.Lookup_nD_To_Lustre.get_interp_using_pre_node(obj,...
         blkParams, inputs);
-
+    
     wrapperNode = ...
         obj.get_wrapper_node(interpolation_nDExtNode,blkParams);
     
-    nasa_toLustre.blocks.Lookup_nD_To_Lustre.com_create_nodes_code(obj,...
-        lus_backend,blkParams,inputs,outputs,{},...
-        interpolation_nDExtNode,wrapperNode,blk);    
-
+    obj.addExtenal_node(interpolation_nDExtNode);
+    obj.addExtenal_node(wrapperNode);
+    
 end
 

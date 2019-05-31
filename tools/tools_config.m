@@ -171,6 +171,6 @@ else
 %         end
 %     end
     %%
-    cocosim_version = 'v0.1';
+    cocosim_version = 'v1';
     tools_config_already_run = true;
 end
