@@ -34,6 +34,7 @@ src/backEnd/verification/iowaToLustreVerify/cocoSpecVerify.m
 src/backEnd/verification/iowaToLustreVerify/utils/
 src/backEnd/verification/lustreVerify/lustre_verify.m
 src/backEnd/verification/lustreVerify/utils/
+src/backEnd/verification/cocoSpecVerify/
 src/backEnd/verification/VerificationMenu.m
 src/backEnd/verification/iowaToLustreVerify/README.txt
 src/frontEnd/IR/std_IR/IR_config.m
@@ -54,4 +55,4 @@ src/external
 tools/build/
 tools/verifiers/
 test
-
+scripts/install_cocosim_tmp.sh
