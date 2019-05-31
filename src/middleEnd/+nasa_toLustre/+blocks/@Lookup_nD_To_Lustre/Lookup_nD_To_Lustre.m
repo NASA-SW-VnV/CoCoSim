@@ -9,12 +9,12 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
     % "Multi-Linear Interpolation" by Rick Wagner (Beach Cities Robotics,
     % First team 294).
     % http://bmia.bmt.tue.nl/people/BRomeny/Courses/8C080/Interpolation.pdf.
-    % We are looking for y = f(u1,u2,...u7) where u1, u2 are coordinate 
+    % We are looking for y = f(u1,u2,...u7) where u1, u2 are coordinate
     % values of dimension 1 and dimension 2 respectively for the point of interest.
     % We can obtain y from the interpolation equation
     % y(u1,u2,u3,...) = u1*N1(u1,u2,...) + u2*N2(u1,u2,...) + ...
     % u3*N3(u1,u2,...) + ... + u7*N7(u1,u2,...)
-    % N1,N2 are shape functions for the 2 bounding nodes of dimension 1.  
+    % N1,N2 are shape functions for the 2 bounding nodes of dimension 1.
     % N3, N4 are shape functions for the 2 bounding nodes of dimension 2.The shape functions
     % are defined by coordinates of the polytope with nodes (breakpoints in
     % simulink dialog) surrounding the point of interest.
@@ -60,9 +60,9 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
     %         if interpolation method = 'Flat',  then y >=
     %         smallest table value and y <= largest table value.
     %         if interpolation method = 'Nearest',  then y >=
-    %         smallest table value and y <= largest table value.    
+    %         smallest table value and y <= largest table value.
     %         if extrapolation method = 'Clip',  then y >=
-    %         smallest table value and y <= largest table value.        
+    %         smallest table value and y <= largest table value.
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -76,15 +76,15 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
     methods
         
         function  write_code(obj, parent, blk, xml_trace, ...
-                lus_backend, varargin)
-                    
-            % codes are shared between Lookup_nD_To_Lustre and LookupTableDynamic 
+                lus_backend, coco_backend, varargin)
+            global  CoCoSimPreferences;
+            % codes are shared between Lookup_nD_To_Lustre and LookupTableDynamic
             blkParams = ...
                 nasa_toLustre.blocks.Lookup_nD_To_Lustre.getInitBlkParams(...
                 blk,lus_backend);
             
             blkParams = obj.readBlkParams(parent,blk,blkParams);
-
+            
             % get block outputs
             [outputs, outputs_dt] = ...
                 nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(...
@@ -96,7 +96,7 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
             numInputs = numel(widths);
             max_width = max(widths);
             RndMeth = blkParams.RndMeth;
-            SaturateOnIntegerOverflow = blkParams.SaturateOnIntegerOverflow;          
+            SaturateOnIntegerOverflow = blkParams.SaturateOnIntegerOverflow;
             inputs = cell(1, numInputs);
             for i=1:numInputs
                 inputs{i} =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk, i);
@@ -108,16 +108,16 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
                 %converts the input data type(s) to real if not real
                 if ~strcmp(Lusinport_dt, 'real')
                     [external_lib, conv_format] = ...
-                       nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(slx_inport_dt, 'real', RndMeth, SaturateOnIntegerOverflow);
+                        nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(slx_inport_dt, 'real', RndMeth, SaturateOnIntegerOverflow);
                     if ~isempty(conv_format)
                         obj.addExternal_libraries(external_lib);
                         inputs{i} = cellfun(@(x) ...
-                           nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(conv_format,x),...
+                            nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(conv_format,x),...
                             inputs{i}, 'un', 0);
                     end
                 end
-            end  
-                        
+            end
+            
             % For n-D Lookup Table, if UseOneInputPortForAllInputData is
             % selected, Combine all input data to one input port
             inputs = ...
@@ -129,7 +129,16 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
             mainCode = obj.getMainCode(blk,outputs,inputs,...
                 wrapperNode,blkParams);
             obj.addCode(mainCode);
-
+            
+            %% Design Error Detection Backend code:
+            if CoCoBackendType.isDED(coco_backend)
+                if ismember(CoCoBackendType.DED_OUTMINMAX, ...
+                        CoCoSimPreferences.dedChecks)
+                    outputDataType = blk.CompiledPortDataTypes.Outport{1};
+                    lusOutDT =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(outputDataType);
+                    DEDUtils.OutMinMaxCheckCode(obj, parent, blk, outputs, lusOutDT, xml_trace);
+                end
+            end
         end
         %%
         function options = getUnsupportedOptions(obj, parent, blk, varargin)
@@ -148,8 +157,8 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
                 obj.addUnsupported_options(sprintf(...
                     'Cubic spline interpolation is not support in block %s',...
                     HtmlItem.addOpenCmd(blk.Origin_path)));
-            end            	
-
+            end
+            
             
             if strcmp(blk.InterpMethod,'Linear') ...
                     && ~(...
@@ -160,21 +169,21 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
                 obj.addUnsupported_options(sprintf(...
                     'IntermediateResultsDataTypeStr in block "%s" should be double or single',...
                     HtmlItem.addOpenCmd(blk.Origin_path)));
-            end            
-
+            end
+            
             options = obj.unsupported_options;
         end
         %%
         function is_Abstracted = isAbstracted(varargin)
             is_Abstracted = false;
         end
-                
+        
         blkParams = readBlkParams(obj,parent,blk,blkParams)
         
         wrapperNode = create_lookup_nodes(obj,blk,lus_backend,blkParams,outputs,inputs)
-
+        
         extNode =  get_wrapper_node(obj,blk,blkParams,inputs,...
-            preLookUpExtNode,interpolationExtNode)        
+            preLookUpExtNode,interpolationExtNode)
         
         [mainCode, main_vars] = getMainCode(obj, blk,outputs,inputs,...
             lookupWrapperExtNode,blkParams)
@@ -182,28 +191,28 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
     end
     
     methods(Static)
-
+        
         inputs = useOneInputPortForAllInputData(blk,lookupTableType,...
             inputs,NumberOfTableDimensions)
         
-%         [inputs,zero,one, external_lib] = ...
-%             getBlockInputsNames_convInType2AccType(parent, blk,...
-%             lookupTableType)
-   
+        %         [inputs,zero,one, external_lib] = ...
+        %             getBlockInputsNames_convInType2AccType(parent, blk,...
+        %             lookupTableType)
+        
         extNode = get_pre_lookup_node(lus_backend,blkParams,inputs)
-
+        
         extNode = get_interp_using_pre_node(obj, blkParams, inputs)
         
         extNode = get_read_table_node(blkParams, inputs)
- 
+        
         [body, vars,Ast_dimJump] = addDimJumpCode(...
             NumberOfTableDimensions,blk_name,indexDataType,blkParams)
-       
-        [body,vars,Breakpoints] = addBreakpointCode(blkParams,node_header)        
+        
+        [body,vars,Breakpoints] = addBreakpointCode(blkParams,node_header)
         
         [body, vars,coords_node,index_node] = addBoundNodeCode(...
             blkParams,Breakpoints,node_header,lus_backend)
-      
+        
         [body, vars, boundingi] = ...
             addBoundNodeInlineIndexCode(index_node,Ast_dimJump,blkParams)
         
@@ -214,7 +223,7 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
             Ast_dimJump)
         
         shapeNodeSign = getShapeBoundingNodeSign(dims)
-
+        
         [body, vars] = addInlineIndexFromArrayIndicesCode(blkParams,...
             Breakpoints,node_header,lus_backend)
         
@@ -223,7 +232,7 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
         
         [body, vars,u_node] = addUnodeCode(numBoundNodes,...
             boundingi,blkParams, readTableNodeName, readTableInputs)
-
+        
         contractBody = getContractBody(blkParams,inputs,outputs)
         
         ep = calculate_eps(BP, j)
@@ -242,7 +251,7 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
             blkParams.lus_backend = lus_backend;
             % inititalize tableIsInputPort and bpIsInputPort to false
             blkParams.tableIsInputPort =  false;
-            blkParams.bpIsInputPort =  false;            
+            blkParams.bpIsInputPort =  false;
         end
         
         function blkParams = addCommonData2BlkParams(blkParams)
@@ -266,9 +275,9 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
         end
         
         function com_create_nodes_code(obj,lus_backend,blkParams,inputs,...
-            outputs,preLookUpExtNode,interpolationExtNode,...
-            wrapperNode,blk)
-                        
+                outputs,preLookUpExtNode,interpolationExtNode,...
+                wrapperNode,blk)
+            
             if LusBackendType.isKIND2(lus_backend) ...
                     && blkParams.NumberOfTableDimensions <= 3
                 contractBody = nasa_toLustre.blocks.Lookup_nD_To_Lustre.getContractBody(...
@@ -289,7 +298,7 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
             end
             if ~isempty(interpolationExtNode)
                 obj.addExtenal_node(interpolationExtNode);
-            end            
+            end
             obj.addExtenal_node(wrapperNode);
             
         end
@@ -299,7 +308,7 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
             slx_outputDataType = blk.CompiledPortDataTypes.Outport{1};
             lus_out_type =...
                 nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(slx_outputDataType);
-
+            
             if ~strcmp(lus_out_type,'real')
                 RndMeth = blkParams.RndMeth;
                 SaturateOnIntegerOverflow = blkParams.SaturateOnIntegerOverflow;
@@ -308,15 +317,15 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
                     slx_outputDataType, RndMeth, SaturateOnIntegerOverflow);
             else
                 output_conv_format = {};
-                external_lib = {};                
-            end            
+                external_lib = {};
+            end
         end
         
         extNode = get_Lookup_nD_Dynamic_wrapper(blkParams,inputs,...
             preLookUpExtNode,interpolationExtNode)
         
         function code = get_direct_method_above_using_coords(...
-                index_node,coords_node, coords_input,dimension, blkParams, epsilon)            
+                index_node,coords_node, coords_input,dimension, blkParams, epsilon)
             % if coordinate at lower boundary node then use lower
             % node, else use higher node
             if  isempty(epsilon)
@@ -334,22 +343,22 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
                     coords_input{dimension}, [], ...
                     LusBackendType.isLUSTREC(blkParams.lus_backend), ...
                     epsilon);
-            end            
+            end
             code = nasa_toLustre.lustreAst.LustreEq(...
                 blkParams.sol_subs_for_dim{dimension}, ...
                 nasa_toLustre.lustreAst.IteExpr(...
-                condition,index_node{dimension,1},index_node{dimension,2})); 
+                condition,index_node{dimension,1},index_node{dimension,2}));
         end
         
         
         function code = get_direct_method_flat_using_coords(blkParams,...
-                index_node,coords_node, coords_input,dimension,epsilon)            
+                index_node,coords_node, coords_input,dimension,epsilon)
             if  isempty(epsilon)
                 condition =  ...
                     nasa_toLustre.lustreAst.BinaryExpr(...
                     nasa_toLustre.lustreAst.BinaryExpr.GTE, ...
                     coords_input{dimension},coords_node{dimension,2},[], ...
-                    LusBackendType.isLUSTREC(blkParams.lus_backend));                
+                    LusBackendType.isLUSTREC(blkParams.lus_backend));
             else
                 condition =  ...
                     nasa_toLustre.lustreAst.BinaryExpr(...
@@ -359,14 +368,14 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
                     epsilon);
             end
             
-            code = nasa_toLustre.lustreAst.LustreEq(...                 
+            code = nasa_toLustre.lustreAst.LustreEq(...
                 blkParams.sol_subs_for_dim{dimension}, nasa_toLustre.lustreAst.IteExpr(...
-                condition,index_node{dimension,2},index_node{dimension,1})); 
-        end       
+                condition,index_node{dimension,2},index_node{dimension,1}));
+        end
         
         function code = get_direct_method_flat_using_fraction(blkParams,...
-                index_node,fraction,k_index,dimension,epsilon)            
-
+                index_node,fraction,k_index,dimension,epsilon)
+            
             tableSize = blkParams.TableDim;
             numBreakpoints_minus_1 = tableSize(dimension) -1;  % 1 for 0 based to 1 based
             numBreakpoints_minus_2 = tableSize(dimension) -2;  % another 1 for lower node
@@ -387,8 +396,8 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
             cond_k_GTE_numBreakp_less_2 = nasa_toLustre.lustreAst.BinaryExpr(...
                 nasa_toLustre.lustreAst.BinaryExpr.GTE, ...
                 k_index{dimension},...
-                nasa_toLustre.lustreAst.IntExpr(numBreakpoints_minus_2));            
-
+                nasa_toLustre.lustreAst.IntExpr(numBreakpoints_minus_2));
+            
             if strcmp(blkParams.ValidIndexMayReachLast, 'on')
                 condition_for_extrap = cond_k_GTE_numBreakp_less_1;
             else
@@ -396,29 +405,29 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
                     nasa_toLustre.lustreAst.BinaryExpr(...
                     nasa_toLustre.lustreAst.BinaryExpr.AND, ...
                     cond_f_GTE_1,...
-                    cond_k_GTE_numBreakp_less_2);                                    
+                    cond_k_GTE_numBreakp_less_2);
             end
             
-            code = nasa_toLustre.lustreAst.LustreEq(...                 
+            code = nasa_toLustre.lustreAst.LustreEq(...
                 blkParams.sol_subs_for_dim{dimension}, ...
                 nasa_toLustre.lustreAst.IteExpr(...
                 condition_for_extrap,index_node{dimension,2},...
-                index_node{dimension,1}));                      
-        end   
+                index_node{dimension,1}));
+        end
         
         
         function code = get_direct_method_clip_using_fraction(blkParams,...
-                index_node,fraction,dimension,epsilon)            
-
-            code = nasa_toLustre.lustreAst.LustreEq(...                 
+                index_node,fraction,dimension,epsilon)
+            
+            code = nasa_toLustre.lustreAst.LustreEq(...
                 blkParams.sol_subs_for_dim{dimension}, ...
-                index_node{dimension,1});             
+                index_node{dimension,1});
             
             
-        end         
+        end
         
         function code = get_direct_method_nearest_using_fraction(...
-                blkParams,index_node,fraction,k_index,dimension,epsilon)   
+                blkParams,index_node,fraction,k_index,dimension,epsilon)
             
             tableSize = blkParams.TableDim;
             numBreakpoints_minus_1 = tableSize(dimension) -1;  % 1 for 0 based to 1 based
@@ -478,9 +487,9 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
         end
         
         function code = get_direct_method_above_using_fraction(blkParams,...
-                index_node,fraction,dimension)               
+                index_node,fraction,dimension)
             % if coordinate at lower boundary node then use lower
-            % node, else use higher node            
+            % node, else use higher node
             condition =  ...
                 nasa_toLustre.lustreAst.BinaryExpr(...
                 nasa_toLustre.lustreAst.BinaryExpr.GT, ...
@@ -491,11 +500,11 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
                 blkParams.sol_subs_for_dim{dimension}, ...
                 nasa_toLustre.lustreAst.IteExpr(...
                 condition,index_node{dimension,1},index_node{dimension,2}));
-        end  
+        end
         
         function [curVars,curBody] = get_direct_method_nearest_using_coords(...
                 index_node,coords_node, coords_input,dimension,...
-                blkParams,epsilon)            
+                blkParams,epsilon)
             % 'Nearest' case, the closest bounding node for each dimension
             % is used.
             curVars = cell(1,2);
@@ -514,7 +523,7 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
                 disFromTableNode{1},...
                 nasa_toLustre.lustreAst.BinaryExpr(...
                 nasa_toLustre.lustreAst.BinaryExpr.MINUS,...
-                coords_input{dimension},coords_node{dimension,1}));            
+                coords_input{dimension},coords_node{dimension,1}));
             curBody{2} = nasa_toLustre.lustreAst.LustreEq(...
                 disFromTableNode{2},...
                 nasa_toLustre.lustreAst.BinaryExpr(...
@@ -526,7 +535,7 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
                     nasa_toLustre.lustreAst.BinaryExpr.LTE, ...
                     disFromTableNode{1},...
                     disFromTableNode{2}, [], ...
-                    LusBackendType.isLUSTREC(blkParams.lus_backend));                
+                    LusBackendType.isLUSTREC(blkParams.lus_backend));
             else
                 condition =  ...
                     nasa_toLustre.lustreAst.BinaryExpr(...
@@ -542,8 +551,8 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
                 nasa_toLustre.lustreAst.IteExpr(...
                 condition,index_node{dimension,1},...
                 index_node{dimension,2}));
-        end        
-            
+        end
+        
     end
     
 end
