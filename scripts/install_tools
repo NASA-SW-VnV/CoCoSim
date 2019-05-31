@@ -753,14 +753,20 @@ else
                 zustre_failed=1;
             }
         fi
+        command_exists zustre || {
+                error_msg "zustre is not properly installed";
+                zustre_failed=1;
+            }
     fi
 
     
     if (( ! zustre_failed )); then
-        command_exists zustre || error_msg "zustre is not properly installed"
-
+        
         success "${cgreen}zustre${coff}${cbold} successfully installed"
-
+        if (( ! z3_failed )); then
+            # update z3 binary by original z3 and not spacer.
+            cp "$install_dir/z3/bin/z3" "$install_dir/bin/z3"
+        fi
         if [[ -f "$build_dir/zustre/tests/two_counters.lus" ]]; then
             progress "Testing zustre on a simple example"
             zustre_output=$(run_log_debug zustre --xml "$build_dir/zustre/tests/two_counters.lus" 2>&1) || {
@@ -783,8 +789,8 @@ fi
 # Install kind2 #
 #################
 kind2_failed=0
-if [ $z3_failed -eq 1 -o $menhir_failed -eq 1 ]; then
-    error_msg "Skipping Kind2: dependancies z3 or menhir installation has failed"
+if (( menhir_failed )); then
+    error_msg "Skipping Kind2: dependancy menhir installation has failed"
 else
     if [[ -x "$install_dir/bin/kind2" ]]; then
         progress "Using already built ${cgreen}kind2"
