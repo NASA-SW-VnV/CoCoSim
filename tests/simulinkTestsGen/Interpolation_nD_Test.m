@@ -63,8 +63,8 @@ classdef Interpolation_nD_Test < Block_Test
                         if bdIsLoaded(mdl_name), bdclose(mdl_name); end
                         mdl_path = fullfile(outputDir, strcat(mdl_name, '.slx'));
                         if exist(mdl_path, 'file')
-                            %delete(mdl_path);
-                            continue;
+                            delete(mdl_path);
+                            %continue;
                         end
                     catch
                         continue;

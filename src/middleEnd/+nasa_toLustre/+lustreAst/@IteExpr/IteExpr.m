@@ -130,7 +130,7 @@ classdef IteExpr < nasa_toLustre.lustreAst.LustreExpr
             if nargin < 8
                 origName = outName;
             end
-            if length(sortedIndices) <= 100
+            if length(sortedIndices) <= 10
                 % do a nomral loop
                 conds = cell(1,length(sortedIndices)-1);
                 thens = cell(1,length(sortedIndices));

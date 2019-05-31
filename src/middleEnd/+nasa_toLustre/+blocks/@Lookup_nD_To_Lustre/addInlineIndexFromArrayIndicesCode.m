@@ -31,7 +31,8 @@ function [body, vars] = addInlineIndexFromArrayIndicesCode(...
     %         nasa_toLustre.lustreAst.LustreEq(element,rhs);
     
     
-    % Second solution: Binary search O(log(n))
+    % Second solution: Binary search O(log(n)). Reduce number of If-else
+    % branches for GCC.
     [body, vars] = nasa_toLustre.lustreAst.IteExpr.binarySearch(...
                 inline_list, index, element.getId(),...
                 'real', [], [], [], element.getId());

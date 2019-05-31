@@ -10,7 +10,17 @@ function code = listVarsWithDT(vars, backend, forNodeHeader)
     end
     if iscell(vars)
         vars_code = cellfun(@(x) x.print(backend), vars, 'UniformOutput', 0);
-        code = MatlabUtils.strjoin(vars_code, '\n\t');
+        % put 5 variables per line
+        n = length(vars_code);
+        code = '';
+        for i=1:5:n
+            if n > i+4
+                tmp = MatlabUtils.strjoin(vars_code(i:i+4), ' ');
+            else
+                tmp = MatlabUtils.strjoin(vars_code(i:end), ' ');
+            end
+            code = sprintf('%s\n\t%s', code, tmp);
+        end
     else
         code = vars.print(backend);
     end

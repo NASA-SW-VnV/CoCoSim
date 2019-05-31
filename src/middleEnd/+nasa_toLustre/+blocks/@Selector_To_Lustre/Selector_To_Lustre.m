@@ -114,6 +114,7 @@ classdef Selector_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             outputs,ind,outputDimsArray,in_matrix_dimension)        
     end
     methods(Static)        
+        extNode = get_read_table_node(blk_name, U_inputs, U_LusDt)
         [codes] = getWriteCodeForNonPortInput(~, numOutDims,...
                 inputs,outputs,ind,outputDimsArray,...
                 in_matrix_dimension) % do not remove in_matrix_dimension parameter
