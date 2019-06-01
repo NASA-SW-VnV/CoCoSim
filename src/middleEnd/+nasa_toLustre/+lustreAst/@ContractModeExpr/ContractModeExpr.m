@@ -25,6 +25,23 @@ classdef ContractModeExpr < nasa_toLustre.lustreAst.LustreExpr
             else
                 obj.ensures = ensures;
             end
+            require_class = unique( cellfun(@(x) class(x), obj.requires, 'UniformOutput', 0));
+            ensures_class = unique( cellfun(@(x) class(x), obj.ensures, 'UniformOutput', 0));
+            % check the object is a valid Lustre AST.
+            if ~( length(require_class) == 1 ...
+                    && strcmp(require_class{1}, 'nasa_toLustre.lustreAst.ContractRequireExpr'))
+                ME = MException('COCOSIM:LUSTREAST', ...
+                    'ContractModeExpr ERROR: Expected second parameter of type "ContractRequireExpr" Got type "%s".',...
+                    MatlabUtils.strjoin(require_class, ', '));
+                throw(ME);
+            end
+            if ~( length(ensures_class) == 1 ...
+                    && strcmp(ensures_class{1}, 'nasa_toLustre.lustreAst.ContractEnsureExpr'))
+                ME = MException('COCOSIM:LUSTREAST', ...
+                    'ContractModeExpr ERROR: Expected third parameter of type "ContractEnsureExpr" Got type "%s".',...
+                    MatlabUtils.strjoin(ensures_class, ', '));
+                throw(ME);
+            end
         end
         
         new_obj = deepCopy(obj)

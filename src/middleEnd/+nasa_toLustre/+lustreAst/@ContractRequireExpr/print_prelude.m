@@ -1,4 +1,4 @@
-function nb_occ = nbOccuranceVar(obj, var)
+function code = print_prelude(obj)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -6,5 +6,5 @@ function nb_occ = nbOccuranceVar(obj, var)
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  
-    nb_occ = obj.exp.nbOccuranceVar(var);
+    code = '';
 end

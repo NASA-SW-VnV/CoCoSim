@@ -1,5 +1,5 @@
-classdef ContractGuaranteeExpr < nasa_toLustre.lustreAst.PropertyExpr
-    %ContractGuaranteeExpr
+classdef ContractEnsureExpr < nasa_toLustre.lustreAst.PropertyExpr
+    %ContractEnsureExpr
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -10,7 +10,7 @@ classdef ContractGuaranteeExpr < nasa_toLustre.lustreAst.PropertyExpr
     end
     
     methods
-        function obj = ContractGuaranteeExpr(id, exp)
+        function obj = ContractEnsureExpr(id, exp)
             obj = obj@nasa_toLustre.lustreAst.PropertyExpr(id, exp);
         end
         new_obj = deepCopy(obj)

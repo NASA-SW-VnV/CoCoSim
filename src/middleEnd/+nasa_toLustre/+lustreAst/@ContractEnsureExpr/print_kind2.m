@@ -1,4 +1,4 @@
-function [new_obj, varIds] = changePre2Var(obj)
+function code = print_kind2(obj, backend)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -6,6 +6,5 @@ function [new_obj, varIds] = changePre2Var(obj)
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  
-    new_obj = obj;
-    varIds = {};
+    code = obj.print(backend);
 end

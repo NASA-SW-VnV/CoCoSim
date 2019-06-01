@@ -1,4 +1,4 @@
-function new_obj = changeArrowExp(obj, ~)
+function new_obj = deepCopy(obj)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -6,5 +6,5 @@ function new_obj = changeArrowExp(obj, ~)
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  
-    new_obj = obj;
+    new_obj = nasa_toLustre.lustreAst.ContractEnsureExpr(obj.id, obj.exp.deepCopy());
 end

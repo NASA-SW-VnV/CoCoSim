@@ -1,4 +1,4 @@
-function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft)
+function code = print_jkind(obj, backend)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -6,6 +6,5 @@ function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft)
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  
-    [new_exp, outputs_map] = obj.exp.pseudoCode2Lustre(outputs_map, isLeft);
-    new_obj = nasa_toLustre.lustreAst.LocalPropertyExpr(obj.id, new_exp);
+    code = obj.print_kind2(backend);
 end

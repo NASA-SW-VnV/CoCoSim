@@ -8,14 +8,14 @@ function code = print_kind2(obj, backend)
 
     require = {};
     for j=1:numel(obj.requires)
-        require{j} = sprintf('\t\trequire %s;\n', ...
+        require{j} = sprintf('%s', ...
             obj.requires{j}.print(backend));
     end
     require = MatlabUtils.strjoin(require, '');
 
     ensure = {};
     for j=1:numel(obj.ensures)
-        ensure{j} = sprintf('\t\tensure %s;\n', ...
+        ensure{j} = sprintf('%s', ...
             obj.ensures{j}.print(backend));
     end
     ensure = MatlabUtils.strjoin(ensure, '');

@@ -1,4 +1,4 @@
-function new_obj = simplify(obj)
+function code = print_prelude(obj)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -6,6 +6,5 @@ function new_obj = simplify(obj)
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  
-    new_obj = nasa_toLustre.lustreAst.LocalPropertyExpr(obj.id, ...
-        obj.exp.simplify());
+    code = '';
 end
