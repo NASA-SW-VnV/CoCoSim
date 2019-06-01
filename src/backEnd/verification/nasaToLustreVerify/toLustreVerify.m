@@ -48,6 +48,7 @@ function [ failed ] = toLustreVerify(model_full_path,  const_files, lus_backend,
         enableParams = get_param(Assertions_list, 'Enabled');
         Assertions_list = Assertions_list(strcmp(enableParams, 'on'));
     end
+    
     ProofObjective_list = find_system(model, ...
         'LookUnderMasks', 'all', 'MaskType', 'Design Verifier Proof Objective');
     if ~isempty(ProofObjective_list)
@@ -55,6 +56,11 @@ function [ failed ] = toLustreVerify(model_full_path,  const_files, lus_backend,
         ProofObjective_list = ProofObjective_list(strcmp(enableParams, 'on'));
     end
     Assertions_list = [Assertions_list; ProofObjective_list];
+    
+    Observers = find_system(model, ...
+        'LookUnderMasks', 'all', 'MaskType', 'Observer');
+    Assertions_list = [Assertions_list; Observers];
+    
     contractBlocks_list = find_system(model, ...
         'LookUnderMasks', 'all',  'MaskType', 'ContractBlock');
 
@@ -107,7 +113,7 @@ function [ failed ] = toLustreVerify(model_full_path,  const_files, lus_backend,
             display_msg('Verification of Assertion blocks is only supported by KIND2 model checker.', MsgType.ERROR, 'toLustreVerify', '');
         end
         if ~isempty(contractBlocks_list)
-            display_msg('Verification of Assertion blocks is only supported by KIND2 model checker.', MsgType.ERROR, 'toLustreVerify', '');
+            display_msg('Verification of Contracts blocks is only supported by KIND2 model checker.', MsgType.ERROR, 'toLustreVerify', '');
         end
     end
 

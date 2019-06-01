@@ -155,7 +155,7 @@ function [unsupportedOptions, ...
             if ~exist(output_dir, 'dir'); MatlabUtils.mkdir(output_dir); end
             MenuUtils.createHtmlListUsingHTMLITEM('Unsupported options/blocks', unsupportedOptions, html_path, file_name);
             msg = sprintf('HTML report of Unsupported options/blocks is in : %s', HtmlItem.addOpenFileCmd(html_path, f_base));
-            display_msg(msg, MsgType.ERROR, 'ToLustreUnsupportedBlocks', '');
+            display_msg(msg, MsgType.RESULT, 'ToLustreUnsupportedBlocks', '');
         catch me
             display_msg(me.getReport(), MsgType.DEBUG, 'unsupportedBlocksMenu', '');
             unsupportedOptions_text = cellfun(@(x) x.print_noHTML(), unsupportedOptions, 'UniformOutput', false);

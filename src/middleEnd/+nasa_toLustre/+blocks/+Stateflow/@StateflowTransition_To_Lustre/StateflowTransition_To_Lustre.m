@@ -88,7 +88,7 @@ classdef StateflowTransition_To_Lustre
         parent = getParent(child)
 
         %% Get unique short name
-        unique_name = nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getUniqueName(object, src, isDefaultTrans)
+        unique_name = getUniqueName(object, src, isDefaultTrans)
 
         node_name = getCondActionName(T)
 
