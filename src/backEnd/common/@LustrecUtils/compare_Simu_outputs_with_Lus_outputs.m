@@ -9,7 +9,7 @@
 %% compare Simulin outputs and Lustre outputs
 function [valid, cex_msg, diff_name, diff] = ...
         compare_Simu_outputs_with_Lus_outputs(...
-        input_dataset, ...
+        input_dataSet, ...
         yout,...
         outputs_array, ...
         eps, ...
@@ -17,7 +17,7 @@ function [valid, cex_msg, diff_name, diff] = ...
     diff_name = '';
     diff = 0;
     numberOfOutputs = length(yout.getElementNames);
-    numberOfInports = length(input_dataset.getElementNames);
+    numberOfInports = length(input_dataSet.getElementNames);
     valid = true;
     cex_msg = {};
     index_out = 0;
@@ -29,9 +29,9 @@ function [valid, cex_msg, diff_name, diff] = ...
         cex_msg{end+1} = sprintf('*****time : %f**********\n',time(i));
         cex_msg{end+1} = sprintf('*****inputs: \n');
         for j=1:numberOfInports
-            in = LustrecUtils.getSignalValuesInlinedUsingTime(input_dataset{j}.Values, time(i));
+            in = LustrecUtils.getSignalValuesInlinedUsingTime(input_dataSet{j}.Values, time(i));
             in_width = numel(in);
-            name = input_dataset{j}.Name;
+            name = input_dataSet{j}.Name;
             for jk=1:in_width
                 cex_msg{end+1} = sprintf('input %s_%d: %f\n',name,jk,in(jk));
             end

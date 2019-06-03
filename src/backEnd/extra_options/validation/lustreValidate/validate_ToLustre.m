@@ -7,6 +7,8 @@
 
 function [...
         valid, ...
+        pp_valid, ...
+        pp_sim_failed, ...
         slx2lus_failed,...
         is_unsupported, ...
         lustrec_failed, ...
@@ -14,26 +16,28 @@ function [...
         sim_failed, ...
         lus_file_path, ...
         validation_compute] = ...
-        validate_ToLustre(model_full_path, tests_method, model_checker, ...
+        validate_ToLustre(orig_model_full_path, tests_method, model_checker, ...
         show_model, deep_CEX, min_max_constraints, options)
     
     
     validation_start = tic;
     
     valid = -1;
+    pp_valid = -1;
     slx2lus_failed = -1;
     lustrec_failed = -1;
     lustrec_binary_failed= -1;
     sim_failed = -1;
+    pp_sim_failed = -1;
     validation_compute = -1;
     is_unsupported = 0;
     lus_file_path = '';
     %close all simulink models
     bdclose('all')
     %% define parameters if not given by the user
-    [model_path, file_name, ~] = fileparts(char(model_full_path));
+    [model_path, file_name, ~] = fileparts(char(orig_model_full_path));
     if ~exist('min_max_constraints', 'var') || isempty(min_max_constraints)
-        min_max_constraints = SLXUtils.constructInportsMinMaxConstraints(model_full_path, -300, 300);
+        min_max_constraints = SLXUtils.constructInportsMinMaxConstraints(orig_model_full_path, -300, 300);
     end
     
     if ~exist('deep_CEX', 'var') || isempty(deep_CEX)
@@ -47,18 +51,20 @@ function [...
     end
     if ~exist('options', 'var') || isempty(options)
         options = {};
+    elseif ~iscell(options)
+        new_opts{1} = options;
+        options = new_opts;
     end
     if nargin < 3
         show_model = 0;
     end
     if show_model
-        open(model_full_path);
-    elseif iscell(options)
-        options{end+1} = 'nodisplay';
+        open(orig_model_full_path);
     else
-        options = {'nodisplay'};
+        options{end+1} = nasa_toLustre.utils.ToLustreOptions.NODISPLAY;
     end
     
+    stopAtPPValidation = ismember(CoCoBackendType.PP_VALIDATION, options);
     
     addpath(model_path);
     %% generate lustre code
@@ -67,7 +73,7 @@ function [...
         display_msg(f_msg, MsgType.RESULT, 'validation', '');
         %GUIUtils.update_status('Runing CocoSim');
         [lus_file_path, xml_trace, slx2lus_failed, unsupportedOptions, ~, pp_model_full_path] = ...
-            nasa_toLustre.ToLustre(model_full_path, [], LusBackendType.LUSTREC, ...
+            nasa_toLustre.ToLustre(orig_model_full_path, [], LusBackendType.LUSTREC, ...
             CoCoBackendType.VALIDATION, options{:});
         is_unsupported = ~isempty(unsupportedOptions);
         if is_unsupported
@@ -78,9 +84,8 @@ function [...
         [~, model_file_name, ~] = fileparts(pp_model_full_path);
         file_name = model_file_name;
         main_node = model_file_name;
-        model_full_path = pp_model_full_path;
         if show_model
-            open(model_full_path);
+            open(pp_model_full_path);
         end
         
     catch ME
@@ -95,10 +100,24 @@ function [...
     % no need in new compiler
     % BUtils.force_inports_DT(file_name);
     %% launch validation
+    % validate pre-processing
+    try
+        [pp_valid, pp_sim_failed] = ...
+            SLXUtils.compareTwoSLXModels(orig_model_full_path, pp_model_full_path);
+    catch ME
+        display_msg(ME.message, MsgType.ERROR, 'validation', '');
+        display_msg(ME.getReport(), MsgType.DEBUG, 'validation', '');
+        return;
+    end
     
+    if stopAtPPValidation
+        %TODO: add support for PP_validation of sub-components to easily
+        %find the source of error.
+        return;
+    end
     try
         [valid, lustrec_failed, lustrec_binary_failed, sim_failed] = ...
-            compare_slx_lus(model_full_path, lus_file_path, main_node, ...
+            compare_slx_lus(pp_model_full_path, lus_file_path, main_node, ...
             output_dir, tests_method, model_checker, show_model,...
             min_max_constraints, options);
     catch ME
@@ -126,7 +145,7 @@ function [...
         if  (deep_CEX > 0)
             %     validate_componentsV2(model_full_path, file_name, file_name, output_dir, ...
             %         deep_CEX, tests_method, model_checker, show_model, min_max_constraints, options);
-            validate_components(model_full_path, file_name, file_name, ...
+            validate_components(pp_model_full_path, file_name, file_name, ...
                 lus_file_path, xml_trace, output_dir, deep_CEX, 1, tests_method,...
                 model_checker, 0, min_max_constraints, options);
         end

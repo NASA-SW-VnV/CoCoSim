@@ -11,6 +11,7 @@ classdef CoCoBackendType < handle
         COMPATIBILITY = 'COMPATIBILITY';
         VERIFICATION = 'Verification';
         VALIDATION = 'Validation';
+        PP_VALIDATION = 'PP_Validation';
         GUIDELINES = 'GUIDELINES';
         DED = 'DesignErrorDetection';
         DED_INTOVERFLOW = 'Integer Overflow';
@@ -25,6 +26,8 @@ classdef CoCoBackendType < handle
         res = isVERIFICATION(b)
 
         res = isVALIDATION(b)
+        
+        res = isPPVALIDATION(b)
 
         res = isGUIDELINES(b)
 
