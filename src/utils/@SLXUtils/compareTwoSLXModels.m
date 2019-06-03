@@ -14,6 +14,9 @@ if nargin < 4
 end
 valid = -1;
 sim_failed = -1;
+
+[orig_mdl_dir, orig_mdl_name, ~] = fileparts(orig_mdl_path);
+[~, pp_mdl_name, ~] = fileparts(pp_mdl_path);
 % Make sure Both models has same interface (Inports/Outports dimensions,
 % datatype)
 areTheSame = modelsAreTheSame(orig_mdl_path, pp_mdl_path);
@@ -43,7 +46,7 @@ if numberOfInports >= 1
         return;
     end
 else
-    st = SLXUtils.getModelCompiledSampleTime(slx_file_name);
+    st = SLXUtils.getModelCompiledSampleTime(orig_mdl_name);
     if st > 0
         time = (0:st:100)';
     else
@@ -69,12 +72,12 @@ try
     
     yout1 = get(simOut1,'yout');
     if isempty(yout1)
-        f_msg = sprintf('Model "%s" has no Outport.',slx_file_name);
+        f_msg = sprintf('Model "%s" has no Outport.',orig_mdl_name);
         display_msg(f_msg, MsgType.RESULT, 'SLXUtils.compareTwoSLXModels', '');
         sim_failed = 1;
         return;
     elseif ~isa(yout1, 'Simulink.SimulationData.Dataset')
-        f_msg = sprintf('Model "%s" shoud use Simulink.SimulationData.Dataset save format.',slx_file_name);
+        f_msg = sprintf('Model "%s" shoud use Simulink.SimulationData.Dataset save format.',orig_mdl_name);
         display_msg(f_msg, MsgType.ERROR, 'SLXUtils.compareTwoSLXModels', '');
         sim_failed = 1;
         return;
@@ -122,11 +125,17 @@ for i=1:numel(time)
         if isempty(yout1_values) || isempty(yout2_values)
             % signal is not defined in the current timestep
             continue;
+        elseif numel(yout1_values) ~= numel(yout2_values)
+            % Signature is not the same
+            valid = 0; 
+            sim_failed = 1;
+            return;
         end
         found_output = true;
         for j=1:out_width(k)
             y1_value = double(yout1_values(j));
             y2_value = double(yout2_values(j));
+
             slx1_output_name =...
                 BUtils.naming_alone(yout1{k}.BlockPath.getBlock(1));
             cex_msg{end+1} = sprintf('Simulink output %s(%d): %10.16f\n',...
@@ -160,8 +169,7 @@ for i=1:numel(time)
     end
     
 end
-[orig_mdl_dir, orig_mdl_name, ~] = fileparts(orig_mdl_path);
-[~, pp_mdl_name, ~] = fileparts(pp_mdl_path);
+
 if valid == 1
     f_msg = sprintf('Comparaison for model "%s" and model "%s" is  valid \n',...
         orig_mdl_name, pp_mdl_name);
@@ -207,7 +215,15 @@ if length(mdl1_inports) ~= length(mdl2_inports) ...
         MsgType.ERROR, 'SLXUtils.compareTwoSLXModels', '');
     return;
 end
-
+% compare sample times
+[st1, ph1] = SLXUtils.getModelCompiledSampleTime(mdl1_name);
+[st2, ph2] = SLXUtils.getModelCompiledSampleTime(mdl2_name);
+if st1 ~= st2 || ph1 ~= ph2
+    display_msg(sprintf('Models "%s" and "%s" do not have the same Sample Time. The first model has "[%f, %f]" where the second has "[%f, %f]".',...
+        mdl1_name, mdl2_name, st1, ph1, st2, ph2),...
+        MsgType.ERROR, 'SLXUtils.compareTwoSLXModels', '');
+    return;
+end
 % compile both models
 try
     evalin('base',sprintf('%s([], [], [], ''compile'')', mdl1_name));
@@ -216,7 +232,8 @@ try
     for i=1:length(mdl1_inports)
         compiledPortDim1 = get_param(mdl1_inports{i}, 'CompiledPortDimensions');
         compiledPortDim2 = get_param(mdl2_inports{i}, 'CompiledPortDimensions');
-        if compiledPortDim1.Outport ~= compiledPortDim2.Outport
+        if length(compiledPortDim1.Outport) ~= length(compiledPortDim2.Outport) ...
+                || any(compiledPortDim1.Outport ~= compiledPortDim2.Outport)
             display_msg(sprintf('Inports "%s" and "%s" do not have the same dimensions.',...
                 mdl1_inports{i}, mdl2_inports{i}),...
                 MsgType.ERROR, 'SLXUtils.compareTwoSLXModels', '');
@@ -237,7 +254,8 @@ try
         for i=1:length(mdl1_outports)
             compiledPortDim1 = get_param(mdl1_outports{i}, 'CompiledPortDimensions');
             compiledPortDim2 = get_param(mdl2_outports{i}, 'CompiledPortDimensions');
-            if compiledPortDim1.Inport ~= compiledPortDim2.Inport
+            if length(compiledPortDim1.Inport) ~= length(compiledPortDim2.Inport) ...
+                    || any(compiledPortDim1.Inport ~= compiledPortDim2.Inport)
                 display_msg(sprintf('Outports "%s" and "%s" do not have the same dimensions.',...
                     mdl1_outports{i}, mdl2_outports{i}),...
                     MsgType.ERROR, 'SLXUtils.compareTwoSLXModels', '');

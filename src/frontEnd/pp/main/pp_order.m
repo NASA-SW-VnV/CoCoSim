@@ -88,8 +88,13 @@ else
     % DO not remove LinkStatus_pp to support as many blocks as possible.
     pp_order_map(0) = {'pp2/blocks/LinkStatus_pp.m'};
     
-    pp_order_map(1) = {'pp2/blocks/ModelReference_pp.m'};
-    pp_order_map(2) = {'pp2/blocks/Outport_pp.m'};
+    % start by setting sample time to the model sample time so the
+    % pre-processing will not messed it up
+    pp_order_map(1) = {'pp2/blocks/SampleTime_pp.m'};
+    
+    
+    pp_order_map(2) = {'pp2/blocks/ModelReference_pp.m'};
+    pp_order_map(3) = {'pp2/blocks/Outport_pp.m'};
     
     pp_order_map(10) = {'std_pp/blocks/integrator_process.m'};
     pp_order_map(11) = {'std_pp/blocks/discrete_integrator_process.m'};

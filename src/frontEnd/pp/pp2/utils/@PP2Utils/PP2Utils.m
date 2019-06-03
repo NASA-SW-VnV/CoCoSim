@@ -24,6 +24,9 @@ classdef PP2Utils
         [denum, status] = getTfDenum(model,blk, ppName)
         
         [failed] = replace_one_block(block,new_block)
+        
+        %%
+        [pp_valid, pp_sim_failed, pp_failed] = validatePP(orig_model_full_path, options)
     end
     
 end
