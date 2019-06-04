@@ -104,9 +104,10 @@ classdef SLX2LusUtils
         %% reset conditions
         isSupported = resetTypeIsSupported(resetType)
 
-        [resetCode, status] = getResetCode(...
-                resetType, resetDT, resetInput, zero )
-
+        [resetCode, status] = getResetCode(resetType, resetDT, resetInput, zero )
+        
+        %% trigger conditions
+        [resetCode, status] = getTriggerCond(triggerType, triggerDT, triggerInput, zero )
         
         %% Add clocks of RateTransitions
         time_step = clockName(st_n, ph_n)
