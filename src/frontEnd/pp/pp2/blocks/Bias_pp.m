@@ -26,7 +26,8 @@ function [status, errors_msg] = Bias_pp(model)
                 pp_name = 'bias';
                 PP2Utils.replace_one_block(Bias_list{i},fullfile('pp_lib',pp_name));
                 set_param(strcat(Bias_list{i},'/bias'),...
-                    'Value',bias);
+                    'Value',bias, ...
+                    'OutDataTypeStr', 'Inherit: Inherit via back propagation');
                 set_param(strcat(Bias_list{i},'/Sum'),...
                     'SaturateOnIntegerOverflow',SaturateOnIntegerOverflow);
             catch

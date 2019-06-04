@@ -14,17 +14,17 @@ function [status, errors_msg] = FromWorkSpace_pp(model)
     errors_msg = {};
     fromWorkSpace_list = find_system(model, ...
         'LookUnderMasks', 'all', 'BlockType','FromWorkspace');
-
+    
     % fromWorkSpace_list = find_system(model,...
     %     'LookUnderMasks', 'all', 'MaskType','From Workspace block');
     if not(isempty(fromWorkSpace_list))
         display_msg('Replacing From Work Space blocks...', MsgType.INFO,...
             'FromWorkSpace_pp', '');
-
+        
         %% pre-processing blocks
         for i=1:length(fromWorkSpace_list)
             try
-
+                
                 try
                     % checking if the parent is not signal Builder.
                     parent = get_param(fromWorkSpace_list{i}, 'Parent');
@@ -34,10 +34,10 @@ function [status, errors_msg] = FromWorkSpace_pp(model)
                     end
                 catch
                 end
-
+                
                 display_msg(fromWorkSpace_list{i}, MsgType.INFO, ...
                     'FromWorkSpace_pp', '');
-
+                
                 VariableName = get_param(fromWorkSpace_list{i},'VariableName');
                 [VariableName_value, ~, status] = SLXUtils.evalParam(...
                     model, ...
@@ -50,7 +50,7 @@ function [status, errors_msg] = FromWorkSpace_pp(model)
                         MsgType.ERROR, 'FromWorkSpace_pp', '');
                     continue;
                 end
-
+                
                 % assume VariableName_value is a 2D matrix
                 variableMatrix = VariableName_value;
                 % convert timeseries
@@ -58,13 +58,13 @@ function [status, errors_msg] = FromWorkSpace_pp(model)
                     [n,m] = size(VariableName_value.Data);
                     variableMatrix = zeros(n,m+1);
                     variableMatrix(:,1) = VariableName_value.Time;
-                    variableMatrix(:,2:m+1) = VariableName_value.Data; 
-                % convert structure
+                    variableMatrix(:,2:m+1) = VariableName_value.Data;
+                    % convert structure
                 elseif isstruct(VariableName_value)
                     [n,m] = size(VariableName_value.signals.values);
                     variableMatrix = zeros(n,m+1);
                     variableMatrix(:,1) = VariableName_value.time;
-                    variableMatrix(:,2:m+1) = VariableName_value.signals.values;                 
+                    variableMatrix(:,2:m+1) = VariableName_value.signals.values;
                 end
                 % if vector input, then we will let FromWorkSpace_To_Lustre
                 % handle it
@@ -74,7 +74,7 @@ function [status, errors_msg] = FromWorkSpace_pp(model)
                         fromWorkSpace_list{i}), ...
                         MsgType.INFO, 'FromWorkSpace_pp', '');
                     continue;
-                end                
+                end
                 % if value at time 0 is not given
                 if variableMatrix(1,1) ~= 0
                     new_value = zeros(1, m);
@@ -95,7 +95,7 @@ function [status, errors_msg] = FromWorkSpace_pp(model)
                 outputDataType = get_param(fromWorkSpace_list{i}, 'OutDataTypeStr');
                 Interpolate = get_param(fromWorkSpace_list{i},'Interpolate');
                 OutputAfterFinalValue = get_param(fromWorkSpace_list{i},'OutputAfterFinalValue');
-
+                
                 PP2Utils.replace_one_block(fromWorkSpace_list{i},fullfile('pp_lib','FromWorkSpace'));
                 % set digital clock sample time
                 % The block 'FromWorkSpace_1_PP/From Workspace/D' does not permit continuous sample
@@ -108,7 +108,7 @@ function [status, errors_msg] = FromWorkSpace_pp(model)
                 %SampleTime_value = 0.2;
                 set_param(strcat(fromWorkSpace_list{i},'/D'),...
                     'SampleTime',SampleTime_value_str);
-
+                
                 [n,m] = size(variableMatrix);
                 % set LookupTable interpolation method
                 InterpMethod = 'Flat';
@@ -139,7 +139,7 @@ function [status, errors_msg] = FromWorkSpace_pp(model)
                     errors_msg{end + 1} = msg;
                     continue;
                 end
-
+                
                 set_param(strcat(fromWorkSpace_list{i},'/T'),...
                     'OutDataTypeStr',OutDataTypeReplaceStr);
                 % ExtrapMethod
@@ -165,31 +165,31 @@ function [status, errors_msg] = FromWorkSpace_pp(model)
                         ExtrapMethod = 'Clip';
                         set_param(strcat(fromWorkSpace_list{i},'/T'),...
                             'UseLastTableValue','on');
-
+                        
                         variableMatrix(n,2:m) = 0.;
                     end
-
+                    
                 end
                 if strcmp(OutputAfterFinalValue, 'Holding final value')
                     ExtrapMethod = 'Clip';
-
+                    
                     set_param(strcat(fromWorkSpace_list{i},'/T'),...
                         'UseLastTableValue','on');
                 end
-
+                
                 set_param(strcat(fromWorkSpace_list{i},'/T'),...
                     'UseLastTableValue','on');
-
+                
                 set_param(strcat(fromWorkSpace_list{i},'/T'),...
                     'ExtrapMethod',ExtrapMethod);
-
+                
                 % set LookupTable breakpoints and data
                 table = mat2str(variableMatrix(:,2:m));
                 set_param(strcat(fromWorkSpace_list{i},'/T'),...
                     'BreakpointsForDimension1',mat2str(variableMatrix(:,1)));
                 set_param(strcat(fromWorkSpace_list{i},'/T'),...
                     'Table',table);
-
+                
             catch me
                 display_msg(me.getReport(), MsgType.DEBUG, 'FromWorkSpace', '');
                 status = 1;
@@ -198,8 +198,9 @@ function [status, errors_msg] = FromWorkSpace_pp(model)
             end
             display_msg('Done\n\n', MsgType.INFO, 'FromWorkSpace_pp', '');
         end
+    end
 end
-
-
-
-
+    
+    
+    
+    

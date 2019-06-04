@@ -36,14 +36,11 @@ function [status, errors_msg] = DotProduct_pp(model)
                 try
                     portHandles = get_param(DotProduct_list{i}, 'PortHandles');
                     dim1 = SLXUtils.getCompiledParam(portHandles.Inport(1), 'CompiledPortDimensions');
-                    if dim1(1) == 1 && length(dim1) > 1
-                        dim1 = dim1(2:end);
-                    end
+                    dim1 = dim1(2:end);% remove first element that says how many dimensions exists.
                     port1CompiledDim = mat2str(dim1);
+                    
                     dim2 = SLXUtils.getCompiledParam(portHandles.Inport(2), 'CompiledPortDimensions');
-                    if dim2(1) == 1 && length(dim2) > 1
-                        dim2 = dim2(2:end);
-                    end
+                    dim2 = dim2(2:end);% remove first element that says how many dimensions exists.
                     port2CompiledDim = mat2str(dim2);
                 catch
                     port1CompiledDim = '-1';

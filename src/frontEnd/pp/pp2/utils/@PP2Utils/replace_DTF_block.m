@@ -6,10 +6,17 @@ function [] = replace_DTF_block(blk, U_dims_blk,num,denum )
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
+    %     For discrete-time transfer functions, it is highly recommended to
+    %     make the length of the numerator and denominator equal to ensure
+    %     correct results.
     if numel(denum) < numel(num)
         tempDenum = zeros(1,length(num));
         tempDenum(1:numel(denum)) = denum;
         denum = tempDenum;
+    elseif numel(num) < numel(denum)
+        tempNum = zeros(1,length(denum));
+        tempNum(1:length(num)) = num;
+        num = tempNum;
     end
 
     % Computing state space representation
