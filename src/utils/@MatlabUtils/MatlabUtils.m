@@ -42,11 +42,11 @@ classdef MatlabUtils
         % open all files that contains a String
         whoUse(folder, str)
         openAllFilesContainingString(folder, str)
-        terminate(modelName)
+        
         count = getNbLines(file)
         F = allMatlabFilesExceeds(folder, n)
         [pList, found, alreadyHandled] = requiredProducts(filepath, alreadyHandled);
-        exportModelsTo(folder_Path, version)
+        
 
         
     end
