@@ -51,35 +51,30 @@ classdef Interpolation_nD_Test < Block_Test
     end
     
     methods
-        function status = generateTests(obj, outputDir)
+        function status = generateTests(obj, outputDir, deleteIfExists)
+            if ~exist('deleteIfExists', 'var')
+                deleteIfExists = true;
+            end
             status = 0;
             params = obj.getParams();
             fstInDims = {'1', '1', '1', '1', '1', '3', '[2,3]'};
-            for i=1 : length(params)
+            nb_tests = length(params);
+            condExecSSPeriod = floor(nb_tests/length(Block_Test.condExecSS));
+            for i=1 : nb_tests
                 try
                     s = params{i};
+                    %% creat new model
                     mdl_name = sprintf('%s%d', obj.fileNamePrefix, i);
-                    try
-                        if bdIsLoaded(mdl_name), bdclose(mdl_name); end
-                        mdl_path = fullfile(outputDir, strcat(mdl_name, '.slx'));
-                        if exist(mdl_path, 'file')
-                            delete(mdl_path);
-                            %continue;
-                        end
-                    catch
+                    addCondExecSS = (mod(i, condExecSSPeriod) == 0);
+                    condExecSSIdx = int32(i/condExecSSPeriod);
+                    [blkPath, mdl_path, skip] = Block_Test.create_new_model(...
+                        mdl_name, outputDir, deleteIfExists, addCondExecSS, ...
+                        condExecSSIdx);
+                    if skip
                         continue;
                     end
-                    new_system(mdl_name);
                     
-                    hws = get_param(mdl_name, 'modelworkspace');
-                    blkPath = fullfile(mdl_name, 'P');
-                    
-%                     if isfield(s, 'Table') && isnumeric(s.Table)
-%                         T = s.Table;
-%                         hws.assignin('T', T);
-%                         s.Table = 'T';
-%                     end
-                    
+                    %% add variables to model workspace if needed
                     TableDim = [];
                     if isfield(s, 'TableDim')
                         TableDim = s.TableDim;
@@ -93,17 +88,21 @@ classdef Interpolation_nD_Test < Block_Test
                                 && ~MatlabUtils.startsWith(s.TableDataTypeStr, 'Inherit:')
                             dt = s.TableDataTypeStr;
                         end
-                        obj.addLookupTableObjectToBaseWs(mdl_name, s.Table, dt, TableDim)
+                        obj.addLookupTableObjectToModelWs(mdl_name, s.Table, dt, TableDim)
                     end
                     
                     
                     
-                    blkParams = Block_Test.struct2blockParams(s);
-                    add_block(obj.blkLibPath, blkPath, blkParams{:});
-                    Block_Test.connectBlockToInportsOutports(blkPath);
+                    %% add the block
+                    Block_Test.add_and_connect_block(obj.blkLibPath, blkPath, s);
                     
-                    % go over inports
-                    inport_list = find_system(mdl_name, ...
+                    %% go over inports
+                    try
+                        blk_parent = get_param(blkPath, 'Parent');
+                    catch
+                        blk_parent = fileparts(blkPath);
+                    end
+                    inport_list = find_system(blk_parent, ...
                         'SearchDepth',1, 'BlockType','Inport');
                     nbInpots = length(inport_list);
                     if isfield(s, 'TableSource') && ...
@@ -130,6 +129,8 @@ classdef Interpolation_nD_Test < Block_Test
                                 set_param(inport_list{inpIdx}, ...
                                     'OutDataTypeStr', 'Bus: kfBus', ...
                                     'BusOutputAsStruct', 'on', 'OutMin', '0');
+                                % propagate type to the root
+                                Block_Test.propagateBusDT(inport_list{inpIdx}, 'Bus: kfBus');
                                 if ~isempty(TableDim)
                                     set_param(inport_list{inpIdx}, 'OutMax', num2str(TableDim(inpIdx)));
                                 end
@@ -156,21 +157,9 @@ classdef Interpolation_nD_Test < Block_Test
                     end
                     
                     
-                    % set model configuration parameters
-                    configSet = getActiveConfigSet(mdl_name);
-                    set_param(configSet, 'Solver', 'FixedStepDiscrete');
-                    set_param(configSet, 'ParameterOverflowMsg', 'none');
-                    
-                    failed = CompileModelCheck_pp( mdl_name );
-                    if failed
-                        display(s);
-                        display_msg(['Model failed: ' mdl_name], ...
-                            MsgType.ERROR, 'generateTests', '');
-                    else
-                        save_system(mdl_name, mdl_path);
-                    end
-                    bdclose(mdl_name);
-                    
+                    %% set model configuration parameters and save model if it compiles
+                    failed = Block_Test.setConfigAndSave(mdl_name, mdl_path);
+                    if failed, display(s), end
                 catch me
                     display(s);
                     display_msg(['Model failed: ' mdl_name], ...
@@ -197,13 +186,20 @@ classdef Interpolation_nD_Test < Block_Test
                 s.ValidIndexMayReachLast = obj.ValidIndexMayReachLast{idx};
                 
                 
-                %IntermediateResultsDataTypeStr
-                idx = mod(i1, length(obj.IntermediateResultsDataTypeStr)) + 1;
-                s.IntermediateResultsDataTypeStr = obj.IntermediateResultsDataTypeStr{idx};
                 
-                %OutDataTypeStr
-                idx = mod(i1, length(obj.OutDataTypeStr)) + 1;
-                s.OutDataTypeStr = obj.OutDataTypeStr{idx};
+                if ~(strcmp(s.InterpMethod, 'Linear') && strcmp(s.ExtrapMethod, 'Linear'))
+                    % cannot extrapolate integer or fixed-point data.
+                    
+                    %IntermediateResultsDataTypeStr
+                    idx = mod(i1, length(obj.IntermediateResultsDataTypeStr)) + 1;
+                    s.IntermediateResultsDataTypeStr = obj.IntermediateResultsDataTypeStr{idx};
+                    
+                    %OutDataTypeStr
+                    idx = mod(i1, length(obj.OutDataTypeStr)) + 1;
+                    s.OutDataTypeStr = obj.OutDataTypeStr{idx};
+                end
+                
+                
                 
                 %RndMeth
                 idx = mod(i1, length(obj.RndMeth)) + 1;
@@ -328,7 +324,7 @@ classdef Interpolation_nD_Test < Block_Test
             
         end
         
-        function addLookupTableObjectToBaseWs(obj, mdl, T, dt, TableDim)
+        function addLookupTableObjectToModelWs(obj, mdl, T, dt, TableDim)
             code = get_param(mdl, 'PreLoadFcn');
             
             code = sprintf('%s\n LUTObj = Simulink.LookupTable;', code);

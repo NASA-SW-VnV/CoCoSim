@@ -25,28 +25,31 @@ classdef LookupTableDynamic_Test < Block_Test
         
     end
     methods
-        function status = generateTests(obj, outputDir)
+        function status = generateTests(obj, outputDir, deleteIfExists)
+            if ~exist('deleteIfExists', 'var')
+                deleteIfExists = true;
+            end
             status = 0;
             params = obj.getParams();
             fstInDims = {'1', '1', '3', '[2,3]'};
-            for i=1 : length(params)
+            nb_tests = length(params);
+            condExecSSPeriod = floor(nb_tests/length(Block_Test.condExecSS));
+            for i=1 : nb_tests
                 try
                     s = params{i};
+                    
+                    %% creat new model
                     mdl_name = sprintf('%s%d', obj.fileNamePrefix, i);
-                    try
-                        if bdIsLoaded(mdl_name), bdclose(mdl_name); end
-                        mdl_path = fullfile(outputDir, strcat(mdl_name, '.slx'));
-                        if exist(mdl_path, 'file')
-                            delete(mdl_path);
-                            %continue;
-                        end
-                    catch
+                    addCondExecSS = (mod(i, condExecSSPeriod) == 0);
+                    condExecSSIdx = int32(i/condExecSSPeriod);
+                    [blkPath, mdl_path, skip] = Block_Test.create_new_model(...
+                        mdl_name, outputDir, deleteIfExists, addCondExecSS, ...
+                        condExecSSIdx);
+                    if skip
                         continue;
                     end
-                    new_system(mdl_name);
                     
-                    blkPath = fullfile(mdl_name, 'P');
-                    
+                    %% remove parametres that does not belong to block params
                     tableDim = 1;
                     if isfield(s, 'TableDim')
                         tableDim = s.TableDim;
@@ -70,12 +73,16 @@ classdef LookupTableDynamic_Test < Block_Test
                         s = rmfield(s, 'xdat');
                     end
                     
-                    blkParams = Block_Test.struct2blockParams(s);
-                    add_block(obj.blkLibPath, blkPath, blkParams{:});
-                    Block_Test.connectBlockToInportsOutports(blkPath);
+                    %% add the block
+                    Block_Test.add_and_connect_block(obj.blkLibPath, blkPath, s);
                     
-                    % go over inports
-                    inport_list = find_system(mdl_name, ...
+                    %% go over inports
+                    try
+                        blk_parent = get_param(blkPath, 'Parent');
+                    catch
+                        blk_parent = fileparts(blkPath);
+                    end
+                    inport_list = find_system(blk_parent, ...
                         'SearchDepth',1, 'BlockType','Inport');
                     
                     % Inport 1: test if the block behaves as scalar function.
@@ -97,25 +104,15 @@ classdef LookupTableDynamic_Test < Block_Test
                         mat2str(tableDim));
                     
                     
-                    % set model configuration parameters
-                    configSet = getActiveConfigSet(mdl_name);
-                    set_param(configSet, 'Solver', 'FixedStepDiscrete');
-                    
-                    failed = CompileModelCheck_pp( mdl_name );
-                    if failed
-                        display(s);
-                        display_msg(['Model failed: ' mdl_name], ...
-                            MsgType.ERROR, 'generateTests', '');
-                    else
-                        save_system(mdl_name, mdl_path);
-                    end
-                    bdclose(mdl_name);
+                    %% set model configuration parameters and save model if it compiles
+                    Block_Test.setConfigAndSave(mdl_name, mdl_path);
                     
                 catch me
+                    display_msg(me.getReport(), MsgType.ERROR, 'generateTests', '');
                     display(s);
                     display_msg(['Model failed: ' mdl_name], ...
                         MsgType.DEBUG, 'generateTests', '');
-                    display_msg(me.getReport(), MsgType.ERROR, 'generateTests', '');
+                    
                     bdclose(mdl_name)
                 end
             end

@@ -61,33 +61,38 @@ classdef Lookup_nD_Test < Block_Test
     end
     
     methods
-        function status = generateTests(obj, outputDir)
+        function status = generateTests(obj, outputDir, deleteIfExists)
+            if ~exist('deleteIfExists', 'var')
+                deleteIfExists = true;
+            end
             status = 0;
             params = obj.getParams();
             fstInDims = {'1', '1', '1', '1', '1', '3', '[2,3]'};
-            for i=1 : length(params)
+            nb_tests = length(params);
+            condExecSSPeriod = floor(nb_tests/length(Block_Test.condExecSS));
+            for i=1 : nb_tests
                 try
                     s = params{i};
+                    %% creat new model
                     mdl_name = sprintf('%s%d', obj.fileNamePrefix, i);
-                    try
-                        if bdIsLoaded(mdl_name), bdclose(mdl_name); end
-                        mdl_path = fullfile(outputDir, strcat(mdl_name, '.slx'));
-                        if exist(mdl_path, 'file')
-                            %delete(mdl_path);
-                            continue;
-                        end
-                    catch
+                    addCondExecSS = (mod(i, condExecSSPeriod) == 0);
+                    condExecSSIdx = int32(i/condExecSSPeriod);
+                    [blkPath, mdl_path, skip] = Block_Test.create_new_model(...
+                        mdl_name, outputDir, deleteIfExists, addCondExecSS, ...
+                        condExecSSIdx);
+                    if skip
                         continue;
                     end
-                    new_system(mdl_name);
                     
+                    %% remove parametres that does not belong to block params
                     hws = get_param(mdl_name, 'modelworkspace');
-                    blkPath = fullfile(mdl_name, 'P');
                     
                     if isfield(s, 'LUTObj')
-                        hws.assignin('LUTObj', s.LUTObj);
+                        LUTObjName = sprintf('LUTObjLKnD%d', i);
+                        s.LookupTableObject = LUTObjName;
+                        hws.assignin(LUTObjName, s.LUTObj);
                         s = rmfield(s, 'LUTObj');
-                        obj.addLookupTableObjectToBaseWs(mdl_name)
+%                         obj.addLookupTableObjectToBaseWs(mdl_name, LUTObjName)
                     end
                     tableDim = 1;
                     if isfield(s, 'TableDim')
@@ -96,12 +101,16 @@ classdef Lookup_nD_Test < Block_Test
                     end
                     
                     
-                    blkParams = Block_Test.struct2blockParams(s);
-                    add_block(obj.blkLibPath, blkPath, blkParams{:});
-                    Block_Test.connectBlockToInportsOutports(blkPath);
+                     %% add the block
+                    Block_Test.add_and_connect_block(obj.blkLibPath, blkPath, s);
                     
-                    % go over inports
-                    inport_list = find_system(mdl_name, ...
+                    %% go over inports
+                    try
+                        blk_parent = get_param(blkPath, 'Parent');
+                    catch
+                        blk_parent = fileparts(blkPath);
+                    end
+                    inport_list = find_system(blk_parent, ...
                         'SearchDepth',1, 'BlockType','Inport');
                     nbInpots = length(inport_list);
                     
@@ -122,21 +131,9 @@ classdef Lookup_nD_Test < Block_Test
                     
                     
                     
-                    % set model configuration parameters
-                    configSet = getActiveConfigSet(mdl_name);
-                    set_param(configSet, 'Solver', 'FixedStepDiscrete');
-                    set_param(configSet, 'ParameterOverflowMsg', 'none');
-                    
-                    failed = CompileModelCheck_pp( mdl_name );
-                    if failed
-                        display(s);
-                        display_msg(['Model failed: ' mdl_name], ...
-                            MsgType.ERROR, 'generateTests', '');
-                    else
-                        save_system(mdl_name, mdl_path);
-                    end
-                    bdclose(mdl_name);
-                    
+                    %% set model configuration parameters and save model if it compiles
+                    failed = Block_Test.setConfigAndSave(mdl_name, mdl_path);
+                    if failed, display(s), end
                 catch me
                     display(s);
                     display_msg(['Model failed: ' mdl_name], ...
@@ -175,9 +172,14 @@ classdef Lookup_nD_Test < Block_Test
                     idx = mod(i1, length(obj.FractionDataTypeStr)) + 1;
                     s.FractionDataTypeStr = obj.FractionDataTypeStr{idx};
                 end
+                
                 %OutDataTypeStr
-                idx = mod(i1, length(obj.OutDataTypeStr)) + 1;
-                s.OutDataTypeStr = obj.OutDataTypeStr{idx};
+                if strcmp(s.InterpMethod, 'Nearest')
+                    s.OutDataTypeStr = 'double';
+                else
+                    idx = mod(i1, length(obj.OutDataTypeStr)) + 1;
+                    s.OutDataTypeStr = obj.OutDataTypeStr{idx};
+                end
                 
                 %RndMeth
                 idx = mod(i1, length(obj.RndMeth)) + 1;
@@ -257,12 +259,16 @@ classdef Lookup_nD_Test < Block_Test
                             tableDataTypeStr = obj.TableDataTypeStr{1};
                             breakpointsForDimension1DataTypeStr = obj.BreakpointsForDimension1DataTypeStr{1};
                         else
-                            idx = mod(i1, length(obj.TableDataTypeStr)) + 1;
-                            tableDataTypeStr = obj.TableDataTypeStr{idx};
+                            
                             
                             if strcmp(s.InterpMethod, 'Nearest')
+                                tableDataTypeStr = 'double';
                                 breakpointsForDimension1DataTypeStr = obj.BreakpointsForDimension1DataTypeStr{1};
+                                
                             else
+                                idx = mod(i1, length(obj.TableDataTypeStr)) + 1;
+                                tableDataTypeStr = obj.TableDataTypeStr{idx};
+                                
                                 idx = mod(i1, length(obj.BreakpointsForDimension1DataTypeStr)) + 1;
                                 breakpointsForDimension1DataTypeStr = obj.BreakpointsForDimension1DataTypeStr{idx};
                             end
@@ -270,13 +276,16 @@ classdef Lookup_nD_Test < Block_Test
                         
                         if i5 == 1
                             %'Explicit values'
-                            if i2 == 1
+                            if i2 < 3
                                 % Table and breakpoints
                                 s3.Table = table;
+                                
                                 s3.TableDataTypeStr = tableDataTypeStr;
                                 
                                 for d =1:length(dim)
-                                    B = sort(MatlabUtils.construct_random_doubles(1, 0, 127, [dim(d) 1]));
+                                    B = sort(MatlabUtils.construct_random_doubles(1, 0, 100, [dim(d) 1]));
+                                    % to make it strictly monotonically increasing after conversion to its run-time data type
+                                    B = B + (1:dim(d))';
                                     s3.(sprintf('BreakpointsForDimension%d', d)) = mat2str(B);
                                     s3.(sprintf('BreakpointsForDimension%dDataTypeStr', d)) = breakpointsForDimension1DataTypeStr;
                                 end
@@ -293,13 +302,15 @@ classdef Lookup_nD_Test < Block_Test
                                     LUTObj.Breakpoints(d).Value = sort(MatlabUtils.construct_random_doubles(1, 0, 127, [dim(d) 1]));
                                     if ~startsWith(breakpointsForDimension1DataTypeStr, 'Inherit')
                                         LUTObj.Breakpoints(d).DataType = breakpointsForDimension1DataTypeStr;
+                                    elseif strcmp(s.InterpMethod, 'Nearest')
+                                        LUTObj.Breakpoints(d).DataType = 'double';
                                     end
                                 end
                                 s3.LUTObj = LUTObj;
                             end
                         else
                             %'Even spacing'
-                            if i2 == 1
+                            if i2 < 3
                                 % Table and breakpoints
                                 s3.Table = table;
                                 s3.TableDataTypeStr = tableDataTypeStr;
@@ -323,6 +334,8 @@ classdef Lookup_nD_Test < Block_Test
                                     LUTObj.Breakpoints(d).Spacing = 1.5;
                                     if ~startsWith(breakpointsForDimension1DataTypeStr, 'Inherit')
                                         LUTObj.Breakpoints(d).DataType = breakpointsForDimension1DataTypeStr;
+                                    elseif strcmp(s.InterpMethod, 'Nearest')
+                                        LUTObj.Breakpoints(d).DataType = 'double';
                                     end
                                 end
                                 s3.LUTObj = LUTObj;
@@ -339,16 +352,16 @@ classdef Lookup_nD_Test < Block_Test
             end
             
         end
-        
-        function addLookupTableObjectToBaseWs(obj, mdl)
-            code = get_param(mdl, 'PreLoadFcn');
-            
-            code = sprintf('%s\n hws = get_param(gcs, ''modelworkspace'');', code);
-            code = sprintf('%s\n if hws.hasVariable(''LUTObj'')', code);
-            code = sprintf('%s\n assignin(''base'',''LUTObj'', hws.getVariable(''LUTObj''));', code);
-            code = sprintf('%s\n end', code);
-            set_param(mdl, 'PreLoadFcn', code);
-        end
+%         
+%         function addLookupTableObjectToBaseWs(obj, mdl, LUTObjName)
+%             code = get_param(mdl, 'PreLoadFcn');
+%             
+%             code = sprintf('%s\n hws = get_param(gcs, ''modelworkspace'');', code);
+%             code = sprintf('%s\n if hws.hasVariable(''%s'')', code, LUTObjName);
+%             code = sprintf('%s\n assignin(''base'',''%s'', hws.getVariable(''%s''));', code, LUTObjName, LUTObjName);
+%             code = sprintf('%s\n end', code);
+%             set_param(mdl, 'PreLoadFcn', code);
+%         end
     end
 end
 

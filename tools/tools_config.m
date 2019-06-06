@@ -72,7 +72,7 @@ else
     LUSTRET = fullfile(solvers_path, 'bin', 'lustret');
     LUCTREC_INCLUDE_DIR = fullfile(solvers_path, 'include', 'lustrec');
     ZUSTRE = fullfile(solvers_path, 'bin', 'zustre');
-    Z3 = fullfile(solvers_path,'z3', 'bin', 'z3');
+    Z3 = fullfile(solvers_path, 'bin', 'z3');
     KIND2 = fullfile(solvers_path, 'bin', 'kind2');
     JKIND = fullfile(verifiers_path, 'jkind', 'jkind');
     JLUSTRE2KIND = fullfile(verifiers_path, 'jkind', 'jlustre2kind');

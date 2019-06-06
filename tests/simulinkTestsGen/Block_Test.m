@@ -1,7 +1,7 @@
 classdef Block_Test
     %BLOCK_TEST : all other blocks test class inherit from this class
-    properties
-        
+    properties(Constant)
+        condExecSS = {'reset', 'trigger', 'enable', 'enable_trigger', 'if'};
     end
     
     methods(Abstract)
@@ -34,6 +34,10 @@ classdef Block_Test
             function status = addInport(newBlkPort)
                 try
                     status = 0;
+                    if get_param(newBlkPort, 'line') > 0
+                        % already connected
+                        return;
+                    end
                     inport_name = fullfile(parent, 'In1');
                     inport_handle = add_block('simulink/Ports & Subsystems/In1',...
                         inport_name,...
@@ -51,6 +55,10 @@ classdef Block_Test
             function status = addOutport(newBlkPort)
                 try
                     status = 0;
+                    if get_param(newBlkPort, 'line') > 0
+                        % already connected
+                        return;
+                    end
                     outport_name = fullfile(parent, 'Out1');
                     outport_handle = add_block('simulink/Ports & Subsystems/Out1',...
                         outport_name,...
@@ -65,6 +73,42 @@ classdef Block_Test
                     status = 1;
                 end
             end
+            % do the same for parent
+            if ~strcmp(bdroot(blk_path), parent)
+                status = Block_Test.connectBlockToInportsOutports(parent);
+            end
+        end
+        
+        %% propagate bus Datatype
+        function propagateBusDT(inport_path, busDT)
+            portIndex = str2num(get_param(inport_path, 'Port'));
+            try
+                blk_parent = get_param(inport_path, 'Parent');
+            catch
+                if ischar(inport_path)
+                    blk_parent = fileparts(inport_path);
+                else
+                    return;
+                end
+            end
+            bdroot_handle = get_param(bdroot(inport_path), 'Handle');
+            blk_parent_h = get_param(blk_parent, 'Handle');
+            if bdroot_handle ~= blk_parent_h
+                subsystemPortHandles = get_param(blk_parent, 'PortHandles');
+                l = get_param(subsystemPortHandles.Inport(portIndex), 'line');
+                if l > 0
+                    srcBlockHandle = get_param(l, 'SrcBlockHandle');
+                    try
+                        set_param(srcBlockHandle, ...
+                            'OutDataTypeStr', busDT, ...
+                            'BusOutputAsStruct', 'on');
+                    catch
+                    end
+                    if strcmp(get_param(srcBlockHandle, 'BlockType'), 'Inport')
+                        Block_Test.propagateBusDT(srcBlockHandle, busDT);
+                    end
+                end
+            end
         end
         
         %% get block params from structur
@@ -77,6 +121,60 @@ classdef Block_Test
             end
         end
         
+        %% create new model
+        function [blkPath, mdl_path, skip] = create_new_model(mdl_name, outputDir, deleteIfExists, addCondExecSS, condExecSSIdx)
+            skip = false;
+            
+            try
+                if bdIsLoaded(mdl_name), bdclose(mdl_name); end
+                mdl_path = fullfile(outputDir, strcat(mdl_name, '.slx'));
+                if exist(mdl_path, 'file')
+                    if deleteIfExists
+                        delete(mdl_path);
+                    else
+                        skip = true;
+                    end
+                end
+            catch
+                skip = true;
+            end
+            new_system(mdl_name);
+            if addCondExecSS
+                if bdIsLoaded('Block_TestLib'), load_system('Block_TestLib'); end
+                libPath = fullfile('Block_TestLib', Block_Test.condExecSS{condExecSSIdx});
+                libDst = fullfile(mdl_name, Block_Test.condExecSS{condExecSSIdx});
+                add_block(libPath, libDst);
+                set_param(libDst, 'LinkStatus', 'inactive');
+                SSlist = find_system(mdl_name, 'BlockType', 'SubSystem');
+                % set blokPath inside the deepest Subsystem
+                blkPath = fullfile(SSlist{end}, 'P');
+            else
+                blkPath = fullfile(mdl_name, 'P');
+            end
+        end
+        
+        %% add the block
+        function add_and_connect_block(blkLibPath, blkPath, s)
+            blkParams = Block_Test.struct2blockParams(s);
+            add_block(blkLibPath, blkPath, blkParams{:});
+            Block_Test.connectBlockToInportsOutports(blkPath);
+        end
+        
+        %% set configuration and save
+        function failed = setConfigAndSave(mdl_name, mdl_path)
+            configSet = getActiveConfigSet(mdl_name);
+            set_param(configSet, 'Solver', 'FixedStepDiscrete');
+            set_param(configSet, 'ParameterOverflowMsg', 'none');
+            
+            failed = CompileModelCheck_pp( mdl_name );
+%             if failed
+%                 display_msg(['Model failed: ' mdl_name], ...
+%                     MsgType.ERROR, 'generateTests', '');
+%             else
+                save_system(mdl_name, mdl_path);
+%             end
+            bdclose(mdl_name);
+        end
     end
 end
 

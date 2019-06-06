@@ -35,30 +35,47 @@ classdef PreLookup_Test < Block_Test
     
     methods
         
-        function status = generateTests(obj, outputDir)
+        function status = generateTests(obj, outputDir, deleteIfExists)
+            if ~exist('deleteIfExists', 'var')
+                deleteIfExists = true;
+            end
             status = 0;
             params = obj.getParams();
             fstInDims = {'1', '1', '1', '3', '[2,3]'};
-            for i=1 : length(params)
+            nb_tests = length(params);
+            condExecSSPeriod = floor(nb_tests/length(Block_Test.condExecSS));
+            for i=1 : nb_tests
                 try
                     s = params{i};
+                    %% creat new model
                     mdl_name = sprintf('%s%d', obj.fileNamePrefix, i);
+                    addCondExecSS = (mod(i, condExecSSPeriod) == 0);
+                    condExecSSIdx = int32(i/condExecSSPeriod);
+                    [blkPath, mdl_path, skip] = Block_Test.create_new_model(...
+                        mdl_name, outputDir, deleteIfExists, addCondExecSS, ...
+                        condExecSSIdx);
+                    if skip
+                        continue;
+                    end
                     
-                    
-                    new_system(mdl_name);
-                    blkPath = fullfile(mdl_name, 'P');
-                    fdnames = fieldnames(s);
-                    blkParams = Block_Test.struct2blockParams(s);
-                    
+                    %% add variables to model workspace if needed
                     if isfield(s, 'OutputBusDataTypeStr')
                         PreLookup_Test.addBusObjectToBaseWorkspace(mdl_name);
                     end
                     if strcmp(s.BreakpointsSpecification, obj.BreakpointsSpecification{3})
                         obj.addBreakpointObjectToBaseWs(mdl_name);
                     end
-                    add_block(obj.blkLibPath, blkPath, blkParams{:});
-                    Block_Test.connectBlockToInportsOutports(blkPath);
-                    inport_list = find_system(mdl_name, ...
+                    
+                    %% add the block
+                    Block_Test.add_and_connect_block(obj.blkLibPath, blkPath, s);
+                    
+                    %% go over inports
+                    try
+                        blk_parent = get_param(blkPath, 'Parent');
+                    catch
+                        blk_parent = fileparts(blkPath);
+                    end
+                    inport_list = find_system(blk_parent, ...
                         'SearchDepth',1, 'BlockType','Inport');
                     if ~isempty(inport_list)
                         
@@ -69,7 +86,7 @@ classdef PreLookup_Test < Block_Test
                             if ~failed
                                 [V, bmin, bmax] = obj.getRandomValues();
                                 set_param(inport_list{2}, 'Value', V);
-                                s.BreakpointMin = num2str(bmin - 10);
+                                s.BreakpointMin = num2str(min(bmin - 10, 0));
                                 s.BreakpointMax = num2str(bmax + 10);
                             end
                         end
@@ -85,24 +102,9 @@ classdef PreLookup_Test < Block_Test
                             end
                         end
                     end
-                    % set model configuration parameters
-                    configSet = getActiveConfigSet(mdl_name);
-                    set_param(configSet, 'Solver', 'FixedStepDiscrete');
-                    set_param(configSet, 'ParameterOverflowMsg', 'none');
                     
-                    failed = CompileModelCheck_pp( mdl_name );
-                    if failed
-                        display(s);
-                        display_msg(['Model failed: ' mdl_name], ...
-                            MsgType.ERROR, 'generateTests', '');
-                    else
-                        mdl_path = fullfile(outputDir, strcat(mdl_name, '.slx'));
-                        if exist(mdl_path, 'file')
-                            delete(mdl_path);
-                        end
-                        save_system(mdl_name, mdl_path);
-                    end
-                    bdclose(mdl_name);
+                    %% set model configuration parameters and save model if it compiles
+                    Block_Test.setConfigAndSave(mdl_name, mdl_path);
                 catch me
                     display_msg(me.getReport(), MsgType.ERROR, 'generateTests', '');
                     bdclose(mdl_name)

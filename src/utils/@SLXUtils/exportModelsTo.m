@@ -6,7 +6,7 @@ if nargin==0
 end
 
 if nargin < 2
-    version = 'R2015a';
+    version = 'R2016a';
 end
 
 
@@ -15,8 +15,9 @@ mdl_models = dir(fullfile(folder_Path,'**/*.mdl'));
 slx_models = dir(fullfile(folder_Path,'**/*.slx'));
 models = [mdl_models; slx_models];
 
-
-for i=1:numel(models)
+nb_models = length(models);
+for i=1:nb_models
+    fprintf('model %d out of %d.\n', i, nb_models);
     m = models(i);
     display(m.name);
     full_path = fullfile(m.folder, m.name);

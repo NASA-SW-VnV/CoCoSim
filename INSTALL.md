@@ -1,7 +1,7 @@
 
 ### Dependencies
 
-* MATLAB(c) and Simulink version **R2016** or newer
+* MATLAB(c) and Simulink version **R2017** or newer (CoCoSim has been well tested in R2017b version)
 * External Matlab libraries :
     * CoCoSim standard libraries from https://github.com/coco-team/cocoSim2
     * Simulink/Matlab selected toolboxes from https://github.com/hbourbouh/cocosim-external-libs
@@ -23,7 +23,7 @@ This will update cocosim repository and copy the external Matlab libraries.
 >cd $PATH_TO_CoCoSim/scripts
 >./install_cocosim 
 ```
-where $PATH_TO_CoCoSim should be replaced by your path.
+where $PATH_TO_CoCoSim should be replaced by your path to CoCosim folder.
 
 install_cocosim script assumes the operating system provides:
     bash, basename, dirname, mkdir, touch, sed, date,
@@ -41,11 +41,21 @@ under `tools/verifiers/osx` if you are Mac user or `tools/verifiers/linux` in th
 
 For example, if the above script failed to install the tools. You may install them in the following paths. If you have linux machin, change "osx" by "linux".
 
-KIND2  : `cocoSim/tools/verfiers/osx/bin/kind2`
+KIND2 binary: `cocoSim/tools/verfiers/osx/bin/kind2`
 
-ZUSTRE : `cocoSim/tools/verfiers/osx/bin/zustre`
+Z3 binary: `cocoSim/tools/verfiers/osx/bin/z3`
 
-LUSTREC: `cocoSim/tools/verfiers/osx/bin/lustrec`
+JKIND binary: `cocoSim/tools/verfiers/jkind/jkind`
+
+JLUSTRE2KIND binray: `cocoSim/tools/verfiers/jkind/jlustre2kind`
+
+ZUSTRE binary: `cocoSim/tools/verfiers/osx/bin/zustre`
+
+LUSTREC binary: `cocoSim/tools/verfiers/osx/bin/lustrec`
+
+LUSTRET binary: `cocoSim/tools/verfiers/osx/bin/lustret`
+
+LUCTREC_INCLUDE_DIR: `cocoSim/tools/verfiers/osx/include/lustrec`
 
 
-
+If you want to customize these paths go to `cocosim/tools/tools_config.m` and change the values of variables KIND2, Z3, JKIND, JLUSTRE2KIND, ZUSTRE, LUSTREC, LUSTRET, LUCTREC_INCLUDE_DIR to your preferences.
