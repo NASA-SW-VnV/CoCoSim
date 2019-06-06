@@ -55,31 +55,57 @@ function [status, errors_msg] = FromWorkSpace_pp(model)
                 variableMatrix = VariableName_value;
                 % convert timeseries
                 if isa(VariableName_value,'timeseries')
-                    [n,m] = size(VariableName_value.Data);
+                    matrixDim = size(VariableName_value.Data);
+                    if length(matrixDim) > 2
+                        % more than 2 dimension
+                        continue;
+                    elseif length(matrixDim) == 2
+                        m = matrixDim(2);
+                        n = matrixDim(1);
+                    else
+                        m = 1;
+                        n = matrixDim(1);
+                    end
                     variableMatrix = zeros(n,m+1);
                     variableMatrix(:,1) = VariableName_value.Time;
                     variableMatrix(:,2:m+1) = VariableName_value.Data;
                     % convert structure
                 elseif isstruct(VariableName_value)
-                    [n,m] = size(VariableName_value.signals.values);
+                    matrixDim = size(VariableName_value.signals.values);
+                    if length(matrixDim) > 2
+                        % more than 2 dimension
+                        continue;
+                    elseif length(matrixDim) == 2
+                        m = matrixDim(2);
+                        n = matrixDim(1);
+                    else
+                        m = 1;
+                        n = matrixDim(1);
+                    end
                     variableMatrix = zeros(n,m+1);
                     variableMatrix(:,1) = VariableName_value.time;
                     variableMatrix(:,2:m+1) = VariableName_value.signals.values;
                 end
                 % if vector input, then we will let FromWorkSpace_To_Lustre
                 % handle it
-                [n,m] = size(variableMatrix);
+                matrixDim = size(variableMatrix);
+                if length(matrixDim) > 2
+                    display_msg(sprintf('FromWorkSpace block %s will be handled through Lustre translation and not through pre-processing',...
+                        fromWorkSpace_list{i}), ...
+                        MsgType.INFO, 'FromWorkSpace_pp', '');
+                    continue;
+                elseif length(matrixDim) == 2
+                    m = matrixDim(2);
+                else
+                    m = 1;
+                end
                 if m > 2
                     display_msg(sprintf('FromWorkSpace block %s will be handled through Lustre translation and not through pre-processing',...
                         fromWorkSpace_list{i}), ...
                         MsgType.INFO, 'FromWorkSpace_pp', '');
                     continue;
                 end
-                % if value at time 0 is not given
-                if variableMatrix(1,1) ~= 0
-                    new_value = zeros(1, m);
-                    variableMatrix = [new_value; variableMatrix];
-                end
+
                 SampleTime = get_param(fromWorkSpace_list{i},'SampleTime');
                 [SampleTime_value, ~, status] = SLXUtils.evalParam(...
                     model, ...
