@@ -13,129 +13,268 @@ classdef FromWorkspace_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     methods
         
         function  write_code(obj, parent, blk, xml_trace, lus_backend, varargin)
-            
-            model_name = strsplit(blk.Origin_path, '/');
-            model_name = model_name{1};
-            SampleTime = SLXUtils.getModelCompiledSampleTime(model_name);
-            
-            interpolate = 1;
-            if strcmp(blk.Interpolate, 'off')
-                interpolate = 0;
-            end
-            
             [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
-            outputDataType = blk.CompiledPortDataTypes.Outport{1};                        
-            VariableName = blk.VariableName;
+            obj.addVariable(outputs_dt);
+            
+            
+            % get Interpolate parameter
+            interpolate = strcmp(blk.Interpolate, 'on');
+            outputAfterFinalValue = blk.OutputAfterFinalValue;
+            % get VariableName parameter
             [variable, ~, status] = ...
-                nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(parent, blk, VariableName);
+                nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(parent, blk, blk.VariableName);
             if status
-                display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
-                    VariableName, HtmlItem.addOpenCmd(blk.Origin_path)), ...
+                display_msg(sprintf('Variable %s in block %s not found neither in Matlab/Model/Mask workspace',...
+                    blk.VariableName, HtmlItem.addOpenCmd(blk.Origin_path)), ...
                     MsgType.ERROR, 'Constant_To_Lustr', '');
                 return;
             end
-            [outLusDT, zero, ~] =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(outputDataType);
-                                                
+            % get output datatype
+            slx_outDataType = blk.CompiledPortDataTypes.Outport{1};
+            [outLusDT, ~, ~] =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(slx_outDataType);
+            if interpolate || strcmp(outputAfterFinalValue, 'Extrapolation')
+                v_lusDT = 'real';
+                v_slxDT = 'double';
+            else
+                v_lusDT = outLusDT;
+                v_slxDT = slx_outDataType;
+            end
             if isnumeric(variable)
                 % for matrix
-                [nrow, ncol] = size(variable);
-                t = variable(:,1);
+                [~, ncol] = size(variable);
+                time = variable(:,1);
                 values = variable(:,2:ncol);
-                dims = ncol - 1;
             elseif isa(variable,'timeseries')
-                [n,m] = size(variable.Data);
-                t = variable.Time;
-                values = variable.Data;   
-                dims = m;
+                time = variable.Time;
+                values = variable.Data;
             elseif isstruct(variable)
                 % for struct
-                t = variable.time;
-                nrow = numel(t);
+                time = variable.time;
                 values = variable.signals.values;
-                dims = variable.signals.dimensions;
             else
                 display_msg(sprintf('Workspace variable must be numeric arrays or struct in block %s',...
                     HtmlItem.addOpenCmd(blk.Origin_path)), MsgType.ERROR, 'FromWorkspace_To_Lustre', '');
                 return;
             end
-
-            blk_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);
-            codeAst_all = {};
-            vars_all = {};   
-            simTime = nasa_toLustre.lustreAst.VarIdExpr(nasa_toLustre.utils.SLX2LusUtils.timeStepStr());    % modify to do cyclic repetition?
-            for i=1:dims  
-
-                time_array = t';
-                data_array = values(:,i)';
-                
-                if numel(t) == 1      % constant case, add another point
-                    t1000 = t(1) + 1000.;
-                    time_array = [time_array, t1000];
-                    data_array = [data_array(1), data_array(1)];                    
+            
+            
+            % In FromWorkspace block :LENGTH(time) and SIZE(values,last_dimension) must be the same.
+            % we gonna change values to match LENGTH(time) == SIZE(values,1)
+            if ~ismatrix(values)
+                n = ndims(values);
+                % shift dimensions to the right by 1
+                values = permute(values, [n (1:n-1)]);
+            end
+            % reshapre values to 2D
+            [n, m] = size(values);
+            values = reshape(values, [n, m]);
+            % change time to column
+            if isrow(time)
+                time = time';
+            end
+            if time(1) ~= 0
+                % add value at time zero
+                if interpolate
+                    zero_value = interp1(time, values, 0, 'linear', 'extrap');
+                else
+                    zero_value = zeros(1, m);
                 end
                 
-                % Add data for t = 0. if none using linear extrapolation of
-                % first 2 data points
-                if time_array(1) > 0.
-
-                    if interpolate    % add 1 point at time 0
-                        x = [time_array(1), time_array(2)];
-                        y = [data_array(1), data_array(2)];
-                        d0 = interp1(x, y, 0.,'linear','extrap');                        
-                        time_array = [0., time_array];
-                        data_array = [d0, data_array];
-                    else  % add 2 data points
-                        time_array = [0., time_array(1), time_array];
-                        data_array = [0., 0.,  data_array];                        
+                time = [0; time];
+                values = [zero_value; values];
+            end
+            
+            
+            if strcmp(outputAfterFinalValue, 'Cyclic repetition')
+                % Cyclic repetition not supported
+                %% TODO(HAMZA) support it with "every" operator
+                display_msg(sprintf('Option %s is not supported in block %s',...
+                    blk.OutputAfterFinalValue, HtmlItem.addOpenCmd(blk.Origin_path)), ...
+                    MsgType.ERROR, 'FromWorkspace_To_Lustre', '');
+                return;
+            end
+            outputs_conds = {};
+            outputs_thens = {};
+            simTime = nasa_toLustre.lustreAst.VarIdExpr(nasa_toLustre.utils.SLX2LusUtils.timeStepStr());
+            for i=1:length(time)-1
+                t = nasa_toLustre.utils.SLX2LusUtils.num2LusExp(...
+                    time(i),  'real');
+                t_plus_1 = nasa_toLustre.utils.SLX2LusUtils.num2LusExp(...
+                    time(i+1), 'real');
+                
+                
+                epsilon =...
+                    nasa_toLustre.blocks.Lookup_nD_To_Lustre.calculate_eps(time, i);
+                lowerCond = nasa_toLustre.lustreAst.BinaryExpr(...
+                    nasa_toLustre.lustreAst.BinaryExpr.GTE, ...
+                    simTime, ...
+                    t, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
+                upperCond = nasa_toLustre.lustreAst.BinaryExpr(...
+                    nasa_toLustre.lustreAst.BinaryExpr.LT, ...
+                    simTime, ...
+                    t_plus_1, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
+                
+                outputs_conds{end+1} = nasa_toLustre.lustreAst.BinaryExpr(...
+                    nasa_toLustre.lustreAst.BinaryExpr.AND, lowerCond, upperCond);
+                thens = cell(1, length(outputs));
+                if interpolate
+                    for outIdx = 1:length(outputs)
+                        v = nasa_toLustre.utils.SLX2LusUtils.num2LusExp(...
+                            values(i, outIdx), v_lusDT, v_slxDT);
+                        v_plus_1 = nasa_toLustre.utils.SLX2LusUtils.num2LusExp(...
+                            values(i+1, outIdx), v_lusDT, v_slxDT);
+                        thens{outIdx} = ...
+                            nasa_toLustre.blocks.Lookup_nD_To_Lustre.interp2points_2D(...
+                            t, v, t_plus_1, v_plus_1, simTime);
+                    end
+                else
+                    for outIdx = 1:length(outputs)
+                        thens{outIdx} = nasa_toLustre.utils.SLX2LusUtils.num2LusExp(...
+                            values(i, outIdx), v_lusDT, v_slxDT);
                     end
                 end
-                
-                % handling blk.OutputAfterFinalValue
-                blkParams = struct;
-                blkParams.OutputAfterFinalValue = blk.OutputAfterFinalValue;
-                blkParams.blk_name = blk_name;
-                [time_array, data_array] = ...
-                    nasa_toLustre.blocks.FromWorkspace_To_Lustre.handleOutputAfterFinalValue(...
-                    time_array, data_array, SampleTime, ...
-                    blkParams.OutputAfterFinalValue);
-%                 t_final = time_array(end)*1.e3;
-%                 if strcmp(blk.OutputAfterFinalValue, 'Extrapolation')
-%                     x = [time_array(end-1), time_array(end)];
-%                     y = [data_array(end-1), data_array(end)];
-%                     df = interp1(x, y, t_final,'linear','extrap');
-%                     time_array = [time_array, t_final];
-%                     data_array = [data_array, df];
-%                 elseif strcmp(blk.OutputAfterFinalValue, 'Setting to zero')
-%                     t_next = time_array(end)+0.5*SampleTime;
-%                     time_array = [time_array, t_next];
-%                     data_array = [data_array, 0.0];
-%                     time_array = [time_array, t_final];
-%                     data_array = [data_array, 0.0];
-%                 elseif strcmp(blk.OutputAfterFinalValue, 'Holding final value')
-%                     time_array = [time_array, t_final];
-%                     data_array = [data_array, data_array(end)];
-%                 else   % Cyclic repetition not supported
-%                     display_msg(sprintf('Option %s is not supported in block %s',...
-%                         blk.OutputAfterFinalValue, HtmlItem.addOpenCmd(blk.Origin_path)), ...
-%                         MsgType.ERROR, 'FromWorkspace_To_Lustre', '');
-%                     return;
-%                 end
-                
-                if numel(outputs) >= i                    
-                    [codeAst, vars] = ...
-                        nasa_toLustre.blocks.Sigbuilderblock_To_Lustre.interpTimeSeries(...
-                        outputs{i},time_array, data_array, ...
-                        blkParams,i,interpolate, simTime,lus_backend);
-                 
-                    codeAst_all = [codeAst_all codeAst];
-                    vars_all = [vars_all vars];
+                if length(outputs) == 1
+                    outputs_thens{end+1} = thens{1};
+                else
+                    outputs_thens{end+1} = nasa_toLustre.lustreAst.TupleExpr(thens);
                 end
             end
-            external_lib = {'LustMathLib_abs_real'};
-            obj.addExternal_libraries(external_lib);
-            obj.addCode( codeAst_all );      
-            obj.addVariable(outputs_dt);
-            obj.addVariable(vars_all);       
+            
+            % t > stop_time
+            
+            if strcmp(outputAfterFinalValue, 'Extrapolation')
+                % extrapolate using last two points
+                t = nasa_toLustre.utils.SLX2LusUtils.num2LusExp(...
+                    time(end-1),  'real');
+                t_plus_1 = nasa_toLustre.utils.SLX2LusUtils.num2LusExp(...
+                    time(end),  'real');
+                thens = cell(1, length(outputs));
+                for outIdx = 1:length(outputs)
+                    v = nasa_toLustre.utils.SLX2LusUtils.num2LusExp(...
+                        values(end-1, outIdx), v_lusDT, v_slxDT);
+                    v_plus_1 = nasa_toLustre.utils.SLX2LusUtils.num2LusExp(...
+                        values(end, outIdx), v_lusDT, v_slxDT);
+                    thens{outIdx} = ...
+                        nasa_toLustre.blocks.Lookup_nD_To_Lustre.interp2points_2D(...
+                        t, v, t_plus_1, v_plus_1, simTime);
+                end
+                if length(outputs) == 1
+                    outputs_thens{end+1} = thens{1};
+                else
+                    outputs_thens{end+1} = nasa_toLustre.lustreAst.TupleExpr(thens);
+                end
+                
+            elseif strcmp(outputAfterFinalValue, 'Setting to zero')
+                % add condition t = t_last => v = vlast
+                t_end = nasa_toLustre.utils.SLX2LusUtils.num2LusExp(...
+                    time(end), 'real');
+                epsilon = nasa_toLustre.blocks.Lookup_nD_To_Lustre.calculate_eps(time, length(time));
+                outputs_conds{end+1} = nasa_toLustre.lustreAst.BinaryExpr(...
+                    nasa_toLustre.lustreAst.BinaryExpr.EQ, ...
+                    simTime, ...
+                    t_end, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
+                thens = cell(1, length(outputs));
+                for outIdx = 1:length(outputs)
+                    thens{outIdx} = nasa_toLustre.utils.SLX2LusUtils.num2LusExp(...
+                        values(end, outIdx), v_lusDT, v_slxDT);
+                end
+                if length(outputs) == 1
+                    outputs_thens{end+1} = thens{1};
+                else
+                    outputs_thens{end+1} = nasa_toLustre.lustreAst.TupleExpr(thens);
+                end
+                % add code t > t_last => v = 0
+                thens = cell(1, length(outputs));
+                for outIdx = 1:length(outputs)
+                    thens{outIdx} = nasa_toLustre.utils.SLX2LusUtils.num2LusExp(...
+                        0, v_lusDT, v_slxDT);
+                end
+                if length(outputs) == 1
+                    outputs_thens{end+1} = thens{1};
+                else
+                    outputs_thens{end+1} = nasa_toLustre.lustreAst.TupleExpr(thens);
+                end
+            elseif strcmp(outputAfterFinalValue, 'Holding final value')
+                % add condition t >= t_last => v = vlast
+                thens = cell(1, length(outputs));
+                for outIdx = 1:length(outputs)
+                    thens{outIdx} = nasa_toLustre.utils.SLX2LusUtils.num2LusExp(...
+                        values(end, outIdx), v_lusDT, v_slxDT);
+                end
+                if length(outputs) == 1
+                    outputs_thens{end+1} = thens{1};
+                else
+                    outputs_thens{end+1} = nasa_toLustre.lustreAst.TupleExpr(thens);
+                end
+                
+            end
+            if length(outputs) == 1
+                lhs = outputs{1};
+            else
+                lhs = nasa_toLustre.lustreAst.TupleExpr(outputs);
+            end
+            
+            % add seperate node and call it. add contract bounding values.
+            blk_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);
+            ext_node = nasa_toLustre.lustreAst.LustreNode();
+            ext_node.setName(blk_name);
+            ext_node.setInputs(nasa_toLustre.lustreAst.LustreVar(simTime, 'real'));
+            ext_node_outputs = outputs_dt;
+            if ~strcmp(v_lusDT, outLusDT)
+                % need casting from real to slx datatype
+                ext_node_outputs = cellfun(@(x) ...
+                    nasa_toLustre.lustreAst.LustreVar(x, 'real'), outputs,...
+                    'UniformOutput', 0);
+            end
+            ext_node.setOutputs(ext_node_outputs);
+            body{1} = nasa_toLustre.lustreAst.LustreEq(...
+                lhs, ...
+                nasa_toLustre.lustreAst.IteExpr.nestedIteExpr(...
+                outputs_conds, outputs_thens));
+            ext_node.setBodyEqs(body);
+            
+            obj.addExtenal_node(ext_node);
+            if strcmp(v_lusDT, outLusDT)
+                obj.addCode(nasa_toLustre.lustreAst.LustreEq(lhs, ...
+                    nasa_toLustre.lustreAst.NodeCallExpr(...
+                    blk_name, simTime)));
+            else
+                % need casting
+                [external_lib, conv_format] =...
+                    nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(...
+                    'real', slx_outDataType, 'Nearest');
+                if ~isempty(conv_format)
+                    obj.addExternal_libraries(external_lib);
+                    local_vars = cellfun(@(x) ...
+                        nasa_toLustre.lustreAst.LustreVar(...
+                        strcat(blk_name, '_', x.getId()), 'real'), outputs,...
+                        'UniformOutput', 0);
+                    obj.addVariable(local_vars);
+                    local_Ids = cellfun(@(x) ...
+                        nasa_toLustre.lustreAst.VarIdExpr(x.getId()), local_vars,...
+                        'UniformOutput', 0);
+                    if length(local_Ids) == 1
+                        new_lhs = local_Ids{1};
+                    else
+                        new_lhs = nasa_toLustre.lustreAst.TupleExpr(local_Ids);
+                    end
+                    obj.addCode(nasa_toLustre.lustreAst.LustreEq(new_lhs, ...
+                        nasa_toLustre.lustreAst.NodeCallExpr(...
+                        blk_name, simTime)));
+                    
+                    %add casting
+                    for i=1:length(outputs)
+                        code = ...
+                            nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(...
+                            conv_format,local_Ids{i});
+                        obj.addCode(nasa_toLustre.lustreAst.LustreEq(outputs{i}, code));
+                    end
+                end
+            end
+            % add abs real for epsilon comparaison if backend is LUstrec
+            if LusBackendType.isLUSTREC(lus_backend)
+                obj.addExternal_libraries('LustMathLib_abs_real');
+            end
         end
         %%
         function options = getUnsupportedOptions(obj, parent, blk, varargin)
@@ -148,14 +287,7 @@ classdef FromWorkspace_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 obj.addUnsupported_options(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
                     VariableName, HtmlItem.addOpenCmd(blk.Origin_path)));
             end
-%             t = [0, 0];
-%             if isnumeric(variable)
-%                 t = variable(:,1);
-%             elseif isstruct(variable)
-%                 t = variable.time;
-%             elseif isa(variable,'timeseries')
-%                 t = variable.Time;
-            if ~isnumeric(variable) & ~isstruct(variable) & ~isa(variable,'timeseries')
+            if ~isnumeric(variable) && ~isstruct(variable) && ~isa(variable,'timeseries')
                 obj.addUnsupported_options(...
                     sprintf('Workspace variable must be numeric arrays, time series or struct with time and data in block %s',...
                     HtmlItem.addOpenCmd(blk.Origin_path)));
@@ -166,7 +298,7 @@ classdef FromWorkspace_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     sprintf('Option %s is not supported in block %s',...
                     blk.OutputAfterFinalValue, HtmlItem.addOpenCmd(blk.Origin_path)));
             end
-            % What if Sample Time of block variable is different from Model ST 
+            %% TODO: What if Sample Time of block variable is different from Model ST
             options = obj.unsupported_options;
         end
         %%
@@ -177,10 +309,9 @@ classdef FromWorkspace_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     methods (Static)
         
         [time_array, data_array] = handleOutputAfterFinalValue(...
-                time_array, data_array, SampleTime, option)
+            time_array, data_array, SampleTime, option)
         
-        code = addValue(a, code, outLusDT)
-
+        
     end
 end
 

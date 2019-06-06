@@ -10,8 +10,13 @@ function [status, errors_msg] = FromWorkSpace_pp(model)
     % Processing FromWorkSpace blocks
     % fromWorkSpace_list = find_system(model,...
     %     'LookUnderMasks', 'all', 'MaskType','From WorkSpace block');
+    
+    
     status = 0;
     errors_msg = {};
+    
+    %% Ignore fromWorkSpace. TODO delete it.
+    return;
     fromWorkSpace_list = find_system(model, ...
         'LookUnderMasks', 'all', 'BlockType','FromWorkspace');
     

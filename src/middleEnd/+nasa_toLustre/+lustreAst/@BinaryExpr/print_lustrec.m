@@ -1,15 +1,17 @@
 function code = print_lustrec(obj, backend)
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Copyright (c) 2017 United States Government as represented by the
-% Administrator of the National Aeronautics and Space Administration.
-% All Rights Reserved.
-% Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-        if obj.addEpsilon ...
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Copyright (c) 2017 United States Government as represented by the
+    % Administrator of the National Aeronautics and Space Administration.
+    % All Rights Reserved.
+    % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+    if obj.addEpsilon ...
             && (strcmp(obj.op, '>=') || strcmp(obj.op, '>') ...
-            || strcmp(obj.op, '<=') || strcmp(obj.op, '<'))
-        if strcmp(obj.op, '>=') || strcmp(obj.op, '<=')
+            || strcmp(obj.op, '<=') || strcmp(obj.op, '<') ...
+            || strcmp(obj.op, '='))
+        if strcmp(obj.op, '>=') || strcmp(obj.op, '<=') ...
+                || strcmp(obj.op, '=')
             epsilonOp = nasa_toLustre.lustreAst.BinaryExpr.LTE;
             and_or = 'or';
         else
