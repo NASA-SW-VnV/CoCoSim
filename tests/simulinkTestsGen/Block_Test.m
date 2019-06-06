@@ -141,6 +141,9 @@ classdef Block_Test
             new_system(mdl_name);
             if addCondExecSS
                 if bdIsLoaded('Block_TestLib'), load_system('Block_TestLib'); end
+                if condExecSSIdx > length(Block_Test.condExecSS)
+                    condExecSSIdx = mod(condExecSSIdx, length(Block_Test.condExecSS)) + 1;
+                end
                 libPath = fullfile('Block_TestLib', Block_Test.condExecSS{condExecSSIdx});
                 libDst = fullfile(mdl_name, Block_Test.condExecSS{condExecSSIdx});
                 add_block(libPath, libDst);
@@ -167,12 +170,12 @@ classdef Block_Test
             set_param(configSet, 'ParameterOverflowMsg', 'none');
             
             failed = CompileModelCheck_pp( mdl_name );
-%             if failed
-%                 display_msg(['Model failed: ' mdl_name], ...
-%                     MsgType.ERROR, 'generateTests', '');
-%             else
+            if failed
+                display_msg(['Model failed: ' mdl_name], ...
+                    MsgType.ERROR, 'generateTests', '');
+            else
                 save_system(mdl_name, mdl_path);
-%             end
+            end
             bdclose(mdl_name);
         end
     end

@@ -92,7 +92,6 @@ classdef Lookup_nD_Test < Block_Test
                         s.LookupTableObject = LUTObjName;
                         hws.assignin(LUTObjName, s.LUTObj);
                         s = rmfield(s, 'LUTObj');
-%                         obj.addLookupTableObjectToBaseWs(mdl_name, LUTObjName)
                     end
                     tableDim = 1;
                     if isfield(s, 'TableDim')
@@ -352,16 +351,7 @@ classdef Lookup_nD_Test < Block_Test
             end
             
         end
-%         
-%         function addLookupTableObjectToBaseWs(obj, mdl, LUTObjName)
-%             code = get_param(mdl, 'PreLoadFcn');
-%             
-%             code = sprintf('%s\n hws = get_param(gcs, ''modelworkspace'');', code);
-%             code = sprintf('%s\n if hws.hasVariable(''%s'')', code, LUTObjName);
-%             code = sprintf('%s\n assignin(''base'',''%s'', hws.getVariable(''%s''));', code, LUTObjName, LUTObjName);
-%             code = sprintf('%s\n end', code);
-%             set_param(mdl, 'PreLoadFcn', code);
-%         end
+
     end
 end
 
