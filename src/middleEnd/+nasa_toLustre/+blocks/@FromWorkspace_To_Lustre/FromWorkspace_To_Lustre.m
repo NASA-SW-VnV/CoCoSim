@@ -165,25 +165,7 @@ classdef FromWorkspace_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 end
                 
             elseif strcmp(outputAfterFinalValue, 'Setting to zero')
-                % add condition t = t_last => v = vlast
-                t_end = nasa_toLustre.utils.SLX2LusUtils.num2LusExp(...
-                    time(end), 'real');
-                epsilon = nasa_toLustre.blocks.Lookup_nD_To_Lustre.calculate_eps(time, length(time));
-                outputs_conds{end+1} = nasa_toLustre.lustreAst.BinaryExpr(...
-                    nasa_toLustre.lustreAst.BinaryExpr.EQ, ...
-                    simTime, ...
-                    t_end, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
-                thens = cell(1, length(outputs));
-                for outIdx = 1:length(outputs)
-                    thens{outIdx} = nasa_toLustre.utils.SLX2LusUtils.num2LusExp(...
-                        values(end, outIdx), v_lusDT, v_slxDT);
-                end
-                if length(outputs) == 1
-                    outputs_thens{end+1} = thens{1};
-                else
-                    outputs_thens{end+1} = nasa_toLustre.lustreAst.TupleExpr(thens);
-                end
-                % add code t > t_last => v = 0
+                % add code t >= t_last => v = 0
                 thens = cell(1, length(outputs));
                 for outIdx = 1:length(outputs)
                     thens{outIdx} = nasa_toLustre.utils.SLX2LusUtils.num2LusExp(...
