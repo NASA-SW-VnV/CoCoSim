@@ -8,7 +8,6 @@ function [ ir ] = diagramBlockParams( ir )
     %DIAGRAMBLOCKPARAMS Add some parameters to the block diagram missing in the
     %original IR
 
-    fields = fieldnames(ir);
     file_path = ir.meta.file_path;
     load_system(file_path);
     [~, file_name, ~] = fileparts(file_path);

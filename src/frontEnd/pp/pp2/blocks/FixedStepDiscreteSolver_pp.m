@@ -12,6 +12,12 @@ function  [status, errors_msg] = FixedStepDiscreteSolver_pp( new_model_base )
     try
         configSet = getActiveConfigSet(new_model_base);
         set_param(configSet, 'Solver', 'FixedStepDiscrete');
+        st = SLXUtils.getModelCompiledSampleTime(new_model_base);
+        if st == 0
+            % no discrete block in the model
+            % set sample time to 0.1
+            set_param(configSet, 'FixedStep', '0.1');
+        end
     catch me
         display_msg(['Please set your model to FixedStepDiscrete'], MsgType.ERROR, 'PP', '');
         display_msg(me.message, MsgType.ERROR, 'PP', '');

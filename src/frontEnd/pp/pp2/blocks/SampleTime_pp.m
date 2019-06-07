@@ -14,10 +14,13 @@ function [status, errors_msg] = SampleTime_pp(new_model_base)
     
     try
         [st, ~] = SLXUtils.getModelCompiledSampleTime(new_model_base);
+        configSet = getActiveConfigSet(new_model_base);
         if st > 0
-            configSet = getActiveConfigSet(new_model_base);
             set_param(configSet, 'SolverType', 'Fixed-step');
             set_param(configSet, 'FixedStep', sprintf('%f', st));
+        elseif st == 0
+            set_param(configSet, 'SolverType', 'Fixed-step');
+            set_param(configSet, 'FixedStep', '0.1');
         end
     catch me
         display_msg(me.getReport(), MsgType.DEBUG, 'PP', '');

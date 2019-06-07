@@ -12,7 +12,7 @@ classdef FromWorkspace_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     
     methods
         
-        function  write_code(obj, parent, blk, xml_trace, lus_backend, varargin)
+        function  write_code(obj, parent, blk, xml_trace, lus_backend, ~, main_sampleTime, varargin)
             [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             obj.addVariable(outputs_dt);
             
@@ -96,23 +96,35 @@ classdef FromWorkspace_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             outputs_conds = {};
             outputs_thens = {};
             simTime = nasa_toLustre.lustreAst.VarIdExpr(nasa_toLustre.utils.SLX2LusUtils.timeStepStr());
+            
+            un_time = unique(time); % remove repetition for SignalBuilder case
+            shifted_time = [0; un_time(1:end-1)];
+            distance = un_time - shifted_time;
+            distance(1) = main_sampleTime(1);% replace first distance by model sample time
+            epsilon = min(distance)/1000;
             for i=1:length(time)-1
+                if time(i) == time(i+1)
+                    % the case of fromworkspace that is inside SignalBuilder
+                    % when t(n) = t(n+1), t(n) is used to interpolate left
+                    % values and t(n+1) is used to interpolate right
+                    % values. the value at t(n)=t(n+1) will be V(n+1).
+                    continue;
+                end
                 t = nasa_toLustre.utils.SLX2LusUtils.num2LusExp(...
                     time(i),  'real');
                 t_plus_1 = nasa_toLustre.utils.SLX2LusUtils.num2LusExp(...
                     time(i+1), 'real');
                 
                 
-                epsilon =...
-                    nasa_toLustre.blocks.Lookup_nD_To_Lustre.calculate_eps(time, i);
+                lowerOP = nasa_toLustre.lustreAst.BinaryExpr.GTE;
                 lowerCond = nasa_toLustre.lustreAst.BinaryExpr(...
-                    nasa_toLustre.lustreAst.BinaryExpr.GTE, ...
-                    simTime, ...
-                    t, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
+                    lowerOP, simTime, t, [],...
+                    LusBackendType.isLUSTREC(lus_backend), epsilon);
+                
+                upperOP = nasa_toLustre.lustreAst.BinaryExpr.LT;
                 upperCond = nasa_toLustre.lustreAst.BinaryExpr(...
-                    nasa_toLustre.lustreAst.BinaryExpr.LT, ...
-                    simTime, ...
-                    t_plus_1, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
+                    upperOP, simTime, t_plus_1, [], ...
+                    LusBackendType.isLUSTREC(lus_backend), epsilon);
                 
                 outputs_conds{end+1} = nasa_toLustre.lustreAst.BinaryExpr(...
                     nasa_toLustre.lustreAst.BinaryExpr.AND, lowerCond, upperCond);
@@ -165,7 +177,24 @@ classdef FromWorkspace_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 end
                 
             elseif strcmp(outputAfterFinalValue, 'Setting to zero')
-                % add code t >= t_last => v = 0
+                % add code t = tlast => v = vlast
+                t = nasa_toLustre.utils.SLX2LusUtils.num2LusExp(...
+                    time(end),  'real');
+                outputs_conds{end+1} = nasa_toLustre.lustreAst.BinaryExpr(...
+                    nasa_toLustre.lustreAst.BinaryExpr.EQ, ...
+                    simTime, ...
+                    t, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
+                thens = cell(1, length(outputs));
+                for outIdx = 1:length(outputs)
+                    thens{outIdx} = nasa_toLustre.utils.SLX2LusUtils.num2LusExp(...
+                        values(end, outIdx), v_lusDT, v_slxDT);
+                end
+                if length(outputs) == 1
+                    outputs_thens{end+1} = thens{1};
+                else
+                    outputs_thens{end+1} = nasa_toLustre.lustreAst.TupleExpr(thens);
+                end
+                % add code t > t_last => v = 0
                 thens = cell(1, length(outputs));
                 for outIdx = 1:length(outputs)
                     thens{outIdx} = nasa_toLustre.utils.SLX2LusUtils.num2LusExp(...

@@ -126,6 +126,9 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, abstractedBlo
                         'Using previously generated code, no modifications '..., 
                         'have been made to the model.'],...
                         MsgType.RESULT, 'ToLustre', '');
+                    display_msg(sprintf('If you want to force code generation set "%s" to 1 in Matlab workspace', ...
+                        nasa_toLustre.utils.ToLustreOptions.FORCE_CODE_GEN),...
+                        MsgType.RESULT, 'ToLustre', '');
                     return;
                 end
             
