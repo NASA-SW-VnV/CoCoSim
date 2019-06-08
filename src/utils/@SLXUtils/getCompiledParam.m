@@ -8,7 +8,11 @@
 %% Get compiled params: CompiledPortDataTypes ...
 function [res] = getCompiledParam(h, param)
     res = [];
-    slx_file_name = get_param(bdroot(h), 'Name');
+    if iscell(h)
+        slx_file_name = get_param(bdroot(h{1}), 'Name');
+    else
+        slx_file_name = get_param(bdroot(h), 'Name');
+    end
     code_on=sprintf('%s([], [], [], ''compile'')', slx_file_name);
     try
         evalin('base',code_on);

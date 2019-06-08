@@ -17,6 +17,7 @@ Gain_list = find_system(model, ...
 if not(isempty(Gain_list))
     display_msg('Replacing Gain blocks...', MsgType.INFO,...
         'Gain_pp', '');
+    allCompiledDT = SLXUtils.getCompiledParam(Gain_list, 'CompiledPortDataTypes');
     for i=1:length(Gain_list)
         try
             display_msg(Gain_list{i}, MsgType.INFO, ...
@@ -30,12 +31,18 @@ if not(isempty(Gain_list))
             if status == 0 && numel(gain_value) == 1
                 continue;
             end
-            CompiledPortDataTypes = SLXUtils.getCompiledParam(Gain_list{i}, 'CompiledPortDataTypes');
-            if strcmp(CompiledPortDataTypes.Inport{1}, 'boolean') ...
+            CompiledPortDataTypes = allCompiledDT{i};
+            if MatlabUtils.contains(CompiledPortDataTypes.Outport{1}, 'fix') ... % sfix, ufix
+                    || MatlabUtils.contains(CompiledPortDataTypes.Outport{1}, 'flt') %flts, fltu
+                productDataType = get_param(Gain_list{i}, 'OutDataTypeStr');
+                cstDataType = 'Inherit: Inherit from ''Constant value''';
+            elseif strcmp(CompiledPortDataTypes.Inport{1}, 'boolean') ...
                     && ~MatlabUtils.contains(CompiledPortDataTypes.Outport{1}, 'fix')
-                outputDataType = CompiledPortDataTypes.Outport{1};
+                productDataType = CompiledPortDataTypes.Outport{1};
+                cstDataType = 'Inherit: Inherit from ''Constant value''';
             else
-                outputDataType = get_param(Gain_list{i}, 'OutDataTypeStr');
+                productDataType = get_param(Gain_list{i}, 'OutDataTypeStr');
+                cstDataType = 'Inherit: Inherit via back propagation';
             end
             Multiplication = get_param(Gain_list{i}, 'Multiplication');
             SaturateOnIntegerOverflow = get_param(Gain_list{i},'SaturateOnIntegerOverflow');
@@ -56,18 +63,18 @@ if not(isempty(Gain_list))
             set_param(strcat(Gain_list{i},'/K'),...
                 'Value',gain);
             set_param(strcat(Gain_list{i},'/K'),...
-                'OutDataTypeStr','Inherit: Inherit via back propagation');
+                'OutDataTypeStr',cstDataType);
             if strcmp(Multiplication, 'Element-wise(K.*u)')
                 set_param(strcat(Gain_list{i},'/K'),...
                 'VectorParams1D','on');
             end
             
             % set parameters to product block
-            if strcmp(outputDataType, 'Inherit: Same as input')
-                outputDataType = 'Inherit: Same as first input';
+            if strcmp(productDataType, 'Inherit: Same as input')
+                productDataType = 'Inherit: Same as first input';
             end
             set_param(strcat(Gain_list{i},'/Product'),...
-                'OutDataTypeStr',outputDataType);
+                'OutDataTypeStr',productDataType);
             set_param(strcat(Gain_list{i},'/Product'),...
                 'SaturateOnIntegerOverflow',SaturateOnIntegerOverflow);
             

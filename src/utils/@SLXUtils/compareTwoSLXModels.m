@@ -12,8 +12,8 @@ function [valid, sim_failed] = compareTwoSLXModels(orig_mdl_path, pp_mdl_path,..
     if nargin < 4
         show_models = false;
     end
-    valid = -1;
-    sim_failed = -1;
+    valid = true;
+    sim_failed = false;
     
     [orig_mdl_dir, orig_mdl_name, ~] = fileparts(orig_mdl_path);
     [~, pp_mdl_name, ~] = fileparts(pp_mdl_path);
@@ -105,6 +105,8 @@ function [valid, sim_failed] = compareTwoSLXModels(orig_mdl_path, pp_mdl_path,..
     for k=1:numberOfOutputs
         out_width(k) = LustrecUtils.getSignalWidth(yout1{k}.Values);
     end
+    diff_name = '';
+    diff_value = 0;
     for i=1:numel(time)
         cex_msg{end+1} = sprintf('*****time : %f**********\n',time(i));
         cex_msg{end+1} = sprintf('*****inputs: \n');
@@ -270,11 +272,16 @@ function areTheSame = modelsAreTheSame(mdl1, mdl2)
                 CompiledPortDataType2 = get_param(mdl2_outports{i}, 'CompiledPortDataTypes');
                 if ~strcmp(CompiledPortDataType1.Inport{1}, CompiledPortDataType2.Inport{1})
                     display_msg(sprintf('Outports "%s" and "%s" do not have the same dataTypes. First has datatype "%s" whereas the second has datatype of "%s"',...
-                        mdl1_outports{i}, mdl2_outports{i}, ...
-                        CompiledPortDataType1.Inport{1}, CompiledPortDataType2.Inport{1}),...
-                        MsgType.ERROR, 'SLXUtils.compareTwoSLXModels', '');
-                    failed = true;
-                    break;
+                            mdl1_outports{i}, mdl2_outports{i}, ...
+                            CompiledPortDataType1.Inport{1}, CompiledPortDataType2.Inport{1}),...
+                            MsgType.ERROR, 'SLXUtils.compareTwoSLXModels', '');
+                    if MatlabUtils.contains(CompiledPortDataType1.Inport{1}, 'fix') ... % fixed-point data type
+                            || MatlabUtils.contains(CompiledPortDataType1.Inport{1}, 'flt') % scaled doubles
+                        % ignore it,
+                    else
+                        failed = true;
+                        break;
+                    end
                 end
             end
         end
