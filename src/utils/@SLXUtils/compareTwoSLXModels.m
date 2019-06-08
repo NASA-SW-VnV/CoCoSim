@@ -22,7 +22,7 @@ function [valid, sim_failed] = compareTwoSLXModels(orig_mdl_path, pp_mdl_path,..
     areTheSame = modelsAreTheSame(orig_mdl_path, pp_mdl_path);
     if ~areTheSame
         valid = 0;
-        sim_failed = 0;
+        sim_failed = 1;
         return;
     end
     % Create the input struct for the simulation
