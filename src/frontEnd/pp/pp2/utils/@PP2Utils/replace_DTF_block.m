@@ -1,24 +1,44 @@
-function [] = replace_DTF_block(blk, U_dims_blk,num,denum )
+function [] = replace_DTF_block(blk, U_dims_blk,num,denum, blkType )
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2017 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
     %     For discrete-time transfer functions, it is highly recommended to
     %     make the length of the numerator and denominator equal to ensure
     %     correct results.
     if numel(denum) < numel(num)
         tempDenum = zeros(1,length(num));
-        tempDenum(1:numel(denum)) = denum;
+        if strcmp(blkType, 'DiscreteTransferFcn')
+            % add zeros on the left of denumerator
+            tempDenum(length(num) - length(denum) + 1:end) = denum;
+        elseif strcmp(blkType, 'DiscreteFilter') ...
+                || strcmp(blkType, 'DiscreteFIRFilter')
+            % add zeros on the right of denumerator
+            tempDenum(1:length(denum)) = denum;
+        else
+            tempDenum = denum;
+        end
         denum = tempDenum;
-    elseif numel(num) < numel(denum)
+    end
+    
+    if numel(num) < numel(denum)
         tempNum = zeros(1,length(denum));
-        tempNum(1:length(num)) = num;
+        if strcmp(blkType, 'DiscreteTransferFcn')
+            % add zeros on the left of numerator
+            tempNum(length(denum) - length(num) + 1:end) = num;
+        elseif strcmp(blkType, 'DiscreteFilter') ...
+                || strcmp(blkType, 'DiscreteFIRFilter')
+            % add zeros on the right of numerator
+            tempNum(1:length(num)) = num;
+        else
+            tempNum = num;
+        end
         num = tempNum;
     end
-
+    
     % Computing state space representation
     [A,B,C,D]=tf2ss(num,denum);
     if isempty(A)
@@ -41,13 +61,13 @@ function [] = replace_DTF_block(blk, U_dims_blk,num,denum )
     else
         D = mat2str(D);
     end
-
+    
     [n,~] = size(num);
     mutliNumerator = 0;
     if n>1
         mutliNumerator = 1;
     end
-
+    
     InitialStates = get_param(blk,'InitialStates');
     outputDataType = get_param(blk, 'OutDataTypeStr');
     if strcmp(outputDataType, 'Inherit: Same as input')

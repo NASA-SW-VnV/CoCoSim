@@ -17,15 +17,12 @@ classdef PP2Utils
         %%
         [Phi, Gamma] = c2d(a, b ,t)
         
-        [] = replace_DTF_block(blk, U_dims_blk,num,denum )
-        
-        [num, status] = getTfNumerator(model,blk,numStr,ppName)
-        
-        [denum, status] = getTfDenum(model,blk, ppName)
+        [] = replace_DTF_block(blk, U_dims_blk,num,denum, blkType )
+                
         
         [failed] = replace_one_block(block,new_block)
         
-        %%
+        %% Validate pre-processing using random tests
         [pp_valid, pp_sim_failed, pp_failed] = validatePP(orig_model_full_path, options)
     end
     

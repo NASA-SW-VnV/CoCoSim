@@ -38,16 +38,25 @@ function [] = DiscreteFIRFilter_pp(model)
                 end
                 % Obtaining z-expression parameters
                 % get numerator
-                [num, status] = PP2Utils.getTfNumerator(model,dFir_list{i}, 'Coefficients','DiscreteFIRFilter_pp');
+                num_str = get_param(dFir_list{i},'Coefficients');
+                [num, ~, status] = SLXUtils.evalParam(...
+                    model, ...
+                    get_param(dFir_list{i}, 'Parent'), ...
+                    dFir_list{i}, ...
+                    num_str);
                 if status
+                    display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
+                        num_str, dFir_list{i}), ...
+                        MsgType.ERROR, 'DiscreteFIRFilter_pp', '');
                     continue;
                 end
+                
 
                 % Computing state space representation
                 denum = zeros(1,length(num));
                 denum(1) = 1;
 
-                PP2Utils.replace_DTF_block(dFir_list{i}, U_dims{i},num,denum);
+                PP2Utils.replace_DTF_block(dFir_list{i}, U_dims{i},num,denum, 'DiscreteFIRFilter');
                 set_param(dFir_list{i}, 'LinkStatus', 'inactive');
             catch
                 status = 1;

@@ -11,14 +11,14 @@ function [status, errors_msg] = DiscreteFilter_pp(model)
     % Processing Gain blocks
     status = 0;
     errors_msg = {};
-
+    
     dFilter_list = find_system(model, ...
         'LookUnderMasks', 'all', 'BlockType','DiscreteFilter');
     if not(isempty(dFilter_list))
         display_msg('Replacing DiscreteFilter blocks...', MsgType.INFO,...
             'DiscreteFilter_pp', '');
         U_dims = SLXUtils.tf_get_U_dims(model, 'DiscreteFilter_pp', dFilter_list);
-
+        
         %% pre-processing blocks
         for i=1:length(dFilter_list)
             try
@@ -27,8 +27,8 @@ function [status, errors_msg] = DiscreteFilter_pp(model)
                 end
                 display_msg(dFilter_list{i}, MsgType.INFO, ...
                     'DiscreteFilter_pp', '');
-
-
+                
+                
                 Filter_structure = get_param(dFilter_list{i}, 'FilterStructure');
                 if strcmp(Filter_structure, 'Direct form I') ...
                         || strcmp(Filter_structure, 'Direct form I transposed') ...
@@ -38,24 +38,41 @@ function [status, errors_msg] = DiscreteFilter_pp(model)
                         MsgType.ERROR, 'DiscreteFilter_pp', '');
                     continue;
                 end
-
+                
                 % Obtaining z-expression parameters
-                [denum, status] = PP2Utils.getTfDenum(model,dFilter_list{i}, 'DiscreteFilter_pp');
+                denum_str = get_param(dFilter_list{i}, 'Denominator');
+                [denum, ~, status] = SLXUtils.evalParam(...
+                    model, ...
+                    get_param(dFilter_list{i}, 'Parent'), ...
+                    dFilter_list{i}, ...
+                    denum_str);
                 if status
+                    display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
+                        denum_str, dFilter_list{i}), ...
+                        MsgType.ERROR, 'DiscreteFilter_pp', '');
                     continue;
                 end
+                
                 % get numerator
-                [num, status] = PP2Utils.getTfNumerator(model,dFilter_list{i},'Numerator', 'DiscreteFilter_pp');
+                num_str = get_param(dFilter_list{i},'Numerator');
+                [num, ~, status] = SLXUtils.evalParam(...
+                    model, ...
+                    get_param(dFilter_list{i}, 'Parent'), ...
+                    dFilter_list{i}, ...
+                    num_str);
                 if status
+                    display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
+                        num_str, dFilter_list{i}), ...
+                        MsgType.ERROR, 'DiscreteFilter_pp', '');
                     continue;
                 end
-
-                PP2Utils.replace_DTF_block(dFilter_list{i}, U_dims{i},num,denum);
+                
+                PP2Utils.replace_DTF_block(dFilter_list{i}, U_dims{i},num,denum, 'DiscreteFilter');
                 set_param(dFilter_list{i}, 'LinkStatus', 'inactive');
             catch
                 status = 1;
                 errors_msg{end + 1} = sprintf('DiscreteFilter pre-process has failed for block %s', dFilter_list{i});
-                continue;            
+                continue;
             end
         end
         display_msg('Done\n\n', MsgType.INFO, 'DiscreteFilter_pp', '');

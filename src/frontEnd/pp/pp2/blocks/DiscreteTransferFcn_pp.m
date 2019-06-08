@@ -34,13 +34,30 @@ function [status, errors_msg] = DiscreteTransferFcn_pp(model)
                 
                 % Obtaining z-expression parameters
                 % get denominator
-                [denum, status] = PP2Utils.getTfDenum(model,dtf_list{i}, 'DiscreteTransferFcn_pp');
+                denum_str = get_param(dtf_list{i}, 'Denominator');
+                [denum, ~, status] = SLXUtils.evalParam(...
+                    model, ...
+                    get_param(dtf_list{i}, 'Parent'), ...
+                    dtf_list{i}, ...
+                    denum_str);
                 if status
+                    display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
+                        denum_str, dtf_list{i}), ...
+                        MsgType.ERROR, 'DiscreteTransferFcn_pp', '');
                     continue;
                 end
+                
                 % get numerator
-                [num, status] = PP2Utils.getTfNumerator(model,dtf_list{i}, 'Numerator','DiscreteTransferFcn_pp');
+                num_str = get_param(dtf_list{i},'Numerator');
+                [num, ~, status] = SLXUtils.evalParam(...
+                    model, ...
+                    get_param(dtf_list{i}, 'Parent'), ...
+                    dtf_list{i}, ...
+                    num_str);
                 if status
+                    display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
+                        num_str, dtf_list{i}), ...
+                        MsgType.ERROR, 'DiscreteTransferFcn_pp', '');
                     continue;
                 end
                 
@@ -60,7 +77,7 @@ function [status, errors_msg] = DiscreteTransferFcn_pp(model)
                     end
                 end
                 
-                PP2Utils.replace_DTF_block(dtf_list{i}, U_dims{i},num,denum);
+                PP2Utils.replace_DTF_block(dtf_list{i}, U_dims{i},num,denum, 'DiscreteTransferFcn');
                 set_param(dtf_list{i}, 'LinkStatus', 'inactive');
             catch
                 status = 1;
