@@ -223,23 +223,6 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, abstractedBlo
         nodes_ast = [external_lib_code, nodes_ast];
     end
     %% create LustreProgram
-    
-    keys = TOLUSTRE_ENUMS_MAP.keys();
-    enumsAst = cell(numel(keys), 1);
-    for i=1:numel(keys)
-        enumsAst{i} = nasa_toLustre.lustreAst.EnumTypeExpr(keys{i}, TOLUSTRE_ENUMS_MAP(keys{i}));
-    end
-    if ~isempty(TOLUSTRE_ENUMS_CONV_NODES)
-        nodes_ast = [TOLUSTRE_ENUMS_CONV_NODES, nodes_ast];
-    end
-    nodes_ast = MatlabUtils.removeEmpty(nodes_ast);
-    contracts_ast = MatlabUtils.removeEmpty(contracts_ast);
-    program =  nasa_toLustre.lustreAst.LustreProgram(open_list, enumsAst, nodes_ast, contracts_ast);
-    if cocosim_optim ...
-            && ~(LusBackendType.isLUSTREC(lus_backend) || LusBackendType.isZUSTRE(lus_backend))
-        % Optimization is not important for Lustrec as the later normalize all expressions. 
-        try program = program.simplify(); catch me, display_msg(me.getReport(), MsgType.DEBUG, 'ToLustre.simplify', ''); end
-    end
     % copy Kind2 libraries
     if LusBackendType.isKIND2(lus_backend)
         if ismember('lustrec_math', open_list)
@@ -257,7 +240,32 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, abstractedBlo
                 '+lib', 'conv.lus');
             copyfile(lib_path, output_dir);
         end
+    else %lustrec, zustre ... 
+        if ismember('simulink_math_fcn', open_list) ...
+                && ismember('lustrec_math', open_list)
+            % simulink_math_fcn includes lustrec_math, so remove
+            % lustrec_math to avoid double definition of functions
+            open_list = open_list(~strcmp(open_list, 'lustrec_math'));
+        end
     end
+    
+    keys = TOLUSTRE_ENUMS_MAP.keys();
+    enumsAst = cell(numel(keys), 1);
+    for i=1:numel(keys)
+        enumsAst{i} = nasa_toLustre.lustreAst.EnumTypeExpr(keys{i}, TOLUSTRE_ENUMS_MAP(keys{i}));
+    end
+    if ~isempty(TOLUSTRE_ENUMS_CONV_NODES)
+        nodes_ast = [TOLUSTRE_ENUMS_CONV_NODES, nodes_ast];
+    end
+    nodes_ast = MatlabUtils.removeEmpty(nodes_ast);
+    contracts_ast = MatlabUtils.removeEmpty(contracts_ast);
+    program =  nasa_toLustre.lustreAst.LustreProgram(open_list, enumsAst, nodes_ast, contracts_ast);
+    if cocosim_optim ...
+            && ~(LusBackendType.isLUSTREC(lus_backend) || LusBackendType.isZUSTRE(lus_backend))
+        % Optimization is not important for Lustrec as the later normalize all expressions. 
+        try program = program.simplify(); catch me, display_msg(me.getReport(), MsgType.DEBUG, 'ToLustre.simplify', ''); end
+    end
+    
     %% writing code
     fid = fopen(lustre_file_path, 'a');
     if fid==-1

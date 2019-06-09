@@ -145,7 +145,7 @@ function blkParams = readTableAndBP(parent, blk, blkParams)
                 [spacing, ~, ~] = ...
                     nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(...
                     parent, blk, blk.(sprintf('BreakpointsForDimension%dSpacing',i)));
-                curBreakPoint = zeros(tableDims(i));   %[];
+                curBreakPoint = zeros(1, tableDims(i));   %[];
                 
                 for j=1:tableDims(i)
                     curBreakPoint(j) = firstPoint + (j-1)*spacing;
