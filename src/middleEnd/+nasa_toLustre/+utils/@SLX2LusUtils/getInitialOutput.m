@@ -28,7 +28,11 @@ function InitialOutput_cell = getInitialOutput(parent, blk, InitialOutput, slx_d
         % in the case of bus type, lus_outputDataType is inlined to
         % the basic types of the bus. We need to inline
         % InitialOutputValue as well
-        InitialOutputValue = arrayfun(@(x) InitialOutputValue, (1:numel(lus_outputDataType)));
+        InitialOutputValue = arrayfun(@(x) InitialOutputValue(1), (1:numel(lus_outputDataType)*max_width));
+        base_lus_outputDataType = lus_outputDataType;
+        for i=2:max_width
+            lus_outputDataType = [lus_outputDataType, base_lus_outputDataType];
+        end
     else
         lus_outputDataType = arrayfun(@(x) {lus_outputDataType}, (1:numel(InitialOutputValue)));
     end
@@ -38,6 +42,7 @@ function InitialOutput_cell = getInitialOutput(parent, blk, InitialOutput, slx_d
         InitialOutput_cell{i} = nasa_toLustre.utils.SLX2LusUtils.num2LusExp(...
             InitialOutputValue(i), lus_outputDataType{i}, InitialOutputType);
     end
+
     if numel(InitialOutput_cell) < max_width
         InitialOutput_cell = arrayfun(@(x) InitialOutput_cell(1), (1:max_width));
     end

@@ -136,7 +136,7 @@ classdef LustDTLib
             if LusBackendType.isKIND2(lus_backend)
                                 opens = {};
                 abstractedNodes = {};
-                external_nodes = {'LustMathLib_abs_real', 'LustDTLib_Round'};
+                external_nodes = {'LustMathLib_abs_real', 'LustDTLib__Round'};
                 % abs(x - y) < 1.0
                 contractElts{1} = nasa_toLustre.lustreAst.ContractGuaranteeExpr('', ...
                     nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.LTE, ...

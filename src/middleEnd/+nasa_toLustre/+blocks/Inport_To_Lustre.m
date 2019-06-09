@@ -19,24 +19,28 @@ classdef Inport_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             outputDataType = blk.CompiledPortDataTypes.Outport{1};
             outLus_dt =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(outputDataType);
             %% add assertions on inputs for intXX types
-            isInsideContract =nasa_toLustre.utils.SLX2LusUtils.isContractBlk(parent);
-            if strcmp(outLus_dt, 'int')
-                v_min = nasa_toLustre.lustreAst.IntExpr(double(intmin(outputDataType)));
-                v_max = nasa_toLustre.lustreAst.IntExpr(double(intmax(outputDataType)));
-                nb_outputs = numel(outputs);
-                for j=1:nb_outputs
-                    prop = nasa_toLustre.lustreAst.BinaryExpr(...
-                        nasa_toLustre.lustreAst.BinaryExpr.AND, ...
-                        nasa_toLustre.lustreAst.BinaryExpr(...
-                        nasa_toLustre.lustreAst.BinaryExpr.LTE, v_min, outputs{j}), ...
-                        nasa_toLustre.lustreAst.BinaryExpr(...
-                        nasa_toLustre.lustreAst.BinaryExpr.LTE, outputs{j}, v_max));
-                    if isInsideContract
-                        %obj.addCode(nasa_toLustre.lustreAst.ContractAssumeExpr('', prop));
-                    else
-                        obj.addCode(nasa_toLustre.lustreAst.AssertExpr(prop));
+            try
+                isInsideContract =nasa_toLustre.utils.SLX2LusUtils.isContractBlk(parent);
+                if ismember(outputDataType, {'int8', 'uint8', 'int16', 'uint16', 'int32', 'uint32'})
+                    v_min = nasa_toLustre.lustreAst.IntExpr(double(intmin(outputDataType)));
+                    v_max = nasa_toLustre.lustreAst.IntExpr(double(intmax(outputDataType)));
+                    nb_outputs = numel(outputs);
+                    for j=1:nb_outputs
+                        prop = nasa_toLustre.lustreAst.BinaryExpr(...
+                            nasa_toLustre.lustreAst.BinaryExpr.AND, ...
+                            nasa_toLustre.lustreAst.BinaryExpr(...
+                            nasa_toLustre.lustreAst.BinaryExpr.LTE, v_min, outputs{j}), ...
+                            nasa_toLustre.lustreAst.BinaryExpr(...
+                            nasa_toLustre.lustreAst.BinaryExpr.LTE, outputs{j}, v_max));
+                        if isInsideContract
+                            %obj.addCode(nasa_toLustre.lustreAst.ContractAssumeExpr('', prop));
+                        else
+                            obj.addCode(nasa_toLustre.lustreAst.AssertExpr(prop));
+                        end
                     end
                 end
+            catch
+                %ignore
             end
             %% We add assumptions on the inport values interval if it is
             % mentioned by the user in OutMin/OutMax in Inport dialog box.

@@ -71,6 +71,7 @@ function [valid, sim_failed] = compareTwoSLXModels(orig_mdl_path, pp_mdl_path,..
             show_models);
         
         yout1 = get(simOut1,'yout');
+        assignin('base', 'yout1', yout1);
         if isempty(yout1)
             f_msg = sprintf('Model "%s" has no Outport.',orig_mdl_name);
             display_msg(f_msg, MsgType.RESULT, 'SLXUtils.compareTwoSLXModels', '');
@@ -91,6 +92,7 @@ function [valid, sim_failed] = compareTwoSLXModels(orig_mdl_path, pp_mdl_path,..
             show_models);
         
         yout2 = get(simOut2,'yout');
+        assignin('base', 'yout2', yout2);
         sim_failed  = 0;
     catch me
         display_msg(me.getReport(), MsgType.DEBUG, 'SLXUtils.compareTwoSLXModels', '');
