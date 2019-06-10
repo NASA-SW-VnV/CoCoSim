@@ -48,7 +48,7 @@ else
     njobs=1
 fi
 lustrec_url="https://github.com/coco-team/lustrec.git"
-lustrec_branch="master"
+lustrec_branch="unstable"
 zustre_url="https://github.com/coco-team/zustre.git"
 zustre_branch="master"
 kind2_url="https://github.com/kind2-mc/kind2.git"

@@ -19,7 +19,7 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, abstractedBlo
     
     %% global variables
     global TOLUSTRE_ENUMS_MAP TOLUSTRE_ENUMS_CONV_NODES ...
-        KIND2 Z3 JLUSTRE2KIND LUSTREC CHECK_SF_ACTIONS ...
+        KIND2 Z3 JLUSTRE2KIND LUSTREC LUCTREC_INCLUDE_DIR CHECK_SF_ACTIONS ...
         ERROR_MSG WARNING_MSG DEBUG_MSG COCOSIM_DEV_DEBUG...
         DED_PROP_MAP CoCoSimPreferences ir_handle_struct_map...
         TOLUSTRE_TIME_STEP_ASTEQ TOLUSTRE_NB_STEP_ASTEQ;
@@ -241,12 +241,22 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, abstractedBlo
             copyfile(lib_path, output_dir);
         end
     else %lustrec, zustre ... 
-        if ismember('simulink_math_fcn', open_list) ...
-                && ismember('lustrec_math', open_list)
-            % simulink_math_fcn includes lustrec_math, so remove
-            % lustrec_math to avoid double definition of functions
-            open_list = open_list(~strcmp(open_list, 'lustrec_math'));
-        end
+        % This fix is not needed for lustrec unstable branch. It should be
+        % fixed in lustrec-seal branch as well
+%         if ismember('simulink_math_fcn', open_list) ...
+%                 && ismember('lustrec_math', open_list)
+%             simulink_math_fcn_path = fullfile(LUCTREC_INCLUDE_DIR, ...
+%                 'simulink_math_fcn.lusi');
+%             if exist(simulink_math_fcn_path, 'file')
+%                 ftext = fileread(simulink_math_fcn_path);
+%                 if MatlabUtils.contains(ftext, 'open <lustrec_math>')
+%                     % simulink_math_fcn includes lustrec_math, so remove
+%                     % lustrec_math to avoid double definition of functions
+%                     % error
+%                     open_list = open_list(~strcmp(open_list, 'lustrec_math'));
+%                 end
+%             end
+%         end
     end
     
     keys = TOLUSTRE_ENUMS_MAP.keys();
