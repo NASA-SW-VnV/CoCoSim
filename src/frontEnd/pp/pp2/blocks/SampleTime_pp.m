@@ -3,7 +3,7 @@ function [status, errors_msg] = SampleTime_pp(new_model_base)
     %sample time as the original model. Sample time should be set before other
     %pre-processing calls.
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2017 United States Government as represented by the
+    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>

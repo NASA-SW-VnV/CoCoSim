@@ -1,7 +1,7 @@
 function [isPortIndex,ind,selectorOutputDimsArray] = ...
         defineMapInd(~,parent,blk,inputs,U_expanded_dims,isSelector)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2017 United States Government as represented by the
+    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>

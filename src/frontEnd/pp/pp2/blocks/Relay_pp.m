@@ -3,7 +3,7 @@ function [status, errors_msg] = Relay_pp(model)
     %  equivalent subsystem.
     %   model is a string containing the name of the model to search in
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2017 United States Government as represented by the
+    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>

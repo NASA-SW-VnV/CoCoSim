@@ -1,6 +1,6 @@
 function [node, external_nodes_i, opens, abstractedNodes] = get__inv_M_6x6(lus_backend,varargin)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Copyright (c) 2017 United States Government as represented by the
+% Copyright (c) 2019 United States Government as represented by the
 % Administrator of the National Aeronautics and Space Administration.
 % All Rights Reserved.
 % Author: Khanh Tringh <khanh.v.trinh@nasa.gov>

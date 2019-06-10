@@ -1,5 +1,5 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Copyright (c) 2017 United States Government as represented by the
+% Copyright (c) 2019 United States Government as represented by the
 % Administrator of the National Aeronautics and Space Administration.
 % All Rights Reserved.
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
@@ -42,7 +42,7 @@ function htmlItemMsg = modelCompatibilityCheck(model_name, main_sampleTime)
             || MatlabUtils.startsWith(x, 'flts'), compiledPortDT), 1);
         if ~isempty(fixdt_idx)
             blk_name = get_param(outPortHandleVector(fixdt_idx), 'Parent');
-            msg = sprintf('Your model has signals with Fixed-Point Data (e.g. Block %s output signal). CoCoSim does not support models with Fixed-Point Data Type.',...
+            msg = sprintf('Your model has signals with Fixed-Point Data (e.g. Block %s output signal). CoCoSim does not support models with Fixed-Point Data Type. Please set block output datatype parameter to one of the following: Bus object, Enumeration, double, single, boolean, int8, uint8, int16, uint16, int32, uint32.',...
                 HtmlItem.addOpenCmd(blk_name));
             subtitles{end+1} = HtmlItem(msg, {}, 'black');
         end

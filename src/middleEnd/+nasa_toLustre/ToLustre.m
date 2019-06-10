@@ -9,7 +9,7 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, abstractedBlo
     %   MODE_DISPLAY: equals to 0 if no display wanted, equals to 1 if the user
     %   want the Simulink model to be open.
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2017 United States Government as represented by the
+    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>

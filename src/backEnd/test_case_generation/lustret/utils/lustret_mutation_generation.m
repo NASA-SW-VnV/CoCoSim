@@ -1,7 +1,7 @@
 function [ err, output_dir] = lustret_mutation_generation( lus_full_path, nb_mutants_max )
     %LUSTRET_TEST_GENERATION Generate test cases based on mutation.
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2017 United States Government as represented by the
+    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>

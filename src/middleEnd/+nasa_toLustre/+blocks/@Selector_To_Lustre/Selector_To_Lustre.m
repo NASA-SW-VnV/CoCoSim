@@ -9,7 +9,7 @@ classdef Selector_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     % in the Assignment_To_Lustre.m class for definition of array ind
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2017 United States Government as represented by the
+    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>

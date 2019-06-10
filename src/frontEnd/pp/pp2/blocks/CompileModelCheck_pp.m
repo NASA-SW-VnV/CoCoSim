@@ -1,7 +1,7 @@
 function  [failed, errors_msg]= CompileModelCheck_pp( new_model_base )
 %compile_process check if the model can be compiled or not.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Copyright (c) 2017 United States Government as represented by the
+% Copyright (c) 2019 United States Government as represented by the
 % Administrator of the National Aeronautics and Space Administration.
 % All Rights Reserved.
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>

@@ -2,7 +2,7 @@ function [block_name, out_port_nb, dimension] = get_block_name_from_variable_usi
     %this function help to get the name of Simulink block from lustre
     %variable name, using the generated tracability by Cocosim.
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2017 United States Government as represented by the
+    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>

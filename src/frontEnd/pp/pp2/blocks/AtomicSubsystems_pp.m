@@ -1,7 +1,7 @@
 function [status, errors_msg] = AtomicSubsystems_pp( new_model_base )
 %ATOMIC_PROCESS change all blocks to be atomic
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Copyright (c) 2017 United States Government as represented by the
+% Copyright (c) 2019 United States Government as represented by the
 % Administrator of the National Aeronautics and Space Administration.
 % All Rights Reserved.
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>

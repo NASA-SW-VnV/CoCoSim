@@ -4,7 +4,7 @@ function [status, errors_msg] = ForIterator_pp( new_model_base )
 %SubSystem. The translator to Lustre supports only block memories to be int
 %the first level of the ForIterator subsystem.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Copyright (c) 2017 United States Government as represented by the
+% Copyright (c) 2019 United States Government as represented by the
 % Administrator of the National Aeronautics and Space Administration.
 % All Rights Reserved.
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>

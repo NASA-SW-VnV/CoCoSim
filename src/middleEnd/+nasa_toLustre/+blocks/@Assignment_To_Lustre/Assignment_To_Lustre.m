@@ -96,7 +96,7 @@ classdef Assignment_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     % 	  else if(U_index_1 = 6) then Constant1_1
     % 	  else In1_6 ;
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2017 United States Government as represented by the
+    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>

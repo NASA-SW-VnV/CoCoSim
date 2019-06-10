@@ -4,7 +4,7 @@ function [code, exp_dt] = expression_To_Lustre(BlkObj, tree, parent, blk,...
     %SwitchCase and Fcn blocks. Also it is used by Stateflow
     %actions
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2017 United States Government as represented by the
+    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>

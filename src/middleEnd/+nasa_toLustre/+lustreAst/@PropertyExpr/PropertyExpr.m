@@ -2,7 +2,7 @@ classdef PropertyExpr < nasa_toLustre.lustreAst.LustreExpr
     %PropertyExpr: This class will be the base class for LocalProperty,
     %AssertExpr, Gurantee, Assume
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2017 United States Government as represented by the
+    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>

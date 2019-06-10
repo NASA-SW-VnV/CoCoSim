@@ -1,6 +1,6 @@
 function [results, passed, priority] = cocosim_guidelines_na_0005(model)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2017 United States Government as represented by the
+    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Khanh Trinh <khanh.v.trinh@nasa.gov>

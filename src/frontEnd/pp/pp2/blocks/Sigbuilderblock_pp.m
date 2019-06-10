@@ -2,7 +2,7 @@ function [status, errors_msg] = Sigbuilderblock_pp(model)
     % Sigbuilderblock_pp searches for Sigbuilderblock_pp blocks and
     % replaces them by Inports
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2017 United States Government as represented by the
+    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>

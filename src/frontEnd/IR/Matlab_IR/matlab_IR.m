@@ -2,7 +2,7 @@ function [ fun_ir_path, status ] = matlab_IR( fun_path, dst_path )
     %matlab_IR exports an internal presentation of matlab function givin in
     %parameters.
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2017 United States Government as represented by the
+    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>

@@ -2,7 +2,7 @@ function [ T ] = lustret_test_mcdc( lus_full_path, node_name, output_dir)
     %lustret_test_mcdc generates unit tests of Lustre nodes based on MC/DC
     %coverage.
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2017 United States Government as represented by the
+    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
