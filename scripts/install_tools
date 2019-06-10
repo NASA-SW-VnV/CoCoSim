@@ -646,6 +646,10 @@ if (( ! z3_failed )); then
     prepend_path "$install_dir/z3/bin"
     prepend_python_path "$install_dir/z3/lib/python"*"/dist-packages"
 
+    if [[ -x "$install_dir/z3/bin/z3" ]]; then
+        # update z3 binary by original z3 and not spacer.
+        cp "$install_dir/z3/bin/z3" "$install_dir/bin/z3"
+    fi
     command_exists z3 || {
         error_msg "z3 is not properly installed";
         z3_failed=1;
