@@ -63,7 +63,7 @@ function [ T, coverage_percentage, status ] = lustret_test_mutation( model_full_
     %% check lustre syntax is supported by lustrec and Kind2/Zustre
     if strcmp(model_checker, LusBackendType.KIND2)
         if ~exist(KIND2,'file')
-            errordlg('KIND2 model checker is not found in %s. Please set KIND2 path in tools_config.m', KIND2);
+            errordlg(sprintf('KIND2 model checker is not found in %s. Please set KIND2 path in tools_config.m', KIND2));
             status = 1;
             return;
         end

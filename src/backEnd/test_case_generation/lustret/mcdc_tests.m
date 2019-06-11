@@ -13,7 +13,7 @@ function [ new_model_path, status ] = mcdc_tests(...
         tools_config;
     end
     if ~exist(KIND2,'file')
-        errordlg('KIND2 model checker is not found in %s. Please set KIND2 path in tools_config.m', KIND2);
+        errordlg(sprintf('KIND2 model checker is not found in %s. Please set KIND2 path in tools_config.m', KIND2));
         status = 1;
         return;
     end
