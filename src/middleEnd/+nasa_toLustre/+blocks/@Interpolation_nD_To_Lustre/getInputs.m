@@ -63,7 +63,9 @@ function [inputs] = getInputs(obj, parent, blk, blkParams)
                 end
             end
             selFraction = cell(1, length(selctNames));
+            %dim = nasa_toLustre.lustreAst.IntExpr(tableDim(end - selDim + 1));
             dim_minus_1 = nasa_toLustre.lustreAst.IntExpr(tableDim(end - selDim + 1) - 1);
+            dim_minus_2 = nasa_toLustre.lustreAst.IntExpr(tableDim(end - selDim + 1) - 2);
             for selIdx = 1: length(selctNames)
                 if strcmp(blk.ValidIndexMayReachLast, 'off')
                     cond = nasa_toLustre.lustreAst.BinaryExpr(...
@@ -73,7 +75,16 @@ function [inputs] = getInputs(obj, parent, blk, blkParams)
                     selFraction{selIdx} = nasa_toLustre.lustreAst.IteExpr(...
                         cond, lusOne, lusZero, true);
                 else
-                    selFraction{selIdx} = nasa_toLustre.lustreAst.RealExpr('0.0');
+                    %if
+                    cond = nasa_toLustre.lustreAst.BinaryExpr(...
+                        nasa_toLustre.lustreAst.BinaryExpr.GTE, ...
+                        selctNames{selIdx}, dim_minus_1);
+                    
+                    selFraction{selIdx} = nasa_toLustre.lustreAst.IteExpr(...
+                        cond, lusOne, lusZero, true);
+                    %                     else
+                    %                         selFraction{selIdx} = nasa_toLustre.lustreAst.RealExpr('0.0');
+                    %                     end
                 end
             end
             inputs{end + 1} = selFraction;
