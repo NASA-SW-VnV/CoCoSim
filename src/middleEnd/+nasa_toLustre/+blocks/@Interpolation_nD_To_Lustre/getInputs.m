@@ -75,16 +75,13 @@ function [inputs] = getInputs(obj, parent, blk, blkParams)
                     selFraction{selIdx} = nasa_toLustre.lustreAst.IteExpr(...
                         cond, lusOne, lusZero, true);
                 else
-                    %if
+                    % this is the same code as the then branch.. seems they
+                    %  needed to be different! TODO: go through logic again
                     cond = nasa_toLustre.lustreAst.BinaryExpr(...
                         nasa_toLustre.lustreAst.BinaryExpr.GTE, ...
-                        selctNames{selIdx}, dim_minus_1);
-                    
+                        selctNames{selIdx}, dim_minus_1);                    
                     selFraction{selIdx} = nasa_toLustre.lustreAst.IteExpr(...
                         cond, lusOne, lusZero, true);
-                    %                     else
-                    %                         selFraction{selIdx} = nasa_toLustre.lustreAst.RealExpr('0.0');
-                    %                     end
                 end
             end
             inputs{end + 1} = selFraction;
