@@ -11,8 +11,8 @@ List of features:
 The following is the list of actions the user can call from CoCoSim menu:
 * **Check compatibility** of a model against the CoCoSim compiler from Simulink to Lustre: This will check and report all blocks in the model that are not supported by the compiler. 
 * **Check model against guidelines**: This will run the model against a list of guidelines from [NASA - Orion GN&C: MATLAB and Simulink Standards](https://www.mathworks.com/solutions/aerospace-defense/standards/nasa.html).
-* **Prove properties**: The model should contain requirements to be verified by one of the supported model checkers (currently only KIND2 is integrated). These requirements can be expressed using SLDV verification blocks or CoCoSpec specification blocks (See [CoCoSpec Specification library](doc/specificationLibrary.md)). 
-* **Design Error Detection**: Currently cocosim only check for specified minimum and maximum signal values specified by the user on blocks outputs using OutMin and OutMax parameters in blocks dialogue box. The check is done using Kind2 model checker. Future work is planned to support the check for integer overflow, out of bound access array and division by zero.
+* **Prove properties**: The model should contain requirements to be verified by one of the supported model checkers (currently only KIND2 is integrated). These requirements can be expressed using SLDV verification blocks or CoCoSpec specification blocks (See [CoCoSpec Specification library](doc/cocosim_iowa_doc/specificationLibrary.md)). 
+* **Design Error Detection**: Currently cocosim only check for specified minimum and maximum signal values specified by the user on blocks outputs using OutMin and OutMax parameters in blocks dialogue box. The check is done using Kind2 model checker. Future work is planned to support the check of integer overflow, out of bound access array and division by zero.
 This features requires Kind2 to be installed.
 * **Test-case Generation**: Currently cocosim supports:
     * **Random Testing**: cocosim generates in this case random inputs, a range can be specified by the user using OutMin and OutMax parameters in the Inport block.

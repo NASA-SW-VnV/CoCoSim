@@ -13,7 +13,10 @@ Installation issues
 
 **Installing external Matlab libraries:**
 
-Read function `cocosim2/scripts/install_cocosim_lib.m` to know what are the external libraries are copied to cocosim2 to do it manually in case the function failed for internet connexion or `git` issues.
+Function `cocosim2/scripts/install_cocosim_lib.m` tries to copy all required libraries.
+It needs `git` to clones external repositories from github and copy some of their code on the
+right place on CoCoSim.
+Read function `cocosim2/scripts/install_cocosim_lib.m` to know what are the external libraries are copied to cocosim2 to do it manually in case the function failed for internet connection or `git` issues.
 
 **Installing external tools (Kind2, Lustrec, etc ...):**
 
@@ -29,4 +32,5 @@ The default paths set by `tools_config` are:
 
 change `osx` by `linux` if your machine is linux machine.
 
+See [INSTALL.md](../INSTALL.md) 
 

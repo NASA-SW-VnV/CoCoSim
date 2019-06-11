@@ -61,7 +61,7 @@ function ceateSubsystemFromBlk(blkH)
             && ~ismember('trigger', portType)...
             && ~ismember('state', portType))
         % if it is not Subsystem, we need to create a Subsystem on top of it
-        display_msg(fullfile(get_param(blkH, 'Parent'), get_param(blkH, 'Name')), MsgType.DEBUG, 'KindContract_pp', '');
+        %display_msg(fullfile(get_param(blkH, 'Parent'), get_param(blkH, 'Name')), MsgType.DEBUG, 'KindContract_pp', '');
         SLXUtils.createSubsystemFromBlk(blkH);
     end
     

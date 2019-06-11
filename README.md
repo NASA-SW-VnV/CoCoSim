@@ -26,7 +26,7 @@ See [RELEASE_NOTES.md](RELEASE_NOTES.md)
 Troubleshooting
 ---------------
 
-See [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
+See [TROUBLESHOOTING.md](doc/TROUBLESHOOTING.md)
 
 
 Installation

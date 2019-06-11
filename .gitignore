@@ -5,11 +5,11 @@ slprj
 PreContextMenu.m
 doc/compositionalAnalysis.md
 doc/images/
-doc/installation.md
+doc/cocosim_iowa_doc/installation.md
 doc/kind2 installation.md
 doc/menu.md
 doc/pp_doc/
-doc/specificationLibrary.md
+doc/cocosim_iowa_doc/specificationLibrary.md
 doc/videos/
 doc/verificationVisualization.md
 examples/StateFlow/

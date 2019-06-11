@@ -16,7 +16,14 @@ There are two steps to install the above dependencies, both are automated in two
 Both steps needs internet connection and git to be installed to clone remote repositories.
 * 1st step: Open your Matlab, navigate to cocosim then run ``` start_cocosim```.
 
-This will update cocosim repository and copy the external Matlab libraries.
+    This will update cocosim repository and copy the external Matlab libraries. 
+
+    It requires `git` to be installed and possibility of cloning two github repositories:
+
+    [https://github.com/coco-team/cocoSim2](https://github.com/coco-team/cocoSim2): CoCoSim standard libraries.
+
+    [https://github.com/hbourbouh/cocosim-external-libs](https://github.com/hbourbouh/cocosim-external-libs): additional libraries used by CoCoSim. 
+
 
 * 2nd step: run from your teminal the installation script: The script will install Kind2, Zustre, Lustrec and Z3.
 ```
