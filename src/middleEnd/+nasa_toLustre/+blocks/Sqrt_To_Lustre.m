@@ -97,12 +97,7 @@ classdef Sqrt_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             end
         end
         
-        function options = getUnsupportedOptions(obj, ~, blk, varargin)
-            
-            if ~strcmp(blk.OutMax, '[]') || ~strcmp(blk.OutMin, '[]')
-                obj.addUnsupported_options(...
-                    sprintf('The minimum/maximum value is not support in block %s', HtmlItem.addOpenCmd(blk.Origin_path)));
-            end
+        function options = getUnsupportedOptions(obj, varargin)
             options = obj.unsupported_options;
         end
         %%

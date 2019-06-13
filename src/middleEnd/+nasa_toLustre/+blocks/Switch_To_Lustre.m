@@ -132,7 +132,7 @@ classdef Switch_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             
             if strcmp(blk.AllowDiffInputSizes, 'on')
                 obj.addUnsupported_options(...
-                    sprintf('The Allow different data input sizes option is not support in block %s', HtmlItem.addOpenCmd(blk.Origin_path)));
+                    sprintf('The Allow different data input sizes option is not supported in block %s', HtmlItem.addOpenCmd(blk.Origin_path)));
             end
             options = obj.unsupported_options;
         end

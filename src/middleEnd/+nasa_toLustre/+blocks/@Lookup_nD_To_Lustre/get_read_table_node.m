@@ -44,7 +44,7 @@ function extNode = get_read_table_node(...
     end
     
     [bodyf, vars] = nasa_toLustre.blocks.Lookup_nD_To_Lustre.addInlineIndexFromArrayIndicesCode(...
-        table_elem, node_header.outputs_name{1},  node_header.inputs_name{1});
+        table_elem, node_header.outputs_name{1},  node_header.inputs_name{1}, 'real');
     vars = nasa_toLustre.lustreAst.LustreVar.removeVar(vars, node_header.outputs_name{1});
     
     body_all = [body_all  bodyf];

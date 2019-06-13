@@ -1,5 +1,5 @@
 function [body, vars] = addInlineIndexFromArrayIndicesCode(...
-        inline_list,element,index)
+        inline_list,element,index, U_LusDt)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -35,7 +35,7 @@ function [body, vars] = addInlineIndexFromArrayIndicesCode(...
     % branches for GCC.
     [body, vars] = nasa_toLustre.lustreAst.IteExpr.binarySearch(...
                 inline_list, index, element.getId(),...
-                'real', [], [], [], element.getId());
+                U_LusDt, [], [], [], element.getId());
     
 end
 

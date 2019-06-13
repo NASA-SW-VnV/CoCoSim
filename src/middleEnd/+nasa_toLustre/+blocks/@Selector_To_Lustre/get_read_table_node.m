@@ -32,7 +32,7 @@ function extNode = get_read_table_node(blk_name, U_inputs, U_LusDt)
     
     
     [body, vars] = nasa_toLustre.blocks.Lookup_nD_To_Lustre.addInlineIndexFromArrayIndicesCode(...
-        U_inputs, output_name,  inputs_name{1});
+        U_inputs, output_name,  inputs_name{1}, U_LusDt);
     vars = nasa_toLustre.lustreAst.LustreVar.removeVar(vars, output_name);
 
     

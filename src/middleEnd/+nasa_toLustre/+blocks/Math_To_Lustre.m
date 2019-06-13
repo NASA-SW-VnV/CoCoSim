@@ -180,14 +180,14 @@ classdef Math_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         end
         %%
         function options = getUnsupportedOptions(obj, ~, blk,  varargin)
-            
-            if  strcmp(blk.Operator, 'transpose') || strcmp(blk.Operator, 'hermitian')
-                in_matrix_dimension = nasa_toLustre.blocks.Assignment_To_Lustre.getInputMatrixDimensions(blk.CompiledPortDimensions.Inport);
-                if in_matrix_dimension{1}.numDs > 2
-                    obj.addUnsupported_options(sprintf('Matrix size > 2 is not supported for transpose/hermitian operator in block %s',...
-                        HtmlItem.addOpenCmd(blk.Origin_path)));
-                end
-            end
+              %% TODO: Simulink does not support it too, remove this check             
+%             if  strcmp(blk.Operator, 'transpose') || strcmp(blk.Operator, 'hermitian')
+%                 in_matrix_dimension = nasa_toLustre.blocks.Assignment_To_Lustre.getInputMatrixDimensions(blk.CompiledPortDimensions.Inport);
+%                 if in_matrix_dimension{1}.numDs > 2
+%                     obj.addUnsupported_options(sprintf('Matrix size > 2 is not supported for transpose/hermitian operator in block %s',...
+%                         HtmlItem.addOpenCmd(blk.Origin_path)));
+%                 end
+%             end
             options = obj.unsupported_options;
         end
         
