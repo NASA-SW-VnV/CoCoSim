@@ -155,14 +155,14 @@ classdef RateTransition_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                             HtmlItem.addOpenCmd(blk.Origin_path));
                     end
                 elseif inTs < outTs % fast to slow
-                    if mod(int32(outTs/inTs),1)==0 &&  inTsOffset == outTsOffset && inTsOffset == 0
+                    if mod(outTs/inTs,1) < eps &&  inTsOffset == outTsOffset && inTsOffset == 0
                         type = 'ZOH';
                     else
                         error_msg = sprintf('RateTransition block "%s" is not supported.\n The following conditionin should be met: Ts = outTs / N and inTsOffset = outTsOffset =0.', ...
                             HtmlItem.addOpenCmd(blk.Origin_path));
                     end
                 else %inTs > outTs : slow to fast
-                    if mod(int32(inTs/outTs),1)==0 &&  inTsOffset == outTsOffset && inTsOffset == 0
+                    if mod(inTs/outTs,1) < eps &&  inTsOffset == outTsOffset && inTsOffset == 0
                         type = '1/z';
                     else
                         error_msg = sprintf('RateTransition block "%s" is not supported.\n The following conditionin should be met: Ts = outTs * N and inTsOffset = outTsOffset =0.', ...

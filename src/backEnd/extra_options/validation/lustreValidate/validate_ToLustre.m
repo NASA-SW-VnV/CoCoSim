@@ -102,6 +102,7 @@ function [...
     %% launch validation
     % validate pre-processing
     try
+        display_msg('Pre-processing Validation', MsgType.RESULT, 'validate_ToLustre', '');
         [pp_valid, pp_sim_failed] = ...
             SLXUtils.compareTwoSLXModels(orig_model_full_path, pp_model_full_path);
     catch ME
@@ -116,6 +117,7 @@ function [...
         return;
     end
     try
+        display_msg('Lustre generation validation', MsgType.RESULT, 'validate_ToLustre', '');
         [valid, lustrec_failed, lustrec_binary_failed, sim_failed] = ...
             compare_slx_lus(pp_model_full_path, lus_file_path, main_node, ...
             output_dir, tests_method, model_checker, show_model,...
@@ -132,7 +134,7 @@ function [...
             prompt = 'The model is not valid. Do you want to check which subsystem is not valid? Y/N [N]: ';
             display_msg(prompt, MsgType.RESULT, 'validate_ToLustre', '');
             str = input('Type "Y" or "y" for yes or "N"|"n" for no: ','s');
-            if ~isempty(str) && strcmp(upper(str), 'Y')
+            if ~isempty(str) && strcmpi(str, 'Y')
                 prompt = 'Provide us with an integer that constrains the validation to a specific depth (1 for first depth only, n for up to n depth):';
                 deep_CEX  = input(prompt);
                 if ~isnumeric(deep_CEX)
