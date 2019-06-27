@@ -22,11 +22,12 @@ function [results, passed, priority] = cocosim_guidelines_bn_0002(model)
     % get names from handles
     Names = arrayfun(@(x) get_param(x, 'Name'), signalList, 'UniformOutput',...
         false);
+
     lengths = cellfun(@(x) length(x), Names);
     % remove names less than
     list = signalList(lengths > 32);
     %add parent
-    failedList = GuidelinesUtils.ppSignalNames(list);
+    failedList = unique(GuidelinesUtils.ppSignalNames(list));
     [max_limit_32_chars_in_name, numFail] = ...
         GuidelinesUtils.process_find_system_results(failedList,title,...
         false); 
