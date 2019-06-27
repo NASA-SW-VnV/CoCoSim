@@ -103,9 +103,7 @@ function [results, passed, priority] = cocosim_guidelines_na_0004(model)
         'The model appearance settings should conform to the '...
         'following guidelines when the model is released. The user ',...
         'is free to change the settings during the development process'];
-    description = HtmlItem(description_text, {}, 'black', 'black');   
+    description = HtmlItem(description_text, {}, 'black', 'black');
     subtitles{1} = description;
     results{end+1} = HtmlItem(title, subtitles, color, color);
 end
-
-
