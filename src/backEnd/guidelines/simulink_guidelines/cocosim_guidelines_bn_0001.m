@@ -6,33 +6,39 @@ function [results, passed, priority] = cocosim_guidelines_bn_0001(model)
     % Author: Khanh Trinh <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % ORION GN&C MATLAB/Simulink Standards
-    % bn_0001: Sussystem name length limit
+    % bn_0001: Subsystem Name Length Limit
     % 32 characters is the maximum limit
     
-    priority = 2;
+    priority = 2; % strongly recommended
     results = {};
     passed = 1;
     totalFail = 0;
     
-    title = 'maximum limit of 32 characters';
+    SubsystemList = find_system(model, 'Regexp', 'on',...
+        'blocktype', 'SubSystem');
     
-    SussystemList = find_system(model, 'Regexp', 'on',...
-        'blocktype','SubSystem');
-    
-%     % TODO:  do we need to check for uniqueness
-%     uniqueSussystemList = unique(SussystemList);
-%     if length(uniqueSussystemList) < length(uniqueSussystemList)
-%         
-%     end
+    % we check for uniqueness
+    title = 'unique name';
+    uniqueSubsystemList = unique(SubsystemList);
+    if length(uniqueSubsystemList) < length(SubsystemList)
+        [C,ia,ib] = unique(SubsystemList,'rows','stable');
+        failedList = SubsystemList(hist(ib,unique(ib))>1);
+        [unique_name, numFail] = ...
+            GuidelinesUtils.process_find_system_results(failedList, ...
+            title, true);
+        totalFail = totalFail + numFail;
+    end
 
-    Names = get_param(SussystemList, 'Name');
+    % we check for name length limit
+    title = 'maximum limit of 32 characters';
+    Names = get_param(SubsystemList, 'Name');
     lengths = cellfun(@(x) length(x), Names);
     % remove names less than
-    failedList = SussystemList(lengths > 32);
+    failedList = SubsystemList(lengths > 32);
     %add parent
     %failedList = GuidelinesUtils.ppSussystemNames(list);
     [max_limit_32_chars_in_name, numFail] = ...
-        GuidelinesUtils.process_find_system_results(failedList,title,...
+        GuidelinesUtils.process_find_system_results(failedList, title, ...
         true);
     totalFail = totalFail + numFail;
     
@@ -43,12 +49,17 @@ function [results, passed, priority] = cocosim_guidelines_bn_0001(model)
         color = 'green';
     end
     
-    title = 'bn_0001: Subsystem name length limit';    
-    description_text = ...
+    % the main guideline
+    title = 'bn_0001: Subsystem name length limit'; 
+    description_text1 = ...
+        'The names of all Subsystem blocks must be unique';
+    description1 = HtmlItem(description_text1, {}, 'black', 'black');
+    description_text2 = ...
         '32 characters is the maximum limit for subsystem name length';
-    description = HtmlItem(description_text, {}, 'black', 'black');
+    description2 = HtmlItem(description_text2, {}, 'black', 'black');
     results{end+1} = HtmlItem(title, ...
-        {description, max_limit_32_chars_in_name}, ...
+        {description1, unique_name, ...
+        description2, max_limit_32_chars_in_name}, ...
         color, color);
     
 end
