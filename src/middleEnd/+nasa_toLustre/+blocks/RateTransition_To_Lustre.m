@@ -133,7 +133,7 @@ classdef RateTransition_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     || LusBackendType.isKIND2(lus_backend))
                 obj.addUnsupported_options(...
                     sprintf('RateTransition block "%s" is not supported by Kind2 and JKind.', ...
-                            HtmlItem.addOpenCmd(blk.Origin_path)));
+                    HtmlItem.addOpenCmd(blk.Origin_path)));
             end
             options = obj.unsupported_options;
         end
@@ -146,32 +146,40 @@ classdef RateTransition_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         function [type, error_msg] = getRateTransferType(blk, inTs, inTsOffset, outTs, outTsOffset )
             type = '';
             error_msg = '';
-            if strcmp(blk.Integrity, 'on') && strcmp(blk.Deterministic, 'on')
-                if inTs == outTs
-                    if inTsOffset == outTsOffset
+            if strcmp(blk.Integrity, 'on')
+                if strcmp(blk.Deterministic, 'on')
+                    if inTs == outTs
+                        if inTsOffset == outTsOffset
+                            type = 'Copy';
+                        else
+                            error_msg = sprintf('RateTransition block "%s" is not supported. inTsOffset should be equal to outTsOffset.', ...
+                                HtmlItem.addOpenCmd(blk.Origin_path));
+                        end
+                    elseif inTs < outTs % fast to slow
+                        if mod(outTs/inTs,1) < eps &&  inTsOffset == outTsOffset && inTsOffset == 0
+                            type = 'ZOH';
+                        else
+                            error_msg = sprintf('RateTransition block "%s" is not supported.\n The following conditionin should be met: Ts = outTs / N and inTsOffset = outTsOffset =0.', ...
+                                HtmlItem.addOpenCmd(blk.Origin_path));
+                        end
+                    else %inTs > outTs : slow to fast
+                        if mod(inTs/outTs,1) < eps &&  inTsOffset == outTsOffset && inTsOffset == 0
+                            type = '1/z';
+                        else
+                            error_msg = sprintf('RateTransition block "%s" is not supported.\n The following conditionin should be met: Ts = outTs * N and inTsOffset = outTsOffset =0.', ...
+                                HtmlItem.addOpenCmd(blk.Origin_path));
+                        end
+                    end
+                else
+                    if inTs == outTs && inTsOffset == outTsOffset
                         type = 'Copy';
                     else
-                        error_msg = sprintf('RateTransition block "%s" is not supported. inTsOffset should be equal to outTsOffset.', ...
-                            HtmlItem.addOpenCmd(blk.Origin_path));
-                    end
-                elseif inTs < outTs % fast to slow
-                    if mod(outTs/inTs,1) < eps &&  inTsOffset == outTsOffset && inTsOffset == 0
-                        type = 'ZOH';
-                    else
-                        error_msg = sprintf('RateTransition block "%s" is not supported.\n The following conditionin should be met: Ts = outTs / N and inTsOffset = outTsOffset =0.', ...
-                            HtmlItem.addOpenCmd(blk.Origin_path));
-                    end
-                else %inTs > outTs : slow to fast
-                    if mod(inTs/outTs,1) < eps &&  inTsOffset == outTsOffset && inTsOffset == 0
-                        type = '1/z';
-                    else
-                        error_msg = sprintf('RateTransition block "%s" is not supported.\n The following conditionin should be met: Ts = outTs * N and inTsOffset = outTsOffset =0.', ...
+                        error_msg = sprintf('RateTransition block "%s" is not supported. Only Copy, ZOH, 1/z or NoOp are supported.', ...
                             HtmlItem.addOpenCmd(blk.Origin_path));
                     end
                 end
             else
-                error_msg = sprintf('RateTransition block "%s" is not supported. Data Integrity and Determinism should be checked', ...
-                    HtmlItem.addOpenCmd(blk.Origin_path));
+                type = 'Copy';
             end
         end
     end

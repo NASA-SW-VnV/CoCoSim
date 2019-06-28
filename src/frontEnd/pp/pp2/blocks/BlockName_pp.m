@@ -23,7 +23,7 @@ function [status, errors_msg] = BlockName_pp(model)
                 name = get_param(block_handles{i},'Name');
                 %remove / before callingnasa_toLustre.utils.SLX2LusUtils.name_format
                 new_name = strrep(name, '/', '_');
-                set_param(block_handles{i},'Name',...
+                changeName(block_handles{i}, ...
                     nasa_toLustre.utils.SLX2LusUtils.name_format(new_name));
             catch me
                 display_msg(me.getReport(), MsgType.DEBUG, 'PP', '');
@@ -36,3 +36,14 @@ function [status, errors_msg] = BlockName_pp(model)
     end
 end
 
+function changeName(bH, name)
+    try
+        set_param(bH,'Name',...
+            nasa_toLustre.utils.SLX2LusUtils.name_format(name));
+    catch me
+        if strcmp(me.identifier, 'Simulink:blocks:DupBlockName')
+            name = strcat(name, '2');
+            changeName(bH, name);
+        end
+    end
+end
