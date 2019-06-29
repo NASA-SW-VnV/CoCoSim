@@ -16,19 +16,19 @@ function [results, passed, priority] = cocosim_guidelines_bn_0001(model)
     
     SubsystemList = find_system(model, 'Regexp', 'on',...
         'blocktype', 'SubSystem');
-    
+    failedList = {};
     % we check for uniqueness
     title = 'unique name';
     uniqueSubsystemList = unique(SubsystemList);
     if length(uniqueSubsystemList) < length(SubsystemList)
         [C,ia,ib] = unique(SubsystemList,'rows','stable');
         failedList = SubsystemList(hist(ib,unique(ib))>1);
-        [unique_name, numFail] = ...
-            GuidelinesUtils.process_find_system_results(failedList, ...
-            title, true);
-        totalFail = totalFail + numFail;
     end
-
+    [unique_name, numFail] = ...
+        GuidelinesUtils.process_find_system_results(failedList, ...
+        title, true);
+    totalFail = totalFail + numFail;
+    
     % we check for name length limit
     title = 'maximum limit of 32 characters';
     Names = get_param(SubsystemList, 'Name');
