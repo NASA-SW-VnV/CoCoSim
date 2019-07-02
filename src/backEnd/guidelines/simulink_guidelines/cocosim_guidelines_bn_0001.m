@@ -16,18 +16,28 @@ function [results, passed, priority] = cocosim_guidelines_bn_0001(model)
     
     SubsystemList = find_system(model, 'Regexp', 'on',...
         'blocktype', 'SubSystem');
+    SSNames = get_param(SubsystemList, 'Name');
     failedList = {};
     % we check for uniqueness
     title = 'unique name';
-    uniqueSubsystemList = unique(SubsystemList);
-    if length(uniqueSubsystemList) < length(SubsystemList)
-        [C,ia,ib] = unique(SubsystemList,'rows','stable');
-        failedList = SubsystemList(hist(ib,unique(ib))>1);
+    uniqueSubsystemNames = unique(SSNames);
+    unique_names = {};
+    if length(uniqueSubsystemNames) < length(SSNames)
+        uniqueNames = unique(SSNames);
+        for i=1:length(uniqueNames)
+            failedList = SubsystemList(strcmp(uniqueNames{i},SSNames));
+            if length(failedList) > 1
+                unique_names{end+1}= GuidelinesUtils.process_find_system_results(failedList, ...
+                    uniqueNames{i}, true);
+                totalFail = totalFail + 1;
+            end
+        end
     end
-    [unique_name, numFail] = ...
-        GuidelinesUtils.process_find_system_results(failedList, ...
-        title, true);
-    totalFail = totalFail + numFail;
+    if ~isempty(unique_names)
+        uniqItem = HtmlItem(title, unique_names, 'red', 'red');
+    else 
+        uniqItem = HtmlItem(title, unique_names, 'green', 'green');
+    end
     
     % we check for name length limit
     title = 'maximum limit of 32 characters';
@@ -58,7 +68,7 @@ function [results, passed, priority] = cocosim_guidelines_bn_0001(model)
         '32 characters is the maximum limit for subsystem name length';
     description2 = HtmlItem(description_text2, {}, 'black', 'black');
     results{end+1} = HtmlItem(title, ...
-        {description1, unique_name, ...
+        {description1, uniqItem, ...
         description2, max_limit_32_chars_in_name}, ...
         color, color);
     
