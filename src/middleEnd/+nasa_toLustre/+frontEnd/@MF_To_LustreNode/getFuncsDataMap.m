@@ -24,7 +24,10 @@ function [fun_data_map, failed] = getFuncsDataMap(blk, script, ...
     end
     %% call function handle
     %fH = evalin('base', sprintf('%s()', blk_name));
-    blkFunHandle = str2func(blk_name);
+    [fun_dir, fun_name, ~] = fileparts(func_path);
+    PWD = pwd;
+    cd(fun_dir);
+    blkFunHandle = str2func(fun_name);
     fH = blkFunHandle();
     % create function inputs
     min = 1;max = 10;
@@ -67,11 +70,12 @@ function [fun_data_map, failed] = getFuncsDataMap(blk, script, ...
             MsgType.WARNING, 'getFuncsDataMap', '');
         failed = true;
     end
+    cd (PWD);
     try delete(func_path), catch, end
 end
 %%
 function [func_path, failed] = print_script(blk_name, funcsList, script)
-    func_path = fullfile(pwd, strcat(blk_name, '.m'));
+    func_path = fullfile(tempdir, strcat(blk_name, '.m'));
     fid = fopen(func_path, 'w');
     failed = false;
     if fid < 0
