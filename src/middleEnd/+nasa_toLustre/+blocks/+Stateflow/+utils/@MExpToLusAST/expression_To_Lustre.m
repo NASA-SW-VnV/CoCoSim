@@ -1,4 +1,4 @@
-function [code, exp_dt] = expression_To_Lustre(BlkObj, tree, parent, blk,...
+function [code, exp_dt, dim] = expression_To_Lustre(BlkObj, tree, parent, blk,...
     data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun)
     %this function is extended to be used by If-Block,
     %SwitchCase and Fcn blocks. Also it is used by Stateflow
@@ -12,7 +12,7 @@ function [code, exp_dt] = expression_To_Lustre(BlkObj, tree, parent, blk,...
         
     
     
-    
+    dim = [];
     narginchk(1, 10);
     if isempty(BlkObj), BlkObj = nasa_toLustre.blocks.DummyBlock_To_Lustre; end
     if nargin < 3, parent = []; end
@@ -52,13 +52,13 @@ function [code, exp_dt] = expression_To_Lustre(BlkObj, tree, parent, blk,...
                 'plus_minus', 'mtimes', 'times', ...
                 'mrdivide', 'mldivide', 'rdivide', 'ldivide', ...
                 'mpower', 'power'}
-            [code, exp_dt] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.binaryExpression_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun);
+            [code, exp_dt, dim] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.binaryExpression_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun);
         otherwise
             % we use the name of tree_type to call the associated function
             func_name = strcat(tree_type, '_To_Lustre');
             func_handle = str2func(strcat('nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.', func_name));
             try
-                [code, exp_dt] = func_handle(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun);
+                [code, exp_dt, dim] = func_handle(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun);
             catch me
                 if strcmp(me.identifier, 'MATLAB:UndefinedFunction')
                     display_msg(me.getReport(), MsgType.DEBUG, 'MExpToLusAST.expression_To_Lustre', '');
