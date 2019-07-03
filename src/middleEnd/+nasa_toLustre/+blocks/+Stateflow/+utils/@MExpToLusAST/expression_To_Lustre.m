@@ -27,6 +27,7 @@ function [code, exp_dt, dim] = expression_To_Lustre(BlkObj, tree, parent, blk,..
     % we assume this function returns cell.
     code = {};
     exp_dt = '';
+    dim = [];
     if isempty(tree)
         return;
     end

@@ -6,8 +6,8 @@ function [code, exp_dt] = constant_To_Lustre(BlkObj, tree, parent, blk, ...
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        
-            v = tree.value;
+    
+    v = tree.value;
     exp_dt = expected_dt;
     if strcmp(expected_dt, 'real')
         code{1} = nasa_toLustre.lustreAst.RealExpr(str2double(v));

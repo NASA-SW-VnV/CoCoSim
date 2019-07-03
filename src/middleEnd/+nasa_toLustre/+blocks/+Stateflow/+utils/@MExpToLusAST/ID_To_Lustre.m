@@ -8,7 +8,7 @@ function [code, dt] = ID_To_Lustre(~, tree, parent, blk, data_map, ...
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     
-        if ischar(tree)
+    if ischar(tree)
         id = tree;
     else
         id = tree.name;
@@ -68,5 +68,4 @@ function [code, dt] = ID_To_Lustre(~, tree, parent, blk, data_map, ...
             throw(ME);
         end
     end
-    
 end
