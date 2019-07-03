@@ -20,7 +20,11 @@ catch
     set_param(configSet, 'SolverMode', 'MultiTasking');
     status = 1;
     errors_msg{end + 1} = sprintf('EnableMultiTasking pre-process has failed');
-    
+end
+try
+    set_param(configSet, 'SingleTaskRateTransMsg', 'error');
+    set_param(configSet, 'MultiTaskRateTransMsg', 'error');
+catch
 end
 set_param(configSet, 'AutoInsertRateTranBlk', 'off');
 solveRateTransitions(new_model_base);
@@ -107,16 +111,18 @@ rateTransBlkName = fullfile(parent, strcat('RateTransition', portNumber));
 rt_H = add_block('simulink/Signal Attributes/Rate Transition',...
     rateTransBlkName, ...
     'MakeNameUnique', 'on', ...
+    'Integrity', 'off', ...
+    'Deterministic', 'off', ...
     'OutPortSampleTime', sampleTimeDst,...
     'Position',[x y (x+20) (y+20)]);
 if rt_H < 0
     return;
 end
-stSrc = str2num(sampleTimeSrc);% keep str2num
-stDst = str2num(sampleTimeDst);% keep str2num
-if  stSrc(1) > stDst(1) 
-    set_param(rt_H, 'Integrity', 'off', 'Deterministic', 'off');
-end
+% stSrc = str2num(sampleTimeSrc);% keep str2num
+% stDst = str2num(sampleTimeDst);% keep str2num
+% if  stSrc(1) > stDst(1) 
+%     set_param(rt_H, 'Integrity', 'off', 'Deterministic', 'off');
+% end
 rt_portsHandles = get_param(rt_H, 'PortHandles');
 add_line(parent, srcPortHandle, rt_portsHandles.Inport(1), 'autorouting', 'on');
 add_line(parent, rt_portsHandles.Outport(1), blockHandles.Inport(str2double(portNumber)), 'autorouting', 'on');
