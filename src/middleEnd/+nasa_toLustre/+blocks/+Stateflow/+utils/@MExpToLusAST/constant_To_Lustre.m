@@ -1,4 +1,4 @@
-function [code, exp_dt] = constant_To_Lustre(BlkObj, tree, parent, blk, ...
+function [code, exp_dt, dim] = constant_To_Lustre(BlkObj, tree, parent, blk, ...
     data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
@@ -9,6 +9,7 @@ function [code, exp_dt] = constant_To_Lustre(BlkObj, tree, parent, blk, ...
     
     v = tree.value;
     exp_dt = expected_dt;
+    dim = 1;
     if strcmp(expected_dt, 'real')
         code{1} = nasa_toLustre.lustreAst.RealExpr(str2double(v));
     elseif strcmp(expected_dt, 'bool')

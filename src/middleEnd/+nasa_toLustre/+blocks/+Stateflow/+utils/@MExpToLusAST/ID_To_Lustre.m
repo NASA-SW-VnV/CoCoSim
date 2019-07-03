@@ -1,5 +1,5 @@
-function [code, dt] = ID_To_Lustre(~, tree, parent, blk, data_map, ...
-    inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun)
+function [code, dt, dim] = ID_To_Lustre(~, tree, parent, blk, data_map, ...
+        inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -7,7 +7,7 @@ function [code, dt] = ID_To_Lustre(~, tree, parent, blk, data_map, ...
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    
+    dim = [];
     if ischar(tree)
         id = tree;
     else
@@ -16,18 +16,25 @@ function [code, dt] = ID_To_Lustre(~, tree, parent, blk, data_map, ...
     dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.ID_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
     if strcmp(id, 'true') || strcmp(id, 'false')
         code{1} = nasa_toLustre.lustreAst.BooleanExpr(id);
-        
+        dim = 1;
     elseif isSimulink && strcmp(id, 'u')
         %the case of u with no index in IF/Fcn/SwitchCase blocks
         code{1} = inputs{1}{1};
-        
+        dim = 1;
     elseif isSimulink && ~isempty(regexp(id, 'u\d+', 'match'))
         %the case of u1, u2 in IF/Fcn/SwitchCase blocks
         input_idx = regexp(id, 'u(\d+)', 'tokens', 'once');
         code{1} = inputs{str2double(input_idx)}{1};
-        
+        dim = 1;
     elseif isKey(data_map, id)
         d = data_map(id);
+        if isfield(d, 'CompiledSize')
+            dim = str2num(d.CompiledSize);
+        elseif isfield(d, 'ArraySize')
+            dim = str2num(d.ArraySize);
+        else
+            dim = [];
+        end
         if isStateFlow || isMatlabFun
             names = nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getDataName(d);
             code = cell(numel(names), 1);
@@ -49,6 +56,7 @@ function [code, dt] = ID_To_Lustre(~, tree, parent, blk, data_map, ...
                 throw(ME);
             end
             dt = expected_dt;
+            dim = size(value);
             code = cell(numel(value), 1);
             for i=1:numel(value)
                 if strcmp(expected_dt, 'bool')
