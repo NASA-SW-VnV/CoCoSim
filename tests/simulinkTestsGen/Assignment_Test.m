@@ -30,8 +30,8 @@ classdef Assignment_Test < Block_Test
             nb_tests = length(params);
             condExecSSPeriod = floor(nb_tests/length(Block_Test.condExecSS));
             for i=1 : nb_tests
-                skipTests = [];
-                if ismember(i,skipTests)
+                skipTests = [10];
+                if ~ismember(i,skipTests)
                     continue;
                 end
                 try

@@ -106,6 +106,8 @@ classdef Reshape_Test < Block_Test
                         for pOutDims = 1:numel(obj.OutputDimensions)
                             s4.OutputDimensions = ...
                                 obj.OutputDimensions{pOutDims};
+                            s4.inputDimension = obj.inputDimension{pOutDims};
+                                    
                             params{end+1} = s4;
                         end
                     else
