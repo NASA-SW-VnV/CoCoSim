@@ -64,7 +64,8 @@ classdef RateTransition_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 clockInVar = nasa_toLustre.lustreAst.VarIdExpr(clockInName);
                 clockOutName =nasa_toLustre.utils.SLX2LusUtils.clockName(outTs/main_sampleTime(1), outTsOffset/main_sampleTime(1));
                 clockOutVar = nasa_toLustre.lustreAst.VarIdExpr(clockOutName);
-                if outTs == main_sampleTime(1) && outTsOffset == main_sampleTime(2)
+                if nasa_toLustre.utils.SLX2LusUtils.isIgnoredSampleTime(...
+                        outTs/main_sampleTime(1), outTsOffset/main_sampleTime(1))
                     cond = clockInVar;
                 else
                     cond = nasa_toLustre.lustreAst.BinaryExpr(...
@@ -97,7 +98,8 @@ classdef RateTransition_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 clockOutVar = nasa_toLustre.lustreAst.VarIdExpr(clockOutName);
                 init_cond =nasa_toLustre.utils.SLX2LusUtils.getInitialOutput(parent, blk,...
                     blk.InitialCondition, outputDataType, nb_outputs);
-                if outTs == main_sampleTime(1) && outTsOffset == main_sampleTime(2)
+                if nasa_toLustre.utils.SLX2LusUtils.isIgnoredSampleTime(...
+                        outTs/main_sampleTime(1), outTsOffset/main_sampleTime(1))
                     for i=1:length(outputs)
                         codes{i} = nasa_toLustre.lustreAst.LustreEq(outputs{i}, inputs{i});
                     end
