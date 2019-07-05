@@ -48,7 +48,7 @@ function [status,...
     
     %%
     try
-        mdlTraceRoot = SLX2Lus_Trace.getxRoot(mdl_trace);
+        mdlTraceRoot = nasa_toLustre.utils.SLX2Lus_Trace.getxRoot(mdl_trace);
     catch
         display_msg(...
             ['file ' mdl_trace ' can not be read as xml file'],...
@@ -80,9 +80,12 @@ function [status,...
     close_system(new_model_name,0);
     model_handle = new_system(new_model_name);
     
-    trace_file_name = fullfile(output_dir, ...
+    xml_trace_file_name = fullfile(output_dir, ...
         strcat(cocospec_name, '.mcdc.trace.xml'));
-    mcdc_trace = SLX2Lus_Trace(new_model_path, trace_file_name);
+    json_trace_file_name = fullfile(output_dir, ...
+        strcat(cocospec_name, '.mcdc.trace.json'));
+    mcdc_trace = nasa_toLustre.utils.SLX2Lus_Trace(new_model_path, ...
+        xml_trace_file_name, json_trace_file_name);
     mcdc_trace.init();
     % save_system(model_handle,new_name);
     
@@ -101,7 +104,6 @@ function [status,...
             status = 1;
             new_model_path = '';
             close_system(new_model_name,0);
-            trace_file_name = '';
             return
         end
         node_idx = ismember(nodes_names, main_node);
@@ -120,7 +122,7 @@ function [status,...
                 
                 block_pos = [(x+100) y (x+250) (y+50)];
                 node_block_path = fullfile(new_model_name,node_name);
-                mcdc_node_process(new_model_name, nodes, node{1}, node_block_path, mdlTraceRoot, block_pos,mcdc_trace);
+                MCDC2SLX.mcdc_node_process(new_model_name, nodes, node{1}, node_block_path, mdlTraceRoot, block_pos,mcdc_trace);
                 
             catch ME
                 display_msg(['couldn''t translate node ' node{1} ' to Simulink'], MsgType.ERROR, 'MCDC2SLX', '');

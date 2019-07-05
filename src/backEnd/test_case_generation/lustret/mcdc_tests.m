@@ -48,6 +48,7 @@ function [ new_model_path, status ] = mcdc_tests(...
         [output_dir, lus_file_name, ~] = fileparts(lus_full_path);
         main_node = MatlabUtils.fileBase(lus_file_name);%remove .LUSTREC/.KIND2 from name.
         [~, slx_file_name, ~] = fileparts(pp_model_full_path);
+        load_system(pp_model_full_path);
     catch ME
         display_msg(['Compilation failed for model ' slx_file_name], ...
             MsgType.ERROR, 'mcdcToSimulink', '');
@@ -107,9 +108,9 @@ function [ new_model_path, status ] = mcdc_tests(...
         return;
     else
         %% TODO Work in progress. Remove this when fixing the MC-DC importer.
-        display_msg('Adding MC-DC conditions to Simulink is not currently supported. Work in progress!',...
-            MsgType.RESULT, 'mcdc_tests', '');
-        return;
+%         display_msg('Adding MC-DC conditions to Simulink is not currently supported. Work in progress!',...
+%             MsgType.RESULT, 'mcdc_tests', '');
+%         return;
     end
 
     % create new model
@@ -137,7 +138,7 @@ function [ new_model_path, status ] = mcdc_tests(...
         return;
     end
 
-    % generate mcdc Simulink blocks
+    %% generate mcdc Simulink blocks
 
     try
         [status, mcdc_model_path, mcdc_trace] = MCDC2SLX.transform(mcdc_IR_path, xml_trace, ...
@@ -157,16 +158,16 @@ function [ new_model_path, status ] = mcdc_tests(...
         return;
     end
 
-    % add mcdc blocks to Simulink model
+    %% add mcdc blocks to Simulink model
     try
         load_system(new_model_path);
         load_system(mcdc_model_path);
         nodes = mcdc_trace.traceRootNode.getElementsByTagName('Node');
         nb_mcdc = 0;
         for idx_node=0:nodes.getLength-1
-            mcdc_blk_name = char(nodes.item(idx_node).getAttribute('block_name'));
-            node_name = char(nodes.item(idx_node).getAttribute('node_name'));
-            simulink_block_name = SLX2Lus_Trace.get_Simulink_block_from_lustre_node_name(xml_trace, ...
+            mcdc_blk_name = char(nodes.item(idx_node).getAttribute('OriginPath'));
+            node_name = char(nodes.item(idx_node).getAttribute('NodeName'));
+            simulink_block_name = nasa_toLustre.utils.SLX2Lus_Trace.get_Simulink_block_from_lustre_node_name(xml_trace, ...
                 node_name, slx_file_name, new_model_name);
             isBaseName = false;
             if isempty(simulink_block_name)
@@ -210,18 +211,18 @@ function [ new_model_path, status ] = mcdc_tests(...
             set_mask_parameters(mcdc_dst_path);
             dst_blk_portHandles = get_param(mcdc_dst_path, 'PortHandles');
 
-            inputs = nodes.item(idx_node).getElementsByTagName('Input');
+            inputs = nodes.item(idx_node).getElementsByTagName('Inport');
             for id_input=0:inputs.getLength-1
 
                 block_name = ...
-                    inputs.item(id_input).getElementsByTagName('block_name').item(0).getTextContent;
+                    inputs.item(id_input).getElementsByTagName('OriginPath').item(0).getTextContent;
                 block_name = regexprep(char(block_name),strcat('^',slx_file_name,'/(\w)'),strcat(new_model_name,'/$1'));
                 if getSimulinkBlockHandle(block_name) ~= -1
                     %TODO: investigate the case where the block output is
                     %not scalar.
                     blk_portHandles = get_param(block_name, 'PortHandles');
                     out_port_nb = char(...
-                        inputs.item(id_input).getElementsByTagName('out_port_nb').item(0).getTextContent);
+                        inputs.item(id_input).getElementsByTagName('PortNumber').item(0).getTextContent);
                     add_line(simulink_block_name,...
                         blk_portHandles.Outport(str2num(out_port_nb)), ...
                         dst_blk_portHandles.Inport(id_input+1), ...
@@ -245,15 +246,25 @@ function [ new_model_path, status ] = mcdc_tests(...
         save_system(new_model_name,new_model_path,'OverwriteIfChangedOnDisk',true);
         close_system(mcdc_subsys,0)
 
-        new_model_path = SLXUtils.makeharness(T, new_model_name, model_parent_path, '_harness');
-        close_system(new_model_name, 0)
-        open(new_model_path);
+        
     catch ME
         display_msg('MCDC to Simulink generation failed', MsgType.ERROR, 'mcdcToSimulink', '');
         display_msg(ME.message, MsgType.ERROR, 'mcdcToSimulink', '');
         display_msg(ME.getReport(), MsgType.DEBUG, 'mcdcToSimulink', '');
         status = 1;
-        return;
+    end
+    
+    
+    %% Create harness model
+    try
+        new_model_path = SLXUtils.makeharness(T, new_model_name, model_parent_path, '_harness');
+        close_system(new_model_name, 0)
+        open(new_model_path);
+    catch ME
+        display_msg('Create harness model failed', MsgType.ERROR, 'mcdcToSimulink', '');
+        display_msg(ME.message, MsgType.ERROR, 'mcdcToSimulink', '');
+        display_msg(ME.getReport(), MsgType.DEBUG, 'mcdcToSimulink', '');
+        status = 1;
     end
 end
 

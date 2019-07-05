@@ -36,7 +36,7 @@ function [instructionsIDs, inputList]= get_mcdc_instructions(initial_variables_n
         end
     end
     if ~isempty(new_variables_names)
-        [instructionsIDs_2, inputList_2]= get_mcdc_instructions(new_variables_names, ...
+        [instructionsIDs_2, inputList_2]= MCDC2SLX.get_mcdc_instructions(new_variables_names, ...
             lhs_instrID_map, lhs_rhs_map, originalNamesMap, traceable_variables);
         instructionsIDs = [instructionsIDs, instructionsIDs_2];
         inputList = [inputList, inputList_2];
