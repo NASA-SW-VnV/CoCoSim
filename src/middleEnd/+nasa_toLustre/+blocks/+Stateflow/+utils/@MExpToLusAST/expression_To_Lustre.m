@@ -12,7 +12,6 @@ function [code, exp_dt, dim] = expression_To_Lustre(BlkObj, tree, parent, blk,..
         
     
     
-    dim = [];
     narginchk(1, 10);
     if isempty(BlkObj), BlkObj = nasa_toLustre.blocks.DummyBlock_To_Lustre; end
     if nargin < 3, parent = []; end

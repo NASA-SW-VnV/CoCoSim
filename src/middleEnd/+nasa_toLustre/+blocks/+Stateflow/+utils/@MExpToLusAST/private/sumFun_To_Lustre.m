@@ -7,17 +7,25 @@ function [code, exp_dt, dim] = sumFun_To_Lustre(BlkObj, tree, parent, blk,...
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
+    code = {};
     op = nasa_toLustre.lustreAst.BinaryExpr.PLUS;
     if length(tree.parameters) == 1
         [x, x_dt, dim] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(BlkObj, tree.parameters(1),...
             parent, blk, data_map, inputs, expected_dt, ...
             isSimulink, isStateFlow, isMatlabFun);
-        code{1} = nasa_toLustre.lustreAst.BinaryExpr.BinaryMultiArgs(op, x);
-        if numel(dim) > 2 || (max(dim) ~= prod(dim))
+        n_dim = numel(dim);
+        if n_dim > 2
             ME = MException('COCOSIM:TREE2CODE', ...
-                'Expression "%s" is not supported in Block %s.',...
-                tree.text, blk.Origin_path);
+            'Function sum in expression "%s" first argument is %s-dimension, more than 2 is not supported.',...
+            tree.text, numel(dim));
             throw(ME);
+        elseif n_dim > 1
+            x_new = reshape(x, dim);
+            for i=1:dim(2)
+                code{end+1} = nasa_toLustre.lustreAst.BinaryExpr.BinaryMultiArgs(op, x_new(:,i));
+            end
+        else
+            code{1} = nasa_toLustre.lustreAst.BinaryExpr.BinaryMultiArgs(op, x);
         end
     else
         %TODO support "sum(X,DIM)" sums along the dimension DIM.
