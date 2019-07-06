@@ -92,7 +92,7 @@ function mcdc_node_process(new_model_name, nodes, node, ...
         
         
         % Inputs
-        blk_inputs(1) =struct('name', '', 'datatype', '', 'original_name', '');
+        blk_inputs =struct('name', '', 'datatype', '', 'original_name', '');
         for i=1:numel(inputList)
             found = true;
             

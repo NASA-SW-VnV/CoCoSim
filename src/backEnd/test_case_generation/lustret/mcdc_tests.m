@@ -5,7 +5,7 @@
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [ new_model_path, status ] = mcdc_tests(...
-    model_full_path, exportToWs, mkHarnessMdl )
+    model_full_path, exportToWs, mkHarnessMdl, nodisplay )
     %MCDCTOSIMULINK try to bring back the MC-DC conditions to simulink level.
 
     global KIND2 Z3;
@@ -31,6 +31,9 @@ function [ new_model_path, status ] = mcdc_tests(...
     if ~exist('mkHarnessMdl', 'var') || isempty(mkHarnessMdl)
         mkHarnessMdl = 0;
     end
+    if ~exist('nodisplay', 'var') || isempty(nodisplay)
+        nodisplay = 0;
+    end
     [model_parent_path, slx_file_name, ~] = fileparts(model_full_path);
     display_msg(['Generating mc-dc coverage Model for : ' slx_file_name],...
         MsgType.INFO, 'mutation_tests', '');
@@ -39,8 +42,13 @@ function [ new_model_path, status ] = mcdc_tests(...
 
     % Compile model
     try
+        options = {};
+        if nodisplay
+            options{1} = nasa_toLustre.utils.ToLustreOptions.NODISPLAY;
+        end
         [lus_full_path, xml_trace, is_unsupported, ~, ~, pp_model_full_path] = ...
-            nasa_toLustre.ToLustre(model_full_path, [], LusBackendType.LUSTREC);
+            nasa_toLustre.ToLustre(model_full_path, [], ...
+            LusBackendType.LUSTREC, [], options{:});
         if is_unsupported
             display_msg('Model is not supported', MsgType.ERROR, 'validation', '');
             return;
@@ -259,7 +267,9 @@ function [ new_model_path, status ] = mcdc_tests(...
     try
         new_model_path = SLXUtils.makeharness(T, new_model_name, model_parent_path, '_harness');
         close_system(new_model_name, 0)
-        open(new_model_path);
+        if ~nodisplay
+            open(new_model_path);
+        end
     catch ME
         display_msg('Create harness model failed', MsgType.ERROR, 'mcdcToSimulink', '');
         display_msg(ME.message, MsgType.ERROR, 'mcdcToSimulink', '');
