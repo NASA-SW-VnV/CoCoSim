@@ -15,7 +15,7 @@ function [fun_data_map, failed] = getFuncsDataMap(blk, script, ...
     %% create matlab file to execute it and get all its workspace
     blk_name = nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);
     try
-        [func_path, failed] = print_script(blk_name, functions_struct, script);
+        [func_path, failed] = print_script(functions_struct, script);
         if failed, return;end
     catch me
         display_msg(me.getReport(), MsgType.DEBUG, 'MF_To_LustreNode.getFuncsDataMap', '');
@@ -74,8 +74,9 @@ function [fun_data_map, failed] = getFuncsDataMap(blk, script, ...
     try delete(func_path), catch, end
 end
 %%
-function [func_path, failed] = print_script(blk_name, funcsList, script)
-    func_path = fullfile(tempdir, strcat(blk_name, '.m'));
+function [func_path, failed] = print_script(funcsList, script)
+    func_path = strcat(tempname, '.m');
+    [fun_dir, fun_name, ~] = fileparts(func_path);
     fid = fopen(func_path, 'w');
     failed = false;
     if fid < 0
@@ -86,7 +87,7 @@ function [func_path, failed] = print_script(blk_name, funcsList, script)
     end
     func_name = funcsList{1}.name;
     fun_header = sprintf('function f = %s()\n\tf = @%s; \n\tCoCoVars = {};', ...
-        blk_name, func_name);
+        fun_name, func_name);
     fprintf(fid, fun_header);
     fprintf(fid, '\n');
     %clean up script
