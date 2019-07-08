@@ -1,5 +1,5 @@
-function [code, exp_dt, dim] = anyFun_To_Lustre(BlkObj, tree, parent, blk,...
-        data_map, inputs, ~, isSimulink, isStateFlow, isMatlabFun)
+classdef MF2LusUtils
+    %MF2LUSUTILS
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -7,9 +7,13 @@ function [code, exp_dt, dim] = anyFun_To_Lustre(BlkObj, tree, parent, blk,...
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %         Francois Conzelmann <francois.conzelmann@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    properties
+    end
     
-    op = nasa_toLustre.lustreAst.BinaryExpr.OR;
-    [code, exp_dt, dim] = nasa_toLustre.blocks.Stateflow.utils.MF2LusUtils.allAnyFun_To_Lustre(...
-        BlkObj, tree, parent, blk,...
-        data_map, inputs, isSimulink, isStateFlow, isMatlabFun, op);
+    methods(Static)
+        [code, exp_dt, dim] = allAnyFun_To_Lustre(BlkObj, tree, parent, blk,...
+        data_map, inputs, isSimulink, isStateFlow, isMatlabFun, op)
+    end
 end
+
