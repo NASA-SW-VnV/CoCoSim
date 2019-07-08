@@ -7,11 +7,11 @@ function [code, exp_dt, dim] = lengthFun_To_Lustre(BlkObj, tree, parent, blk,...
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    dim = 1;
-    [x, ~, ~] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(BlkObj, tree.parameters(1),...
+    dim = [1 1];
+    [~, ~, x_dim] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(BlkObj, tree.parameters(1),...
         parent, blk, data_map, inputs, '', ...
         isSimulink, isStateFlow, isMatlabFun);
-    code{1} = nasa_toLustre.lustreAst.IntExpr(length(x));
+    code{1} = nasa_toLustre.lustreAst.IntExpr(max(x_dim));
     exp_dt = 'int';
 end
 
