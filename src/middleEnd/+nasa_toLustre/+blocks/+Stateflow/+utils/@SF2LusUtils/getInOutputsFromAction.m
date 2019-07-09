@@ -1,4 +1,4 @@
-function [outputs, inputs] = getInOutputsFromAction(lus_action, isCondition, data_map, expreession)
+function [outputs, inputs] = getInOutputsFromAction(lus_action, isCondition, data_map, expression)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -23,8 +23,8 @@ function [outputs, inputs] = getInOutputsFromAction(lus_action, isCondition, dat
                 continue;
             elseif~isa(assignments{act_idx}, 'nasa_toLustre.lustreAst.LustreEq')
                 ME = MException('COCOSIM:STATEFLOW', ...
-                    'Action "%s" in "%s" should be an assignement (e.g. outputs = f(inputs))', ...
-                    expreession, action_parentPath);
+                    'Action "%s" should be an assignement (e.g. outputs = f(inputs))', ...
+                    expression);
                 throw(ME);
             end
         end
@@ -45,7 +45,7 @@ function [outputs, inputs] = getInOutputsFromAction(lus_action, isCondition, dat
             else
                 ME = MException('COCOSIM:STATEFLOW', ...
                     'Variable %s can not be found for action "%s"', ...
-                    k, expreession);
+                    k, expression);
                 throw(ME);
             end
         end
@@ -56,7 +56,7 @@ function [outputs, inputs] = getInOutputsFromAction(lus_action, isCondition, dat
             else
                 ME = MException('COCOSIM:STATEFLOW', ...
                     'Variable %s can not be found for Action "%s"', ...
-                    k, expreession);
+                    k, expression);
                 throw(ME);
             end
         end

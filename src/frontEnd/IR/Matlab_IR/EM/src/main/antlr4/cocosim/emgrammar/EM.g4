@@ -12,7 +12,7 @@ emfile
 	;
 
 script
-	: contract?
+	: //contract?
 	  nlosoc?
 	  script_body
       nlosoc?
@@ -100,7 +100,7 @@ coco_expression
 	| coco_expression IMPLIES coco_expression
 	| LPAREN nlosoc? coco_expression nlosoc? RPAREN
 	| coco_expression LUS_NEQ coco_expression
-	| coco_expression LUS_AND_OR coco_expression
+//	| coco_expression LUS_AND_OR coco_expression
 	;
 	
 CONTRACT : '%{@contract';
@@ -116,7 +116,7 @@ PRE : 'pre';
 INIT : '->';
 IMPLIES : '=>';
 LUS_NEQ : '<>';
-LUS_AND_OR : 'and'|'or';
+//LUS_AND_OR : 'and'|'or';
 
 statement
     : expression   
