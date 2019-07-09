@@ -4,7 +4,7 @@
 % All Rights Reserved.
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
- 
+
 
 function [new_model_name, status] = makeharness(T, subsys_path, output_dir, postfix_name)
     % the model should be already loaded and subsys_path is the
@@ -33,40 +33,47 @@ function [new_model_name, status] = makeharness(T, subsys_path, output_dir, post
         if nargin < 3 || isempty(output_dir)
             output_dir = model_dir;
         end
-
+        
         %get CompiledPortDataTypes of inports
         Inportsblocks = find_system(subsys_path, 'SearchDepth',1,'BlockType','Inport');
         compile_cmd = strcat(modelName, '([],[],[],''compile'')');
         eval (compile_cmd);
         compiledPortDataTypes = get_param(Inportsblocks,'CompiledPortDataTypes');
         compiledPortwidths = get_param(Inportsblocks,'CompiledPortWidths');
+        compiledPortDimensions = get_param(Inportsblocks,'CompiledPortDimensions');
         InportsDTs = cellfun(@(x) x.Outport, compiledPortDataTypes);
         term_cmd = strcat(modelName, '([],[],[],''term'')');
         eval (term_cmd);
         InportsWidths = cellfun(@(x) x.Outport, compiledPortwidths);
-        if prod(InportsWidths) > 1
-            display_msg('Make harness model does not support Multidimensional Signals',...
-                MsgType.ERROR, 'makeharness', '');
-%             return;
+        acceptedDT = {'double' , 'single' , 'int8' , 'uint8' , 'int16' ,...
+            'uint16' , 'int32' , 'uint32', 'boolean'};
+        InportsDTs = cellfun(@(x) x.Outport, compiledPortDataTypes);
+        for i=1:length(InportsDTs)
+            if ~ismember(InportsDTs{i}, acceptedDT)
+                display_msg(sprintf('Make harness model does not support datatype "%s" of Inport "%s".', ...
+                    InportsDTs{i}, HtmlItem.addOpenCmd(Inportsblocks{i})),...
+                    MsgType.ERROR, 'makeharness', '');
+                return;
+            end
         end
         [~, subsys_name, ~] = fileparts(subsys_path);
         sampleTime = SLXUtils.getModelCompiledSampleTime(modelName);
         if numel(sampleTime) == 1
             sampleTime = [sampleTime, 0];
         end
-
+        
         newBaseName = strcat(modelName, postfix_name);
         close_system(newBaseName, 0);
         new_model_name = fullfile(output_dir, strcat(newBaseName, ext));
         if exist(newBaseName, 'file'), delete(newBaseName);end
         if ~exist(new_model_name, 'file'), copyfile(model_full_path, new_model_name);end
-
-
+        
+        
         % create new model
         newSubName = fullfile(newBaseName, subsys_name);
-
+        
         new_system(newBaseName);
-
+        
         if MatlabUtils.contains(subsys_path, filesep)
             add_block(subsys_path, newSubName);
         else
@@ -94,14 +101,14 @@ function [new_model_name, status] = makeharness(T, subsys_path, output_dir, post
                 NewSubPortHandles.Outport(i), outportPortHandle.Inport(1),...
                 'autorouting', 'on');
         end
-
+        
         % add convertion subsystem with rate transitions
         convertSys = fullfile(newBaseName, 'Converssion');
         add_block('built-in/Subsystem', convertSys, ...
             'Position', [270    50   290   (50+30*m)], ...
             'BackgroundColor', 'black', ...
             'ForegroundColor', 'black');
-
+        
         for i=1:nb_inports
             x = 100; y=100*i;
             inport_name = strcat(convertSys, filesep, 'In',num2str(i));
@@ -136,7 +143,7 @@ function [new_model_name, status] = makeharness(T, subsys_path, output_dir, post
                     strcat('rateT', num2str(i), '/1'), ...
                     'autorouting','on');
             end
-
+            
             outport_name = strcat(convertSys, filesep, 'Out',num2str(i));
             add_block('simulink/Ports & Subsystems/Out1',...
                 outport_name,...
@@ -146,13 +153,13 @@ function [new_model_name, status] = makeharness(T, subsys_path, output_dir, post
                 strcat('rateT', num2str(i), '/1'), ...
                 strcat('Out',num2str(i), '/1'), ...
                 'autorouting','on');
-
+            
             %link conversion subsystem to model subsystem.
             add_line(newBaseName, ...
                 strcat('Converssion', '/', num2str(i)), ...
                 strcat(subsys_name, '/', num2str(i)), ...
                 'autorouting','on');
-
+            
         end
         % add signal builder signal
         try
@@ -222,15 +229,53 @@ function [new_model_name, status] = makeharness(T, subsys_path, output_dir, post
                 end
             end
             set_param(signalBuilderName, 'Position', [50    50   210   (50+30*m)]);
-
+            in_idx = 1;
+            sgPortHandle = get_param(signalBuilderName,'PortHandles');
+            convPortHandle = get_param(convertSys, 'PortHandles');
             for i=1:nb_inports
-                add_line(newBaseName, ...
-                    strcat('Inputs', '/', num2str(i)), ...
-                    strcat('Converssion', '/', num2str(i)), ...
-                    'autorouting','on');
-
+                if InportsWidths(i) > 1
+                    
+                    for j=1:InportsWidths(i)
+                        if j == 1
+                            % add Mux block Inputs
+                            muxH = add_block('built-in/Mux',...
+                                fullfile(newBaseName, 'Mux'),...
+                                'MAKENAMEUNIQUE','ON', ...
+                                'Inputs', num2str(InportsWidths(i)));
+                            muxPortHandle = get_param(muxH,'PortHandles');
+                        end
+                        add_line(newBaseName,...
+                            sgPortHandle.Outport(in_idx), ...
+                            muxPortHandle.Inport(j),...
+                            'autorouting', 'on');
+                        
+                        in_idx = in_idx +1;
+                    end
+                    reshapeH = add_block('simulink/Math Operations/Reshape',...
+                        fullfile(newBaseName, 'Reshape'),...
+                        'MAKENAMEUNIQUE','ON', ...
+                        'OutputDimensionality', 'Customize', ...
+                        'OutputDimensions', mat2str(compiledPortDimensions{i}.Outport(2:end)));
+                    reshapePortHandle = get_param(reshapeH,'PortHandles');
+                    add_line(newBaseName, ...
+                        muxPortHandle.Outport(1), ...
+                        reshapePortHandle.Inport(1), ...
+                        'autorouting','on');
+                    add_line(newBaseName, ...
+                        reshapePortHandle.Outport(1), ...
+                        convPortHandle.Inport(i), ...
+                        'autorouting','on');
+                else
+                    add_line(newBaseName, ...
+                        sgPortHandle.Outport(in_idx), ...
+                        convPortHandle.Inport(i), ...
+                        'autorouting','on');
+                    in_idx = in_idx +1;
+                end
             end
-
+            % re-organize blocks
+            BlocksPosition_pp(newBaseName, 1);
+            
             configSet = getActiveConfigSet(newBaseName);
             set_param(configSet, 'SaveFormat', 'Structure', ...
                 'StopTime', num2str(stopTime), ...
@@ -246,7 +291,7 @@ function [new_model_name, status] = makeharness(T, subsys_path, output_dir, post
             display_msg(me.getReport(), MsgType.DEBUG, 'makeharness', '');
             status = 1;
         end
-
+        
     catch me
         display_msg('Failed generating harness model.', MsgType.ERROR, 'makeharness', '');
         display_msg(me.message, MsgType.ERROR, 'makeharness', '');
