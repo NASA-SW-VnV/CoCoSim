@@ -7,13 +7,16 @@ classdef MF2LusUtils
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %         Francois Conzelmann <francois.conzelmann@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+    
     properties
     end
     
     methods(Static)
         [code, exp_dt, dim] = allAnyFun_To_Lustre(BlkObj, tree, parent, blk,...
-        data_map, inputs, isSimulink, isStateFlow, isMatlabFun, op)
+            data_map, inputs, isSimulink, isStateFlow, isMatlabFun, op)
+        
+        [code, exp_dt, dim] = binaryFun_To_Lustre(BlkObj, tree, parent, blk,...
+            data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun, op)
     end
 end
 
