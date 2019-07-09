@@ -155,7 +155,7 @@ if nargin >= 3 && ~isempty(srcPort) ...
     % traceability
     if needToLogTraceability
         for index=1:numel(names)
-            xml_trace.add_InputOutputVar( 'Variable', names{index}.getId(), ...
+            xml_trace.add_Var(names{index}.getId(), ...
                 blk.Origin_path, port, numel(names), index, isInsideContract, IsNotInSimulink);
         end
     end
@@ -166,7 +166,7 @@ else
         names_dt = [names_dt, names_dt_i];
         if needToLogTraceability
             for index=1:numel(names_i)
-                xml_trace.add_InputOutputVar( 'Variable', names_i{index}.getId(), ...
+                xml_trace.add_Var(names_i{index}.getId(), ...
                     blk.Origin_path, port, numel(names_i), index, isInsideContract, IsNotInSimulink);
             end
         end

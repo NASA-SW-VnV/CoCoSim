@@ -15,10 +15,10 @@ function addVariable(obj, varname, ...
     if nargin >= 3
         if iscell(varname)
             for i=1:numel(varname)
-                xml_trace.add_InputOutputVar('Variable', varname{i}.getId(), originPath, port, width, i, isInsideContract, IsNotInSimulink);
+                xml_trace.add_Var(varname{i}.getId(), originPath, port, width, i, isInsideContract, IsNotInSimulink);
             end
         else
-            xml_trace.add_InputOutputVar('Variable', varname.getId(), originPath, port, width, index, isInsideContract, IsNotInSimulink);
+            xml_trace.add_Var(varname.getId(), originPath, port, width, index, isInsideContract, IsNotInSimulink);
         end
     end
 end

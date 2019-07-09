@@ -110,7 +110,7 @@ function [status,...
         node_name = emf_fieldnames{node_idx};
         node_block_path = fullfile(new_model_name, BUtils.adapt_block_name(main_node));
         block_pos = [(x+100) y (x+250) (y+50)];
-        mcdc_node_process(new_model_name, nodes, node_name, node_block_path, mdlTraceRoot, block_pos, mcdc_trace);
+        MCDC2SLX.mcdc_node_process(new_model_name, nodes, node_name, node_block_path, mdlTraceRoot, block_pos, mcdc_trace);
     else
         for node = emf_fieldnames
             try

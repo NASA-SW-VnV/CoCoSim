@@ -118,7 +118,26 @@ classdef SLX2Lus_Trace < handle
         end
         
         
-        function element = add_InputOutputVar(obj, type, var_name, originPath, port, width, index, isInsideContract, IsNotInSimulink)
+        function element = add_Input(obj, var_name, originPath, port, width,...
+                index, isInsideContract, IsNotInSimulink)
+            element = obj.add_InputOutputVar('Inport', var_name, ...
+                originPath, port, width, index, isInsideContract,...
+                IsNotInSimulink);
+        end
+        function element = add_Output(obj, var_name, originPath, port, width,...
+                index, isInsideContract, IsNotInSimulink)
+            element = obj.add_InputOutputVar('Outport', var_name, ...
+                originPath, port, width, index, isInsideContract,...
+                IsNotInSimulink);
+        end
+        function element = add_Var(obj, var_name, originPath, port, width,...
+                index, isInsideContract, IsNotInSimulink)
+            element = obj.add_InputOutputVar('Variable', var_name, ...
+                originPath, port, width, index, isInsideContract,...
+                IsNotInSimulink);
+        end
+        function element = add_InputOutputVar(obj, type, var_name, originPath,...
+                port, width, index, isInsideContract, IsNotInSimulink)
             if ~exist('IsNotInSimulink', 'var')
                 IsNotInSimulink = 0;
             end
@@ -191,16 +210,6 @@ classdef SLX2Lus_Trace < handle
         
         % functions for compatibility with old traceability used in
         % lustre_compiler
-        function element = add_Input(obj, var_name, originPath, port, width)
-            % this function is only used in write_chart.
-            %Use add_InputOutputVar for ToLustre function
-            element = obj.add_InputOutputVar('Inport', var_name, originPath, port, width, 1, 0, 0);
-        end
-        function element = add_Output(obj, var_name, originPath, port, width)
-            % this function is only used in write_chart.
-            %Use add_InputOutputVar for ToLustre function
-            element = obj.add_InputOutputVar('Outport', var_name, originPath, port, width, 1, 0, 0);
-        end
     end
     
     methods(Static)
@@ -208,6 +217,6 @@ classdef SLX2Lus_Trace < handle
         node_name = get_lustre_node_from_Simulink_block_name(trace_root,Simulink_block_name)
         simulink_block_name = get_Simulink_block_from_lustre_node_name(trace_root, lustre_node_name, Sim_file_name, new_model_name)
         variables_names = get_tracable_variables(xml_trace, node_name)
-        [block_name, index, width] = get_SlxBlockName_from_LusVar_UsingXML(xml_trace, node_name, var_name)
+        [block_name, index, width, port] = get_SlxBlockName_from_LusVar_UsingXML(xml_trace, node_name, var_name)
     end
 end

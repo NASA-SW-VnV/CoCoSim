@@ -5,11 +5,12 @@
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  
-function [block_name, index, width] = get_SlxBlockName_from_LusVar_UsingXML(xml_trace, node_name, var_name)
+function [block_name, index, width, port] = get_SlxBlockName_from_LusVar_UsingXML(xml_trace, node_name, var_name)
     
     block_name = '';
     index = [];
     width = [];
+    port = [];
     xRoot = nasa_toLustre.utils.SLX2Lus_Trace.getxRoot(xml_trace);
     if isempty(xRoot)
         display_msg('UNKNOWN Variable type trace_root in nasa_toLustre.utils.SLX2Lus_Trace.get_SlxBlockName_from_LusVar_UsingXML',...
@@ -27,6 +28,7 @@ function [block_name, index, width] = get_SlxBlockName_from_LusVar_UsingXML(xml_
                     block_name = char(input.getElementsByTagName('OriginPath').item(0).getTextContent());
                     index = str2num(input.getElementsByTagName('Index').item(0).getTextContent());
                     width = str2num(input.getElementsByTagName('Width').item(0).getTextContent());
+                    port = str2num(input.getElementsByTagName('PortNumber').item(0).getTextContent());
                     return;
                 end
             end
@@ -37,6 +39,7 @@ function [block_name, index, width] = get_SlxBlockName_from_LusVar_UsingXML(xml_
                     block_name = char(output.getElementsByTagName('OriginPath').item(0).getTextContent());
                     index = str2num(output.getElementsByTagName('Index').item(0).getTextContent());
                     width = str2num(output.getElementsByTagName('Width').item(0).getTextContent());
+                    port = str2num(output.getElementsByTagName('PortNumber').item(0).getTextContent());
                     return;
                 end
             end
@@ -48,6 +51,7 @@ function [block_name, index, width] = get_SlxBlockName_from_LusVar_UsingXML(xml_
                     block_name = char(var.getElementsByTagName('OriginPath').item(0).getTextContent());
                     index = str2num(var.getElementsByTagName('Index').item(0).getTextContent());
                     width = str2num(var.getElementsByTagName('Width').item(0).getTextContent());
+                    port = str2num(var.getElementsByTagName('PortNumber').item(0).getTextContent());
                     return;
                 end
             end

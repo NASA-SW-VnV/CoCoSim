@@ -24,7 +24,7 @@ function [new_model_name, status] = makeharness(T, subsys_path, output_dir, post
         if isa(T, 'Simulink.SimulationData.Dataset')
             TisDataSet = true;
         elseif ~isfield(T(1), 'time') || ~isfield(T(1), 'signals')
-            display_msg('Tests struct should have "signals" and "time" field"',...
+            display_msg('Tests struct should have "signals" and "time" fields or to be of type Simulink.SimulationData.Dataset',...
                 MsgType.ERROR, 'makeharness', '');
             return;
         end
@@ -47,10 +47,10 @@ function [new_model_name, status] = makeharness(T, subsys_path, output_dir, post
         if prod(InportsWidths) > 1
             display_msg('Make harness model does not support Multidimensional Signals',...
                 MsgType.ERROR, 'makeharness', '');
-            return;
+%             return;
         end
         [~, subsys_name, ~] = fileparts(subsys_path);
-        sampleTime = SLXUtils.getModelCompiledSampleTime(subsys_name);
+        sampleTime = SLXUtils.getModelCompiledSampleTime(modelName);
         if numel(sampleTime) == 1
             sampleTime = [sampleTime, 0];
         end
@@ -122,6 +122,8 @@ function [new_model_name, status] = makeharness(T, subsys_path, output_dir, post
             rateBlkName = strcat(convertSys, filesep, 'rateT', num2str(i));
             add_block('simulink/Signal Attributes/Rate Transition',rateBlkName, ...
                 'Position', [(x + 150) (y - 15) (x + 200) (y+35)],...
+                'Integrity', 'off', ...
+                'Deterministic', 'off', ...
                 'OutPortSampleTime', mat2str(sampleTime));
             if ~strcmp(InportsDTs{i}, 'double')
                 add_line(convertSys, ...
