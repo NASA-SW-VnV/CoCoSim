@@ -1,13 +1,13 @@
 function [code, exp_dt, dim] = binaryExpression_To_Lustre(BlkObj, tree, parent,...
-    blk, data_map, inputs, ~, isSimulink, isStateFlow, isMatlabFun)
+        blk, data_map, inputs, ~, isSimulink, isStateFlow, isMatlabFun)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        
-        
+    
+    
     
     tree_type = tree.type;
     dim = [];
@@ -31,20 +31,14 @@ function [code, exp_dt, dim] = binaryExpression_To_Lustre(BlkObj, tree, parent,.
     if strcmp(tree_type, 'plus_minus') % '+' '-'
         dim = left_dim;
         op = tree.operator;
-    elseif strcmp(tree_type, 'mtimes') ... % '*' '.*'
-            || strcmp(tree_type, 'times')
-        
+    elseif strcmp(tree_type, 'mtimes') % '*'
+        [code, dim] = nasa_toLustre.blocks.Stateflow.utils.MF2LusUtils.mtimesFun_To_Lustre(left, left_dim, right, right_dim);
+        return;
+    elseif strcmp(tree_type, 'times') % '.*'
         if length(left_dim) == 1 && left_dim(1) == 1
             dim = right_dim;
         elseif length(right_dim) == 1 && right_dim(1) == 1
             dim = left_dim;
-        elseif length(left_dim) <= 2 && length(right_dim) <= 2
-            if strcmp(tree_type, 'times')
-                % '.*'
-                dim = left_dim;
-            else
-                dim = [left_dim(1), right_dim(end)];
-            end
         else
             %TODO support more than 3 dimensions
             dim = left_dim;
@@ -117,7 +111,7 @@ function [code, exp_dt, dim] = binaryExpression_To_Lustre(BlkObj, tree, parent,.
 end
 
 function [code, exp_dt, dim] = getPowerCode(BlkObj, tree, parent, blk, data_map, inputs, isSimulink, isStateFlow, isMatlabFun)
-        
+    
     exp_dt = 'real';
     tree_type = tree.type;
     BlkObj.addExternal_libraries('LustMathLib_lustrec_math');

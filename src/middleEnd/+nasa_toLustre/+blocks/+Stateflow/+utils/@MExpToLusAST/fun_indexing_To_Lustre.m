@@ -31,7 +31,7 @@ function [code, exp_dt, dim] = fun_indexing_To_Lustre(BlkObj, tree, parent, blk,
             [code, exp_dt, dim] = convFun_To_Lustre(BlkObj, tree, parent, blk,...
                 data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun);
             
-        case {'or', 'and', 'xor', 'plus', 'minus',}
+        case {'or', 'and', 'xor', 'plus', 'minus'}
             [code, exp_dt, dim] = binaryFun_To_Lustre(BlkObj, tree, parent, blk,...
                 data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun);
             

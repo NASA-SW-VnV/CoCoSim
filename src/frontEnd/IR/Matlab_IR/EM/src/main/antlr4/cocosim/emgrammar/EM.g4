@@ -19,7 +19,7 @@ script
     ;
 function
 	: NL* FUNCTION func_output? ID func_input? nloc
-	  contract?
+	  //contract?
 	  body?
 	  END? 
       nlosoc?
@@ -72,7 +72,7 @@ BASETYPE
     | 'real' //| 'single' | 'double'
     | 'bool' //| 'boolean'
     ;
-
+/*
 contract :  CONTRACT  contract_item+ '%}'
 	;
  
@@ -91,6 +91,7 @@ require:
     ;
 ensure: ENSURE coco_expression nlos
 	;  
+
 	
 coco_expression 
 	: expression
@@ -100,8 +101,9 @@ coco_expression
 	| coco_expression IMPLIES coco_expression
 	| LPAREN nlosoc? coco_expression nlosoc? RPAREN
 	| coco_expression LUS_NEQ coco_expression
-//	| coco_expression LUS_AND_OR coco_expression
+	| coco_expression LUS_AND_OR coco_expression
 	;
+
 	
 CONTRACT : '%{@contract';
 CONST : 'const';
@@ -116,8 +118,8 @@ PRE : 'pre';
 INIT : '->';
 IMPLIES : '=>';
 LUS_NEQ : '<>';
-//LUS_AND_OR : 'and'|'or';
-
+LUS_AND_OR : 'and'|'or';
+*/
 statement
     : expression   
     | if_block
