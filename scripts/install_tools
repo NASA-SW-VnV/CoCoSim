@@ -685,7 +685,7 @@ else
     
     if (( ! lustrec_failed )); then
         progress_run ./configure \
-            --prefix="$install_dir" || {
+            --disable-salsa --prefix="$install_dir" || {
             error_configure lustrec; lustrec_failed=1;
         }
     fi
