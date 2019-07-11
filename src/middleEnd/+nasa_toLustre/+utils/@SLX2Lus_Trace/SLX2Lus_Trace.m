@@ -119,32 +119,38 @@ classdef SLX2Lus_Trace < handle
         
         
         function element = add_Input(obj, var_name, originPath, port, width,...
-                index, isInsideContract, IsNotInSimulink)
+                index, isInsideContract, IsNotInSimulink, portType)
             element = obj.add_InputOutputVar('Inport', var_name, ...
                 originPath, port, width, index, isInsideContract,...
-                IsNotInSimulink);
+                IsNotInSimulink, portType);
         end
         function element = add_Output(obj, var_name, originPath, port, width,...
-                index, isInsideContract, IsNotInSimulink)
+                index, isInsideContract, IsNotInSimulink, portType)
             element = obj.add_InputOutputVar('Outport', var_name, ...
                 originPath, port, width, index, isInsideContract,...
-                IsNotInSimulink);
+                IsNotInSimulink, portType);
         end
         function element = add_Var(obj, var_name, originPath, port, width,...
-                index, isInsideContract, IsNotInSimulink)
+                index, isInsideContract, IsNotInSimulink, portType)
             element = obj.add_InputOutputVar('Variable', var_name, ...
                 originPath, port, width, index, isInsideContract,...
-                IsNotInSimulink);
+                IsNotInSimulink, portType);
         end
         function element = add_InputOutputVar(obj, type, var_name, originPath,...
-                port, width, index, isInsideContract, IsNotInSimulink)
+                port, width, index, isInsideContract, IsNotInSimulink, portType)
             if ~exist('IsNotInSimulink', 'var')
                 IsNotInSimulink = 0;
             end
             if ~exist('isInsideContract', 'var')
                 isInsideContract = 0;
             end
-            element = obj.create_Data_Trace_Element(type, var_name, originPath, port, width, index, isInsideContract, IsNotInSimulink);
+            if ~exist('portType', 'var')
+                % for BusCreator values are computed from Inports
+                portType = 'Outports';
+            end
+            element = obj.create_Data_Trace_Element(type, var_name, ...
+                originPath, port, width, index, isInsideContract, ...
+                IsNotInSimulink, portType);
             if strcmp(type, 'Inport')
                 obj.current_inputs.appendChild(element);
             elseif strcmp(type, 'Outport')
@@ -158,14 +164,17 @@ classdef SLX2Lus_Trace < handle
         
         % Generic functions
         function element = create_Data_Trace_Element(obj,...
-                varType, var_name, originPath, port, width, index, isInsideContract, isNotInSimulink)
+                varType, var_name, originPath, port, width, index, ...
+                isInsideContract, isNotInSimulink, portType)
             element = obj.traceDOM.createElement(varType);
             element.setAttribute('VariableName', var_name);
+            element.setAttribute('IsNotInSimulink', num2str(isNotInSimulink));
+            element.setAttribute('IsInsideContract', num2str(isInsideContract));
             element.appendChild(obj.create_Text_Node('OriginPath', originPath));
             element.appendChild(obj.create_Text_Node('PortNumber', num2str(port)));
+            element.appendChild(obj.create_Text_Node('PortType', portType));
             element.appendChild(obj.create_Text_Node('Width', num2str(width)));
             element.appendChild(obj.create_Text_Node('Index', num2str(index)));
-            element.setAttribute('IsNotInSimulink', num2str(isNotInSimulink));
             
             %JSON
             s = struct();
@@ -177,6 +186,8 @@ classdef SLX2Lus_Trace < handle
             end
             s.VariableName = var_name;
             s.VariableType = varType;
+            s.PortNumber = num2str(port);
+            s.PortType = portType;
             s.Width = num2str(width);
             s.Index = num2str(index);
             obj.addStructMapping(s);
@@ -217,6 +228,7 @@ classdef SLX2Lus_Trace < handle
         node_name = get_lustre_node_from_Simulink_block_name(trace_root,Simulink_block_name)
         simulink_block_name = get_Simulink_block_from_lustre_node_name(trace_root, lustre_node_name, Sim_file_name, new_model_name)
         variables_names = get_tracable_variables(xml_trace, node_name)
-        [block_name, index, width, port] = get_SlxBlockName_from_LusVar_UsingXML(xml_trace, node_name, var_name)
+        [originPath, port, width, index, isInsideContract, IsNotInSimulink, portType] = ...
+            get_SlxBlockName_from_LusVar_UsingXML(xml_trace, node_name, var_name)
     end
 end
