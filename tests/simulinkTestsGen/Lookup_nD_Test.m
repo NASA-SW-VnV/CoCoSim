@@ -68,6 +68,9 @@ classdef Lookup_nD_Test < Block_Test
             status = 0;
             params = obj.getParams();
             fstInDims = {'1', '1', '1', '1', '1', '3', '[2,3]'};
+            inputDataType = {'double', 'single', 'double', 'single',...
+                'double', 'single', 'double', 'single',...
+                'int8', 'uint8', 'int16', 'uint16', 'int32', 'uint32'};
             nb_tests = length(params);
             condExecSSPeriod = floor(nb_tests/length(Block_Test.condExecSS));
             for i=1 : nb_tests
@@ -112,19 +115,40 @@ classdef Lookup_nD_Test < Block_Test
                     inport_list = find_system(blk_parent, ...
                         'SearchDepth',1, 'BlockType','Inport');
                     nbInpots = length(inport_list);
-                    
+
+                    % if 'Nearest' then inputs must match break point data type
+                    % if 'Even Spacing' then value of breakpoints spacing 
+                    %    must fit in datatype to the last precision bit.
+                    inpType_Idx = mod(i, length(inputDataType)) + 1;                    
                     if strcmp(s.UseOneInputPortForAllInputData, 'on')
                         set_param(inport_list{1}, 'PortDimensions', ...
                             num2str(length(tableDim)));
+
+                        if ~strcmp(s.InterpMethod, 'Nearest')
+                            if ~strcmp(s.BreakpointsSpecification, ...
+                                    'Even spacing')
+                                set_param(inport_list{1}, 'OutDataTypeStr', ...
+                                    inputDataType{inpType_Idx});
+                            end
+                        end
                     else
                         for inpIdx = 1:nbInpots
                             set_param(inport_list{inpIdx},...
                                 'OutMin', '0', 'OutMax', '127');
+                            if ~strcmp(s.InterpMethod, 'Nearest')
+                                if ~strcmp(s.BreakpointsSpecification, ...
+                                        'Even spacing')
+                                    set_param(inport_list{inpIdx}, 'OutDataTypeStr', ...
+                                        inputDataType{inpType_Idx});
+                                end
+                            end
                         end
                         % test if the block behaves as scalar function.
                         dim_Idx = mod(i, length(fstInDims)) + 1;
                         set_param(inport_list{1}, 'PortDimensions', ...
                             fstInDims{dim_Idx});
+                        
+                        
                     end
                     
                     

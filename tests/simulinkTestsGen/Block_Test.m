@@ -174,6 +174,7 @@ classdef Block_Test
             if failed
                 display_msg(['Model failed: ' mdl_name], ...
                     MsgType.ERROR, 'generateTests', '');
+                %save_system(mdl_name, mdl_path);
             else
                 save_system(mdl_name, mdl_path);
             end

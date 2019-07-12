@@ -11,6 +11,10 @@ classdef LookupTableDynamic_Test < Block_Test
         LookUpMeth = {'Interpolation-Extrapolation', ...
             'Interpolation-Use End Values', 'Use Input Nearest', ...
             'Use Input Below', 'Use Input Above'};
+        % not block specific parameters
+        inputDataType = {'double', 'single', 'int8', ...
+            'uint8', 'int16', 'uint16', ...
+            'int32', 'uint32'};
     end
     
     properties
@@ -35,6 +39,10 @@ classdef LookupTableDynamic_Test < Block_Test
             nb_tests = length(params);
             condExecSSPeriod = floor(nb_tests/length(Block_Test.condExecSS));
             for i=1 : nb_tests
+                skipTests = [];
+                if ismember(i,skipTests)
+                    continue;
+                end                  
                 try
                     s = params{i};
                     
@@ -73,6 +81,9 @@ classdef LookupTableDynamic_Test < Block_Test
                         s = rmfield(s, 'xdat');
                     end
                     
+                    inputType = s.inputDataType;
+                    s = rmfield(s, 'inputDataType');
+                    
                     %% add the block
                     Block_Test.add_and_connect_block(obj.blkLibPath, blkPath, s);
                     
@@ -87,8 +98,18 @@ classdef LookupTableDynamic_Test < Block_Test
                     
                     % Inport 1: test if the block behaves as scalar function.
                     dim_Idx = mod(i, length(fstInDims)) + 1;
+                    % OutMin and OutMax has to respect data type
+                    if startsWith(inputType, 'uint')
+                        BPMin = max(BPMin,0);
+                    end
+                    if contains(inputType, 'int')
+                        maxClassname = intmax(inputType);
+                        BPMax = num2str(min(BPMax, maxClassname));
+                    end
+                    
                     set_param(inport_list{1},...
                         'PortDimensions', fstInDims{dim_Idx}, ...
+                        'OutDataTypeStr', inputType, ...
                         'OutMin', num2str(BPMin), ...
                         'OutMax', num2str(BPMax));
                     
@@ -96,7 +117,9 @@ classdef LookupTableDynamic_Test < Block_Test
                     failed = PP2Utils.replace_one_block(inport_list{2},...
                         'simulink/Sources/Constant');
                     if ~failed
-                        set_param(inport_list{2}, 'Value', xdat);
+                        set_param(inport_list{2}, ...
+                            'OutDataTypeStr', inputType, ...
+                            'Value', xdat);
                     end
                     
                     % Inport 3: set dimension
@@ -140,24 +163,22 @@ classdef LookupTableDynamic_Test < Block_Test
         end
         function params = getPermutations(obj)
             params = {};
-            for i=1:length(obj.LookUpMeth)
+            for pLookUpMethog=1:length(obj.LookUpMeth)
                 s = struct();
-                s.LookUpMeth = obj.LookUpMeth{i};
-                for d = 1:2
-                    % xdat and ydat can be 1 or 2 dimensional
-                    if d == 1
-                        B = MatlabUtils.construct_random_doubles(1, 0, 127, [5 1]);
-                        s.BPMin = min(B(:));
-                        s.BPMax = max(B(:));
-                        s.xdat = mat2str(sort(B));
-                        s.TableDim = 5;
-                    else
-                        B = MatlabUtils.construct_random_doubles(1, 0, 127, [3, 5]);
-                        s.BPMin = min(B(:));
-                        s.BPMax = max(B(:));
-                        s.xdat = mat2str(reshape(sort(B(:)), [3, 5]));
-                        s.TableDim = [3, 5];
-                    end
+                s.LookUpMeth = obj.LookUpMeth{pLookUpMethog};
+                for pInputType = 1:numel(obj.inputDataType)
+                    s.inputDataType = obj.inputDataType{pInputType};
+                    B = MatlabUtils.construct_random_doubles(1, 0, 127, [5 1]);
+%                     if pInputType==1
+%                         B = MatlabUtils.construct_random_doubles(1, 0, 127, [5 1]);
+%                     else
+%                         B = [0, 2, 5, 8, 20];
+%                     end
+                    
+                    s.BPMin = min(B(:));
+                    s.BPMax = max(B(:));
+                    s.xdat = mat2str(sort(B));
+                    s.TableDim = 5;
                     params{end+1} = s;
                 end
             end

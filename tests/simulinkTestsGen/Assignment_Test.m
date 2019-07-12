@@ -27,11 +27,14 @@ classdef Assignment_Test < Block_Test
             end
             status = 0;
             params = obj.getParams();
+            inputDataType = {'double', 'single', 'double', 'single',...
+                'double', 'single', 'double', 'single',...
+                'int8', 'uint8', 'int16', 'uint16', 'int32', 'uint32'};              
             nb_tests = length(params);
             condExecSSPeriod = floor(nb_tests/length(Block_Test.condExecSS));
             for i=1 : nb_tests
-                skipTests = [10];
-                if ~ismember(i,skipTests)
+                skipTests = [];
+                if ismember(i,skipTests)
                     continue;
                 end
                 try
@@ -73,20 +76,21 @@ classdef Assignment_Test < Block_Test
                     end
                     inport_list = find_system(blk_parent, ...
                         'SearchDepth',1, 'BlockType','Inport');
-                    nbInpots = length(inport_list);  
+                    nbInpots = length(inport_list); 
+                    
+                    % rotate over input data type
+                    inpType_Idx = mod(i, length(inputDataType)) + 1;
                     
                     % set Y0 dimension
-                    set_param(inport_list{1}, 'PortDimensions', mat2str(dim_Y0));
+                    set_param(inport_list{1}, ...
+                        'PortDimensions', mat2str(dim_Y0),...
+                        'OutDataTypeStr',inputDataType{inpType_Idx});
                     
                     % set U dimension
-                    set_param(inport_list{2}, 'PortDimensions', mat2str(dim_U));
-                    
-                    % set limits on port 'Index vector (port)' and 'Starting index (port)'
-%    what about these ports?              inputPorts = [blokPortHandles.Enable, ...
-%                                         blokPortHandles.Ifaction, ...
-%                                         blokPortHandles.Inport, ...
-%                                         blokPortHandles.Reset, ...
-%                                         blokPortHandles.Trigger];                    
+                    set_param(inport_list{2}, ...
+                        'PortDimensions', mat2str(dim_U),...
+                        'OutDataTypeStr',inputDataType{inpType_Idx});
+                                      
                     portOffset = 1 + Y0_portNumber;
                     for portId=1:IndexPortNumber
                         if strcmp(s.IndexMode,'One-based')

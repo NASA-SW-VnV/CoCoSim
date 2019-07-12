@@ -1,22 +1,24 @@
-classdef Reshape_Test < Block_Test
-    %Reshape_Test generates test automatically.
+classdef DiscretePulseGenerator_Test < Block_Test
+    %DiscretePulseGenerator_Test generates test automatically.
     
     properties(Constant)
-        fileNamePrefix = 'Reshape_TestGen';
-        blkLibPath = 'simulink/Math Operations/Reshape';
+        fileNamePrefix = 'DiscretePulseGenerator_TestGen';
+        blkLibPath = 'simulink/Sources/Pulse Generator';
     end
     
     properties
-        % properties that will participate in permutations
-        OutputDimensionality = {'1-D array','Column vector (2-D)',...
-            'Row vector (2-D)','Customize','Derive from reference input port'};
-        OutputDimensions =  {'[1,2]','[2,1]','[2,3]','[2,3,4]'};
-        inputDimension = {'[1,2]','[2,1]','[2,3]','[2,3,4]','[2,3,4,2]'};
+        % properties that will participate in permutations      
+        PulseType = {'Time based','Sample based'};
+        Amplitude = {'1','0.5'};
+        Period =  {'10','.5'};
+        PulseWidth = {'5','15'};
+        PhaseDelay = {'2','0'};
+        VectorParams1D = {'off','on'};
     end
     
     properties
-        % other properties
-
+        % other properties        
+        SampleTime = {'-1'};       
     end
     
     methods
@@ -26,15 +28,11 @@ classdef Reshape_Test < Block_Test
             end
             status = 0;
             params = obj.getParams();
-            inputDataType = {'double', 'single', 'double', 'single',...
-                'double', 'single', 'double', 'single',...
-                'int8', 'uint8', 'int16', 'uint16', 'int32', 'uint32'};              
-            
             nb_tests = length(params);
             condExecSSPeriod = floor(nb_tests/length(Block_Test.condExecSS));
             for i=1 : nb_tests
-                skipTests = [];
-                if ismember(i,skipTests)
+                testId = [24];
+                if ~ismember(i,testId)
                     continue;
                 end
                 try
@@ -51,11 +49,9 @@ classdef Reshape_Test < Block_Test
                     end
                     
                     %% remove parametres that does not belong to block params
-                    inpDimension = s.inputDimension;
-                    s = rmfield(s,'inputDimension');
                                         
                     %% add the block
-
+                                   
                     Block_Test.add_and_connect_block(obj.blkLibPath, blkPath, s);
                     
                     %% go over inports
@@ -65,24 +61,13 @@ classdef Reshape_Test < Block_Test
                         blk_parent = fileparts(blkPath);
                     end
                     inport_list = find_system(blk_parent, ...
-                        'SearchDepth',1, 'BlockType','Inport');   
-
-                    % rotate over input data type for U
-                    inpType_Idx = mod(i, length(inputDataType)) + 1;
-                    set_param(inport_list{1}, ...      
-                        'OutDataTypeStr',inputDataType{inpType_Idx});
+                        'SearchDepth',1, 'BlockType','Inport');
+                    nbInpots = length(inport_list);  
                     
-                    for inPort = 1:numel(inport_list)
-                        set_param(inport_list{inPort}, 'PortDimensions', inpDimension);
-                    end
                     
-                    % if vector, alternate between row and column vector
-                    
-
+                    %% set model configuration parameters and save model if it compiles
                     failed = Block_Test.setConfigAndSave(mdl_name, mdl_path);
                     if failed, display(s), end
-                
-                    
                 catch me
                     display(s);
                     display_msg(['Model failed: ' mdl_name], ...
@@ -98,31 +83,32 @@ classdef Reshape_Test < Block_Test
             params1 = obj.getPermutations();
             params2 = cell(1, length(params1));
             for p1 = 1 : length(params1)
-                s = params1{p1};                
+                s = params1{p1};
+                
                 params2{p1} = s;
             end
         end
         
         function params = getPermutations(obj)
             params = {};       
-            for pOutpDimensionality = 1 : numel(obj.OutputDimensionality) 
-                for pInputDims = 1 : numel( obj.inputDimension )
-                    s = struct();
-                    s.OutputDimensionality = obj.OutputDimensionality{pOutpDimensionality};
-                    s.inputDimension = obj.inputDimension{pInputDims};
-                    if pOutpDimensionality == 4
-                        s4 = s;
-                        for pOutDims = 1:numel(obj.OutputDimensions)
-                            s4.OutputDimensions = ...
-                                obj.OutputDimensions{pOutDims};
-                            s4.inputDimension = obj.inputDimension{pOutDims};
-                                    
-                            params{end+1} = s4;
-                        end
-                    else
-                        params{end+1} = s;
+            for pPulseType = 1 : numel(obj.PulseType)  
+                for pAmplitude = 1:numel(obj.Amplitude)
+                    for pPeriod = 1:numel(obj.Period)
+                        for pPulseWidth = 1 : numel( obj.PulseWidth )
+                            for pPhaseDelay = 1:numel(obj.PhaseDelay)
+                                for pVectorParams1D = 1:numel(obj.VectorParams1D)
+                                    s = struct();
+                                    s.PulseType = obj.PulseType{pPulseType};
+                                    s.Amplitude = obj.Amplitude{pAmplitude};
+                                    s.Period = obj.Period{pPeriod};
+                                    s.PulseWidth = obj.PulseWidth{pPulseWidth};
+                                    s.PhaseDelay = obj.PhaseDelay{pPhaseDelay};
+                                    s.VectorParams1D = obj.VectorParams1D{pVectorParams1D}; 
+                                    params{end+1} = s;
+                                end
+                            end
+                        end                           
                     end
-
                 end
                 
             end

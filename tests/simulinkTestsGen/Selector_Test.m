@@ -31,6 +31,9 @@ classdef Selector_Test < Block_Test
             end
             status = 0;
             params = obj.getParams();
+            inputDataType = {'double', 'single', 'double', 'single',...
+                'double', 'single', 'double', 'single',...
+                'int8', 'uint8', 'int16', 'uint16', 'int32', 'uint32'};              
             nb_tests = length(params);
             condExecSSPeriod = floor(nb_tests/length(Block_Test.condExecSS));
             for i=1 : nb_tests
@@ -74,19 +77,19 @@ classdef Selector_Test < Block_Test
                         blk_parent = fileparts(blkPath);
                     end
                     inport_list = find_system(blk_parent, ...
-                        'SearchDepth',1, 'BlockType','Inport');                     
+                        'SearchDepth',1, 'BlockType','Inport');    
+                    
+                        % rotate over input data type
+                    inpType_Idx = mod(i, length(inputDataType)) + 1;
+                
                     
                     % set U dimension
                     if numel(dim_U) > 1
-                        set_param(inport_list{1}, 'PortDimensions', mat2str(dim_U));
+                        set_param(inport_list{1}, ...
+                            'PortDimensions', mat2str(dim_U),...
+                            'OutDataTypeStr',inputDataType{inpType_Idx});
                     end
-                    
-                    % set limits on port 'Index vector (port)' and 'Starting index (port)'
-%    what about these ports?              inputPorts = [blokPortHandles.Enable, ...
-%                                         blokPortHandles.Ifaction, ...
-%                                         blokPortHandles.Inport, ...
-%                                         blokPortHandles.Reset, ...
-%                                         blokPortHandles.Trigger];                    
+                
                     portOffset = 1 ;
                     for portId=1:IndexPortNumber
                         constParams = {};
