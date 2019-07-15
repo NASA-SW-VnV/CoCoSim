@@ -245,7 +245,37 @@ public class EM2JSON {
 		}
 
 		@Override public void exitNotAssignment(EMParser.NotAssignmentContext ctx) {
-			setJSON(ctx,getJSON(ctx.relopOR()));
+			setJSON(ctx,getJSON(ctx.colonExpression()));
+		}
+		
+		@Override public void exitColonExpression(EMParser.ColonExpressionContext ctx) {
+			if (ctx.colonExpression() == null){
+				setJSON(ctx,getJSON(ctx.relopOR()));
+			}
+			else{
+				StringBuilder buf = new StringBuilder();
+				buf.append("{");
+				buf.append("\n");
+				buf.append(Quotes("type")+":"+Quotes("colonExpression"));
+				buf.append(",\n");
+				if (ctx.END() != null){
+					buf.append(Quotes("operator")+":"+Quotes(":end"));
+					buf.append(",\n");
+				}
+				else{
+					buf.append(Quotes("operator")+":"+Quotes(":"));
+					buf.append(",\n");
+				}
+				buf.append(Quotes("leftExp")+":"+getJSON(ctx.colonExpression()));
+				buf.append(",\n");
+				if (ctx.relopOR() != null){
+					buf.append(Quotes("rightExp")+":"+getJSON(ctx.relopOR()));
+					buf.append(",\n");
+				}
+				buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
+				buf.append("\n}");
+				setJSON(ctx, buf.toString());
+			}
 		}
 
 		@Override public void exitRelopOR(EMParser.RelopORContext ctx) { 
@@ -305,12 +335,10 @@ public class EM2JSON {
 		}
 
 		@Override public void exitPower(EMParser.PowerContext ctx) { 
-			callExpression( ctx,  "power",  "colonExpression");
+			callExpression( ctx,  "power",  "unaryExpression");
 		}
 
-		@Override public void exitColonExpression(EMParser.ColonExpressionContext ctx) {
-			callExpression( ctx,  "colonExpression",  "unaryExpression");
-		}
+		
 
 		@Override public void exitUnaryExpression(EMParser.UnaryExpressionContext ctx) {
 			callExpression( ctx,  "unaryExpression",  "postfixExpression");

@@ -542,8 +542,8 @@ public class EM2PseudoLustre {
 
 		@Override
 		public void exitNotAssignment(EMParser.NotAssignmentContext ctx) {
-			setLus(ctx, getLus(ctx.relopOR()));
-			setDataType(ctx, getDataType(ctx.relopOR()));
+			setLus(ctx, getLus(ctx.colonExpression()));
+			setDataType(ctx, getDataType(ctx.colonExpression()));
 		}
 
 		@Override

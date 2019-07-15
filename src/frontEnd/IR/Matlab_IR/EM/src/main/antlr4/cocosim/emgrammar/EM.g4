@@ -153,7 +153,13 @@ assignmentOperator
     :   '=' 		
     ;
 notAssignment
+    :   colonExpression
+    ;
+
+colonExpression
     :   relopOR
+    |   colonExpression ':' relopOR
+    |   colonExpression ':' END relopOR?
     ;
 
 relopOR
@@ -229,14 +235,10 @@ ldivide
     ;
 
 power
-    :   colonExpression
-    |   power '.^' colonExpression
+    :   unaryExpression
+    |   power '.^' unaryExpression
     ;
 
-colonExpression
-    :   unaryExpression
-    |   colonExpression ':' unaryExpression
-    ;
 
 unaryExpression
     :   postfixExpression
@@ -262,7 +264,7 @@ primaryExpression
     |   '(' expression ')'  
     |   cell
 	|   matrix   
-    |   ignore_value
+    | ignore_value
     ;
 
 indexing
