@@ -8,13 +8,19 @@ function [ new_model_path, status ] = mcdc_tests(...
         model_full_path, exportToWs, mkHarnessMdl, nodisplay )
     %MCDCTOSIMULINK try to bring back the MC-DC conditions to simulink level.
     
-    global KIND2 Z3;
+    global KIND2 Z3 LUSTRET; 
     if isempty(KIND2)
         tools_config;
     end
     if ~exist(KIND2,'file')
         errordlg(sprintf('KIND2 model checker is not found in %s. Please set KIND2 path in tools_config.m', KIND2));
         status = 1;
+        return;
+    end
+    status = BUtils.check_files_exist(LUSTRET);
+    if status
+        msg = 'LUSTRET not found, please configure tools_config file under tools folder';
+        display_msg(msg, MsgType.ERROR, 'mcdc_tests', '');
         return;
     end
     
@@ -126,7 +132,7 @@ function [ new_model_path, status ] = mcdc_tests(...
     new_model_name = strcat(slx_file_name,'_mcdc');
     new_model_path = fullfile(output_dir, strcat(new_model_name,'.slx'));
     
-    display_msg(['Cocospec path: ' new_model_path ], MsgType.INFO, 'mcdcToSimulink', '');
+    display_msg(['MCDC file path: ' new_model_path ], MsgType.INFO, 'mcdcToSimulink', '');
     
     if exist(new_model_path,'file')
         if bdIsLoaded(new_model_name)

@@ -284,7 +284,7 @@ function [new_model_name, status] = makeharness(T, subsys_path, output_dir, post
             save_system(newBaseName, new_model_name,'OverwriteIfChangedOnDisk',true);
             display_msg(['Generated harness model is in: ' new_model_name],...
                 MsgType.RESULT, 'makeharness', '');
-            open(new_model_name)
+            %open(new_model_name)
         catch me
             display_msg('Test cases struct is not well formed.', MsgType.ERROR, 'makeharness', '');
             display_msg(me.message, MsgType.ERROR, 'makeharness', '');

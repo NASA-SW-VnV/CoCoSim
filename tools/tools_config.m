@@ -22,7 +22,7 @@
 % 3- Set your own paths by redefining the variables : ZUSTRE, LUSTREC,
 %   KIND2
 
-global tools_config_already_run LUSTREC LUSTREC_OPTS LUSTRET ...
+global tools_config_already_run LUSTREC LUSTREC_OPTS LUSTRET LUSTREV ...
     LUCTREC_INCLUDE_DIR ZUSTRE Z3 KIND2 JKIND JLUSTRE2KIND SEAHORN...
     WLLVM WLLVMPP EXTRACT_BC IKOS cocosim_version;
 if isempty(tools_config_already_run) 
@@ -70,6 +70,7 @@ else
     %(default : C division semantics)
     LUSTREC_OPTS = '-int_div_euclidean -algebraic-loop-solve -int "long long int"';
     LUSTRET = fullfile(solvers_path, 'bin', 'lustret');
+    LUSTREV = fullfile(solvers_path, 'bin', 'lustrev');
     LUCTREC_INCLUDE_DIR = fullfile(solvers_path, 'include', 'lustrec');
     ZUSTRE = fullfile(solvers_path, 'bin', 'zustre');
     Z3 = fullfile(solvers_path, 'z3', 'bin', 'z3');
