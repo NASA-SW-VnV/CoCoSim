@@ -7,7 +7,11 @@ function [blk, Inputs, Outputs] = creatInportsOutports(blk)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     content = struct();
-    Inputs = blk.Inputs;
+    if isfield(blk, 'Inputs')
+        Inputs = blk.Inputs;
+    else
+        Inputs = {};
+    end
     Outputs = blk.Outputs;
     for i=1:numel(Inputs)
         in = Inputs{i};
