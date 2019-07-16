@@ -7,6 +7,19 @@ function [code, exp_dt, dim] = colonExpression_To_Lustre(BlkObj, tree, parent,..
     % Author: Francois Conzelmann <francois.conzelmann@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
+    if strcmp(tree.operator, ':end')
+        ME = MException('COCOSIM:TREE2CODE', ...
+            'Colon indexing without constant is not supported',...
+            tree.text);
+        throw(ME);
+    end
+    
+    if ~isfield(tree, 'leftExp') || ~isfield(tree, 'rightExp')
+        ME = MException('COCOSIM:TREE2CODE', ...
+            'Colon indexing without constant is not supported',...
+            tree.text);
+        throw(ME);
+    end
     if count(tree.text, ':') == 2
         if strcmp(tree.leftExp.leftExp.type, 'constant') && strcmp(tree.leftExp.rightExp.type, 'constant') && strcmp(tree.rightExp.type, 'constant')
             [left, left_dt, ~] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(BlkObj, tree.leftExp.leftExp,...

@@ -53,7 +53,7 @@ function [code, exp_dt, dim] = expression_To_Lustre(BlkObj, tree, parent, blk,..
                 'mrdivide', 'mldivide', 'rdivide', 'ldivide', ...
                 'mpower', 'power'}
             [code, exp_dt, dim] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.binaryExpression_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun);
-        case {'COLON'}
+        case {'COLON', 'colonExpression'}
             [code, exp_dt, dim] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.colonExpression_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun);
         otherwise
             % we use the name of tree_type to call the associated function
