@@ -623,9 +623,9 @@ public class EM2JSON {
 		@Override public void exitHorzcat(EMParser.HorzcatContext ctx) { 
 			StringBuilder buf = new StringBuilder();
 			buf.append("[");
-			int n = ctx.expression().size();
+			int n = ctx.notAssignment().size();
 			for (int i=0;i < n; i++) {
-				EMParser.ExpressionContext ectx = ctx.expression(i);
+				EMParser.NotAssignmentContext ectx = ctx.notAssignment(i);
 				buf.append(getJSON(ectx));
 				if(i < n-1) buf.append(",");
 			}

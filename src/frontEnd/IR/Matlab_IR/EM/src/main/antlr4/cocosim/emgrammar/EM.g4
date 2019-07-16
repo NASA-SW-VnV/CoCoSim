@@ -1,5 +1,8 @@
 grammar EM;
 
+@members{
+	int whitespace_cnt = 0;
+}
 
 nlosoc	: ( NL |SEMI | COMMA)+;
 nloc	: ( NL |COMMA )+; 
@@ -348,9 +351,9 @@ HEX_DIGIT
 
 //**************************************************************
 cell	: LBRACE horzcat? ( nlos horzcat )* RBRACE ;
-horzcat	:	expression ( COMMA? expression )*? ;
+horzcat	:	 notAssignment WS_IGNORE* ( (COMMA|WS_IGNORE) WS_IGNORE* notAssignment )*  ;
 //**************************************************************
-matrix	: LSBRACE horzcat ( nlos horzcat )* RSBRACE ;
+matrix	: LSBRACE WS_IGNORE*  horzcat ( WS_IGNORE* nlos WS_IGNORE* horzcat )* WS_IGNORE* RSBRACE ;
 
 
 
@@ -444,7 +447,8 @@ COMMA	: ',';
 SEMI	: ';';
 NL   : ('\r' '\n' | '\n' | '\r')+;
 //NL	: ('\r'? '\n')+  -> skip;
-WS  : [ \t\r]+ -> skip;
+//WS : [ \t\r]+;
+WS_IGNORE  : [ \t\r]+ {whitespace_cnt == 0}? -> skip;
 
 // language keywords
 BREAK	: 'break';
@@ -477,8 +481,8 @@ LPAREN	: '(';
 RPAREN	: ')';
 LBRACE	: '{';
 RBRACE	: '}';
-LSBRACE	: '[';
-RSBRACE	: ']';
+LSBRACE	: '[' {whitespace_cnt = 1;};
+RSBRACE	: ']' {whitespace_cnt = 0;};
 AT	: '@';
 ANNOT : '%@';
 DOT	: '.';
