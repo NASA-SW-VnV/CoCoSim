@@ -31,7 +31,7 @@ function [code, exp_dt, dim] = sumFun_To_Lustre(BlkObj, tree, parent, blk,...
         end
     else
         param2 = tree.parameters{2};
-        if param2.type == 'constant'
+        if strcmp(param2.type, 'constant')
             param2_value = str2num(param2.value);
         else
             ME = MException('COCOSIM:TREE2CODE', ...
