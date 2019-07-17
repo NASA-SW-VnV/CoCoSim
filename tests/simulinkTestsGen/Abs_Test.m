@@ -1,9 +1,9 @@
-classdef DataTypeConversion_Test < Block_Test
-    %DataTypeConversion_Test generates test automatically.
+classdef Abs_Test < Block_Test
+    %Abs_Test generates test automatically.
     
     properties(Constant)
-        fileNamePrefix = 'DataTypeConversion_TestGen';
-        blkLibPath = 'simulink/Signal Attributes/Data Type Conversion';
+        fileNamePrefix = 'Abs_TestGen';
+        blkLibPath = 'simulink/Math Operations/Abs';
     end
     
     properties
@@ -11,18 +11,18 @@ classdef DataTypeConversion_Test < Block_Test
         % tested 11 elements for OutDataTypeStr
         OutDataTypeStr = {...
             'double','single','int8','uint8','int16','uint16','int32',...
-            'uint32','boolean','fixdt(1,16,0)',...
+            'uint32','fixdt(1,16,0)',...
             'fixdt(1,16,2^0,0)'};
 %         OutDataTypeStr = {...    % reduce to keep number of tests low
-%             'double','int8','uint8','int32','uint32','boolean',...
+%             'double','int8','uint8','int32','uint32',...
 %             'fixdt(1,16,0)'};  
         % tested 11 elements for inputDataType
         % inputDataType is not a block parameter
         inputDataType = {'double', 'single','int8',...
             'uint8','int16','uint16','int32', ...
-            'uint32','boolean','fixdt(1,16,0)','fixdt(1,16,2^0,0)'};
+            'uint32','fixdt(1,16,0)','fixdt(1,16,2^0,0)'};
 %         inputDataType = {'double', 'int8','uint32',...
-%             'boolean','fixdt(1,16,0)'};        
+%             'fixdt(1,16,0)'};        
     end
     
     properties
@@ -30,7 +30,6 @@ classdef DataTypeConversion_Test < Block_Test
         RndMeth = {'Ceiling', 'Convergent', 'Floor', 'Nearest', ...
             'Round', 'Simplest', 'Zero'};
         SaturateOnIntegerOverflow = {'off', 'on'};
-        ConvertRealWorld={'Real World Value (RWV)','Stored Integer (SI)'};
         LockScale = {'off','on'};
         
     end
@@ -130,7 +129,6 @@ classdef DataTypeConversion_Test < Block_Test
                     s.SaturateOnIntegerOverflow = ...
                         obj.SaturateOnIntegerOverflow{iSaturate};
                     rotate2 = mod(length(params), 2) + 1;
-                    s.ConvertRealWorld = obj.ConvertRealWorld{rotate2};
                     s.LockScale = obj.LockScale{rotate2};
                     params{end+1} = s;
                 end

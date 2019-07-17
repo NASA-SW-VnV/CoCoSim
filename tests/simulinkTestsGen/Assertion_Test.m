@@ -1,37 +1,26 @@
-classdef DataTypeConversion_Test < Block_Test
-    %DataTypeConversion_Test generates test automatically.
+classdef Assertion_Test < Block_Test
+    %Assertion_Test generates test automatically.
     
     properties(Constant)
-        fileNamePrefix = 'DataTypeConversion_TestGen';
-        blkLibPath = 'simulink/Signal Attributes/Data Type Conversion';
+        fileNamePrefix = 'Assertion_TestGen';
+        blkLibPath = 'simulink/Model Verification/Assertion';
     end
     
     properties
         % properties that will participate in permutations
-        % tested 11 elements for OutDataTypeStr
-        OutDataTypeStr = {...
-            'double','single','int8','uint8','int16','uint16','int32',...
-            'uint32','boolean','fixdt(1,16,0)',...
-            'fixdt(1,16,2^0,0)'};
-%         OutDataTypeStr = {...    % reduce to keep number of tests low
-%             'double','int8','uint8','int32','uint32','boolean',...
-%             'fixdt(1,16,0)'};  
-        % tested 11 elements for inputDataType
+        
         % inputDataType is not a block parameter
         inputDataType = {'double', 'single','int8',...
             'uint8','int16','uint16','int32', ...
             'uint32','boolean','fixdt(1,16,0)','fixdt(1,16,2^0,0)'};
-%         inputDataType = {'double', 'int8','uint32',...
-%             'boolean','fixdt(1,16,0)'};        
+      
     end
     
     properties
         % other properties
-        RndMeth = {'Ceiling', 'Convergent', 'Floor', 'Nearest', ...
-            'Round', 'Simplest', 'Zero'};
-        SaturateOnIntegerOverflow = {'off', 'on'};
-        ConvertRealWorld={'Real World Value (RWV)','Stored Integer (SI)'};
-        LockScale = {'off','on'};
+        Enabled = {'off','on'};
+        AssertionFailFcn = {''};
+        StopWhenAssertionFail = {'off', 'on'};
         
     end
     
@@ -113,25 +102,15 @@ classdef DataTypeConversion_Test < Block_Test
         
         function params = getPermutations(obj)
             params = {};             
-            inpIsIntCount = 0;
-            for pOutType = 1 : numel(obj.OutDataTypeStr)
+            for pEnabled = 1 : numel(obj.Enabled)
                 for pInType = 1 : numel(obj.inputDataType)
-                    if strfind(obj.inputDataType{pInType}, 'int') 
-                        inpIsIntCount = inpIsIntCount + 1;
-                    end
-                    iRound = mod(inpIsIntCount, ...
-                        length(obj.RndMeth)) + 1;
-                    iSaturate = mod(inpIsIntCount, ...
-                        length(obj.SaturateOnIntegerOverflow)) + 1;
                     s = struct();
+                    s.Enabled = obj.Enabled{pEnabled};
                     s.inputDataType = obj.inputDataType{pInType};
-                    s.OutDataTypeStr = obj.OutDataTypeStr{pOutType};
-                    s.RndMeth = obj.RndMeth{iRound};
-                    s.SaturateOnIntegerOverflow = ...
-                        obj.SaturateOnIntegerOverflow{iSaturate};
                     rotate2 = mod(length(params), 2) + 1;
-                    s.ConvertRealWorld = obj.ConvertRealWorld{rotate2};
-                    s.LockScale = obj.LockScale{rotate2};
+                    s.AssertionFailFcn = obj.AssertionFailFcn{1};
+                    s.StopWhenAssertionFail = ...
+                        obj.StopWhenAssertionFail{rotate2};
                     params{end+1} = s;
                 end
             end
