@@ -149,7 +149,7 @@ expression
     ;
 
 assignment
-    :   unaryExpression assignmentOperator notAssignment
+    :   primaryExpression assignmentOperator notAssignment
     ;
 
 assignmentOperator
@@ -238,18 +238,8 @@ ldivide
     ;
 
 power
-    :   unaryExpression
-    |   power '.^' unaryExpression
-    ;
-
-
-unaryExpression
     :   postfixExpression
-    |   unaryOperator unaryExpression
-    ;
-
-unaryOperator
-    :   '&' | '*' | '+' | '-' | '~' | '!'
+    |   power '.^' postfixExpression
     ;
 
 
@@ -264,13 +254,21 @@ TRANSPOSE :   ( '\'' | '.\'')
     
 primaryExpression
     :   struct_indexing
+    | unaryExpression
     |   constant
     |   cell
 	|   matrix   
     | ignore_value
+
     ;
 
+unaryExpression
+    :    unaryOperator primaryExpression
+    ;
 
+unaryOperator
+    :   '&' | '*' | '+' | '-' | '~' | '!'
+    ;
 
 struct_indexing
 	:  
@@ -352,9 +350,13 @@ HEX_DIGIT
 
 //**************************************************************
 cell	: LBRACE horzcat? ( nlos horzcat )* RBRACE ;
+
+// Do not use notAssignement instead of primaryExpression, 
+// we do not support binary expression with not parentheses.
+//e.g, [x-y] Vs [x -y], the first has one element "(x-y)", the second has two elements "x" and "-y".
 horzcat	
-	:	 notAssignment 
-	| horzcat COMMA?  notAssignment 
+	:	 primaryExpression 
+	| horzcat COMMA?  primaryExpression 
 	;
 	
 	//{_input.LT(-1).getType() == WS || _input.LT(-1).getType() == COMMA}?

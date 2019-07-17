@@ -232,7 +232,7 @@ public class EM2JSON {
 			buf.append(",\n");
 			buf.append(Quotes("operator")+":"+Quotes(ctx.assignmentOperator().getText()));
 			buf.append(",\n");
-			buf.append(Quotes("leftExp")+":"+getJSON(ctx.unaryExpression()));
+			buf.append(Quotes("leftExp")+":"+getJSON(ctx.primaryExpression()));
 			buf.append(",\n");
 			buf.append(Quotes("rightExp")+":"+getJSON(ctx.notAssignment()));
 			buf.append(",\n");
@@ -334,13 +334,29 @@ public class EM2JSON {
 		}
 
 		@Override public void exitPower(EMParser.PowerContext ctx) { 
-			callExpression( ctx,  "power",  "unaryExpression");
+			callExpression( ctx,  "power",  "postfixExpression");
 		}
 
 		
 
 		@Override public void exitUnaryExpression(EMParser.UnaryExpressionContext ctx) {
-			callExpression( ctx,  "unaryExpression",  "postfixExpression");
+			StringBuilder buf = new StringBuilder();
+			buf.append("{");
+			buf.append("\n");
+			buf.append(Quotes("type")+":"+Quotes("unaryExpression"));
+			buf.append(",\n");
+
+			String operator = null;
+			operator = ctx.unaryOperator().getText();
+			buf.append(Quotes("operator")+":"+Quotes(operator));
+			buf.append(",\n");
+			buf.append(Quotes("rightExp")+":"+getJSON(ctx.primaryExpression()));
+			
+			buf.append(",\n");
+			buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
+			
+			buf.append("\n}");
+			setJSON(ctx, buf.toString());
 		}
 
 		@Override public void exitPostfixExpression(EMParser.PostfixExpressionContext ctx) { 
@@ -600,14 +616,14 @@ public class EM2JSON {
 				}
 				buf.append(getJSON(ctx.horzcat()));
 				buf.append(",\n");
-				buf.append(getJSON(ctx.notAssignment()));
+				buf.append(getJSON(ctx.primaryExpression()));
 				if (!(ctx.parent instanceof EMParser.HorzcatContext)){
 					buf.append("]");
 				}
 				setJSON(ctx, buf.toString());
 			}
 			else{
-				setJSON(ctx, getJSON(ctx.notAssignment()));
+				setJSON(ctx, getJSON(ctx.primaryExpression()));
 			}
 			
 		}
@@ -961,17 +977,12 @@ public class EM2JSON {
 					buf.append(",\n");
 
 					String operator = null;
-					if (methodName1.equals("unaryExpression")) operator = ctx.getChild(0).getText();
-					else operator = ctx.getChild(1).getText();
+					operator = ctx.getChild(1).getText();
 					buf.append(Quotes("operator")+":"+Quotes(operator));
 					buf.append(",\n");
-					if (!methodName1.equals("unaryExpression")){
-						buf.append(Quotes("leftExp")+":"+getJSON((ParseTree) method1.invoke(ctx)));
-						buf.append(",\n");
-						buf.append(Quotes("rightExp")+":"+getJSON((ParseTree) method2.invoke(ctx)));
-					}
-					else 
-						buf.append(Quotes("rightExp")+":"+getJSON((ParseTree) method1.invoke(ctx)));
+					buf.append(Quotes("leftExp")+":"+getJSON((ParseTree) method1.invoke(ctx)));
+					buf.append(",\n");
+					buf.append(Quotes("rightExp")+":"+getJSON((ParseTree) method2.invoke(ctx)));
 					
 					buf.append(",\n");
 					buf.append(Quotes("text")+":"+Quotes(ctx.getText()));

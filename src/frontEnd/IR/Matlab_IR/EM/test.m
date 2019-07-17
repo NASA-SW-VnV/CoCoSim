@@ -1,2 +1,2 @@
 function y = fcn(u1, u2)
-y = [x(1) y z];
+y = [ z(1) (x+y) -x];
