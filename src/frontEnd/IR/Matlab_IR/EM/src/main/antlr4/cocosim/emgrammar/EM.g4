@@ -260,21 +260,28 @@ postfixExpression
 TRANSPOSE :   ( '\'' | '.\'')
     ;
 
+
+    
 primaryExpression
-    :   ID
-	|	indexing
+    :   struct_indexing
     |   constant
-    |   '(' expression ')'  
+    |   parenthesedExpression  
     |   cell
 	|   matrix   
     | ignore_value
     ;
 
-indexing
-	:	fun_indexing
-    |   cell_indexing
-    |   struct_indexing
-    ;
+parenthesedExpression :'(' expression ')'   ;
+
+struct_indexing
+	:  
+	fun_indexing # s_fun_indexing
+	| cell_indexing # s_cell_indexing
+	|struct_indexing DOT parenthesedExpression  # struct_indexing_expr
+	| struct_indexing DOT ID # struct_indexing_id
+	
+	| ID # s_id
+	;
 fun_indexing
 	:	ID LPAREN function_parameter_list? RPAREN
 	;
@@ -282,14 +289,8 @@ fun_indexing
 cell_indexing
 	:	ID (LBRACE function_parameter_list RBRACE)+
 	;	
-	
-struct_indexing
-	:	ID 
-    ( 
-        DOT indexing
-	)+
-	;
 
+	
 function_parameter_list
 	: function_parameter ( COMMA function_parameter )*
 	;
@@ -351,9 +352,14 @@ HEX_DIGIT
 
 //**************************************************************
 cell	: LBRACE horzcat? ( nlos horzcat )* RBRACE ;
-horzcat	:	 notAssignment WS_IGNORE* ( (COMMA|WS_IGNORE) WS_IGNORE* notAssignment )*  ;
+horzcat	
+	:	 notAssignment 
+	| horzcat COMMA?  notAssignment 
+	;
+	
+	//{_input.LT(-1).getType() == WS || _input.LT(-1).getType() == COMMA}?
 //**************************************************************
-matrix	: LSBRACE WS_IGNORE*  horzcat ( WS_IGNORE* nlos WS_IGNORE* horzcat )* WS_IGNORE* RSBRACE ;
+matrix	: LSBRACE   horzcat (  nlos  horzcat )*  RSBRACE ;
 
 
 
@@ -448,7 +454,7 @@ SEMI	: ';';
 NL   : ('\r' '\n' | '\n' | '\r')+;
 //NL	: ('\r'? '\n')+  -> skip;
 //WS : [ \t\r]+;
-WS_IGNORE  : [ \t\r]+ {whitespace_cnt == 0}? -> skip;
+WS  : [ \t\r]+ -> skip; //{whitespace_cnt == 0}? -> skip;
 
 // language keywords
 BREAK	: 'break';
@@ -481,8 +487,8 @@ LPAREN	: '(';
 RPAREN	: ')';
 LBRACE	: '{';
 RBRACE	: '}';
-LSBRACE	: '[' {whitespace_cnt = 1;};
-RSBRACE	: ']' {whitespace_cnt = 0;};
+LSBRACE	: '[' ;//{whitespace_cnt = 1;};
+RSBRACE	: ']' ;//{whitespace_cnt = 0;};
 AT	: '@';
 ANNOT : '%@';
 DOT	: '.';

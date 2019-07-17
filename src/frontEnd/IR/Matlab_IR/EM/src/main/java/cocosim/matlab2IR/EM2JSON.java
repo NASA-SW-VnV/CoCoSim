@@ -21,7 +21,6 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import cocosim.emgrammar.EMBaseListener;
 import cocosim.emgrammar.EMLexer;
 import cocosim.emgrammar.EMParser;
-import cocosim.matlab2Lustre.EM2Lustre.LusEmitter;
 
 /*################################################################################
 #
@@ -370,36 +369,22 @@ public class EM2JSON {
 		}
 
 		@Override public void exitPrimaryExpression(EMParser.PrimaryExpressionContext ctx) { 
-			if (ctx.getChild(0).getText().equals("(")){
-				StringBuilder buf = new StringBuilder();
-				buf.append("{");
-				buf.append("\n");
-				buf.append(Quotes("type")+":"+Quotes("parenthesedExpression"));
-				buf.append(",\n");
-				buf.append(Quotes("expression")+":"+getJSON(ctx.expression()));
-				buf.append(",\n");
-				buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
-				buf.append("\n}");
-				setJSON(ctx, buf.toString());
-			}
-			else if(ctx.ID() != null && ctx.indexing() == null){
-				StringBuilder buf = new StringBuilder();
-				buf.append("{");
-				buf.append("\n");
-				buf.append(Quotes("type")+":"+Quotes("ID"));
-				buf.append(",\n");
-				buf.append(Quotes("name")+":"+Quotes(ctx.ID().getText()));
-				buf.append(",\n");
-				buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
-				buf.append("\n}");
-				setJSON(ctx, buf.toString());
-			}
-			else{
-				setJSON(ctx, getJSON(ctx.getChild(0)));
-			}
-
+			setJSON(ctx, getJSON(ctx.getChild(0)));
 		}
 
+		@Override public void exitParenthesedExpression(EMParser.ParenthesedExpressionContext ctx){
+			StringBuilder buf = new StringBuilder();
+			buf.append("{");
+			buf.append("\n");
+			buf.append(Quotes("type")+":"+Quotes("parenthesedExpression"));
+			buf.append(",\n");
+			buf.append(Quotes("expression")+":"+getJSON(ctx.expression()));
+			buf.append(",\n");
+			buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
+			buf.append("\n}");
+			setJSON(ctx, buf.toString());
+		}
+		
 		@Override public void exitIgnore_value(EMParser.Ignore_valueContext ctx) {
 			StringBuilder buf = new StringBuilder();
 			buf.append("{");
@@ -473,9 +458,7 @@ public class EM2JSON {
 				setJSON(ctx, buf.toString());
 			}
 		}
-		@Override public void exitIndexing(EMParser.IndexingContext ctx) { 
-			setJSON(ctx, getJSON(ctx.getChild(0)));
-		}
+
 		@Override public void exitFun_indexing(EMParser.Fun_indexingContext ctx) { 
 			StringBuilder buf = new StringBuilder();
 			buf.append("{");
@@ -525,50 +508,61 @@ public class EM2JSON {
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
 		}
-		@Override public void exitStruct_indexing(EMParser.Struct_indexingContext ctx){ 
+		
+		@Override public void exitStruct_indexing_id(EMParser.Struct_indexing_idContext ctx){
 			StringBuilder buf = new StringBuilder();
 			buf.append("{");
 			buf.append("\n");
 			buf.append(Quotes("type")+":"+Quotes("struct_indexing"));
 			buf.append(",\n");
-			buf.append(Quotes("ID")+":"+Quotes(ctx.getChild(0).getText()));
+			buf.append(Quotes("leftExp")+":"+getJSON(ctx.struct_indexing()));
 			buf.append(",\n");
-			int i = 1;
-			int child = 1;
-			int n =  ctx.children.size();
-			while(i<n){
-
-				buf.append(Quotes("child"+(child++))+":"+getJSON(ctx.getChild(i++)));
-				if (i<n) buf.append(",\n");
-//				if(ctx.getChild(i).getText().equals("(")){
-//					i++;
-//					buf.append("{");
-//					buf.append("\n");
-//					buf.append(Quotes("type")+":"+Quotes("DotPARENIndex"));
-//					buf.append(",\n");
-//					buf.append(Quotes("expression")+":"+getJSON(ctx.getChild(i++)));
-//					buf.append("\n}");
-//					i++;//consume ")"
-//					if (i<n-1) buf.append(",\n");
-//				}else{
-//					buf.append("{");
-//					buf.append("\n");
-//					buf.append(Quotes("type")+":"+Quotes("DotID"));
-//					buf.append(",\n");
-//					buf.append(Quotes("name")+":"+Quotes(ctx.getChild(i++).getText()));
-//					buf.append("\n}");
-//					if (i<n-1) buf.append(",\n");
-//				}
-				
-			}
-
+			buf.append(Quotes("rightExp")+":"+getIdJson(ctx.ID().getText()));
 			buf.append(",\n");
 			buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
-			
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
 		}
+		@Override public void exitStruct_indexing_expr(EMParser.Struct_indexing_exprContext ctx){
+			StringBuilder buf = new StringBuilder();
+			buf.append("{");
+			buf.append("\n");
+			buf.append(Quotes("type")+":"+Quotes("struct_indexing"));
+			buf.append(",\n");
+			buf.append(Quotes("leftExp")+":"+getJSON(ctx.struct_indexing()));
+			buf.append(",\n");
+			buf.append(Quotes("rightExp")+":"+getJSON(ctx.parenthesedExpression()));
+			buf.append(",\n");
+			buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
+			buf.append("\n}");
+			setJSON(ctx, buf.toString());
 
+		}
+		@Override public void exitS_fun_indexing(EMParser.S_fun_indexingContext ctx){
+			setJSON(ctx, getJSON(ctx.fun_indexing()));
+		}
+		@Override public void exitS_cell_indexing(EMParser.S_cell_indexingContext ctx){
+			setJSON(ctx, getJSON(ctx.cell_indexing()));
+		}
+		
+		@Override public void exitS_id(EMParser.S_idContext ctx){
+
+			setJSON(ctx, getIdJson(ctx.ID().getText()));
+		}
+
+		String getIdJson(String text){
+			StringBuilder buf = new StringBuilder();
+			buf.append("{");
+			buf.append("\n");
+			buf.append(Quotes("type")+":"+Quotes("ID"));
+			buf.append(",\n");
+			buf.append(Quotes("name")+":"+Quotes(text));
+			buf.append(",\n");
+			buf.append(Quotes("text")+":"+Quotes(text));
+			buf.append("\n}");
+			return buf.toString();
+		}
+		
 		@Override public void exitFunction_parameter_list(EMParser.Function_parameter_listContext ctx) { 
 			StringBuilder buf = new StringBuilder();
 			buf.append("[");
@@ -622,15 +616,22 @@ public class EM2JSON {
 
 		@Override public void exitHorzcat(EMParser.HorzcatContext ctx) { 
 			StringBuilder buf = new StringBuilder();
-			buf.append("[");
-			int n = ctx.notAssignment().size();
-			for (int i=0;i < n; i++) {
-				EMParser.NotAssignmentContext ectx = ctx.notAssignment(i);
-				buf.append(getJSON(ectx));
-				if(i < n-1) buf.append(",");
+			if (ctx.horzcat() != null){
+				if (!(ctx.parent instanceof EMParser.HorzcatContext)){
+					buf.append("[");
+				}
+				buf.append(getJSON(ctx.horzcat()));
+				buf.append(",\n");
+				buf.append(getJSON(ctx.notAssignment()));
+				if (!(ctx.parent instanceof EMParser.HorzcatContext)){
+					buf.append("]");
+				}
+				setJSON(ctx, buf.toString());
 			}
-			buf.append("]\n");
-			setJSON(ctx, buf.toString());
+			else{
+				setJSON(ctx, getJSON(ctx.notAssignment()));
+			}
+			
 		}
 
 		@Override public void exitMatrix(EMParser.MatrixContext ctx) { 
