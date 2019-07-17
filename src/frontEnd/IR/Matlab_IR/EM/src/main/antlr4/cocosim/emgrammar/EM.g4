@@ -265,23 +265,23 @@ TRANSPOSE :   ( '\'' | '.\'')
 primaryExpression
     :   struct_indexing
     |   constant
-    |   parenthesedExpression  
     |   cell
 	|   matrix   
     | ignore_value
     ;
 
-parenthesedExpression :'(' expression ')'   ;
+
 
 struct_indexing
 	:  
-	fun_indexing # s_fun_indexing
-	| cell_indexing # s_cell_indexing
-	|struct_indexing DOT parenthesedExpression  # struct_indexing_expr
-	| struct_indexing DOT ID # struct_indexing_id
-	
-	| ID # s_id
+	 struct_indexing DOT struct_indexing  	   # struct_indexing_expr
+	| fun_indexing 							   # s_fun_indexing
+	| cell_indexing 							   # s_cell_indexing
+	| parenthesedExpression					   # s_parenthesedExpression
+	| ID 									   # s_id
 	;
+parenthesedExpression :'(' expression ')'   ;
+
 fun_indexing
 	:	ID LPAREN function_parameter_list? RPAREN
 	;

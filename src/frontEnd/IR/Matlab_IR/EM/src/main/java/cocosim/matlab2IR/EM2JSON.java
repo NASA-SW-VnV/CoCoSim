@@ -486,52 +486,29 @@ public class EM2JSON {
 			buf.append(",\n");
 			buf.append(Quotes("ID")+":"+Quotes(ctx.getChild(0).getText()));
 			buf.append(",\n");
-			int i = 1;
-			int child = 1;
-			int n =  ctx.children.size();
-			while(i<n){
-				buf.append(Quotes("BRACE"+(child++))+":");
-				buf.append("{");
-				buf.append("\n");
-				if (ctx.getChild(i).getText().equals("}"))
-					buf.append(Quotes("parameters")+":"+"[]");
-				else
-					buf.append(Quotes("parameters")+":"+getJSON(ctx.getChild(i++)));
-				buf.append("\n}");
-				i++;//consume "}"
-				if (i<n-1) buf.append(",\n");
+			int n = ctx.function_parameter_list().size();
+			for(int i=0; i<n; i++) {
+				buf.append(Quotes("parameters"+Integer.toString(i))+":"+getJSON(ctx.function_parameter_list(i)));
+				buf.append(",\n");
 			}
 
-			buf.append(",\n");
+			if (n == 0) buf.append(",\n");
 			buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
 			
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
 		}
 		
-		@Override public void exitStruct_indexing_id(EMParser.Struct_indexing_idContext ctx){
-			StringBuilder buf = new StringBuilder();
-			buf.append("{");
-			buf.append("\n");
-			buf.append(Quotes("type")+":"+Quotes("struct_indexing"));
-			buf.append(",\n");
-			buf.append(Quotes("leftExp")+":"+getJSON(ctx.struct_indexing()));
-			buf.append(",\n");
-			buf.append(Quotes("rightExp")+":"+getIdJson(ctx.ID().getText()));
-			buf.append(",\n");
-			buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
-			buf.append("\n}");
-			setJSON(ctx, buf.toString());
-		}
+
 		@Override public void exitStruct_indexing_expr(EMParser.Struct_indexing_exprContext ctx){
 			StringBuilder buf = new StringBuilder();
 			buf.append("{");
 			buf.append("\n");
 			buf.append(Quotes("type")+":"+Quotes("struct_indexing"));
 			buf.append(",\n");
-			buf.append(Quotes("leftExp")+":"+getJSON(ctx.struct_indexing()));
+			buf.append(Quotes("leftExp")+":"+getJSON(ctx.struct_indexing(0)));
 			buf.append(",\n");
-			buf.append(Quotes("rightExp")+":"+getJSON(ctx.parenthesedExpression()));
+			buf.append(Quotes("rightExp")+":"+getJSON(ctx.struct_indexing(1)));
 			buf.append(",\n");
 			buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
 			buf.append("\n}");
@@ -544,9 +521,10 @@ public class EM2JSON {
 		@Override public void exitS_cell_indexing(EMParser.S_cell_indexingContext ctx){
 			setJSON(ctx, getJSON(ctx.cell_indexing()));
 		}
-		
+		@Override public void exitS_parenthesedExpression(EMParser.S_parenthesedExpressionContext ctx){
+			setJSON(ctx, getJSON(ctx.parenthesedExpression()));
+		}
 		@Override public void exitS_id(EMParser.S_idContext ctx){
-
 			setJSON(ctx, getIdJson(ctx.ID().getText()));
 		}
 
