@@ -4,7 +4,7 @@
 % All Rights Reserved.
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [ new_model_path, status ] = sysDyn_tests(...
+function [ new_model_path, status ] = seal_tests(...
         model_full_path, exportToWs, mkHarnessMdl, nodisplay )
     %MCDCTOSIMULINK try to bring back the MC-DC conditions to simulink level.
     
@@ -20,7 +20,7 @@ function [ new_model_path, status ] = sysDyn_tests(...
     status = BUtils.check_files_exist(LUSTRET, LUSTREV, LUCTREC_INCLUDE_DIR);
     if status
         msg = 'LUSTRET or LUSTREV not found, please configure "tools_config" file under tools folder';
-        display_msg(msg, MsgType.ERROR, 'mcdc_tests', '');
+        display_msg(msg, MsgType.ERROR, 'seal_tests', '');
         return;
     end
     
@@ -92,7 +92,7 @@ function [ new_model_path, status ] = sysDyn_tests(...
         new_mcdc_file = LustrecUtils.adapt_lustre_file(mcdc_file, LusBackendType.KIND2);
         [syntax_status, output] = Kind2Utils2.checkSyntaxError(new_mcdc_file, KIND2, Z3);
         if syntax_status
-            display_msg(output, MsgType.DEBUG, 'mcdc_tests', '');
+            display_msg(output, MsgType.DEBUG, 'seal_tests', '');
             display_msg('This model is not compatible for MC-DC generation.', MsgType.RESULT, 'mcdcToSimulink', '');
             status = 1;
             return;
