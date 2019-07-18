@@ -58,6 +58,9 @@ classdef Interpolation_nD_Test < Block_Test
             status = 0;
             params = obj.getParams();
             fstInDims = {'1', '1', '1', '1', '1', '3', '[2,3]'};
+            inputDataType = {'double', 'single', 'double', 'single',...
+                'double', 'single', 'double', 'single',...
+                'int8', 'uint8', 'int16', 'uint16', 'int32', 'uint32'};            
             nb_tests = length(params);
             condExecSSPeriod = floor(nb_tests/length(Block_Test.condExecSS));
             for i=1 : nb_tests
@@ -124,7 +127,7 @@ classdef Interpolation_nD_Test < Block_Test
                     if nbInpots > 0
                         if strcmp(s.RequireIndexFractionAsBus, 'on')
                             % input is a bus
-                            PreLookup_Test.addBusObjectToBaseWorkspace(mdl_name);
+                            PreLookup_Test.addBusObjectToBlockInitFcn(blkPath);
                             for inpIdx = 1:nbInpots
                                 set_param(inport_list{inpIdx}, ...
                                     'OutDataTypeStr', 'Bus: kfBus', ...
