@@ -8,16 +8,15 @@ function [code, exp_dt, dim] = colonExpression_To_Lustre(BlkObj, tree, parent,..
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     if strcmp(tree.operator, ':end')
-        ME = MException('COCOSIM:TREE2CODE', ...
-            'Colon indexing without constant is not supported',...
-            tree.text);
+        msg = sprintf('Expression "%s" in block "%s" is not supported: Colon indexing without constant is not supported',...
+            tree.text, HtmlItem.addOpenCmd(blk.Origin_path));
+        ME = MException('COCOSIM:TREE2CODE', msg);
         throw(ME);
     end
     
     if ~isfield(tree, 'leftExp') || ~isfield(tree, 'rightExp')
         ME = MException('COCOSIM:TREE2CODE', ...
-            'Colon indexing without constant is not supported',...
-            tree.text);
+            'Colon indexing without constant is not supported');
         throw(ME);
     end
     if count(tree.text, ':') == 2
