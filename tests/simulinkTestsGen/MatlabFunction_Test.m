@@ -9,24 +9,20 @@ classdef MatlabFunction_Test < Block_Test
     properties
         % properties that will participate in permutations
         inputDataType = {'double','single','int8',...
-            'uint8','int32','uint32','fixdt(1,16,0)',...
-            'boolean'};
-        inputDimension = {'1', '1', '1', '1', '[3,1]', '[1,3]', '[2,3]'};
+            'uint8','int32','uint32', 'boolean', 'Bus: MyBus', 'Enum: Days'};
+        inputDimension = {'1', '[3,1]', '[1,3]', '[2,3]', '[2 3 4]'};
         oneInputFcn = { ...
             'y = all(u);',...
             'y = all(u, 1);',...
-            'y = all(all(u));',...
             'y = all(u, 2);',...
             'y = any(u);',...
             'y = any(u, 1);',...
-            'y = any(any(u));',...
             'y = any(u, 2);',...
             'y = length(u);',...
             'y = not(u);',...
             'y = numel(u);',...
             'y = sum(u);',...
             'y = sum(u, 1);',...
-            'y = sum(sum(u));',...
             'y = sum(u, 2);',...
             'y = transpose(u);'};
         twoInputsFcn = { ...
@@ -53,6 +49,7 @@ classdef MatlabFunction_Test < Block_Test
                 deleteIfExists = true;
             end
             status = 0;
+            %
             params = obj.getParams();                     
             nb_tests = length(params);
             condExecSSPeriod = floor(nb_tests/length(Block_Test.condExecSS));
@@ -79,18 +76,35 @@ classdef MatlabFunction_Test < Block_Test
                     s = rmfield(s,'inputDataType');
                     inputDims  = s.inputDimension;
                     s = rmfield(s,'inputDimension');
-                    oneInpFcn = s.oneInputFcn;
-                    s = rmfield(s,'oneInputFcn');
+                    inpFcnIndex = s.inpFcnIndex;
+                    s = rmfield(s,'inpFcnIndex'); 
+                    numInputs = s.numInputs;
+                    s = rmfield(s,'numInputs'); 
+                    % define MATLAB function
+                    testFunctionScript = '';
+
+                    if numInputs == 1                       
+                        header = 'function y = fcn(u)';
+                        testFunctionScript = ...
+                            [header newline obj.oneInputFcn{inpFcnIndex}];
+                    elseif numInputs == 2          
+                        header = 'function y = fcn(u,v)';                      
+                        testFunctionScript = ...
+                            [header newline obj.inpFcnIndex{inpFcnIndex}]; 
+                    else
+                        header = 'function y = fcn(u)';
+                        testFunctionScript = ...
+                            [header newline obj.oneInputFcn{inpFcnIndex}];                        
+                    end                    
+                    
+
                     %% add the block
                     Block_Test.add_and_connect_block(obj.blkLibPath, blkPath, s);
                     
-                    % define MATLAB function
-                    blockHandle = find(slroot, '-isa', ...
+
+                    blockObj = find(slroot, '-isa', ...
                         'Stateflow.EMChart', 'Path', blkPath);
-                    header = 'function y = fcn(u)';
-                    scripts = [header newline obj.oneInputFcn{oneInpFcn}];
-                    %blockHandle.Script = fileread('fcn.m');
-                    blockHandle.Script = scripts;
+                    blockObj.Script = testFunctionScript;
                     
                     %% go over inports
                     try
@@ -123,7 +137,8 @@ classdef MatlabFunction_Test < Block_Test
         end
         
         function params2 = getParams(obj)
-            
+            do_1_input = false;
+            if do_1_input
             params1 = obj.getPermutations();
             params2 = cell(1, length(params1));
             for p1 = 1 : length(params1)
@@ -138,9 +153,10 @@ classdef MatlabFunction_Test < Block_Test
             
             for pInType = 1 : numel(obj.inputDataType)
                 for pInDim = 1:numel(obj.inputDimension)
-                    for p1inputFunc = 1:numel(obj.oneInputFcn)
+                    for pFunc = 1:numel(obj.oneInputFcn)
                         s = struct();
-                        s.oneInputFcn = p1inputFunc;
+                        s.inpFcnIndex = pFunc;
+                        s.numInputs = 1;
                         s.inputDataType = obj.inputDataType{pInType};
                         s.inputDimension = obj.inputDimension{pInDim};
                         params{end+1} = s;
@@ -149,7 +165,39 @@ classdef MatlabFunction_Test < Block_Test
             end
             
         end
-
+        function params = get_1_input_Permutations(obj)
+            params = {};
+       
+            for pInType = 1 : numel(obj.inputDataType)
+                for pInDim = 1:numel(obj.inputDimension)
+                    for pFunc = 1:numel(obj.oneInputFcn)
+                        s = struct();
+                        s.inpFcnIndex = pFunc;
+                        s.numInputs = 2;
+                        s.inputDataType = obj.inputDataType{pInType};
+                        s.inputDimension = obj.inputDimension{pInDim};
+                        params{end+1} = s;
+                    end
+                end
+            end
+            
+        end
+        function params = get_2_inputs_Permutations(obj)
+            params = {};
+           
+            for pInType = 1 : numel(obj.inputDataType)
+                for pInDim = 1:numel(obj.inputDimension)
+                    for pFunc = 1:numel(obj.twoInputsFcn)
+                        s = struct();
+                        s.inpFcnIndex = pFunc;
+                        s.inputDataType = obj.inputDataType{pInType};
+                        s.inputDimension = obj.inputDimension{pInDim};
+                        params{end+1} = s;
+                    end
+                end
+            end
+            
+        end        
     end
 end
 
