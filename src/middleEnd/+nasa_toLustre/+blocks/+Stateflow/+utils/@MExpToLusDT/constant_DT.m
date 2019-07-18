@@ -6,9 +6,8 @@ function dt = constant_DT(tree, varargin)
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    if strcmp(tree.dataType, 'Integer')
-        dt = 'int';
-    elseif strcmp(tree.dataType, 'Float')
+    if strcmp(tree.dataType, 'Integer') || strcmp(tree.dataType, 'Float')
+        %e.g., for matlab "1" is double
         dt = 'real';
     else
         dt = '';

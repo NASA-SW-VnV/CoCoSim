@@ -16,15 +16,20 @@ function dt = matrix_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatla
     else
         rows = tree.rows;
     end
-    nb_rows = numel(rows);
-    nb_culomns = numel(rows{1});
-    dt = cell(nb_rows, nb_culomns);
-    for i=1:nb_rows
-        columns = rows{i};
-        for j=1:numel(columns)
-            dt{i, j} = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.expression_DT(columns(j), data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
-        end
-    end
-    dt = reshape(dt, [nb_rows * nb_culomns, 1]);
+    dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.expression_DT(rows{1}(1), ...
+        data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
+    % the following code is for the function outputs :
+    % e.g., "function [y, z] = f(x)"
+    %     nb_rows = numel(rows);
+    %     nb_culomns = numel(rows{1});
+    
+    %     dt = cell(nb_rows, nb_culomns);
+    %     for i=1:nb_rows
+    %         columns = rows{i};
+    %         for j=1:numel(columns)
+    %             dt{i, j} = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.expression_DT(columns(j), data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
+    %         end
+    %     end
+    %     dt = reshape(dt, [nb_rows * nb_culomns, 1]);
 end
 
