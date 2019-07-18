@@ -19,6 +19,9 @@ classdef MF2LusUtils
             data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun, op)
         
         [code, dim] = mtimesFun_To_Lustre(x, x_dim, y, y_dim)
+        
+        [code, exp_dt, dim] = numFun_To_Lustre(BlkObj, tree, parent, blk,...
+        data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun, num)
     end
 end
 
