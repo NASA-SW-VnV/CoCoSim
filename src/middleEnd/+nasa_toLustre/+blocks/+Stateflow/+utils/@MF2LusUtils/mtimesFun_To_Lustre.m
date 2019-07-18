@@ -25,23 +25,13 @@ function [code, dim] = mtimesFun_To_Lustre(x, x_dim, y, y_dim)
         
         dim = [x_dim(1), y_dim(2)];
         
-        for j=1:x_dim(1)
-            for i=1:y_dim(2)
+        for i=1:x_dim(1)
+            for j=1:y_dim(2)
                 exp = {};
-                for k=0:(x_dim(2)-1)
-                    x_ind = mod(i + k, x_dim(2));
-                    y_ind = mod(i + k, y_dim(1));
-                    if x_ind == 0
-                        x_ind = x_dim(2);
-                    end
-                    if y_ind == 0
-                        y_ind = y_dim(1);
-                    end
-                    ax_indice = [i, x_ind];
-                    ay_indice = [y_ind, j];
+                for k=1:x_dim(2)
                     exp{end+1} = nasa_toLustre.lustreAst.BinaryExpr(multi, ...
-                        x_reshape(i, x_ind), ...
-                        y_reshape(y_ind, j),...
+                        x_reshape(i, k), ...
+                        y_reshape(k, j),...
                         false);
                 end
                 code{end+1} = nasa_toLustre.lustreAst.BinaryExpr.BinaryMultiArgs(plus, exp);
