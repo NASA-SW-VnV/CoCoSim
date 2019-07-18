@@ -42,9 +42,16 @@ classdef PreLookup_Test < Block_Test
             status = 0;
             params = obj.getParams();
             fstInDims = {'1', '1', '1', '3', '[2,3]'};
+            inputDataType = {'double', 'single', 'double', 'single',...
+                'double', 'single', 'double', 'single',...
+                'int8', 'uint8', 'int16', 'uint16', 'int32', 'uint32'};            
             nb_tests = length(params);
             condExecSSPeriod = floor(nb_tests/length(Block_Test.condExecSS));
             for i=1 : nb_tests
+                skipTests = [];
+                if ismember(i,skipTests)
+                    continue;
+                end                
                 try
                     s = params{i};
                     %% creat new model
@@ -58,17 +65,27 @@ classdef PreLookup_Test < Block_Test
                         continue;
                     end
                     
-                    %% add variables to model workspace if needed
-                    if isfield(s, 'OutputBusDataTypeStr')
-                        PreLookup_Test.addBusObjectToBaseWorkspace(mdl_name);
-                    end
-                    if strcmp(s.BreakpointsSpecification, obj.BreakpointsSpecification{3})
-                        obj.addBreakpointObjectToBaseWs(mdl_name);
+                    % remove breakpoint min max
+                    if isfield(s, 'BreakpointMin')
+                        breakpointMax = s.BreakpointMax;
+                        s = rmfield(s, 'BreakpointMax');
+                        breakpointMin = s.BreakpointMin;
+                        s = rmfield(s, 'BreakpointMin');
+                    else
+                        breakpointMax = '9999999999';
+                        breakpointMin = '0';
                     end
                     
                     %% add the block
                     Block_Test.add_and_connect_block(obj.blkLibPath, blkPath, s);
                     
+                    %% add variables to model workspace if needed
+                    if isfield(s, 'OutputBusDataTypeStr')
+                        PreLookup_Test.addBusObjectToBlockInitFcn(blkPath);
+                    end
+                    if strcmp(s.BreakpointsSpecification, obj.BreakpointsSpecification{3})
+                        obj.addBreakpointObjectToBlockInitFcn(blkPath);
+                    end
                     %% go over inports
                     try
                         blk_parent = get_param(blkPath, 'Parent');
@@ -86,8 +103,8 @@ classdef PreLookup_Test < Block_Test
                             if ~failed
                                 [V, bmin, bmax] = obj.getRandomValues();
                                 set_param(inport_list{2}, 'Value', V);
-                                s.BreakpointMin = num2str(min(bmin - 10, 0));
-                                s.BreakpointMax = num2str(bmax + 10);
+                                breakpointMin = num2str(max(bmin - 10, 0));
+                                breakpointMax = num2str(bmax + 10);
                             end
                         end
                         if length(inport_list) >= 1
@@ -95,10 +112,27 @@ classdef PreLookup_Test < Block_Test
                             dim_Idx = mod(i, length(fstInDims)) + 1;
                             set_param(inport_list{1}, 'PortDimensions', ...
                                 fstInDims{dim_Idx});
+                            inpType_Idx = mod(i, length(inputDataType)) + 1;
+                            % extrapolation linear requires input to be
+                            % float type
+                            if ~strcmp(s.ExtrapMethod,'Linear')
+                                set_param(inport_list{1}, 'OutDataTypeStr', ...
+                                    inputDataType{inpType_Idx});
+                            end
                             if isfield(s, 'BreakpointMin')
                                 % to generate meaningful tests.
-                                set_param(inport_list{1}, 'OutMin', s.BreakpointMin);
-                                set_param(inport_list{1}, 'OutMax', s.BreakpointMax);
+                                bmin = breakpointMin;
+                                if str2num(breakpointMin) < 0 ...
+                                        && startsWith(s.BreakpointDataTypeStr, 'uint')
+                                    bmin = '0';
+                                end
+                                set_param(inport_list{1}, 'OutMin', bmin);
+                                bmax = breakpointMax;
+                                if contains(inputDataType{inpType_Idx}, 'int')
+                                    maxClassname = intmax(inputDataType{inpType_Idx});
+                                    bmax = num2str(min(str2num(bmax), maxClassname));
+                                end
+                                set_param(inport_list{1}, 'OutMax', bmax);
                             end
                         end
                     end
@@ -172,8 +206,8 @@ classdef PreLookup_Test < Block_Test
                     if i==1
                         % Dialog
                         [s.BreakpointsData, bmin, bmax] = obj.getRandomValues();
-                        s.BreakpointMin = num2str(bmin - 10);
-                        s.BreakpointMax = num2str(bmax + 10);
+                        breakpointMin = num2str(bmin - 10);
+                        breakpointMax = num2str(bmax + 10);                       
                     end
                     for j=2:length(obj.IndexSearchMethod)
                         s2 = s;
@@ -199,8 +233,8 @@ classdef PreLookup_Test < Block_Test
                 s.BreakpointsSpacing = num2str(spacing);
                 s.BreakpointsNumPoints = num2str(floor((lastPoint - firstPoint)/spacing));
                 s.IndexSearchMethod = obj.IndexSearchMethod{1};
-                s.BreakpointMin = num2str(firstPoint - 10);
-                s.BreakpointMax = num2str(lastPoint + 10);
+                breakpointMin = num2str(firstPoint - 10);
+                breakpointMax = num2str(lastPoint + 10);            
                 params{k} = s;
             end
         end
@@ -211,8 +245,8 @@ classdef PreLookup_Test < Block_Test
                 s = struct();
                 s.BreakpointsSpecification = obj.BreakpointsSpecification{3};
                 s.BreakpointObject = 'myBpSet';
-                s.BreakpointMin = num2str(-5);
-                s.BreakpointMax = num2str(5);
+                breakpointMin = num2str(-5);
+                breakpointMax = num2str(5);
                 params{k} = s;
             end
         end
@@ -221,7 +255,7 @@ classdef PreLookup_Test < Block_Test
             % Values must be strictly monotonically increasing after conversion to its run-time data type
             % we prefer using even spacing value to make sure casting of values to int
             % will not have the same value
-            firstPoint = MatlabUtils.construct_random_doubles(1, 0, 50, 1);
+            firstPoint = MatlabUtils.construct_random_doubles(1, 11, 61, 1);
             lastPoint = MatlabUtils.construct_random_doubles(1, firstPoint+3, 127, 1);
             if firstPoint > lastPoint
                 tmp = firstPoint;
@@ -236,17 +270,18 @@ classdef PreLookup_Test < Block_Test
         
         
         
-        function addBreakpointObjectToBaseWs(obj, mdl)
-            code = 'myBpSet = Simulink.Breakpoint;';
+        function addBreakpointObjectToBlockInitFcn(obj, blk_path)
+            code = get_param(blk_path, 'InitFcn');
+            code = sprintf('%s\nmyBpSet = Simulink.Breakpoint;', code);
             code = sprintf('%s\nmyBpSet.Breakpoints.Value = [-2 -1 0 1 2];', code);
-            set_param(mdl, 'PreLoadFcn', code);
+            set_param(blk_path, 'InitFcn', code);
         end
     end
     
     methods(Static)
-        function addBusObjectToBaseWorkspace(mdl)
+        function addBusObjectToBlockInitFcn(blk_path)
             %             hws = get_param(mdl, 'modelworkspace');
-            code = get_param(mdl, 'PreLoadFcn');
+            code = get_param(blk_path, 'InitFcn');
             code = sprintf('%s\nelems(1) = Simulink.BusElement;', code);
             code = sprintf('%s\nelems(1).Name = ''Index'';', code);
             code = sprintf('%s\nelems(1).DataType = ''int8'';', code);
@@ -260,7 +295,7 @@ classdef PreLookup_Test < Block_Test
             code = sprintf('%s\nclear elems;', code);
             code = sprintf('%s\nassignin(''base'', ''kfBus'', kfBus);', code);
             %             hws.assignin('kfBus', kfBus);
-            set_param(mdl, 'PreLoadFcn', code);
+            set_param(blk_path, 'InitFcn', code);
         end
         
     end
