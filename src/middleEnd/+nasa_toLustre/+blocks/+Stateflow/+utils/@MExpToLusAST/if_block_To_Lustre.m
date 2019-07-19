@@ -30,21 +30,39 @@ function [code, exp_dt, dim] = if_block_To_Lustre(BlkObj, tree, parent, blk,...
         'Port', '1');
     data_map(cond_name) = s;
     
-    
-    
-    [statements, ~, ~] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(BlkObj, tree.statements,...
-        parent, blk, data_map, inputs, expected_dt, ...
-        isSimulink, isStateFlow, isMatlabFun, cond_ID);
-    code = MatlabUtils.concat(code, statements);
+    if length(tree.statements) > 1
+        for i=1:length(tree.statements)
+            [statements, ~, ~] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(BlkObj, tree.statements{i},...
+                parent, blk, data_map, inputs, expected_dt, ...
+                isSimulink, isStateFlow, isMatlabFun, cond_ID);
+            code = MatlabUtils.concat(code, statements);
+        end
+    else
+        [statements, ~, ~] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(BlkObj, tree.statements,...
+            parent, blk, data_map, inputs, expected_dt, ...
+            isSimulink, isStateFlow, isMatlabFun, cond_ID);
+        code = MatlabUtils.concat(code, statements);
+    end
     
     not_condID = nasa_toLustre.lustreAst.UnaryExpr(...
         nasa_toLustre.lustreAst.UnaryExpr.NOT, cond_ID);
-    [else_block, ~, ~] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(BlkObj, tree.else_block.statements,...
-        parent, blk, data_map, inputs, expected_dt, ...
-        isSimulink, isStateFlow, isMatlabFun, not_condID);
-    code = MatlabUtils.concat(code, else_block);
-
-
+    if isfield(tree.else_block, 'statements')
+        if length(tree.else_block.statements) > 1
+            for i=1:length(tree.else_block.statements)
+                [else_block, ~, ~] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(BlkObj, tree.else_block.statements(i),...
+                    parent, blk, data_map, inputs, expected_dt, ...
+                    isSimulink, isStateFlow, isMatlabFun, not_condID);
+                code = MatlabUtils.concat(code, else_block);
+            end
+        else
+            [else_block, ~, ~] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(BlkObj, tree.else_block.statements,...
+                parent, blk, data_map, inputs, expected_dt, ...
+                isSimulink, isStateFlow, isMatlabFun, not_condID);
+            code = MatlabUtils.concat(code, else_block);
+        end
+    end
+    
+    
     exp_dt = '';
     dim = [];
 end
