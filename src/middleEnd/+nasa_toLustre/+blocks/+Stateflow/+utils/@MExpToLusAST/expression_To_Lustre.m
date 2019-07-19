@@ -1,5 +1,4 @@
-function [code, exp_dt, dim] = expression_To_Lustre(BlkObj, tree, parent, blk,...
-        data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun, if_cond)
+function [code, exp_dt, dim] = expression_To_Lustre(tree, args)
     %this function is extended to be used by If-Block,
     %SwitchCase and Fcn blocks. Also it is used by Stateflow
     %actions
@@ -10,18 +9,18 @@ function [code, exp_dt, dim] = expression_To_Lustre(BlkObj, tree, parent, blk,..
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    narginchk(1, 11);
-    if isempty(BlkObj), BlkObj = nasa_toLustre.blocks.DummyBlock_To_Lustre; end
-    if nargin < 3, parent = []; end
-    if nargin < 4, blk = []; end
-    if nargin < 5, data_map = containers.Map; end
-    if nargin < 6, inputs = {}; end
-    if nargin < 7, expected_dt = ''; end
-    if nargin < 8, isSimulink = false; end
-    if nargin < 9, isStateFlow = false; end
-    if nargin < 10, isMatlabFun = false; end
-    if nargin < 11, if_cond = []; end
-    
+    narginchk(2,2);
+    if ~isfield(args, 'blkObj'), args.blkObj = nasa_toLustre.blocks.DummyBlock_To_Lustre; end
+    if ~isfield(args, 'data_map'), args.data_map = containers.Map; end
+    if ~isfield(args, 'inputs'), args.inputs = {}; end
+    if ~isfield(args, 'isLeft'), args.isLeft = false; end
+    if ~isfield(args, 'isSimulink'), args.isSimulink = false; end
+    if ~isfield(args, 'isStateFlow'), args.isStateFlow = false; end
+    if ~isfield(args, 'isMatlabFun'), args.isMatlabFun = false; end
+    if ~isfield(args, 'expected_lusDT'), args.expected_lusDT = ''; end
+    if ~isfield(args, 'blk'), args.blk = []; end
+    if ~isfield(args, 'parent'), args.parent = []; end
+    if ~isfield(args, 'if_cond'), args.if_cond = []; end
     % we assume this function returns cell.
     code = {};
     exp_dt = '';
@@ -51,15 +50,15 @@ function [code, exp_dt, dim] = expression_To_Lustre(BlkObj, tree, parent, blk,..
                 'plus_minus', 'mtimes', 'times', ...
                 'mrdivide', 'mldivide', 'rdivide', 'ldivide', ...
                 'mpower', 'power'}
-            [code, exp_dt, dim] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.binaryExpression_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun);
+            [code, exp_dt, dim] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.binaryExpression_To_Lustre(tree, args);
         case {'COLON', 'colonExpression'}
-            [code, exp_dt, dim] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.colonExpression_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun);
+            [code, exp_dt, dim] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.colonExpression_To_Lustre(tree, args);
         otherwise
             % we use the name of tree_type to call the associated function
             func_name = strcat(tree_type, '_To_Lustre');
             func_handle = str2func(strcat('nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.', func_name));
             try
-                [code, exp_dt, dim] = func_handle(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun, if_cond);
+                [code, exp_dt, dim] = func_handle(tree, args);
             catch me
                 if strcmp(me.identifier, 'MATLAB:UndefinedFunction')
                     display_msg(me.getReport(), MsgType.DEBUG, 'MExpToLusAST.expression_To_Lustre', '');
@@ -78,7 +77,7 @@ function [code, exp_dt, dim] = expression_To_Lustre(BlkObj, tree, parent, blk,..
             end
     end
     % convert tree DT to what is expected.
-    code = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.convertDT(BlkObj, code, exp_dt, expected_dt);
-    if ~isempty(expected_dt), exp_dt = expected_dt; end
+    [code, output_dt] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.convertDT(args.blkObj, code, exp_dt, args.expected_lusDT);
+    if ~isempty(output_dt), exp_dt = output_dt; end
     
 end

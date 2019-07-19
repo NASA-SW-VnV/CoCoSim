@@ -1,4 +1,4 @@
-function dt = unaryExpression_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun)
+function [lusDT, slxDT] = unaryExpression_DT(tree, args)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -9,9 +9,10 @@ function dt = unaryExpression_DT(tree, data_map, inputs, isSimulink, isStateFlow
     %unaryExpression_DT for unaryOperator :  '&' | '*' | '+' | '-' | '~' | '!'
     
     if strcmp(tree.operator, '~') || strcmp(tree.operator, '!')
-        dt = 'bool';
+        lusDT = 'bool';
+        slxDT = 'boolean';
     else
-        dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.expression_DT(tree.rightExp, data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
+        [lusDT, slxDT] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.expression_DT(tree.rightExp, args);
     end
 end
 

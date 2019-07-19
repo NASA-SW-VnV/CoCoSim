@@ -10,8 +10,17 @@ function [exp, status] = formatConditionToLustre(obj, cond, inputs_cell, data_ma
     
     %display_msg(cond, MsgType.DEBUG, 'If_To_Lustre', '');
     expected_dt = 'bool';
+    args.blkObj = obj;
+    args.blk = blk;
+    args.parent = parent;
+    args.data_map = data_map;
+    args.inputs = inputs_cell;
+    args.expected_lusDT = expected_dt;
+    args.isSimulink = true;
+    args.isStateFlow = false;
+    args.isMatlabFun = false;
     [exp, status] = ...
-        nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.translate(obj, cond, parent, blk,data_map, inputs_cell, expected_dt, true, false, false);
+        nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.translate(cond, args);
     if iscell(exp) 
         if numel(exp) == 1
             exp = exp{1};

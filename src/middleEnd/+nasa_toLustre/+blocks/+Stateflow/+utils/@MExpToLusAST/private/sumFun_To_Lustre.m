@@ -1,5 +1,4 @@
-function [code, exp_dt, dim] = sumFun_To_Lustre(BlkObj, tree, parent, blk,...
-        data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun)
+function [code, exp_dt, dim] = sumFun_To_Lustre(tree, args)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -10,9 +9,8 @@ function [code, exp_dt, dim] = sumFun_To_Lustre(BlkObj, tree, parent, blk,...
     
     code = {};
     op = nasa_toLustre.lustreAst.BinaryExpr.PLUS;
-    [x, x_dt, x_dim] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(BlkObj, tree.parameters(1),...
-        parent, blk, data_map, inputs, expected_dt, ...
-        isSimulink, isStateFlow, isMatlabFun);
+    [x, x_dt, x_dim] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(...
+        tree.parameters(1), args);
     n_dim = numel(x_dim);
     x_new = reshape(x, x_dim);
     

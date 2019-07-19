@@ -1,5 +1,4 @@
-function [code, exp_dt, dim] = notFun_To_Lustre(BlkObj, tree, parent, blk,...
-        data_map, inputs, ~, isSimulink, isStateFlow, isMatlabFun)
+function [code, exp_dt, dim] = notFun_To_Lustre(tree, args)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -8,8 +7,8 @@ function [code, exp_dt, dim] = notFun_To_Lustre(BlkObj, tree, parent, blk,...
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     op = nasa_toLustre.lustreAst.UnaryExpr.NOT;
-    [right, ~, dim] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(BlkObj, tree.parameters(1), parent,...
-        blk, data_map, inputs, 'bool', isSimulink, isStateFlow, isMatlabFun);
+    args.expected_lusDT = 'bool';
+    [right, ~, dim] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(1), args);
     code = arrayfun(@(i) nasa_toLustre.lustreAst.UnaryExpr(op, right{i}, false), ...
         (1:numel(right)), 'UniformOutput', false);
     exp_dt = 'bool';

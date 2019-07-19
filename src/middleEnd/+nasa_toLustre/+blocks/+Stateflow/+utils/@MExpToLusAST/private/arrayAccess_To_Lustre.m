@@ -1,4 +1,4 @@
-function [code, exp_dt] = arrayAccess_To_Lustre(obj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun)
+function [code, exp_dt] = arrayAccess_To_Lustre(tree, args)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -9,8 +9,8 @@ function [code, exp_dt] = arrayAccess_To_Lustre(obj, tree, parent, blk, data_map
     % This function should be only called from fun_indexing_To_Lustre.m
     %Array access
     
-    exp_dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.expression_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
-    d = data_map(tree.ID);
+    exp_dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.expression_DT(tree, args);
+    d = args.data_map(tree.ID);
     if isfield(d, 'CompiledSize')
         CompiledSize = str2num(d.CompiledSize);
     elseif isfield(d, 'ArraySize')
@@ -31,8 +31,7 @@ function [code, exp_dt] = arrayAccess_To_Lustre(obj, tree, parent, blk, data_map
         throw(ME);
     end
     params_dt = 'int';
-    namesAst = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.ID_To_Lustre(obj, tree.ID, parent, blk, data_map, ...
-        inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun);
+    namesAst = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.ID_To_Lustre(tree.ID, args);
     
     if numel(tree.parameters) == 1
         %Vector Access
@@ -54,10 +53,9 @@ function [code, exp_dt] = arrayAccess_To_Lustre(obj, tree, parent, blk, data_map
                 throw(ME);
             end
         else
+            args.expected_lusDT = params_dt;
             [arg, ~, ~] = ...
-                nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(obj, tree.parameters, ...
-                parent, blk, data_map, inputs, params_dt, isSimulink,...
-                isStateFlow, isMatlabFun);
+                nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(tree.parameters, args);
             for argIdx=1:numel(arg)
                 if isa(arg{argIdx}, 'nasa_toLustre.lustreAst.IntExpr')
                     value = arg{argIdx}.getValue();
@@ -109,17 +107,16 @@ function [code, exp_dt] = arrayAccess_To_Lustre(obj, tree, parent, blk, data_map
                 throw(ME);
             end
         else
-            args = cell(numel(parameters), 1);
+            params = cell(numel(parameters), 1);
+            args.expected_lusDT = params_dt;
             for i=1:numel(parameters)
-                [args(i), ~] = ...
-                    nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(obj, parameters{i}, ...
-                    parent, blk, data_map, inputs, params_dt, isSimulink,...
-                    isStateFlow, isMatlabFun);
+                [params(i), ~] = ...
+                    nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(parameters{i}, args);
             end
             
-            idx = args{1};
+            idx = params{1};
             for i=2:numel(parameters)
-                v = args{i};
+                v = params{i};
                 idx = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.PLUS,...
                     idx,...
                     nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.MULTIPLY,...

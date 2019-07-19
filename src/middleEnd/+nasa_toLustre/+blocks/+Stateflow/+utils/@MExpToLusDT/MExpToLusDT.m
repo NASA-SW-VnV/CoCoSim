@@ -11,30 +11,33 @@ classdef MExpToLusDT
     end
     
     methods(Static)
-        % use alphabetic order
-        dt = assignment_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun)
-        dt = binaryExpression_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun)
-        dt = constant_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun)
-        dt = expression_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun)
-        dt = fun_indexing_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun)
-        dt = ID_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun)
-        dt = matrix_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun)
-        dt = parenthesedExpression_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun)
-        dt = struct_indexing_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun)
-        dt = unaryExpression_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun)
+        % sort by alphabetic order
+        [lusDT, slxDT] = assignment_DT(tree, args)
+        [lusDT, slxDT] = binaryExpression_DT(tree, args)
+        [lusDT, slxDT] = constant_DT(tree, args)
+        [lusDT, slxDT] = expression_DT(tree, args)
+        [lusDT, slxDT] = fun_indexing_DT(tree, args)
+        [lusDT, slxDT] = ID_DT(tree, args)
+        [lusDT, slxDT] = matrix_DT(tree, args)
+        [lusDT, slxDT] = parenthesedExpression_DT(tree, args)
+        [lusDT, slxDT] = struct_indexing_DT(tree, args)
+        [lusDT, slxDT] = unaryExpression_DT(tree, args)
     end
     
     methods(Static)
         %Utils
-        function dt = getVarDT(data_map, var_name)
+        function [lusDT, slxDT] = getVarDT(data_map, var_name)
             if ~isKey(data_map, var_name)
-                dt = '';
+                lusDT = '';
+                slxDT = '';
                 return;
             end
             if isfield(data_map(var_name), 'LusDatatype')
-                dt = data_map(var_name).LusDatatype;
+                lusDT = data_map(var_name).LusDatatype;
+                slxDT = data_map(var_name).CompiledType;
             elseif ischar(data_map(var_name))
-                dt = data_map(var_name);
+                lusDT = data_map(var_name);
+                slxDT = LusValidateUtils.get_slx_dt(lusDT);
             else
                 ME = MException('COCOSIM:TREE2CODE', ...
                     'Variable data_map is not well defined');
@@ -42,7 +45,7 @@ classdef MExpToLusDT
             end
         end
         
-        function code = convertDT(obj, code, input_dt, output_dt)
+        function [code, output_dt] = convertDT(obj, code, input_dt, output_dt)
             
             if isempty(code) || ...
                     isempty(input_dt) || isempty(output_dt) 
@@ -58,33 +61,69 @@ classdef MExpToLusDT
             [output_dt, input_dt] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.inlineOperands(output_dt, input_dt);
             for i=1:numel(code)
                 if strcmp(input_dt{i}, output_dt{i})
-                    return;
+                    continue;
                 end
                 conv = strcat(input_dt{i}, '_to_', output_dt{i});
                 obj.addExternal_libraries(strcat('LustDTLib_', conv));
-                code{i} = nasa_toLustre.lustreAst.NodeCallExpr(conv, {code{i}});
+                code{i} = nasa_toLustre.lustreAst.NodeCallExpr(conv, code(i));
             end
         end
         
-        function dt = upperDT(left_dt, right_dt)
-            if isempty(left_dt) && isempty(right_dt)
-                dt = '';
+        function [lusDT, slxDT] = upperDT(left_lusDT, right_lusDT, left_slxDT, right_slxDT)
+            if nargin < 3 
+                left_slxDT = '';
+            end
+            if nargin < 4 
+                right_slxDT = '';
+            end
+            if isempty(left_lusDT) && isempty(right_lusDT)
+                lusDT = '';
+                slxDT = '';
                 return;
             end
-            if isempty(left_dt)
-                dt = right_dt;
+            if isempty(left_lusDT)
+                lusDT = right_lusDT;
+                slxDT = right_slxDT;
                 return;
             end
-            if isempty(right_dt)
-                dt = left_dt;
+            if isempty(right_lusDT)
+                lusDT = left_lusDT;
+                slxDT = left_slxDT;
                 return;
             end
-            if strcmp(left_dt, 'real') || strcmp(right_dt, 'real')
-                dt = 'real';
-            elseif strcmp(left_dt, 'int') || strcmp(right_dt, 'int')
-                dt = 'int';
+            
+            if strcmp(left_lusDT, 'real') || strcmp(right_lusDT, 'real')
+                lusDT = 'real';
+                if strcmp(left_slxDT, 'double') || strcmp(right_slxDT, 'double')
+                    slxDT = 'double';
+                else
+                    slxDT = left_slxDT;
+                end
+            elseif strcmp(left_lusDT, 'int') || strcmp(right_lusDT, 'int')
+                lusDT = 'int';
+                if MatlabUtils.contains(left_slxDT, 'int') ...
+                        && MatlabUtils.contains(right_slxDT, 'int')
+                    d1 = str2double(regexprep(left_slxDT, '[a-zA-Z]+', ''));
+                    d2 = str2double(regexprep(right_slxDT, '[a-zA-Z]+', ''));
+                    if d1 > d2
+                        slxDT = left_slxDT;
+                    else
+                        slxDT = right_slxDT;
+                    end
+                else
+                    if MatlabUtils.contains(left_slxDT, 'int')
+                        slxDT = left_slxDT;
+                    else
+                        slxDT = right_slxDT;
+                    end
+                end
+            elseif strcmp(left_lusDT, 'bool') && strcmp(right_lusDT, 'bool')
+                lusDT = 'bool';
+                slxDT = 'boolean';
             else
-                dt = 'bool';
+                lusDT = '';
+                slxDT = '';
+                return;
             end
         end
         

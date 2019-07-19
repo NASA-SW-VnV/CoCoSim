@@ -1,4 +1,4 @@
-function dt = cell_indexing_DT(varargin)
+function [lusDT, slxDT] = cell_indexing_DT(varargin)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -6,6 +6,7 @@ function dt = cell_indexing_DT(varargin)
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    dt = '';
+    lusDT = '';
+    slxDT = '';
 end
 

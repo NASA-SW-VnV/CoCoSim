@@ -1,5 +1,4 @@
-function [code, exp_dt, dim] = binaryFun_To_Lustre(BlkObj, tree, parent, blk,...
-        data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun)
+function [code, exp_dt, dim] = binaryFun_To_Lustre(tree, args)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -8,7 +7,7 @@ function [code, exp_dt, dim] = binaryFun_To_Lustre(BlkObj, tree, parent, blk,...
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     tree_ID = tree.ID;
-    
+    expected_dt = args.expected_lusDT;
     switch tree_ID
         case {'or'}
             op = nasa_toLustre.lustreAst.BinaryExpr.OR;
@@ -26,12 +25,11 @@ function [code, exp_dt, dim] = binaryFun_To_Lustre(BlkObj, tree, parent, blk,...
         otherwise
             ME = MException('COCOSIM:TREE2CODE', ...
                 'Function "%s" is not handled in Block %s',...
-                tree.ID, blk.Origin_path);
+                tree.ID, args.blk.Origin_path);
             throw(ME);
     end
-    
+    args.expected_lusDT = expected_dt;
     [code, exp_dt, dim] = nasa_toLustre.blocks.Stateflow.utils.MF2LusUtils.binaryFun_To_Lustre(...
-        BlkObj, tree, parent, blk, data_map, inputs, expected_dt, ...
-        isSimulink, isStateFlow, isMatlabFun, op);
+        tree, args, op);
     
 end

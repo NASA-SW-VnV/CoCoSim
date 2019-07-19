@@ -1,5 +1,4 @@
-function [code, assignment_dt, dim] = assignment_To_Lustre(BlkObj, tree, parent, blk, ...
-        data_map, inputs, ~, isSimulink, isStateFlow, isMatlabFun, if_cond)
+function [code, assignment_dt, dim] = assignment_To_Lustre(tree, args)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -7,15 +6,16 @@ function [code, assignment_dt, dim] = assignment_To_Lustre(BlkObj, tree, parent,
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     global VISITED_VARIABLES;
-    assignment_dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.expression_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
-    [left, ~, ~] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(BlkObj, tree.leftExp, ...
-        parent, blk, data_map, inputs, assignment_dt,...
-        isSimulink, isStateFlow, isMatlabFun);
+    if_cond = args.if_cond;
+    assignment_dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.expression_DT(tree, args);
+    args.expected_lusDT = assignment_dt;
+    [left, ~, ~] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(...
+        tree.leftExp, args);
     
-    [right, ~, dim] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(BlkObj, tree.rightExp, parent, blk,...
-        data_map, inputs, assignment_dt, isSimulink, isStateFlow, isMatlabFun);
+    [right, ~, dim] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(...
+        tree.rightExp, args);
     %TODO for length(left) > 1
-    if isMatlabFun && ~isempty(if_cond)
+    if args.isMatlabFun && ~isempty(if_cond)
         if nasa_toLustre.lustreAst.VarIdExpr.ismemberVar(left{1}, VISITED_VARIABLES)
             init = left{1};
         else

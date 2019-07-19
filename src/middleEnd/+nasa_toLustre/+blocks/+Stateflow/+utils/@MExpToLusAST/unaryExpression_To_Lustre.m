@@ -1,5 +1,4 @@
-function [code, exp_dt, dim] = unaryExpression_To_Lustre(BlkObj, tree, parent,...
-    blk, data_map, inputs, ~, isSimulink, isStateFlow, isMatlabFun, ~)
+function [code, exp_dt, dim] = unaryExpression_To_Lustre(tree, args)
     %     unaryOperator :   '&' | '*' | '+' | '-' | '~' | '!'
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
@@ -11,9 +10,11 @@ function [code, exp_dt, dim] = unaryExpression_To_Lustre(BlkObj, tree, parent,..
         
     
     
-    exp_dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.expression_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
-    [right, ~, dim] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(BlkObj, tree.rightExp, parent,...
-        blk, data_map, inputs, exp_dt, isSimulink, isStateFlow, isMatlabFun, if_cond);
+    exp_dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.expression_DT(...
+        tree, args);
+    args.expected_lusDT = exp_dt;
+    [right, ~, dim] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(...
+        tree.rightExp, args);
     if strcmp(tree.operator, '~') || strcmp(tree.operator, '!')
         op = nasa_toLustre.lustreAst.UnaryExpr.NOT;
     elseif strcmp(tree.operator, '-')

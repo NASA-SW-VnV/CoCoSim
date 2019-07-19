@@ -1,5 +1,4 @@
-function [code, exp_dt, dim] = mathFun_To_Lustre(BlkObj, tree, parent, blk,...
-        data_map, inputs, ~, isSimulink, isStateFlow, isMatlabFun)
+function [code, exp_dt, dim] = mathFun_To_Lustre(tree, args)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -9,7 +8,7 @@ function [code, exp_dt, dim] = mathFun_To_Lustre(BlkObj, tree, parent, blk,...
         
             
     % Do not forget to update exp_dt in each switch case if needed
-    exp_dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.expression_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
+    exp_dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.expression_DT(tree, args);
     tree_ID = tree.ID;
     
     switch tree_ID
@@ -18,10 +17,9 @@ function [code, exp_dt, dim] = mathFun_To_Lustre(BlkObj, tree, parent, blk,...
                 'sqrt', 'exp', 'log', 'log10',...
                 'sin','tan', 'sinh', 'trunc'}
             fun_name = tree_ID;
-            BlkObj.addExternal_libraries('LustMathLib_lustrec_math');
-            [param, ~, dim] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(BlkObj, tree.parameters(1),...
-                parent, blk, data_map, inputs, 'real', ...
-                isSimulink, isStateFlow, isMatlabFun);
+            args.blkObj.addExternal_libraries('LustMathLib_lustrec_math');
+            args.expected_lusDT = 'real';
+            [param, ~, dim] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(1), args);
             code = arrayfun(@(i) nasa_toLustre.lustreAst.NodeCallExpr(fun_name, param{i}), ...
                 (1:numel(param)), 'UniformOutput', false);
             exp_dt = 'real';
@@ -29,18 +27,17 @@ function [code, exp_dt, dim] = mathFun_To_Lustre(BlkObj, tree, parent, blk,...
             
         case {'atan2', 'power', 'pow'}
             % two arguments
-            BlkObj.addExternal_libraries('LustMathLib_lustrec_math');
+            args.blkObj.addExternal_libraries('LustMathLib_lustrec_math');
             if strcmp(tree_ID, 'power')
                 fun_name = 'pow';
             else
                 fun_name = tree_ID;
             end
-            [param1, ~, dim1] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(BlkObj, tree.parameters(1),...
-                parent, blk, data_map, inputs, 'real', ...
-                isSimulink, isStateFlow, isMatlabFun);
-            [param2, ~, dim2] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(BlkObj, tree.parameters(2),...
-                parent, blk, data_map, inputs, 'real', ...
-                isSimulink, isStateFlow, isMatlabFun);
+            args.expected_lusDT = 'real';
+            [param1, ~, dim1] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(...
+                tree.parameters(1), args);
+            [param2, ~, dim2] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(...
+                tree.parameters(2), args);
             
             if numel(dim1) > numel(dim2)
                 dim = dim1;
@@ -57,13 +54,12 @@ function [code, exp_dt, dim] = mathFun_To_Lustre(BlkObj, tree, parent, blk,...
             
         case 'hypot'
             exp_dt = 'real';
-            BlkObj.addExternal_libraries('LustMathLib_lustrec_math');
-            [param1, ~, dim1] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(BlkObj, tree.parameters(1),...
-                parent, blk, data_map, inputs, 'real', ...
-                isSimulink, isStateFlow, isMatlabFun);
-            [param2, ~, dim2] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(BlkObj, tree.parameters(2),...
-                parent, blk, data_map, inputs, 'real', ...
-                isSimulink, isStateFlow, isMatlabFun);
+            args.blkObj.addExternal_libraries('LustMathLib_lustrec_math');
+            args.expected_lusDT = 'real';
+            [param1, ~, dim1] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(...
+                tree.parameters(1), args);
+            [param2, ~, dim2] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(...
+                tree.parameters(2), args);
             
             % sqrt(x*x, y*y)
             param1 = arrayfun(@(i) nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.MULTIPLY, param1{i}, param1{i}), ...
@@ -96,31 +92,26 @@ function [code, exp_dt, dim] = mathFun_To_Lustre(BlkObj, tree, parent, blk,...
                 expected_param_dt = 'real';
             end
             lib_name = strcat('LustMathLib_', fun_name);
-            BlkObj.addExternal_libraries(lib_name);
-            
-            [param, ~, dim] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(BlkObj, tree.parameters(1),...
-                parent, blk, data_map, inputs, expected_param_dt, ...
-                isSimulink, isStateFlow, isMatlabFun);
+            args.blkObj.addExternal_libraries(lib_name);
+            args.expected_lusDT = expected_param_dt;
+            [param, ~, dim] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(1), args);
             code = arrayfun(@(i) nasa_toLustre.lustreAst.NodeCallExpr(fun_name, param{i}), ...
                 (1:numel(param)), 'UniformOutput', false);
             exp_dt = expected_param_dt;
             
             %function with two arguments
         case {'rem', 'mod'}
-            [param1, param1_dt, dim1] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(BlkObj, tree.parameters(1),...
-                parent, blk, data_map, inputs, '', ...
-                isSimulink, isStateFlow, isMatlabFun);
-            [param2, param2_dtm, dim2] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(BlkObj, tree.parameters(2),...
-                parent, blk, data_map, inputs, '', ...
-                isSimulink, isStateFlow, isMatlabFun);
+            args.expected_lusDT = '';
+            [param1, param1_dt, dim1] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(1), args);
+            [param2, param2_dt, dim2] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(2), args);
             params_Dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.upperDT(param1_dt, param2_dt);
             if strcmp(params_Dt, 'int')
                 fun_name = strcat(tree_ID, '_int_int');
                 lib_name = strcat('LustMathLib_', fun_name);
-                BlkObj.addExternal_libraries(lib_name);
+                args.blkObj.addExternal_libraries(lib_name);
                 exp_dt = 'int';
             else
-                BlkObj.addExternal_libraries('LustMathLib_simulink_math_fcn');
+                args.blkObj.addExternal_libraries('LustMathLib_simulink_math_fcn');
                 fun_name = strcat(tree_ID, '_real');
                 params_Dt = 'real';
                 exp_dt = 'real';
@@ -132,8 +123,8 @@ function [code, exp_dt, dim] = mathFun_To_Lustre(BlkObj, tree, parent, blk,...
                 dim = dim2;
             end
             % make sure parameter is converted to real
-            param1 = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.convertDT(BlkObj, param1, param1_dt, params_Dt);
-            param2 = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.convertDT(BlkObj, param2, param2_dt, params_Dt);
+            param1 = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.convertDT(args.blkObj, param1, param1_dt, params_Dt);
+            param2 = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.convertDT(args.blkObj, param2, param2_dt, params_Dt);
             
             % inline operands
             [param1, param2] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.inlineOperands(param1, param2, tree);
@@ -143,7 +134,7 @@ function [code, exp_dt, dim] = mathFun_To_Lustre(BlkObj, tree, parent, blk,...
         otherwise
             ME = MException('COCOSIM:TREE2CODE', ...
                 'Function "%s" is not handled in Block %s',...
-                tree.ID, blk.Origin_path);
+                tree.ID, args.blk.Origin_path);
             throw(ME);
     end
 end

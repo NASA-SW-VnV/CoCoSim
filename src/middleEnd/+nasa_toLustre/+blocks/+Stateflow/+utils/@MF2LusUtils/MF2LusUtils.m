@@ -12,16 +12,13 @@ classdef MF2LusUtils
     end
     
     methods(Static)
-        [code, exp_dt, dim] = allAnyFun_To_Lustre(BlkObj, tree, parent, blk,...
-            data_map, inputs, isSimulink, isStateFlow, isMatlabFun, op)
+        [code, exp_dt, dim] = allAnyFun_To_Lustre(tree, args, op)
         
-        [code, exp_dt, dim] = binaryFun_To_Lustre(BlkObj, tree, parent, blk,...
-            data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun, op)
+        [code, exp_dt, dim] = binaryFun_To_Lustre(tree, args, op)
         
         [code, dim] = mtimesFun_To_Lustre(x, x_dim, y, y_dim)
         
-        [code, exp_dt, dim] = numFun_To_Lustre(BlkObj, tree, parent, blk,...
-        data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun, num)
+        [code, exp_dt, dim] = numFun_To_Lustre(tree, args, num)
     end
 end
 

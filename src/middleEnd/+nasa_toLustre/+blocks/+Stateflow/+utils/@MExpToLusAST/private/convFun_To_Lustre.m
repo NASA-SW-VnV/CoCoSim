@@ -1,5 +1,4 @@
-function [code, exp_dt, dim] = convFun_To_Lustre(BlkObj, tree, parent, blk,...
-        data_map, inputs, ~, isSimulink, isStateFlow, isMatlabFun)
+function [code, exp_dt, dim] = convFun_To_Lustre(tree, args)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -21,11 +20,9 @@ function [code, exp_dt, dim] = convFun_To_Lustre(BlkObj, tree, parent, blk,...
                 fun_name = tree_ID;
                 lib_name = strcat('LustMathLib_', fun_name);
             end
-            BlkObj.addExternal_libraries(lib_name);
-            
-            [param, ~, dim] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(BlkObj, tree.parameters(1),...
-                parent, blk, data_map, inputs, expected_param_dt, ...
-                isSimulink, isStateFlow, isMatlabFun);
+            args.blkObj.addExternal_libraries(lib_name);
+            args.expected_lusDT = expected_param_dt;
+            [param, ~, dim] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(1), args);
             code = arrayfun(@(i) nasa_toLustre.lustreAst.NodeCallExpr(fun_name, param{i}), ...
                 (1:numel(param)), 'UniformOutput', false);
             exp_dt = 'real';
@@ -46,12 +43,12 @@ function [code, exp_dt, dim] = convFun_To_Lustre(BlkObj, tree, parent, blk,...
                 end
             else
                 % cast of expression/variable
-                [param, param_dt, dim] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(BlkObj, tree.parameters(1),...
-                    parent, blk, data_map, inputs, '', isSimulink, isStateFlow, isMatlabFun);
+                args.expected_lusDT = '';
+                [param, param_dt, dim] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(1),args);
                 [external_lib, conv_format] = ...
                     nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(param_dt, tree_ID);
                 if ~isempty(conv_format)
-                    BlkObj.addExternal_libraries(external_lib);
+                    args.blkObj.addExternal_libraries(external_lib);
                     code = arrayfun(@(i) ...
                         nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(conv_format, param{i}), ...
                         (1:numel(param)), 'UniformOutput', false);
@@ -65,7 +62,7 @@ function [code, exp_dt, dim] = convFun_To_Lustre(BlkObj, tree, parent, blk,...
         otherwise
             ME = MException('COCOSIM:TREE2CODE', ...
                 'Function "%s" is not handled in Block %s',...
-                tree.ID, blk.Origin_path);
+                tree.ID, args.blk.Origin_path);
             throw(ME);
     end
 end

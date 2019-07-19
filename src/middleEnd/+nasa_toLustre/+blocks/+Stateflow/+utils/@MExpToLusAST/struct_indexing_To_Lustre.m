@@ -1,5 +1,4 @@
-function [code, exp_dt, dim] = struct_indexing_To_Lustre(BlkObj, tree, parent, blk,...
-        data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun, ~)
+function [code, exp_dt, dim] = struct_indexing_To_Lustre(tree, args)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -9,7 +8,7 @@ function [code, exp_dt, dim] = struct_indexing_To_Lustre(BlkObj, tree, parent, b
         
             
     % Do not forget to update exp_dt in each switch case if needed
-    exp_dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.expression_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
+    exp_dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.expression_DT(tree, args);
     tree_ID = tree.ID;
     dim = [];
     switch tree_ID
@@ -21,7 +20,7 @@ function [code, exp_dt, dim] = struct_indexing_To_Lustre(BlkObj, tree, parent, b
         otherwise
             ME = MException('COCOSIM:TREE2CODE', ...
                 'Expression "%s" is not supported in Block %s.',...
-                tree.text, blk.Origin_path);
+                tree.text, args.blk.Origin_path);
             throw(ME);
     end
     

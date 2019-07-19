@@ -31,8 +31,17 @@ classdef Fcn_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             
             expected_dt = 'real';
             
+            args.blkObj = obj;
+            args.blk = blk;
+            args.parent = parent;
+            args.data_map = data_map;
+            args.inputs = inputs;
+            args.expected_lusDT = expected_dt;
+            args.isSimulink = true;
+            args.isStateFlow = false;
+            args.isMatlabFun = false;
             [lusCode, status] = ...
-                nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.translate(obj, blk.Expr, parent, blk, data_map, inputs, expected_dt, true, false, false);
+                nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.translate(blk.Expr, args);
             
             if status
                 display_msg(sprintf('Block %s is not supported', HtmlItem.addOpenCmd(blk.Origin_path)), ...

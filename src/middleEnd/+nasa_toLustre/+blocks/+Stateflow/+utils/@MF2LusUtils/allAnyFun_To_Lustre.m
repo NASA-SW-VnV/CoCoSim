@@ -1,5 +1,4 @@
-function [code, exp_dt, dim] = allAnyFun_To_Lustre(BlkObj, tree, parent, blk,...
-        data_map, inputs, isSimulink, isStateFlow, isMatlabFun, op)
+function [code, exp_dt, dim] = allAnyFun_To_Lustre(tree, args, op)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -9,9 +8,8 @@ function [code, exp_dt, dim] = allAnyFun_To_Lustre(BlkObj, tree, parent, blk,...
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     code = {};
-    [x, ~, x_dim] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(BlkObj, tree.parameters(1),...
-        parent, blk, data_map, inputs, 'bool', ...
-        isSimulink, isStateFlow, isMatlabFun);
+    args.expected_lusDT = 'bool';
+    [x, ~, x_dim] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(1), args);
     n_dim = numel(x_dim);
     x_new = reshape(x, x_dim);
     

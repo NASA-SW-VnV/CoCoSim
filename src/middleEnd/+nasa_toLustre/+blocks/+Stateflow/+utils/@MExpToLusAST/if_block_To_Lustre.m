@@ -1,5 +1,4 @@
-function [code, exp_dt, dim] = if_block_To_Lustre(BlkObj, tree, parent, blk,...
-        data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun, if_cond)
+function [code, exp_dt, dim] = if_block_To_Lustre(tree, args)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -11,9 +10,12 @@ function [code, exp_dt, dim] = if_block_To_Lustre(BlkObj, tree, parent, blk,...
         counter = 0;
     end
     code = {};
-    [condition, ~, ~] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(BlkObj, tree.condition,...
-        parent, blk, data_map, inputs, 'bool', ...
-        isSimulink, isStateFlow, isMatlabFun, []);
+    if_cond = args.if_cond;
+    args.expected_lusDT = 'bool';
+    [condition, ~, ~] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(...
+        tree.condition, args);
+    args.expected_lusDT = '';
+    
     cond_name = strcat('ifCond_', num2str(counter), strrep(num2str(rand(1)), '0.', '_'));
     counter = counter + 1;
     cond_ID = nasa_toLustre.lustreAst.VarIdExpr(cond_name);
@@ -28,36 +30,37 @@ function [code, exp_dt, dim] = if_block_To_Lustre(BlkObj, tree, parent, blk,...
         'CompiledType', 'boolean', 'InitialValue', '0', ...
         'ArraySize', '1 1', 'CompiledSize', '1 1', 'Scope', 'Local', ...
         'Port', '1');
-    data_map(cond_name) = s;
+    args.data_map(cond_name) = s;
     
     if length(tree.statements) > 1
         for i=1:length(tree.statements)
-            [statements, ~, ~] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(BlkObj, tree.statements{i},...
-                parent, blk, data_map, inputs, expected_dt, ...
-                isSimulink, isStateFlow, isMatlabFun, cond_ID);
+            args.if_cond = cond_ID;
+            [statements, ~, ~] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(...
+                tree.statements{i}, args);
             code = MatlabUtils.concat(code, statements);
         end
     else
-        [statements, ~, ~] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(BlkObj, tree.statements,...
-            parent, blk, data_map, inputs, expected_dt, ...
-            isSimulink, isStateFlow, isMatlabFun, cond_ID);
+        args.if_cond = cond_ID;
+        [statements, ~, ~] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(...
+            tree.statements, args);
         code = MatlabUtils.concat(code, statements);
     end
     
     not_condID = nasa_toLustre.lustreAst.UnaryExpr(...
         nasa_toLustre.lustreAst.UnaryExpr.NOT, cond_ID);
+    %% TODO: why the length(tree.else_block.statements) > 1, discuss it with Hamza
     if isfield(tree.else_block, 'statements')
         if length(tree.else_block.statements) > 1
             for i=1:length(tree.else_block.statements)
-                [else_block, ~, ~] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(BlkObj, tree.else_block.statements(i),...
-                    parent, blk, data_map, inputs, expected_dt, ...
-                    isSimulink, isStateFlow, isMatlabFun, not_condID);
+                args.if_cond = not_condID;
+                [else_block, ~, ~] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(...
+                    tree.else_block.statements(i), args);
                 code = MatlabUtils.concat(code, else_block);
             end
         else
-            [else_block, ~, ~] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(BlkObj, tree.else_block.statements,...
-                parent, blk, data_map, inputs, expected_dt, ...
-                isSimulink, isStateFlow, isMatlabFun, not_condID);
+            args.if_cond = not_condID;
+            [else_block, ~, ~] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(...
+                tree.else_block.statements, args);
             code = MatlabUtils.concat(code, else_block);
         end
     end

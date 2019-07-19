@@ -1,5 +1,4 @@
-function [code, dt, dim] = matrix_To_Lustre(BlkObj, tree, parent, blk, data_map,...
-        inputs, ~, isSimulink, isStateFlow, isMatlabFun, ~)
+function [code, dt, dim] = matrix_To_Lustre(tree, args)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -7,7 +6,7 @@ function [code, dt, dim] = matrix_To_Lustre(BlkObj, tree, parent, blk, data_map,
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.expression_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
+    dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.expression_DT(tree, args);
     
     if isstruct(tree.rows)
         rows = arrayfun(@(x) x, tree.rows, 'UniformOutput', false);
@@ -33,10 +32,10 @@ function [code, dt, dim] = matrix_To_Lustre(BlkObj, tree, parent, blk, data_map,
     for i=1:nb_rows
         columns = rows{i};
         for j=1:numel(columns)
+            args.expected_lusDT = code_dt{i, j};
             code(end+1) =...
-                nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(BlkObj, columns(j), ...
-                parent, blk, data_map, inputs, code_dt{i, j},...
-                isSimulink, isStateFlow, isMatlabFun);
+                nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(...
+                columns(j), args);
         end
     end
     

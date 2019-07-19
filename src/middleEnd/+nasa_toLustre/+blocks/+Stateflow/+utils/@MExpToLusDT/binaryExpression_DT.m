@@ -1,5 +1,4 @@
-function dt = binaryExpression_DT(tree, data_map, inputs, isSimulink, ...
-    isStateFlow, isMatlabFun)
+function [lusDT, slxDT] = binaryExpression_DT(tree, args)
     %BINARYEXPRESSION_DT for arithmetic operation such as +, *, / ...
     % and relational operation
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -15,15 +14,17 @@ function dt = binaryExpression_DT(tree, data_map, inputs, isSimulink, ...
         case {'relopAND', 'relopelAND',...
                 'relopOR', 'relopelOR', ...
                 'relopGL', 'relopEQ_NE'}
-            dt = 'bool';
+            lusDT = 'bool';
+            slxDT = 'boolean';
         case {'plus_minus', 'mtimes', 'times', ...
                 'mrdivide', 'mldivide', 'rdivide', 'ldivide', ...
                 'mpower', 'power'}
-            left_dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.expression_DT(tree.leftExp, data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
-            right_dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.expression_DT(tree.rightExp, data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
-            dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.upperDT(left_dt, right_dt);
+            [left_lusDT, left_slxDT] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.expression_DT(tree.leftExp, args);
+            [right_lusDT, right_slxDT] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.expression_DT(tree.rightExp, args);
+            [lusDT, slxDT] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.upperDT(left_lusDT, right_lusDT, left_slxDT, right_slxDT);
         otherwise
-            dt = '';
+            lusDT = '';
+            slxDT = '';
     end
 end
 

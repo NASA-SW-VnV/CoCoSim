@@ -1,4 +1,4 @@
-function dt = fun_indexing_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun)
+function [lusDT, slxDT] = fun_indexing_DT(tree, args)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -10,53 +10,66 @@ function dt = fun_indexing_DT(tree, data_map, inputs, isSimulink, isStateFlow, i
     tree_ID = tree.ID;
     switch tree_ID
         case {'abs', 'sgn'}
-            dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.expression_DT(tree.parameters(1), data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
+            [lusDT, slxDT] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.expression_DT(...
+                tree.parameters(1), args);
         case 'rem'
-            param1 = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.expression_DT(tree.parameters(1), data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
-            param2 = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.expression_DT(tree.parameters(2), data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
-            dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.upperDT(param1, param2);
+            [lusDT1, slxDT1] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.expression_DT(...
+                tree.parameters(1), args);
+            [lusDT2, slxDT2] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.expression_DT(...
+                tree.parameters(2), args);
+            [lusDT, slxDT] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.upperDT(...
+                lusDT1, lusDT2, slxDT1, slxDT2);
         case {'sqrt', 'exp', 'log', 'log10',...
                 'sin','cos','tan',...
                 'asin','acos','atan','atan2', 'power', ...
                 'sinh','cosh', ...
                 'ceil', 'floor', 'hypot'}
-            dt = 'real';
+            lusDT = 'real';
+            slxDT = 'double';
         case {'all', 'any'}
-            dt = 'bool';
+            lusDT = 'bool';
+            slxDT = 'boolean';
         otherwise
-            dt = simulinkStateflow_Fun_Indexing_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
+            [lusDT, slxDT] = simulinkStateflow_Fun_Indexing_DT(tree, args);
     end
 end
 
-function dt = simulinkStateflow_Fun_Indexing_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun)
-    global SF_MF_FUNCTIONS_MAP SF_STATES_NODESAST_MAP;
+function [lusDT, slxDT] = simulinkStateflow_Fun_Indexing_DT(tree, args)
+    global SF_MF_FUNCTIONS_MAP;% SF_STATES_NODESAST_MAP;
     
-    dt = '';
-    
+    data_map = args.data_map;
+    inputs = args.inputs;
+    isSimulink = args.isSimulink;
+    isStateFlow = args.isStateflow;
+    isMatlabFun = args.isMatlabFun;
+    lusDT = '';
+    slxDT = '';
     if (isStateFlow || isMatlabFun) && data_map.isKey(tree.ID)
         % A variable in Stateflow
-        dt = data_map(tree.ID).LusDatatype;
+        [lusDT, slxDT] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.getVarDT(...
+            data_map, tree.ID);
     elseif (isStateFlow || isMatlabFun)  && SF_MF_FUNCTIONS_MAP.isKey(tree.ID)
         % Graphical function in Stateflow
         nodeAst = SF_MF_FUNCTIONS_MAP(tree.ID);
         outputs = nodeAst.getOutputs();
-        dt =  cell(numel(outputs), 1);
+        lusDT =  cell(numel(outputs), 1);
         for i=1:numel(outputs)
             d = outputs{i};
-            dt{i} = d.getDT();
+            lusDT{i} = d.getDT();
         end
+        slxDT = LusValidateUtils.get_slx_dt(lusDT);
     elseif isSimulink && strcmp(tree.ID, 'u')
         %"u" refers to an input in IF, Switch and Fcn
         %blocks
         if strcmp(tree.parameters(1).type, 'constant')
             %the case of u(1), u(2) ...
             input_idx = str2double(tree.parameters(1).value);
-            dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.getVarDT(data_map, ...
+            [lusDT, slxDT] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.getVarDT(data_map, ...
                 inputs{1}{input_idx}.getId());
         else
             % we assume "u" is a vector of the same dataType. Which is the
             % case for Fcn/IF/Switch case blocks where isSimulink=true
-            dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.getVarDT(data_map, ...
+            [lusDT, slxDT] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.getVarDT(data_map, ...
                 inputs{1}{1}.getId());
         end
         
@@ -65,12 +78,12 @@ function dt = simulinkStateflow_Fun_Indexing_DT(tree, data_map, inputs, isSimuli
         input_number = str2double(regexp(tree.ID, 'u(\d+)', 'tokens', 'once'));
         if strcmp(tree.parameters(1).type, 'constant')
             arrayIndex = str2double(tree.parameters(1).value);
-            dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.getVarDT(data_map, ...
+            [lusDT, slxDT] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.getVarDT(data_map, ...
                 inputs{input_number}{arrayIndex}.getId());
         else
             % we assume "u" is a vector of the same dataType. Which is the
             % case for Fcn/IF/Switch case blocks where isSimulink=true
-            dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.getVarDT(data_map, ...
+            [lusDT, slxDT] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.getVarDT(data_map, ...
                 inputs{input_number}{1}.getId());
         end
     end

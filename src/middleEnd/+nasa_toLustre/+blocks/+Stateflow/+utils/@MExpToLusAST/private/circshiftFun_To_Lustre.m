@@ -1,5 +1,4 @@
-function [code, exp_dt, dim] = circshiftFun_To_Lustre(BlkObj, tree, parent, blk,...
-        data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun)
+function [code, exp_dt, dim] = circshiftFun_To_Lustre(tree, args)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -7,12 +6,9 @@ function [code, exp_dt, dim] = circshiftFun_To_Lustre(BlkObj, tree, parent, blk,
     % Author: Francois Conzelmann <francois.conzelmann@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    [X, X_dt, X_dim] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(BlkObj, tree.parameters(1),...
-        parent, blk, data_map, inputs, expected_dt, ...
-        isSimulink, isStateFlow, isMatlabFun);
-    [Y, ~, ~] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(BlkObj, tree.parameters(2),...
-        parent, blk, data_map, inputs, 'int', ...
-        isSimulink, isStateFlow, isMatlabFun);
+    [X, X_dt, X_dim] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(1),args);
+    args.expected_lusDT = 'int';
+    [Y, ~, ~] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(2),args);
     
     X_reshp = reshape(X, X_dim);
     
@@ -29,9 +25,8 @@ function [code, exp_dt, dim] = circshiftFun_To_Lustre(BlkObj, tree, parent, blk,
     end
     
     if (length(tree.parameters) > 2)
-        [d, ~, ~] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(BlkObj, tree.parameters(3),...
-            parent, blk, data_map, inputs, 'int', ...
-            isSimulink, isStateFlow, isMatlabFun);
+        args.expected_lusDT = 'int';
+        [d, ~, ~] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(3),args);
         code1 = circshift(X_reshp, Y, d{1}.value);
     else
         code1 = circshift(X_reshp, Y);

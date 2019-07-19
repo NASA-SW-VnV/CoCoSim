@@ -1,4 +1,4 @@
-function dt = parenthesedExpression_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun)
+function [lusDT, slxDT] = parenthesedExpression_DT(tree, args)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -7,6 +7,6 @@ function dt = parenthesedExpression_DT(tree, data_map, inputs, isSimulink, isSta
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     
-    dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.expression_DT(tree.expression, data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
+    [lusDT, slxDT] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.expression_DT(tree.expression, args);
 end
 

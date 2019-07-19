@@ -1,4 +1,4 @@
-function dt = expression_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun)
+function [lusDT, slxDT] = expression_DT(tree, args)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -11,12 +11,14 @@ function dt = expression_DT(tree, data_map, inputs, isSimulink, isStateFlow, isM
     %SwitchCase and Fcn blocks. Also it is used by Stateflow
     %actions
     narginchk(1,6);
-    if nargin < 2, data_map = containers.Map; end
-    if nargin < 3, inputs = {}; end
-    if nargin < 4, isSimulink = false; end
-    if nargin < 5, isStateFlow = false; end
-    if nargin < 6, isMatlabFun = false; end
-    dt = '';
+    if ~isfield(args, 'data_map'), args.data_map = containers.Map; end
+    if ~isfield(args, 'inputs'), args.inputs = {}; end
+    if ~isfield(args, 'isLeft'), args.isLeft = false; end
+    if ~isfield(args, 'isSimulink'), args.isSimulink = false; end
+    if ~isfield(args, 'isStateFlow'), args.isStateFlow = false; end
+    if ~isfield(args, 'isMatlabFun'), args.isMatlabFun = false; end
+    lusDT = '';
+    slxDT = '';
     if isempty(tree)
         return;
     end
@@ -34,16 +36,18 @@ function dt = expression_DT(tree, data_map, inputs, isSimulink, isStateFlow, isM
                 'plus_minus', 'mtimes', 'times', ...
                 'mrdivide', 'mldivide', 'rdivide', 'ldivide', ...
                 'mpower', 'power'}
-            dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.binaryExpression_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
+            [lusDT, slxDT] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.binaryExpression_DT(...
+                tree, args);
             
         otherwise
             % we use the name of tree_type to call the associated function
             func_name = strcat(tree_type, '_DT');
             func_handle = str2func(strcat('nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.', func_name));
             try
-                dt = func_handle(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
+                [lusDT, slxDT] = func_handle(tree, args);
             catch me
-                dt = '';
+                lusDT = '';
+                slxDT = '';
                 if strcmp(me.identifier, 'MATLAB:UndefinedFunction')
                     display_msg(...
                         sprintf(['DataType ERROR: No method with name "%s".'...

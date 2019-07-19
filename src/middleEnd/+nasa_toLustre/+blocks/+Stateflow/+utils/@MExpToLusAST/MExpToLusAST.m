@@ -6,34 +6,50 @@ classdef MExpToLusAST
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        
+    
     properties
     end
     methods(Static)
-        function [lusCode, status] = translate(BlkObj, exp, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun)
+        % use alphabetic order.
+        [code, lusDT, dim] = assignment_To_Lustre(tree, args)
+        [code, lusDT, dim] = binaryExpression_To_Lustre(tree, args)
+        [code, lusDT, dim] = colonExpression_To_Lustre(tree, args)
+        [code, lusDT, dim] = constant_To_Lustre(tree, args)
+        [code, lusDT, dim] = expression_To_Lustre(tree, args)
+        [code, lusDT, dim] = fun_indexing_To_Lustre(tree, args)
+        [code, lusDT, dim] = ID_To_Lustre(tree, args)
+        [code, lusDT, dim] = if_block_To_Lustre(tree, args)
+        [code, lusDT, dim] = matrix_To_Lustre(tree, args)
+        [code, lusDT, dim] = parenthesedExpression_To_Lustre(tree, args)
+        [code, lusDT, dim] = struct_indexing_To_Lustre(tree, args)
+        [code, lusDT, dim] = transpose_To_Lustre(tree, args)
+        [code, lusDT, dim] = unaryExpression_To_Lustre(tree, args)
+    end
+    
+    methods(Static)
+        function [lusCode, status] = translate(exp, args)
             
             global SF_MF_FUNCTIONS_MAP ;
             
             
-            narginchk(2, 10);
-            if isempty(BlkObj), BlkObj = nasa_toLustre.blocks.DummyBlock_To_Lustre; end
-            if nargin < 3, parent = []; end
-            if nargin < 4, blk = []; end
-            if nargin < 5, data_map = containers.Map; end
-            if nargin < 6, inputs = {}; end
-            if nargin < 7, expected_dt = ''; end
-            if nargin < 8, isSimulink = false; end
-            if nargin < 9, isStateFlow = false; end
-            if nargin < 10, isMatlabFun = false; end
+            narginchk(2, 2);
+
             
-            if ~exist('isStateFlow', 'var')
-                isStateFlow = false;
-            end
-            if isempty(blk)
-                if isStateFlow
-                    blk.Origin_path = 'Stateflow chart';
+            if ~isfield(args, 'blkObj'), args.blkObj = nasa_toLustre.blocks.DummyBlock_To_Lustre; end
+            if ~isfield(args, 'data_map'), args.data_map = containers.Map; end
+            if ~isfield(args, 'inputs'), args.inputs = {}; end
+            if ~isfield(args, 'isLeft'), args.isLeft = false; end
+            if ~isfield(args, 'isSimulink'), args.isSimulink = false; end
+            if ~isfield(args, 'isStateFlow'), args.isStateFlow = false; end
+            if ~isfield(args, 'isMatlabFun'), args.isMatlabFun = false; end
+            if ~isfield(args, 'expected_lusDT'), args.expected_lusDT = ''; end
+            if ~isfield(args, 'blk'), args.blk = []; end
+            if ~isfield(args, 'parent'), args.parent = []; end
+            if isempty(args.blk)
+                if args.isStateFlow
+                    args.blk.Origin_path = 'Stateflow chart';
                 else
-                    blk.Origin_path = '';
+                    args.blk.Origin_path = '';
                 end
             end
             status = 0;
@@ -52,16 +68,16 @@ classdef MExpToLusAST
             catch me
                 status = 1;
                 display_msg(sprintf('ParseError for expression "%s" in block %s', ...
-                    orig_exp, blk.Origin_path), ...
+                    orig_exp, args.blk.Origin_path), ...
                     MsgType.ERROR, 'MExpToLusAST.translate', '');
                 display_msg(me.getReport(), MsgType.DEBUG, 'MExpToLusAST.translate', '');
                 return;
             end
             try
                 
-                lusCode = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun);
+                lusCode = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(tree, args);
                 % transform Stateflow Function call with no outputs to an equation
-                if isStateFlow && ~isempty(tree)
+                if args.isStateFlow && ~isempty(tree)
                     if iscell(tree) && numel(tree) == 1
                         tree = tree{1};
                     end
@@ -80,7 +96,7 @@ classdef MExpToLusAST
                 if strcmp(me.identifier, 'COCOSIM:TREE2CODE')
                     display_msg(me.message, MsgType.ERROR, 'MExpToLusAST.translate', '')
                     display_msg(sprintf('ParseError for expression "%s" in block %s', ...
-                        orig_exp, blk.Origin_path), ...
+                        orig_exp, args.blk.Origin_path), ...
                         MsgType.ERROR, 'MExpToLusAST.translate', '');
                     return;
                 else
@@ -90,22 +106,7 @@ classdef MExpToLusAST
             
         end
     end
-    methods(Static)
-        % use alphabetic order.
-        [code, exp_dt, dim] = assignment_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun, if_cond)
-        [code, exp_dt, dim] = binaryExpression_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun, if_cond)
-        [code, exp_dt, dim] = colonExpression_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun, if_cond)
-        [code, exp_dt, dim] = constant_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun, if_cond)
-        [code, exp_dt, dim] = expression_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun, if_cond)
-        [code, exp_dt, dim] = fun_indexing_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun, if_cond)
-        [code, exp_dt, dim] = ID_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun, if_cond)
-        [code, exp_dt, dim] = if_block_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun, if_cond)
-        [code, exp_dt, dim] = matrix_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun, if_cond)
-        [code, exp_dt, dim] = parenthesedExpression_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun, if_cond)
-        [code, exp_dt, dim] = struct_indexing_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun, if_cond)
-        [code, exp_dt, dim] = transpose_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun, if_cond)
-        [code, exp_dt, dim] = unaryExpression_To_Lustre(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun, if_cond)
-    end
+    
     
     methods(Static)
         % Utils

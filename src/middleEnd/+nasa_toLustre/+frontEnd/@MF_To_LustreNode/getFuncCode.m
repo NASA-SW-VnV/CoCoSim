@@ -25,9 +25,15 @@ function [fun_node,failed ]  = getFuncCode(func, data_map, blkObj, parent, blk)
             s = statements{i};
         end
         try
-            lusCode = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(blkObj, s,...
-                parent, blk, data_map, {}, expected_dt, ...
-                isSimulink, isStateFlow, isMatlabFun, []);
+            args.blkObj = blkObj;
+            args.blk = blk;
+            args.parent = parent;
+            args.data_map = data_map;
+            args.expected_lusDT = expected_dt;
+            args.isSimulink = false;
+            args.isStateFlow = false;
+            args.isMatlabFun = true;
+            lusCode = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(s, args);
             [vars, ~] = nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getInOutputsFromAction(lusCode, ...
                 false, data_map, s.text);
             variables = MatlabUtils.concat(variables, vars);

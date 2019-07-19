@@ -1,5 +1,4 @@
-function [code, exp_dt, dim] = onesFun_To_Lustre(BlkObj, tree, parent, blk,...
-        data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun)
+function [code, exp_dt, dim] = onesFun_To_Lustre(tree, args)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -8,8 +7,7 @@ function [code, exp_dt, dim] = onesFun_To_Lustre(BlkObj, tree, parent, blk,...
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     [code, exp_dt, dim] = nasa_toLustre.blocks.Stateflow.utils.MF2LusUtils.numFun_To_Lustre(...
-        BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, ...
-        isStateFlow, isMatlabFun, 1);
+        tree, args, 1);
     
 end
 

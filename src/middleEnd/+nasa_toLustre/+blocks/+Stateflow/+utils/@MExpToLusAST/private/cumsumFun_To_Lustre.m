@@ -1,5 +1,4 @@
-function [code, exp_dt, dim] = cumsumFun_To_Lustre(BlkObj, tree, parent, blk,...
-        data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun)
+function [code, exp_dt, dim] = cumsumFun_To_Lustre(tree, args)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -12,8 +11,7 @@ function [code, exp_dt, dim] = cumsumFun_To_Lustre(BlkObj, tree, parent, blk,...
     code = {};
     op = nasa_toLustre.lustreAst.BinaryExpr.PLUS;
     
-    [x, exp_dt, dim] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(BlkObj, tree.parameters(1), parent,...
-        blk, data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun);
+    [x, exp_dt, dim] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(1), args);
     
     if length(dim) > 2 % TODO support multi-dimension input
         ME = MException('COCOSIM:TREE2CODE', ...
@@ -30,8 +28,8 @@ function [code, exp_dt, dim] = cumsumFun_To_Lustre(BlkObj, tree, parent, blk,...
         if strcmp(tree.parameters{2}.type, 'String')
             reverse = strcmp(tree.parameters{2}.value, '''reverse''');
         else
-            [y, ~, ~] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(BlkObj, tree.parameters(2), parent,...
-                blk, data_map, inputs, 'int', isSimulink, isStateFlow, isMatlabFun);
+            args.expected_lusDT = 'int';
+            [y, ~, ~] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(2), args);
             dimension = y{1}.value;
         end
     end

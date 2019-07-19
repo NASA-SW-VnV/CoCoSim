@@ -1,5 +1,4 @@
-function [code, exp_dt, dim] = constant_To_Lustre(BlkObj, tree, parent, blk, ...
-    data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun, ~)
+function [code, exp_dt, dim] = constant_To_Lustre(tree, args)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -8,13 +7,13 @@ function [code, exp_dt, dim] = constant_To_Lustre(BlkObj, tree, parent, blk, ...
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     v = tree.value;
-    exp_dt = expected_dt;
+    exp_dt = args.expected_lusDT;
     dim = 1;
-    if strcmp(expected_dt, 'real')
+    if strcmp(args.expected_lusDT, 'real')
         code{1} = nasa_toLustre.lustreAst.RealExpr(str2double(v));
-    elseif strcmp(expected_dt, 'bool')
+    elseif strcmp(args.expected_lusDT, 'bool')
         code{1} = nasa_toLustre.lustreAst.BooleanExpr(str2double(v));
-    elseif strcmp(expected_dt, 'int')
+    elseif strcmp(args.expected_lusDT, 'int')
         %tree might be 1 or 3e5
         code{1} = nasa_toLustre.lustreAst.IntExpr(str2double(v));
     else
@@ -29,7 +28,7 @@ function [code, exp_dt, dim] = constant_To_Lustre(BlkObj, tree, parent, blk, ...
             % String | function_handle
             ME = MException('COCOSIM:TREE2CODE', ...
                 'Expression "%s" of type "%s" is not handled in Block %s',...
-                tree.text, tree_type, blk.Origin_path);
+                tree.text, tree_type, args.blk.Origin_path);
             throw(ME);
         end
     end

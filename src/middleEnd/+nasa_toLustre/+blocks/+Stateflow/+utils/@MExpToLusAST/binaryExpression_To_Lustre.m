@@ -1,5 +1,4 @@
-function [code, exp_dt, dim] = binaryExpression_To_Lustre(BlkObj, tree, parent,...
-        blk, data_map, inputs, ~, isSimulink, isStateFlow, isMatlabFun, ~)
+function [code, exp_dt, dim] = binaryExpression_To_Lustre(tree, args)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -12,20 +11,21 @@ function [code, exp_dt, dim] = binaryExpression_To_Lustre(BlkObj, tree, parent,.
     tree_type = tree.type;
     dim = [];
     % get Operands DataType
-    exp_dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.binaryExpression_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
+    exp_dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.binaryExpression_DT(tree, args);
     if ismember(tree_type, {'relopGL', 'relopEQ_NE'})
-        left_dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.expression_DT(tree.leftExp, data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
-        right_dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.expression_DT(tree.rightExp, data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
+        left_dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.expression_DT(tree.leftExp, args);
+        right_dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.expression_DT(tree.rightExp, args);
         operands_dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.upperDT(left_dt, right_dt);
     else
         operands_dt = exp_dt;
     end
     
     % GEt Left Right operand
-    [left, ~, left_dim] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(BlkObj, tree.leftExp, parent,...
-        blk, data_map, inputs, operands_dt, isSimulink, isStateFlow, isMatlabFun);
-    [right, ~, right_dim] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(BlkObj, tree.rightExp, parent,...
-        blk, data_map, inputs, operands_dt, isSimulink, isStateFlow, isMatlabFun);
+    args.expected_lusDT = operands_dt;
+    [left, ~, left_dim] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(...
+        tree.leftExp, args);
+    [right, ~, right_dim] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(...
+        tree.rightExp, args);
     
     % Get Operator
     if strcmp(tree_type, 'plus_minus') % '+' '-'
@@ -97,8 +97,7 @@ function [code, exp_dt, dim] = binaryExpression_To_Lustre(BlkObj, tree, parent,.
         op = nasa_toLustre.lustreAst.BinaryExpr.OR;
         
     elseif ismember(tree_type, {'mpower', 'power'}) % '^' '.^'
-        [code, exp_dt, dim] = getPowerCode(BlkObj, tree, parent, blk, data_map, ...
-            inputs, isSimulink, isStateFlow, isMatlabFun);
+        [code, exp_dt, dim] = getPowerCode(tree, args);
         return;
     end
     
@@ -110,15 +109,16 @@ function [code, exp_dt, dim] = binaryExpression_To_Lustre(BlkObj, tree, parent,.
         (1:numel(left)), 'UniformOutput', false);
 end
 
-function [code, exp_dt, dim] = getPowerCode(BlkObj, tree, parent, blk, data_map, inputs, isSimulink, isStateFlow, isMatlabFun)
+function [code, exp_dt, dim] = getPowerCode(tree, args)
     
     exp_dt = 'real';
     tree_type = tree.type;
-    BlkObj.addExternal_libraries('LustMathLib_lustrec_math');
-    [left, ~, left_dim] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(BlkObj, tree.leftExp, parent,...
-        blk, data_map, inputs, 'real', isSimulink, isStateFlow, isMatlabFun);
-    [right, ~, right_dim] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(BlkObj, tree.rightExp, parent,...
-        blk, data_map, inputs, 'real', isSimulink, isStateFlow, isMatlabFun);
+    args.blkObj.addExternal_libraries('LustMathLib_lustrec_math');
+    args.expected_lusDT = 'real';
+    [left, ~, left_dim] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(...
+        tree.leftExp, args);
+    [right, ~, right_dim] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(...
+        tree.rightExp, args);
     if numel(left) > 1 && strcmp(tree_type, 'mpower')
         ME = MException('COCOSIM:TREE2CODE', ...
             'Expression "%s" has a power of matrix is not supported.',...
