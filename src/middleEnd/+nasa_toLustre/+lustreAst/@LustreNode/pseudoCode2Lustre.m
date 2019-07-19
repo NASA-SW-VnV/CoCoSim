@@ -13,7 +13,9 @@ function [new_obj, varIds] = pseudoCode2Lustre(obj)
     for i=1:numel(obj.outputs)
         outputs_map(obj.outputs{i}.getId()) = 0;
     end
-
+    for i=1:numel(obj.localVars)
+        outputs_map(obj.localVars{i}.getId()) = 0;
+    end
     % go over body equations to change each occurance of outputs to new var
     new_bodyEqs = cell(numel(obj.bodyEqs),1);
     isLeft = false;
@@ -56,6 +58,29 @@ function [new_obj, varIds] = pseudoCode2Lustre(obj)
                 out_DT);
         end
     end
+    tobeRemoved = {};
+    for i=1:numel(obj.localVars)
+        out_name = obj.localVars{i}.getId();
+        out_DT = obj.localVars{i}.getDT();
+        if ~isKey(outputs_map, out_name)
+            continue;
+        end
+        last_Idx = outputs_map(out_name);
+        if last_Idx >= 1
+            tobeRemoved{end+1} = obj.localVars{i};
+        end
+        for j=1:last_Idx
+            obj.addVar(...
+                nasa_toLustre.lustreAst.LustreVar(strcat(out_name, '__', num2str(j)),...
+                out_DT));
+        end
+        
+    end
+    for i=1:length(tobeRemoved)
+        obj.localVars =...
+               nasa_toLustre.lustreAst.LustreVar.removeVar(obj.localVars, tobeRemoved{i});
+    end
+    % construct the node
     new_obj = nasa_toLustre.lustreAst.LustreNode(obj.metaInfo, obj.name, obj.inputs, ...
         obj.outputs, new_localContract, obj.localVars, new_bodyEqs, ...
         obj.isMain, obj.isImported);

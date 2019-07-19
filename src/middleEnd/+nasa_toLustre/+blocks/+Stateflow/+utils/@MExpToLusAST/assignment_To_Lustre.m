@@ -1,12 +1,12 @@
 function [code, assignment_dt, dim] = assignment_To_Lustre(BlkObj, tree, parent, blk, ...
-        data_map, inputs, ~, isSimulink, isStateFlow, isMatlabFun)
+        data_map, inputs, ~, isSimulink, isStateFlow, isMatlabFun, if_cond)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        
+    global VISITED_VARIABLES;
     assignment_dt = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.expression_DT(tree, data_map, inputs, isSimulink, isStateFlow, isMatlabFun);
     [left, ~, ~] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(BlkObj, tree.leftExp, ...
         parent, blk, data_map, inputs, assignment_dt,...
@@ -14,6 +14,16 @@ function [code, assignment_dt, dim] = assignment_To_Lustre(BlkObj, tree, parent,
     
     [right, ~, dim] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(BlkObj, tree.rightExp, parent, blk,...
         data_map, inputs, assignment_dt, isSimulink, isStateFlow, isMatlabFun);
+    %TODO for length(left) > 1
+    if isMatlabFun && ~isempty(if_cond)
+        if nasa_toLustre.lustreAst.VarIdExpr.ismemberVar(left{1}, VISITED_VARIABLES)
+            init = left{1};
+        else
+            %TOTO use InitialValue
+            init = nasa_toLustre.lustreAst.RealExpr('0.0');
+        end
+        right = {nasa_toLustre.lustreAst.IteExpr(if_cond, right, init)};
+    end
     if strcmp(tree.leftExp.type, 'fun_indexing') ...
             && ~strcmp(tree.leftExp.parameters.type, 'constant')
         [code, status] = ArrayIndexNotConstant(left, right, tree);
@@ -25,6 +35,7 @@ function [code, assignment_dt, dim] = assignment_To_Lustre(BlkObj, tree, parent,
         end
         return;
     end
+    VISITED_VARIABLES = MatlabUtils.concat(VISITED_VARIABLES, left);
     if strcmp(tree.leftExp.type, 'matrix') && numel(right) == 1
         %e.g. [z,y] = f(x)
         left{1} = nasa_toLustre.lustreAst.TupleExpr(left);
@@ -50,7 +61,7 @@ function [code, status] = ArrayIndexNotConstant(left, right, tree)
     %e.g. u(index) = exp
     % u_1 = if index = 1 then exp else u_1;
     % u_2 = if index = 2 then exp else u_2;
-            status = 0;
+    status = 0;
     code = {};
     [left, right] = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.inlineOperands(left, right, tree);
     eqts = {};

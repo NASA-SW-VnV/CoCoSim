@@ -41,7 +41,8 @@ function [outputs, inputs] = getInOutputsFromAction(lus_action, isCondition, dat
         for i=1:numel(outputs_names)
             k = outputs_names{i};
             if isKey(data_map, k)
-                outputs{end + 1} = nasa_toLustre.lustreAst.LustreVar(k, data_map(k).LusDatatype);
+                lusDT = nasa_toLustre.blocks.Stateflow.utils.MExpToLusDT.getVarDT(data_map, k);
+                outputs{end + 1} = nasa_toLustre.lustreAst.LustreVar(k, lusDT);
             else
                 ME = MException('COCOSIM:STATEFLOW', ...
                     'Variable %s can not be found for action "%s"', ...

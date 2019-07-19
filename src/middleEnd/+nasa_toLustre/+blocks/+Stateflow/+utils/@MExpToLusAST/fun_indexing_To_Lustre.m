@@ -1,5 +1,5 @@
 function [code, exp_dt, dim] = fun_indexing_To_Lustre(BlkObj, tree, parent, blk,...
-        data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun)
+        data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun, ~)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.

@@ -1,5 +1,5 @@
 function [code, dt, dim] = ID_To_Lustre(~, tree, parent, blk, data_map, ...
-        inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun)
+        inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun, ~)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.

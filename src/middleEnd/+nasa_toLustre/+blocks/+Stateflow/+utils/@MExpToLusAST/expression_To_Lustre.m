@@ -1,5 +1,5 @@
 function [code, exp_dt, dim] = expression_To_Lustre(BlkObj, tree, parent, blk,...
-    data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun)
+        data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun, if_cond)
     %this function is extended to be used by If-Block,
     %SwitchCase and Fcn blocks. Also it is used by Stateflow
     %actions
@@ -9,10 +9,8 @@ function [code, exp_dt, dim] = expression_To_Lustre(BlkObj, tree, parent, blk,..
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        
     
-    
-    narginchk(1, 10);
+    narginchk(1, 11);
     if isempty(BlkObj), BlkObj = nasa_toLustre.blocks.DummyBlock_To_Lustre; end
     if nargin < 3, parent = []; end
     if nargin < 4, blk = []; end
@@ -22,6 +20,7 @@ function [code, exp_dt, dim] = expression_To_Lustre(BlkObj, tree, parent, blk,..
     if nargin < 8, isSimulink = false; end
     if nargin < 9, isStateFlow = false; end
     if nargin < 10, isMatlabFun = false; end
+    if nargin < 11, if_cond = []; end
     
     % we assume this function returns cell.
     code = {};
@@ -60,7 +59,7 @@ function [code, exp_dt, dim] = expression_To_Lustre(BlkObj, tree, parent, blk,..
             func_name = strcat(tree_type, '_To_Lustre');
             func_handle = str2func(strcat('nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.', func_name));
             try
-                [code, exp_dt, dim] = func_handle(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun);
+                [code, exp_dt, dim] = func_handle(BlkObj, tree, parent, blk, data_map, inputs, expected_dt, isSimulink, isStateFlow, isMatlabFun, if_cond);
             catch me
                 if strcmp(me.identifier, 'MATLAB:UndefinedFunction')
                     display_msg(me.getReport(), MsgType.DEBUG, 'MExpToLusAST.expression_To_Lustre', '');

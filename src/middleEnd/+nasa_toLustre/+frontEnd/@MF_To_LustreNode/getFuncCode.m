@@ -5,10 +5,8 @@ function [fun_node,failed ]  = getFuncCode(func, data_map, blkObj, parent, blk)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
-    %
-    %
-    
+    global VISITED_VARIABLES;
+    VISITED_VARIABLES = {};
     statements = func.statements;
     expected_dt = '';
     isSimulink = false;
@@ -29,7 +27,7 @@ function [fun_node,failed ]  = getFuncCode(func, data_map, blkObj, parent, blk)
         try
             lusCode = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(blkObj, s,...
                 parent, blk, data_map, {}, expected_dt, ...
-                isSimulink, isStateFlow, isMatlabFun);
+                isSimulink, isStateFlow, isMatlabFun, []);
             [vars, ~] = nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getInOutputsFromAction(lusCode, ...
                 false, data_map, s.text);
             variables = MatlabUtils.concat(variables, vars);

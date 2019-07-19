@@ -1,2 +1,7 @@
-function y = fcn(u1, u2)
-y = [ z(1) (x+y) -x];
+function y = fct(x)
+	if (x==1)
+		y=2;
+	else
+		y = 1;
+	end
+end
