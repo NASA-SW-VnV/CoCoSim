@@ -20,7 +20,7 @@ function [exp, status] = formatConditionToLustre(obj, cond, inputs_cell, data_ma
     args.isStateFlow = false;
     args.isMatlabFun = false;
     [exp, status] = ...
-        nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.translate(cond, args);
+        nasa_toLustre.utils.MExpToLusAST.translate(cond, args);
     if iscell(exp) 
         if numel(exp) == 1
             exp = exp{1};

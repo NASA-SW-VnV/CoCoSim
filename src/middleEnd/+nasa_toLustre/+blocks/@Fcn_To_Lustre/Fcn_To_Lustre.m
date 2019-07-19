@@ -41,7 +41,7 @@ classdef Fcn_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             args.isStateFlow = false;
             args.isMatlabFun = false;
             [lusCode, status] = ...
-                nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.translate(blk.Expr, args);
+                nasa_toLustre.utils.MExpToLusAST.translate(blk.Expr, args);
             
             if status
                 display_msg(sprintf('Block %s is not supported', HtmlItem.addOpenCmd(blk.Origin_path)), ...
