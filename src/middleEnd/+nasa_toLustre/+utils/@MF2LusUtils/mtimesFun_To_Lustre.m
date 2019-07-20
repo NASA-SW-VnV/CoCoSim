@@ -6,8 +6,8 @@ function [code, dim] = mtimesFun_To_Lustre(x, x_dim, y, y_dim)
     % Author: Francois Conzelmann <francois.conzelmann@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    x_reshape = reshape(x, x_dim);
-    y_reshape = reshape(y, y_dim);
+    
+    
     
     code={};
     multi = nasa_toLustre.lustreAst.BinaryExpr.MULTIPLY;
@@ -22,6 +22,9 @@ function [code, dim] = mtimesFun_To_Lustre(x, x_dim, y, y_dim)
         code = arrayfun(@(z) nasa_toLustre.lustreAst.BinaryExpr(multi, ...
             x(z), y, false), 1:numel(x), 'UniformOutput', 0);
     elseif length(x_dim) <= 2 && length(y_dim) <= 2
+        
+        x_reshape = reshape(x, x_dim);
+        y_reshape = reshape(y, y_dim);
         
         dim = [x_dim(1), y_dim(2)];
         

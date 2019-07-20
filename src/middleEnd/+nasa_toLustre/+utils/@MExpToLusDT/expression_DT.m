@@ -48,6 +48,7 @@ function [lusDT, slxDT] = expression_DT(tree, args)
             catch me
                 lusDT = '';
                 slxDT = '';
+                display_msg(me.getReport(), MsgType.DEBUG, 'MExpToLusAST.translate', '');
                 if strcmp(me.identifier, 'MATLAB:UndefinedFunction')
                     display_msg(...
                         sprintf(['DataType ERROR: No method with name "%s".'...
@@ -57,7 +58,6 @@ function [lusDT, slxDT] = expression_DT(tree, args)
                     display_msg(...
                         sprintf('DataType ERROR for Expression "%s" with type "%s"',...
                         tree.text, tree_type), MsgType.WARNING, 'MExpToLusDT.expression_DT', '');
-                    display_msg(me.getReport(), MsgType.DEBUG, 'MExpToLusAST.translate', '');
                 end
             end
     end

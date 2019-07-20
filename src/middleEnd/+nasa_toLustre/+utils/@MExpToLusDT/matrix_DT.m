@@ -17,7 +17,7 @@ function [lusDT, slxDT] = matrix_DT(tree, args)
     else
         rows = tree.rows;
     end
-    if isLeft
+    if args.isLeft
         % the following code is for the function outputs :
         % e.g., "function [y, z] = f(x)"
         nb_rows = numel(rows);
