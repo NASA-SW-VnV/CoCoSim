@@ -610,21 +610,51 @@ public class EM2JSON {
 
 		@Override public void exitHorzcat(EMParser.HorzcatContext ctx) { 
 			StringBuilder buf = new StringBuilder();
-			if (ctx.horzcat() != null){
-				if (!(ctx.parent instanceof EMParser.HorzcatContext)){
-					buf.append("[");
+			buf.append("[");
+			int n1 = ctx.notAssignment().size();
+			int n2 = ctx.primaryExpression().size();
+			//System.out.println("safs: "+ ctx.getText());
+			
+			if (n1 > 0) {
+				
+				for (int i=0;i < n1; i++) {
+					EMParser.NotAssignmentContext vctx = ctx.notAssignment(i);
+					
+					buf.append(getJSON(vctx));
+					if(i < n1-1) buf.append(",");
 				}
-				buf.append(getJSON(ctx.horzcat()));
-				buf.append(",\n");
-				buf.append(getJSON(ctx.primaryExpression()));
-				if (!(ctx.parent instanceof EMParser.HorzcatContext)){
-					buf.append("]");
+				
+				
+			}
+			else {
+				
+				for (int i=0;i < n2; i++) {
+					EMParser.PrimaryExpressionContext vctx = ctx.primaryExpression(i);
+					buf.append(getJSON(vctx));
+					if(i < n2-1) buf.append(",");
 				}
-				setJSON(ctx, buf.toString());
 			}
-			else{
-				setJSON(ctx, getJSON(ctx.primaryExpression()));
-			}
+			
+			buf.append("]");
+			setJSON(ctx, buf.toString());
+//			if (ctx.horzcat() != null){
+//				if (!(ctx.parent instanceof EMParser.HorzcatContext)){
+//					buf.append("[");
+//				}
+//				buf.append(getJSON(ctx.horzcat()));
+//				buf.append(",\n");
+//				if (ctx.primaryExpression() != null)
+//					buf.append(getJSON(ctx.primaryExpression()));
+//				else
+//					buf.append(getJSON(ctx.notAssignment()));
+//				if (!(ctx.parent instanceof EMParser.HorzcatContext)){
+//					buf.append("]");
+//				}
+//				setJSON(ctx, buf.toString());
+//			}
+//			else{
+//				setJSON(ctx, getJSON(ctx.primaryExpression()));
+//			}
 			
 		}
 

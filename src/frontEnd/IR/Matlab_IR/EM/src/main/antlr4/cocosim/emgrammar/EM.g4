@@ -317,7 +317,7 @@ Float
 	;
 
 String
-	: '\'' ( ESC_SEQ | ~('\\'|'\'') )* '\''
+	: '\'' ( ESC_SEQ | '\'\'' | ~('\\'|'\'' | '\n' | '\r') )* '\''
 //	: '\'' ( ESC_SEQ | ~('\\'|'%'|'\'') )* '\''
 	;
 
@@ -355,8 +355,8 @@ cell	: LBRACE horzcat? ( nlos horzcat )* RBRACE ;
 // we do not support binary expression with not parentheses.
 //e.g, [x-y] Vs [x -y], the first has one element "(x-y)", the second has two elements "x" and "-y".
 horzcat	
-	:	 primaryExpression 
-	| horzcat COMMA?  primaryExpression 
+	: primaryExpression ( primaryExpression)*
+	| notAssignment ( COMMA notAssignment)* 
 	;
 	
 	//{_input.LT(-1).getType() == WS || _input.LT(-1).getType() == COMMA}?
