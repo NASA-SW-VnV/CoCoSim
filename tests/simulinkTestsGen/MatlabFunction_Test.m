@@ -137,34 +137,17 @@ classdef MatlabFunction_Test < Block_Test
         end
         
         function params2 = getParams(obj)
-            do_1_input = false;
+            do_1_input = true;
             if do_1_input
-            params1 = obj.getPermutations();
-            params2 = cell(1, length(params1));
+                params1 = obj.get_1_input_Permutations();
+                params2 = cell(1, length(params1));
+            end
             for p1 = 1 : length(params1)
                 s = params1{p1};                
                 params2{p1} = s;
             end
         end
         
-        function params = getPermutations(obj)
-            params = {};
-%             inpIsIntCount = 0;
-            
-            for pInType = 1 : numel(obj.inputDataType)
-                for pInDim = 1:numel(obj.inputDimension)
-                    for pFunc = 1:numel(obj.oneInputFcn)
-                        s = struct();
-                        s.inpFcnIndex = pFunc;
-                        s.numInputs = 1;
-                        s.inputDataType = obj.inputDataType{pInType};
-                        s.inputDimension = obj.inputDimension{pInDim};
-                        params{end+1} = s;
-                    end
-                end
-            end
-            
-        end
         function params = get_1_input_Permutations(obj)
             params = {};
        
@@ -173,7 +156,7 @@ classdef MatlabFunction_Test < Block_Test
                     for pFunc = 1:numel(obj.oneInputFcn)
                         s = struct();
                         s.inpFcnIndex = pFunc;
-                        s.numInputs = 2;
+                        s.numInputs = 1;
                         s.inputDataType = obj.inputDataType{pInType};
                         s.inputDimension = obj.inputDimension{pInDim};
                         params{end+1} = s;
@@ -189,6 +172,7 @@ classdef MatlabFunction_Test < Block_Test
                 for pInDim = 1:numel(obj.inputDimension)
                     for pFunc = 1:numel(obj.twoInputsFcn)
                         s = struct();
+                        s.numInputs = 2;
                         s.inpFcnIndex = pFunc;
                         s.inputDataType = obj.inputDataType{pInType};
                         s.inputDimension = obj.inputDimension{pInDim};
@@ -196,7 +180,6 @@ classdef MatlabFunction_Test < Block_Test
                     end
                 end
             end
-            
         end        
     end
 end
