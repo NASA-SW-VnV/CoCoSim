@@ -8,7 +8,7 @@ function [code, exp_dt, dim] = constant_To_Lustre(tree, args)
     
     v = tree.value;
     exp_dt = args.expected_lusDT;
-    dim = 1;
+    dim = [1 1];
     if strcmp(args.expected_lusDT, 'real')
         code{1} = nasa_toLustre.lustreAst.RealExpr(str2double(v));
     elseif strcmp(args.expected_lusDT, 'bool')

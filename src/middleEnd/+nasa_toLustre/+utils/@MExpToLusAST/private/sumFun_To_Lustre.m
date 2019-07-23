@@ -57,5 +57,5 @@ function [code, exp_dt, dim] = sumFun_To_Lustre(tree, args)
         throw(ME);
     end
     
-    exp_dt = x_dt;
+    exp_dt = x_dt{1};
     
