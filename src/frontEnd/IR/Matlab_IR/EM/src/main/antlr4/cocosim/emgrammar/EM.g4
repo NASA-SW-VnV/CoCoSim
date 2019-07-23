@@ -1,23 +1,32 @@
 grammar EM;
 
-//@members{
-//	int whitespace_cnt = 0;
-//}
+@members{
+	int whitespace_cnt = 0;
+}
 
+
+nlosoc	: ( NL |SEMI | COMMA)+;
+nloc	: ( NL |COMMA )+; 
+nlos	: ( NL | SEMI )+; 
+soc     : ( SEMI | COMMA );
 
 
 emfile 	
-	: '\n'* function+ 
+	: function+ 
 	| script  
 	;
 
 script
-	: script_body
+	: 
+	nlosoc?
+	script_body
+	nlosoc?
     ;
 function
-	: FUNCTION func_output? ID func_input? NL+
-	  body
+	: NL* FUNCTION func_output? ID func_input? nloc
+	  body?
 	  END?
+	  nlosoc?
 	;
 
 func_input
@@ -30,27 +39,23 @@ func_output
 	;
 
 script_body
-	:   script_body_item 
-    |   script_body  script_body_item 
+	:   statement (nlosoc | EOF)
+    |   script_body  statement (nlosoc | EOF)
     ;
 body
-    :   body_item 
-    |   body  body_item 
+    :   body_item (nlosoc | EOF)
+    |   body  body_item  (nlosoc | EOF)
     ;
 
-exp_sep :  (NL|','|';')+;
-script_body_item
-	:  exp_sep
-    | statement 			
-    ;
+//exp_sep :  (NL|','|';')+;
+
 body_item
-    :  exp_sep
-    | statement 			
+    :   statement 			
     |  function 
     ;
 
 statement
-    : expression exp_sep
+    : expression
     | if_block
     | switch_block
 	| for_block
@@ -79,8 +84,7 @@ assignment
     ;
 
 notAssignment
-    : 
-    notAssignment '.^' notAssignment						#  power
+    : notAssignment '.^' notAssignment						#  power
     | notAssignment '^' notAssignment						#  mpower
     | unaryOperator primaryExpression 						# unaryExpression
     | notAssignment '.*' notAssignment						#  times
@@ -282,10 +286,6 @@ clear_exp
 	;
 
 
-nlosoc	: ( NL |SEMI | COMMA)+;
-nloc	: ( NL |COMMA )+; 
-nlos	: ( NL | SEMI )+; 
-soc     : ( SEMI | COMMA );
 
 
 // *****************************************************************************************   Others       ***********************************************	
@@ -306,10 +306,10 @@ THREEDOTS
 POW	: '^';
 COMMA	: ',';
 SEMI	: ';';
-//NL   : [\r\n] +;
-NL	: ('\r'? '\n')+  ;//-> skip;
+NL   : ('\r' '\n' | '\n' | '\r')+;
+//NL	: ('\r'? '\n')+  ;//-> skip;
 //WS : [ \t\r]+;
-WS  : [ \t]+ -> skip; //{whitespace_cnt == 0}? -> skip;
+WS  : [ \t\r]+ -> skip; //{whitespace_cnt == 0}? -> skip;
 
 // language keywords
 BREAK	: 'break';

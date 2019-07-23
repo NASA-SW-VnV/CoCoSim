@@ -145,11 +145,11 @@ public class EM2JSON {
 				StringBuilder buf = new StringBuilder();
 				buf.append(getJSON(ctx.script_body()));
 				buf.append(",\n");
-				buf.append(getJSON(ctx.script_body_item()));
+				buf.append(getJSON(ctx.statement()));
 				setJSON(ctx, buf.toString());
 			}
 			else
-				setJSON(ctx,getJSON(ctx.script_body_item()));
+				setJSON(ctx,getJSON(ctx.statement()));
 		}
 		
 		@Override public void exitBody(EMParser.BodyContext ctx) {
@@ -164,11 +164,7 @@ public class EM2JSON {
 				setJSON(ctx,getJSON(ctx.body_item()));
 		}
 
-		
-		@Override public void exitScript_body_item(EMParser.Script_body_itemContext ctx) { 
-			setJSON(ctx,getJSON(ctx.getChild(0)));
-		}
-		
+
 		@Override public void exitBody_item(EMParser.Body_itemContext ctx) { 
 			setJSON(ctx,getJSON(ctx.getChild(0)));
 
