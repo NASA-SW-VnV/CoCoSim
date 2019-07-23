@@ -101,7 +101,7 @@ notAssignment
     | notAssignment '||' notAssignment						#  relopOR
     | notAssignment ('=='|'~=') notAssignment				#  relopEQ_NE
     | notAssignment ('<'|'>'|'<='|'>=') notAssignment		#  relopGL
-    |primaryExpression TRANSPOSE						#  postfixExpression
+    | primaryExpression ( '\'' | '.\'')						#  postfixExpression
     | primaryExpression					   					# notAssignment_primaryExpression
     ;
     
@@ -150,10 +150,10 @@ ignore_value : '~';
 constant
     :   Integer
     |   Float
-    |   String
+    |   string
     |   function_handle
     ;
-String
+string
 	: '\'' ~('\'')* '\''  
 	//  '\'' ( ESC_SEQ | '\'\'' | ~('\\'|'\'' | '\n' | '\r') )* '\''
 	;
@@ -172,7 +172,7 @@ Float
 	| ('0'..'9')+ EXPONENT
 	;
 
-TRANSPOSE : ( '\'' | '.\'');
+//TRANSPOSE : ( '\'' | '.\'');
 
 fragment
 EXPONENT

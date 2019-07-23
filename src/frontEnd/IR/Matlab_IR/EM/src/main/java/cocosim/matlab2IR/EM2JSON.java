@@ -374,7 +374,7 @@ public class EM2JSON {
 				t = "Float";
 //			else if (ctx.end() != null)
 //				t = "end";
-			else if (ctx.String() != null)
+			else if (ctx.string() != null)
 				t = "String";
 			return t;
 		}
