@@ -101,7 +101,7 @@ notAssignment
     | notAssignment '||' notAssignment						#  relopOR
     | notAssignment ('=='|'~=') notAssignment				#  relopEQ_NE
     | notAssignment ('<'|'>'|'<='|'>=') notAssignment		#  relopGL
-    |primaryExpression ( '\'' | '.\'')						#  postfixExpression
+    |primaryExpression TRANSPOSE						#  postfixExpression
     | primaryExpression					   					# notAssignment_primaryExpression
     ;
     
@@ -150,11 +150,12 @@ ignore_value : '~';
 constant
     :   Integer
     |   Float
-    |   string
+    |   String
     |   function_handle
     ;
-string
-	: '\'' ( ESC_SEQ | '\'\'' | ~('\\'|'\'' | '\n' | '\r') )* '\''
+String
+	: '\'' ~('\'')* '\''  
+	//  '\'' ( ESC_SEQ | '\'\'' | ~('\\'|'\'' | '\n' | '\r') )* '\''
 	;
 	
 function_handle
@@ -171,12 +172,13 @@ Float
 	| ('0'..'9')+ EXPONENT
 	;
 
-
+TRANSPOSE : ( '\'' | '.\'');
 
 fragment
 EXPONENT
 	: ('e'|'E') ('+'|'-')? ('0'..'9')+ ;
 
+/*
 fragment
 ESC_SEQ
 	: '\\' ('b'|'t'|'n'|'f'|'r'|'\"'|'\''|'\\')
@@ -198,7 +200,7 @@ UNICODE_ESC
 fragment
 HEX_DIGIT
 	: ('0'..'9'|'a'..'f'|'A'..'F') ;
-
+*/
 
 //**************************************************************
 cell	: LBRACE horzcat? ( nlos horzcat )* RBRACE ;
@@ -334,6 +336,7 @@ CLEAR	: 'clear';
 
 
 COLON	: ':';
+
 EQ	: '=';
 ID	: ('a'..'z'|'A'..'Z') ('a'..'z'|'A'..'Z'|'0'..'9'|'_')* ;
 
