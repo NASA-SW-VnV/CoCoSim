@@ -145,11 +145,11 @@ public class EM2JSON {
 				StringBuilder buf = new StringBuilder();
 				buf.append(getJSON(ctx.script_body()));
 				buf.append(",\n");
-				buf.append(getJSON(ctx.script_body_item()));
+				buf.append(getJSON(ctx.statement()));
 				setJSON(ctx, buf.toString());
 			}
 			else
-				setJSON(ctx,getJSON(ctx.script_body_item()));
+				setJSON(ctx,getJSON(ctx.statement()));
 		}
 		
 		@Override public void exitBody(EMParser.BodyContext ctx) {
@@ -164,52 +164,13 @@ public class EM2JSON {
 				setJSON(ctx,getJSON(ctx.body_item()));
 		}
 
-		
-		@Override public void exitScript_body_item(EMParser.Script_body_itemContext ctx) { 
-			setJSON(ctx,getJSON(ctx.getChild(0)));
-		}
-		
+
 		@Override public void exitBody_item(EMParser.Body_itemContext ctx) { 
 			setJSON(ctx,getJSON(ctx.getChild(0)));
 
 		}
 
-		@Override public void exitAnnotation(EMParser.AnnotationContext ctx) { 
-			setJSON(ctx,getJSON(ctx.getChild(0)));
-		}
-		@Override public void exitDeclare_type(EMParser.Declare_typeContext ctx) { 
-			if (ctx.DeclareType() != null){
-				StringBuilder buf = new StringBuilder();
-				buf.append("{");
-				buf.append("\n");
-				buf.append(Quotes("type")+":"+Quotes("declare_typeAnnotation"));
-				buf.append(",\n");
-				buf.append(Quotes("variable")+":"+Quotes(ctx.ID().getText()));
-				buf.append(",\n");
-				buf.append(Quotes("datatype")+":"+getJSON(ctx.dataType()));
-
-				buf.append("\n}");
-				setJSON(ctx, buf.toString());
-			}
-		}
-		@Override public void exitDataType(EMParser.DataTypeContext ctx) { 
-			StringBuilder buf = new StringBuilder();
-			buf.append("{");
-			buf.append("\n");
-			buf.append(Quotes("baseType")+":"+Quotes(ctx.BASETYPE().getText()));
-			buf.append(",\n");
-			buf.append(Quotes("dimensions")+":");
-			buf.append("[");
-			for (int i=0;i < ctx.dimension().size(); i++) {
-				EMParser.DimensionContext dim = ctx.dimension(i);
-				buf.append(Quotes(dim.getText()));
-				if(i < ctx.dimension().size()-1) buf.append(",");
-			}
-			buf.append("]");
-		}
-		@Override public void exitDimension(EMParser.DimensionContext ctx) { 
-			setJSON(ctx,getJSON(ctx.getChild(0)));
-		}
+		
 		@Override public void exitStatement(EMParser.StatementContext ctx) {
 			setJSON(ctx,getJSON(ctx.getChild(0)));
 		}
@@ -230,7 +191,7 @@ public class EM2JSON {
 			buf.append("\n");
 			buf.append(Quotes("type")+":"+Quotes("assignment"));
 			buf.append(",\n");
-			buf.append(Quotes("operator")+":"+Quotes(ctx.assignmentOperator().getText()));
+			buf.append(Quotes("operator")+":"+Quotes("="));
 			buf.append(",\n");
 			buf.append(Quotes("leftExp")+":"+getJSON(ctx.primaryExpression()));
 			buf.append(",\n");
@@ -242,99 +203,73 @@ public class EM2JSON {
 
 
 		}
-
-		@Override public void exitNotAssignment(EMParser.NotAssignmentContext ctx) {
-			setJSON(ctx,getJSON(ctx.colonExpression()));
+//
+		@Override public void exitNotAssignment_primaryExpression(EMParser.NotAssignment_primaryExpressionContext ctx) {
+			setJSON(ctx,getJSON(ctx.primaryExpression()));
 		}
-		
+//		
 		@Override public void exitColonExpression(EMParser.ColonExpressionContext ctx) {
-			if (ctx.colonExpression() == null){
-				setJSON(ctx,getJSON(ctx.relopOR()));
-			}
-			else{
-				StringBuilder buf = new StringBuilder();
-				buf.append("{");
-				buf.append("\n");
-				buf.append(Quotes("type")+":"+Quotes("colonExpression"));
-				buf.append(",\n");
-				if (ctx.END() != null){
-					buf.append(Quotes("operator")+":"+Quotes(":end"));
-					buf.append(",\n");
-				}
-				else{
-					buf.append(Quotes("operator")+":"+Quotes(":"));
-					buf.append(",\n");
-				}
-				buf.append(Quotes("leftExp")+":"+getJSON(ctx.colonExpression()));
-				buf.append(",\n");
-				if (ctx.relopOR() != null){
-					buf.append(Quotes("rightExp")+":"+getJSON(ctx.relopOR()));
-					buf.append(",\n");
-				}
-				buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
-				buf.append("\n}");
-				setJSON(ctx, buf.toString());
-			}
+			binaryExpression( ctx,  "colonExpression");
 		}
-
+//
 		@Override public void exitRelopOR(EMParser.RelopORContext ctx) { 
-			callExpression( ctx,  "relopOR",  "relopAND");
+			binaryExpression( ctx,  "relopOR");
 		}
 
 		@Override public void exitRelopAND(EMParser.RelopANDContext ctx) { 
-			callExpression( ctx,  "relopAND",  "relopelOR");
+			binaryExpression( ctx,  "relopAND");
 		}
 
 		@Override public void exitRelopelOR(EMParser.RelopelORContext ctx) { 
-			callExpression( ctx,  "relopelOR",  "relopelAND");
+			binaryExpression( ctx,  "relopelOR");
 		}
 
 		@Override public void exitRelopelAND(EMParser.RelopelANDContext ctx) {
-			callExpression( ctx,  "relopelAND",  "relopEQ_NE");
+			binaryExpression( ctx,  "relopelAND");
 		}
 
 		@Override public void exitRelopEQ_NE(EMParser.RelopEQ_NEContext ctx) {
-			callExpression( ctx,  "relopEQ_NE",  "relopGL");
+			binaryExpression( ctx,  "relopEQ_NE");
 		}
 
 		@Override public void exitRelopGL(EMParser.RelopGLContext ctx) {
-			callExpression( ctx,  "relopGL",  "plus_minus");
+			binaryExpression( ctx,  "relopGL");
 		}
 
 		@Override public void exitPlus_minus(EMParser.Plus_minusContext ctx) {
-			callExpression( ctx,  "plus_minus",  "mtimes");
+			binaryExpression( ctx,  "plus_minus");
 		}
 
 		@Override public void exitMtimes(EMParser.MtimesContext ctx) {
-			callExpression( ctx,  "mtimes",  "mrdivide");
+			binaryExpression( ctx,  "mtimes");
 		}
 
 		@Override public void exitMrdivide(EMParser.MrdivideContext ctx) {
-			callExpression( ctx,  "mrdivide",  "mldivide");
+			binaryExpression( ctx,  "mrdivide");
 		}
 
 		@Override public void exitMldivide(EMParser.MldivideContext ctx) {
-			callExpression( ctx,  "mldivide",  "mpower");
+			binaryExpression( ctx,  "mldivide");
 		}
 
 		@Override public void exitMpower(EMParser.MpowerContext ctx) { 
-			callExpression( ctx,  "mpower",  "times");
+			binaryExpression( ctx,  "mpower");
 		}
 
 		@Override public void exitTimes(EMParser.TimesContext ctx) {
-			callExpression( ctx,  "times",  "rdivide");
+			binaryExpression( ctx,  "times");
 		}
 
 		@Override public void exitRdivide(EMParser.RdivideContext ctx) {
-			callExpression( ctx,  "rdivide",  "ldivide");
+			binaryExpression( ctx,  "rdivide");
 		}
 
 		@Override public void exitLdivide(EMParser.LdivideContext ctx) { 
-			callExpression( ctx,  "ldivide",  "power");
+			binaryExpression( ctx,  "ldivide");
 		}
 
 		@Override public void exitPower(EMParser.PowerContext ctx) { 
-			callExpression( ctx,  "power",  "postfixExpression");
+			binaryExpression( ctx,  "power");
 		}
 
 		
@@ -358,43 +293,40 @@ public class EM2JSON {
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
 		}
-
+//
 		@Override public void exitPostfixExpression(EMParser.PostfixExpressionContext ctx) { 
-			if (ctx.primaryExpression() != null)
-				setJSON(ctx, getJSON(ctx.primaryExpression()));
-			else if (ctx.TRANSPOSE() != null){
+
 				StringBuilder buf = new StringBuilder();
 				buf.append("{");
 				buf.append("\n");
 				buf.append(Quotes("type")+":"+Quotes("transpose"));
 				buf.append(",\n");
 
-				String operator = ctx.TRANSPOSE().getText();
+				String operator = ctx.getChild(1).getText();
 				buf.append(Quotes("operator")+":"+Quotes(operator));
 				
 				buf.append(",\n");
-				buf.append(Quotes("leftExp")+":"+getJSON(ctx.postfixExpression()));
+				buf.append(Quotes("leftExp")+":"+getJSON(ctx.primaryExpression()));
 				
 				buf.append(",\n");
 				buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
 				buf.append("\n}");
 
 				setJSON(ctx, buf.toString());
-			}
 
 		}
-
+//
 		@Override public void exitPrimaryExpression(EMParser.PrimaryExpressionContext ctx) { 
 			setJSON(ctx, getJSON(ctx.getChild(0)));
 		}
-
+//
 		@Override public void exitParenthesedExpression(EMParser.ParenthesedExpressionContext ctx){
 			StringBuilder buf = new StringBuilder();
 			buf.append("{");
 			buf.append("\n");
 			buf.append(Quotes("type")+":"+Quotes("parenthesedExpression"));
 			buf.append(",\n");
-			buf.append(Quotes("expression")+":"+getJSON(ctx.expression()));
+			buf.append(Quotes("expression")+":"+getJSON(ctx.notAssignment()));
 			buf.append(",\n");
 			buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
 			buf.append("\n}");
@@ -440,7 +372,9 @@ public class EM2JSON {
 				t = "Integer";
 			else if (ctx.Float() != null)
 				t = "Float";
-			else if (ctx.String() != null)
+//			else if (ctx.end() != null)
+//				t = "end";
+			else if (ctx.string() != null)
 				t = "String";
 			return t;
 		}
@@ -677,7 +611,7 @@ public class EM2JSON {
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
 		}
-
+//
 		@Override public void exitIf_block(EMParser.If_blockContext ctx) { 
 			StringBuilder buf = new StringBuilder();
 			buf.append("{");
@@ -707,7 +641,7 @@ public class EM2JSON {
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
 		}
-
+//
 		@Override public void exitElseif_block(EMParser.Elseif_blockContext ctx) {
 			StringBuilder buf = new StringBuilder();
 			buf.append("{");
@@ -974,7 +908,7 @@ public class EM2JSON {
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
 		}
-
+//
 		@Override public void exitNlosoc(EMParser.NlosocContext ctx) { 
 			nlosoc(ctx, "nlosoc");
 		}
@@ -991,56 +925,77 @@ public class EM2JSON {
 		@Override public void visitTerminal(TerminalNode node) { 
 			setJSON(node, Quotes(node.getText()));
 		}
+//
+//
+		public void binaryExpression(ParserRuleContext ctx, String methodName1){
+			StringBuilder buf = new StringBuilder();
+			buf.append("{");
+			buf.append("\n");
+			buf.append(Quotes("type")+":"+Quotes(methodName1));
+			buf.append(",\n");
 
-
-		public void callExpression(ParserRuleContext ctx, String methodName1, String methodName2){
-			java.lang.reflect.Method method1;
-			java.lang.reflect.Method method2;
-			try {
-				method1 = ctx.getClass().getMethod(methodName1);
-				method2 = ctx.getClass().getMethod(methodName2);
-				if (method1.invoke(ctx) != null){
-					StringBuilder buf = new StringBuilder();
-					buf.append("{");
-					buf.append("\n");
-					buf.append(Quotes("type")+":"+Quotes(methodName1));
-					buf.append(",\n");
-
-					String operator = null;
-					operator = ctx.getChild(1).getText();
-					buf.append(Quotes("operator")+":"+Quotes(operator));
-					buf.append(",\n");
-					buf.append(Quotes("leftExp")+":"+getJSON((ParseTree) method1.invoke(ctx)));
-					buf.append(",\n");
-					buf.append(Quotes("rightExp")+":"+getJSON((ParseTree) method2.invoke(ctx)));
-					
-					buf.append(",\n");
-					buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
-					
-					buf.append("\n}");
-					setJSON(ctx, buf.toString());
-				}else
-					setJSON(ctx, getJSON((ParseTree) method2.invoke(ctx)));
-
-			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			catch ( IllegalArgumentException  e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			catch ( InvocationTargetException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}catch (SecurityException e) { 
-				e.printStackTrace();
-			}
-			catch (NoSuchMethodException e) {
-				e.printStackTrace();
-			}
+			String operator = null;
+			operator = ctx.getChild(1).getText();
+			buf.append(Quotes("operator")+":"+Quotes(operator));
+			buf.append(",\n");
+			buf.append(Quotes("leftExp")+":"+getJSON(ctx.getChild(0)));
+			buf.append(",\n");
+			buf.append(Quotes("rightExp")+":"+getJSON(ctx.getChild(2)));
+			
+			buf.append(",\n");
+			buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
+			
+			buf.append("\n}");
+			setJSON(ctx, buf.toString());
 		}
-
+//		public void callExpression(ParserRuleContext ctx, String methodName1, String methodName2){
+//			java.lang.reflect.Method method1;
+//			java.lang.reflect.Method method2;
+//			try {
+//				method1 = ctx.getClass().getMethod(methodName1);
+//				method2 = ctx.getClass().getMethod(methodName2);
+//				if (method1.invoke(ctx) != null){
+//					StringBuilder buf = new StringBuilder();
+//					buf.append("{");
+//					buf.append("\n");
+//					buf.append(Quotes("type")+":"+Quotes(methodName1));
+//					buf.append(",\n");
+//
+//					String operator = null;
+//					operator = ctx.getChild(1).getText();
+//					buf.append(Quotes("operator")+":"+Quotes(operator));
+//					buf.append(",\n");
+//					buf.append(Quotes("leftExp")+":"+getJSON((ParseTree) method1.invoke(ctx)));
+//					buf.append(",\n");
+//					buf.append(Quotes("rightExp")+":"+getJSON((ParseTree) method2.invoke(ctx)));
+//					
+//					buf.append(",\n");
+//					buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
+//					
+//					buf.append("\n}");
+//					setJSON(ctx, buf.toString());
+//				}else
+//					setJSON(ctx, getJSON((ParseTree) method2.invoke(ctx)));
+//
+//			} catch (IllegalAccessException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//			catch ( IllegalArgumentException  e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//			catch ( InvocationTargetException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}catch (SecurityException e) { 
+//				e.printStackTrace();
+//			}
+//			catch (NoSuchMethodException e) {
+//				e.printStackTrace();
+//			}
+//		}
+//
 		public void nlosoc(ParserRuleContext ctx, String type) { 
 			StringBuilder buf = new StringBuilder();
 			buf.append("{");
@@ -1059,7 +1014,7 @@ public class EM2JSON {
 			if ( s==null || s.charAt(0)=='"' ) return s;
 			return '"'+s+'"';
 		}
-
+//
 	}
 
 	// Main Functions
