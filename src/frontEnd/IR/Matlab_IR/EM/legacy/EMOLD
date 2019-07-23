@@ -1,0 +1,182 @@
+
+annotation
+    : declare_type  
+    ;
+    
+declare_type
+    : ANNOT DeclareType ID COLON dataType nlos
+    ;
+
+DeclareType: 'DeclareType'
+	;
+dataType : BASETYPE (POW dimension)*
+	;
+
+dimension :ID | Integer
+	;
+
+BASETYPE
+    : 'int' //| 'int8' | 'uint8' |'int16' | 'uint16' |'int32' | 'uint32'
+    | 'real' //| 'single' | 'double'
+    | 'bool' //| 'boolean'
+    ;
+/*
+contract :  CONTRACT  contract_item+ '%}'
+	;
+ 
+contract_item
+	: CONST ID (COLON dataType)? EQ coco_expression SEMI 	#CONTRACT_CONST
+    | VAR ID COLON dataType EQ coco_expression SEMI			#CONTRACT_VAR
+    | ASSUME coco_expression SEMI							#CONTRACT_ASSUME
+    | GUARANTEE coco_expression SEMI						#CONTRACT_GUARANTEE 
+    | coco_mode												#CONTRACT_MODE
+    | NL+													#CONTRACT_NL
+  	;
+coco_mode: MODE ID LPAREN require* ensure* RPAREN SEMI?
+	;
+require:
+	 REQUIRE coco_expression nlos
+    ;
+ensure: ENSURE coco_expression nlos
+	;  
+
+	
+coco_expression 
+	: expression
+	| NOT coco_expression
+	| PRE coco_expression
+	| coco_expression INIT coco_expression
+	| coco_expression IMPLIES coco_expression
+	| LPAREN nlosoc? coco_expression nlosoc? RPAREN
+	| coco_expression LUS_NEQ coco_expression
+	| coco_expression LUS_AND_OR coco_expression
+	;
+
+	
+CONTRACT : '%{@contract';
+CONST : 'const';
+VAR : 'var';
+ASSUME : 'assume';
+GUARANTEE : 'guarantee';
+MODE : 'mode';
+REQUIRE : 'require';
+ENSURE : 'ensure';
+NOT : 'not';
+PRE : 'pre';
+INIT : '->';
+IMPLIES : '=>';
+LUS_NEQ : '<>';
+LUS_AND_OR : 'and'|'or';
+*/
+
+
+
+
+
+binaryExpression
+    :  notAssignment COLON  notAssignment   # colonExpression
+    |  notAssignment '||' notAssignment		#  relopOR
+    ;
+
+colonExpression
+    :   relopOR
+    |   colonExpression ':' relopOR
+    |   colonExpression ':' END relopOR?
+    ;
+
+relopOR
+    :   relopAND
+    |   relopOR '||' relopAND
+    ;
+
+relopAND
+    :   relopelOR
+    |   relopAND '&&' relopelOR
+    ;
+
+relopelOR
+    :   relopelAND
+    |   relopelOR '|' relopelAND
+    ;
+
+relopelAND
+    :   relopEQ_NE
+    |   relopelAND '&' relopEQ_NE
+    ;
+
+relopEQ_NE
+    :   relopGL
+    |   relopEQ_NE '==' relopGL
+    |   relopEQ_NE '~=' relopGL
+    ;
+    
+    
+relopGL
+    :   plus_minus
+    |   relopGL '<' plus_minus
+    |   relopGL '>' plus_minus
+    |   relopGL '<=' plus_minus
+    |   relopGL '>=' plus_minus
+    ;
+
+plus_minus
+    :   mtimes
+    |   plus_minus '+' mtimes
+    |   plus_minus '-' mtimes
+    ;
+
+mtimes
+    :   mrdivide
+    |   mtimes '*' mrdivide
+    ;
+
+mrdivide
+    :   mldivide
+    |   mrdivide '/' mldivide
+    ;
+
+mldivide
+    :   mpower
+    |   mldivide '\\' mpower
+    ;
+
+mpower
+    :   times
+    |   mpower '^' times
+    ;
+
+times
+    :   rdivide
+    |   times '.*' rdivide
+    ;
+
+rdivide
+    :   ldivide
+    |   rdivide './' ldivide
+    ;
+
+ldivide
+    :   power
+    |   ldivide '.\\' power
+    ;
+
+power
+    :   postfixExpression
+    |   power '.^' postfixExpression
+    ;
+    
+    
+postfixExpression
+    :   primaryExpression
+    |   postfixExpression TRANSPOSE
+    ;
+TRANSPOSE :   ( '\'' | '.\'')
+    ;
+    
+    
+    
+    
+
+unaryExpression
+    :    unaryOperator primaryExpression
+    ;    

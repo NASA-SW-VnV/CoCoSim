@@ -2,7 +2,8 @@ function [new_model_path, status] = importLustreSpec(...
         current_openedSS,...
         lus_json_path,...
         fret_trace_file, ...
-        createNewFile)
+        createNewFile, ...
+        organize_blocks)
     %new_model_path = importLustreSpec(model_path, contract_path)
     % Inputs:
     % model_path : the path of Simulink model
@@ -31,6 +32,9 @@ function [new_model_path, status] = importLustreSpec(...
     end
     if nargin < 4
         createNewFile = 0;
+    end
+    if ~exist('organize_blocks', 'var') || isempty(organize_blocks)
+        organize_blocks = false;
     end
     try
         if bdIsLoaded(base_name)
@@ -73,7 +77,7 @@ function [new_model_path, status] = importLustreSpec(...
         nb_coco = 0;
         
         
-        [status, translated_nodes_path, ~]  = lus2slx(lus_json_path, coco_dir, [], [], 1);
+        [status, translated_nodes_path, ~]  = lus2slx(lus_json_path, coco_dir, [], [], organize_blocks);
         if status
             return;
         end
@@ -96,7 +100,8 @@ function [new_model_path, status] = importLustreSpec(...
                     && isfield(mapping_json.(original_name), 'model_path')
                 simulink_block_name = mapping_json.(original_name).model_path;
                 simulink_block_name = renamePath(simulink_block_name, base_name, new_model_name);
-                if getSimulinkBlockHandle(simulink_block_name) == -1
+                isBdRoot = strcmp(get_param(simulink_block_name, 'Type'), 'block_diagram');
+                if ~isBdRoot && getSimulinkBlockHandle(simulink_block_name) == -1
                     % model_path in traceability file does not exist.
                     simulink_block_name = renamePath(current_openedSS, base_name, new_model_name);
                     skip_linking = true;
