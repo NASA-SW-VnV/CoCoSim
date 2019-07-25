@@ -111,7 +111,8 @@ classdef MExpToLusAST
     methods(Static)
         % Utils
         
-        function [left, right] = inlineOperands(left, right, tree)
+        function [left, right, failed] = inlineOperands(left, right, tree)
+            failed = false;
             if isempty(left) && isempty(right)
                 return;
             end
@@ -122,6 +123,7 @@ classdef MExpToLusAST
                 left = arrayfun(@(x) left{1}, ...
                     (1:numel(right)), 'UniformOutput', false);
             elseif numel(left) ~= numel(right)
+                failed = true;
                 if nargin < 3 || isempty(tree)
                     return;
                 end
