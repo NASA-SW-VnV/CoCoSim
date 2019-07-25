@@ -17,7 +17,7 @@ function [code, exp_dt, dim] = numFun_To_Lustre(tree, args, num)
         throw(ME);
     end
     
-    if length(tree.parameters) == 1 && prod(x_dim) == 1
+    if length(tree.parameters) == 1 || prod(x_dim) == 1
         dim = [x{1}.value x{1}.value];
     elseif length(x_dim) > 1
         dim = arrayfun(@(i) x{i}.value, (1:prod(x_dim)));
