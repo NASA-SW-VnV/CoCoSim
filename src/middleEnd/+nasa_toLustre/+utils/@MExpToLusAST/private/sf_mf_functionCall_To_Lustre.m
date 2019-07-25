@@ -5,7 +5,7 @@ function code = sf_mf_functionCall_To_Lustre(tree, args)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        
+    % G    
     
     global SF_MF_FUNCTIONS_MAP ;
     
@@ -24,6 +24,7 @@ function code = sf_mf_functionCall_To_Lustre(tree, args)
         params_ast = {};
         dt_idx = 1;
         for i=1:numel(parameters)
+            args.expected_lusDT = params_dt{dt_idx};
             [f_args, dt] = ...
                 nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
                 parameters{i}, args);

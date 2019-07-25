@@ -5,8 +5,8 @@ function [outputs, inputs] = getInOutputsFromAction(lus_action, isCondition, dat
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-        outputs = {};
+    
+    outputs = {};
     inputs = {};
     
     if numel(lus_action) == 1 && isa(lus_action{1}, 'nasa_toLustre.lustreAst.ConcurrentAssignments')
@@ -17,7 +17,8 @@ function [outputs, inputs] = getInOutputsFromAction(lus_action, isCondition, dat
     for act_idx=1:numel(assignments)
         if ~isCondition
             if isa(assignments{act_idx}, 'nasa_toLustre.lustreAst.ConcurrentAssignments')
-                [outputs_i, inputs_i] = nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getInOutputsFromAction(assignments(act_idx));
+                [outputs_i, inputs_i] = nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getInOutputsFromAction(...
+                    assignments(act_idx), isCondition, data_map, expression);
                 outputs = MatlabUtils.concat(outputs, outputs_i);
                 inputs = MatlabUtils.concat(inputs, inputs_i);
                 continue;

@@ -42,8 +42,8 @@ function [fun_data_map, failed] = getFuncsDataMap(blk, script, ...
             MsgType.DEBUG, 'getFuncsDataMap', '');
         
         if MatlabUtils.startsWith(me.identifier, 'MATLAB:') ...
-            && length(me.stack) >= 1 && isfield(me.stack(1), 'file') ...
-            && strcmp(me.stack(1).file, func_path)
+                && length(me.stack) >= 1 && isfield(me.stack(1), 'file') ...
+                && strcmp(me.stack(1).file, func_path)
             filetext = fileread(me.stack(1).file);
             filecell = regexp(filetext, '\n', 'split');
             if length(filecell) >= me.stack(1).line
@@ -126,18 +126,35 @@ function [func_path, failed] = print_script(funcsList, script)
         has_END = funcsList{i}.has_END;
         
         if has_END
-            end_codes = regexp(functions_code{i}, '(^|[\s\t\r\n]+)end', 'split');
-            end_codes = end_codes(~strcmp(end_codes, ''));
-            if length(end_codes) == 1
-                functions_code{i} = ...
-                    sprintf('function %s\nCoCoVars{%d} = whos;\nend', ...
-                    end_codes{1}, i);
+            func_code = functions_code{i};
+            I = regexp(func_code, '(^|[\s\t\r\n]+)end', 'start');
+            idx = I(end);
+            if length(func_code) >= idx+4
+                
+                new_fun_code = sprintf('function %s\nCoCoVars{%d} = whos;\nend\n%s',...
+                    func_code(1:idx), i, func_code(idx+4:end));
+            elseif length(func_code) >= idx
+                new_fun_code = sprintf('function %s\nCoCoVars{%d} = whos;\nend\n',...
+                    func_code(1:idx), i);
             else
-                body = MatlabUtils.strjoin(end_codes, '\nend\n');
-                functions_code{i} = ...
-                    sprintf('function %s\nCoCoVars{%d} = whos;\nend\n',...
-                    body, i);
+                %PAS POSSIBLE
+                new_fun_code = sprintf('function %s', func_code);
             end
+            functions_code{i} = new_fun_code;
+            
+            %OLD Method:
+            %             end_codes = regexp(functions_code{i}, '(^|[\s\t\r\n]+)end', 'split');
+            %             % end_codes = end_codes(~strcmp(end_codes, ''));
+            % %             if length(end_codes) == 1
+            % %                 functions_code{i} = ...
+            % %                     sprintf('function %s\nCoCoVars{%d} = whos;\nend', ...
+            % %                     end_codes{1}, i);
+            % %             else
+            %                 body = MatlabUtils.strjoin(end_codes, '\nend\n');
+            %                 functions_code{i} = ...
+            %                     sprintf('function %s\nCoCoVars{%d} = whos;\nend\n',...
+            %                     body, i);
+            % %             end
         else
             functions_code{i} = ...
                 sprintf('function %s\nCoCoVars{%d} = whos;\nend', ...

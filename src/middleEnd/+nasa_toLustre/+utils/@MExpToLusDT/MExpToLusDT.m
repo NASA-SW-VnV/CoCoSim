@@ -21,6 +21,7 @@ classdef MExpToLusDT
         [lusDT, slxDT] = matrix_DT(tree, args)
         [lusDT, slxDT] = parenthesedExpression_DT(tree, args)
         [lusDT, slxDT] = struct_indexing_DT(tree, args)
+        [lusDT, slxDT] = transpose_DT(tree, args)
         [lusDT, slxDT] = unaryExpression_DT(tree, args)
     end
     
@@ -45,28 +46,50 @@ classdef MExpToLusDT
             end
         end
         
-        function [code, output_dt] = convertDT(obj, code, input_dt, output_dt)
-            
-            if isempty(code) || ...
-                    isempty(input_dt) || isempty(output_dt) 
+        function [new_code, new_output_dt] = convertDT(obj, code, input_dt, output_dt)
+            new_code = code;
+            new_output_dt = output_dt;
+            if isempty(code) ...
+                    || isempty(input_dt) ...
+                    || isempty(output_dt) ...
+                    || length(code) < length(input_dt)
                 return;
             end
-            if ischar(input_dt)
-                input_dt = {input_dt};
-            end
-            if ischar(output_dt)
-                output_dt = {output_dt};
-            end
-            [code, input_dt] = nasa_toLustre.utils.MExpToLusAST.inlineOperands(code, input_dt);
-            [output_dt, input_dt] = nasa_toLustre.utils.MExpToLusAST.inlineOperands(output_dt, input_dt);
-            for i=1:numel(code)
-                if strcmp(input_dt{i}, output_dt{i})
-                    continue;
+            try
+                if ischar(input_dt)
+                    input_dt = {input_dt};
                 end
-                conv = strcat(input_dt{i}, '_to_', output_dt{i});
-                obj.addExternal_libraries(strcat('LustDTLib_', conv));
-                code{i} = nasa_toLustre.lustreAst.NodeCallExpr(conv, code(i));
+                if ischar(output_dt)
+                    output_dt = {output_dt};
+                end
+                [code, input_dt, failed] = nasa_toLustre.utils.MExpToLusAST.inlineOperands(code, input_dt);
+                if failed
+                    return;
+                end
+                [output_dt, input_dt, failed] = nasa_toLustre.utils.MExpToLusAST.inlineOperands(output_dt, input_dt);
+                if failed
+                    return;
+                end
+                new_code =  cell(1, length(code));
+                new_output_dt = cell(1, length(code));
+                for i=1:length(new_code)
+                    if strcmp(input_dt{i}, output_dt{i})
+                        new_code{i} = code{i};
+                        new_output_dt = output_dt{i};
+                        continue;
+                    end
+                    conv = strcat(input_dt{i}, '_to_', output_dt{i});
+                    obj.addExternal_libraries(strcat('LustDTLib_', conv));
+                    new_code{i} = nasa_toLustre.lustreAst.NodeCallExpr(conv, code(i));
+                    new_output_dt = output_dt{i};
+                end
+            catch me
+                display_msg(sprintf('I could not cast expression: %s\n', code{1}.print(LusBackendType.LUSTREC)), ...
+                    MsgType.DEBUG, 'MExpToLusDT.convertDT', '')
+                display_msg(me.getReport(), MsgType.DEBUG, 'MExpToLusDT.convertDT', '');
+                % ignore type casting
             end
+           
         end
         
         function [lusDT, slxDT] = upperDT(left_lusDT, right_lusDT, left_slxDT, right_slxDT)

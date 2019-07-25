@@ -14,6 +14,9 @@ function [code, exp_dt, dim] = if_block_To_Lustre(tree, args)
     args.expected_lusDT = 'bool';
     [condition, ~, ~] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
         tree.condition, args);
+    not_condition_list = nasa_toLustre.lustreAst.UnaryExpr(...
+        nasa_toLustre.lustreAst.UnaryExpr.NOT, condition);
+    last_condition = condition;
     args.expected_lusDT = '';
     
     cond_name = strcat('ifCond_', num2str(counter), strrep(num2str(rand(1)), '0.', '_'));
@@ -40,6 +43,11 @@ function [code, exp_dt, dim] = if_block_To_Lustre(tree, args)
     end
     args.if_cond = cond_ID;
     for i=1:length(tree_statements)
+        tree_type = tree_statements{i}.type;
+        if strcmp(tree_statements{i}.type, 'assignment')
+            
+            
+        end
         [statements_code, ~, ~] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
             tree_statements{i}, args);
         code = MatlabUtils.concat(code, statements_code);
@@ -55,9 +63,16 @@ function [code, exp_dt, dim] = if_block_To_Lustre(tree, args)
             new_cond_ID = nasa_toLustre.lustreAst.VarIdExpr(cond_name);
             [condition, ~, ~] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
                 elif.condition, args);
+            
             code{end+1} = nasa_toLustre.lustreAst.LustreEq(new_cond_ID, ...
                 nasa_toLustre.lustreAst.BinaryExpr(...
-                nasa_toLustre.lustreAst.BinaryExpr.AND, cond_ID, condition));
+                nasa_toLustre.lustreAst.BinaryExpr.AND, not_condition_list, condition));
+            
+            not_condition_list = nasa_toLustre.lustreAst.BinaryExpr(...
+                nasa_toLustre.lustreAst.BinaryExpr.AND, ...
+                not_condition_list, nasa_toLustre.lustreAst.UnaryExpr(...
+                nasa_toLustre.lustreAst.UnaryExpr.NOT, condition));
+            
             s = struct('Name', cond_name, 'LusDatatype', 'bool', 'DataType', 'boolean', ...
                 'CompiledType', 'boolean', 'InitialValue', '0', ...
                 'ArraySize', '1 1', 'CompiledSize', '1 1', 'Scope', 'Local', ...
@@ -74,9 +89,6 @@ function [code, exp_dt, dim] = if_block_To_Lustre(tree, args)
     end
     
     % else
-    not_condID = nasa_toLustre.lustreAst.UnaryExpr(...
-        nasa_toLustre.lustreAst.UnaryExpr.NOT, cond_ID);
-    
     
     if isfield(tree.else_block, 'statements')
         if isstruct(tree.else_block.statements)
@@ -84,7 +96,7 @@ function [code, exp_dt, dim] = if_block_To_Lustre(tree, args)
         else
             else_block_statements = tree.else_block.statements;
         end
-        args.if_cond = not_condID;
+        args.if_cond = not_condition_list;
         for i=1:length(else_block_statements)
             [else_block_code, ~, ~] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
                 else_block_statements{i}, args);

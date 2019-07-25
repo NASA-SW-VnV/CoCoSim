@@ -77,7 +77,11 @@ function [code, exp_dt, dim] = expression_To_Lustre(tree, args)
             end
     end
     % convert tree DT to what is expected.
+    try
     [code, output_dt] = nasa_toLustre.utils.MExpToLusDT.convertDT(args.blkObj, code, exp_dt, args.expected_lusDT);
+    catch me
+        me
+    end
     if ~isempty(output_dt), exp_dt = output_dt; end
     
 end
