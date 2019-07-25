@@ -8,6 +8,7 @@ function [code, exp_dt, dim] = anyFun_To_Lustre(tree, args)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     op = nasa_toLustre.lustreAst.BinaryExpr.OR;
+    args.expected_lusDT = 'bool';
     [code, exp_dt, dim] = nasa_toLustre.utils.MF2LusUtils.allAnyFun_To_Lustre(...
         tree, args, op);
 end
