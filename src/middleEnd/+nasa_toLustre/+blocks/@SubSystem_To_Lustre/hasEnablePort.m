@@ -5,15 +5,18 @@ function [b, ShowOutputPortIsOn, StatesWhenEnabling] = hasEnablePort(blk)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    if isfield(blk, 'Content')
+        fields = fieldnames(blk.Content);
+        fields = ...
+            fields(...
+            cellfun(@(x) isfield(blk.Content.(x),'BlockType'), fields));
+        enablePortsFields = fields(...
+            cellfun(@(x) strcmp(blk.Content.(x).BlockType,'EnablePort'), fields));
+        b = ~isempty(enablePortsFields);
+    else
+        b = false;
+    end
     
-    fields = fieldnames(blk.Content);
-    fields = ...
-        fields(...
-        cellfun(@(x) isfield(blk.Content.(x),'BlockType'), fields));
-    enablePortsFields = fields(...
-        cellfun(@(x) strcmp(blk.Content.(x).BlockType,'EnablePort'), fields));
-    b = ~isempty(enablePortsFields);
-
     if b
         ShowOutputPortIsOn =  ...
             strcmp(blk.Content.(enablePortsFields{1}).ShowOutputPort, 'on');
