@@ -51,17 +51,19 @@ classdef MExpToLusDT
             new_output_dt = output_dt;
             if isempty(code) ...
                     || isempty(input_dt) ...
-                    || isempty(output_dt) ...
-                    || length(code) < length(input_dt)
+                    || isempty(output_dt) 
+                return;
+            end
+            if ischar(input_dt)
+                input_dt = {input_dt};
+            end
+            if ischar(output_dt)
+                output_dt = {output_dt};
+            end
+            if  length(code) < length(input_dt)
                 return;
             end
             try
-                if ischar(input_dt)
-                    input_dt = {input_dt};
-                end
-                if ischar(output_dt)
-                    output_dt = {output_dt};
-                end
                 [code, input_dt, failed] = nasa_toLustre.utils.MExpToLusAST.inlineOperands(code, input_dt);
                 if failed
                     return;

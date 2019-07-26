@@ -46,6 +46,7 @@ function [code, exp_dt, dim] = fun_indexing_To_Lustre(tree, args)
             catch me
                 if strcmp(me.identifier, 'MATLAB:UndefinedFunction')
                     code = parseOtherFunc(tree, args);
+                    dim = [1 1];
                 else
                     display_msg(me.getReport(), MsgType.DEBUG, 'MExpToLusAST.fun_indexing_To_Lustre', '');
                     ME = MException('COCOSIM:TREE2CODE', ...
@@ -62,7 +63,6 @@ end
 
 function code = parseOtherFunc(tree, args)
     global SF_MF_FUNCTIONS_MAP;
-    
     
     if (args.isStateFlow || args.isMatlabFun) && args.data_map.isKey(tree.ID)
         %Array Access

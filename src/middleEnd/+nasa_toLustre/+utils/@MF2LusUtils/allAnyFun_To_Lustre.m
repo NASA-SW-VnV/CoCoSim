@@ -79,9 +79,7 @@ function [code, exp_dt, dim] = allAnyFun_To_Lustre(tree, args, op)
         exp_dt = 'bool';
     else
         % called from sumFun_To_Lustre
-        if ischar(x_dt)
-            exp_dt = x_dt;
-        elseif iscell(x_dt)
+        if iscell(x_dt)
             exp_dt = x_dt{1};
         else
             exp_dt = x_dt;

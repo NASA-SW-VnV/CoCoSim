@@ -127,15 +127,15 @@ function [func_path, failed] = print_script(funcsList, script)
         
         if has_END
             func_code = functions_code{i};
-            I = regexp(func_code, '(^|[\s\t\r\n]+)end', 'start');
+            I = regexp(func_code, '(^|[\s\t\r\n]+)end', 'end');
             idx = I(end);
-            if length(func_code) >= idx+4
+            if length(func_code) >= idx+1
                 
                 new_fun_code = sprintf('function %s\nCoCoVars{%d} = whos;\nend\n%s',...
-                    func_code(1:idx), i, func_code(idx+4:end));
+                    func_code(1:idx-3), i, func_code(idx+1:end));
             elseif length(func_code) >= idx
                 new_fun_code = sprintf('function %s\nCoCoVars{%d} = whos;\nend\n',...
-                    func_code(1:idx), i);
+                    func_code(1:idx-3), i);
             else
                 %PAS POSSIBLE
                 new_fun_code = sprintf('function %s', func_code);
