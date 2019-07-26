@@ -1,25 +1,16 @@
-function [params] = matlabFunction_allTest(fun_name)
-    if nargin < 1
-        fun_name = 'all';
-    end
+function [params] = matlabFunction_transposeTest()
+    fun_name = 'transpose';
     % properties that will participate in permutations
     inputDataType = {'double','single','int8', 'uint8','int32','uint32', 'boolean'};
-    inputDimension = {'1', '[3,1]', '[1,3]', '[2,3]', '[2 3 4]'};
+    inputDimension = {'1', '[3,1]', '[1,3]', '[2,3]'};
     oneInputFcn = { ...
-        sprintf('y = %s(u);', fun_name),...
-        sprintf('y = %s(u, 1);', fun_name),...
-        sprintf('y = %s(u, 2);', fun_name), ...
-        sprintf('y = %s(u, 3);', fun_name)};
+        sprintf('y = %s(u);', fun_name)};
     
     header = 'function y = fcn(u)';
     params = {};
     pInType = 0;
     for funcIdx = 1 : length(oneInputFcn)
         for inDim_idx = 1 : length(inputDimension)
-            if funcIdx == 4 && inDim_idx < 5
-                % 'y = all(u, 3);' =>  dim = '[2 3 4]'
-                continue;
-            end
             pInType = mod(pInType, length(inputDataType)) + 1;
             s = struct();
             s.Script = sprintf('%s\n%s', header, oneInputFcn{funcIdx});

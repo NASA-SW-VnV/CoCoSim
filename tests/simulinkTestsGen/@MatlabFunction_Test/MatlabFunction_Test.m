@@ -7,7 +7,8 @@ classdef MatlabFunction_Test < Block_Test
     end
     
     properties
-        supportedFun = {'all'};
+        supportedFun = {'all', 'any', 'circshift', 'sum', 'transpose'};
+        %supportedFun = {'any'};
     end
     
     
@@ -34,8 +35,10 @@ classdef MatlabFunction_Test < Block_Test
                         mdl_name = sprintf('%s_%s%d', obj.fileNamePrefix, ...
                             obj.supportedFun{f}, i);
                         addCondExecSS = false;
+                        new_output_dir = fullfile(outputDir, obj.supportedFun{f});
+                        MatlabUtils.mkdir(new_output_dir);
                         [blkPath, mdl_path, skip] = Block_Test.create_new_model(...
-                            mdl_name, outputDir, deleteIfExists, addCondExecSS);
+                            mdl_name, new_output_dir, deleteIfExists, addCondExecSS);
                         if skip
                             continue;
                         end
@@ -69,7 +72,7 @@ classdef MatlabFunction_Test < Block_Test
                         
                         
                     catch me
-                        display(s);
+                        display(param);
                         display_msg(['Model failed: ' mdl_name], ...
                             MsgType.DEBUG, 'generateTests', '');
                         display_msg(me.getReport(), MsgType.ERROR, 'generateTests', '');
