@@ -15,6 +15,7 @@ classdef MExpToLusDT
         [lusDT, slxDT] = assignment_DT(tree, args)
         [lusDT, slxDT] = binaryExpression_DT(tree, args)
         [lusDT, slxDT] = constant_DT(tree, args)
+        [lusDT, slxDT] = end_DT(tree, args)
         [lusDT, slxDT] = expression_DT(tree, args)
         [lusDT, slxDT] = fun_indexing_DT(tree, args)
         [lusDT, slxDT] = ID_DT(tree, args)

@@ -36,12 +36,16 @@ classdef MatlabUtils
         vector = construct_random_booleans(nb_iterations, IMIN, IMAX, dim)
         vector = construct_random_doubles(nb_iterations, IMIN, IMAX,dim)
         
+        %% cell cartesian product
+        c2 = cellCartesianProduct(c1)
         %% get package prefix
         path_prefix = getPackagePrefix(f_parent, f_name)
         %% This function for developers
         % open all files that contains a String
         whoUse(folder, str)
         openAllFilesContainingString(folder, str)
+        
+        
         
         count = getNbLines(file)
         F = allMatlabFilesExceeds(folder, n)

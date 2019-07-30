@@ -5,17 +5,19 @@ function [code, exp_dt, dim] = colonExpression_To_Lustre(tree, args)
     % All Rights Reserved.
     % Author: Francois Conzelmann <francois.conzelmann@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
-    if strcmp(tree.operator, ':end')
-        msg = sprintf('Expression "%s" in block "%s" is not supported: Colon indexing without constant is not supported',...
-            tree.text, HtmlItem.addOpenCmd(args.blk.Origin_path));
-        ME = MException('COCOSIM:TREE2CODE', msg);
-        throw(ME);
-    end
+  
+    % ':end' is not produced by the parser anymore
+%     if strcmp(tree.operator, ':end')
+%         msg = sprintf('Expression "%s" in block "%s" is not supported: Colon indexing without constant is not supported',...
+%             tree.text, HtmlItem.addOpenCmd(args.blk.Origin_path));
+%         ME = MException('COCOSIM:TREE2CODE', msg);
+%         throw(ME);
+%     end
     
     if ~isfield(tree, 'leftExp') || ~isfield(tree, 'rightExp')
         ME = MException('COCOSIM:TREE2CODE', ...
-            'Colon indexing without constant is not supported');
+            'Colon indexing in expression "%s" is not supported', ...
+            tree.text);
         throw(ME);
     end
     if count(tree.text, ':') == 2

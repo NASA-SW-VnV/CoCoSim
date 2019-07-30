@@ -353,7 +353,10 @@ public class EM2JSON {
 				StringBuilder buf = new StringBuilder();
 				buf.append("{");
 				buf.append("\n");
-				buf.append(Quotes("type")+":"+Quotes("constant"));
+				if (ctx.END() != null)
+					buf.append(Quotes("type")+":"+Quotes("end"));
+				else
+					buf.append(Quotes("type")+":"+Quotes("constant"));
 				buf.append(",\n");
 				String dataType = ConstantDataType(ctx);
 				buf.append(Quotes("dataType")+":"+Quotes(dataType));
@@ -372,8 +375,8 @@ public class EM2JSON {
 				t = "Integer";
 			else if (ctx.Float() != null)
 				t = "Float";
-//			else if (ctx.end() != null)
-//				t = "end";
+			else if (ctx.END() != null)
+				t = "Integer";
 			else if (ctx.string() != null)
 				t = "String";
 			return t;
@@ -415,7 +418,13 @@ public class EM2JSON {
 			buf.append("\n");
 			buf.append(Quotes("type")+":"+Quotes("fun_indexing"));
 			buf.append(",\n");
-			buf.append(Quotes("ID")+":"+Quotes(ctx.getChild(0).getText()));
+			if (ctx.ID() != null)
+				buf.append(Quotes("ID")+":"+Quotes(ctx.ID().getText()));
+			else{
+				// case of cell indexing in the left
+				buf.append(Quotes("ID")+":"+getJSON(ctx.cell_indexing()));
+			}
+				
 			buf.append(",\n");
 			if (ctx.getChild(2).getText().equals(")"))
 				buf.append(Quotes("parameters")+":"+"[]");
@@ -434,7 +443,7 @@ public class EM2JSON {
 			buf.append("\n");
 			buf.append(Quotes("type")+":"+Quotes("cell_indexing"));
 			buf.append(",\n");
-			buf.append(Quotes("ID")+":"+Quotes(ctx.getChild(0).getText()));
+			buf.append(Quotes("ID")+":"+Quotes(ctx.ID().getText()));
 			buf.append(",\n");
 			int n = ctx.function_parameter_list().size();
 			for(int i=0; i<n; i++) {

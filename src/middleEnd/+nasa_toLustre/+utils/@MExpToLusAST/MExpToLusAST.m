@@ -15,6 +15,7 @@ classdef MExpToLusAST
         [code, lusDT, dim] = binaryExpression_To_Lustre(tree, args)
         [code, lusDT, dim] = colonExpression_To_Lustre(tree, args)
         [code, lusDT, dim] = constant_To_Lustre(tree, args)
+        [code, lusDT, dim] = end_To_Lustre(tree, args)
         [code, lusDT, dim] = expression_To_Lustre(tree, args)
         [code, lusDT, dim] = fun_indexing_To_Lustre(tree, args)
         [code, lusDT, dim] = ID_To_Lustre(tree, args)

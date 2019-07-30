@@ -1,7 +1,7 @@
 grammar EM;
 
 @members{
-	int whitespace_cnt = 0;
+	int isIndex = 0;
 }
 
 
@@ -133,7 +133,7 @@ struct_indexing
 parenthesedExpression :'(' notAssignment ')'   ;
 
 fun_indexing
-	:	ID LPAREN function_parameter_list? RPAREN
+	:	(ID | cell_indexing) LPAREN function_parameter_list? RPAREN
 	;
 
 cell_indexing
@@ -142,7 +142,7 @@ cell_indexing
 
 	
 function_parameter_list
-	: function_parameter ( COMMA function_parameter )*
+	: { isIndex = 1; } function_parameter ( COMMA function_parameter )* { isIndex = 0; }
 	;
 function_parameter : notAssignment	| COLON	| ignore_value;
 //**************************************************************
@@ -150,6 +150,7 @@ ignore_value : '~';
 constant
     :   Integer
     |   Float
+    | {isIndex == 1}? END
     |   string
     |   function_handle
     ;
