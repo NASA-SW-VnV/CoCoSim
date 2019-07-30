@@ -7,7 +7,7 @@ function [code, exp_dt, dim] = onesFun_To_Lustre(tree, args)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     [code, exp_dt, dim] = nasa_toLustre.utils.MF2LusUtils.numFun_To_Lustre(...
-        tree, args, 1);
+        tree, args);
     
 end
 

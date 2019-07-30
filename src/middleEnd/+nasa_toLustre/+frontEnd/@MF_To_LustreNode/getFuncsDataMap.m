@@ -35,25 +35,8 @@ function [fun_data_map, failed] = getFuncsDataMap(blk, script, ...
         SLXUtils.get_random_values( 1, min, max, ...
         str2num(x.CompiledSize), x.CompiledType{1}), Inputs, 'UniformOutput', 0);
     %call function
-    try
-        fH(args{:});
-    catch me
-        display_msg(me.getReport(), ...
-            MsgType.DEBUG, 'getFuncsDataMap', '');
-        
-        if MatlabUtils.startsWith(me.identifier, 'MATLAB:') ...
-                && length(me.stack) >= 1 && isfield(me.stack(1), 'file') ...
-                && strcmp(me.stack(1).file, func_path)
-            filetext = fileread(me.stack(1).file);
-            filecell = regexp(filetext, '\n', 'split');
-            if length(filecell) >= me.stack(1).line
-                msg = sprintf('Error "%s": in "%s" in block %s\n', ...
-                    me.message, filecell{me.stack(1).line}, ...
-                    HtmlItem.addOpenCmd(blk.Origin_path));
-                display_msg(msg, MsgType.ERROR, 'getFuncsDataMap', '');
-            end
-        end
-        failed = true;
+    failed = callFunction(fH, args, func_path, blk);
+    if failed
         try delete(func_path), catch, end
         return;
     end
@@ -165,6 +148,59 @@ function [func_path, failed] = print_script(funcsList, script)
     % the end of the main function under the name blk_name
     fprintf(fid, '\nend');
     fclose(fid);
+end
+%% call function with random args
+function failed = callFunction(fH, args, func_path, blk)
+    failed = false;
+    try
+        fH(args{:});
+    catch me
+        
+        if strcmp(me.identifier, 'MATLAB:innerdim')
+            % in Simulink a vector of 3 elements can be considered of dimension 
+            % [3 1] or [1 3]
+            % the following code will try to call the function with all different
+            % settings by transposing vectors
+            I = (1:length(args));
+            II = I(cellfun(@(x) isvector(x) && length(x) > 1, args));
+            if length(II) >= 1
+                c = arrayfun(@(x) [0 1], (1:length(II)), 'UniformOutput', 0);
+                c2 = MatlabUtils.cartesian(c{:});
+                [n, ~] = size(c2);
+                for i=1:n
+                    III = II(boolean(c2(i, :)));
+                    if isempty(III)
+                        continue;
+                    end
+                    new_args = args;
+                    for j=1:length(III)
+                        new_args{III(j)} = new_args{III(j)}';
+                    end
+                    failed = callFunction(fH, new_args, func_path, blk);
+                    if ~failed
+                        return;
+                    end
+                end
+            end
+        end
+        display_msg(me.getReport(), ...
+            MsgType.DEBUG, 'getFuncsDataMap', '');
+        if MatlabUtils.startsWith(me.identifier, 'MATLAB:') ...
+                && length(me.stack) >= 1 && isfield(me.stack(1), 'file') ...
+                && strcmp(me.stack(1).file, func_path)
+            filetext = fileread(me.stack(1).file);
+            filecell = regexp(filetext, '\n', 'split');
+            if length(filecell) >= me.stack(1).line
+                msg = sprintf('Error "%s": in "%s" in block %s\n', ...
+                    me.message, filecell{me.stack(1).line}, ...
+                    HtmlItem.addOpenCmd(blk.Origin_path));
+                display_msg(msg, MsgType.ERROR, 'getFuncsDataMap', '');
+            end
+        end
+        failed = true;
+        
+        return;
+    end
 end
 %%
 function data = buildData(d, inputs_names, outputs_names)

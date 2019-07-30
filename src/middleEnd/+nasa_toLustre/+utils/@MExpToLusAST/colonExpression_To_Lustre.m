@@ -5,21 +5,9 @@ function [code, exp_dt, dim] = colonExpression_To_Lustre(tree, args)
     % All Rights Reserved.
     % Author: Francois Conzelmann <francois.conzelmann@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  
-    % ':end' is not produced by the parser anymore
-%     if strcmp(tree.operator, ':end')
-%         msg = sprintf('Expression "%s" in block "%s" is not supported: Colon indexing without constant is not supported',...
-%             tree.text, HtmlItem.addOpenCmd(args.blk.Origin_path));
-%         ME = MException('COCOSIM:TREE2CODE', msg);
-%         throw(ME);
-%     end
     
-    if ~isfield(tree, 'leftExp') || ~isfield(tree, 'rightExp')
-        ME = MException('COCOSIM:TREE2CODE', ...
-            'Colon indexing in expression "%s" is not supported', ...
-            tree.text);
-        throw(ME);
-    end
+    
+    
     if count(tree.text, ':') == 2
         if strcmp(tree.leftExp.leftExp.type, 'constant') && strcmp(tree.leftExp.rightExp.type, 'constant') && strcmp(tree.rightExp.type, 'constant')
             [left, left_dt, ~] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
@@ -40,28 +28,69 @@ function [code, exp_dt, dim] = colonExpression_To_Lustre(tree, args)
             end
         else
             ME = MException('COCOSIM:TREE2CODE', ...
-                'Function in expression "%s" only support constant input',...
-                tree.text, numel(Y));
+                'Expression "%s" only support constant input',...
+                tree.text);
             throw(ME);
         end
         
     elseif count(tree.text, ':') == 1
-        [left, left_dt, ~] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
-            tree.leftExp, args);
-        [right, right_dt, ~] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
-            tree.rightExp, args);
-        exp_dt = nasa_toLustre.utils.MExpToLusDT.upperDT(left_dt, right_dt);
-        left_value = left{1}.value;
-        right_value = right{1}.value;
-        if strcmp(exp_dt, 'int')
-            code = arrayfun(@(x) nasa_toLustre.lustreAst.IntExpr(x), (left_value:right_value), 'UniformOutput', 0);
+        if ~isfield(tree, 'leftExp') && ~isfield(tree, 'rightExp')
+            t = MatlabUtils.getExpTree('u(1:end)');
+            tree = t.parameters(1);
+        end
+        c = symvar(tree.text);
+        if isempty(c) || (length(c) == 1 && strcmp(c{1}, 'end'))
+            try
+                [code, exp_dt, dim] = nasa_toLustre.utils.MF2LusUtils.numFun_To_Lustre(...
+                    tree, args);
+            catch
+                [left, left_dt, ~] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
+                    tree.leftExp, args);
+                [right, right_dt, ~] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
+                    tree.rightExp, args);
+                exp_dt = nasa_toLustre.utils.MExpToLusDT.upperDT(left_dt, right_dt);
+                if isa(left, 'nasa_toLustre.lustreAst.IntExpr') || ...
+                        isa(left, 'nasa_toLustre.lustreAst.RealExpr')
+                    left_value = left{1}.value;
+                else
+                    try
+                        left_value = eval(left{1}.print_lustrec(LusBackendType.LUSTREC));
+                    catch
+                        ME = MException('COCOSIM:TREE2CODE', ...
+                            'Expression "%s" only support constant input',...
+                            tree.text);
+                        throw(ME);
+                    end
+                end
+                if isa(right, 'nasa_toLustre.lustreAst.IntExpr') || ...
+                        isa(right, 'nasa_toLustre.lustreAst.RealExpr')
+                    right_value = right{1}.value;
+                else
+                    try
+                        right_value = eval(right{1}.print_lustrec(LusBackendType.LUSTREC));
+                    catch
+                        ME = MException('COCOSIM:TREE2CODE', ...
+                            'Expression "%s" only support constant input',...
+                            tree.text);
+                        throw(ME);
+                    end
+                end
+                if strcmp(exp_dt, 'int')
+                    code = arrayfun(@(x) nasa_toLustre.lustreAst.IntExpr(x), (left_value:right_value), 'UniformOutput', 0);
+                else
+                    code = arrayfun(@(x) nasa_toLustre.lustreAst.RealExpr(x), (left_value:right_value), 'UniformOutput', 0);
+                end
+            end
         else
-            code = arrayfun(@(x) nasa_toLustre.lustreAst.RealExpr(x), (left_value:right_value), 'UniformOutput', 0);
+            ME = MException('COCOSIM:TREE2CODE', ...
+                'Using variable "%s" in expression "%s" is not supported.',...
+                c{1}, tree.text);
+            throw(ME);
         end
     else
         ME = MException('COCOSIM:TREE2CODE', ...
-            'Function in expression "%s" is not supported.',...
-            tree.text, numel(Y));
+            'Expression "%s" is not supported.',...
+            tree.text);
         throw(ME);
     end
     dim = [1 numel(code)];

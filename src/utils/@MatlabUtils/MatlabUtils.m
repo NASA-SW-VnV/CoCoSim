@@ -37,6 +37,7 @@ classdef MatlabUtils
         vector = construct_random_doubles(nb_iterations, IMIN, IMAX,dim)
         
         %% cell cartesian product
+        c2 = cartesian(varargin)
         c2 = cellCartesianProduct(c1)
         %% get package prefix
         path_prefix = getPackagePrefix(f_parent, f_name)

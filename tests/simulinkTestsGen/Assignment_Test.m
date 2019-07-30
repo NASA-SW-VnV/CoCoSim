@@ -16,7 +16,9 @@ classdef Assignment_Test < Block_Test
     
     properties
         % other properties
-        IndexMode =  {'Zero-based','One-based'};        
+        IndexMode =  {'Zero-based','One-based'};     
+        OutputInitialize = {'Initialize using input port <Y0>',...
+            'Specify size for each dimension in table'};
         SampleTime = {'-1'};
     end
     
@@ -33,8 +35,8 @@ classdef Assignment_Test < Block_Test
             nb_tests = length(params);
             condExecSSPeriod = floor(nb_tests/length(Block_Test.condExecSS));
             for i=1 : nb_tests
-                skipTests = [];
-                if ismember(i,skipTests)
+                skipTests = [20];
+                if ~ismember(i,skipTests)
                     continue;
                 end
                 try
@@ -93,15 +95,56 @@ classdef Assignment_Test < Block_Test
                                       
                     portOffset = 1 + Y0_portNumber;
                     for portId=1:IndexPortNumber
+                        outMin = '1';
+                        outMax = '2';
                         if strcmp(s.IndexMode,'One-based')
-                            set_param(inport_list{portId+portOffset},...
-                                'OutMin', '1', 'OutMax', '3');
+%                             if strcmp(s.IndexOptionArray{,'Starting index (port)')
+%                                 outMin = '1';
+%                                 outMax = '2';
+%                             end
                         else
                             set_param(inport_list{portId+portOffset},...
-                                'OutMin', '0', 'OutMax', '2');                            
+                                'OutMin', '0', 'OutMax', '2');   
+                            outMin = '0';
+                            outMax = '1';
+%                             if strcmp(s.IndexOptionArray,'Starting index (port)')
+%                                 outMin = '0';
+%                                 outMax = '1';                                
+%                             end                            
                         end
+                        set_param(inport_list{portId+portOffset},...
+                            'OutMin', outMin, 'OutMax', outMax);
+                        % add Simulink/Discontinuities/Saturation block
+                        saturationPath = fullfile(blk_parent, ...
+                            sprintf('port_%d',portId));
+                        add_block('simulink/Discontinuities/Saturation',...
+                            saturationPath,'UpperLimit',outMax,...
+                            'LowerLimit',outMin);
+                        % remove existing connection
+                        
+                        assignmentBlockPortHandles = get_param(blkPath, ...
+                            'PortHandles');
+                        inportPortHandles = get_param(...
+                            inport_list{portId+portOffset}, 'PortHandles');
+                        
+                        delete_line(blk_parent,...
+                            inportPortHandles.Outport,...
+                            assignmentBlockPortHandles.Inport(portId+portOffset));
+                        % add new connection
+                        % saturation block to assignment
+                        satOutPortHandles = get_param(...
+                            saturationPath, 'PortHandles');                        
+                        add_line(blk_parent,...
+                            satOutPortHandles.Outport, ...
+                            assignmentBlockPortHandles.Inport(portId+portOffset),...
+                            'autorouting', 'on');
+                        % input to saturation
+                        add_line(blk_parent,...
+                            inportPortHandles.Outport,...
+                            satOutPortHandles.Inport,...                            
+                            'autorouting', 'on');                        
                     end
-                    
+                    BlocksPosition_pp(mdl_name);
                     %% set model configuration parameters and save model if it compiles
                     failed = Block_Test.setConfigAndSave(mdl_name, mdl_path);
                     if failed, display(s), end
