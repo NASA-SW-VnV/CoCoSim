@@ -103,7 +103,8 @@ function [...
     % validate pre-processing
     try
         [pp_valid, pp_sim_failed] = ...
-            SLXUtils.compareTwoSLXModels(orig_model_full_path, pp_model_full_path);
+            SLXUtils.compareTwoSLXModels(orig_model_full_path, pp_model_full_path,...
+            min_max_constraints, show_model);
     catch ME
         display_msg(ME.message, MsgType.ERROR, 'validation', '');
         display_msg(ME.getReport(), MsgType.DEBUG, 'validation', '');

@@ -1,7 +1,10 @@
 function [valid, sim_failed] = compareTwoSLXModels(orig_mdl_path, pp_mdl_path,...
         min_max_constraints, show_models)
     
-    if nargin >= 3 && iscell(min_max_constraints) && numel(min_max_constraints) > 0
+    if ~exist('min_max_constraints', 'var') || isempty(min_max_constraints)
+        min_max_constraints = SLXUtils.constructInportsMinMaxConstraints(orig_mdl_path, -300, 300);
+    end
+    if iscell(min_max_constraints) && numel(min_max_constraints) > 0
         IMIN = cellfun(@(x) x{2}, min_max_constraints);
         IMAX = cellfun(@(x) x{3}, min_max_constraints);
     else
@@ -12,7 +15,7 @@ function [valid, sim_failed] = compareTwoSLXModels(orig_mdl_path, pp_mdl_path,..
     if nargin < 4
         show_models = false;
     end
-    valid = true;
+    valid = false;
     sim_failed = false;
     
     [orig_mdl_dir, orig_mdl_name, ~] = fileparts(orig_mdl_path);
@@ -156,7 +159,11 @@ function [valid, sim_failed] = compareTwoSLXModels(orig_mdl_path, pp_mdl_path,..
                 else
                     diff = abs(y1_value-y2_value);
                 end
-                valid = valid && (diff<eps);
+                if i == 1 && k == 1 && j == 1
+                    valid = diff <  eps;
+                else
+                    valid = valid && (diff <  eps);
+                end
                 if  (diff >= eps)
                     diff_name =  ...
                         BUtils.naming_alone(yout1{k}.BlockPath.getBlock(1));

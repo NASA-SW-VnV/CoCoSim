@@ -18,7 +18,7 @@ function [valid, cex_msg, diff_name, diff] = ...
     diff = 0;
     numberOfOutputs = length(yout.getElementNames);
     numberOfInports = length(input_dataSet.getElementNames);
-    valid = true;
+    valid = false;
     cex_msg = {};
     index_out = 0;
     out_width = zeros(numberOfOutputs,1);
@@ -78,7 +78,11 @@ function [valid, cex_msg, diff_name, diff] = ...
                             diff = abs(output_val);
                         end
                     end
-                    valid = valid && (diff<eps);
+                    if i == 1 && k == 1 && j == 1
+                        valid = diff <  eps;
+                    else
+                        valid = valid && (diff <  eps);
+                    end
                     if  ~valid
                         diff_name =  ...
                             BUtils.naming_alone(yout{k}.BlockPath.getBlock(1));
