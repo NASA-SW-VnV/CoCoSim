@@ -11,7 +11,7 @@ classdef Concatenate_Test < Block_Test
         % properties that will participate in permutations
         NumInputs = {'1','2','3','4'};
         Mode =  {'Vector','Multidimensional array'};
-        ConcatenateDimension = {'1','2','3','4'};  % for Multidimensional array
+        ConcatenateDimension = {'1','2'};  % for Multidimensional array
     end
     
     properties

@@ -21,7 +21,7 @@ function [codes] = concatenateDimension1(inputs, outputs,in_matrix_dimension)
     end
     codes = cell(1, numel(outputs));
     for i=1:numel(outputs)
-        [d1, d2,~,~,~,~,~ ] = ind2sub(outMatSize,i);   % 7 dims max
+        [d1, d2,d3,d4,d5,d6,d7 ] = ind2sub(outMatSize,i);   % 7 dims max
         rowCounted = 0;
         inputPortIndex = 0;
         for j=1:7
@@ -35,7 +35,7 @@ function [codes] = concatenateDimension1(inputs, outputs,in_matrix_dimension)
         end
         curD1 = d1-rowCounted;
         curMatSize = in_matrix_dimension{inputPortIndex}.dims;
-        inputIndex = sub2ind(curMatSize,curD1,d2);
+        inputIndex = sub2ind(curMatSize,curD1,d2,d3,d4,d5,d6,d7);
         codes{i} = nasa_toLustre.lustreAst.LustreEq(outputs{i},...
             inputs{inputPortIndex}{inputIndex});
     end
