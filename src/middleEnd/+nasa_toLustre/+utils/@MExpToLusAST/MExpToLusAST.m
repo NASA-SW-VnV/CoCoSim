@@ -25,6 +25,7 @@ classdef MExpToLusAST
         [code, lusDT, dim] = struct_indexing_To_Lustre(tree, args)
         [code, lusDT, dim] = transpose_To_Lustre(tree, args)
         [code, lusDT, dim] = unaryExpression_To_Lustre(tree, args)
+        [code, lusDT, dim] = while_block_To_Lustre(tree, args)
     end
     
     methods(Static)

@@ -49,12 +49,12 @@ function [code, exp_dt, dim] = colonExpression_To_Lustre(tree, args)
                 [right, right_dt, ~] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
                     tree.rightExp, args);
                 exp_dt = nasa_toLustre.utils.MExpToLusDT.upperDT(left_dt, right_dt);
-                if isa(left, 'nasa_toLustre.lustreAst.IntExpr') || ...
-                        isa(left, 'nasa_toLustre.lustreAst.RealExpr')
+                if isa(left{1}, 'nasa_toLustre.lustreAst.IntExpr') || ...
+                        isa(left{1}, 'nasa_toLustre.lustreAst.RealExpr')
                     left_value = left{1}.value;
                 else
                     try
-                        left_value = eval(left{1}.print_lustrec(LusBackendType.LUSTREC));
+                        left_value = eval(left{1}.print(LusBackendType.LUSTREC));
                     catch
                         ME = MException('COCOSIM:TREE2CODE', ...
                             'Expression "%s" only support constant input',...
@@ -62,12 +62,12 @@ function [code, exp_dt, dim] = colonExpression_To_Lustre(tree, args)
                         throw(ME);
                     end
                 end
-                if isa(right, 'nasa_toLustre.lustreAst.IntExpr') || ...
-                        isa(right, 'nasa_toLustre.lustreAst.RealExpr')
+                if isa(right{1}, 'nasa_toLustre.lustreAst.IntExpr') || ...
+                        isa(right{1}, 'nasa_toLustre.lustreAst.RealExpr')
                     right_value = right{1}.value;
                 else
                     try
-                        right_value = eval(right{1}.print_lustrec(LusBackendType.LUSTREC));
+                        right_value = eval(right{1}.print(LusBackendType.LUSTREC));
                     catch
                         ME = MException('COCOSIM:TREE2CODE', ...
                             'Expression "%s" only support constant input',...

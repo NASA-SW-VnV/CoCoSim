@@ -24,6 +24,7 @@ classdef MExpToLusDT
         [lusDT, slxDT] = struct_indexing_DT(tree, args)
         [lusDT, slxDT] = transpose_DT(tree, args)
         [lusDT, slxDT] = unaryExpression_DT(tree, args)
+        [lusDT, slxDT] = while_block_DT(tree, args)
     end
     
     methods(Static)
