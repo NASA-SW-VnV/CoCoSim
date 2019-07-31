@@ -1,4 +1,5 @@
-function [lustre_file_path, xml_trace, failed, unsupportedOptions, abstractedBlocks, pp_model_full_path]= ...
+function [lustre_file_path, xml_trace, failed, unsupportedOptions, ...
+        abstractedBlocks, pp_model_full_path, ir_json_path]= ...
         ToLustre(model_path, const_files, lus_backend, coco_backend, varargin)
     %ToLustre translate Simulink models to Lustre. It is based on
     %article :
@@ -90,6 +91,7 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, abstractedBlo
     unsupportedOptions = {};
     abstractedBlocks = {};
     pp_model_full_path = '';
+    ir_json_path = '';
     %% Get Simulink model full path
     if exist(model_path, 'file') == 4
         model_path = which(model_path);
@@ -122,6 +124,9 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, abstractedBlo
                     unsupportedOptions = M.unsupportedOptions;
                     abstractedBlocks = M.abstractedBlocks;
                     pp_model_full_path = M.pp_model_full_path;
+                    if isfield(M, 'ir_json_path')
+                        ir_json_path = M.ir_json_path;
+                    end
                     display_msg(['Skipping Lustre generation step. ', ...
                         'Using previously generated code, no modifications '..., 
                         'have been made to the model.'],...
@@ -138,7 +143,7 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, abstractedBlo
     
     try
         [unsupportedOptions, failed, pp_model_full_path, ir_struct, ...
-            output_dir, abstractedBlocks]= ...
+            output_dir, abstractedBlocks, ir_json_path]= ...
             nasa_toLustre.ToLustreUnsupportedBlocks(model_path, const_files, lus_backend, ...
             coco_backend, varargin{:});
         
@@ -303,7 +308,7 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, abstractedBlo
     xml_trace.write();
     
     %% save results in mat file.
-    save(mat_file, 'xml_trace', 'failed', 'unsupportedOptions', 'abstractedBlocks', 'pp_model_full_path');
+    save(mat_file, 'xml_trace', 'failed', 'unsupportedOptions', 'abstractedBlocks', 'pp_model_full_path', 'ir_json_path');
     ToLustre_datenum_map(model_path) = lustre_file_path;
     
     %% check lustre syntax

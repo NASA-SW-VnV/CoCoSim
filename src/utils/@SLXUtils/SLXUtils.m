@@ -54,7 +54,7 @@ classdef SLXUtils
         terminate(modelName)
         
         %% compare two models
-        [valid, sim_failed] = compareTwoSLXModels(orig_mdl_path, pp_mdl_path, min_max_constraints, show_models)
+        [valid, sim_failed, cex_file_path] = compareTwoSLXModels(orig_mdl_path, pp_mdl_path, min_max_constraints, show_models)
         %%
         [new_model_path, new_model_name, status] = ...
             crete_model_from_subsystem(file_name, ss_path, output_dir )
