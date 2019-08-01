@@ -5,33 +5,26 @@
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [...
-        valid, ...
-        pp_valid, ...
-        pp_sim_failed, ...
-        slx2lus_failed,...
-        is_unsupported, ...
-        lustrec_failed, ...
-        lustrec_binary_failed, ...
-        sim_failed, ...
-        lus_file_path, ...
-        validation_compute] = ...
+function [res] = ...
         validate_ToLustre(orig_model_full_path, tests_method, model_checker, ...
         show_model, deep_CEX, min_max_constraints, options)
     
     
     validation_start = tic;
-    
-    valid = -1;
-    pp_valid = -1;
-    slx2lus_failed = -1;
-    lustrec_failed = -1;
-    lustrec_binary_failed= -1;
-    sim_failed = -1;
-    pp_sim_failed = -1;
-    validation_compute = -1;
-    is_unsupported = 0;
-    lus_file_path = '';
+    res = struct();
+    res.pp_VS_lustre_valid = -1;
+    res.orig_VS_pp_valid = -1;
+    res.orig_VS_pp_simulation_failed = -1;
+    res.ToLustre_failed = -1;
+    res.lustrec_failed = -1;
+    res.lustrec_binary_failed= -1;
+    res.pp_VS_lustre_simulation_failed = -1;
+    res.validation_compute = -1;
+    res.is_unsupported = 0;
+    res.lus_file_path = '';
+    res.orig_VS_pp_cex_file_path = '';
+    res.pp_VS_lustre_cex_file_path = '';
+    res.ir_json_path = '';
     %close all simulink models
     bdclose('all')
     %% define parameters if not given by the user
@@ -72,15 +65,16 @@ function [...
         f_msg = sprintf('Compiling model "%s" to Lustre\n',file_name);
         display_msg(f_msg, MsgType.RESULT, 'validation', '');
         %GUIUtils.update_status('Runing CocoSim');
-        [lus_file_path, xml_trace, slx2lus_failed, unsupportedOptions, ~, pp_model_full_path] = ...
+        [res.lus_file_path, xml_trace, res.ToLustre_failed, ...
+            unsupportedOptions, ~, pp_model_full_path, res.ir_json_path] = ...
             nasa_toLustre.ToLustre(orig_model_full_path, [], LusBackendType.LUSTREC, ...
             CoCoBackendType.VALIDATION, options{:});
-        is_unsupported = ~isempty(unsupportedOptions);
-        if is_unsupported
+        res.is_unsupported = ~isempty(unsupportedOptions);
+        if res.is_unsupported
             display_msg('Model is not supported', MsgType.ERROR, 'validation', '');
             return;
         end
-        [output_dir, ~, ~] = fileparts(lus_file_path);
+        [output_dir, ~, ~] = fileparts(res.lus_file_path);
         [~, model_file_name, ~] = fileparts(pp_model_full_path);
         file_name = model_file_name;
         main_node = model_file_name;
@@ -102,8 +96,11 @@ function [...
     %% launch validation
     % validate pre-processing
     try
-        [pp_valid, pp_sim_failed] = ...
-            SLXUtils.compareTwoSLXModels(orig_model_full_path, pp_model_full_path);
+        [res.orig_VS_pp_valid, ...
+            res.orig_VS_pp_simulation_failed, ...
+            res.orig_VS_pp_cex_file_path] = ...
+            SLXUtils.compareTwoSLXModels(orig_model_full_path, pp_model_full_path,...
+            min_max_constraints, show_model);
     catch ME
         display_msg(ME.message, MsgType.ERROR, 'validation', '');
         display_msg(ME.getReport(), MsgType.DEBUG, 'validation', '');
@@ -116,8 +113,11 @@ function [...
         return;
     end
     try
-        [valid, lustrec_failed, lustrec_binary_failed, sim_failed] = ...
-            compare_slx_lus(pp_model_full_path, lus_file_path, main_node, ...
+        [res.pp_VS_lustre_valid, res.lustrec_failed,...
+            res.lustrec_binary_failed, ...
+            res.pp_VS_lustre_simulation_failed, ...
+            res.pp_VS_lustre_cex_file_path] = ...
+            compare_slx_lus(pp_model_full_path, res.lus_file_path, main_node, ...
             output_dir, tests_method, model_checker, show_model,...
             min_max_constraints, options);
     catch ME
@@ -127,7 +127,7 @@ function [...
     end
     
     
-    if valid~=1 && lustrec_failed~=1 && sim_failed~=1 && lustrec_binary_failed~=1
+    if res.pp_VS_lustre_valid~=1 && res.lustrec_failed~=1 && res.pp_VS_lustre_simulation_failed~=1 && res.lustrec_binary_failed~=1
         if show_model && deep_CEX <= 0
             prompt = 'The model is not valid. Do you want to check which subsystem is not valid? Y/N [N]: ';
             display_msg(prompt, MsgType.RESULT, 'validate_ToLustre', '');
@@ -155,10 +155,10 @@ function [...
     % close_system(model_full_path,0);
     % bdclose('all')
     
-    if sim_failed==1
-        validation_compute = -1;
+    if res.pp_VS_lustre_simulation_failed==1
+        res.validation_compute = -1;
     else
-        validation_compute = toc(validation_start);
+        res.validation_compute = toc(validation_start);
     end
 end
 
