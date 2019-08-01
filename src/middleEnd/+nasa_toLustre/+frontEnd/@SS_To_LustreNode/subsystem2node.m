@@ -150,7 +150,7 @@ function [ main_node, isContractBlk, external_nodes, external_libraries ] = ...
             && isfield(ss_ir, 'MaskType') ...
             && strcmp(ss_ir.MaskType, 'VerificationSubsystem')
         node_outputs{end+1} = nasa_toLustre.lustreAst.LustreVar('VerificationSubsystem_virtual', 'bool');
-        body{end+1} = nasa_toLustre.lustreAst.LustreEq(nasa_toLustre.lustreAst.VarIdExpr('VerificationSubsystem_virtual'),  nasa_toLustre.lustreAst.BooleanExpr(true));
+        body{end+1} = nasa_toLustre.lustreAst.LustreEq(nasa_toLustre.lustreAst.VarIdExpr('VerificationSubsystem_virtual'),  nasa_toLustre.lustreAst.BoolExpr(true));
     end
     % If the Subsystem has VerificationSubsystem, then add virtual
     % variable

@@ -1,4 +1,4 @@
-classdef BooleanExpr < nasa_toLustre.lustreAst.LustreExpr
+classdef BoolExpr < nasa_toLustre.lustreAst.LustreExpr
     %BooleanExpr
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
@@ -11,7 +11,7 @@ classdef BooleanExpr < nasa_toLustre.lustreAst.LustreExpr
     end
     
     methods
-        function obj = BooleanExpr(v)
+        function obj = BoolExpr(v)
             obj.value = v;
         end
         %%
@@ -60,7 +60,7 @@ classdef BooleanExpr < nasa_toLustre.lustreAst.LustreExpr
         end
         % This function is used in Stateflow compiler to change from imperative
         % code to Lustre
-        [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, ~)
+        [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft, node, data_map)
         
         %% This function is used by KIND2 LustreProgram.print()
         function nodesCalled = getNodesCalled(~)

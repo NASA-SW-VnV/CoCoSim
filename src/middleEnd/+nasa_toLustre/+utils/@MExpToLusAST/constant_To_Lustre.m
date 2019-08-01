@@ -22,7 +22,7 @@ function [code, exp_dt, dim] = constant_To_Lustre(tree, args)
     if strcmp(args.expected_lusDT, 'real')
         code{1} = nasa_toLustre.lustreAst.RealExpr(str2double(v));
     elseif strcmp(args.expected_lusDT, 'bool')
-        code{1} = nasa_toLustre.lustreAst.BooleanExpr(str2double(v));
+        code{1} = nasa_toLustre.lustreAst.BoolExpr(str2double(v));
     elseif strcmp(args.expected_lusDT, 'int')
         %tree might be 1 or 3e5
         code{1} = nasa_toLustre.lustreAst.IntExpr(str2double(v));

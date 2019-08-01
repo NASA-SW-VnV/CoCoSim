@@ -5,7 +5,7 @@
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [new_obj, varIds] = pseudoCode2Lustre(obj)
+function [new_obj, varIds] = pseudoCode2Lustre(obj, data_map)
         varIds = {};
     outputs_map = containers.Map('KeyType', 'char', 'ValueType', 'int32');
 
@@ -29,16 +29,16 @@ function [new_obj, varIds] = pseudoCode2Lustre(obj)
             continue;
         end
         [new_bodyEqs{i}, outputs_map] = ...
-            obj.bodyEqs{i}.pseudoCode2Lustre(outputs_map, isLeft);
+            obj.bodyEqs{i}.pseudoCode2Lustre(outputs_map, isLeft, obj, data_map);
     end
 
     %Go over Assertions, localProperties, ...
     for i=I
         [new_bodyEqs{i}, outputs_map] = ...
-            obj.bodyEqs{i}.pseudoCode2Lustre(outputs_map, isLeft);
+            obj.bodyEqs{i}.pseudoCode2Lustre(outputs_map, isLeft, obj, data_map);
     end
     if ~isempty(obj.localContract)
-        new_localContract = obj.localContract.pseudoCode2Lustre(outputs_map, isLeft);
+        new_localContract = obj.localContract.pseudoCode2Lustre(outputs_map, isLeft, obj, data_map);
     else
         new_localContract = obj.localContract;
     end

@@ -64,7 +64,7 @@ classdef Switch_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                         elseif strcmp(lus_inportDataType, 'int')
                             threshold_str_temp = nasa_toLustre.lustreAst.IntExpr(0);
                         else
-                            threshold_str_temp = nasa_toLustre.lustreAst.BooleanExpr('false');
+                            threshold_str_temp = nasa_toLustre.lustreAst.BoolExpr('false');
                             secondInputIsBoolean = 1;
                         end
                         threshold_ast = cell(1, max_width);

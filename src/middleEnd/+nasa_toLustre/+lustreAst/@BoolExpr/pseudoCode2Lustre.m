@@ -1,4 +1,4 @@
-function new_obj = deepCopy(obj)
+function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, varargin)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Copyright (c) 2019 United States Government as represented by the
 % Administrator of the National Aeronautics and Space Administration.
@@ -6,5 +6,5 @@ function new_obj = deepCopy(obj)
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    new_obj = nasa_toLustre.lustreAst.BooleanExpr(obj.value);
+    new_obj = obj;
 end

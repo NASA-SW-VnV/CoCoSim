@@ -11,7 +11,7 @@ classdef SF2LusUtils
     end
     
     methods(Static)
-        [outputs, inputs] = getInOutputsFromAction(lus_action, isCondition, data_map, expreession)
+        [outputs, inputs] = getInOutputsFromAction(lus_action, isCondition, data_map, expreession, isMatlab)
         
         % this function for Entry, Exit State Actions
         new_assignements = addInnerCond(lus_eqts, isInnerLusVar, orig_exp, state)

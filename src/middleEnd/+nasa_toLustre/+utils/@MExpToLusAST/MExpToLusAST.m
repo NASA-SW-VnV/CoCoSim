@@ -17,6 +17,7 @@ classdef MExpToLusAST
         [code, lusDT, dim] = constant_To_Lustre(tree, args)
         [code, lusDT, dim] = end_To_Lustre(tree, args)
         [code, lusDT, dim] = expression_To_Lustre(tree, args)
+        [code, lusDT, dim] = for_block_To_Lustre(tree, args)
         [code, lusDT, dim] = fun_indexing_To_Lustre(tree, args)
         [code, lusDT, dim] = ID_To_Lustre(tree, args)
         [code, lusDT, dim] = if_block_To_Lustre(tree, args)

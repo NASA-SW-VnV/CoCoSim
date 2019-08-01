@@ -35,7 +35,7 @@ function [fun_node,failed ]  = getFuncCode(func, data_map, blkObj, parent, blk)
             args.isMatlabFun = true;
             lusCode = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(s, args);
             [vars, ~] = nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getInOutputsFromAction(lusCode, ...
-                false, data_map, s.text);
+                false, data_map, s.text, true);
             variables = MatlabUtils.concat(variables, vars);
             body = MatlabUtils.concat(body, lusCode);
         catch me
@@ -56,5 +56,5 @@ function [fun_node,failed ]  = getFuncCode(func, data_map, blkObj, parent, blk)
     variables = nasa_toLustre.lustreAst.LustreVar.setDiff(variables, node_outputs);
     fun_node.setLocalVars(variables);
     fun_node.setBodyEqs(body);
-    fun_node = fun_node.pseudoCode2Lustre();
+    fun_node = fun_node.pseudoCode2Lustre(data_map);
 end

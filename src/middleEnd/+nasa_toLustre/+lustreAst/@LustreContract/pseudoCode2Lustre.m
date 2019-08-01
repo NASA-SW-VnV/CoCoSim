@@ -1,4 +1,4 @@
-function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft)
+function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft, node, data_map)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -11,7 +11,7 @@ function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft)
         for i=1:numel(obj.bodyEqs)
             if isa(obj.bodyEqs{i}, 'nasa_toLustre.lustreAst.ContractImportExpr')
                 [obj.bodyEqs{i}, outputs_map] = ...
-                    obj.bodyEqs{i}.pseudoCode2Lustre(outputs_map);
+                    obj.bodyEqs{i}.pseudoCode2Lustre(outputs_map, isLeft, node, data_map);
             end
         end
         new_obj = obj;

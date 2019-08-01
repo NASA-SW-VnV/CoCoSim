@@ -8,10 +8,10 @@ function [lus_action, outputs, inputs, external_libraries] = ...
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   
     
-    if nargin < 3
+    if nargin < 3 || isempty(isCondition)
         isCondition = false;
     end
-    if nargin < 5
+    if nargin < 5 || isempty(ignoreOutInputs)
         ignoreOutInputs = false;
     end
     outputs = {};

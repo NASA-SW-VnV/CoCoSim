@@ -10,9 +10,8 @@ function [external_nodes, failed] = getMFunctionCode(blkObj, parent,  blk, Input
     %
     %
     global SF_MF_FUNCTIONS_MAP MFUNCTION_EXTERNAL_NODES
-    if isempty(MFUNCTION_EXTERNAL_NODES)
-        MFUNCTION_EXTERNAL_NODES = {};
-    end
+    % reset MFUNCTION_EXTERNAL_NODES
+    MFUNCTION_EXTERNAL_NODES = {};
     external_nodes ={};
     % get all user functions needed in one script
     [script, failed] = nasa_toLustre.frontEnd.MF_To_LustreNode.getAllRequiredFunctionsInOneScript(blk );

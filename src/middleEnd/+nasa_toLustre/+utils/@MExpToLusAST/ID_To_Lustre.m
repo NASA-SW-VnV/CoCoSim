@@ -14,7 +14,7 @@ function [code, dt, dim] = ID_To_Lustre(tree, args)
     end
     dt = nasa_toLustre.utils.MExpToLusDT.ID_DT(tree, args);
     if strcmp(id, 'true') || strcmp(id, 'false')
-        code{1} = nasa_toLustre.lustreAst.BooleanExpr(id);
+        code{1} = nasa_toLustre.lustreAst.BoolExpr(id);
         dim = [1 1];
     elseif args.isSimulink && strcmp(id, 'u')
         %the case of u with no index in IF/Fcn/SwitchCase blocks
@@ -59,7 +59,7 @@ function [code, dt, dim] = ID_To_Lustre(tree, args)
             code = cell(numel(value), 1);
             for i=1:numel(value)
                 if strcmp(args.expected_lusDT, 'bool')
-                    code{i} = nasa_toLustre.lustreAst.BooleanExpr(value(i));
+                    code{i} = nasa_toLustre.lustreAst.BoolExpr(value(i));
                 elseif strcmp(args.expected_lusDT, 'int')
                     code{i} = nasa_toLustre.lustreAst.IntExpr(value(i));
                 else

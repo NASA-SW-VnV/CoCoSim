@@ -83,7 +83,7 @@ function [code, exp_dt] = arrayAccess_To_Lustre(tree, args)
             %idx = i + (j-1) * n + (k-1) * n * m
             code{1} = constantIndexing(namesAst, parameters, CompiledSize, tree);
         else
-            %e.g., x = A(1:end, 2)
+            %e.g., A(1:end, 2) , H(:,j)
             cell_params = cell(numel(parameters), 1);
             args.expected_lusDT = params_dt;
             for i=1:length(parameters)

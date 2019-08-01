@@ -115,7 +115,7 @@ function code = parseOtherFunc(tree, args)
                     || isempty(args.expected_lusDT)
                 code = nasa_toLustre.lustreAst.RealExpr(value);
             elseif strcmp(args.expected_lusDT, 'bool')
-                code = nasa_toLustre.lustreAst.BooleanExpr(value);
+                code = nasa_toLustre.lustreAst.BoolExpr(value);
             else
                 code = nasa_toLustre.lustreAst.IntExpr(value);
             end

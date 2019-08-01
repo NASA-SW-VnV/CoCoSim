@@ -1,4 +1,4 @@
-function [outputs, inputs] = getInOutputsFromAction(lus_action, isCondition, data_map, expression)
+function [outputs, inputs] = getInOutputsFromAction(lus_action, isCondition, data_map, expression, isMatlab)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -6,6 +6,9 @@ function [outputs, inputs] = getInOutputsFromAction(lus_action, isCondition, dat
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
+    if nargin < 5 || isempty(isMatlab)
+        isMatlab = false;
+    end
     outputs = {};
     inputs = {};
     
@@ -23,6 +26,9 @@ function [outputs, inputs] = getInOutputsFromAction(lus_action, isCondition, dat
                 inputs = MatlabUtils.concat(inputs, inputs_i);
                 continue;
             elseif~isa(assignments{act_idx}, 'nasa_toLustre.lustreAst.LustreEq')
+                if isMatlab
+                    continue;
+                end
                 ME = MException('COCOSIM:STATEFLOW', ...
                     'Action "%s" should be an assignement (e.g. outputs = f(inputs))', ...
                     expression);
