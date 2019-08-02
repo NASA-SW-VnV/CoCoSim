@@ -3,14 +3,14 @@ classdef CoCoDocker
     %% example using the API
     % sharedFolder = '/path/to/cocosim_result/absolute'
     % CoCoDocker.start(sharedFolder)
-    % CoCoDocker.exec(sharedFolder, 'lustrec -node absolute_PP -int="long long int" absolute_PP.lus')
-    % CoCoDocker.exec(sharedFolder, 'make -f absolute_PP.makefile')
+    % CoCoDocker.exec(sharedFolder, 'lustrec -node absolute_PP -int="long long int" absolute_PP.LUSTREC.lus')
+    % CoCoDocker.exec(sharedFolder, 'make -f absolute_PP.LUSTREC.makefile')
     % CoCoDocker.exec(sharedFolder, '/lus/absolute_PP.LUSTREC_absolute_PP < /lus/absolute_PP_input_values > absolute_PP_output_values')
     % CocoDocker.stop()
     %% in terminal (example)
     % docker run -d --name=toto -v $(pwd):/lus cocotest
-    % docker exec toto lustrec -node absolute_PP -int="long long int" absolute_PP.lus
-    % docker exec toto make -f absolute_PP.makefile
+    % docker exec toto lustrec -node absolute_PP -int="long long int" absolute_PP.LUSTREC.lus
+    % docker exec toto make -f absolute_PP.LUSTREC.makefile
     % docker exec toto bash -c '/lus/absolute_PP.LUSTREC_absolute_PP < /lus/absolute_PP_input_values > absolute_PP_output_values'
     % docker stop toto && docker rm toto
     properties
@@ -40,24 +40,40 @@ classdef CoCoDocker
         end
         
         function [c_name, errCode, stdout] = start(sharedFolder)
+            global DOCKER
+            if isempty(DOCKER)
+                tools_config;
+            end
             c_name = CoCoDocker.getCurrentContainerName(true);
-            [errCode, stdout] = system(sprintf('docker run -d --name=%s -v %s:/lus cocosim/lustre', ...
-                c_name, sharedFolder));
+            [errCode, stdout] = system(sprintf('%s run -d --name=%s -v %s:/lus cocosim/lustre', ...
+                DOCKER, c_name, sharedFolder));
         end
         
         function [errCode, stdout] = cp(dockerPath, hostPath)
+            global DOCKER
+            if isempty(DOCKER)
+                tools_config;
+            end
             c_name = CoCoDocker.getCurrentContainerName();
-            [errCode, stdout] = system(sprintf('docker cp %s:%s %s', ...
-                c_name, dockerPath, hostPath));
+            [errCode, stdout] = system(sprintf('%s cp %s:%s %s', ...
+                DOCKER, c_name, dockerPath, hostPath));
         end 
         
         function [errCode, stdout] = stop()
+            global DOCKER
+            if isempty(DOCKER)
+                tools_config;
+            end
             c_name = CoCoDocker.getCurrentContainerName(false, true);
-            [errCode, stdout] = system(sprintf('docker stop %s; docker rm %s', ...
-                c_name, c_name));
+            [errCode, stdout] = system(sprintf('%s kill %s; docker rm %s', ...
+                DOCKER, c_name, c_name));
         end 
         
         function [errCode, stdout] = exec(sharedFolder, cmd)
+            global DOCKER
+            if isempty(DOCKER)
+                tools_config;
+            end
             c_name = CoCoDocker.getCurrentContainerName();
             if isempty(c_name)
                 [c_name, errCode, stdout] = CoCoDocker.start(sharedFolder);
@@ -65,8 +81,8 @@ classdef CoCoDocker
                     return;
                 end
             end
-            [errCode, stdout] = system(sprintf('docker exec %s bash -c ''%s''', ...
-                c_name, cmd));
+            [errCode, stdout] = system(sprintf('%s exec %s bash -c ''%s''', ...
+                DOCKER, c_name, cmd));
         end
         
         
