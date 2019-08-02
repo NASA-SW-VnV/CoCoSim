@@ -24,7 +24,8 @@
 
 global tools_config_already_run LUSTREC LUSTREC_OPTS LUSTRET ...
     LUCTREC_INCLUDE_DIR ZUSTRE Z3 KIND2 JKIND JLUSTRE2KIND SEAHORN...
-    WLLVM WLLVMPP EXTRACT_BC IKOS cocosim_version;
+    WLLVM WLLVMPP EXTRACT_BC IKOS cocosim_version ...
+    DOCKER;
 if isempty(tools_config_already_run) 
     tools_config_already_run = false;
 end
@@ -77,6 +78,7 @@ else
     JKIND = fullfile(verifiers_path, 'jkind', 'jkind');
     JLUSTRE2KIND = fullfile(verifiers_path, 'jkind', 'jlustre2kind');
     SEAHORN = 'PATH';
+    [status, DOCKER] = system('which docker'); % you can set here docker path
     
     if ~tools_config_already_run
         if ~exist(LUSTREC,'file')
@@ -107,7 +109,15 @@ else
             display_msg('You can ignore the previous warning if you are not going to use Kind2 for verification', ...
                 MsgType.WARNING, 'tools_config', '');
         end
-        
+        if ~exist(DOCKER,'file')
+            display_msg(...
+                sprintf('DOCKER is not found in %s, configure your path in tools_config.m', DOCKER), ...
+                MsgType.WARNING, 'tools_config', '');
+            display_msg('You can set your Docker to Matlab path by: setenv(''PATH'', [getenv(''PATH'') '':/path/to/docker'']);', ...
+                MsgType.WARNING, 'tools_config', '');
+            display_msg('You can ignore the previous warning if you are not going to use DOCKER for verification', ...
+                MsgType.WARNING, 'tools_config', '');
+        end
     end
     %% IKOS Configuration: WLLVM, WLLVMPP, EXTRACT_BC, IKOS
     % You should be interested to configure this part only if you will use IKOS
