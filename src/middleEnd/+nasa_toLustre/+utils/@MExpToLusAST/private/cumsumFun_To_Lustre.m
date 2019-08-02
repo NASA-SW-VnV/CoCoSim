@@ -13,7 +13,8 @@ function [code, exp_dt, dim, extra_code] = cumsumFun_To_Lustre(tree, args)
     op = nasa_toLustre.lustreAst.BinaryExpr.PLUS;
     
     [x, exp_dt, dim, extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(1), args);
-    
+    if isrow(x), x = x'; end
+
     if length(dim) > 2 % TODO support multi-dimension input
         ME = MException('COCOSIM:TREE2CODE', ...
             'Function cumsum in expression "%s" first argument is %d-dimension, more than 2 is not supported.',...
@@ -72,7 +73,7 @@ function [code, exp_dt, dim, extra_code] = cumsumFun_To_Lustre(tree, args)
         end
     end
     
-    code = reshape(code, [1 prod(dim)]);
+    code = reshape(code, [prod(dim) 1]);
     
 end
 

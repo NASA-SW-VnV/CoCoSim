@@ -26,7 +26,7 @@ function [code, dt, dim, extra_code] = matrix_To_Lustre(tree, args)
     else
         code_dt = dt;
     end
-    
+    if isrow(code_dt), code_dt = code_dt'; end
     code = {};
     code_dt = reshape(code_dt, nb_rows, nb_columns);
     if args.isLeft && nb_columns == 1
@@ -52,13 +52,14 @@ function [code, dt, dim, extra_code] = matrix_To_Lustre(tree, args)
                 [code_j, ~, code_dim, extra_code_i] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
                     v, args);
                 extra_code = MatlabUtils.concat(extra_code, extra_code_i);
+                if isrow(code_j), code_j = code_j'; end
                 code_j = reshape(code_j, code_dim);
                 code_i = [code_i, code_j];
             end
             code_rows = [code_rows; code_i];
         end
         dim = size(code_rows);
-        code = reshape(code_rows, 1, numel(code_rows));
+        code = reshape(code_rows, numel(code_rows), 1);
     end
     
 end

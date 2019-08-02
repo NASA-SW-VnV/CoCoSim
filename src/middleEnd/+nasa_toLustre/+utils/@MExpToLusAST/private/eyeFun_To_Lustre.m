@@ -13,6 +13,7 @@ function [code, exp_dt, dim, extra_code] = eyeFun_To_Lustre(tree, args)
     end
     new_tree = MatlabUtils.getExpTree(expr);
     [r_code, exp_dt, dim, extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(new_tree, args);
+    if isrow(r_code), r_code = r_code'; end
     if prod(dim) > 1
         r_code = reshape(r_code, dim);
     end

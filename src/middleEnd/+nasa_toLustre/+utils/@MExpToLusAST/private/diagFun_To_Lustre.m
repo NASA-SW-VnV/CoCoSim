@@ -24,11 +24,12 @@ function [code, exp_dt, dim, extra_code] = diagFun_To_Lustre(tree, args)
             r_code = arrayfun(@(x) nasa_toLustre.lustreAst.RealExpr(0), (1:prod(dim)), 'UniformOutput', 0);
             exp_dt = 'real';
         end
+        if isrow(r_code), r_code = r_code'; end
         r_code = reshape(r_code, dim);
         for i=1:prod(x_dim)
             r_code(i, i) = x(i);
         end
-        code = reshape(r_code, 1, prod(dim));
+        code = reshape(r_code, [prod(dim) 1]);
     end
     
 end

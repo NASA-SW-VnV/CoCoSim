@@ -39,7 +39,8 @@ function [code, exp_dt, dim, extra_code] = circshiftFun_To_Lustre(tree, args)
         code1 = circshift(X_reshp, Y);
     end
     exp_dt = X_dt;
-    code = reshape(code1, [1 prod(X_dim)]);
+    if isrow(code1), code1 = code1'; end
+    code = reshape(code1, [prod(X_dim) 1]);
     dim = X_dim;
 end
 
