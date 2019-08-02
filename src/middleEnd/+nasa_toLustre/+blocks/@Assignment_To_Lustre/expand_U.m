@@ -38,5 +38,6 @@ function [in_matrix_dimension, U_expanded_dims,inputs] = ...
     
     if numel(inputs{2}) == 1 && numel(inputs{2}) < U_expanded_dims.width
         inputs{2} = arrayfun(@(x) {inputs{2}{1}}, (1:U_expanded_dims.width));
+        in_matrix_dimension{2} = U_expanded_dims;
     end
 end

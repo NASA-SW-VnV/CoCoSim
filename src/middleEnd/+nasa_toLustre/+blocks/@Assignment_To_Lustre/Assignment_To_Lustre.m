@@ -112,7 +112,9 @@ classdef Assignment_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             % share code with Selector_To_Lustre
              isSelector = 0;
             % getBlockInputsOutputs
-            [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+            [outputs, outputs_dt] = ...
+                nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(...
+                parent, blk, [], xml_trace);
             % for the example above (assignment_mixed_port_u_expanded.slx): 
             % outputs = {{'Assignment_1'}    {'Assignment_2'}    {'Assignment_3'}    {'Assignment_4'}    {'Assignment_5'}  {'Assignment_6'}}
             % outputs_dt = {'Assignment_1: real;', 'Assignment_2: real;',
@@ -120,32 +122,36 @@ classdef Assignment_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             %               'Assignment_6: real;'}            
             
             [inputs] = ...
-                nasa_toLustre.blocks.Assignment_To_Lustre.getBlockInputsNames_convInType2AccType(obj, parent, blk,isSelector);
+                nasa_toLustre.blocks.Assignment_To_Lustre.getBlockInputsNames_convInType2AccType(...
+                obj, parent, blk,isSelector);
             % For the exmple above:
             % inputs{1} = 'In1_1'    'In1_2'    'In1_3'  'In1_4'    'In1_5'    'In1_6'
             % inputs{2} = 'Constant1_1'
             % inputs{3} = 'real_to_int(Saturation_1)'
    
             [numOutDims, ~, ~] = ...
-                nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(parent, blk, blk.NumberOfDimensions);   
+                nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(...
+                parent, blk, blk.NumberOfDimensions);   
             % For the example above
             % numOutDims = 2
             
             % get matrix dimension of all inputs, and expand U if needed.
             % inputs is also expanded if U is expanded
             % expanding second input            
-            [in_matrix_dimension, U_expanded_dims,inputs] = ...
+            [in_matrix_dimension, U_expanded_dims,inputs_for_ind] = ...
                 obj.expand_U(parent,blk,inputs,numOutDims);
             % For the example above
             % in_matrix_dimension{1} =struct( "numDs": 2, "dims": [3,2], "width": 6)
             % in_matrix_dimension{2} =struct( "numDs": 1, "dims": 1, "width": 1)
             % in_matrix_dimension{3} =struct( "numDs": 1, "dims": 1, "width": 1)
             % U_expanded_dims = struct( "numDs": 2, "dims": [2,1], "width": 2) 
-            % inputs{2} changed to
-            % inputs{2} = 'Constant1_1'  'Constant1_1'
+            % inputs_for_ind{2} changed to
+            % inputs_for_ind{2} = 'Constant1_1'  'Constant1_1'
                 
             % define mapping array ind
-            [isPortIndex,ind,~] = nasa_toLustre.blocks.Assignment_To_Lustre.defineMapInd(obj,parent,blk,inputs,U_expanded_dims,isSelector);
+            [isPortIndex,ind,~] = ...
+                nasa_toLustre.blocks.Assignment_To_Lustre.defineMapInd(...
+                obj,parent,blk,inputs_for_ind,U_expanded_dims,isSelector);
             % For the example above
             % isPortIndex = 1
             % ind{1} = [1,3]  
@@ -154,9 +160,13 @@ classdef Assignment_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             % if index assignment is read in from index port, write mapping
             % code on Lustre side
             if isPortIndex
-                [codes] = getWriteCodeForPortInput(obj, in_matrix_dimension,inputs,outputs,numOutDims,U_expanded_dims,ind,blk);                
+                [codes] = getWriteCodeForPortInput(obj, ...
+                    in_matrix_dimension,inputs_for_ind,outputs,numOutDims,...
+                    U_expanded_dims,ind,blk);                
             else  % no port input
-                [codes] = getWriteCodeForNonPortInput(obj,in_matrix_dimension,inputs,outputs,numOutDims,U_expanded_dims,ind);                
+                [codes] = getWriteCodeForNonPortInput(obj,...
+                    in_matrix_dimension,inputs_for_ind,outputs,numOutDims,...
+                    U_expanded_dims,ind);                
             end
             
             obj.addCode( codes );
@@ -164,7 +174,9 @@ classdef Assignment_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         end
         function options = getUnsupportedOptions(obj, ~, blk, varargin)
             
-            in_matrix_dimension = nasa_toLustre.blocks.Assignment_To_Lustre.getInputMatrixDimensions(blk.CompiledPortDimensions.Inport);
+            in_matrix_dimension = ...
+                nasa_toLustre.blocks.Assignment_To_Lustre.getInputMatrixDimensions(...
+                blk.CompiledPortDimensions.Inport);
             if in_matrix_dimension{1}.numDs>7
                 msg = sprintf('More than 7 dimensions is not supported in block %s',...
                     HtmlItem.addOpenCmd(blk.Origin_path));
@@ -179,7 +191,8 @@ classdef Assignment_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             for i=1:numel(blk.IndexOptionArray)
                 if strcmp(blk.IndexOptionArray{i}, 'Starting and ending indices (port)')
                     msg = sprintf('IndexOption  %s not supported in block %s',...
-                        blk.IndexOptionArray{i}, HtmlItem.addOpenCmd(blk.Origin_path));
+                        blk.IndexOptionArray{i}, ...
+                        HtmlItem.addOpenCmd(blk.Origin_path));
                     obj.addUnsupported_options(msg);
                 end
             end
@@ -191,14 +204,19 @@ classdef Assignment_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         
     end
     methods
-        [in_matrix_dimension, U_expanded_dims,inputs] = expand_U(obj, parent,blk,inputs,numOutDims)
-        [codes] = getWriteCodeForNonPortInput(obj, in_matrix_dimension,inputs,outputs,numOutDims,U_expanded_dims,ind)
-        [codes] = getWriteCodeForPortInput(obj, in_matrix_dimension,inputs,outputs,numOutDims,U_expanded_dims,ind,blk)
+        [in_matrix_dimension, U_expanded_dims,inputs] = ...
+            expand_U(obj, parent,blk,inputs,numOutDims)
+        [codes] = getWriteCodeForNonPortInput(obj, in_matrix_dimension,...
+            inputs,outputs,numOutDims,U_expanded_dims,ind)
+        [codes] = getWriteCodeForPortInput(obj, in_matrix_dimension,...
+            inputs,outputs,numOutDims,U_expanded_dims,ind,blk)
     end
     methods(Static)
         in_matrix_dimension = getInputMatrixDimensions(inport_dimensions)
-        [inputs] = getBlockInputsNames_convInType2AccType(obj, parent, blk,isSelector)
-        [isPortIndex,ind,selectorOutputDimsArray] = defineMapInd(~,parent,blk,inputs,U_expanded_dims,isSelector)
+        [inputs] = getBlockInputsNames_convInType2AccType(obj, parent,...
+            blk,isSelector)
+        [isPortIndex,ind,selectorOutputDimsArray] = defineMapInd(~,...
+            parent,blk,inputs,U_expanded_dims,isSelector)
     end
     
 end

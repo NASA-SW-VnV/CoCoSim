@@ -50,8 +50,16 @@ function [codes] = getWriteCodeForNonPortInput(~, in_matrix_dimension,inputs,out
 %     end
 
     %% Second approach
-    Y0_reshaped = reshape(inputs{1}, in_matrix_dimension{1}.dims);
-    U_reshaped = reshape(inputs{2}, in_matrix_dimension{2}.dims);
+    in_matrix_dimension_1_dims = in_matrix_dimension{1}.dims;
+    in_matrix_dimension_2_dims = in_matrix_dimension{2}.dims;
+    if numel(in_matrix_dimension_1_dims) == 1
+        in_matrix_dimension_1_dims = [1, in_matrix_dimension_1_dims];
+    end
+    if numel(in_matrix_dimension_2_dims) == 1
+        in_matrix_dimension_2_dims = [1, in_matrix_dimension_2_dims];
+    end    
+    Y0_reshaped = reshape(inputs{1}, in_matrix_dimension_1_dims);
+    U_reshaped = reshape(inputs{2}, in_matrix_dimension_2_dims);
     Y = Y0_reshaped;
     Y(ind{:}) = U_reshaped;
     Y_inlined = reshape(Y, [1, prod(in_matrix_dimension{1}.dims)]);
