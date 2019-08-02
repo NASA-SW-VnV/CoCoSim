@@ -1,4 +1,4 @@
-function [code, exp_dt, dim] = expression_To_Lustre(tree, args)
+function [code, exp_dt, dim, extra_code] = expression_To_Lustre(tree, args)
     %this function is extended to be used by If-Block,
     %SwitchCase and Fcn blocks. Also it is used by Stateflow
     %actions
@@ -23,6 +23,7 @@ function [code, exp_dt, dim] = expression_To_Lustre(tree, args)
     if ~isfield(args, 'if_cond'), args.if_cond = []; end
     % we assume this function returns cell.
     code = {};
+    extra_code = {};
     exp_dt = '';
     dim = [];
     if isempty(tree)
@@ -50,15 +51,15 @@ function [code, exp_dt, dim] = expression_To_Lustre(tree, args)
                 'plus_minus', 'mtimes', 'times', ...
                 'mrdivide', 'mldivide', 'rdivide', 'ldivide', ...
                 'mpower', 'power'}
-            [code, exp_dt, dim] = nasa_toLustre.utils.MExpToLusAST.binaryExpression_To_Lustre(tree, args);
+            [code, exp_dt, dim, extra_code] = nasa_toLustre.utils.MExpToLusAST.binaryExpression_To_Lustre(tree, args);
         case {'COLON', 'colonExpression'}
-            [code, exp_dt, dim] = nasa_toLustre.utils.MExpToLusAST.colonExpression_To_Lustre(tree, args);
+            [code, exp_dt, dim, extra_code] = nasa_toLustre.utils.MExpToLusAST.colonExpression_To_Lustre(tree, args);
         otherwise
             % we use the name of tree_type to call the associated function
             func_name = strcat(tree_type, '_To_Lustre');
             func_handle = str2func(strcat('nasa_toLustre.utils.MExpToLusAST.', func_name));
             try
-                [code, exp_dt, dim] = func_handle(tree, args);
+                [code, exp_dt, dim, extra_code] = func_handle(tree, args);
             catch me
                 if strcmp(me.identifier, 'MATLAB:UndefinedFunction')
                     display_msg(me.getReport(), MsgType.DEBUG, 'MExpToLusAST.expression_To_Lustre', '');
@@ -77,11 +78,11 @@ function [code, exp_dt, dim] = expression_To_Lustre(tree, args)
             end
     end
     % convert tree DT to what is expected.
-    try
+%     try
     [code, output_dt] = nasa_toLustre.utils.MExpToLusDT.convertDT(args.blkObj, code, exp_dt, args.expected_lusDT);
-    catch me
-        me
-    end
+%     catch me
+%         me
+%     end
     if ~isempty(output_dt), exp_dt = output_dt; end
     
 end

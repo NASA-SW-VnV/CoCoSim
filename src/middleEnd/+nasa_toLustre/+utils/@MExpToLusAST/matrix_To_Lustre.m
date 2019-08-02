@@ -1,4 +1,4 @@
-function [code, dt, dim] = matrix_To_Lustre(tree, args)
+function [code, dt, dim, extra_code] = matrix_To_Lustre(tree, args)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -8,7 +8,7 @@ function [code, dt, dim] = matrix_To_Lustre(tree, args)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     dt = nasa_toLustre.utils.MExpToLusDT.expression_DT(tree, args);
-    
+    extra_code = {};
     if isstruct(tree.rows)
         rows = arrayfun(@(x) x, tree.rows, 'UniformOutput', false);
     else
@@ -35,9 +35,10 @@ function [code, dt, dim] = matrix_To_Lustre(tree, args)
             for i=1:nb_rows
                 v = rows{i}(j);
                 args.expected_lusDT = code_dt{i, j};
-                code = MatlabUtils.concat(code, ...
-                    nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
-                    v, args));
+                [code_i, ~, ~, extra_code_i] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
+                    v, args);
+                extra_code = MatlabUtils.concat(extra_code, extra_code_i);
+                code = MatlabUtils.concat(code, code_i);
             end
         end
         dim = [1 length(code)];
@@ -48,8 +49,9 @@ function [code, dt, dim] = matrix_To_Lustre(tree, args)
             for j=1:nb_columns
                 v = rows{i}(j);
                 args.expected_lusDT = code_dt{i, j};
-                [code_j, ~, code_dim] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
+                [code_j, ~, code_dim, extra_code_i] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
                     v, args);
+                extra_code = MatlabUtils.concat(extra_code, extra_code_i);
                 code_j = reshape(code_j, code_dim);
                 code_i = [code_i, code_j];
             end

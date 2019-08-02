@@ -1,4 +1,4 @@
-function [code, exp_dt, dim] = colonExpression_To_Lustre(tree, args)
+function [code, exp_dt, dim, extra_code] = colonExpression_To_Lustre(tree, args)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -7,15 +7,17 @@ function [code, exp_dt, dim] = colonExpression_To_Lustre(tree, args)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     
-    
+    extra_code = {};
     if count(tree.text, ':') == 2
         if strcmp(tree.leftExp.leftExp.type, 'constant') && strcmp(tree.leftExp.rightExp.type, 'constant') && strcmp(tree.rightExp.type, 'constant')
-            [left, left_dt, ~] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
+            [left, left_dt, ~, left_extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
                 tree.leftExp.leftExp, args);
-            [middle, middle_dt, ~] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
+            [middle, middle_dt, ~, middle_extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
                 tree.leftExp.rightExp, args);
-            [right, right_dt, ~] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
+            [right, right_dt, ~, right_extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
                 tree.rightExp, args);
+            extra_code = MatlabUtils.concat(left_extra_code, middle_extra_code, right_extra_code);
+
             upper_dt = nasa_toLustre.utils.MExpToLusDT.upperDT(left_dt, right_dt);
             exp_dt = nasa_toLustre.utils.MExpToLusDT.upperDT(upper_dt, middle_dt);
             left_value = left{1}.value;
@@ -44,10 +46,12 @@ function [code, exp_dt, dim] = colonExpression_To_Lustre(tree, args)
                 [code, exp_dt, dim] = nasa_toLustre.utils.MF2LusUtils.numFun_To_Lustre(...
                     tree, args);
             catch
-                [left, left_dt, ~] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
+                [left, left_dt, ~, left_extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
                     tree.leftExp, args);
-                [right, right_dt, ~] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
+                [right, right_dt, ~, right_extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
                     tree.rightExp, args);
+                extra_code = MatlabUtils.concat(left_extra_code, right_extra_code);
+
                 exp_dt = nasa_toLustre.utils.MExpToLusDT.upperDT(left_dt, right_dt);
                 if isa(left{1}, 'nasa_toLustre.lustreAst.IntExpr') || ...
                         isa(left{1}, 'nasa_toLustre.lustreAst.RealExpr')

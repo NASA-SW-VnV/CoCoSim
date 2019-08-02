@@ -1,4 +1,4 @@
-function [code, exp_dt, dim] = while_block_To_Lustre(tree, args)
+function [code, exp_dt, dim, extra_code] = while_block_To_Lustre(tree, args)
     % end is used for Array indexing: e.g., x(end-1), x(1:end) ... 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
@@ -12,7 +12,7 @@ function [code, exp_dt, dim] = while_block_To_Lustre(tree, args)
     code = {};
     exp_dt = '';
     dim = [];
-    
+    extra_code = {};
     %%
     [while_node] = nasa_toLustre.utils.MF2LusUtils.abstract_statements_block(...
         tree, args, 'WHILE');

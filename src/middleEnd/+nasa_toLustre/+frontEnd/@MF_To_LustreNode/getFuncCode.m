@@ -33,11 +33,16 @@ function [fun_node,failed ]  = getFuncCode(func, data_map, blkObj, parent, blk)
             args.isSimulink = false;
             args.isStateFlow = false;
             args.isMatlabFun = true;
-            lusCode = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(s, args);
+            [lusCode, ~, ~, extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(s, args);
+            if ~isempty(extra_code)
+                [vars, ~] = nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getInOutputsFromAction(extra_code, ...
+                    false, data_map, s.text, true);
+                variables = MatlabUtils.concat(variables, vars);
+            end
             [vars, ~] = nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getInOutputsFromAction(lusCode, ...
                 false, data_map, s.text, true);
             variables = MatlabUtils.concat(variables, vars);
-            body = MatlabUtils.concat(body, lusCode);
+            body = MatlabUtils.concat(body, extra_code, lusCode);
         catch me
             if strcmp(me.identifier, 'COCOSIM:STATEFLOW')
                 display_msg(me.message, MsgType.WARNING, 'getMFunctionCode', '');

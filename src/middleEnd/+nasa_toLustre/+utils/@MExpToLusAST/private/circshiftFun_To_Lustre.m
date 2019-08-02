@@ -1,4 +1,4 @@
-function [code, exp_dt, dim] = circshiftFun_To_Lustre(tree, args)
+function [code, exp_dt, dim, extra_code] = circshiftFun_To_Lustre(tree, args)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -6,10 +6,10 @@ function [code, exp_dt, dim] = circshiftFun_To_Lustre(tree, args)
     % Author: Francois Conzelmann <francois.conzelmann@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    [X, X_dt, X_dim] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(1),args);
+    [X, X_dt, X_dim, extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(1),args);
     args.expected_lusDT = 'int';
-    [Y, ~, ~] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(2),args);
-    
+    [Y, ~, ~, extra_code_i] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(2),args);
+    extra_code = MatlabUtils.concat(extra_code, extra_code_i);
     X_reshp = reshape(X, X_dim);
     if isempty(Y) || ~isa(Y{1}, 'nasa_toLustre.lustreAst.RealExpr') ...
             || (length(Y) == 2 && ~isa(Y{2}, 'nasa_toLustre.lustreAst.RealExpr'))
@@ -32,7 +32,8 @@ function [code, exp_dt, dim] = circshiftFun_To_Lustre(tree, args)
     
     if (length(tree.parameters) > 2)
         args.expected_lusDT = 'int';
-        [d, ~, ~] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(3),args);
+        [d, ~, ~, extra_code_i] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(3),args);
+        extra_code = MatlabUtils.concat(extra_code, extra_code_i);
         code1 = circshift(X_reshp, Y, d{1}.value);
     else
         code1 = circshift(X_reshp, Y);

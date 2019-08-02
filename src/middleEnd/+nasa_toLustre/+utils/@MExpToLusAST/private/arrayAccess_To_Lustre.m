@@ -1,4 +1,4 @@
-function [code, exp_dt] = arrayAccess_To_Lustre(tree, args)
+function [code, exp_dt, extra_code] = arrayAccess_To_Lustre(tree, args)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -9,6 +9,7 @@ function [code, exp_dt] = arrayAccess_To_Lustre(tree, args)
     % This function should be only called from fun_indexing_To_Lustre.m
     %Array access
     code = {};
+    extra_code = {};
     exp_dt = nasa_toLustre.utils.MExpToLusDT.expression_DT(tree, args);
     
     params_dt = 'int';
@@ -42,8 +43,9 @@ function [code, exp_dt] = arrayAccess_To_Lustre(tree, args)
         else
             args.expected_lusDT = params_dt;
             args.end_value = prod(CompiledSize);
-            [arg, ~, ~] = ...
+            [arg, ~, ~, extra_code] = ...
                 nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(tree.parameters, args);
+            
             for argIdx=1:numel(arg)
                 if isa(arg{argIdx}, 'nasa_toLustre.lustreAst.IntExpr')
                     value = arg{argIdx}.getValue();
@@ -94,8 +96,9 @@ function [code, exp_dt] = arrayAccess_To_Lustre(tree, args)
                 else
                     args.end_value = CompiledSize(i);
                 end
-                [cell_params{i}, ~] = ...
+                [cell_params{i}, ~, ~, extra_code_i] = ...
                     nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(parameters{i}, args);
+                extra_code = MatlabUtils.concat(extra_code, extra_code_i);
             end
             params_list = MatlabUtils.cellCartesianProduct(cell_params);
             [nbR, ~] = size(params_list);

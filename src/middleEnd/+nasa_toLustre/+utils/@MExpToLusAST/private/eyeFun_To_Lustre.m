@@ -1,4 +1,4 @@
-function [code, exp_dt, dim] = eyeFun_To_Lustre(tree, args)
+function [code, exp_dt, dim, extra_code] = eyeFun_To_Lustre(tree, args)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -12,7 +12,7 @@ function [code, exp_dt, dim] = eyeFun_To_Lustre(tree, args)
         expr = sprintf("zeros(%s, %s)", tree.parameters.text);
     end
     new_tree = MatlabUtils.getExpTree(expr);
-    [r_code, exp_dt, dim] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(new_tree, args);
+    [r_code, exp_dt, dim, extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(new_tree, args);
     if prod(dim) > 1
         r_code = reshape(r_code, dim);
     end

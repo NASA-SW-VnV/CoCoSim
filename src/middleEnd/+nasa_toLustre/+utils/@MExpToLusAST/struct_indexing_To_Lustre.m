@@ -1,4 +1,4 @@
-function [code, exp_dt, dim] = struct_indexing_To_Lustre(tree, args)
+function [code, exp_dt, dim, extra_code] = struct_indexing_To_Lustre(tree, args)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -11,6 +11,7 @@ function [code, exp_dt, dim] = struct_indexing_To_Lustre(tree, args)
     exp_dt = nasa_toLustre.utils.MExpToLusDT.expression_DT(tree, args);
     tree_ID = tree.ID;
     dim = [];
+    extra_code = {};
     switch tree_ID
         case {'coder'}
             %ignore these Matlab class

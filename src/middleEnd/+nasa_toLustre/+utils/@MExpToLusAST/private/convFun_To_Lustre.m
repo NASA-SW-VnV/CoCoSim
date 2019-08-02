@@ -1,4 +1,4 @@
-function [code, exp_dt, dim] = convFun_To_Lustre(tree, args)
+function [code, exp_dt, dim, extra_code] = convFun_To_Lustre(tree, args)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -7,6 +7,7 @@ function [code, exp_dt, dim] = convFun_To_Lustre(tree, args)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         
     dim = [];
+    extra_code = {};
     % Do not forget to update exp_dt in each switch case if needed
     tree_ID = tree.ID;
     
@@ -22,7 +23,7 @@ function [code, exp_dt, dim] = convFun_To_Lustre(tree, args)
             end
             args.blkObj.addExternal_libraries(lib_name);
             args.expected_lusDT = expected_param_dt;
-            [param, ~, dim] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(1), args);
+            [param, ~, dim, extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(1), args);
             code = arrayfun(@(i) nasa_toLustre.lustreAst.NodeCallExpr(fun_name, param{i}), ...
                 (1:numel(param)), 'UniformOutput', false);
             exp_dt = 'real';
@@ -44,7 +45,7 @@ function [code, exp_dt, dim] = convFun_To_Lustre(tree, args)
             else
                 % cast of expression/variable
                 args.expected_lusDT = '';
-                [param, param_dt, dim] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(1),args);
+                [param, param_dt, dim, extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(1),args);
                 [external_lib, conv_format] = ...
                     nasa_toLustre.utils.SLX2LusUtils.dataType_conversion(param_dt, tree_ID);
                 if ~isempty(conv_format)

@@ -1,4 +1,4 @@
-function [code, exp_dt, dim] = constant_To_Lustre(tree, args)
+function [code, exp_dt, dim, extra_code] = constant_To_Lustre(tree, args)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -8,7 +8,7 @@ function [code, exp_dt, dim] = constant_To_Lustre(tree, args)
     code = {};
     exp_dt = args.expected_lusDT;
     dim = [1 1];
-    
+    extra_code = {};
     if ~strcmp(tree.dataType, 'Integer') && ~strcmp(tree.dataType, 'Float')
         % String | function_handle
         ME = MException('COCOSIM:TREE2CODE', ...

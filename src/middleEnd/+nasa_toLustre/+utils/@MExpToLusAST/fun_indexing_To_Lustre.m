@@ -1,4 +1,4 @@
-function [code, exp_dt, dim] = fun_indexing_To_Lustre(tree, args)
+function [code, exp_dt, dim, extra_code] = fun_indexing_To_Lustre(tree, args)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -11,6 +11,7 @@ function [code, exp_dt, dim] = fun_indexing_To_Lustre(tree, args)
     exp_dt = nasa_toLustre.utils.MExpToLusDT.expression_DT(tree, args);
     tree_ID = tree.ID;
     dim = [];
+    extra_code = {};
     switch tree_ID
         case  {'acos', 'acosh', 'asin', 'asinh', 'atan', ...
                 'atanh', 'cbrt', 'cos', 'cosh',...
@@ -20,16 +21,16 @@ function [code, exp_dt, dim] = fun_indexing_To_Lustre(tree, args)
                 'hypot', 'abs', 'sgn', 'sign', ...
                 'rem', 'mod'}
             
-            [code, exp_dt, dim] = mathFun_To_Lustre(tree, args);
+            [code, exp_dt, dim, extra_code] = mathFun_To_Lustre(tree, args);
             
         case {'ceil', 'floor', 'round', 'fabs', ...
                 'int8', 'int16', 'int32', ...
                 'uint8', 'uint16', 'uint32', ...
                 'double', 'single', 'boolean'}
-            [code, exp_dt, dim] = convFun_To_Lustre(tree, args);
+            [code, exp_dt, dim, extra_code] = convFun_To_Lustre(tree, args);
             
         case {'or', 'and', 'xor', 'plus', 'minus'}
-            [code, exp_dt, dim] = binaryFun_To_Lustre(tree, args);
+            [code, exp_dt, dim, extra_code] = binaryFun_To_Lustre(tree, args);
             
         case {'disp', 'sprintf', 'fprintf', 'plot'}
             %ignore these printing functions
@@ -42,10 +43,10 @@ function [code, exp_dt, dim] = fun_indexing_To_Lustre(tree, args)
                 %cocosim2/src/middleEnd/+nasa_toLustre/+blocks/+Stateflow/+utils/@MExpToLusAST/private
                 func_name = strcat(tree_ID, 'Fun_To_Lustre');
                 func_handle = str2func(func_name);
-                [code, exp_dt, dim] = func_handle(tree, args);
+                [code, exp_dt, dim, extra_code] = func_handle(tree, args);
             catch me
                 if strcmp(me.identifier, 'MATLAB:UndefinedFunction')
-                    code = parseOtherFunc(tree, args);
+                    [code, extra_code] = parseOtherFunc(tree, args);
                     dim = [1 1];
                 else
                     display_msg(me.getReport(), MsgType.DEBUG, 'MExpToLusAST.fun_indexing_To_Lustre', '');
@@ -61,16 +62,16 @@ end
 
 
 
-function code = parseOtherFunc(tree, args)
+function [code, extra_code] = parseOtherFunc(tree, args)
     global SF_MF_FUNCTIONS_MAP;
-    
+    extra_code = {};
     if (args.isStateFlow || args.isMatlabFun) && args.data_map.isKey(tree.ID)
         %Array Access
-        code = arrayAccess_To_Lustre(tree, args);
+        [code, ~, extra_code] = arrayAccess_To_Lustre(tree, args);
         
     elseif (args.isStateFlow || args.isMatlabFun) && SF_MF_FUNCTIONS_MAP.isKey(tree.ID)
         %Stateflow Function and Matlab Function block
-        code = sf_mf_functionCall_To_Lustre(tree, args);
+        [code, extra_code] = sf_mf_functionCall_To_Lustre(tree, args);
         
     elseif args.isSimulink && strcmp(tree.ID, 'u')
         %"u" refers to an input in IF, Switch and Fcn
@@ -119,8 +120,12 @@ function code = parseOtherFunc(tree, args)
             else
                 code = nasa_toLustre.lustreAst.IntExpr(value);
             end
-        catch
-            
+        catch me
+            display_msg(...
+                sprintf('Function "%s" is not handled in Block %s. The code will be abstracted.',...
+                tree.ID, args.blk.Origin_path),...
+                MsgType.WARNING, 'MExpToLusAST.fun_indexing_To_Lustre', '');
+            display_msg(me.getReport(), MsgType.DEBUG, 'MExpToLusAST.fun_indexing_To_Lustre', '');
             ME = MException('COCOSIM:TREE2CODE', ...
                 'Function "%s" is not handled in Block %s',...
                 tree.ID, args.blk.Origin_path);

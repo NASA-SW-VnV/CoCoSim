@@ -1,4 +1,4 @@
-function [code, exp_dt, dim] = unaryExpression_To_Lustre(tree, args)
+function [code, exp_dt, dim, extra_code] = unaryExpression_To_Lustre(tree, args)
     %     unaryOperator :   '&' | '*' | '+' | '-' | '~' | '!'
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
@@ -13,7 +13,7 @@ function [code, exp_dt, dim] = unaryExpression_To_Lustre(tree, args)
     exp_dt = nasa_toLustre.utils.MExpToLusDT.expression_DT(...
         tree, args);
     args.expected_lusDT = exp_dt;
-    [right, ~, dim] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
+    [right, ~, dim, extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
         tree.rightExp, args);
     if strcmp(tree.operator, '~') || strcmp(tree.operator, '!')
         op = nasa_toLustre.lustreAst.UnaryExpr.NOT;

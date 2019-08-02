@@ -1,4 +1,4 @@
-function [code, exp_dt, dim] = transposeFun_To_Lustre(tree, args)
+function [code, exp_dt, dim, extra_code] = transposeFun_To_Lustre(tree, args)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -6,7 +6,7 @@ function [code, exp_dt, dim] = transposeFun_To_Lustre(tree, args)
     % Author: Francois Conzelmann <francois.conzelmann@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    [x, exp_dt, x_dim] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
+    [x, exp_dt, x_dim, extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
         tree.parameters(1), args);
     x_reshp = reshape(x, x_dim);
     code = reshape(x_reshp', [1 prod(x_dim)]);

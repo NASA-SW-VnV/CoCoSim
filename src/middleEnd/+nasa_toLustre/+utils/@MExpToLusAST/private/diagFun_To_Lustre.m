@@ -1,4 +1,4 @@
-function [code, exp_dt, dim] = diagFun_To_Lustre(tree, args)
+function [code, exp_dt, dim, extra_code] = diagFun_To_Lustre(tree, args)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -7,7 +7,7 @@ function [code, exp_dt, dim] = diagFun_To_Lustre(tree, args)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     dim = [];
-    [x, exp_dt, x_dim] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(1), args);
+    [x, exp_dt, x_dim, extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(1), args);
     if length(tree.parameters) > 1
         if prod(x_dim) > max(x_dim)
             ME = MException('COCOSIM:TREE2CODE', ...

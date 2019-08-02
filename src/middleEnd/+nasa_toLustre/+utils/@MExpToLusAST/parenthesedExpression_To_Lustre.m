@@ -1,4 +1,4 @@
-function [code, exp_dt, dim] = parenthesedExpression_To_Lustre(tree, args)
+function [code, exp_dt, dim, extra_code] = parenthesedExpression_To_Lustre(tree, args)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -8,7 +8,7 @@ function [code, exp_dt, dim] = parenthesedExpression_To_Lustre(tree, args)
     
         
     
-    [exp, exp_dt, dim] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
+    [exp, exp_dt, dim, extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
         tree.expression, args);
     code = arrayfun(@(i) nasa_toLustre.lustreAst.ParenthesesExpr(exp{i}), ...
         (1:numel(exp)), 'UniformOutput', false);

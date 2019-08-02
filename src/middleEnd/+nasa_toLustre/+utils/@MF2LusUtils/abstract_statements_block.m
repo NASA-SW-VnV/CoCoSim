@@ -25,7 +25,7 @@ function [while_node] = abstract_statements_block(tree, args, type)
         'bool');
     node_outputs = nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getDataVars(data_set);
     counter = counter + 1;
-    node_name = sprintf('%s_abstract_%s_loop_%d', ...
+    node_name = sprintf('%s_abstract_%s_%d', ...
         nasa_toLustre.utils.SLX2LusUtils.node_name_format(args.blk), type, ...
         counter);
     comment = nasa_toLustre.lustreAst.LustreComment(...
@@ -44,10 +44,13 @@ end
 
 function IDs = modifiedVars(tree)
     IDs = {};
-    if isstruct(tree.statements)
-        tree_statements = arrayfun(@(x) x, tree.statements, 'UniformOutput', 0);
+    if isfield(tree, 'statements')
+        tree = tree.statements;
+    end
+    if isstruct(tree)
+        tree_statements = arrayfun(@(x) x, tree, 'UniformOutput', 0);
     else
-        tree_statements = tree.statements;
+        tree_statements = tree;
     end
     for i=1:length(tree_statements)
         if strcmp(tree_statements{i}.type, 'assignment')

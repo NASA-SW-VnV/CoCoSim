@@ -1,4 +1,4 @@
-function [code, exp_dt, dim] = sumFun_To_Lustre(tree, args)
+function [code, exp_dt, dim, extra_code] = sumFun_To_Lustre(tree, args)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -8,7 +8,7 @@ function [code, exp_dt, dim] = sumFun_To_Lustre(tree, args)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     op = nasa_toLustre.lustreAst.BinaryExpr.PLUS;
-    [code, exp_dt, dim] = nasa_toLustre.utils.MF2LusUtils.allAnyFun_To_Lustre(...
+    [code, exp_dt, dim, extra_code] = nasa_toLustre.utils.MF2LusUtils.allAnyFun_To_Lustre(...
         tree, args, op);
 end
     

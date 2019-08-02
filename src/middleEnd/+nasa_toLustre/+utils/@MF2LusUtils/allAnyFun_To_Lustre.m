@@ -1,4 +1,4 @@
-function [code, exp_dt, dim] = allAnyFun_To_Lustre(tree, args, op)
+function [code, exp_dt, dim, extra_code] = allAnyFun_To_Lustre(tree, args, op)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -9,7 +9,7 @@ function [code, exp_dt, dim] = allAnyFun_To_Lustre(tree, args, op)
     
     code = {};
     
-    [x, x_dt, x_dim] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(1), args);
+    [x, x_dt, x_dim, extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(1), args);
     n_dim = numel(x_dim);
     x_new = reshape(x, x_dim);
     

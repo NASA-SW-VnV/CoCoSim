@@ -1,4 +1,4 @@
-function [code, exp_dt, dim] = binaryExpression_To_Lustre(tree, args)
+function [code, exp_dt, dim, extra_code] = binaryExpression_To_Lustre(tree, args)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -10,6 +10,7 @@ function [code, exp_dt, dim] = binaryExpression_To_Lustre(tree, args)
     
     tree_type = tree.type;
     dim = [];
+    extra_code = {};
     % get Operands DataType
     exp_dt = nasa_toLustre.utils.MExpToLusDT.binaryExpression_DT(tree, args);
     if ismember(tree_type, {'relopGL', 'relopEQ_NE'})
@@ -22,11 +23,12 @@ function [code, exp_dt, dim] = binaryExpression_To_Lustre(tree, args)
     
     % GEt Left Right operand
     args.expected_lusDT = operands_dt;
-    [left, ~, left_dim] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
+    [left, ~, left_dim, left_extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
         tree.leftExp, args);
-    [right, ~, right_dim] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
+    [right, ~, right_dim, right_extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
         tree.rightExp, args);
-    
+    extra_code = MatlabUtils.concat(left_extra_code, right_extra_code);
+
     % Get Operator
     if strcmp(tree_type, 'plus_minus') % '+' '-'
         dim = left_dim;
@@ -97,7 +99,7 @@ function [code, exp_dt, dim] = binaryExpression_To_Lustre(tree, args)
         op = nasa_toLustre.lustreAst.BinaryExpr.OR;
         
     elseif ismember(tree_type, {'mpower', 'power'}) % '^' '.^'
-        [code, exp_dt, dim] = getPowerCode(tree, args);
+        [code, exp_dt, dim, extra_code] = getPowerCode(tree, args);
         return;
     end
     
@@ -109,16 +111,17 @@ function [code, exp_dt, dim] = binaryExpression_To_Lustre(tree, args)
         (1:numel(left)), 'UniformOutput', false);
 end
 
-function [code, exp_dt, dim] = getPowerCode(tree, args)
+function [code, exp_dt, dim, extra_code] = getPowerCode(tree, args)
     
     exp_dt = 'real';
     tree_type = tree.type;
     args.blkObj.addExternal_libraries('LustMathLib_lustrec_math');
     args.expected_lusDT = 'real';
-    [left, ~, left_dim] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
+    [left, ~, left_dim, left_extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
         tree.leftExp, args);
-    [right, ~, right_dim] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
+    [right, ~, right_dim, right_extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
         tree.rightExp, args);
+    extra_code = MatlabUtils.concat(left_extra_code, right_extra_code);
     if numel(left) > 1 && strcmp(tree_type, 'mpower')
         ME = MException('COCOSIM:TREE2CODE', ...
             'Expression "%s" has a power of matrix is not supported.',...

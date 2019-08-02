@@ -1,26 +1,51 @@
-function [code, assignment_dt, dim] = assignment_To_Lustre(tree, args)
+function [code, assignment_dt, dim, extra_code] = assignment_To_Lustre(tree, args)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    global VISITED_VARIABLES;
+    global VISITED_VARIABLES MFUNCTION_EXTERNAL_NODES;
     code = {};
+    dim = [];
+    extra_code = {};
     if_cond = args.if_cond;
     assignment_dt = nasa_toLustre.utils.MExpToLusDT.expression_DT(tree, args);
     
     %% Get left and right expressions
-    args.expected_lusDT = assignment_dt;
-    
-    args.isLeft = true;
-    [left, left_exp_dt, ~] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
-        tree.leftExp, args);
-    
-    args.isLeft = false;
-    [right, ~, dim] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
-        tree.rightExp, args);
-    
+    try
+        args.expected_lusDT = assignment_dt;
+        
+        args.isLeft = true;
+        [left, left_exp_dt, dim, left_extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
+            tree.leftExp, args);
+        
+        args.isLeft = false;
+        [right, ~, ~, right_extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
+            tree.rightExp, args);
+        extra_code = MatlabUtils.concat(left_extra_code, right_extra_code);
+    catch me
+        display_msg(...
+            sprintf('Expression "%s" is not handled in Block %s. The code will be abstracted.',...
+            tree.text, HtmlItem.addOpenCmd(args.blk.Origin_path)),...
+            MsgType.WARNING, 'MExpToLusAST.assignment_To_Lustre', '');
+        
+        display_msg(me.getReport(), MsgType.DEBUG, 'MExpToLusAST.assignment_To_Lustre', '');
+        
+        [assignment_node] = nasa_toLustre.utils.MF2LusUtils.abstract_statements_block(...
+            tree, args, 'Expression');
+        if isempty( assignment_node )
+            return;
+        end
+        [call, oututs_Ids] = assignment_node.nodeCall();
+        if length(oututs_Ids) > 1
+            oututs_Ids = nasa_toLustre.lustreAst.TupleExpr(oututs_Ids);
+        end
+        code{1} = nasa_toLustre.lustreAst.LustreEq(oututs_Ids, call);
+        assignment_node = assignment_node.pseudoCode2Lustre(args.data_map);
+        MFUNCTION_EXTERNAL_NODES{end+1} = assignment_node;
+        return;
+    end
     %% Solve the issue of u(j) = x; => u_1 = if j == 1 then x else u_1; ....
     if strcmp(tree.leftExp.type, 'fun_indexing')
         conds = nasa_toLustre.lustreAst.IteExpr.getCondsThens(left{1});

@@ -1,4 +1,4 @@
-function [code, exp_dt, dim] = for_block_To_Lustre(tree, args)
+function [code, exp_dt, dim, extra_code] = for_block_To_Lustre(tree, args)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -11,13 +11,13 @@ function [code, exp_dt, dim] = for_block_To_Lustre(tree, args)
     code = {};
     exp_dt = '';
     dim = [];
-    
+    extra_code = {};
     %%
     should_be_abstracted = false;
     indexes = [];
     index_dt = '';
     try
-        [index_expression, index_dt, ~] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
+        [index_expression, index_dt, ~, extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
             tree.index_expression, args);
         index_class = unique(cellfun(@(x) class(x), index_expression, 'UniformOutput', 0));
         if length(index_class) == 1 && ...

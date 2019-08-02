@@ -1,4 +1,4 @@
-function [code, exp_dt, dim] = normFun_To_Lustre(tree, args)
+function [code, exp_dt, dim, extra_code] = normFun_To_Lustre(tree, args)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -20,6 +20,6 @@ function [code, exp_dt, dim] = normFun_To_Lustre(tree, args)
     expr = sprintf("sqrt(sum(abs(%s).^%s))", x_text, p_text);
     new_tree = MatlabUtils.getExpTree(expr);
     
-    [code, exp_dt, dim] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(new_tree, args);
+    [code, exp_dt, dim, extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(new_tree, args);
     
 end

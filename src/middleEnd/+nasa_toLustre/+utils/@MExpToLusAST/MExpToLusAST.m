@@ -11,22 +11,22 @@ classdef MExpToLusAST
     end
     methods(Static)
         % use alphabetic order.
-        [code, lusDT, dim] = assignment_To_Lustre(tree, args)
-        [code, lusDT, dim] = binaryExpression_To_Lustre(tree, args)
-        [code, lusDT, dim] = colonExpression_To_Lustre(tree, args)
-        [code, lusDT, dim] = constant_To_Lustre(tree, args)
-        [code, lusDT, dim] = end_To_Lustre(tree, args)
-        [code, lusDT, dim] = expression_To_Lustre(tree, args)
-        [code, lusDT, dim] = for_block_To_Lustre(tree, args)
-        [code, lusDT, dim] = fun_indexing_To_Lustre(tree, args)
-        [code, lusDT, dim] = ID_To_Lustre(tree, args)
-        [code, lusDT, dim] = if_block_To_Lustre(tree, args)
-        [code, lusDT, dim] = matrix_To_Lustre(tree, args)
-        [code, lusDT, dim] = parenthesedExpression_To_Lustre(tree, args)
-        [code, lusDT, dim] = struct_indexing_To_Lustre(tree, args)
-        [code, lusDT, dim] = transpose_To_Lustre(tree, args)
-        [code, lusDT, dim] = unaryExpression_To_Lustre(tree, args)
-        [code, lusDT, dim] = while_block_To_Lustre(tree, args)
+        [code, lusDT, dim, extra_code] = assignment_To_Lustre(tree, args)
+        [code, lusDT, dim, extra_code] = binaryExpression_To_Lustre(tree, args)
+        [code, lusDT, dim, extra_code] = colonExpression_To_Lustre(tree, args)
+        [code, lusDT, dim, extra_code] = constant_To_Lustre(tree, args)
+        [code, lusDT, dim, extra_code] = end_To_Lustre(tree, args)
+        [code, lusDT, dim, extra_code] = expression_To_Lustre(tree, args)
+        [code, lusDT, dim, extra_code] = for_block_To_Lustre(tree, args)
+        [code, lusDT, dim, extra_code] = fun_indexing_To_Lustre(tree, args)
+        [code, lusDT, dim, extra_code] = ID_To_Lustre(tree, args)
+        [code, lusDT, dim, extra_code] = if_block_To_Lustre(tree, args)
+        [code, lusDT, dim, extra_code] = matrix_To_Lustre(tree, args)
+        [code, lusDT, dim, extra_code] = parenthesedExpression_To_Lustre(tree, args)
+        [code, lusDT, dim, extra_code] = struct_indexing_To_Lustre(tree, args)
+        [code, lusDT, dim, extra_code] = transpose_To_Lustre(tree, args)
+        [code, lusDT, dim, extra_code] = unaryExpression_To_Lustre(tree, args)
+        [code, lusDT, dim, extra_code] = while_block_To_Lustre(tree, args)
     end
     
     methods(Static)
@@ -78,7 +78,9 @@ classdef MExpToLusAST
             end
             try
                 
-                lusCode = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(tree, args);
+                [lusCode, ~, ~, extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(tree, args);
+                lusCode = MatlabUtils.concat(lusCode, extra_code);
+                
                 % transform Stateflow Function call with no outputs to an equation
                 if args.isStateFlow && ~isempty(tree)
                     if iscell(tree) && numel(tree) == 1

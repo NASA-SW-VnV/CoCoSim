@@ -1,4 +1,4 @@
-function [code, exp_dt, dim] = binaryFun_To_Lustre(tree, args, op)
+function [code, exp_dt, dim, extra_code] = binaryFun_To_Lustre(tree, args, op)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -7,9 +7,9 @@ function [code, exp_dt, dim] = binaryFun_To_Lustre(tree, args, op)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     code = {};
-    [x, x_dt, x_dim] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(1),args);
-    [y, ~, ~] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(2), args);
-    
+    [x, x_dt, x_dim, extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(1),args);
+    [y, ~, ~, extra_code_i] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(2), args);
+    extra_code = MatlabUtils.concat(extra_code, extra_code_i);
     for i=1:numel(x)
         code{end+1} = nasa_toLustre.lustreAst.BinaryExpr(op, ...
             x(i), ...

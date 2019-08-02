@@ -12,9 +12,9 @@ classdef MF2LusUtils
     end
     
     methods(Static)
-        [code, exp_dt, dim] = allAnyFun_To_Lustre(tree, args, op)
+        [code, exp_dt, dim, extra_code] = allAnyFun_To_Lustre(tree, args, op)
         
-        [code, exp_dt, dim] = binaryFun_To_Lustre(tree, args, op)
+        [code, exp_dt, dim, extra_code] = binaryFun_To_Lustre(tree, args, op)
         
         [code, dim] = mtimesFun_To_Lustre(x, x_dim, y, y_dim)
         
@@ -26,6 +26,7 @@ classdef MF2LusUtils
         
         [IDs] = getAssignmentLeftIDs(tree)
         
+        vars = addLocalVars(args, exp_dt, n)
         
     end
 end

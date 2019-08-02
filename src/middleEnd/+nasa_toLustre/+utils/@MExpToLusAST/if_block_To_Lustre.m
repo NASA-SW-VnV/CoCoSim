@@ -1,4 +1,4 @@
-function [code, exp_dt, dim] = if_block_To_Lustre(tree, args)
+function [code, exp_dt, dim, extra_code] = if_block_To_Lustre(tree, args)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -9,10 +9,10 @@ function [code, exp_dt, dim] = if_block_To_Lustre(tree, args)
     if isempty(counter)
         counter = 0;
     end
-    code = {};
+    extra_code = {};
     if_cond = args.if_cond;
     args.expected_lusDT = 'bool';
-    [condition, ~, ~] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
+    [condition, ~, ~, code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
         tree.condition, args);
     not_condition_list = nasa_toLustre.lustreAst.UnaryExpr(...
         nasa_toLustre.lustreAst.UnaryExpr.NOT, condition);
@@ -48,8 +48,9 @@ function [code, exp_dt, dim] = if_block_To_Lustre(tree, args)
             
             
         end
-        [statements_code, ~, ~] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
+        [statements_code, ~, ~, extra_code_i] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
             tree_statements{i}, args);
+        code = MatlabUtils.concat(code, extra_code_i);
         code = MatlabUtils.concat(code, statements_code);
     end
     
@@ -61,9 +62,9 @@ function [code, exp_dt, dim] = if_block_To_Lustre(tree, args)
             cond_name = strcat('ifCond_', num2str(counter), strrep(num2str(rand(1)), '0.', '_'));
             counter = counter + 1;
             new_cond_ID = nasa_toLustre.lustreAst.VarIdExpr(cond_name);
-            [condition, ~, ~] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
+            [condition, ~, ~, extra_code_i] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
                 elif.condition, args);
-            
+            code = MatlabUtils.concat(code, extra_code_i);
             code{end+1} = nasa_toLustre.lustreAst.LustreEq(new_cond_ID, ...
                 nasa_toLustre.lustreAst.BinaryExpr(...
                 nasa_toLustre.lustreAst.BinaryExpr.AND, not_condition_list, condition));
@@ -80,8 +81,9 @@ function [code, exp_dt, dim] = if_block_To_Lustre(tree, args)
             args.data_map(cond_name) = s;
             args.if_cond = new_cond_ID;
             for j=1:length(elif.statements)
-                [line, ~, ~] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
+                [line, ~, ~, extra_code_i] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
                     elif.statements(j), args);
+                code = MatlabUtils.concat(code, extra_code_i);
                 code = MatlabUtils.concat(code, line);
             end
             cond_ID = new_cond_ID;
@@ -98,8 +100,9 @@ function [code, exp_dt, dim] = if_block_To_Lustre(tree, args)
         end
         args.if_cond = not_condition_list;
         for i=1:length(else_block_statements)
-            [else_block_code, ~, ~] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
+            [else_block_code, ~, ~, extra_code_i] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
                 else_block_statements{i}, args);
+            code = MatlabUtils.concat(code, extra_code_i);
             code = MatlabUtils.concat(code, else_block_code);
         end
         

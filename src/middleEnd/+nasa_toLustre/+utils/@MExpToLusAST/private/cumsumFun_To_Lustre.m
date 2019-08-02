@@ -1,4 +1,4 @@
-function [code, exp_dt, dim] = cumsumFun_To_Lustre(tree, args)
+function [code, exp_dt, dim, extra_code] = cumsumFun_To_Lustre(tree, args)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -9,9 +9,10 @@ function [code, exp_dt, dim] = cumsumFun_To_Lustre(tree, args)
     reverse = false;
     dimension = 1;
     code = {};
+    extra_code = {};
     op = nasa_toLustre.lustreAst.BinaryExpr.PLUS;
     
-    [x, exp_dt, dim] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(1), args);
+    [x, exp_dt, dim, extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(1), args);
     
     if length(dim) > 2 % TODO support multi-dimension input
         ME = MException('COCOSIM:TREE2CODE', ...
@@ -29,7 +30,8 @@ function [code, exp_dt, dim] = cumsumFun_To_Lustre(tree, args)
             reverse = strcmp(tree.parameters{2}.value, '''reverse''');
         else
             args.expected_lusDT = 'int';
-            [y, ~, ~] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(2), args);
+            [y, ~, ~, extra_code_i] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(2), args);
+            extra_code = MatlabUtils.concat(extra_code, extra_code_i);
             dimension = y{1}.value;
         end
     end

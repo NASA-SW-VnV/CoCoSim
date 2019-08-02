@@ -1,4 +1,4 @@
-function code = sf_mf_functionCall_To_Lustre(tree, args)
+function [code, extra_code] = sf_mf_functionCall_To_Lustre(tree, args)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -8,7 +8,7 @@ function code = sf_mf_functionCall_To_Lustre(tree, args)
     % G    
     
     global SF_MF_FUNCTIONS_MAP ;
-    
+    extra_code = {};
     if isa(tree.parameters, 'struct')
         parameters = arrayfun(@(x) x, tree.parameters, 'UniformOutput', false);
     else
@@ -25,9 +25,10 @@ function code = sf_mf_functionCall_To_Lustre(tree, args)
         dt_idx = 1;
         for i=1:numel(parameters)
             args.expected_lusDT = params_dt{dt_idx};
-            [f_args, dt] = ...
+            [f_args, dt, extra_code_i] = ...
                 nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
                 parameters{i}, args);
+            extra_code = MatlabUtils.concat(extra_code, extra_code_i);
             f_args = nasa_toLustre.utils.MExpToLusDT.convertDT(args.blkObj, f_args, dt, params_dt{dt_idx});
             dt_idx = dt_idx + length(f_args);
             params_ast = MatlabUtils.concat(params_ast, f_args);

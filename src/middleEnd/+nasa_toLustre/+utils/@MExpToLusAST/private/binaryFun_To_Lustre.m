@@ -1,4 +1,4 @@
-function [code, exp_dt, dim] = binaryFun_To_Lustre(tree, args)
+function [code, exp_dt, dim, extra_code] = binaryFun_To_Lustre(tree, args)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -29,7 +29,7 @@ function [code, exp_dt, dim] = binaryFun_To_Lustre(tree, args)
             throw(ME);
     end
     args.expected_lusDT = expected_dt;
-    [code, exp_dt, dim] = nasa_toLustre.utils.MF2LusUtils.binaryFun_To_Lustre(...
+    [code, exp_dt, dim, extra_code] = nasa_toLustre.utils.MF2LusUtils.binaryFun_To_Lustre(...
         tree, args, op);
     
 end
