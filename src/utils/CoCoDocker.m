@@ -3,14 +3,14 @@ classdef CoCoDocker
     %% example using the API
     % sharedFolder = '/path/to/cocosim_result/absolute'
     % CoCoDocker.start(sharedFolder)
-    % CoCoDocker.exec(sharedFolder, 'lustrec -node absolute_PP -int="long long int" absolute_PP.lus')
-    % CoCoDocker.exec(sharedFolder, 'make -f absolute_PP.makefile')
+    % CoCoDocker.exec(sharedFolder, 'lustrec -node absolute_PP -int="long long int" absolute_PP.LUSTREC.lus')
+    % CoCoDocker.exec(sharedFolder, 'make -f absolute_PP.LUSTREC.makefile')
     % CoCoDocker.exec(sharedFolder, '/lus/absolute_PP.LUSTREC_absolute_PP < /lus/absolute_PP_input_values > absolute_PP_output_values')
     % CocoDocker.stop()
     %% in terminal (example)
     % docker run -d --name=toto -v $(pwd):/lus cocotest
-    % docker exec toto lustrec -node absolute_PP -int="long long int" absolute_PP.lus
-    % docker exec toto make -f absolute_PP.makefile
+    % docker exec toto lustrec -node absolute_PP -int="long long int" absolute_PP.LUSTREC.lus
+    % docker exec toto make -f absolute_PP.LUSTREC.makefile
     % docker exec toto bash -c '/lus/absolute_PP.LUSTREC_absolute_PP < /lus/absolute_PP_input_values > absolute_PP_output_values'
     % docker stop toto && docker rm toto
     properties
@@ -53,7 +53,7 @@ classdef CoCoDocker
         
         function [errCode, stdout] = stop()
             c_name = CoCoDocker.getCurrentContainerName(false, true);
-            [errCode, stdout] = system(sprintf('docker stop %s; docker rm %s', ...
+            [errCode, stdout] = system(sprintf('docker kill %s; docker rm %s', ...
                 c_name, c_name));
         end 
         
