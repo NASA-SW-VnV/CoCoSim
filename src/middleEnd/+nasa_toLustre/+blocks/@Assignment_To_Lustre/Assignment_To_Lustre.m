@@ -7,7 +7,7 @@ classdef Assignment_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     %  a value in U.  If a value in U is to be used, then the U_to_Y0 map
     %  will tell us which index of U to use.
     % Key to this task is understanding and using the mapping cell array
-    % ind and the U_to_Y0 inline map. 
+    % ind. 
     %   ind{i} maps index for dimension i.  This is expanding out the user
     %   inputs from the dialog box
     %      -  ind{1} = [1,3] means for dimension 1, U has 2 rows (length of array), 1st row of U maps

@@ -57,7 +57,7 @@ function [codes] = getWriteCodeForNonPortInput(~, numOutDims,...
     end
     U_reshaped = reshape(inputs{1}, in_matrix_dimension_1_dims);
     Y = U_reshaped(ind{:});
-    Y_inlined = reshape(Y, [1, prod(in_matrix_dimension{1}.dims)]);
+    Y_inlined = reshape(Y, [1, numel(Y)]);
     for i=1:numel(outputs)
         codes{i} = nasa_toLustre.lustreAst.LustreEq(outputs{i}, Y_inlined{i});
     end
