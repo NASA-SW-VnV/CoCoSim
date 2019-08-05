@@ -38,15 +38,24 @@ import cocosim.emgrammar.EMParser;
 public class EM2JSON {
 	public static class JSONEmitter extends EMBaseListener {
 		ParseTreeProperty<String> json = new ParseTreeProperty<String>();
-
+		ParseTreeProperty<String> text = new ParseTreeProperty<String>();
+		
 		String getJSON(ParseTree ctx) { 
 			String s = "";
 			String tmp = json.get(ctx);
 			if (tmp != null) s = tmp;
 			return s; 
 		}
-
 		void setJSON(ParseTree ctx, String s) { json.put(ctx, s); }
+		
+		String getTreeText(ParseTree ctx) { 
+			String s = "";
+			String tmp = text.get(ctx);
+			if (tmp != null) s = tmp;
+			return s; 
+		}
+		void setTreeText(ParseTree ctx, String s) { text.put(ctx, s); }
+		
 		@Override
 		public void exitEmfile(EMParser.EmfileContext ctx) {   
 			StringBuilder buf = new StringBuilder();
@@ -67,7 +76,7 @@ public class EM2JSON {
 			}
 
 			setJSON(ctx, buf.toString());
-
+			setTreeText(ctx, ctx.getText());
 		}
 
 		@Override
@@ -80,6 +89,7 @@ public class EM2JSON {
 			buf.append(Quotes("statements")+":["+getJSON(ctx.script_body()));
 			buf.append("\n]");
 			setJSON(ctx, buf.toString());
+			setTreeText(ctx, ctx.getText());
 		}
 
 		@Override
@@ -112,6 +122,7 @@ public class EM2JSON {
 			buf.append(Quotes("statements")+":["+getJSON(ctx.body()));
 			buf.append("\n]\n}");
 			setJSON(ctx, buf.toString());
+			setTreeText(ctx, ctx.getText());
 		}
 
 		@Override public void exitFunc_input(EMParser.Func_inputContext ctx) { 
@@ -124,6 +135,7 @@ public class EM2JSON {
 			}
 			buf.append("]");
 			setJSON(ctx, buf.toString());
+			setTreeText(ctx, ctx.getText());
 		}
 
 		@Override public void exitFunc_output(EMParser.Func_outputContext ctx) {
@@ -137,6 +149,7 @@ public class EM2JSON {
 			}
 			buf.append("]");
 			setJSON(ctx, buf.toString());
+			setTreeText(ctx, ctx.getText());
 		}
 
 
@@ -150,6 +163,7 @@ public class EM2JSON {
 			}
 			else
 				setJSON(ctx,getJSON(ctx.statement()));
+			setTreeText(ctx, ctx.getText());
 		}
 		
 		@Override public void exitBody(EMParser.BodyContext ctx) {
@@ -162,17 +176,20 @@ public class EM2JSON {
 			}
 			else
 				setJSON(ctx,getJSON(ctx.body_item()));
+			setTreeText(ctx, ctx.getText());
 		}
 
 
 		@Override public void exitBody_item(EMParser.Body_itemContext ctx) { 
 			setJSON(ctx,getJSON(ctx.getChild(0)));
+			setTreeText(ctx, ctx.getText());
 
 		}
 
 		
 		@Override public void exitStatement(EMParser.StatementContext ctx) {
 			setJSON(ctx,getJSON(ctx.getChild(0)));
+			setTreeText(ctx, ctx.getText());
 		}
 
 		
@@ -183,10 +200,12 @@ public class EM2JSON {
 			}
 			else
 				setJSON(ctx,getJSON(ctx.assignment()));
+			setTreeText(ctx, ctx.getText());
 		}
 
 		@Override public void exitAssignment(EMParser.AssignmentContext ctx) {
 			StringBuilder buf = new StringBuilder();
+			StringBuilder tbuf = new StringBuilder();
 			buf.append("{");
 			buf.append("\n");
 			buf.append(Quotes("type")+":"+Quotes("assignment"));
@@ -197,15 +216,17 @@ public class EM2JSON {
 			buf.append(",\n");
 			buf.append(Quotes("rightExp")+":"+getJSON(ctx.notAssignment()));
 			buf.append(",\n");
-			buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
+			tbuf.append(getTreeText(ctx.primaryExpression()) + " = " + getTreeText(ctx.notAssignment()));
+			buf.append(Quotes("text")+":"+Quotes(tbuf.toString()));
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
-
+			setTreeText(ctx, tbuf.toString());
 
 		}
 //
 		@Override public void exitNotAssignment_primaryExpression(EMParser.NotAssignment_primaryExpressionContext ctx) {
 			setJSON(ctx,getJSON(ctx.primaryExpression()));
+			setTreeText(ctx,getTreeText(ctx.primaryExpression()));
 		}
 //		
 		@Override public void exitColonExpression(EMParser.ColonExpressionContext ctx) {
@@ -275,7 +296,7 @@ public class EM2JSON {
 		
 
 		@Override public void exitUnaryExpression(EMParser.UnaryExpressionContext ctx) {
-			StringBuilder buf = new StringBuilder();
+			StringBuilder buf= new StringBuilder(), tbuf = new StringBuilder();
 			buf.append("{");
 			buf.append("\n");
 			buf.append(Quotes("type")+":"+Quotes("unaryExpression"));
@@ -288,10 +309,12 @@ public class EM2JSON {
 			buf.append(Quotes("rightExp")+":"+getJSON(ctx.primaryExpression()));
 			
 			buf.append(",\n");
+			tbuf.append(operator  + getTreeText(ctx.primaryExpression()));
 			buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
 			
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
+			setTreeText(ctx, tbuf.toString());
 		}
 //
 		@Override public void exitPostfixExpression(EMParser.PostfixExpressionContext ctx) { 
@@ -313,11 +336,12 @@ public class EM2JSON {
 				buf.append("\n}");
 
 				setJSON(ctx, buf.toString());
-
+				setTreeText(ctx, ctx.getText());
 		}
 //
 		@Override public void exitPrimaryExpression(EMParser.PrimaryExpressionContext ctx) { 
 			setJSON(ctx, getJSON(ctx.getChild(0)));
+			setTreeText(ctx, getTreeText(ctx.getChild(0)));
 		}
 //
 		@Override public void exitParenthesedExpression(EMParser.ParenthesedExpressionContext ctx){
@@ -331,6 +355,7 @@ public class EM2JSON {
 			buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
+			setTreeText(ctx, ctx.getText());
 		}
 		
 		@Override public void exitIgnore_value(EMParser.Ignore_valueContext ctx) {
@@ -344,6 +369,7 @@ public class EM2JSON {
 			buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
+			setTreeText(ctx, ctx.getText());
 		}
 
 		@Override public void exitConstant(EMParser.ConstantContext ctx) { 
@@ -367,6 +393,7 @@ public class EM2JSON {
 				buf.append("\n}");
 				setJSON(ctx, buf.toString());
 			}
+			setTreeText(ctx, ctx.getText());
 		}
 
 		public String ConstantDataType(EMParser.ConstantContext ctx){
@@ -410,6 +437,7 @@ public class EM2JSON {
 				buf.append("\n}");
 				setJSON(ctx, buf.toString());
 			}
+			setTreeText(ctx, ctx.getText());
 		}
 
 		@Override public void exitFun_indexing(EMParser.Fun_indexingContext ctx) { 
@@ -436,31 +464,35 @@ public class EM2JSON {
 			
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
+			setTreeText(ctx, ctx.getText());
 		}
 		@Override public void exitCell_indexing(EMParser.Cell_indexingContext ctx) { 
-			StringBuilder buf = new StringBuilder();
+			StringBuilder buf = new StringBuilder(), tbuf = new StringBuilder();
 			buf.append("{");
 			buf.append("\n");
 			buf.append(Quotes("type")+":"+Quotes("cell_indexing"));
 			buf.append(",\n");
 			buf.append(Quotes("ID")+":"+Quotes(ctx.ID().getText()));
+			tbuf.append(ctx.ID().getText());
 			buf.append(",\n");
 			int n = ctx.function_parameter_list().size();
 			for(int i=0; i<n; i++) {
 				buf.append(Quotes("parameters"+Integer.toString(i))+":"+getJSON(ctx.function_parameter_list(i)));
 				buf.append(",\n");
+				tbuf.append("{" + getTreeText(ctx.function_parameter_list(i)) + "}");
 			}
 
 			if (n == 0) buf.append(",\n");
-			buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
+			buf.append(Quotes("text")+":"+Quotes(tbuf.toString()));
 			
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
+			setTreeText(ctx, tbuf.toString());
 		}
 		
 
 		@Override public void exitStruct_indexing_expr(EMParser.Struct_indexing_exprContext ctx){
-			StringBuilder buf = new StringBuilder();
+			StringBuilder buf = new StringBuilder(), tbuf = new StringBuilder();
 			buf.append("{");
 			buf.append("\n");
 			buf.append(Quotes("type")+":"+Quotes("struct_indexing"));
@@ -469,22 +501,27 @@ public class EM2JSON {
 			buf.append(",\n");
 			buf.append(Quotes("rightExp")+":"+getJSON(ctx.struct_indexing(1)));
 			buf.append(",\n");
-			buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
+			tbuf.append(getTreeText(ctx.struct_indexing(0)) + "." + getTreeText(ctx.struct_indexing(1)));
+			buf.append(Quotes("text")+":"+Quotes(tbuf.toString()));
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
-
+			setTreeText(ctx, tbuf.toString());
 		}
 		@Override public void exitS_fun_indexing(EMParser.S_fun_indexingContext ctx){
 			setJSON(ctx, getJSON(ctx.fun_indexing()));
+			setTreeText(ctx, getTreeText(ctx.fun_indexing()));
 		}
 		@Override public void exitS_cell_indexing(EMParser.S_cell_indexingContext ctx){
 			setJSON(ctx, getJSON(ctx.cell_indexing()));
+			setTreeText(ctx, getTreeText(ctx.cell_indexing()));
 		}
 		@Override public void exitS_parenthesedExpression(EMParser.S_parenthesedExpressionContext ctx){
 			setJSON(ctx, getJSON(ctx.parenthesedExpression()));
+			setTreeText(ctx, getTreeText(ctx.parenthesedExpression()));
 		}
 		@Override public void exitS_id(EMParser.S_idContext ctx){
 			setJSON(ctx, getIdJson(ctx.ID().getText()));
+			setTreeText(ctx, ctx.ID().getText());
 		}
 
 		String getIdJson(String text){
@@ -511,6 +548,7 @@ public class EM2JSON {
 			}
 			buf.append("]");
 			setJSON(ctx, buf.toString());
+			setTreeText(ctx, ctx.getText());
 		}
 
 		@Override public void exitFunction_parameter(EMParser.Function_parameterContext ctx) { 
@@ -528,7 +566,7 @@ public class EM2JSON {
 				buf.append("\n}");
 				setJSON(ctx, buf.toString());
 			}
-
+			setTreeText(ctx, ctx.getText());
 		}
 
 		@Override public void exitCell(EMParser.CellContext ctx) { 
@@ -549,10 +587,11 @@ public class EM2JSON {
 			buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
+			setTreeText(ctx, ctx.getText());
 		}
 
 		@Override public void exitHorzcat(EMParser.HorzcatContext ctx) { 
-			StringBuilder buf = new StringBuilder();
+			StringBuilder buf = new StringBuilder(), tbuf = new StringBuilder();
 			buf.append("[");
 			int n1 = ctx.notAssignment().size();
 			int n2 = ctx.primaryExpression().size();
@@ -564,7 +603,11 @@ public class EM2JSON {
 					EMParser.NotAssignmentContext vctx = ctx.notAssignment(i);
 					
 					buf.append(getJSON(vctx));
-					if(i < n1-1) buf.append(",");
+					tbuf.append(getTreeText(vctx));
+					if(i < n1-1) {
+						buf.append(",");
+						tbuf.append(", ");
+					}
 				}
 				
 				
@@ -574,51 +617,45 @@ public class EM2JSON {
 				for (int i=0;i < n2; i++) {
 					EMParser.PrimaryExpressionContext vctx = ctx.primaryExpression(i);
 					buf.append(getJSON(vctx));
-					if(i < n2-1) buf.append(",");
+					tbuf.append(getTreeText(vctx));
+					if(i < n2-1) {
+						buf.append(",");
+						tbuf.append(", ");
+					}
 				}
 			}
 			
 			buf.append("]");
 			setJSON(ctx, buf.toString());
-//			if (ctx.horzcat() != null){
-//				if (!(ctx.parent instanceof EMParser.HorzcatContext)){
-//					buf.append("[");
-//				}
-//				buf.append(getJSON(ctx.horzcat()));
-//				buf.append(",\n");
-//				if (ctx.primaryExpression() != null)
-//					buf.append(getJSON(ctx.primaryExpression()));
-//				else
-//					buf.append(getJSON(ctx.notAssignment()));
-//				if (!(ctx.parent instanceof EMParser.HorzcatContext)){
-//					buf.append("]");
-//				}
-//				setJSON(ctx, buf.toString());
-//			}
-//			else{
-//				setJSON(ctx, getJSON(ctx.primaryExpression()));
-//			}
-			
+			setTreeText(ctx, tbuf.toString());
 		}
 
 		@Override public void exitMatrix(EMParser.MatrixContext ctx) { 
-			StringBuilder buf = new StringBuilder();
+			StringBuilder buf = new StringBuilder(), tbuf = new StringBuilder();
 			buf.append("{");
 			buf.append("\n");
 			buf.append(Quotes("type")+":"+Quotes("matrix"));
 			buf.append(",\n");
 			buf.append(Quotes("rows")+":[");
 			int n = ctx.horzcat().size();
+			tbuf.append("[");
 			for (int i=0;i < n; i++) {
 				EMParser.HorzcatContext vctx = ctx.horzcat(i);
 				buf.append(getJSON(vctx));
-				if(i < n-1) buf.append(",");
+				tbuf.append(getTreeText(vctx));
+				if(i < n-1) {
+					buf.append(",");
+					tbuf.append("; ");
+				}
+				
 			}
 			buf.append("]");
+			tbuf.append("]");
 			buf.append(",\n");
-			buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
+			buf.append(Quotes("text")+":"+Quotes(tbuf.toString()));
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
+			setTreeText(ctx, tbuf.toString());
 		}
 //
 		@Override public void exitIf_block(EMParser.If_blockContext ctx) { 
@@ -649,6 +686,7 @@ public class EM2JSON {
 			
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
+			setTreeText(ctx, ctx.getText());
 		}
 //
 		@Override public void exitElseif_block(EMParser.Elseif_blockContext ctx) {
@@ -665,6 +703,7 @@ public class EM2JSON {
 			buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
+			setTreeText(ctx, ctx.getText());
 		}
 		@Override public void exitElse_block(EMParser.Else_blockContext ctx) { 
 			StringBuilder buf = new StringBuilder();
@@ -678,6 +717,7 @@ public class EM2JSON {
 			buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
+			setTreeText(ctx, ctx.getText());
 		}
 
 		@Override public void exitSwitch_block(EMParser.Switch_blockContext ctx) { 
@@ -706,6 +746,7 @@ public class EM2JSON {
 			
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
+			setTreeText(ctx, ctx.getText());
 		}
 
 		@Override public void exitCase_block(EMParser.Case_blockContext ctx) { 
@@ -724,6 +765,7 @@ public class EM2JSON {
 			
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
+			setTreeText(ctx, ctx.getText());
 		}
 
 		@Override public void exitOtherwise_block(EMParser.Otherwise_blockContext ctx) {
@@ -740,6 +782,7 @@ public class EM2JSON {
 			
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
+			setTreeText(ctx, ctx.getText());
 		}
 
 		@Override public void exitFor_block(EMParser.For_blockContext ctx) { 
@@ -760,6 +803,7 @@ public class EM2JSON {
 			
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
+			setTreeText(ctx, ctx.getText());
 		}
 
 		@Override public void exitWhile_block(EMParser.While_blockContext ctx) { 
@@ -778,6 +822,7 @@ public class EM2JSON {
 			
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
+			setTreeText(ctx, ctx.getText());
 		}
 
 		@Override public void exitTry_catch_block(EMParser.Try_catch_blockContext ctx) { 
@@ -799,6 +844,7 @@ public class EM2JSON {
 			
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
+			setTreeText(ctx, ctx.getText());
 		}
 		@Override public void exitCatch_block(EMParser.Catch_blockContext ctx) { 
 			StringBuilder buf = new StringBuilder();
@@ -819,6 +865,7 @@ public class EM2JSON {
 			
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
+			setTreeText(ctx, ctx.getText());
 		}
 		@Override public void exitReturn_exp(EMParser.Return_expContext ctx) { 
 			StringBuilder buf = new StringBuilder();
@@ -831,6 +878,7 @@ public class EM2JSON {
 			
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
+			setTreeText(ctx, ctx.getText());
 		}
 		@Override public void exitBreak_exp(EMParser.Break_expContext ctx) { 
 			StringBuilder buf = new StringBuilder();
@@ -843,6 +891,7 @@ public class EM2JSON {
 			
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
+			setTreeText(ctx, ctx.getText());
 		}
 		@Override public void exitContinue_exp(EMParser.Continue_expContext ctx) { 
 			StringBuilder buf = new StringBuilder();
@@ -855,6 +904,7 @@ public class EM2JSON {
 			
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
+			setTreeText(ctx, ctx.getText());
 		}
 		@Override public void exitGlobal_exp(EMParser.Global_expContext ctx) { 
 			StringBuilder buf = new StringBuilder();
@@ -875,6 +925,7 @@ public class EM2JSON {
 			
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
+			setTreeText(ctx, ctx.getText());
 		}
 		@Override public void exitPersistent_exp(EMParser.Persistent_expContext ctx) { 
 			StringBuilder buf = new StringBuilder();
@@ -895,6 +946,7 @@ public class EM2JSON {
 			
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
+			setTreeText(ctx, ctx.getText());
 		}
 		@Override public void exitClear_exp(EMParser.Clear_expContext ctx) { 
 			StringBuilder buf = new StringBuilder();
@@ -916,6 +968,7 @@ public class EM2JSON {
 			
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
+			setTreeText(ctx, ctx.getText());
 		}
 //
 		@Override public void exitNlosoc(EMParser.NlosocContext ctx) { 
@@ -933,6 +986,7 @@ public class EM2JSON {
 
 		@Override public void visitTerminal(TerminalNode node) { 
 			setJSON(node, Quotes(node.getText()));
+			setTreeText(node, node.getText());
 		}
 //
 //
@@ -956,6 +1010,7 @@ public class EM2JSON {
 			
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
+			setTreeText(ctx, ctx.getText());
 		}
 //		public void callExpression(ParserRuleContext ctx, String methodName1, String methodName2){
 //			java.lang.reflect.Method method1;
@@ -1017,6 +1072,7 @@ public class EM2JSON {
 			buf.append(Quotes("text")+":"+Quotes(ctx.getText()));
 			buf.append("\n}");
 			setJSON(ctx, buf.toString());
+			setTreeText(ctx, ctx.getText());
 		}
 
 		public static String Quotes(String s) {
