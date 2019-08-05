@@ -31,22 +31,20 @@ classdef Concatenate_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                         MsgType.ERROR, 'Concatenate_To_Lustre', '');
                     return;
                 end
-                if numel(in_matrix_dimension) > 7
-                    display_msg(sprintf('More than 7 dimensions is not supported in block %s ',...
-                        HtmlItem.addOpenCmd(blk.Origin_path)), ...
-                        MsgType.ERROR, 'Concatenate_To_Lustre', '');
-                    return;
+                
+                codes = cell(1, numel(outputs));
+                inputs_reshaped = {};
+                for i=1:length(in_matrix_dimension)
+                    inputs_reshaped{i} = reshape(inputs{i}, ...
+                        in_matrix_dimension{i}.dims);
                 end
-                if ConcatenateDimension == 2    %concat matrix in row direction
-                    [codes] = nasa_toLustre.blocks.Concatenate_To_Lustre.concatenateDimension2(inputs, outputs,in_matrix_dimension);
-                elseif ConcatenateDimension == 1    %concat matrix in column direction
-                    [codes] = nasa_toLustre.blocks.Concatenate_To_Lustre.concatenateDimension1(inputs, outputs,in_matrix_dimension);
-                else
-                    display_msg(sprintf('ConcatenateDimension > 2 in block %s',...
-                        HtmlItem.addOpenCmd(blk.Origin_path)), ...
-                        MsgType.ERROR, 'Constant_To_Lustr', '');
-                    return;
+                Y = cat(ConcatenateDimension,inputs_reshaped{:});
+                Y_inlined = reshape(Y, [1, numel(Y)]);
+                for i=1:numel(outputs)
+                    codes{i} = nasa_toLustre.lustreAst.LustreEq(outputs{i},...
+                        Y_inlined{i});
                 end
+
             end
             
             obj.addCode( codes );
@@ -61,11 +59,7 @@ classdef Concatenate_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 obj.addUnsupported_options(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
                     blk.ConcatenateDimension, HtmlItem.addOpenCmd(blk.Origin_path)));
             end
-%             if numel(blk.CompiledPortDimensions.Inport) > 7
-%                 obj.addUnsupported_options(...
-%                     sprintf('More than 7 dimensions is not supported in block %s',...
-%                     HtmlItem.addOpenCmd(blk.Origin_path)));
-%             end
+
             if ConcatenateDimension > 2
                 obj.addUnsupported_options(sprintf('ConcatenateDimension > 2 in block %s',...
                         HtmlItem.addOpenCmd(blk.Origin_path)));
