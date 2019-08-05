@@ -5,7 +5,7 @@ function [code, exp_dt, dim, extra_code] = convFun_To_Lustre(tree, args)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        
+    
     dim = [];
     extra_code = {};
     % Do not forget to update exp_dt in each switch case if needed
@@ -14,19 +14,15 @@ function [code, exp_dt, dim, extra_code] = convFun_To_Lustre(tree, args)
     switch tree_ID
         case {'ceil', 'floor', 'round'}
             expected_param_dt = 'real';
-            if ismember(tree_ID, {'ceil', 'floor', 'round'})
-                fun_name = strcat('_', tree_ID);
-                lib_name = strcat('LustDTLib_', fun_name);
-            elseif strcmp(tree_ID, 'fabs')
-                fun_name = tree_ID;
-                lib_name = strcat('LustMathLib_', fun_name);
-            end
+            fun_name = strcat('_', tree_ID);
+            lib_name = strcat('LustDTLib_', fun_name);
             args.blkObj.addExternal_libraries(lib_name);
             args.expected_lusDT = expected_param_dt;
-            [param, ~, dim, extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(1), args);
+            [param, exp_dt, dim, extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(1), args);
             code = arrayfun(@(i) nasa_toLustre.lustreAst.NodeCallExpr(fun_name, param{i}), ...
                 (1:numel(param)), 'UniformOutput', false);
-            exp_dt = 'real';
+            %ceil(int8(3.4)) returns int8
+            %exp_dt = 'real';
             
         case {'int8', 'int16', 'int32', ...
                 'uint8', 'uint16', 'uint32', ...
