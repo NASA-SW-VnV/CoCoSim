@@ -7,7 +7,7 @@ function [fun_data_map, failed] = getFuncsDataMap(blk, script, ...
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        
+    
     %
     %
     fun_data_map = containers.Map('KeyType', 'char', 'ValueType', 'any');
@@ -150,14 +150,17 @@ function [func_path, failed] = print_script(funcsList, script)
     fclose(fid);
 end
 %% call function with random args
-function failed = callFunction(fH, args, func_path, blk)
+function failed = callFunction(fH, args, func_path, blk, loop_flag)
+    if nargin < 5 || isempty(loop_flag)
+        loop_flag = false;
+    end
     failed = false;
     try
         fH(args{:});
     catch me
         
-        if strcmp(me.identifier, 'MATLAB:innerdim')
-            % in Simulink a vector of 3 elements can be considered of dimension 
+        if strcmp(me.identifier, 'MATLAB:innerdim') && ~loop_flag
+            % in Simulink a vector of 3 elements can be considered of dimension
             % [3 1] or [1 3]
             % the following code will try to call the function with all different
             % settings by transposing vectors
@@ -176,7 +179,7 @@ function failed = callFunction(fH, args, func_path, blk)
                     for j=1:length(III)
                         new_args{III(j)} = new_args{III(j)}';
                     end
-                    failed = callFunction(fH, new_args, func_path, blk);
+                    failed = callFunction(fH, new_args, func_path, blk, true);
                     if ~failed
                         return;
                     end
