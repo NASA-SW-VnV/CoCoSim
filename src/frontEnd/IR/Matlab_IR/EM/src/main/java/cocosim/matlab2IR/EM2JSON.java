@@ -329,7 +329,7 @@ public class EM2JSON {
 				buf.append(Quotes("operator")+":"+Quotes(operator));
 				
 				buf.append(",\n");
-				buf.append(Quotes("leftExp")+":"+getJSON(ctx.primaryExpression()));
+				buf.append(Quotes("leftExp")+":"+getJSON(ctx.notAssignment()));
 				
 				buf.append(",\n");
 				buf.append(Quotes("text")+":"+Quotes(ctx.getText()));

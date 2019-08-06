@@ -84,9 +84,10 @@ assignment
     ;
 
 notAssignment
-    : notAssignment '.^' notAssignment						#  power
+    : primaryExpression					   					# notAssignment_primaryExpression
+    | notAssignment ( '\'' | '.\'')						    #  postfixExpression
+    | notAssignment '.^' notAssignment						#  power
     | notAssignment '^' notAssignment						#  mpower
-    | unaryOperator primaryExpression 						# unaryExpression
     | notAssignment '.*' notAssignment						#  times
     | notAssignment './' notAssignment						#  rdivide
     | notAssignment '.\\' notAssignment						#  ldivide
@@ -94,15 +95,14 @@ notAssignment
     | notAssignment '/' notAssignment						#  mrdivide
     | notAssignment '\\' notAssignment						#  mldivide
     | notAssignment ('+'|'-') notAssignment					#  plus_minus
-    | notAssignment COLON  notAssignment   					# colonExpression
+    | notAssignment ('=='|'~=') notAssignment				#  relopEQ_NE
+    | notAssignment ('<'|'>'|'<='|'>=') notAssignment		#  relopGL
+    | unaryOperator primaryExpression 						#  unaryExpression
+    | notAssignment COLON  notAssignment   					#  colonExpression
     | notAssignment '&' notAssignment						#  relopelAND
     | notAssignment '|' notAssignment						#  relopelOR
     | notAssignment '&&' notAssignment						#  relopAND
     | notAssignment '||' notAssignment						#  relopOR
-    | notAssignment ('=='|'~=') notAssignment				#  relopEQ_NE
-    | notAssignment ('<'|'>'|'<='|'>=') notAssignment		#  relopGL
-    | primaryExpression ( '\'' | '.\'')						#  postfixExpression
-    | primaryExpression					   					# notAssignment_primaryExpression
     ;
     
 unaryOperator
