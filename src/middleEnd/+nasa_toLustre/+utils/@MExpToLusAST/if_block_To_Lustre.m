@@ -44,7 +44,7 @@ function [code, exp_dt, dim, extra_code] = if_block_To_Lustre(tree, args)
     args.if_cond = cond_ID;
     for i=1:length(tree_statements)
         tree_type = tree_statements{i}.type;
-        if strcmp(tree_statements{i}.type, 'assignment')
+        if strcmp(tree_type, 'assignment')
             
             
         end

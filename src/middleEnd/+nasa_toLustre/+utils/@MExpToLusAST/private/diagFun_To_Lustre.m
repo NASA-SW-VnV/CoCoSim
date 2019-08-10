@@ -7,13 +7,18 @@ function [code, exp_dt, dim, extra_code] = diagFun_To_Lustre(tree, args)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     dim = [];
+    code = {};
     [x, exp_dt, x_dim, extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(1), args);
     if length(tree.parameters) > 1
-        if prod(x_dim) > max(x_dim)
             ME = MException('COCOSIM:TREE2CODE', ...
                 'Function diag in expression "%s" do not support a 2nd argument.',...
                 tree.text);
             throw(ME);
+    elseif prod(x_dim) > max(x_dim) % if is a matrix and not a vector
+        dim = [min(x_dim) 1];
+        x = reshape(x, x_dim);
+        for i=1:dim(1)
+            code{end + 1} = x(i, i);
         end
     else
         dim = [max(x_dim) max(x_dim)];

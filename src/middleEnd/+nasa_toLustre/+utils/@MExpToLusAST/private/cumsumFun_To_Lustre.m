@@ -11,7 +11,6 @@ function [code, exp_dt, dim, extra_code] = cumsumFun_To_Lustre(tree, args)
     code = {};
     extra_code = {};
     op = nasa_toLustre.lustreAst.BinaryExpr.PLUS;
-    
     [x, exp_dt, dim, extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(1), args);
     if isrow(x), x = x'; end
 

@@ -7,7 +7,7 @@ function [code, exp_dt, dim, extra_code] = transpose_To_Lustre(tree, args)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     [x, exp_dt, x_dim, extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
-        tree.leftExp, args);
+        tree.parameters(1), args);
     if isrow(x), x = x'; end
     x_reshp = reshape(x, x_dim);
     code = reshape(x_reshp', [prod(x_dim) 1]);
