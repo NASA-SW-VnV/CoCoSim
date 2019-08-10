@@ -1,12 +1,10 @@
-function [params] = matlabFunction_circshiftTest()
-    fun_name = 'circshift';
+function [params] = matlabFunction_diagTest()
+    fun_name = 'diag';
     % properties that will participate in permutations
     inputDataType = {'double','single','int8', 'uint8','int32','uint32', 'boolean'};
-    inputDimension = {'1', '[3,1]', '[1,3]', '[2,3]', '[2 3 4]'};
+    inputDimension = {'1', '[3,1]', '[1,3]', '[2,3]'};
     oneInputFcn = { ...
-        sprintf('y = %s(u, 1);', fun_name),...
-        sprintf('y = %s(u, 2);', fun_name), ...
-        sprintf('y = %s(u, [1 -1]);', fun_name)};
+        sprintf('y = %s(u);', fun_name),};
     
     header = 'function y = fcn(u)';
     params = {};
@@ -23,3 +21,4 @@ function [params] = matlabFunction_circshiftTest()
         end
     end
 end
+
