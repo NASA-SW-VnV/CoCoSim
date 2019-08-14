@@ -14,6 +14,7 @@ classdef MExpToLusDT
         % sort by alphabetic order
         [lusDT, slxDT] = assignment_DT(tree, args)
         [lusDT, slxDT] = binaryExpression_DT(tree, args)
+        [lusDT, slxDT] = colonExpression_DT(tree, args)
         [lusDT, slxDT] = constant_DT(tree, args)
         [lusDT, slxDT] = end_DT(tree, args)
         [lusDT, slxDT] = expression_DT(tree, args)
