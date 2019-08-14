@@ -83,6 +83,21 @@ classdef MExpToLusDT
                         new_output_dt = output_dt{i};
                         continue;
                     end
+                    if strcmp(output_dt{i}, 'int') && (isa(code{i}, 'nasa_toLustre.lustreAst.RealExpr') ...
+                            || isa(code{i}, 'nasa_toLustre.lustreAst.BoolExpr'))
+                        new_code{i} = nasa_toLustre.lustreAst.IntExpr(fix(code{i}.value));
+                        continue
+                    end
+                    if strcmp(output_dt{i}, 'real') && (isa(code{i}, 'nasa_toLustre.lustreAst.IntExpr') ...
+                            || isa(code{i}, 'nasa_toLustre.lustreAst.BoolExpr'))
+                        new_code{i} = nasa_toLustre.lustreAst.IntExpr(code{i}.value);
+                        continue
+                    end
+                    if strcmp(output_dt{i}, 'bool') && (isa(code{i}, 'nasa_toLustre.lustreAst.RealExpr') ...
+                            || isa(code{i}, 'nasa_toLustre.lustreAst.IntExpr'))
+                        new_code{i} = nasa_toLustre.lustreAst.IntExpr(boolean(code{i}.value));
+                        continue
+                    end
                     conv = strcat(input_dt{i}, '_to_', output_dt{i});
                     obj.addExternal_libraries(strcat('LustDTLib_', conv));
                     new_code{i} = nasa_toLustre.lustreAst.NodeCallExpr(conv, code(i));
