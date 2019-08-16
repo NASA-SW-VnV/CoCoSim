@@ -147,7 +147,9 @@ classdef Math_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                         {inputs{1}{i}, inputs{2}{i}}));
                 end
             elseif  strcmp(operator, 'transpose') || strcmp(operator, 'hermitian')
-                in_matrix_dimension = nasa_toLustre.blocks.Assignment_To_Lustre.getInputMatrixDimensions(blk.CompiledPortDimensions.Inport);
+                in_matrix_dimension = ...
+                    nasa_toLustre.blocks.Assignment_To_Lustre.getInputMatrixDimensions(...
+                    blk.CompiledPortDimensions.Inport);
                 if in_matrix_dimension{1}.numDs > 2
                     display_msg(sprintf('Matrix size > 2 is not supported for transpose/hermitian operator in block %s',...
                         HtmlItem.addOpenCmd(blk.Origin_path)), MsgType.ERROR, 'Math_To_Lustre', '');
@@ -155,15 +157,15 @@ classdef Math_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 if numel(in_matrix_dimension{1}.dims) == 1
                     in_matrix_dimension{1}.dims(2) = 1;
                 end
-                outIndex = 0;
-                for j=1:in_matrix_dimension{1}.dims(1)
-                    for i=1:in_matrix_dimension{1}.dims(2)
-                        outIndex = outIndex + 1;
-                        inIndex = sub2ind(in_matrix_dimension{1}.dims,j,i);
-                        codes{outIndex} = nasa_toLustre.lustreAst.LustreEq(outputs{outIndex},...
-                            inputs{1}{inIndex}) ;
-                    end
+                
+                mat_inputs = reshape(inputs{1}, in_matrix_dimension{1}.dims);
+                mat_inputs_transpose = mat_inputs';
+                Y_inlined = reshape(mat_inputs_transpose, [1, prod(in_matrix_dimension{1}.dims)]);
+                
+                for i=1:numel(outputs)
+                    codes{i} = nasa_toLustre.lustreAst.LustreEq(outputs{i}, Y_inlined{i});
                 end
+                
             end
             
             obj.addCode(codes);
