@@ -1,4 +1,4 @@
-function [code, exp_dt, extra_code] = arrayAccess_To_Lustre(tree, args)
+function [code, exp_dt, dim, extra_code] = arrayAccess_To_Lustre(tree, args)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -83,6 +83,7 @@ function [code, exp_dt, extra_code] = arrayAccess_To_Lustre(tree, args)
         if isConstant
             %[n,m,l] = size(M)
             %idx = i + (j-1) * n + (k-1) * n * m
+            dim = [1 1];
             code{1} = constantIndexing(namesAst, parameters, CompiledSize, tree);
         else
             %e.g., A(1:end, 2) , H(:,j)
@@ -100,6 +101,7 @@ function [code, exp_dt, extra_code] = arrayAccess_To_Lustre(tree, args)
                     nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(parameters{i}, args);
                 extra_code = MatlabUtils.concat(extra_code, extra_code_i);
             end
+            dim = arrayfun(@(i) length(cell_params{i}), 1:length(cell_params));
             params_list = MatlabUtils.cellCartesianProduct(cell_params);
             [nbR, ~] = size(params_list);
             for pidx = 1:nbR
