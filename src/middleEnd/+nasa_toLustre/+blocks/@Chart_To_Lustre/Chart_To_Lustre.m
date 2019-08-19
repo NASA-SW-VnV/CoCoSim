@@ -62,7 +62,7 @@ classdef Chart_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 inputs = [cond, inputs];
             end
             if isempty(inputs)
-                inputs{1} = nasa_toLustre.lustreAst.BooleanExpr(true);
+                inputs{1} = nasa_toLustre.lustreAst.BoolExpr(true);
             end
             
             

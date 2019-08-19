@@ -6,14 +6,18 @@ function [b, ShowOutputPortIsOn, TriggerType, TriggerDT] = hasTriggerPort(blk)
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    fields = fieldnames(blk.Content);
-    fields = ...
-        fields(...
-        cellfun(@(x) isfield(blk.Content.(x),'BlockType'), fields));
-    triggerPortsFields = fields(...
-        cellfun(@(x) strcmp(blk.Content.(x).BlockType,'TriggerPort'), fields));
-    b = ~isempty(triggerPortsFields);
-
+    if isfield(blk, 'Content')
+        fields = fieldnames(blk.Content);
+        fields = ...
+            fields(...
+            cellfun(@(x) isfield(blk.Content.(x),'BlockType'), fields));
+        triggerPortsFields = fields(...
+            cellfun(@(x) strcmp(blk.Content.(x).BlockType,'TriggerPort'), fields));
+        b = ~isempty(triggerPortsFields);
+    else
+        b = false;
+    end
+    
     if b
         TriggerType = blk.Content.(triggerPortsFields{1}).TriggerType;
         ShowOutputPortIsOn =  ...

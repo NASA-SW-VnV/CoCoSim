@@ -6,14 +6,18 @@ function [b, Iteratorblk] = hasForIterator(blk)
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    fields = fieldnames(blk.Content);
-    fields = ...
-        fields(...
-        cellfun(@(x) isfield(blk.Content.(x),'BlockType'), fields));
-    forIteratorFields = fields(...
-        cellfun(@(x) strcmp(blk.Content.(x).BlockType,'ForIterator'), fields));
-    b = ~isempty(forIteratorFields);
-
+    if isfield(blk, 'Content')
+        fields = fieldnames(blk.Content);
+        fields = ...
+            fields(...
+            cellfun(@(x) isfield(blk.Content.(x),'BlockType'), fields));
+        forIteratorFields = fields(...
+            cellfun(@(x) strcmp(blk.Content.(x).BlockType,'ForIterator'), fields));
+        b = ~isempty(forIteratorFields);
+    else
+        b = false;
+    end
+    
     if b
         Iteratorblk = blk.Content.(forIteratorFields{1});
     else

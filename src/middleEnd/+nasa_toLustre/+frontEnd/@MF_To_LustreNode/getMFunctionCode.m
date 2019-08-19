@@ -9,7 +9,9 @@ function [external_nodes, failed] = getMFunctionCode(blkObj, parent,  blk, Input
     
     %
     %
-    global SF_MF_FUNCTIONS_MAP
+    global SF_MF_FUNCTIONS_MAP MFUNCTION_EXTERNAL_NODES
+    % reset MFUNCTION_EXTERNAL_NODES
+    MFUNCTION_EXTERNAL_NODES = {};
     external_nodes ={};
     % get all user functions needed in one script
     [script, failed] = nasa_toLustre.frontEnd.MF_To_LustreNode.getAllRequiredFunctionsInOneScript(blk );
@@ -42,7 +44,9 @@ function [external_nodes, failed] = getMFunctionCode(blkObj, parent,  blk, Input
         nasa_toLustre.frontEnd.MF_To_LustreNode.getFuncCode(func, fun_data_map(func.name), blkObj, parent, blk), ...
         funcList, 'UniformOutput', 0);
     failed = all([failed{:}]);
-    
+    if ~isempty(MFUNCTION_EXTERNAL_NODES)
+        external_nodes = MatlabUtils.concat(external_nodes, MFUNCTION_EXTERNAL_NODES);
+    end
 end
 
 

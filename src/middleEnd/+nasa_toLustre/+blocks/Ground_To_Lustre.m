@@ -18,7 +18,7 @@ classdef Ground_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             lus_outputDataType =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Outport{1});
             
             if strcmp(lus_outputDataType, 'bool')
-                v = nasa_toLustre.lustreAst.BooleanExpr('false');
+                v = nasa_toLustre.lustreAst.BoolExpr('false');
             elseif strcmp(lus_outputDataType, 'int')
                 v = nasa_toLustre.lustreAst.IntExpr('0');
             else

@@ -11,6 +11,13 @@ function [script, failed] = getAllRequiredFunctionsInOneScript(blk)
     %
     failed = false;
     script = blk.Script;
+    
+    %No need for this at the moment
+%     % remove multi-line comment
+%     script = regexprep(script,'\%\{.+\%\}', '');
+%     % remove one-line comment
+%     script = regexprep(script,'\%[^\n]*', '');
+
     func_path = strcat(tempname, '.m');
     [fun_dir, ~, ~] = fileparts(func_path);
     PWD = pwd;
@@ -22,6 +29,8 @@ function [script, failed] = getAllRequiredFunctionsInOneScript(blk)
         failed = true;
         return;
     end
+    % print % in file
+    script = strrep(script, '%', '%%');
     fprintf(fid, script);
     fclose(fid);
     fList = matlab.codetools.requiredFilesAndProducts(func_path);

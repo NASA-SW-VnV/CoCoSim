@@ -80,8 +80,8 @@ classdef PropertyExpr < nasa_toLustre.lustreAst.LustreExpr
         
         %% This function is used in Stateflow compiler to change from imperative
         % code to Lustre
-        function [obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft)
-            [obj.exp, outputs_map] = obj.exp.pseudoCode2Lustre(outputs_map, isLeft);
+        function [obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft, node, data_map)
+            [obj.exp, outputs_map] = obj.exp.pseudoCode2Lustre(outputs_map, isLeft, node, data_map);
         end
         
         

@@ -6,14 +6,18 @@ function [b, ResetType] = hasResetPort(blk)
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    fields = fieldnames(blk.Content);
-    fields = ...
-        fields(...
-        cellfun(@(x) isfield(blk.Content.(x),'BlockType'), fields));
-    resetPortsFields = fields(...
-        cellfun(@(x) strcmp(blk.Content.(x).BlockType,'ResetPort'), fields));
-    b = ~isempty(resetPortsFields);
-
+    if isfield(blk, 'Content')
+        fields = fieldnames(blk.Content);
+        fields = ...
+            fields(...
+            cellfun(@(x) isfield(blk.Content.(x),'BlockType'), fields));
+        resetPortsFields = fields(...
+            cellfun(@(x) strcmp(blk.Content.(x).BlockType,'ResetPort'), fields));
+        b = ~isempty(resetPortsFields);
+    else
+        b = false;
+    end
+    
     if b
         ResetType = blk.Content.(resetPortsFields{1}).ResetTriggerType;
     else

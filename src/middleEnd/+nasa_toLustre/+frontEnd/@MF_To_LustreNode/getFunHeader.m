@@ -9,7 +9,8 @@ function [fun_node] = getFunHeader(func, blk, data_map)
     %
     %
     
-    data_set = data_map.values();
+    data_set = data_map.values(); 
+    data_set = data_set(cellfun(@(x) isstruct(x), data_set));
     scopes = cellfun(@(x) x.Scope, data_set, 'UniformOutput', 0);
     Inputs = data_set(strcmp(scopes, 'Input'));
     Outputs = data_set(strcmp(scopes, 'Output'));

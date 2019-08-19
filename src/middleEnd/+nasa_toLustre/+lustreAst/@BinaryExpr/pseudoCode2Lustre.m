@@ -1,4 +1,4 @@
-function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, ~)
+function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft, node, data_map)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Copyright (c) 2019 United States Government as represented by the
 % Administrator of the National Aeronautics and Space Administration.
@@ -8,8 +8,8 @@ function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, ~)
 
     
     %BinaryExpr is always on the right of an Equation
-    [leftExp, ~] = obj.left.pseudoCode2Lustre(outputs_map, false);
-    [rightExp, ~] = obj.right.pseudoCode2Lustre(outputs_map, false);
+    [leftExp, ~] = obj.left.pseudoCode2Lustre(outputs_map, false, node, data_map);
+    [rightExp, ~] = obj.right.pseudoCode2Lustre(outputs_map, false, node, data_map);
     new_obj = nasa_toLustre.lustreAst.BinaryExpr(obj.op,...
         leftExp,...
         rightExp, ...

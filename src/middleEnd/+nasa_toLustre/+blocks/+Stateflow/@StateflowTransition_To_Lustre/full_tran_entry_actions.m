@@ -73,7 +73,7 @@ function [body, outputs, inputs, antiCondition] = ...
                 if isKey(SF_STATES_NODESAST_MAP, entryNodeName)
                     %entry Action exists.
                     actionNodeAst = SF_STATES_NODESAST_MAP(entryNodeName);
-                    [call, oututs_Ids] = actionNodeAst.nodeCall(true, nasa_toLustre.lustreAst.BooleanExpr(false));
+                    [call, oututs_Ids] = actionNodeAst.nodeCall(true, nasa_toLustre.lustreAst.BoolExpr(false));
                     if isempty(trans_cond)
                         body{end+1} = nasa_toLustre.lustreAst.LustreEq(oututs_Ids, call);
                         outputs = [outputs, actionNodeAst.getOutputs()];
@@ -94,7 +94,7 @@ function [body, outputs, inputs, antiCondition] = ...
                 nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getEntryActionNodeName(dest_parent);
             if isKey(SF_STATES_NODESAST_MAP, entryNodeName)
                 actionNodeAst = SF_STATES_NODESAST_MAP(entryNodeName);
-                [call, oututs_Ids] = actionNodeAst.nodeCall(true, nasa_toLustre.lustreAst.BooleanExpr(false));
+                [call, oututs_Ids] = actionNodeAst.nodeCall(true, nasa_toLustre.lustreAst.BoolExpr(false));
                 if isempty(trans_cond)
                     body{end+1} = nasa_toLustre.lustreAst.LustreEq(oututs_Ids, call);
                     outputs = [outputs, actionNodeAst.getOutputs()];
@@ -136,7 +136,7 @@ function [body, outputs, inputs, antiCondition] = ...
             nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getEntryActionNodeName(dest_parent);
         if isKey(SF_STATES_NODESAST_MAP, entryNodeName)
             actionNodeAst = SF_STATES_NODESAST_MAP(entryNodeName);
-            [call, oututs_Ids] = actionNodeAst.nodeCall(true, nasa_toLustre.lustreAst.BooleanExpr(true));
+            [call, oututs_Ids] = actionNodeAst.nodeCall(true, nasa_toLustre.lustreAst.BoolExpr(true));
             if isempty(trans_cond)
                 body{end+1} = nasa_toLustre.lustreAst.LustreEq(oututs_Ids, call);
                 outputs = [outputs, actionNodeAst.getOutputs()];

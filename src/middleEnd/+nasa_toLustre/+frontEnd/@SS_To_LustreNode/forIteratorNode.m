@@ -45,7 +45,7 @@ function [main_node, iterator_node] = forIteratorNode(main_node, variables,...
     if strcmp(iteration_dt, 'int')
         v = nasa_toLustre.lustreAst.IntExpr(iterationValue);
     elseif strcmp(iteration_dt, 'bool')
-        v = nasa_toLustre.lustreAst.BooleanExpr(iterationValue);
+        v = nasa_toLustre.lustreAst.BoolExpr(iterationValue);
     else
         v = nasa_toLustre.lustreAst.RealExpr(iterationValue);
     end
@@ -200,7 +200,7 @@ function [main_node, iterator_node] = forIteratorNode(main_node, variables,...
         if strcmp(iteration_dt, 'int')
             input_names{end} = nasa_toLustre.lustreAst.IntExpr(iterationValue);
         elseif strcmp(iteration_dt, 'bool')
-            input_names{end} = nasa_toLustre.lustreAst.BooleanExpr(iterationValue);
+            input_names{end} = nasa_toLustre.lustreAst.BoolExpr(iterationValue);
         else
             input_names{end} = nasa_toLustre.lustreAst.RealExpr(iterationValue);
         end

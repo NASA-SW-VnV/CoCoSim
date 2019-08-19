@@ -42,7 +42,7 @@ classdef RandomNumber_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             codes = {};
             if LusBackendType.isKIND2(lus_backend)
                 codes{1} = nasa_toLustre.lustreAst.LustreEq(outputs{1}, ...
-                    nasa_toLustre.lustreAst.NodeCallExpr(blk_name, nasa_toLustre.lustreAst.BooleanExpr('true')));
+                    nasa_toLustre.lustreAst.NodeCallExpr(blk_name, nasa_toLustre.lustreAst.BoolExpr('true')));
             else
                 clk_var = nasa_toLustre.lustreAst.VarIdExpr(sprintf('%s_clock', blk_name));
                 obj.addVariable(nasa_toLustre.lustreAst.LustreVar(clk_var, 'bool clock'));
@@ -53,7 +53,7 @@ classdef RandomNumber_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 % generating 100 random random that will be repeated each 100
                 % steps
                 codes{2} = nasa_toLustre.lustreAst.LustreEq(outputs{1}, ...
-                    nasa_toLustre.lustreAst.EveryExpr(blk_name, nasa_toLustre.lustreAst.BooleanExpr('true'), clk_var));
+                    nasa_toLustre.lustreAst.EveryExpr(blk_name, nasa_toLustre.lustreAst.BoolExpr('true'), clk_var));
             end
             
             obj.addCode( codes );

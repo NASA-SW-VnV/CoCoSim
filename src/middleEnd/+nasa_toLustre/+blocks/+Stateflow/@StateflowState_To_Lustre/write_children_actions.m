@@ -36,7 +36,7 @@ function [actions, outputs, inputs] = ...
             end
             actionNodeAst = SF_STATES_NODESAST_MAP(action_node_name);
             [call, oututs_Ids] = actionNodeAst.nodeCall(...
-                true, nasa_toLustre.lustreAst.BooleanExpr(false));
+                true, nasa_toLustre.lustreAst.BoolExpr(false));
             actions{end+1} = nasa_toLustre.lustreAst.LustreEq(oututs_Ids, call);
             outputs = [outputs, actionNodeAst.getOutputs()];
             inputs = [inputs, actionNodeAst.getInputs()];
@@ -100,7 +100,7 @@ function [actions, outputs, inputs] = ...
             end
             actionNodeAst = SF_STATES_NODESAST_MAP(action_node_name);
             [call, oututs_Ids] = actionNodeAst.nodeCall(...
-                true, nasa_toLustre.lustreAst.BooleanExpr(false));
+                true, nasa_toLustre.lustreAst.BoolExpr(false));
             if isOneChildEntry
                 concurrent_actions{end+1} = nasa_toLustre.lustreAst.LustreEq(oututs_Ids, call);
                 outputs = [outputs, actionNodeAst.getOutputs()];

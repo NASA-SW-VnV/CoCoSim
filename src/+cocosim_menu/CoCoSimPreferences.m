@@ -13,7 +13,8 @@ classdef CoCoSimPreferences < handle
         modelChecker = 'Kind2';
         irToLustreCompiler = false; %only used by cocosim IOWA
         compositionalAnalysis = true; %Kind2 compositionalAnalysis
-        kind2Binary = 'Local';% possible values are {'Kind2 web service', 'Local'}
+        kind2Binary = 'Local';% possible values are {'Kind2 web service', 'Docker', 'Local'}
+        lustrecBinary = 'Local';% possible values are {'Docker', 'Local'}
         verificationTimeout = 1200; % In seconds
         lustreCompiler = 'NASA';% possible values are {'NASA', 'IOWA'}
         lustreBackend = LusBackendType.KIND2; % see LusBackendType for possible values
@@ -62,7 +63,7 @@ classdef CoCoSimPreferences < handle
             warning('on', 'MATLAB:structOnObject')
         end
         
-        function save(CoCoSimPreferences)% the parameter is used by save function
+        function save(CoCoSimPreferences)% Ignore warning: the parameter is used by save function
             preferencesFile = cocosim_menu.CoCoSimPreferences.getPreferencesMatPath();
             save(preferencesFile, 'CoCoSimPreferences');
         end

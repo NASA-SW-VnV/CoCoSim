@@ -33,7 +33,7 @@ function code = getAssumptionExpr(blk, inputs, inport_lus_dt)
             if strcmp(inport_lus_dt, 'int')
                 p = nasa_toLustre.lustreAst.IntExpr(intervalsCell{i}.value);
             elseif strcmp(inport_lus_dt, 'bool')
-                p = nasa_toLustre.lustreAst.BooleanExpr(intervalsCell{i}.value);
+                p = nasa_toLustre.lustreAst.BoolExpr(intervalsCell{i}.value);
             else
                 p = nasa_toLustre.lustreAst.RealExpr(intervalsCell{i}.value);
             end
@@ -62,7 +62,7 @@ function code = getAssumptionExpr(blk, inputs, inport_lus_dt)
             if strcmp(inport_lus_dt, 'int')
                 p = nasa_toLustre.lustreAst.IntExpr(intervalsCell{i});
             elseif strcmp(inport_lus_dt, 'bool')
-                p = nasa_toLustre.lustreAst.BooleanExpr(intervalsCell{i});
+                p = nasa_toLustre.lustreAst.BoolExpr(intervalsCell{i});
             else
                 p = nasa_toLustre.lustreAst.RealExpr(intervalsCell{i});
             end

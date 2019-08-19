@@ -19,7 +19,9 @@ function [main_node, external_nodes ] = ...
         % try translate Matlab code to Lustre if failed, it will be set as
         % imported
         [ fun_nodes, failed] = nasa_toLustre.frontEnd.MF_To_LustreNode.getMFunctionCode(blkObj, parent,  blk, Inputs);
-        main_node = fun_nodes{1};
+        if length(fun_nodes) >= 1
+            main_node = fun_nodes{1};
+        end
         if length(fun_nodes) > 1
             external_nodes = fun_nodes(2:end);
         end
@@ -52,7 +54,7 @@ function [main_node, external_nodes ] = ...
             {}, ...
             false);
         main_node.setIsImported(true);
-        display_msg(sprintf('Matlab Function block "%s" couldn''t be translated to Lustre. It will be abstracted as an imported node.', ...
+        display_msg(sprintf('Matlab Function block "%s" couldn''t be translated to Lustre.\nIt will be abstracted as an imported node.', ...
             HtmlItem.addOpenCmd(blk.Origin_path)), MsgType.WARNING, 'MF_To_LustreNode.mfunction2node', '');
     end
 end
