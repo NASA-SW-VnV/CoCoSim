@@ -139,7 +139,7 @@ classdef Block_Test
                 skip = true;
             end
             new_system(mdl_name);
-            %open_system(mdl_name);
+            open_system(mdl_name);
             if addCondExecSS
                 if bdIsLoaded('Block_TestLib'), load_system('Block_TestLib'); end
                 if condExecSSIdx > length(Block_Test.condExecSS)

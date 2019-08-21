@@ -10,15 +10,11 @@ classdef Abs_Test < Block_Test
         % properties that will participate in permutations
         % tested 11 elements for OutDataTypeStr
         OutDataTypeStr = {...
-            'Inherit: Inherit via internal rule',...
-            'Inherit: Inherit via back propagation',...
-            'Inherit: Same as input',...
-            'double','single','int8','uint8','int16','uint16','int32',...
+            'double','single','int8','uint8','int32',...
             'uint32','fixdt(1,16,0)',...
             'fixdt(1,16,2^0,0)'};
         
-        inpDataType = {'double', 'single','int8',...
-            'uint8','int16','uint16','int32', ...
+        inpDataType = {'single','int8',...
             'uint32','fixdt(1,16,0)','fixdt(1,16,2^0,0)'};
         
     end
@@ -26,8 +22,8 @@ classdef Abs_Test < Block_Test
     properties
         % other properties
         SampleTime = {'-1'};
-        OutMin = {[]};
-        OutMax = {[]};
+        OutMin = {'0','.5','5'};
+        OutMax = {'0.1','.51','6','8'};
         RndMeth = {'Ceiling', 'Convergent', 'Floor', 'Nearest', ...
             'Round', 'Simplest', 'Zero'};
         SaturateOnIntegerOverflow = {'off', 'on'};
@@ -89,7 +85,9 @@ classdef Abs_Test < Block_Test
                         'PortDimensions', fstInDims{dim_Idx});
 
                     failed = Block_Test.setConfigAndSave(mdl_name, mdl_path);
-                    if failed, display(s), end
+                    if failed 
+                        display(s); 
+                    end
                 
                     
                 catch me
@@ -124,6 +122,13 @@ classdef Abs_Test < Block_Test
                         length(obj.RndMeth)) + 1;
                     iSaturate = mod(inpIsIntCount, ...
                         length(obj.SaturateOnIntegerOverflow)) + 1;
+                    iOutMin = mod(length(params), ...
+                        length(obj.OutMin)) + 1;                    
+                    iOutMax = mod(length(params), ...
+                        length(obj.OutMax)) + 1;     
+                    if iOutMax < iOutMin
+                        iOutMax = iOutMin;
+                    end
                     s = struct();
                     s.inpDataType = obj.inpDataType{pInType};
                     s.OutDataTypeStr = obj.OutDataTypeStr{pOutType};
@@ -132,6 +137,9 @@ classdef Abs_Test < Block_Test
                         obj.SaturateOnIntegerOverflow{iSaturate};
                     rotate2 = mod(length(params), 2) + 1;
                     s.LockScale = obj.LockScale{rotate2};
+                    s.ZeroCross = obj.ZeroCross{rotate2};
+                    s.OutMin = obj.OutMin{iOutMin};
+                    s.OutMax = obj.OutMax{iOutMax};
                     params{end+1} = s;
                 end
             end
