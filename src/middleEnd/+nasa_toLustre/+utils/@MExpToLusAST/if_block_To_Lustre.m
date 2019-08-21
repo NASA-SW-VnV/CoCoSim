@@ -14,9 +14,6 @@ function [code, exp_dt, dim, extra_code] = if_block_To_Lustre(tree, args)
     args.expected_lusDT = 'bool';
     [condition, ~, ~, code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
         tree.condition, args);
-    not_condition_list = nasa_toLustre.lustreAst.UnaryExpr(...
-        nasa_toLustre.lustreAst.UnaryExpr.NOT, condition);
-    last_condition = condition;
     args.expected_lusDT = '';
     
     cond_name = strcat('ifCond_', num2str(counter), strrep(num2str(rand(1)), '0.', '_'));
@@ -53,6 +50,8 @@ function [code, exp_dt, dim, extra_code] = if_block_To_Lustre(tree, args)
         code = MatlabUtils.concat(code, extra_code_i);
         code = MatlabUtils.concat(code, statements_code);
     end
+    not_cond_ID = nasa_toLustre.lustreAst.UnaryExpr(...
+                nasa_toLustre.lustreAst.UnaryExpr.NOT, cond_ID, false);
     
     
     % elseif
@@ -66,27 +65,27 @@ function [code, exp_dt, dim, extra_code] = if_block_To_Lustre(tree, args)
                 elif.condition, args);
             code = MatlabUtils.concat(code, extra_code_i);
             code{end+1} = nasa_toLustre.lustreAst.LustreEq(new_cond_ID, ...
-                nasa_toLustre.lustreAst.BinaryExpr(...
-                nasa_toLustre.lustreAst.BinaryExpr.AND, not_condition_list, condition));
+                condition);
             
-            not_condition_list = nasa_toLustre.lustreAst.BinaryExpr(...
-                nasa_toLustre.lustreAst.BinaryExpr.AND, ...
-                not_condition_list, nasa_toLustre.lustreAst.UnaryExpr(...
-                nasa_toLustre.lustreAst.UnaryExpr.NOT, condition));
+            if_condition = nasa_toLustre.lustreAst.BinaryExpr(...
+                nasa_toLustre.lustreAst.BinaryExpr.AND, not_cond_ID, new_cond_ID);
             
             s = struct('Name', cond_name, 'LusDatatype', 'bool', 'DataType', 'boolean', ...
                 'CompiledType', 'boolean', 'InitialValue', '0', ...
                 'ArraySize', '1 1', 'CompiledSize', '1 1', 'Scope', 'Local', ...
                 'Port', '1');
             args.data_map(cond_name) = s;
-            args.if_cond = new_cond_ID;
+            args.if_cond = if_condition;
             for j=1:length(elif.statements)
                 [line, ~, ~, extra_code_i] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
                     elif.statements(j), args);
                 code = MatlabUtils.concat(code, extra_code_i);
                 code = MatlabUtils.concat(code, line);
             end
-            cond_ID = new_cond_ID;
+            not_cond_ID = nasa_toLustre.lustreAst.BinaryExpr(...
+                nasa_toLustre.lustreAst.BinaryExpr.AND, not_cond_ID, ...
+                nasa_toLustre.lustreAst.UnaryExpr(...
+                nasa_toLustre.lustreAst.UnaryExpr.NOT, new_cond_ID, false), false);
         end
     end
     
@@ -98,7 +97,7 @@ function [code, exp_dt, dim, extra_code] = if_block_To_Lustre(tree, args)
         else
             else_block_statements = tree.else_block.statements;
         end
-        args.if_cond = not_condition_list;
+        args.if_cond = not_cond_ID;
         for i=1:length(else_block_statements)
             [else_block_code, ~, ~, extra_code_i] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
                 else_block_statements{i}, args);
