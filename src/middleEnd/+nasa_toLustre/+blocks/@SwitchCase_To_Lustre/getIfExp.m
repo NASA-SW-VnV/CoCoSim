@@ -16,7 +16,7 @@ function IfExp = getIfExp(obj, blk)
             for j=1:numel(CaseConditions{i})
                 exp{j} = sprintf('u1 == %d', CaseConditions{i}(j));
             end
-            IfExp{i} = MatlabUtils.strjoin(exp, ' | ');
+            IfExp{i} = MatlabUtils.strjoin(exp, ' || ');
         end
 
     end

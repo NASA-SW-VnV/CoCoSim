@@ -18,8 +18,13 @@ function [valid, sim_failed, cex_file_path] = compareTwoSLXModels(orig_mdl_path,
     valid = false;
     sim_failed = false;
     cex_file_path = '';
+    if strcmp(orig_mdl_path, pp_mdl_path)
+        valid = true;
+        return;
+    end
     [orig_mdl_dir, orig_mdl_name, ~] = fileparts(orig_mdl_path);
     [~, pp_mdl_name, ~] = fileparts(pp_mdl_path);
+    
     % Make sure Both models has same interface (Inports/Outports dimensions,
     % datatype)
     areTheSame = modelsAreTheSame(orig_mdl_path, pp_mdl_path);

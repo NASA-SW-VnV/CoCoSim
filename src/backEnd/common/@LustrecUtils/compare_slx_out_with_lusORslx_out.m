@@ -30,6 +30,7 @@ function [valid, cex_msg, diff_name, diff_value, sim_failed] = ...
     for k=1:numberOfOutputs
         out_width(k) = LustrecUtils.getSignalWidth(yout1{k}.Values);
     end
+    first_comparaison = true;
     for i=1:numel(time)
         cex_msg{end+1} = sprintf('*****time : %f**********\n',time(i));
         cex_msg{end+1} = sprintf('*****inputs: \n');
@@ -55,7 +56,7 @@ function [valid, cex_msg, diff_name, diff_value, sim_failed] = ...
             end
             if ~isComparingAgainstLustre && numel(yout1_values) ~= numel(yout2_values)
                 % Signature is not the same
-                valid = 0;
+                valid = false;
                 sim_failed = true;
                 return;
             end
@@ -107,8 +108,9 @@ function [valid, cex_msg, diff_name, diff_value, sim_failed] = ...
                     diff = abs(y1_value-y2_value);
                 end
                 
-                if i == 1 && k == 1 && j == 1
+                if first_comparaison
                     valid = diff <  eps;
+                    first_comparaison = false;
                 else
                     valid = valid && (diff <  eps);
                 end
@@ -125,7 +127,7 @@ function [valid, cex_msg, diff_name, diff_value, sim_failed] = ...
         if ~found_output
             cex_msg{end+1} = sprintf('No Output saved for this time step.\n');
         end
-        if  ~valid
+        if  found_output && ~valid
             break;
         end
     end
