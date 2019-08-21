@@ -1,16 +1,16 @@
-classdef BitClear_Test < Block_Test
-    %BitClear_Test generates test automatically.
+classdef Clock_Test < Block_Test
+    %Clock_Test generates test automatically.
     
     properties(Constant)
-        fileNamePrefix = 'BitClear_TestGen';
-        blkLibPath = 'simulink/Logic and Bit Operations/Bit Clear';
+        fileNamePrefix = 'Clock_TestGen';
+        blkLibPath = 'simulink/Sources/Clock';
     end
     
     properties
         % properties that will participate in permutations
-        inputDataType = {'int8','uint8','int16','uint16',...
-            'int32','uint32','fixdt(1,16,0)','boolean'};
-        iBit = {'0','[1 2 4]', '[0 2; 3 4]'};
+        %OutDataTypeStr = {'double','single'};
+        DisplayTime = {'off'};
+        Decimation = {'1','10','100','1000'};
     end
     
     properties
@@ -46,29 +46,11 @@ classdef BitClear_Test < Block_Test
                     end
                     
                     %% remove parametres that does not belong to block params
-                    inpDataType = s.inputDataType;
-                    s = rmfield(s,'inputDataType');
-                    inputDims  = s.inputDims;
-                    s = rmfield(s,'inputDims');
+%                     outDataType = s.outputDataType;
+%                     s = rmfield(s,'outputDataType');
                     %% add the block
 
                     Block_Test.add_and_connect_block(obj.blkLibPath, blkPath, s);
-                    
-                    %% go over inports
-                    try
-                        blk_parent = get_param(blkPath, 'Parent');
-                    catch
-                        blk_parent = fileparts(blkPath);
-                    end
-                    inport_list = find_system(blk_parent, ...
-                        'SearchDepth',1, 'BlockType','Inport');                 
-                    
-                    % rotate over input data type 
-                    set_param(inport_list{1}, ...
-                        'OutDataTypeStr',inpDataType);
-                    
-                    set_param(inport_list{1}, ...
-                        'PortDimensions', inputDims);
 
                     failed = Block_Test.setConfigAndSave(mdl_name, mdl_path);
                     if failed, display(s), end
@@ -96,35 +78,17 @@ classdef BitClear_Test < Block_Test
         
         function params = getPermutations(obj)
             params = {};
-            inpIsIntCount = 0;
-            for pInType = 1 : numel(obj.inputDataType)
-                % rotate iBit
-                piBit = mod(pInType, ...
-                    length(obj.iBit)) + 1;
-                if strfind(obj.inputDataType{pInType}, 'int')
-                    inpIsIntCount = inpIsIntCount + 1;
+            for pDisplayTime = 1 : numel(obj.DisplayTime)
+                for pDecimation = 1:numel(obj.Decimation)
+%                     pOutputDataType = mod(numel(params), ...
+%                         length(obj.OutDataTypeStr)) + 1;
+                    s = struct();
+                    s.DisplayTime = obj.DisplayTime{pDisplayTime};
+                    s.Decimation = obj.Decimation{pDecimation};
+                    %s.OutDataTypeStr = obj.OutDataTypeStr{pOutputDataType};
+                    params{end+1} = s;
+                    
                 end
-                s = struct();
-                s.iBit = obj.iBit{piBit};
-                s.inputDataType = obj.inputDataType{pInType};
-                %s.outputDataType = obj.outputDataType{pOutType};
-                s.inputDims = '1';
-                params{end+1} = s;
-                if piBit == 1   % scalar bias, add different input dims
-                    s.inputDims = '[1 3]';
-                    params{end+1} = s;
-                    s.inputDims = '[2 2]';
-                    params{end+1} = s;
-                elseif piBit == 2
-                    s.inputDims = '[1 3]';
-                    params{end+1} = s;
-                    %                         s.inputDims = '[3 1]';
-                    %                         params{end+1} = s;
-                elseif piBit == 3
-                    s.inputDims = '[2 2]';
-                    params{end+1} = s;
-                end
-                
             end
             
         end

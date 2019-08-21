@@ -1,39 +1,21 @@
-classdef Abs_Test < Block_Test
-    %Abs_Test generates test automatically.
+classdef BitSet_Test < Block_Test
+    %BitSet_Test generates test automatically.
     
     properties(Constant)
-        fileNamePrefix = 'Abs_TestGen';
-        blkLibPath = 'simulink/Math Operations/Abs';
+        fileNamePrefix = 'BitSet_TestGen';
+        blkLibPath = 'simulink/Logic and Bit Operations/Bit Set';
     end
     
     properties
         % properties that will participate in permutations
-        % tested 11 elements for OutDataTypeStr
-        OutDataTypeStr = {...
-            'Inherit: Inherit via internal rule',...
-            'Inherit: Inherit via back propagation',...
-            'Inherit: Same as input',...
-            'double','single','int8','uint8','int16','uint16','int32',...
-            'uint32','fixdt(1,16,0)',...
-            'fixdt(1,16,2^0,0)'};
-        
-        inpDataType = {'double', 'single','int8',...
-            'uint8','int16','uint16','int32', ...
-            'uint32','fixdt(1,16,0)','fixdt(1,16,2^0,0)'};
-        
+        inputDataType = {'int8','uint8','int16','uint16',...
+            'int32','uint32','fixdt(1,16,0)','boolean'};
+        iBit = {'0','[1 2 4]', '[0 2; 3 4]'};
     end
     
     properties
         % other properties
-        SampleTime = {'-1'};
-        OutMin = {[]};
-        OutMax = {[]};
-        RndMeth = {'Ceiling', 'Convergent', 'Floor', 'Nearest', ...
-            'Round', 'Simplest', 'Zero'};
-        SaturateOnIntegerOverflow = {'off', 'on'};
-        LockScale = {'off','on'};
-        ZeroCross = {'off', 'on'};
-              
+  
     end
     
     methods
@@ -42,8 +24,7 @@ classdef Abs_Test < Block_Test
                 deleteIfExists = true;
             end
             status = 0;
-            params = obj.getParams();             
-            fstInDims = {'1', '1', '1', '1', '1', '3', '[2,3]'};       
+            params = obj.getParams();                     
             nb_tests = length(params);
             condExecSSPeriod = floor(nb_tests/length(Block_Test.condExecSS));
             for i=1 : nb_tests
@@ -64,10 +45,12 @@ classdef Abs_Test < Block_Test
                         continue;
                     end
                     
-                    % remove parametres that does not belong to block params
-                    inputDataType = s.inpDataType;
-                    s = rmfield(s,'inpDataType');
-                    % add the block
+                    %% remove parametres that does not belong to block params
+                    inpDataType = s.inputDataType;
+                    s = rmfield(s,'inputDataType');
+                    inputDims  = s.inputDims;
+                    s = rmfield(s,'inputDims');
+                    %% add the block
 
                     Block_Test.add_and_connect_block(obj.blkLibPath, blkPath, s);
                     
@@ -78,15 +61,14 @@ classdef Abs_Test < Block_Test
                         blk_parent = fileparts(blkPath);
                     end
                     inport_list = find_system(blk_parent, ...
-                        'SearchDepth',1, 'BlockType','Inport');  
+                        'SearchDepth',1, 'BlockType','Inport');                 
                     
-                    % rotate over input data type for U
+                    % rotate over input data type 
                     set_param(inport_list{1}, ...
-                        'OutDataTypeStr',inputDataType);
+                        'OutDataTypeStr',inpDataType);
                     
-                    dim_Idx = mod(i, length(fstInDims)) + 1;
                     set_param(inport_list{1}, ...
-                        'PortDimensions', fstInDims{dim_Idx});
+                        'PortDimensions', inputDims);
 
                     failed = Block_Test.setConfigAndSave(mdl_name, mdl_path);
                     if failed, display(s), end
@@ -113,28 +95,38 @@ classdef Abs_Test < Block_Test
         end
         
         function params = getPermutations(obj)
-            params = {};             
+            params = {};
             inpIsIntCount = 0;
-            for pOutType = 1 : numel(obj.OutDataTypeStr)
-                for pInType = 1 : numel(obj.inpDataType)
-                    if strfind(obj.inpDataType{pInType}, 'int') 
-                        inpIsIntCount = inpIsIntCount + 1;
-                    end
-                    iRound = mod(inpIsIntCount, ...
-                        length(obj.RndMeth)) + 1;
-                    iSaturate = mod(inpIsIntCount, ...
-                        length(obj.SaturateOnIntegerOverflow)) + 1;
-                    s = struct();
-                    s.inpDataType = obj.inpDataType{pInType};
-                    s.OutDataTypeStr = obj.OutDataTypeStr{pOutType};
-                    s.RndMeth = obj.RndMeth{iRound};
-                    s.SaturateOnIntegerOverflow = ...
-                        obj.SaturateOnIntegerOverflow{iSaturate};
-                    rotate2 = mod(length(params), 2) + 1;
-                    s.LockScale = obj.LockScale{rotate2};
+            for pInType = 1 : numel(obj.inputDataType)
+                % rotate iBit
+                piBit = mod(pInType, ...
+                    length(obj.iBit)) + 1;
+                if strfind(obj.inputDataType{pInType}, 'int')
+                    inpIsIntCount = inpIsIntCount + 1;
+                end
+                s = struct();
+                s.iBit = obj.iBit{piBit};
+                s.inputDataType = obj.inputDataType{pInType};
+                %s.outputDataType = obj.outputDataType{pOutType};
+                s.inputDims = '1';
+                params{end+1} = s;
+                if piBit == 1   % scalar bias, add different input dims
+                    s.inputDims = '[1 3]';
+                    params{end+1} = s;
+                    s.inputDims = '[2 2]';
+                    params{end+1} = s;
+                elseif piBit == 2
+                    s.inputDims = '[1 3]';
+                    params{end+1} = s;
+                    %                         s.inputDims = '[3 1]';
+                    %                         params{end+1} = s;
+                elseif piBit == 3
+                    s.inputDims = '[2 2]';
                     params{end+1} = s;
                 end
+                
             end
+            
         end
 
     end
