@@ -31,7 +31,7 @@ function [code, exp_dt, dim, extra_code] = arrayAccess_To_Lustre(tree, args)
         param_type = param.type;
         if strcmp(param_type, 'constant')
             value = str2num(param.value);
-            
+            dim = [1 1];
             if iscell(namesAst) && numel(namesAst) >= value
                 code{1} = namesAst{value};
             else
@@ -43,8 +43,14 @@ function [code, exp_dt, dim, extra_code] = arrayAccess_To_Lustre(tree, args)
         else
             args.expected_lusDT = params_dt;
             args.end_value = prod(CompiledSize);
-            [arg, ~, ~, extra_code] = ...
+            [arg, ~, arg_dim, extra_code] = ...
                 nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(tree.parameters, args);
+            
+            if endsWith(args.data_map(tree.ID).ArraySize, '  1')
+                dim = [arg_dim(2) arg_dim(1)];
+            else
+                dim = arg_dim;
+            end
             
             for argIdx=1:numel(arg)
                 if isa(arg{argIdx}, 'nasa_toLustre.lustreAst.IntExpr')
