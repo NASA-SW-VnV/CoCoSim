@@ -1,3 +1,1 @@
-function A = f(x)
-A = x(end);
-end
+x1 == 3 | x1 == 6

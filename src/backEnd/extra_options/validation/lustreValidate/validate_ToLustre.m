@@ -70,7 +70,7 @@ function [res] = ...
             nasa_toLustre.ToLustre(orig_model_full_path, [], LusBackendType.LUSTREC, ...
             CoCoBackendType.VALIDATION, options{:});
         res.is_unsupported = ~isempty(unsupportedOptions);
-        if res.is_unsupported
+        if res.is_unsupported || res.ToLustre_failed
             display_msg('Model is not supported', MsgType.ERROR, 'validation', '');
             return;
         end
