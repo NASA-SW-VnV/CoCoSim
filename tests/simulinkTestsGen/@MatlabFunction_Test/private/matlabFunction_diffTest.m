@@ -8,8 +8,8 @@ function [params] = matlabFunction_diffTest()
     
     fun_name = 'diff';
     % properties that will participate in permutations
-    inputDataType = {'double','single','int8', 'uint8','int32','uint32', 'boolean'};
-    inputDimension = {'1', '[3,1]', '[1,3]', '[2,3]', '[3, 2]', '[3, 2]', '[3, 2]'};
+    inputDataType = {'double','single', 'int32'};
+    inputDimension = {'[3,3]', '[3,3]'};
     oneInputFcn = { ...
         sprintf('y = %s(u);', fun_name), ...
         sprintf('y = %s(u, 1);', fun_name), ...
