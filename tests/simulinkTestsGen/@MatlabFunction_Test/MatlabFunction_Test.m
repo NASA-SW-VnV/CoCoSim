@@ -8,7 +8,8 @@ classdef MatlabFunction_Test < Block_Test
     
     properties
         supportedFun = {'all', 'any', 'ceil', 'circshift', 'cumsum', ...
-            'diag', 'dot', 'eye', 'floor', 'length', 'mtimes', 'round', 'sum', 'transpose'};
+            'diag', 'diff', 'dot', 'eye', 'floor', 'length', 'mtimes', ...
+            'permute', 'round', 'sum', 'transpose', 'trapz'};
         %supportedFun = {'any'};
     end
     
