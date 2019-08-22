@@ -14,8 +14,14 @@ function [code, exp_dt, dim, extra_code] = dotFun_To_Lustre(tree, args)
         throw(ME);
     end
     
-    x_text = tree.parameters(1).text;
-    y_text = tree.parameters(2).text;
+    if iscell(tree.parameters)
+        params = tree.parameters;
+    else
+        params = arrayfun(@(x) x, tree.parameters, 'UniformOutput', 0);
+    end
+    
+    x_text = params{1}.text;
+    y_text = params{2}.text;
     
     expr = sprintf("sum(%s.*%s))", x_text, y_text);
     new_tree = MatlabUtils.getExpTree(expr);
