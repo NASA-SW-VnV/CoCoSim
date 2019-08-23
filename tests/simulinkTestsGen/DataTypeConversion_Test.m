@@ -8,21 +8,13 @@ classdef DataTypeConversion_Test < Block_Test
     
     properties
         % properties that will participate in permutations
-        % tested 11 elements for OutDataTypeStr
         OutDataTypeStr = {...
             'double','single','int8','uint8','int16','uint16','int32',...
             'uint32','boolean','fixdt(1,16,0)',...
             'fixdt(1,16,2^0,0)'};
-%         OutDataTypeStr = {...    % reduce to keep number of tests low
-%             'double','int8','uint8','int32','uint32','boolean',...
-%             'fixdt(1,16,0)'};  
-        % tested 11 elements for inputDataType
-        % inputDataType is not a block parameter
         inputDataType = {'double', 'single','int8',...
             'uint8','int16','uint16','int32', ...
-            'uint32','boolean','fixdt(1,16,0)','fixdt(1,16,2^0,0)'};
-%         inputDataType = {'double', 'int8','uint32',...
-%             'boolean','fixdt(1,16,0)'};        
+            'uint32','boolean','fixdt(1,16,0)','fixdt(1,16,2^0,0)'};   
     end
     
     properties
@@ -32,7 +24,9 @@ classdef DataTypeConversion_Test < Block_Test
         SaturateOnIntegerOverflow = {'off', 'on'};
         ConvertRealWorld={'Real World Value (RWV)','Stored Integer (SI)'};
         LockScale = {'off','on'};
-        
+        SampleTime = {'-1'};
+        OutMin = {'0','.5','5'};
+        OutMax = {'0.1','.51','6','8'};        
     end
     
     methods

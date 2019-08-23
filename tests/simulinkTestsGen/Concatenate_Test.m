@@ -16,7 +16,9 @@ classdef Concatenate_Test < Block_Test
     
     properties
         % other properties
-
+        inputDataType = {'double', 'single', 'double', 'single',...
+            'double', 'single', 'double', 'single',...
+            'int8', 'uint8', 'int16', 'uint16', 'int32', 'uint32'};
     end
     
     methods
@@ -26,9 +28,7 @@ classdef Concatenate_Test < Block_Test
             end
             status = 0;
             params = obj.getParams();
-            inputDataType = {'double', 'single', 'double', 'single',...
-                'double', 'single', 'double', 'single',...
-                'int8', 'uint8', 'int16', 'uint16', 'int32', 'uint32'};             
+            
             nb_tests = length(params);
             condExecSSPeriod = floor(nb_tests/length(Block_Test.condExecSS));
             for i=1 : nb_tests
@@ -50,7 +50,8 @@ classdef Concatenate_Test < Block_Test
                     end
                     
                     %% remove parametres that does not belong to block params
-                                        
+                    inpDataType = s.inputDataType;
+                    s = rmfield(s,'inputDataType');                                        
                      %% add the block
                     if strcmp(s.Mode,'Vector')
                         blkLibPath = obj.blkLibPath_vector;
@@ -67,10 +68,7 @@ classdef Concatenate_Test < Block_Test
                     end
                     inport_list = find_system(blk_parent, ...
                         'SearchDepth',1, 'BlockType','Inport');   
-                    
-                    % rotate over input data type
-                    inpType_Idx = mod(i, length(inputDataType)) + 1;
-                                        
+                                       
                     for inPort = 1:numel(inport_list)
                         if strcmp(s.Mode,'Vector')   % vectors are either [1,3] or [3,1]
                             if mod(i,2)==0
@@ -82,19 +80,19 @@ classdef Concatenate_Test < Block_Test
                             if strcmp(s.ConcatenateDimension,'1')
                                 set_param(inport_list{inPort}, ...
                                     'PortDimensions', mat2str([3,4,5]),...
-                                    'OutDataTypeStr',inputDataType{inpType_Idx});
+                                    'OutDataTypeStr',inpDataType);
                             elseif strcmp(s.ConcatenateDimension,'2')
                                 set_param(inport_list{inPort}, ...
                                     'PortDimensions', mat2str([2,4,5]),...
-                                    'OutDataTypeStr',inputDataType{inpType_Idx});
+                                    'OutDataTypeStr',inpDataType);
                             elseif strcmp(s.ConcatenateDimension,'3')
                                 set_param(inport_list{inPort}, ...
                                     'PortDimensions', mat2str([2,3,5]),...
-                                    'OutDataTypeStr',inputDataType{inpType_Idx});
+                                    'OutDataTypeStr',inpDataType);
                             elseif strcmp(s.ConcatenateDimension,'4') 
                                 set_param(inport_list{inPort}, ...
                                     'PortDimensions', mat2str([2,3,4]),...
-                                    'OutDataTypeStr',inputDataType{inpType_Idx});
+                                    'OutDataTypeStr',inpDataType);
                             else
                                 disp('should not be here');
                             end
@@ -138,6 +136,9 @@ classdef Concatenate_Test < Block_Test
                     s = struct();
                     s.NumInputs = num2str(pNumInputs);
                     s.Mode = obj.Mode{pMode};
+                    iInpType = mod(length(params), ...
+                        length(obj.inputDataType)) + 1;
+                    s.inputDataType = obj.inputDataType{iInpType};
                     if pMode == 2
                         for pConDim = 1:numel(obj.ConcatenateDimension)
                             s.ConcatenateDimension = ...

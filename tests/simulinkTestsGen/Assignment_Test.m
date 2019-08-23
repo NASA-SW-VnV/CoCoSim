@@ -20,6 +20,9 @@ classdef Assignment_Test < Block_Test
         OutputInitialize = {'Initialize using input port <Y0>',...
             'Specify size for each dimension in table'};
         SampleTime = {'-1'};
+        IndexParamArray = {};  % cell array defined in function getPermutations 
+        OutputSizeArray = {};  % cell array defined in function getPermutations 
+        DiagnosticForDimensions = {};  % not used
     end
     
     methods

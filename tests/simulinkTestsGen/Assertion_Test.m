@@ -21,7 +21,7 @@ classdef Assertion_Test < Block_Test
         Enabled = {'off','on'};
         AssertionFailFcn = {''};
         StopWhenAssertionFail = {'off', 'on'};
-        
+        SampleTime = {'-1'};
     end
     
     methods

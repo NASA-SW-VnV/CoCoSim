@@ -9,7 +9,7 @@ classdef CompareToConstant_Test < Block_Test
     properties
         % properties that will participate in permutations
         OutDataTypeStr = {'uint8','boolean'};
-        InputDataType = {...
+        inpDataType = {...
             'double','single','int8','uint8','int16','uint16','int32',...
             'uint32','fixdt(1,16,0)',...
             'fixdt(1,16,2^0,0)','boolean'};        
@@ -29,7 +29,8 @@ classdef CompareToConstant_Test < Block_Test
                 deleteIfExists = true;
             end
             status = 0;
-            params = obj.getParams();                     
+            params = obj.getParams();   
+            fstInDims = {'1', '1', '1', '1', '1', '3', '[2,3]'};
             nb_tests = length(params);
             condExecSSPeriod = floor(nb_tests/length(Block_Test.condExecSS));
             for i=1 : nb_tests
@@ -51,7 +52,8 @@ classdef CompareToConstant_Test < Block_Test
                     end
                     
                     %% remove parametres that does not belong to block params
-
+                    inputDataType = s.inpDataType;
+                    s = rmfield(s,'inpDataType');
                     %% add the block
 
                     Block_Test.add_and_connect_block(obj.blkLibPath, blkPath, s);
@@ -65,12 +67,13 @@ classdef CompareToConstant_Test < Block_Test
                     inport_list = find_system(blk_parent, ...
                         'SearchDepth',1, 'BlockType','Inport');                 
                     
-                    % rotate over input data type 
-%                     set_param(inport_list{1}, ...
-%                         'OutDataTypeStr',inpDataType);
+                    % rotate over input data type for U
+                    set_param(inport_list{1}, ...
+                        'OutDataTypeStr',inputDataType);
                     
-%                     set_param(inport_list{1}, ...
-%                         'PortDimensions', inputDims);
+                    dim_Idx = mod(i, length(fstInDims)) + 1;
+                    set_param(inport_list{1}, ...
+                        'PortDimensions', fstInDims{dim_Idx});
 
                     failed = Block_Test.setConfigAndSave(mdl_name, mdl_path);
                     if failed, display(s), end
@@ -100,10 +103,16 @@ classdef CompareToConstant_Test < Block_Test
             params = {};
             for pRelop = 1 : numel(obj.relop)
                 for pOutDataTypeStr = 1 : numel(obj.OutDataTypeStr)
-                    s = struct();
-                    s.OutDataTypeStr = obj.OutDataTypeStr{pOutDataTypeStr};
-                    s.relop = obj.relop{pRelop};
-                    params{end+1} = s;
+                    for pConst = 1:numel(obj.const)
+                        s = struct();
+                        iInType = mod(length(params), ...
+                            length(obj.inpDataType)) + 1;
+                        s.const = obj.const{pConst};
+                        s.OutDataTypeStr = obj.OutDataTypeStr{pOutDataTypeStr};
+                        s.relop = obj.relop{pRelop};
+                        s.inpDataType = obj.inpDataType{iInType};
+                        params{end+1} = s;
+                    end
                 end
                 
             end
