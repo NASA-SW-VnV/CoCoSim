@@ -112,13 +112,12 @@ function [code, dim, extra_code] = parseOtherFunc(tree, args)
                     exp, args.blk.Origin_path);
                 throw(ME);
             end
-            if strcmp(args.expected_lusDT, 'real') ...
-                    || isempty(args.expected_lusDT)
-                code = nasa_toLustre.lustreAst.RealExpr(value);
+            if strcmp(args.expected_lusDT, 'int')
+                code = nasa_toLustre.lustreAst.IntExpr(value);
             elseif strcmp(args.expected_lusDT, 'bool')
                 code = nasa_toLustre.lustreAst.BoolExpr(value);
             else
-                code = nasa_toLustre.lustreAst.IntExpr(value);
+                code = nasa_toLustre.lustreAst.RealExpr(value);
             end
         catch me
             display_msg(...
