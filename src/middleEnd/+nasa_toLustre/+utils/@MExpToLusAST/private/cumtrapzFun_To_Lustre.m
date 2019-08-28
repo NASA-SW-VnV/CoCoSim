@@ -1,4 +1,4 @@
-function [code, exp_dt, dim, extra_code] = trapzFun_To_Lustre(tree, args)
+function [code, exp_dt, dim, extra_code] = cumtrapzFun_To_Lustre(tree, args)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -6,15 +6,17 @@ function [code, exp_dt, dim, extra_code] = trapzFun_To_Lustre(tree, args)
     % Author: Francois Conzelmann <francois.conzelmann@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    [first_arg, second_arg, m, ~, y, perm, pre_exp, extra_code] = ...
+    
+    [first_arg, second_arg, m, n, y, perm, pre_exp, extra_code] = ...
         nasa_toLustre.utils.MF2LusUtils.trapzUtil(tree, args);
     
-    siz = size(y); siz(1) = 1;
+    siz = size(y);
     
     if m >= 2
-        left_exp = sprintf("diff(%s, 1, 1).' * ", first_arg);
-        right_exp = sprintf("(%s(1:%d,1:%d) + %s(2:%d,1:%d))/2", second_arg, ...
-            m-1, size(y,2), second_arg, m, size(y,2));
+        left_exp = sprintf("[zeros(1, %d); ", n);
+        dt_exp = sprintf("repmat(diff(%s,1,1)/2,1,%d)", first_arg, n);
+        right_exp = sprintf("cumsum(%s .* (%s(1:%d,1:%d) + %s(2:%d,1:%d)), 1)];", ...
+            dt_exp, second_arg, m-1, size(y,2), second_arg, m, size(y,2));
         expr = strcat(left_exp, right_exp);
     else
         expr = "[";
