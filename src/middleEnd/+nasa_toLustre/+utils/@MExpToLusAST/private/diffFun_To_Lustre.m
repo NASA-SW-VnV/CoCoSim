@@ -38,7 +38,7 @@ function [code, exp_dt, dim, extra_code] = diffFun_To_Lustre(tree, args)
     
     if length(tree.parameters) > 2
         if strcmp(tree.parameters{2}.type, 'constant')
-            [n, ~, ~, extra_code_i] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(2), args);
+            [n, ~, ~, extra_code_i] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(3), args);
             extra_code = MatlabUtils.concat(extra_code, extra_code_i);
             dimension = n{1}.value;
         else
@@ -58,7 +58,7 @@ function [code, exp_dt, dim, extra_code] = diffFun_To_Lustre(tree, args)
                 for j=1:dim(2)
                     exp = nasa_toLustre.lustreAst.BinaryExpr.BinaryMultiArgs(op, x_reshape(i:(i+1), j));
                     code{i, j} = nasa_toLustre.lustreAst.UnaryExpr(...
-                nasa_toLustre.lustreAst.UnaryExpr.NEG, exp);
+                        nasa_toLustre.lustreAst.UnaryExpr.NEG, exp);
                 end
             end
         elseif dimension == 2
@@ -67,7 +67,7 @@ function [code, exp_dt, dim, extra_code] = diffFun_To_Lustre(tree, args)
                 for j=1:dim(2)
                     exp = nasa_toLustre.lustreAst.BinaryExpr.BinaryMultiArgs(op, x_reshape(i, j:(j+1)));
                     code{i, j} = nasa_toLustre.lustreAst.UnaryExpr(...
-                nasa_toLustre.lustreAst.UnaryExpr.NEG, exp);
+                        nasa_toLustre.lustreAst.UnaryExpr.NEG, exp);
                 end
             end
         else
@@ -80,7 +80,17 @@ function [code, exp_dt, dim, extra_code] = diffFun_To_Lustre(tree, args)
         code = reshape(code, [prod(dim) 1]);
     else
         x_text = tree.parameters{1}.text;
-        expr = sprintf("diff(diff(%s, %d))", x_text, recursive - 1);
+        expr = sprintf("diff(%s, 1, %d)", x_text, dimension);
+        if length(tree.parameters) <= 2
+            for i= 2:recursive
+                expr = sprintf("diff(%s, 1)", expr);
+            end
+        else
+            for i= 2:recursive
+                expr = sprintf("diff(%s, 1, %d)", expr, dimension);
+            end
+        end
+        
         new_tree = MatlabUtils.getExpTree(expr);
         
         [code, exp_dt, dim, extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(new_tree, args);
