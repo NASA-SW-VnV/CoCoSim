@@ -1,7 +1,10 @@
-function [valid, sim_failed] = compareTwoSLXModels(orig_mdl_path, pp_mdl_path,...
+function [valid, sim_failed, cex_file_path] = compareTwoSLXModels(orig_mdl_path, pp_mdl_path,...
         min_max_constraints, show_models)
     
-    if nargin >= 3 && iscell(min_max_constraints) && numel(min_max_constraints) > 0
+    if ~exist('min_max_constraints', 'var') || isempty(min_max_constraints)
+        min_max_constraints = SLXUtils.constructInportsMinMaxConstraints(orig_mdl_path, -300, 300);
+    end
+    if iscell(min_max_constraints) && numel(min_max_constraints) > 0
         IMIN = cellfun(@(x) x{2}, min_max_constraints);
         IMAX = cellfun(@(x) x{3}, min_max_constraints);
     else
@@ -12,11 +15,16 @@ function [valid, sim_failed] = compareTwoSLXModels(orig_mdl_path, pp_mdl_path,..
     if nargin < 4
         show_models = false;
     end
-    valid = true;
+    valid = false;
     sim_failed = false;
-    
+    cex_file_path = '';
+    if strcmp(orig_mdl_path, pp_mdl_path)
+        valid = true;
+        return;
+    end
     [orig_mdl_dir, orig_mdl_name, ~] = fileparts(orig_mdl_path);
     [~, pp_mdl_name, ~] = fileparts(pp_mdl_path);
+    
     % Make sure Both models has same interface (Inports/Outports dimensions,
     % datatype)
     areTheSame = modelsAreTheSame(orig_mdl_path, pp_mdl_path);
@@ -61,7 +69,7 @@ function [valid, sim_failed] = compareTwoSLXModels(orig_mdl_path, pp_mdl_path,..
     end
     stop_time = time(end);
     
-    % Simulate the model
+    %% Simulate the model
     try
         simOut1 = SLXUtils.simulate_model(orig_mdl_path, ...
             input_dataSet, ...
@@ -100,81 +108,18 @@ function [valid, sim_failed] = compareTwoSLXModels(orig_mdl_path, pp_mdl_path,..
         sim_failed = 1;
         return;
     end
-    numberOfOutputs = length(yout1.getElementNames);
-    numberOfInports = length(input_dataSet.getElementNames);
-    cex_msg = {};
-    out_width = zeros(numberOfOutputs,1);
-    for k=1:numberOfOutputs
-        out_width(k) = LustrecUtils.getSignalWidth(yout1{k}.Values);
-    end
-    diff_name = '';
-    diff_value = 0;
-    for i=1:numel(time)
-        cex_msg{end+1} = sprintf('*****time : %f**********\n',time(i));
-        cex_msg{end+1} = sprintf('*****inputs: \n');
-        for j=1:numberOfInports
-            in = LustrecUtils.getSignalValuesInlinedUsingTime(input_dataSet{j}.Values, time(i));
-            in_width = numel(in);
-            name = input_dataSet{j}.Name;
-            for jk=1:in_width
-                cex_msg{end+1} = sprintf('input %s_%d: %f\n',name,jk,in(jk));
-            end
-        end
-        cex_msg{end+1} = sprintf('*****outputs: \n');
-        found_output = false;
-        diff_value = 0;
-        for k=1:numberOfOutputs
-            yout1_values = LustrecUtils.getSignalValuesInlinedUsingTime(yout1{k}.Values, time(i));
-            yout2_values = LustrecUtils.getSignalValuesInlinedUsingTime(yout2{k}.Values, time(i));
-            if isempty(yout1_values) || isempty(yout2_values)
-                % signal is not defined in the current timestep
-                continue;
-            elseif numel(yout1_values) ~= numel(yout2_values)
-                % Signature is not the same
-                valid = 0;
-                sim_failed = 1;
-                return;
-            end
-            found_output = true;
-            for j=1:out_width(k)
-                y1_value = double(yout1_values(j));
-                y2_value = double(yout2_values(j));
-                
-                slx1_output_name =...
-                    BUtils.naming_alone(yout1{k}.BlockPath.getBlock(1));
-                cex_msg{end+1} = sprintf('%s Simulink output %s(%d): %10.16f\n',...
-                    orig_mdl_name, slx1_output_name, j, y1_value);
-                slx2_output_name =...
-                    BUtils.naming_alone(yout2{k}.BlockPath.getBlock(1));
-                cex_msg{end+1} = sprintf('%s Simulink output %s(%d): %10.16f\n',...
-                    pp_mdl_name, slx2_output_name, j, y2_value);
-                if isinf(y1_value) || isnan(y1_value)...
-                        || isinf(y2_value) || isnan(y2_value)
-                    diff=0;
-                elseif abs(y1_value) > 10^10 && abs(y1_value-y2_value) > eps
-                    diff = abs(y1_value-y2_value)/y1_value;
-                else
-                    diff = abs(y1_value-y2_value);
-                end
-                valid = valid && (diff<eps);
-                if  (diff >= eps)
-                    diff_name =  ...
-                        BUtils.naming_alone(yout1{k}.BlockPath.getBlock(1));
-                    diff_name =  strcat(diff_name, '(',num2str(j), ')');
-                    diff_value = diff;
-                    % don't break now untile this timestep finish displatyin all outputs
-                    %break
-                end
-            end
-        end
-        if ~found_output
-            cex_msg{end+1} = sprintf('No Output saved for this time step.\n');
-        end
-        if  ~valid
-            break;
-        end
-        
-    end
+
+    
+    %% compare both outputs
+    [valid, cex_msg, diff_name, diff_value, sim_failed] = ...
+        LustrecUtils.compare_slx_out_with_lusORslx_out(...
+        input_dataSet, ...
+        yout1,...
+        yout2, ...
+        [], ...
+        eps, ...
+        time);
+
     
     if valid == 1
         f_msg = sprintf('Comparaison for model "%s" and model "%s" is  valid \n',...

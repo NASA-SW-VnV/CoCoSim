@@ -11,9 +11,9 @@ function call = changeEvents(call, EventsNames, E)
         args, 'UniformOutput', false);
     for i=1:numel(inputs_Ids)
         if strcmp(inputs_Ids{i}.getId(), E)
-            inputs_Ids{i} = nasa_toLustre.lustreAst.BooleanExpr(true);
+            inputs_Ids{i} = nasa_toLustre.lustreAst.BoolExpr(true);
         elseif ismember(inputs_Ids{i}.getId(), EventsNames)
-            inputs_Ids{i} = nasa_toLustre.lustreAst.BooleanExpr(false);
+            inputs_Ids{i} = nasa_toLustre.lustreAst.BoolExpr(false);
         end
     end
 

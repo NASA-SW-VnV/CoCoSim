@@ -82,6 +82,8 @@ function [Value, valueDataType, status] = evalParam(modelObj, parent, blk, param
                 catch
                     % It is not a mask parameter
                 end
+                % TODO fix bug here were a variable define in the script 
+                % have the same name than one in the workspace
                 Value = evalin('base', param);
                 if ischar(Value)
                     [Value, valueDataType, status] = ...

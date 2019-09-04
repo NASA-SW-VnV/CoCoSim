@@ -99,8 +99,8 @@ classdef DiscretePulseGenerator_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lust
                     zero = nasa_toLustre.lustreAst.IntExpr(0);
                     amp = nasa_toLustre.lustreAst.IntExpr(Amplitude(i));
                 else
-                    zero = nasa_toLustre.lustreAst.BooleanExpr('false');
-                    amp = nasa_toLustre.lustreAst.BooleanExpr(Amplitude(i));
+                    zero = nasa_toLustre.lustreAst.BoolExpr('false');
+                    amp = nasa_toLustre.lustreAst.BoolExpr(Amplitude(i));
                 end                
                 if PhaseDelay(i) == 0
                     cond = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.LT, ...

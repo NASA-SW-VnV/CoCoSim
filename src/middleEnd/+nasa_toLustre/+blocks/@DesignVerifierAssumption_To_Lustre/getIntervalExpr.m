@@ -21,8 +21,8 @@ function exp = getIntervalExpr(x, xDT, interval)
         vLow = nasa_toLustre.lustreAst.IntExpr(interval.low);
         vHigh = nasa_toLustre.lustreAst.IntExpr(interval.high);
     elseif strcmp(xDT, 'bool')
-        vLow = nasa_toLustre.lustreAst.BooleanExpr(interval.low);
-        vHigh = nasa_toLustre.lustreAst.BooleanExpr(interval.high);
+        vLow = nasa_toLustre.lustreAst.BoolExpr(interval.low);
+        vHigh = nasa_toLustre.lustreAst.BoolExpr(interval.high);
     else
         vLow = nasa_toLustre.lustreAst.RealExpr(interval.low);
         vHigh = nasa_toLustre.lustreAst.RealExpr(interval.high);

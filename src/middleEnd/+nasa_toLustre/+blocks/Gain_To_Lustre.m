@@ -57,7 +57,7 @@ classdef Gain_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 gainAst = nasa_toLustre.lustreAst.IntExpr(gain);
             elseif strcmp(lusOutDT, 'bool')
                 % this case never occur as output can never be bool.
-                gainAst = nasa_toLustre.lustreAst.BooleanExpr(gain);
+                gainAst = nasa_toLustre.lustreAst.BoolExpr(gain);
             else
                 gainAst = nasa_toLustre.lustreAst.RealExpr(gain);
             end

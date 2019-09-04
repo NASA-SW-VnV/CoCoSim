@@ -65,7 +65,7 @@ classdef EnumTypeExpr < nasa_toLustre.lustreAst.LustreExpr
         end
         % This function is used in Stateflow compiler to change from imperative
         % code to Lustre
-        [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, ~)
+        [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, varargin)
         %% This function is used by KIND2 LustreProgram.print()
         function nodesCalled = getNodesCalled(~)
             nodesCalled = {};

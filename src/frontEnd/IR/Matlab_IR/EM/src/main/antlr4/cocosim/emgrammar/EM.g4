@@ -1,28 +1,32 @@
 grammar EM;
 
+@members{
+	int isIndex = 0;
+}
+
 
 nlosoc	: ( NL |SEMI | COMMA)+;
 nloc	: ( NL |COMMA )+; 
 nlos	: ( NL | SEMI )+; 
-soc     : ( SEMI | COMMA )+;
+soc     : ( SEMI | COMMA );
+
 
 emfile 	
-	: function+
+	: function+ 
 	| script  
 	;
 
 script
-	: contract?
-	  nlosoc?
-	  script_body
-      nlosoc?
+	: 
+	nlosoc?
+	script_body
+	nlosoc?
     ;
 function
 	: NL* FUNCTION func_output? ID func_input? nloc
-	  contract?
 	  body?
-	  END? 
-      nlosoc?
+	  END?
+	  nlosoc?
 	;
 
 func_input
@@ -33,93 +37,25 @@ func_output
 	: ID EQ                             
 	| LSBRACE (ID COMMA?)*? RSBRACE EQ  
 	;
+
 script_body
-	:   script_body_item (nlosoc | EOF)
-    |   script_body  script_body_item (nlosoc | EOF)
-    ;
-script_body_item
-    :  statement 			
-    |  annotation 		
+	:   statement (nlosoc | EOF)
+    |   script_body  statement (nlosoc | EOF)
     ;
 body
     :   body_item (nlosoc | EOF)
-    |   body  body_item (nlosoc | EOF)
+    |   body  body_item  (nlosoc | EOF)
     ;
+
+//exp_sep :  (NL|','|';')+;
 
 body_item
-    :  statement 			
+    :   statement 			
     |  function 
-    |  annotation 		
     ;
-annotation
-    : declare_type  
-    ;
-    
-declare_type
-    : ANNOT DeclareType ID COLON dataType nlos
-    ;
-
-DeclareType: 'DeclareType'
-	;
-dataType : BASETYPE (POW dimension)*
-	;
-
-dimension :ID | Integer
-	;
-
-BASETYPE
-    : 'int' //| 'int8' | 'uint8' |'int16' | 'uint16' |'int32' | 'uint32'
-    | 'real' //| 'single' | 'double'
-    | 'bool' //| 'boolean'
-    ;
-
-contract :  CONTRACT  contract_item+ '%}'
-	;
- 
-contract_item
-	: CONST ID (COLON dataType)? EQ coco_expression SEMI 	#CONTRACT_CONST
-    | VAR ID COLON dataType EQ coco_expression SEMI			#CONTRACT_VAR
-    | ASSUME coco_expression SEMI							#CONTRACT_ASSUME
-    | GUARANTEE coco_expression SEMI						#CONTRACT_GUARANTEE 
-    | coco_mode												#CONTRACT_MODE
-    | NL+													#CONTRACT_NL
-  	;
-coco_mode: MODE ID LPAREN require* ensure* RPAREN SEMI?
-	;
-require:
-	 REQUIRE coco_expression nlos
-    ;
-ensure: ENSURE coco_expression nlos
-	;  
-	
-coco_expression 
-	: expression
-	| NOT coco_expression
-	| PRE coco_expression
-	| coco_expression INIT coco_expression
-	| coco_expression IMPLIES coco_expression
-	| LPAREN nlosoc? coco_expression nlosoc? RPAREN
-	| coco_expression LUS_NEQ coco_expression
-	| coco_expression LUS_AND_OR coco_expression
-	;
-	
-CONTRACT : '%{@contract';
-CONST : 'const';
-VAR : 'var';
-ASSUME : 'assume';
-GUARANTEE : 'guarantee';
-MODE : 'mode';
-REQUIRE : 'require';
-ENSURE : 'ensure';
-NOT : 'not';
-PRE : 'pre';
-INIT : '->';
-IMPLIES : '=>';
-LUS_NEQ : '<>';
-LUS_AND_OR : 'and'|'or';
 
 statement
-    : expression   
+    : expression
     | if_block
     | switch_block
 	| for_block
@@ -139,152 +75,74 @@ statement
     
 
 expression
-    :   assignment 
-    |   notAssignment
+    : assignment 
+    | notAssignment 
     ;
 
 assignment
-    :   unaryExpression assignmentOperator notAssignment
+    :   primaryExpression '='  notAssignment
     ;
 
-assignmentOperator
-    :   '=' 		
-    ;
 notAssignment
-    :   relopOR
+    : primaryExpression					   					# notAssignment_primaryExpression
+    | notAssignment ( '\'' | '.\'')						    #  postfixExpression
+    | notAssignment '.^' notAssignment						#  power
+    | notAssignment '^' notAssignment						#  mpower
+    | notAssignment '.*' notAssignment						#  times
+    | notAssignment './' notAssignment						#  rdivide
+    | notAssignment '.\\' notAssignment						#  ldivide
+    | notAssignment '*' notAssignment						#  mtimes
+    | notAssignment '/' notAssignment						#  mrdivide
+    | notAssignment '\\' notAssignment						#  mldivide
+    | notAssignment ('+'|'-') notAssignment					#  plus_minus
+    | notAssignment ('=='|'~=') notAssignment				#  relopEQ_NE
+    | notAssignment ('<'|'>'|'<='|'>=') notAssignment		#  relopGL
+    | unaryOperator primaryExpression 						#  unaryExpression
+    | notAssignment COLON  notAssignment   					#  colonExpression
+    | notAssignment '&' notAssignment						#  relopelAND
+    | notAssignment '|' notAssignment						#  relopelOR
+    | notAssignment '&&' notAssignment						#  relopAND
+    | notAssignment '||' notAssignment						#  relopOR
     ;
-
-relopOR
-    :   relopAND
-    |   relopOR '||' relopAND
-    ;
-relopAND
-    :   relopelOR
-    |   relopAND '&&' relopelOR
-    ;
-
-relopelOR
-    :   relopelAND
-    |   relopelOR '|' relopelAND
-    ;
-
-relopelAND
-    :   relopEQ_NE
-    |   relopelAND '&' relopEQ_NE
-    ;
-relopEQ_NE
-    :   relopGL
-    |   relopEQ_NE '==' relopGL
-    |   relopEQ_NE '~=' relopGL
-    ;
-relopGL
-    :   plus_minus
-    |   relopGL '<' plus_minus
-    |   relopGL '>' plus_minus
-    |   relopGL '<=' plus_minus
-    |   relopGL '>=' plus_minus
-    ;
-
-plus_minus
-    :   mtimes
-    |   plus_minus '+' mtimes
-    |   plus_minus '-' mtimes
-    ;
-
-mtimes
-    :   mrdivide
-    |   mtimes '*' mrdivide
-    ;
-
-mrdivide
-    :   mldivide
-    |   mrdivide '/' mldivide
-    ;
-
-mldivide
-    :   mpower
-    |   mldivide '\\' mpower
-    ;
-
-mpower
-    :   times
-    |   mpower '^' times
-    ;
-
-times
-    :   rdivide
-    |   times '.*' rdivide
-    ;
-
-rdivide
-    :   ldivide
-    |   rdivide './' ldivide
-    ;
-
-ldivide
-    :   power
-    |   ldivide '.\\' power
-    ;
-
-power
-    :   colonExpression
-    |   power '.^' colonExpression
-    ;
-
-colonExpression
-    :   unaryExpression
-    |   colonExpression ':' unaryExpression
-    ;
-
-unaryExpression
-    :   postfixExpression
-    |   unaryOperator unaryExpression
-    ;
-
+    
 unaryOperator
-    :   '&' | '*' | '+' | '-' | '~' | '!'
+    :  '+' | '-' | '~' | '!'
     ;
 
 
-postfixExpression
-    :   primaryExpression
-    |   postfixExpression TRANSPOSE
-    ;
-TRANSPOSE :   ( '\'' | '.\'')
-    ;
 
+    
 primaryExpression
-    :   ID
-	|	indexing
+    :   struct_indexing
     |   constant
-    |   '(' expression ')'  
     |   cell
 	|   matrix   
-    |   ignore_value
+    | 	ignore_value
     ;
 
-indexing
-	:	fun_indexing
-    |   cell_indexing
-    |   struct_indexing
-    ;
+
+
+struct_indexing
+	:  
+	 struct_indexing DOT struct_indexing  	   # struct_indexing_expr
+	| fun_indexing 							   # s_fun_indexing
+	| cell_indexing 							   # s_cell_indexing
+	| parenthesedExpression					   # s_parenthesedExpression
+	| ID 									   # s_id
+	;
+parenthesedExpression :'(' notAssignment ')'   ;
+
 fun_indexing
-	:	ID LPAREN function_parameter_list? RPAREN
+	:	(ID | cell_indexing) LPAREN function_parameter_list? RPAREN
 	;
 
 cell_indexing
 	:	ID (LBRACE function_parameter_list RBRACE)+
 	;	
-	
-struct_indexing
-	:	ID 
-    ( 
-        DOT indexing
-	)+
-	;
 
+	
 function_parameter_list
-	: function_parameter ( COMMA function_parameter )*
+	: { isIndex = 1; } function_parameter ( COMMA function_parameter )* { isIndex = 0; }
 	;
 function_parameter : notAssignment	| COLON	| ignore_value;
 //**************************************************************
@@ -292,10 +150,15 @@ ignore_value : '~';
 constant
     :   Integer
     |   Float
-    |   String
+    //| {isIndex == 1}? END
+    |   string
     |   function_handle
     ;
-
+string
+	: '\'' ~('\'')* '\''  
+	//  '\'' ( ESC_SEQ | '\'\'' | ~('\\'|'\'' | '\n' | '\r') )* '\''
+	;
+	
 function_handle
 	: AT ID 
 	| AT func_input expression?
@@ -310,15 +173,13 @@ Float
 	| ('0'..'9')+ EXPONENT
 	;
 
-String
-	: '\'' ( ESC_SEQ | ~('\\'|'\'') )* '\''
-//	: '\'' ( ESC_SEQ | ~('\\'|'%'|'\'') )* '\''
-	;
+//TRANSPOSE : ( '\'' | '.\'');
 
 fragment
 EXPONENT
 	: ('e'|'E') ('+'|'-')? ('0'..'9')+ ;
 
+/*
 fragment
 ESC_SEQ
 	: '\\' ('b'|'t'|'n'|'f'|'r'|'\"'|'\''|'\\')
@@ -340,13 +201,22 @@ UNICODE_ESC
 fragment
 HEX_DIGIT
 	: ('0'..'9'|'a'..'f'|'A'..'F') ;
-
+*/
 
 //**************************************************************
 cell	: LBRACE horzcat? ( nlos horzcat )* RBRACE ;
-horzcat	:	expression ( COMMA? expression )*? ;
+
+// Do not use notAssignement instead of primaryExpression, 
+// we do not support binary expression with not parentheses.
+//e.g, [x-y] Vs [x -y], the first has one element "(x-y)", the second has two elements "x" and "-y".
+horzcat	
+	: primaryExpression ( primaryExpression)*
+	| notAssignment ( COMMA notAssignment)* 
+	;
+	
+	//{_input.LT(-1).getType() == WS || _input.LT(-1).getType() == COMMA}?
 //**************************************************************
-matrix	: LSBRACE horzcat ( nlos horzcat )* RSBRACE ;
+matrix	: LSBRACE   horzcat (  nlos  horzcat )*  RSBRACE ;
 
 
 
@@ -420,6 +290,7 @@ clear_exp
 
 
 
+
 // *****************************************************************************************   Others       ***********************************************	
 MULTILINECOMMENT
     :   '%{' ~['@'] .*?  '%}' -> skip
@@ -439,8 +310,9 @@ POW	: '^';
 COMMA	: ',';
 SEMI	: ';';
 NL   : ('\r' '\n' | '\n' | '\r')+;
-//NL	: ('\r'? '\n')+  -> skip;
-WS  : [ \t\r]+ -> skip;
+//NL	: ('\r'? '\n')+  ;//-> skip;
+//WS : [ \t\r]+;
+WS  : [ \t\r]+ -> skip; //{whitespace_cnt == 0}? -> skip;
 
 // language keywords
 BREAK	: 'break';
@@ -465,6 +337,7 @@ CLEAR	: 'clear';
 
 
 COLON	: ':';
+
 EQ	: '=';
 ID	: ('a'..'z'|'A'..'Z') ('a'..'z'|'A'..'Z'|'0'..'9'|'_')* ;
 
@@ -473,8 +346,8 @@ LPAREN	: '(';
 RPAREN	: ')';
 LBRACE	: '{';
 RBRACE	: '}';
-LSBRACE	: '[';
-RSBRACE	: ']';
+LSBRACE	: '[' ;//{whitespace_cnt = 1;};
+RSBRACE	: ']' ;//{whitespace_cnt = 0;};
 AT	: '@';
 ANNOT : '%@';
 DOT	: '.';

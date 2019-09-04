@@ -30,12 +30,12 @@ function lustreExp = num2LusExp(v, lus_dt, slx_dt)
             lustreExp = nasa_toLustre.lustreAst.IntExpr(v);
         end
     elseif strcmp(lus_dt, 'bool')
-        lustreExp = nasa_toLustre.lustreAst.BooleanExpr(v);
+        lustreExp = nasa_toLustre.lustreAst.BoolExpr(v);
     elseif strncmp(slx_dt, 'int', 3) ...
             || strncmp(slx_dt, 'uint', 4)
         lustreExp = nasa_toLustre.lustreAst.IntExpr(v);
     elseif strcmp(slx_dt, 'boolean') || strcmp(slx_dt, 'logical')
-       lustreExp = nasa_toLustre.lustreAst.BooleanExpr(v);
+       lustreExp = nasa_toLustre.lustreAst.BoolExpr(v);
     else
         lustreExp = nasa_toLustre.lustreAst.RealExpr(v);
     end

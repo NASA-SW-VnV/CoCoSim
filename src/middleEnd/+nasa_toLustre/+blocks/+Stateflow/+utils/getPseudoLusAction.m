@@ -8,10 +8,10 @@ function [lus_action, outputs, inputs, external_libraries] = ...
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   
     
-    if nargin < 3
+    if nargin < 3 || isempty(isCondition)
         isCondition = false;
     end
-    if nargin < 5
+    if nargin < 5 || isempty(ignoreOutInputs)
         ignoreOutInputs = false;
     end
     outputs = {};
@@ -19,9 +19,14 @@ function [lus_action, outputs, inputs, external_libraries] = ...
     
     obj = nasa_toLustre.blocks.DummyBlock_To_Lustre();
     blk.Origin_path = action_parentPath;
+    args.blkObj = obj;
+    args.blk = blk;
+    args.data_map = data_map;
+    args.isSimulink = false;
+    args.isStateFlow = true;
+    args.isMatlabFun = false;
     [lus_action, status] = ...
-        nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.translate(obj, expreession, [], blk, ...
-        data_map, [], '', false, true, false);
+        nasa_toLustre.utils.MExpToLusAST.translate(expreession, args);
     if status
         ME = MException('COCOSIM:STATEFLOW', ...
             'ParseError: unsupported Action %s in StateFlow.', expreession);

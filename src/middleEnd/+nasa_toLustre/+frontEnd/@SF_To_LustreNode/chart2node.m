@@ -202,9 +202,9 @@ function [main_node, external_nodes, external_libraries ] = ...
         external_nodes_i];
     
     %change from imperative code to Lustre
-    %main_node = main_node.pseudoCode2Lustre();% already handled
+    %main_node = main_node.pseudoCode2Lustre(SF_DATA_MAP);% already handled
     for i=1:numel(external_nodes)
-        external_nodes{i} = external_nodes{i}.pseudoCode2Lustre();
+        external_nodes{i} = external_nodes{i}.pseudoCode2Lustre(SF_DATA_MAP);
     end
     
     % add Stateflow Enumerations to ToLustre set of enumerations.

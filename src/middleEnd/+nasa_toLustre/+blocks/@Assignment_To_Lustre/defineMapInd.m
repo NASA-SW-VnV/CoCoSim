@@ -50,12 +50,12 @@ function [isPortIndex,ind,selectorOutputDimsArray] = ...
                 end
             end
         elseif strcmp(blk.IndexOptionArray{i}, 'Starting index (dialog)')
-            [selectorOutputDimsArray(i), ~, ~] = ...
-                nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(parent, blk, blk.OutputSizeArray{i});
             [Idx, ~, ~] = ...
                 nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(parent, blk, blk.IndexParamArray{i});
             if isSelector
-                ind{i} = (Idx:Idx+selectorOutputDimsArray(i)-1);
+                [selectorOutputDimsArray(i), ~, ~] = ...
+                    nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(parent, blk, blk.OutputSizeArray{i});                
+                    ind{i} = (Idx:Idx+selectorOutputDimsArray(i)-1);
             else
                 % check for scalar or vector
                 if U_expanded_dims.numDs == 1
@@ -74,9 +74,9 @@ function [isPortIndex,ind,selectorOutputDimsArray] = ...
             indexPortNumber = indexPortNumber + 1;
             portNumber = indexPortNumber + portNumberOffset;
             indPortNumber(i) = portNumber;
-            [selectorOutputDimsArray(i), ~, ~] = ...
-                nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(parent, blk, blk.OutputSizeArray{i});
             if isSelector
+                [selectorOutputDimsArray(i), ~, ~] = ...
+                    nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(parent, blk, blk.OutputSizeArray{i});
                 for j=1:selectorOutputDimsArray(i)
                     
                     if strcmp(IndexMode, 'Zero-based')

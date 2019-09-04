@@ -46,7 +46,7 @@ classdef LustreProgram < nasa_toLustre.lustreAst.LustreAst
         new_obj = changeArrowExp(obj, ~)
         %% This function is used in Stateflow compiler to change from imperative
         % code to Lustre
-        [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, ~)
+        [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, varargin)
        
         %% nbOccuranceVar is used within a node
         nb_occ = nbOccuranceVar(varargin)

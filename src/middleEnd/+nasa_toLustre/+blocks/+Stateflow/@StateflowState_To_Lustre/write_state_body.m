@@ -116,7 +116,7 @@ function [outputs, inputs, body, variables] = write_state_body(state)
             nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getEntryActionNodeName(state);
         if isKey(SF_STATES_NODESAST_MAP, entry_act_node_name)
             nodeAst = SF_STATES_NODESAST_MAP(entry_act_node_name);
-            [call, oututs_Ids] = nodeAst.nodeCall(true, nasa_toLustre.lustreAst.BooleanExpr(false));
+            [call, oututs_Ids] = nodeAst.nodeCall(true, nasa_toLustre.lustreAst.BoolExpr(false));
             cond = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.EQ,...
                 idStateVar, idStateInactiveEnum);
             children_actions{end+1} = nasa_toLustre.lustreAst.LustreEq(oututs_Ids, ...

@@ -189,7 +189,7 @@ classdef LustreNode < nasa_toLustre.lustreAst.LustreAst
         %% This is used for Stateflow
         [call, oututs_Ids] = nodeCall(obj, isInner, InnerValue)
 
-        [new_obj, varIds] = pseudoCode2Lustre(obj)
+        [new_obj, varIds] = pseudoCode2Lustre(obj, data_map)
 
         %% This function is used by KIND2 LustreProgram.print()
         function nodesCalled = getNodesCalled(obj)

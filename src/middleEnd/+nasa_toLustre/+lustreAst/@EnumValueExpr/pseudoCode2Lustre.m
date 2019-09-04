@@ -1,4 +1,4 @@
-function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, ~)
+function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, varargin)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
