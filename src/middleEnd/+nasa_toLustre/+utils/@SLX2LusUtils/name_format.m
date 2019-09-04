@@ -8,7 +8,7 @@
 
 %% adapt blocks names to be a valid lustre names.
 function str_out = name_format(str)
-    str_out = strrep(str, newline, '');
+    str_out = strrep(str, newline, '_newline_'); % removing newline can cause a problem of similar names.
     str_out = regexprep(str_out, '^\s', '_');
     str_out = regexprep(str_out, '\s$', '_');
     str_out = strrep(str_out, ' ', '');
