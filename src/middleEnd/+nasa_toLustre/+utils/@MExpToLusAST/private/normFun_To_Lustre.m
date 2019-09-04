@@ -23,7 +23,7 @@ function [code, exp_dt, dim, extra_code] = normFun_To_Lustre(tree, args)
         else
             ME = MException('COCOSIM:TREE2CODE', ...
                 'Second argument of norm in expression "%s" must be a constant.',...
-                tree.text, numel(x_dim));
+                tree.text);
             throw(ME);
         end
     end
@@ -57,12 +57,12 @@ function [code, exp_dt, dim, extra_code] = normFun_To_Lustre(tree, args)
                 % TODO : support this case
                 ME = MException('COCOSIM:TREE2CODE', ...
                     'norm in expression "%s" is not supported.',...
-                    tree.text, numel(x_dim));
+                    tree.text);
                 throw(ME);
-            otherwise
+            otherwise  % should never happen
                 ME = MException('COCOSIM:TREE2CODE', ...
                     'Unexpected case in norm expression "%s"',...
-                    tree.text, numel(x_dim));
+                    tree.text);
                 throw(ME);
         end
     end
