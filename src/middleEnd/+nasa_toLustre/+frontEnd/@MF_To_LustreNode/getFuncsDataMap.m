@@ -38,6 +38,7 @@ function [fun_data_map, failed] = getFuncsDataMap(blk, script, ...
     failed = callFunction(fH, args, func_path, blk);
     if failed
         try delete(func_path), catch, end
+        cd (PWD);
         return;
     end
     fhinfo = functions(fH);

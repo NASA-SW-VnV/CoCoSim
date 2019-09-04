@@ -379,9 +379,9 @@ public class EM2JSON {
 				StringBuilder buf = new StringBuilder();
 				buf.append("{");
 				buf.append("\n");
-				if (ctx.END() != null)
-					buf.append(Quotes("type")+":"+Quotes("end"));
-				else
+				//if (ctx.END() != null)
+				//	buf.append(Quotes("type")+":"+Quotes("end"));
+				//else
 					buf.append(Quotes("type")+":"+Quotes("constant"));
 				buf.append(",\n");
 				String dataType = ConstantDataType(ctx);
@@ -402,8 +402,8 @@ public class EM2JSON {
 				t = "Integer";
 			else if (ctx.Float() != null)
 				t = "Float";
-			else if (ctx.END() != null)
-				t = "Integer";
+			//else if (ctx.END() != null)
+			//	t = "Integer";
 			else if (ctx.string() != null)
 				t = "String";
 			return t;

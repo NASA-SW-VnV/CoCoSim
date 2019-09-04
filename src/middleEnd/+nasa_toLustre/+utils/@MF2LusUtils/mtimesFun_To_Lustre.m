@@ -27,7 +27,7 @@ function [code, dim] = mtimesFun_To_Lustre(x, x_dim, y, y_dim)
         y_reshape = reshape(y, y_dim);
         
         dim = [x_dim(1), y_dim(2)];
-        
+        code_matrix = cell(x_dim(1), y_dim(2));
         for i=1:x_dim(1)
             for j=1:y_dim(2)
                 exp = {};
@@ -37,11 +37,12 @@ function [code, dim] = mtimesFun_To_Lustre(x, x_dim, y, y_dim)
                         y_reshape(k, j),...
                         false);
                 end
-                code{end+1} = nasa_toLustre.lustreAst.BinaryExpr.BinaryMultiArgs(plus, exp);
+                code_matrix(i,j) = {nasa_toLustre.lustreAst.BinaryExpr.BinaryMultiArgs(plus, exp)};
             end
         end
+        code = reshape(code_matrix, [1, numel(code_matrix)]);
     else
-        
+        % TODO for francois
     end
 end
 

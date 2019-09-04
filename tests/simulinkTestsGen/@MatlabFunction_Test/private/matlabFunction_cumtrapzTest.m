@@ -1,4 +1,4 @@
-function [params] = matlabFunction_diffTest()
+function [params] = matlabFunction_cumtrapzTest()
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -6,17 +6,14 @@ function [params] = matlabFunction_diffTest()
     % Author: Francois Conzelmann <francois.conzelmann@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    fun_name = 'diff';
+    fun_name = 'cumtrapz';
     % properties that will participate in permutations
-    inputDataType = {'double','single', 'int32'};
-    inputDimension = {'[3,3]', '[3,3]'};
+    inputDataType = {'double','single'};
+    inputDimension = {'1', '[3,1]', '[1,3]', '[2,3]'};
     oneInputFcn = { ...
         sprintf('y = %s(u);', fun_name), ...
         sprintf('y = %s(u, 1);', fun_name), ...
-        sprintf('y = %s(u, 1, 1);', fun_name), ...
-        sprintf('y = %s(u, 1, 2);', fun_name), ...
-        sprintf('y = %s(u, 2, 2);', fun_name),...
-        sprintf('y = %s(u, 3);', fun_name),};
+        sprintf('y = %s(u, 2);', fun_name)};
     
     header = 'function y = fcn(u)';
     params = {};

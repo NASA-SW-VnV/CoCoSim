@@ -28,6 +28,8 @@ classdef MF2LusUtils
         
         vars = addLocalVars(args, exp_dt, n)
         
+        [first_arg, second_arg, m, n, y, perm, pre_exp, extra_code] = trapzUtil(tree, args)
+        
     end
 end
 

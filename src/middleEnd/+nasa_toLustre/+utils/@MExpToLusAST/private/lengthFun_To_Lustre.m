@@ -7,9 +7,15 @@ function [code, exp_dt, dim, extra_code] = lengthFun_To_Lustre(tree, args)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     dim = [1 1];
-
+    code = {};
     [~, ~, x_dim, extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(1), args);
-    code{1} = nasa_toLustre.lustreAst.IntExpr(max(x_dim));
-    exp_dt = 'int';
+    if strcmp(args.expected_lusDT, 'real')
+        code{1} = nasa_toLustre.lustreAst.RealExpr(max(x_dim));
+        exp_dt = 'real';
+    else
+        code{1} = nasa_toLustre.lustreAst.IntExpr(max(x_dim));
+        exp_dt = 'int';
+    end
+
 end
 

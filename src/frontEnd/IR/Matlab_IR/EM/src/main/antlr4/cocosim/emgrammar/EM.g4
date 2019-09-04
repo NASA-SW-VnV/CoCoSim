@@ -150,7 +150,7 @@ ignore_value : '~';
 constant
     :   Integer
     |   Float
-    | {isIndex == 1}? END
+    //| {isIndex == 1}? END
     |   string
     |   function_handle
     ;
