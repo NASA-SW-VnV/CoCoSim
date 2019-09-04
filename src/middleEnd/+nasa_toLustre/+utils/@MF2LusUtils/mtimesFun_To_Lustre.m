@@ -41,8 +41,11 @@ function [code, dim] = mtimesFun_To_Lustre(x, x_dim, y, y_dim)
             end
         end
         code = reshape(code_matrix, [1, numel(code_matrix)]);
-    else
-        % TODO for francois
+    else  % should never happen as mtimes only works for matrix and scalar 
+        ME = MException('COCOSIM:TREE2CODE', ...
+            'Unexpected case in mtimes expression "%s"',...
+            tree.text);
+        throw(ME);
     end
 end
 
