@@ -8,11 +8,15 @@
 function res = contains(str, pattern)
     try
         %use Matlab startsWith for Matlab versions > 2016
-        res = contains(s, pattern);
+        res = contains(str, pattern);
     catch
         try
             % do not change it
-            res = ~isempty(strfind(str, pattern));
+            if iscell(str)
+                res = cellfun(@(x) ~isempty(strfind(x, pattern)), str);
+            else
+                res = ~isempty(strfind(str, pattern));
+            end
         catch E
             throw(E);
         end

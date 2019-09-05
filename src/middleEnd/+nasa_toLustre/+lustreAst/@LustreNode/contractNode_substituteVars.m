@@ -13,6 +13,9 @@ function obj = contractNode_substituteVars(obj)
         return;
     end
     new_localVars = obj.localVars;
+    varsDT = cellfun(@(x) x.getDT(), new_localVars, 'un', 0);
+    clockVars = new_localVars(MatlabUtils.contains(varsDT, 'clock'));
+    clockVarIDs = cellfun(@(x) x.getId(), clockVars, 'UniformOutput', false);
     % include ConcurrentAssignments as normal Eqts
     new_bodyEqs = {};
     for i=1:numel(obj.bodyEqs)
@@ -31,9 +34,6 @@ function obj = contractNode_substituteVars(obj)
     if ismember('nasa_toLustre.lustreAst.LustreAutomaton', all_objClass)
         return;
     end
-    %get EveryExpr Conditions
-    EveryExprObjects = all_body_obj(strcmp(all_objClass, 'nasa_toLustre.lustreAst.EveryExpr'));
-    EveryConds = cellfun(@(x) x.getCond(), EveryExprObjects, 'UniformOutput', false);
     
     %get all VarIdExpr objects
     VarIdExprObjects = all_body_obj(strcmp(all_objClass, 'nasa_toLustre.lustreAst.VarIdExpr'));
@@ -65,9 +65,9 @@ function obj = contractNode_substituteVars(obj)
                 continue;
             end
             
-            % check the variable is not used in EveryExpr condition.
-            nb_occ_perEveryCond = cellfun(@(x) x.nbOccuranceVar(var), EveryConds, 'UniformOutput', true);
-            if ~isempty(nb_occ_perEveryCond) && sum(nb_occ_perEveryCond) >= 1
+            % skip var if it is used in EveryExpr/Merge/Activate condition. For Lustrec
+            % limitation
+            if ismember(var.getId(), clockVarIDs)
                 continue;
             end
             
