@@ -23,7 +23,15 @@ classdef MergeBoolExpr < nasa_toLustre.lustreAst.MergeExpr
             obj.addWhentrue = addWhentrue;
             obj.addWhenfalse = addWhenfalse;
         end
-        
+        %%
+        function new_obj = simplify(obj)            
+            new_obj = nasa_toLustre.lustreAst.MergeBoolExpr(...
+                obj.clock.simplify(), ...
+                obj.true_expr.simplify(), ...
+                obj.addWhentrue, ...
+                obj.false_expr.simplify(), ...
+                obj.addWhenfalse);
+        end
         %%
         function code = print(obj, backend)
             if LusBackendType.isKIND2(backend)
