@@ -110,7 +110,7 @@ classdef Assignment_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         function  write_code(obj, parent, blk, xml_trace, varargin)
             
             % share code with Selector_To_Lustre
-            isSelector = 0;
+             isSelector = 0;
             % getBlockInputsOutputs
             [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
             % for the example above (assignment_mixed_port_u_expanded.slx): 
@@ -145,7 +145,6 @@ classdef Assignment_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             % inputs{2} = 'Constant1_1'  'Constant1_1'
                 
             % define mapping array ind
-            isSelector = 0;
             [isPortIndex,ind,~] = nasa_toLustre.blocks.Assignment_To_Lustre.defineMapInd(obj,parent,blk,inputs,U_expanded_dims,isSelector);
             % For the example above
             % isPortIndex = 1

@@ -50,6 +50,8 @@ if not(isempty(memoryBlk_list))
                 set_param(fullfile(memoryBlk_list{i}, 'S'),...
                     'OutDataTypeStr', CompiledPortDataTypes.Inport{1});
             end
+            % expand it to make unit delay clear.
+            ExpandNonAtomicSubsystems_pp(memoryBlk_list{i});
         catch
             status = 1;
             errors_msg{end + 1} = sprintf('memoryBlk pre-process has failed for block %s', memoryBlk_list{i});

@@ -1,4 +1,4 @@
-function [ new_ir, ir_handle_struct_map ] = internalRep_pp( new_ir, json_export, output_dir )
+function [ new_ir, ir_handle_struct_map, ir_json_path ] = internalRep_pp( new_ir, json_export, output_dir )
     %IR_PP pre-process the IR for cocoSim to adapte the IR to the compiler or
     %make some analysis in the IR level.
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -30,7 +30,7 @@ function [ new_ir, ir_handle_struct_map ] = internalRep_pp( new_ir, json_export,
     end
     [~, model_name, ~] = fileparts(new_ir.meta.file_path);
     ir_handle_struct_map = get_ir_handle_struct_map(new_ir, model_name);
-    
+    ir_json_path = '';
     %% export json
     if json_export
         try
@@ -55,8 +55,8 @@ function [ new_ir, ir_handle_struct_map ] = internalRep_pp( new_ir, json_export,
             fprintf(fid, '%s\n', ir_encoded);
             fclose(fid);
             
-            new_path = fullfile(output_dir, strcat('IR_pp_', mdl_name,'.json'));
-            cmd = ['cat ' json_path ' | python -mjson.tool > ' new_path];
+            ir_json_path = fullfile(output_dir, strcat('IR_pp_', mdl_name,'.json'));
+            cmd = ['cat ' json_path ' | python -mjson.tool > ' ir_json_path];
             try
                 [status, output] = system(cmd);
                 if status==0

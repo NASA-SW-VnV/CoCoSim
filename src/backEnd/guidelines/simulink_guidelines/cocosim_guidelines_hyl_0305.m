@@ -32,10 +32,10 @@ function [results, passed, priority] = cocosim_guidelines_hyl_0305(model)
             continue;
         end
         I = strcmpi(Names{i},Names);
-        if sum(double(I)) > 1
+        if sum(I) > 1
             uniqueUsingCase{end+1} = GuidelinesUtils.process_find_system_results(...
                 blockList(I),Names{i}, true, false);
-            totalFail = totalFail + 1; 
+            totalFail = totalFail + 1;
             Names(I) = {''};
         end
     end

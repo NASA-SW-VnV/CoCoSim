@@ -54,7 +54,8 @@ RUN ./autogen.sh && ./build.sh
 FROM ubuntu:18.04
 # Install runtime dependencies:
 # JRE (required by JKind) and libgomp1 (required by Z3)
-RUN apt-get update && apt-get install -y default-jre libgomp1 \
+# Make and gcc for compilation
+RUN apt-get update && apt-get install -y default-jre libgomp1 make gcc\
   && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /z3-4.7.1-x64-ubuntu-16.04/bin/z3 /bin/
@@ -67,5 +68,7 @@ COPY --from=builder /lustrec-build/include /include/lustrec
 
 # Entry point.
 #ENTRYPOINT ["/bin/kind2"]
+
+WORKDIR /lus
 
 CMD tail -f /dev/null

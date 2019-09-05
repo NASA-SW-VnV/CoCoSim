@@ -7,10 +7,10 @@ function exp  = outputsValues(outputsNumber, outputIdx)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     
-    values = arrayfun(@(x) nasa_toLustre.lustreAst.BooleanExpr('false'), (1:outputsNumber),...
+    values = arrayfun(@(x) nasa_toLustre.lustreAst.BoolExpr('false'), (1:outputsNumber),...
         'UniformOutput', 0);
     if outputIdx > 0 && outputIdx <= outputsNumber
-        values{outputIdx} = nasa_toLustre.lustreAst.BooleanExpr('true');
+        values{outputIdx} = nasa_toLustre.lustreAst.BoolExpr('true');
     end
     exp = nasa_toLustre.lustreAst.TupleExpr(values);
 end

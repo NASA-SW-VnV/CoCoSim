@@ -23,7 +23,9 @@ function [b, status, type, masktype, sfblockType, isIgnored] = getWriteType(sub_
         isIgnored = 1;
         return;
     end
-    if isfield(sub_blk, 'Mask') && strcmp(sub_blk.Mask, 'on')
+    if isfield(sub_blk, 'Mask') ...
+            && strcmp(sub_blk.Mask, 'on')...
+            && ~isempty(sub_blk.MaskType)
         masktype = sub_blk.MaskType;
         fun_name = [nasa_toLustre.frontEnd.Block_To_Lustre.blkTypeFormat(masktype) '_To_Lustre'];
         fun_name = sprintf('nasa_toLustre.blocks.%s', fun_name);
