@@ -33,6 +33,8 @@ classdef BinaryExpr < nasa_toLustre.lustreAst.LustreExpr
         ARROW = '->';
         MERGEARROW = '->'; % the arrow used in Merge expressions to indicate the clock Value
         WHEN = 'when';
+        PRELUDE_MULTIPLY = '*^';
+        PRELUDE_DIVIDE = '/^';
     end
     methods
         %%

@@ -36,12 +36,28 @@ classdef RateTransition_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             %
             if LusBackendType.isPRELUDE(lus_backend)
                 %% Using Prelude syntax
+                codes = cell(1, length(outputs));
                 if outTs > inTs
                     % fast to slow /^(outTs/inTs)
+                    c = outTs / inTs;
+                    for i=1:length(outputs)
+                        codes{i} = nasa_toLustre.lustreAst.LustreEq(outputs{i}, ....
+                            nasa_toLustre.lustreAst.BinaryExpr(...
+                            nasa_toLustre.lustreAst.BinaryExpr.PRELUDE_DIVIDE, ...
+                            inputs{i}, ...
+                            nasa_toLustre.lustreAst.IntExpr(c)));
+                    end
                 elseif outTs < inTs
                     % slow to fast *^(inTs/outTs)
+                    c = inTs / outTs;
+                    for i=1:length(outputs)
+                        codes{i} = nasa_toLustre.lustreAst.LustreEq(outputs{i}, ....
+                            nasa_toLustre.lustreAst.BinaryExpr(...
+                            nasa_toLustre.lustreAst.BinaryExpr.PRELUDE_MULTIPLY, ...
+                            inputs{i}, ...
+                            nasa_toLustre.lustreAst.IntExpr(c)));
+                    end
                 else
-                    codes = cell(1, length(outputs));
                     for i=1:length(outputs)
                         codes{i} = nasa_toLustre.lustreAst.LustreEq(outputs{i}, inputs{i});
                     end
