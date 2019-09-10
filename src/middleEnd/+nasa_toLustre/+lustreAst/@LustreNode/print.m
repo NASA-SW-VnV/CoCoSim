@@ -8,24 +8,46 @@
 function code = print(obj, backend)
     
     lines = {};
+    %% metaInfo
     if ~isempty(obj.metaInfo)
         if ischar(obj.metaInfo)
-            lines{end + 1} = sprintf('(*\n%s\n*)\n',...
-                obj.metaInfo);
+            if LusBackendType.isPRELUDE(backend)
+                lines{end + 1} = sprintf('--%s\n',...
+                    strrep(obj.metaInfo, newline, '--'));
+            else
+                lines{end + 1} = sprintf('(*\n%s\n*)\n',...
+                    obj.metaInfo);
+            end
         else
             lines{end + 1} = obj.metaInfo.print(backend);
         end
     end
+    %% PRELUDE for main node
+    if LusBackendType.isPRELUDE(backend) ...
+            && obj.isMain
+        for i=1:length(obj.inputs)
+            lines{end + 1} = sprintf('sensor %s wcet 1;\n', obj.inputs{i}.getId());
+        end
+        for i=1:length(obj.outputs)
+            lines{end + 1} = sprintf('actuator %s wcet 1;\n', obj.outputs{i}.getId());
+        end
+    end
+    %%    
     if obj.isImported
         isImported_str = 'imported';
     else
         isImported_str = '';
     end
-    lines{end + 1} = sprintf('node %s %s(%s)\nreturns(%s);\n', ...
+    semicolon =';';
+    if LusBackendType.isPRELUDE(backend)
+        semicolon = '';
+    end
+    lines{end + 1} = sprintf('node %s %s(%s)\nreturns(%s)%s\n', ...
         isImported_str, ...
         obj.name, ...
         nasa_toLustre.lustreAst.LustreAst.listVarsWithDT(obj.inputs, backend, true), ...
-        nasa_toLustre.lustreAst.LustreAst.listVarsWithDT(obj.outputs, backend, true));
+        nasa_toLustre.lustreAst.LustreAst.listVarsWithDT(obj.outputs, backend, true), ...
+        semicolon);
     if ~isempty(obj.localContract)
         lines{end + 1} = obj.localContract.print(backend);
     end

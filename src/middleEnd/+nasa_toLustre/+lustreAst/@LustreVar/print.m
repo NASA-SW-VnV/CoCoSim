@@ -7,5 +7,17 @@ function code = print(obj, backend)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  
     %TODO: check if LUSTREC syntax is OK for the other backends.
-    code = obj.print_lustrec(backend);
+    
+    if LusBackendType.isKIND2(backend) ...
+            && strcmp(obj.type, 'bool clock')
+        dt = 'bool';
+    else
+        dt = obj.type;
+    end
+    if LusBackendType.isPRELUDE(backend) ...
+            && ~isempty(obj.rate)
+        code = sprintf('%s : %s %s;', obj.id, dt, obj.rate);
+    else
+        code = sprintf('%s : %s;', obj.id, dt);
+    end
 end

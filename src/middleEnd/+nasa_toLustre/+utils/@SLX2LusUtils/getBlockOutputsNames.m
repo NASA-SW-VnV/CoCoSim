@@ -123,6 +123,24 @@ end
         else
             [lus_dt, ~, ~, isBus] = nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(slx_dt);
         end
+        % For PRELUDE
+        if strcmp(parent.BlockType, 'block_diagram')...
+                && strcmp(blk.BlockType, 'Inport') ...
+                && isfield(blk,'CompiledSampleTime')...
+                && isfield(parent,'CompiledSampleTime') 
+            blkT = blk.CompiledSampleTime(1);
+            blkP = blk.CompiledSampleTime(2);
+            parentT = parent.CompiledSampleTime(1);
+            if blkP ~= 0
+                p = sprintf('%d/%d', blkP/parentT, blkT/parentT);
+            else
+                p = '0';
+            end
+            rate = sprintf('rate(%.0f, %s)', ...
+                blkT/parentT, p);
+        else
+            rate = '';
+        end
         % The width should start from the port width regarding all
         % subsystem outputs
         idx = sum(width(1:portNumber-1))+1;
@@ -131,16 +149,16 @@ end
                 for k=1:numel(lus_dt)
                     names{end+1} = nasa_toLustre.lustreAst.VarIdExpr(...
                         nasa_toLustre.utils.SLX2LusUtils.name_format(strcat(blk.Name, '_', num2str(idx), '_BusElem', num2str(k))));
-                    names_dt{end+1} = nasa_toLustre.lustreAst.LustreVar(names{end} , lus_dt{k});
+                    names_dt{end+1} = nasa_toLustre.lustreAst.LustreVar(names{end} , lus_dt{k}, rate);
                 end
             elseif iscell(lus_dt) && numel(lus_dt) == width(portNumber)
                 names{end+1} = nasa_toLustre.lustreAst.VarIdExpr(...
                     nasa_toLustre.utils.SLX2LusUtils.name_format(strcat(blk.Name, '_', num2str(idx))));
-                names_dt{end+1} = nasa_toLustre.lustreAst.LustreVar(names{end}, char(lus_dt{i}));
+                names_dt{end+1} = nasa_toLustre.lustreAst.LustreVar(names{end}, char(lus_dt{i}), rate);
             else
                 names{end+1} = nasa_toLustre.lustreAst.VarIdExpr(...
                     nasa_toLustre.utils.SLX2LusUtils.name_format(strcat(blk.Name, '_', num2str(idx))));
-                names_dt{end+1} = nasa_toLustre.lustreAst.LustreVar(names{end}, char(lus_dt));
+                names_dt{end+1} = nasa_toLustre.lustreAst.LustreVar(names{end}, char(lus_dt), rate);
             end
             idx = idx + 1;
         end

@@ -35,6 +35,7 @@ classdef BinaryExpr < nasa_toLustre.lustreAst.LustreExpr
         WHEN = 'when';
         PRELUDE_MULTIPLY = '*^';
         PRELUDE_DIVIDE = '/^';
+        PRELUDE_OFFSET = '~>';
     end
     methods
         %%

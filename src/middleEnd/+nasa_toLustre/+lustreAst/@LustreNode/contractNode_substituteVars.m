@@ -40,7 +40,7 @@ function obj = contractNode_substituteVars(obj)
     varIDs = cellfun(@(x) x.getId(), VarIdExprObjects, 'UniformOutput', false);
     % go over Assignments
     for i=1:numel(new_bodyEqs)
-        % e.g. y = f(x);
+        
         
         if isa(new_bodyEqs{i}, 'nasa_toLustre.lustreAst.LustreEq')...
                 && isa(new_bodyEqs{i}.getLhs(), 'nasa_toLustre.lustreAst.VarIdExpr')...
@@ -49,10 +49,16 @@ function obj = contractNode_substituteVars(obj)
             rhs = new_bodyEqs{i}.getRhs();
             new_var = nasa_toLustre.lustreAst.ParenthesesExpr(rhs.deepCopy());
             
-            % if rhs class is IteExpr, skip it. To hep debugging.
+            % if rhs class is IteExpr, skip it. To help in debugging.
             if isa(rhs, 'nasa_toLustre.lustreAst.IteExpr')
                 continue;
             end
+            
+            % Skip node calls for PRelude. e.g. y = f(x);
+            if isa(rhs, 'nasa_toLustre.lustreAst.NodeCallExpr')
+                continue;
+            end
+            
             % if used on its definition, skip it
             %e.g. x = 0 -> pre x + 1;
             if rhs.nbOccuranceVar(var) >= 1

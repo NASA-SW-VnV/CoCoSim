@@ -29,7 +29,7 @@ classdef RateTransition_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             % detect Rate type (see documentation
             
             [type, error_msg] = nasa_toLustre.blocks.RateTransition_To_Lustre.getRateTransferType(blk, inTs, inTsOffset, outTs, outTsOffset );
-            if ~isempty(error_msg)
+            if ~LusBackendType.isPRELUDE(lus_backend) && ~isempty(error_msg)
                 display_msg(error_msg, MsgType.ERROR, 'RateTransition_To_Lustre', '');
                 return;
             end
@@ -37,30 +37,46 @@ classdef RateTransition_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             if LusBackendType.isPRELUDE(lus_backend)
                 %% Using Prelude syntax
                 codes = cell(1, length(outputs));
+                rhs = cell(1, length(inputs));
                 if outTs > inTs
                     % fast to slow /^(outTs/inTs)
                     c = outTs / inTs;
-                    for i=1:length(outputs)
-                        codes{i} = nasa_toLustre.lustreAst.LustreEq(outputs{i}, ....
-                            nasa_toLustre.lustreAst.BinaryExpr(...
+                    for i=1:length(inputs)
+                        rhs{i} = nasa_toLustre.lustreAst.BinaryExpr(...
                             nasa_toLustre.lustreAst.BinaryExpr.PRELUDE_DIVIDE, ...
                             inputs{i}, ...
-                            nasa_toLustre.lustreAst.IntExpr(c)));
+                            nasa_toLustre.lustreAst.IntExpr(c));
                     end
                 elseif outTs < inTs
                     % slow to fast *^(inTs/outTs)
                     c = inTs / outTs;
-                    for i=1:length(outputs)
-                        codes{i} = nasa_toLustre.lustreAst.LustreEq(outputs{i}, ....
-                            nasa_toLustre.lustreAst.BinaryExpr(...
+                    for i=1:length(inputs)
+                        rhs{i} = nasa_toLustre.lustreAst.BinaryExpr(...
                             nasa_toLustre.lustreAst.BinaryExpr.PRELUDE_MULTIPLY, ...
                             inputs{i}, ...
-                            nasa_toLustre.lustreAst.IntExpr(c)));
+                            nasa_toLustre.lustreAst.IntExpr(c));
                     end
                 else
-                    for i=1:length(outputs)
-                        codes{i} = nasa_toLustre.lustreAst.LustreEq(outputs{i}, inputs{i});
+                    for i=1:length(inputs)
+                        rhs{i} = inputs{i};
                     end
+                end
+                % add offset
+                if outTsOffset ~= 0
+                    normalizedOutT = outTs / main_sampleTime(1);
+                    normalizedOutP = outTsOffset / main_sampleTime(1);
+                    for i=1:length(inputs)
+                        rhs{i} = nasa_toLustre.lustreAst.BinaryExpr(...
+                            nasa_toLustre.lustreAst.BinaryExpr.PRELUDE_OFFSET, ...
+                            rhs{i}, ...
+                            nasa_toLustre.lustreAst.BinaryExpr(...
+                            nasa_toLustre.lustreAst.BinaryExpr.DIVIDE, ...
+                            nasa_toLustre.lustreAst.IntExpr(normalizedOutP), ...
+                            nasa_toLustre.lustreAst.IntExpr(normalizedOutT)));
+                    end
+                end
+                for i=1:length(outputs)
+                    codes{i} = nasa_toLustre.lustreAst.LustreEq(outputs{i}, rhs{i});
                 end
             else
                 %% Solution assuming all signals are defined at all time steps

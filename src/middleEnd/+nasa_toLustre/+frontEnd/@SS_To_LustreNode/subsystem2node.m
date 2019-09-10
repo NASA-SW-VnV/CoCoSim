@@ -24,7 +24,7 @@ function [ main_node, isContractBlk, external_nodes, external_libraries ] = ...
         is_main_node = 0;
     end
 
-    %% handling Stateflow
+    %% handling Stateflow using Old Compiler. The new compiler is handling SF Chart in SF_To_LustreNode
     try
         TOLUSTRE_SF_COMPILER = evalin('base', 'TOLUSTRE_SF_COMPILER');
     catch
