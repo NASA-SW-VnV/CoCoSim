@@ -208,7 +208,7 @@ classdef LustreNode < nasa_toLustre.lustreAst.LustreAst
         end
         
         %%
-        code = print(obj, backend)
+        code = print(obj, backend, inPreludeFile)
 
         code = print_lustrec(obj, backend)
        
@@ -219,6 +219,8 @@ classdef LustreNode < nasa_toLustre.lustreAst.LustreAst
         code = print_jkind(obj)
 
         code = print_prelude(obj)
+        
+        code = print_preludeImportedNode(obj);
 
     end
     methods(Static)

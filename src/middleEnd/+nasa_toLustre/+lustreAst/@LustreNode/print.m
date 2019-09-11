@@ -5,13 +5,19 @@
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function code = print(obj, backend)
-    
+function code = print(obj, backend, inPreludeFile)
+    % inPreludeFile is true if the code is printed in plu file.
+    % backend can be PRELUDE but printed in "lus" file for the monoperiodic
+    % nodes implementation. They should respect some restriction as no starting
+    % with underscore in variable/node names.
+    if ~exist('inPreludeFile', 'var')
+        inPreludeFile = false;
+    end
     lines = {};
     %% metaInfo
     if ~isempty(obj.metaInfo)
         if ischar(obj.metaInfo)
-            if LusBackendType.isPRELUDE(backend)
+            if LusBackendType.isPRELUDE(backend) && inPreludeFile
                 lines{end + 1} = sprintf('--%s\n',...
                     strrep(obj.metaInfo, newline, '--'));
             else
@@ -24,6 +30,7 @@ function code = print(obj, backend)
     end
     %% PRELUDE for main node
     if LusBackendType.isPRELUDE(backend) ...
+            && inPreludeFile...
             && obj.isMain
         for i=1:length(obj.inputs)
             lines{end + 1} = sprintf('sensor %s wcet 1;\n', obj.inputs{i}.getId());
@@ -39,16 +46,22 @@ function code = print(obj, backend)
         isImported_str = '';
     end
     semicolon =';';
-    if LusBackendType.isPRELUDE(backend)
+    if LusBackendType.isPRELUDE(backend) && inPreludeFile
         semicolon = '';
+    end
+    nodeName = obj.name;
+    %PRELUDE does not support "_" in the begining of the word.
+    if LusBackendType.isPRELUDE(backend) ...
+            && MatlabUtils.startsWith(nodeName, '_')
+        nodeName = sprintf('x%s', nodeName);
     end
     lines{end + 1} = sprintf('node %s %s(%s)\nreturns(%s)%s\n', ...
         isImported_str, ...
-        obj.name, ...
+        nodeName, ...
         nasa_toLustre.lustreAst.LustreAst.listVarsWithDT(obj.inputs, backend, true), ...
         nasa_toLustre.lustreAst.LustreAst.listVarsWithDT(obj.outputs, backend, true), ...
         semicolon);
-    if ~isempty(obj.localContract)
+    if ~isempty(obj.localContract) && ~inPreludeFile
         lines{end + 1} = obj.localContract.print(backend);
     end
 

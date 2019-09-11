@@ -53,17 +53,58 @@ classdef SubSystem_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             end
             
             %% add time input and clocks
-            inputs{end + 1} = nasa_toLustre.lustreAst.VarIdExpr(nasa_toLustre.utils.SLX2LusUtils.timeStepStr());
-            inputs{end + 1} = nasa_toLustre.lustreAst.VarIdExpr(nasa_toLustre.utils.SLX2LusUtils.nbStepStr());
-            clocks_list =nasa_toLustre.utils.SLX2LusUtils.getRTClocksSTR(blk, main_sampleTime);
+            extra_inputs = {};
+            extra_inputs{1} = ...
+                nasa_toLustre.lustreAst.VarIdExpr(...
+                nasa_toLustre.utils.SLX2LusUtils.timeStepStr());
+            extra_inputs{2} = ...
+                nasa_toLustre.lustreAst.VarIdExpr(...
+                nasa_toLustre.utils.SLX2LusUtils.nbStepStr());
+            clocks_list =nasa_toLustre.utils.SLX2LusUtils.getRTClocksSTR(...
+                blk, main_sampleTime);
             if ~isempty(clocks_list)
-                clocks_var = cell(1, numel(clocks_list));
-                for i=1:numel(clocks_list)
-                    clocks_var{i} = nasa_toLustre.lustreAst.VarIdExpr(...
-                        clocks_list{i});
-                end
-                inputs = [inputs, clocks_var];
+                clocks_var = cellfun(@(x) nasa_toLustre.lustreAst.VarIdExpr(x), ...
+                    clocks_list, 'UniformOutput', 0);
+                extra_inputs = [extra_inputs, clocks_var];
             end
+            try
+                if LusBackendType.isPRELUDE(lus_backend) ...
+                        && isfield(blk, 'CompiledSampleTime') ...
+                        && isfield(parent, 'CompiledSampleTime')
+                    [inTs, inTsOffset] = ...
+                        nasa_toLustre.utils.SLX2LusUtils.getSSSampleTime(parent.CompiledSampleTime);
+                    [outTs, outTsOffset] = ...
+                        nasa_toLustre.utils.SLX2LusUtils.getSSSampleTime(blk.CompiledSampleTime);
+                    if (outTs ~= inTs || outTsOffset ~= inTsOffset)
+                        c = outTs / inTs;
+                        if outTs > inTs
+                            for i=1:length(extra_inputs)
+                                extra_inputs{i} = nasa_toLustre.lustreAst.BinaryExpr(...
+                                    nasa_toLustre.lustreAst.BinaryExpr.PRELUDE_DIVIDE, ...
+                                    extra_inputs{i}, ...
+                                    nasa_toLustre.lustreAst.IntExpr(c));
+                            end
+                        end
+                        % add offset
+                        if outTsOffset ~= 0
+                            normalizedOutT = outTs / parent.CompiledSampleTime(1);
+                            normalizedOutP = outTsOffset / parent.CompiledSampleTime(1);
+                            for i=1:length(extra_inputs)
+                                extra_inputs{i} = nasa_toLustre.lustreAst.BinaryExpr(...
+                                    nasa_toLustre.lustreAst.BinaryExpr.PRELUDE_OFFSET, ...
+                                    extra_inputs{i}, ...
+                                    nasa_toLustre.lustreAst.BinaryExpr(...
+                                    nasa_toLustre.lustreAst.BinaryExpr.DIVIDE, ...
+                                    nasa_toLustre.lustreAst.IntExpr(normalizedOutP), ...
+                                    nasa_toLustre.lustreAst.IntExpr(normalizedOutT)));
+                            end
+                        end
+                    end
+                end
+            catch me
+                me
+            end
+            inputs = [inputs, extra_inputs];
             
             %% Check Resettable SS case
             [isResetSubsystem, ResetType] =nasa_toLustre.blocks.SubSystem_To_Lustre.hasResetPort(blk);

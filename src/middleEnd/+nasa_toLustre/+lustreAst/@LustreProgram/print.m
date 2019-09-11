@@ -1,4 +1,4 @@
-function code = print(obj, backend)
+function [lus_code, plu_code] = print(obj, backend)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -7,5 +7,5 @@ function code = print(obj, backend)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  
     %TODO: check if LUSTREC syntax is OK for the other backends.
-    code = obj.print_lustrec(backend);
+    [lus_code, plu_code] = obj.print_lustrec(backend);
 end

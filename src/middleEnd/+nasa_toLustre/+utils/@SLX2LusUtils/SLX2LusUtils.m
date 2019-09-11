@@ -18,7 +18,7 @@ classdef SLX2LusUtils
         time_step = nbStepStr()
         it = iterationVariable()
         res = isContractBlk(ss_ir)
-        [lus_path, mat_file] = getLusOutputPath(output_dir, model_name, lus_backend)
+        [lus_path, mat_file, plu_path] = getLusOutputPath(output_dir, model_name, lus_backend)
         %% adapt blocks names to be a valid lustre names.
         str_out = name_format(str)
         
@@ -115,7 +115,8 @@ classdef SLX2LusUtils
         b = isIgnoredSampleTime(st_n, ph_n)
 
         clocks_list = getRTClocksSTR(blk, main_sampleTime)
-
+        
+        [st, ph] = getSSSampleTime(Clocks)
         %% check model compatibility: Variable size signals, Fixed Data types, 
         % main_sample time. ...
         htmlItemMsg = modelCompatibilityCheck(model_name, main_sampleTime)

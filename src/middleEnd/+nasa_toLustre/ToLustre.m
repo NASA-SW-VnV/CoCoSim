@@ -164,11 +164,13 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, ...
     end
     [~, file_name, ~] = fileparts(pp_model_full_path);
     %% Definition of the generated output files names
-    [lustre_file_path, mat_file] = ...
+    [lustre_file_path, mat_file, plu_path] = ...
         nasa_toLustre.utils.SLX2LusUtils.getLusOutputPath(output_dir, file_name, lus_backend);
     %% Create Meta informations
     create_file_meta_info(lustre_file_path);
-    
+    if LusBackendType.isPRELUDE(lus_backend)
+        create_file_meta_info(plu_path);
+    end
     %% Create traceability informations in XML format
     display_msg('Start tracebility', MsgType.INFO, 'ToLustre', '');
     xml_trace_file_name = fullfile(output_dir, strcat(file_name, '.toLustre.trace.xml'));
@@ -193,22 +195,38 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, ...
     end
     model_struct = ir_struct.(main_fieldName);
     main_sampleTime = model_struct.CompiledSampleTime;
-    TOLUSTRE_TIME_STEP_ASTEQ = nasa_toLustre.lustreAst.LustreEq(nasa_toLustre.lustreAst.VarIdExpr(nasa_toLustre.utils.SLX2LusUtils.timeStepStr()), ...
+    external_libraries = {};
+    if LusBackendType.isPRELUDE(lus_backend)
+        % no computation is allowed in prelude file
+        external_libraries{end+1} = 'getNbStep';
+        external_libraries{end+1} = 'getTimeStep';
+        TOLUSTRE_TIME_STEP_ASTEQ = nasa_toLustre.lustreAst.LustreEq(...
+            nasa_toLustre.lustreAst.VarIdExpr(nasa_toLustre.utils.SLX2LusUtils.timeStepStr()), ...
+            nasa_toLustre.lustreAst.NodeCallExpr('getTimeStep', ...
+            {nasa_toLustre.lustreAst.RealExpr(main_sampleTime(1))}));
+        TOLUSTRE_NB_STEP_ASTEQ = nasa_toLustre.lustreAst.LustreEq(...
+            nasa_toLustre.lustreAst.VarIdExpr(nasa_toLustre.utils.SLX2LusUtils.nbStepStr()), ...
+            nasa_toLustre.lustreAst.NodeCallExpr('getNbStep', ...
+            {nasa_toLustre.lustreAst.BoolExpr(true)}));
+    else
+        TOLUSTRE_TIME_STEP_ASTEQ = nasa_toLustre.lustreAst.LustreEq(nasa_toLustre.lustreAst.VarIdExpr(nasa_toLustre.utils.SLX2LusUtils.timeStepStr()), ...
             nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.ARROW, ...
             nasa_toLustre.lustreAst.RealExpr('0.0'), ...
             nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.PLUS, ...
             nasa_toLustre.lustreAst.UnaryExpr(nasa_toLustre.lustreAst.UnaryExpr.PRE, nasa_toLustre.lustreAst.VarIdExpr(nasa_toLustre.utils.SLX2LusUtils.timeStepStr())), ...
             nasa_toLustre.lustreAst.RealExpr(main_sampleTime(1)))));
-    TOLUSTRE_NB_STEP_ASTEQ = nasa_toLustre.lustreAst.LustreEq(nasa_toLustre.lustreAst.VarIdExpr(nasa_toLustre.utils.SLX2LusUtils.nbStepStr()), ...
+        TOLUSTRE_NB_STEP_ASTEQ = nasa_toLustre.lustreAst.LustreEq(nasa_toLustre.lustreAst.VarIdExpr(nasa_toLustre.utils.SLX2LusUtils.nbStepStr()), ...
             nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.ARROW, ...
             nasa_toLustre.lustreAst.IntExpr('0'), ...
             nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.PLUS, ...
             nasa_toLustre.lustreAst.UnaryExpr(nasa_toLustre.lustreAst.UnaryExpr.PRE, nasa_toLustre.lustreAst.VarIdExpr(nasa_toLustre.utils.SLX2LusUtils.nbStepStr())), ...
-            nasa_toLustre.lustreAst.IntExpr('1'))));    
-        
+            nasa_toLustre.lustreAst.IntExpr('1'))));
+    end
     is_main_node = 1;
-    [nodes_ast, contracts_ast, external_libraries, failed] = recursiveGeneration(...
+    [nodes_ast, contracts_ast, external_libraries_i, failed] = recursiveGeneration(...
         model_struct, model_struct, main_sampleTime, is_main_node, lus_backend, coco_backend, xml_trace);
+    external_libraries = MatlabUtils.concat(external_libraries, external_libraries_i);
+    
     if ~forceGeneration && failed
         html_path = fullfile(output_dir, strcat(file_name, '_error_messages.html'));
         %HtmlItem.displayErrorMessages(html_path, ERROR_MSG, mode_display);
@@ -282,18 +300,39 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, ...
     end
     
     %% writing code
-    fid = fopen(lustre_file_path, 'a');
-    if fid==-1
+    lus_fid = fopen(lustre_file_path, 'a');
+    if lus_fid==-1
         msg = sprintf('Opening file "%s" is not possible', lustre_file_path);
         display_msg(msg, MsgType.ERROR, 'ToLustre', '');
+        failed = 1;
+        return;
+    end
+    if LusBackendType.isPRELUDE(lus_backend)
+        plu_fid = fopen(plu_path, 'a');
+        if plu_fid==-1
+            msg = sprintf('Opening file "%s" is not possible', plu_path);
+            display_msg(msg, MsgType.ERROR, 'ToLustre', '');
+            failed = 1;
+            return;
+        end
     end
     try
-        Lustrecode = program.print(lus_backend);
-        fprintf(fid, '%s', Lustrecode);
-        fclose(fid);
+        [lustrecode, preludeCode] = program.print(lus_backend);
+        fprintf(lus_fid, '%s', lustrecode);
+        fclose(lus_fid);
+        if LusBackendType.isPRELUDE(lus_backend)
+            fprintf(plu_fid, '%s', preludeCode);
+            fclose(plu_fid);
+        end
         if COCOSIM_DEV_DEBUG
-            display_msg(strrep(Lustrecode, '%', '%%'), MsgType.DEBUG, ...
+            display_msg(strrep(lustrecode, '%', '%%'), MsgType.DEBUG, ...
                 'ToLustre', '');
+            if LusBackendType.isPRELUDE(lus_backend)
+                display_msg('*****PRELUDE CODE *******', MsgType.DEBUG, ...
+                'ToLustre', '');
+                display_msg(strrep(preludeCode, '%', '%%'), MsgType.DEBUG, ...
+                    'ToLustre', '');
+            end
         end
     catch me
         display_msg('Printing Lustre AST to file failed',...
@@ -361,6 +400,10 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, ...
     
     msg = sprintf('Lustre File generated:%s', lustre_file_path);
     display_msg(msg, MsgType.RESULT, 'ToLustre', '');
+    if LusBackendType.isPRELUDE(lus_backend)
+        msg = sprintf('PRELUDE File generated:%s', plu_path);
+        display_msg(msg, MsgType.RESULT, 'ToLustre', '');
+    end
     msg = sprintf('Lustre generation finished in %f seconds', t_finish);
     display_msg(msg, MsgType.RESULT, 'ToLustre', '');
     

@@ -34,6 +34,7 @@ classdef RateTransition_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 return;
             end
             %
+            nb_outputs = length(outputs);
             if LusBackendType.isPRELUDE(lus_backend)
                 %% Using Prelude syntax
                 codes = cell(1, length(outputs));
@@ -49,11 +50,15 @@ classdef RateTransition_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     end
                 elseif outTs < inTs
                     % slow to fast *^(inTs/outTs)
+                    init_cond =nasa_toLustre.utils.SLX2LusUtils.getInitialOutput(parent, blk,...
+                        blk.InitialCondition, outputDataType, length(inputs));
                     c = inTs / outTs;
                     for i=1:length(inputs)
                         rhs{i} = nasa_toLustre.lustreAst.BinaryExpr(...
                             nasa_toLustre.lustreAst.BinaryExpr.PRELUDE_MULTIPLY, ...
-                            inputs{i}, ...
+                            nasa_toLustre.lustreAst.BinaryExpr(...
+                            nasa_toLustre.lustreAst.BinaryExpr.PRELUDE_FBY, ...
+                            init_cond{i}, inputs{i}), ...
                             nasa_toLustre.lustreAst.IntExpr(c));
                     end
                 else
@@ -80,7 +85,7 @@ classdef RateTransition_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 end
             else
                 %% Solution assuming all signals are defined at all time steps
-                nb_outputs = length(outputs);
+                
                 codes = cell(1, length(outputs));
                 if strcmp(type, 'ZOH')
                     %TODO: offset normalization outTsOffset/main_sampleTime(1) ??
