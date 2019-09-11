@@ -67,7 +67,7 @@ function [lus_code, plu_code] = print_lustrec(obj, backend)
                 else
                     
                     lus_lines{end+1} = sprintf('%s\n', ...
-                        nodesList{i}.print(backend, false));
+                        nodesList{i}.print(LusBackendType.LUSTREC));
                     plu_lines{end+1} = sprintf('%s\n', ...
                         nodesList{i}.print_preludeImportedNode());
                     
