@@ -44,22 +44,33 @@ function [fun_data_map, failed] = getFuncsDataMap(blk, script, ...
     fhinfo = functions(fH);
     if isfield(fhinfo, 'workspace') && isfield(fhinfo.workspace{1}, 'CoCoVars')
         CoCoVars = fhinfo.workspace{1}.CoCoVars;
-        if length(CoCoVars) ~= length(functions_struct)
+        if length(CoCoVars) > length(functions_struct)
             display_msg(sprintf('Could not get Information about DataType of variables in block %s.', ...
                 HtmlItem.addOpenCmd(blk.Origin_path)), ...
                 MsgType.DEBUG, 'getFuncsDataMap', '');
             failed = true;
             return;
         end
+        fnames = cellfun(@(x) x.name, functions_struct, 'UniformOutput', false);
         for i=1:length(CoCoVars)
-            inputs_names = functions_struct{i}.input_params;
-            outputs_names = functions_struct{i}.return_params;
+            vars = CoCoVars{i};
+            if isempty(vars)
+                continue;
+            end
+            if isfield(vars(1), 'nesting') && isfield(vars(1).nesting, 'function')
+                [~, fname, ~] = fileparts(vars(1).nesting.function);
+                j = find(strcmp(fnames, fname));
+            else
+                j = i;
+            end
+            inputs_names = functions_struct{j}.input_params;
+            outputs_names = functions_struct{j}.return_params;
             data = arrayfun(@(d) ...
-                buildData(d, inputs_names, outputs_names), CoCoVars{i}, 'UniformOutput', 0);
-            data_names = arrayfun(@(d) d.name, CoCoVars{i}, 'UniformOutput', 0);
+                buildData(d, inputs_names, outputs_names),vars, 'UniformOutput', 0);
+            data_names = arrayfun(@(d) d.name, vars, 'UniformOutput', 0);
             data_map = containers.Map(data_names, data);
             data_map = nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.addArrayData(data_map, data);
-            fun_data_map(functions_struct{i}.name) = data_map;
+            fun_data_map(functions_struct{j}.name) = data_map;
         end
     else
         display_msg(sprintf('Getting workspace of Matlab function in block %s failed.', ...

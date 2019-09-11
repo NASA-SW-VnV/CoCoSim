@@ -73,7 +73,7 @@ function [code, exp_dt, dim, extra_code] = diffFun_To_Lustre(tree, args)
         else
             ME = MException('COCOSIM:TREE2CODE', ...
                 'Function diff in expression "%s" do not support value above 2 as second argument',...
-                tree.text, numel(x_dim));
+                tree.text);
             throw(ME);
         end
         
