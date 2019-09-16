@@ -57,6 +57,7 @@ classdef MExpToLusAST
             end
             status = 0;
             lusCode = {};
+            extra_code = {};
             if isempty(exp)
                 return;
             end

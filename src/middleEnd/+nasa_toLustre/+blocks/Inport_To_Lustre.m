@@ -75,7 +75,7 @@ classdef Inport_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             % Inports in root level should have the same model sampleTime
             if strcmp(parent.BlockType, 'block_diagram')
                 inST = blk.CompiledSampleTime;
-                if main_sampleTime(1) ~= inST(1) || main_sampleTime(2) ~= inST(2)
+                if inST(1) ~= 0 && (main_sampleTime(1) ~= inST(1) || main_sampleTime(2) ~= inST(2))
                     obj.addUnsupported_options(sprintf('Inport %s with Sample time %s is different from Model sample time %s. CoCosim requires Inports at root level to have same sample time as the model.', ...
                         HtmlItem.addOpenCmd(blk.Origin_path),...
                         mat2str(inST), mat2str(main_sampleTime)));

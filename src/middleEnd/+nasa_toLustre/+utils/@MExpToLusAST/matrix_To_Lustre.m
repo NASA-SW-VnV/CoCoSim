@@ -29,7 +29,7 @@ function [code, dt, dim, extra_code] = matrix_To_Lustre(tree, args)
     if isrow(code_dt), code_dt = code_dt'; end
     code = {};
     code_dt = reshape(code_dt, nb_rows, nb_columns);
-    if args.isLeft && nb_columns == 1
+    if args.isLeft && nb_rows == 1
         %e.g., [x, y] = f(...)
         for j=1:nb_columns
             for i=1:nb_rows

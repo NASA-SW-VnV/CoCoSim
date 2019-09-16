@@ -140,14 +140,14 @@ classdef Chart_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             end
             
             %% get all events types and check for function call.
-            events = SFContent.Events;
-            for i=1:numel(events)
-                if strcmp(events{i}.Trigger, 'Function call')
-                    obj.addUnsupported_options(...
-                        sprintf('Event "%s" in chart %s with "Function call" Trigger is not supported.',....
-                        events{i}.Name, HtmlItem.addOpenCmd(blk.Origin_path)));
-                end
-            end
+%             events = SFContent.Events;
+%             for i=1:numel(events)
+%                 if strcmp(events{i}.Trigger, 'Function call')
+%                     obj.addUnsupported_options(...
+%                         sprintf('Event "%s" in chart %s with "Function call" Trigger is not supported.',....
+%                         events{i}.Name, HtmlItem.addOpenCmd(blk.Origin_path)));
+%                 end
+%             end
             %% get all states unsupportedOptions
             states = SFContent.States;
             for i=1:numel(states)
