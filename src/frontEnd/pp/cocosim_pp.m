@@ -19,9 +19,9 @@ function [new_file_path, failed] = cocosim_pp(model_path, varargin)
 
     global cocosim_pp_gen_verif  cocosim_pp_gen_verif_dir CoCoSimPreferences;
 
-    if isempty(CoCoSimPreferences)
-        CoCoSimPreferences = cocosim_menu.CoCoSimPreferences.load();
-    end
+    % 
+    CoCoSimPreferences = cocosim_menu.CoCoSimPreferences.load();
+    
     
     nodisplay = 0;
     cocosim_pp_gen_verif = 0;

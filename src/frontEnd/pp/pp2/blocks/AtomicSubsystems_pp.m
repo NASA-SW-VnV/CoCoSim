@@ -50,59 +50,40 @@ function solveAlgebraicLoops(new_model_base)
         causes = ME.cause;
         if isempty(causes) ...
                 && strcmp(ME.identifier, 'Simulink:Engine:NoNonvirtSubsysSelfLoops')
-            display_msg('Algebraic Loop detected', MsgType.INFO, 'PP', '');
-            msg = ME.message;
-            tokens = regexp(msg, matlabOpenFormat, 'tokens', 'once');
-            if ~isempty(tokens)
-                subsys = tokens{1};
+            causes{1} = ME;
+        end
+        for c=causes'
+            subsys = '';
+            switch c{1}.identifier
+                case {'Simulink:Engine:BlkInAlgLoopErr', ...
+                        'Simulink:Engine:BlkInAlgLoopErrWithInfo', ...
+                        'Simulink:Engine:NoNonvirtSubsysSelfLoops'}
+                    display_msg('Algebraic Loop detected', MsgType.INFO, 'PP', '');
+                    msg = c{1}.message;
+                    tokens = regexp(msg, matlabOpenFormat, 'tokens', 'once');
+                    if isempty(tokens)
+                        continue;
+                    end
+                    subsys = tokens{1};
+                case 'Simulink:DataType:InputPortCannotAcceptMixedDataTypeWithHint'
+                    msg = c{1}.message;
+                    tokens = regexp(msg, 'The inport block\s*''([^''])+''', 'tokens', 'once');
+                    if isempty(tokens)
+                        continue;
+                    end
+                    subsys = fileparts(tokens{1});
+            end
+            if ~isempty(subsys)
                 try
                     display_msg(['Turn off atomic in block' subsys], MsgType.INFO, 'PP', '');
                     set_param(subsys,'TreatAsAtomicUnit','off');
+                    try Simulink.BlockDiagram.expandSubsystem(subsys); catch, end
                     solveAlgebraicLoops(new_model_base);
                 catch
                 end
             end
-        else
-            for c=causes'
-                subsys = '';
-                switch c{1}.identifier
-                    case 'Simulink:Engine:BlkInAlgLoopErr'
-                        display_msg('Algebraic Loop detected', MsgType.INFO, 'PP', '');
-                        msg = c{1}.message;
-                        tokens = regexp(msg, matlabOpenFormat, 'tokens', 'once');
-                        if isempty(tokens)
-                            continue;
-                        end
-                        subsys = tokens{1};
-                        break;
-                    case 'Simulink:Engine:BlkInAlgLoopErrWithInfo'
-                        display_msg('Algebraic Loop detected', MsgType.INFO, 'PP', '');
-                        msg = c{1}.message;
-                        tokens = regexp(msg, matlabOpenFormat, 'tokens', 'once');
-                        if isempty(tokens)
-                            continue;
-                        end
-                        subsys = tokens{1};
-                        break;
-                    case 'Simulink:DataType:InputPortCannotAcceptMixedDataTypeWithHint'
-                        msg = c{1}.message;
-                        tokens = regexp(msg, 'The inport block\s*''([^''])+''', 'tokens', 'once');
-                        if isempty(tokens)
-                            continue;
-                        end
-                        subsys = fileparts(tokens{1});
-                        break;
-                end
-                if ~isempty(subsys)
-                    try
-                        display_msg(['Turn off atomic in block' subsys], MsgType.INFO, 'PP', '');
-                        set_param(subsys,'TreatAsAtomicUnit','off');
-                        solveAlgebraicLoops(new_model_base);
-                    catch
-                    end
-                end
-            end
         end
+        
         return;
     end
     code_off=sprintf('%s([], [], [], ''term'')', new_model_base);
