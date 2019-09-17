@@ -48,7 +48,7 @@ classdef MergeExpr < nasa_toLustre.lustreAst.LustreExpr
         end
          % This function is used in Stateflow compiler to change from imperative
         % code to Lustre
-        [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft)
+        [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft, node, data_map)
         %% This function is used by KIND2 LustreProgram.print()
         function nodesCalled = getNodesCalled(obj)
             nodesCalled = {};

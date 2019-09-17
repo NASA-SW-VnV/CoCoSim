@@ -139,6 +139,7 @@ classdef Block_Test
                 skip = true;
             end
             new_system(mdl_name);
+            %open_system(mdl_name);
             if addCondExecSS
                 if bdIsLoaded('Block_TestLib'), load_system('Block_TestLib'); end
                 if condExecSSIdx > length(Block_Test.condExecSS)
@@ -158,8 +159,12 @@ classdef Block_Test
         
         %% add the block
         function add_and_connect_block(blkLibPath, blkPath, s)
-            blkParams = Block_Test.struct2blockParams(s);
-            add_block(blkLibPath, blkPath, blkParams{:});
+            if isempty(s)
+                add_block(blkLibPath, blkPath);
+            else
+                blkParams = Block_Test.struct2blockParams(s);
+                add_block(blkLibPath, blkPath, blkParams{:});
+            end
             Block_Test.connectBlockToInportsOutports(blkPath);
         end
         
@@ -173,6 +178,7 @@ classdef Block_Test
             if failed
                 display_msg(['Model failed: ' mdl_name], ...
                     MsgType.ERROR, 'generateTests', '');
+                %save_system(mdl_name, mdl_path);
             else
                 save_system(mdl_name, mdl_path);
             end

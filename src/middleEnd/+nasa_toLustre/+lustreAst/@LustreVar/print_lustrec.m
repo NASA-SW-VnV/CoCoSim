@@ -6,12 +6,5 @@ function code = print_lustrec(obj, backend)
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  
-    if LusBackendType.isKIND2(backend) ...
-            && strcmp(obj.type, 'bool clock')
-        dt = 'bool';
-    else
-        dt = obj.type;
-    end
-    
-    code = sprintf('%s : %s;', obj.id, dt);
+    code = obj.print(backend);
 end

@@ -1,12 +1,15 @@
-function [outputs, inputs] = getInOutputsFromAction(lus_action, isCondition, data_map, expreession)
+function [outputs, inputs] = getInOutputsFromAction(lus_action, isCondition, data_map, expression, isMatlab)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-        outputs = {};
+    
+    if nargin < 5 || isempty(isMatlab)
+        isMatlab = false;
+    end
+    outputs = {};
     inputs = {};
     
     if numel(lus_action) == 1 && isa(lus_action{1}, 'nasa_toLustre.lustreAst.ConcurrentAssignments')
@@ -17,14 +20,18 @@ function [outputs, inputs] = getInOutputsFromAction(lus_action, isCondition, dat
     for act_idx=1:numel(assignments)
         if ~isCondition
             if isa(assignments{act_idx}, 'nasa_toLustre.lustreAst.ConcurrentAssignments')
-                [outputs_i, inputs_i] = nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getInOutputsFromAction(assignments(act_idx));
+                [outputs_i, inputs_i] = nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getInOutputsFromAction(...
+                    assignments(act_idx), isCondition, data_map, expression);
                 outputs = MatlabUtils.concat(outputs, outputs_i);
                 inputs = MatlabUtils.concat(inputs, inputs_i);
                 continue;
             elseif~isa(assignments{act_idx}, 'nasa_toLustre.lustreAst.LustreEq')
+                if isMatlab
+                    continue;
+                end
                 ME = MException('COCOSIM:STATEFLOW', ...
-                    'Action "%s" in "%s" should be an assignement (e.g. outputs = f(inputs))', ...
-                    expreession, action_parentPath);
+                    'Action "%s" should be an assignement (e.g. outputs = f(inputs))', ...
+                    expression);
                 throw(ME);
             end
         end
@@ -41,11 +48,12 @@ function [outputs, inputs] = getInOutputsFromAction(lus_action, isCondition, dat
         for i=1:numel(outputs_names)
             k = outputs_names{i};
             if isKey(data_map, k)
-                outputs{end + 1} = nasa_toLustre.lustreAst.LustreVar(k, data_map(k).LusDatatype);
+                lusDT = nasa_toLustre.utils.MExpToLusDT.getVarDT(data_map, k);
+                outputs{end + 1} = nasa_toLustre.lustreAst.LustreVar(k, lusDT);
             else
                 ME = MException('COCOSIM:STATEFLOW', ...
                     'Variable %s can not be found for action "%s"', ...
-                    k, expreession);
+                    k, expression);
                 throw(ME);
             end
         end
@@ -56,7 +64,7 @@ function [outputs, inputs] = getInOutputsFromAction(lus_action, isCondition, dat
             else
                 ME = MException('COCOSIM:STATEFLOW', ...
                     'Variable %s can not be found for Action "%s"', ...
-                    k, expreession);
+                    k, expression);
                 throw(ME);
             end
         end

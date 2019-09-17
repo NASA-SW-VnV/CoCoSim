@@ -24,7 +24,7 @@ function [ main_node, isContractBlk, external_nodes, external_libraries ] = ...
         is_main_node = 0;
     end
 
-    %% handling Stateflow
+    %% handling Stateflow using Old Compiler. The new compiler is handling SF Chart in SF_To_LustreNode
     try
         TOLUSTRE_SF_COMPILER = evalin('base', 'TOLUSTRE_SF_COMPILER');
     catch
@@ -40,7 +40,8 @@ function [ main_node, isContractBlk, external_nodes, external_libraries ] = ...
     end
     %%
 
-    if isContractBlk && ~LusBackendType.isKIND2(lus_backend)
+    if isContractBlk ...
+            && (~LusBackendType.isKIND2(lus_backend) )
         %generate contracts only for KIND2 lus_backend
         % For other backends, a contract will be considered as a node
         % containing sub properties.
@@ -121,8 +122,8 @@ function [ main_node, isContractBlk, external_nodes, external_libraries ] = ...
     if isfield(ss_ir, 'ContractNodeNames')
         contractImports = nasa_toLustre.frontEnd.SS_To_LustreNode.getImportedContracts(...
                 parent_ir, ss_ir, main_sampleTime, node_inputs_withoutDT_cell, node_outputs_withoutDT_cell);
-        if LusBackendType.isKIND2(lus_backend) ...
-                || LusBackendType.isLUSTREC(lus_backend)
+        if ~CoCoBackendType.isDED(coco_backend) && (LusBackendType.isKIND2(lus_backend) ...
+                || LusBackendType.isLUSTREC(lus_backend))
             %import contract
             contract = nasa_toLustre.lustreAst.LustreContract('', '', {}, {}, {}, ...
                 contractImports, true);
@@ -150,7 +151,7 @@ function [ main_node, isContractBlk, external_nodes, external_libraries ] = ...
             && isfield(ss_ir, 'MaskType') ...
             && strcmp(ss_ir.MaskType, 'VerificationSubsystem')
         node_outputs{end+1} = nasa_toLustre.lustreAst.LustreVar('VerificationSubsystem_virtual', 'bool');
-        body{end+1} = nasa_toLustre.lustreAst.LustreEq(nasa_toLustre.lustreAst.VarIdExpr('VerificationSubsystem_virtual'),  nasa_toLustre.lustreAst.BooleanExpr(true));
+        body{end+1} = nasa_toLustre.lustreAst.LustreEq(nasa_toLustre.lustreAst.VarIdExpr('VerificationSubsystem_virtual'),  nasa_toLustre.lustreAst.BoolExpr(true));
     end
     % If the Subsystem has VerificationSubsystem, then add virtual
     % variable

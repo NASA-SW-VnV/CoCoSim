@@ -9,7 +9,8 @@ function [fun_node] = getFunHeader(func, blk, data_map)
     %
     %
     
-    data_set = data_map.values();
+    data_set = data_map.values(); 
+    data_set = data_set(cellfun(@(x) isstruct(x), data_set));
     scopes = cellfun(@(x) x.Scope, data_set, 'UniformOutput', 0);
     Inputs = data_set(strcmp(scopes, 'Input'));
     Outputs = data_set(strcmp(scopes, 'Output'));
@@ -21,6 +22,9 @@ function [fun_node] = getFunHeader(func, blk, data_map)
     comment = nasa_toLustre.lustreAst.LustreComment(...
         sprintf('Function %s inside Matlab Function block: %s',func.name, blk.Origin_path), true);
     node_name = strcat(blk_name, '_', func.name);
+    if isempty(node_inputs)
+        node_inputs{1} = nasa_toLustre.lustreAst.LustreVar('_virtual', 'bool');
+    end
     fun_node = nasa_toLustre.lustreAst.LustreNode(...
         comment, ...
         node_name,...

@@ -5,10 +5,8 @@ function [fun_node,failed ]  = getFuncCode(func, data_map, blkObj, parent, blk)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
-    %
-    %
-    
+    global VISITED_VARIABLES;
+    VISITED_VARIABLES = {};
     statements = func.statements;
     expected_dt = '';
     isSimulink = false;
@@ -27,13 +25,24 @@ function [fun_node,failed ]  = getFuncCode(func, data_map, blkObj, parent, blk)
             s = statements{i};
         end
         try
-            lusCode = nasa_toLustre.blocks.Stateflow.utils.MExpToLusAST.expression_To_Lustre(blkObj, s,...
-                parent, blk, data_map, {}, expected_dt, ...
-                isSimulink, isStateFlow, isMatlabFun);
+            args.blkObj = blkObj;
+            args.blk = blk;
+            args.parent = parent;
+            args.data_map = data_map;
+            args.expected_lusDT = expected_dt;
+            args.isSimulink = false;
+            args.isStateFlow = false;
+            args.isMatlabFun = true;
+            [lusCode, ~, ~, extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(s, args);
+            if ~isempty(extra_code)
+                [vars, ~] = nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getInOutputsFromAction(extra_code, ...
+                    false, data_map, s.text, true);
+                variables = MatlabUtils.concat(variables, vars);
+            end
             [vars, ~] = nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getInOutputsFromAction(lusCode, ...
-                false, data_map, s.text);
+                false, data_map, s.text, true);
             variables = MatlabUtils.concat(variables, vars);
-            body = MatlabUtils.concat(body, lusCode);
+            body = MatlabUtils.concat(body, extra_code, lusCode);
         catch me
             if strcmp(me.identifier, 'COCOSIM:STATEFLOW')
                 display_msg(me.message, MsgType.WARNING, 'getMFunctionCode', '');
@@ -52,5 +61,5 @@ function [fun_node,failed ]  = getFuncCode(func, data_map, blkObj, parent, blk)
     variables = nasa_toLustre.lustreAst.LustreVar.setDiff(variables, node_outputs);
     fun_node.setLocalVars(variables);
     fun_node.setBodyEqs(body);
-    fun_node = fun_node.pseudoCode2Lustre();
+    fun_node = fun_node.pseudoCode2Lustre(data_map);
 end

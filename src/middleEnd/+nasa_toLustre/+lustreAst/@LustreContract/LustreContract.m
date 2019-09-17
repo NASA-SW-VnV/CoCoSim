@@ -125,7 +125,7 @@ classdef LustreContract < nasa_toLustre.lustreAst.LustreAst
         
         %% This function is used in Stateflow compiler to change from imperative
         % code to Lustre
-        [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft)
+        [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft, node, data_map)
         %% This function is used by KIND2 LustreProgram.print()
         function nodesCalled = getNodesCalled(obj)
             nodesCalled = {};
@@ -140,7 +140,7 @@ classdef LustreContract < nasa_toLustre.lustreAst.LustreAst
         
         
         %%
-        code = print(obj, backend)
+        code = print(obj, varargin)
         
         code = print_lustrec(obj)
         

@@ -60,8 +60,8 @@ function [ Lustre_type, zero, one, isBus, isEnum, hasEnum] = ...
                 one{i} = members{1};
                 hasEnum = true;
             elseif strcmp(Lustre_type{i}, 'bool')
-                zero{i} = nasa_toLustre.lustreAst.BooleanExpr('false');
-                one{i} = nasa_toLustre.lustreAst.BooleanExpr('true') ;
+                zero{i} = nasa_toLustre.lustreAst.BoolExpr('false');
+                one{i} = nasa_toLustre.lustreAst.BoolExpr('true') ;
             elseif strcmp(Lustre_type{i}, 'int')
                 zero{i} = nasa_toLustre.lustreAst.IntExpr('0');
                 one{i} = nasa_toLustre.lustreAst.IntExpr('1');
@@ -77,8 +77,8 @@ function [ Lustre_type, zero, one, isBus, isEnum, hasEnum] = ...
             one = members{1};
             hasEnum = true;
         elseif strcmp(Lustre_type, 'bool')
-            zero = nasa_toLustre.lustreAst.BooleanExpr('false');
-            one = nasa_toLustre.lustreAst.BooleanExpr('true');
+            zero = nasa_toLustre.lustreAst.BoolExpr('false');
+            one = nasa_toLustre.lustreAst.BoolExpr('true');
         elseif strcmp(Lustre_type, 'int')
             zero = nasa_toLustre.lustreAst.IntExpr('0');
             one = nasa_toLustre.lustreAst.IntExpr('1');

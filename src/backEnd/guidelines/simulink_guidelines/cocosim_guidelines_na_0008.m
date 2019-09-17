@@ -4,42 +4,76 @@ function [results, passed, priority] = cocosim_guidelines_na_0008(model)
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Khanh Trinh <khanh.v.trinh@nasa.gov>
+    %         Francois Conzelmann <francois.conzelmann@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % ORION GN&C MATLAB/Simulink Standards
     % na_0008: Display of labels on signals
     
-        priority = 2;
+        priority = 3;
         results = {};
         passed = 1;
         totalFail = 0;
 
        allLines = find_system(model,'FindAll', 'On', 'type', 'line');
        % Intialize Line Information Class
-       %allLineProperties = LineInformation;
-       % Parse through lines and Assign the object properties. 
+       % Parse through lines and Assign the object properties.
+       failedInport = {};
+       failedFrom = {};
+       failedSubsystemSrc = {};
+       failedDemux = {};
+       failedBusSelector = {};
+       failedSelector = {};
+       failedGoto = {};
+       failedBusCreator = {};
+       failedMux = {};
+       failedSubsystemDst = {};
+       failedOutport = {};
+
        for i = 1 : length(allLines)
-           %allLineProperties(i).Identifier =  allLines(i);  
+           isLabelDisplayed = ~strcmp(get_param(allLines(i), 'Name'), '');
+           if isLabelDisplayed
+               continue
+           end
            sourceData = get_param(allLines(i),'SrcBlockHandle');
+           isSourceBlock = get_param(sourceData, 'Type') == 'block';
            destinationData = get_param(allLines(i),'DstBlockHandle');
-           sourcePortData = get_param(allLines(i),'SrcportHandle');
-           destinationPortData = get_param(allLines(i),'DstportHandle');
-           SourceBlock =  get_param(sourceData, 'Name');
-           DestinationBlock =  get_param(destinationData, 'Name');
-           SourcePort =  get_param(sourcePortData, 'Name');
-           DestinationPort =  get_param(destinationPortData, 'Name');
+           if numel(destinationData) > 1 % ignore line with more than one destination as they are consider as multiple lines with one destination each
+               continue
+           end
+           isDestinationBlock = get_param(destinationData, 'Type') == 'block';
+           if isSourceBlock
+               blockType = get_param(sourceData, 'blocktype');
+               srcPath = strcat(get_param(sourceData, 'Parent'), '/', get_param(sourceData, 'Name'));
+               if strcmp(blockType, 'Inport')
+                   failedInport{end+1} = srcPath; %#ok<*AGROW>
+               elseif strcmp(blockType, 'From')
+                   failedFrom{end+1} = srcPath;
+               elseif strcmp(blockType, 'SubSystem')
+                   failedSubsystemSrc{end+1} = srcPath;
+               elseif strcmp(blockType, 'Demux')
+                   failedDemux{end+1} = srcPath;
+               elseif strcmp(blockType, 'BusSelector')
+                   failedBusSelector{end+1} = srcPath;
+               elseif strcmp(blockType, 'Selector')
+                   failedSelector{end+1} = srcPath;
+               end
+           end
+           if isDestinationBlock
+               blockType = get_param(destinationData, 'blocktype');
+               dstPath = strcat(get_param(destinationData, 'Parent'), '/', get_param(destinationData, 'Name'));
+               if strcmp(blockType, 'Outport')
+                   failedOutport{end+1} = dstPath;
+               elseif strcmp(blockType, 'Goto')
+                   failedGoto{end+1} = dstPath;
+               elseif strcmp(blockType, 'BusCreator')
+                   failedBusCreator{end+1} = dstPath;
+               elseif strcmp(blockType, 'Mux')
+                   failedMux{end+1} = dstPath;
+               elseif strcmp(blockType, 'SubSystem')
+                   failedSubsystemDst{end+1} = dstPath;
+               end
+           end
        end    
-
-
-%         lineList = find_system(model, 'Regexp', 'on','FindAll','on',...
-%             'type','line');
-%     for i=1:numel(lineList)
-%         lineName = get_param(lineList(i),'Name');
-%         source = get_param(lineList(i), 'SourceBlock');
-%         % if < , then propagate
-%         display(lineName);
-%         display(source);
-%     end    
-    
     
     % get linesNames      two type with/without brackets
     % get_param(lineHandle, 'Source')
@@ -48,98 +82,85 @@ function [results, passed, priority] = cocosim_guidelines_na_0008(model)
     
     % TODO: signal originating from the following blocks
     item_title = 'Inport block';
-    failedList = {};
     [Inport_signal_display, numFail] = ...
-        GuidelinesUtils.process_find_system_results(failedList,item_title,...
+        GuidelinesUtils.process_find_system_results(failedInport,item_title,...
         true, true); 
     totalFail = totalFail + numFail;
     
     item_title = 'From block';
-    failedList = {};
     [From_signal_display, numFail] = ...
-        GuidelinesUtils.process_find_system_results(failedList,item_title,...
+        GuidelinesUtils.process_find_system_results(failedFrom,item_title,...
         true, true); 
     totalFail = totalFail + numFail;    
 
     item_title = 'System block or Stateflow chart block';
-    failedList = {};
     [Subsystem_or_StateflowChartBlock, numFail] = ...
-        GuidelinesUtils.process_find_system_results(failedList,item_title,...
+        GuidelinesUtils.process_find_system_results(failedSubsystemSrc,item_title,...
         true, true); 
     totalFail = totalFail + numFail;        
 
     item_title = 'Bus Selector block';
-    failedList = {};
     [BusSelectorBlock, numFail] = ...
-        GuidelinesUtils.process_find_system_results(failedList,item_title,...
+        GuidelinesUtils.process_find_system_results(failedDemux,item_title,...
         true, true); 
     totalFail = totalFail + numFail;      
     
     item_title = 'Demux block';
-    failedList = {};
     [DemuxBlock, numFail] = ...
-        GuidelinesUtils.process_find_system_results(failedList,item_title,...
+        GuidelinesUtils.process_find_system_results(failedBusSelector,item_title,...
         true, true); 
     totalFail = totalFail + numFail;      
 
     item_title = 'Selector block';
-    failedList = {};
     [SelectorBlock, numFail] = ...
-        GuidelinesUtils.process_find_system_results(failedList,item_title,...
+        GuidelinesUtils.process_find_system_results(failedSelector,item_title,...
         true, true); 
     totalFail = totalFail + numFail;          
     
     % signal connected to the following destination blocks 
     item_title = 'Outport block';
-    failedList = {};
     [Outport_signal_display, numFail] = ...
-        GuidelinesUtils.process_find_system_results(failedList,item_title,...
+        GuidelinesUtils.process_find_system_results(failedOutport,item_title,...
         true, true); 
     totalFail = totalFail + numFail;
     
     item_title = 'Goto block';
-    failedList = {};
     [Goto_signal_display, numFail] = ...
-        GuidelinesUtils.process_find_system_results(failedList,item_title,...
+        GuidelinesUtils.process_find_system_results(failedGoto,item_title,...
         true, true); 
     totalFail = totalFail + numFail;    
 
     item_title = 'Subsystem block';
-    failedList = {};
     [SubsystemBlock, numFail] = ...
-        GuidelinesUtils.process_find_system_results(failedList,item_title,...
+        GuidelinesUtils.process_find_system_results(failedSubsystemDst,item_title,...
         true, true); 
     totalFail = totalFail + numFail;        
 
     item_title = 'Bus Creator block';
-    failedList = {};
     [BusCreatorBlock, numFail] = ...
-        GuidelinesUtils.process_find_system_results(failedList,item_title,...
+        GuidelinesUtils.process_find_system_results(failedBusCreator,item_title,...
         true, true); 
     totalFail = totalFail + numFail;      
     
     item_title = 'Mux block';
-    failedList = {};
     [MuxBlock, numFail] = ...
-        GuidelinesUtils.process_find_system_results(failedList,item_title,...
+        GuidelinesUtils.process_find_system_results(failedMux,item_title,...
         true, true); 
     totalFail = totalFail + numFail;      
 
-    item_title = 'Chart block';
-    failedList = {};
-    [ChartBlock, numFail] = ...
-        GuidelinesUtils.process_find_system_results(failedList,item_title,...
-        true, true); 
-    totalFail = totalFail + numFail;        
+%     item_title = 'Chart block';
+%     [ChartBlock, numFail] = ...
+%         GuidelinesUtils.process_find_system_results(failedList,item_title,...
+%         true, true);
+%     totalFail = totalFail + numFail;
+%
+%
+%     item_title = 'Embedded Matlab Block';
+%     [EmbeddedMatlabBlock, numFail] = ...
+%         GuidelinesUtils.process_find_system_results(failedList,item_title,...
+%         true, true);
+%     totalFail = totalFail + numFail;
     
-
-    item_title = 'Embedded Matlab Block';
-    failedList = {};
-    [EmbeddedMatlabBlock, numFail] = ...
-        GuidelinesUtils.process_find_system_results(failedList,item_title,...
-        true, true); 
-    totalFail = totalFail + numFail;       
-        
     if totalFail > 0
         passed = 0;
         color = 'red';
@@ -152,8 +173,8 @@ function [results, passed, priority] = cocosim_guidelines_na_0008(model)
         'A label must be displayed on any signal originating from the following blocks:';
     description1 = HtmlItem(description_text1, {}, 'black', 'black');
     description_text2 = [...
-        'A label must be displayed on any signal connected to the <br>'...
-        'following destination blocks (directly or via a basic block <br>'...
+        'A label must be displayed on any signal connected to the '...
+        'following destination blocks (directly or via a basic block '...
         'that performs a non transformative operation):'];   
     description2 = HtmlItem(description_text2, {}, 'black', 'black');
     results{end+1} = HtmlItem(title, ...
@@ -169,12 +190,8 @@ function [results, passed, priority] = cocosim_guidelines_na_0008(model)
         Goto_signal_display, ...
         SubsystemBlock,...
         BusCreatorBlock, ...
-        MuxBlock, ...
-        ChartBlock, ...        
-        EmbeddedMatlabBlock}, ...
+        MuxBlock}, ...
         color, color);      
-    
-
 end
 
 

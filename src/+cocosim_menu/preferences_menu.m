@@ -16,8 +16,10 @@ function schema = preferences_menu(callbackInfo)
     
     schema.childrenFcns = {...
         {@getLustreCompiler, CoCoSimPreferences}, ...
+        {@getNASACompilerPreferences, CoCoSimPreferences}, ...
         {@getLustreBackend, CoCoSimPreferences}, ...
         {@getKind2Options, CoCoSimPreferences}, ...
+        {@getLustrecBinary, CoCoSimPreferences}, ...
         {@PreferencesMenu.getVerificationTimeout, CoCoSimPreferences}, ...
         {@getDEDChecks, CoCoSimPreferences}, ...
         @resetSettings ...
@@ -56,6 +58,37 @@ end
 function setCompilerOption(compilerNameValue, CoCoSimPreferences, varargin)
     CoCoSimPreferences.lustreCompiler = compilerNameValue;
     CoCoSimPreferences.irToLustreCompiler = strcmp(compilerNameValue, 'IOWA');
+    cocosim_menu.CoCoSimPreferences.save(CoCoSimPreferences);
+end
+
+%% NASA Compiler preferences
+function schema = getNASACompilerPreferences(callbackInfo)
+    schema = sl_container_schema;
+    schema.label = 'NASA compiler preferences';
+    schema.statustip = 'NASA compiler preferences';
+    schema.autoDisableWhen = 'Busy';
+    CoCoSimPreferences = callbackInfo.userdata;
+    schema.childrenFcns = {...
+        {@getForceTypecastingOfInt, CoCoSimPreferences}...
+        };
+end
+function schema = getForceTypecastingOfInt(callbackInfo)
+    schema = sl_toggle_schema;
+    schema.label = 'Force type-casting of int to machine type (int8, int16..)';
+    
+    CoCoSimPreferences = callbackInfo.userdata;
+    if CoCoSimPreferences.forceTypeCastingOfInt
+        schema.checked = 'checked';
+    else
+        schema.checked = 'unchecked';
+    end
+    
+    schema.callback = @forceTypecastingOfInt;
+    schema.userdata = CoCoSimPreferences;
+end
+function forceTypecastingOfInt(callbackInfo)
+    CoCoSimPreferences = callbackInfo.userdata;
+    CoCoSimPreferences.forceTypeCastingOfInt = ~ CoCoSimPreferences.forceTypeCastingOfInt;
     cocosim_menu.CoCoSimPreferences.save(CoCoSimPreferences);
 end
 
@@ -115,6 +148,44 @@ function schema = getKind2Options(callbackInfo)
         {@PreferencesMenu.getKind2Binary, CoCoSimPreferences}
         };
 end
+
+%% Lustrec options
+function schema = getLustrecBinary(callbackInfo)
+    schema = sl_container_schema;
+    schema.label = 'Lustrec binary';
+    schema.statustip = 'Lustrec binary';
+    schema.autoDisableWhen = 'Busy';
+    
+    CoCoSimPreferences = callbackInfo.userdata;
+    
+    options = {'Docker', 'Local'};
+    callbacks = cell(1, length(options));
+    for i=1:length(options)
+        callbacks{i} = @(x) lustreBinaryCallback(options{i}, ...
+            CoCoSimPreferences, x);
+    end
+    schema.childrenFcns = callbacks;
+end
+
+function schema = lustreBinaryCallback(name, CoCoSimPreferences, varargin)
+    schema = sl_toggle_schema;
+    schema.label = name;
+    schema.label = name;
+    if strcmp(name, CoCoSimPreferences.lustrecBinary)
+        schema.checked = 'checked';
+    else
+        schema.checked = 'unchecked';
+    end
+    
+    schema.callback = @(x) setlustreBinarydOption(name, ...
+        CoCoSimPreferences, x);
+end
+
+function setlustreBinarydOption(name, CoCoSimPreferences, varargin)
+    CoCoSimPreferences.lustrecBinary = name;
+    cocosim_menu.CoCoSimPreferences.save(CoCoSimPreferences);
+end
+
 %% DED Checks
 function schema = getDEDChecks(callbackInfo)
     schema = sl_container_schema;

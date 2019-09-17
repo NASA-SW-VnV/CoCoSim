@@ -22,7 +22,7 @@ function [call, oututs_Ids] = nodeCall(obj, isInner, InnerValue)
             inputs_Ids{i} = InnerValue;
         elseif strcmp(inputs_Ids{i}.getId(), ...
                 nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.virtualVarStr())
-            inputs_Ids{i} = nasa_toLustre.lustreAst.BooleanExpr(true);
+            inputs_Ids{i} = nasa_toLustre.lustreAst.BoolExpr(true);
         end
     end
 

@@ -11,8 +11,17 @@ function [script, failed] = getAllRequiredFunctionsInOneScript(blk)
     %
     failed = false;
     script = blk.Script;
-    blk_name = nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);
-    func_path = fullfile(pwd, strcat(blk_name, '.m'));
+    
+    %No need for this at the moment
+%     % remove multi-line comment
+%     script = regexprep(script,'\%\{.+\%\}', '');
+%     % remove one-line comment
+%     script = regexprep(script,'\%[^\n]*', '');
+
+    func_path = strcat(tempname, '.m');
+    [fun_dir, ~, ~] = fileparts(func_path);
+    PWD = pwd;
+    cd(fun_dir);
     fid = fopen(func_path, 'w');
     if fid < 0
         display_msg(sprintf('Could not open file "%s" for writing', func_path), ...
@@ -20,6 +29,9 @@ function [script, failed] = getAllRequiredFunctionsInOneScript(blk)
         failed = true;
         return;
     end
+    % print % in file
+    script = strrep(script, '%', '%%');
+    script = strrep(script, '\', '\\');
     fprintf(fid, script);
     fclose(fid);
     fList = matlab.codetools.requiredFilesAndProducts(func_path);
@@ -30,4 +42,5 @@ function [script, failed] = getAllRequiredFunctionsInOneScript(blk)
     end
 
     try delete(func_path), catch, end
+    cd(PWD);
 end

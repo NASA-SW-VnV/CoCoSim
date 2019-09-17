@@ -7,7 +7,7 @@ classdef ActivateExpr < nasa_toLustre.lustreAst.LustreExpr
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     properties
-        nodeName;
+        nodeName;%string
         nodeArgs;
         activate_cond;
         has_restart;
@@ -18,6 +18,7 @@ classdef ActivateExpr < nasa_toLustre.lustreAst.LustreExpr
         function obj = ActivateExpr(nodeName, nodeArgs, activate_cond,...
                 has_restart, restart_cond)
             obj.nodeName = nodeName;
+            
             if ~iscell(nodeArgs)
                 obj.nodeArgs{1} = nodeArgs;
             else
@@ -80,7 +81,7 @@ classdef ActivateExpr < nasa_toLustre.lustreAst.LustreExpr
         end
         % This function is used in Stateflow compiler to change from imperative
         % code to Lustre
-        [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft)
+        [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft, node, data_map)
         %% This function is used by KIND2 LustreProgram.print()
         function nodesCalled = getNodesCalled(obj)
             nodesCalled = {};

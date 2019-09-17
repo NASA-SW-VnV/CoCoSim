@@ -9,10 +9,11 @@ classdef LustreVar < nasa_toLustre.lustreAst.LustreExpr
     properties
         id;%String
         type;%String
+        rate; %for Prelude
     end
     
     methods
-        function obj = LustreVar(id, type)
+        function obj = LustreVar(id, type, rate)
             if isa(id, 'nasa_toLustre.lustreAst.VarIdExpr')
                 obj.id = id.getId();
             elseif iscell(id) && numel(id) == 1
@@ -24,6 +25,11 @@ classdef LustreVar < nasa_toLustre.lustreAst.LustreExpr
                 obj.type = type{1};
             else
                 obj.type = type;
+            end
+            if nargin < 3
+                obj.rate = '';
+            else
+                obj.rate = rate;
             end
         end
         
@@ -60,7 +66,7 @@ classdef LustreVar < nasa_toLustre.lustreAst.LustreExpr
         end
         % this function is used in Stateflow compiler to change from imperative
         % code to Lustre
-        [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft)
+        [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft, node, data_map)
         
         %% This function is used by KIND2 LustreProgram.print()
         function nodesCalled = getNodesCalled(obj)

@@ -1,4 +1,4 @@
-function code = print_prelude(obj)
+function [lus_code, plu_code] = print_prelude(obj)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -6,5 +6,5 @@ function code = print_prelude(obj)
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  
-    code = obj.print_lustrec(LusBackendType.PRELUDE);
+    [lus_code, plu_code] = obj.print_lustrec(LusBackendType.PRELUDE);
 end
