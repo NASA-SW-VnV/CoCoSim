@@ -59,19 +59,19 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, ...
     try
         forceGeneration = evalin('base', nasa_toLustre.utils.ToLustreOptions.FORCE_CODE_GEN);
     catch
-        forceGeneration = 0;
+        forceGeneration = CoCoSimPreferences.forceCodeGen;
     end
     mode_display = 1;
     try
         skip_sf_actions_check = evalin('base', nasa_toLustre.utils.ToLustreOptions.SKIP_SF_ACTIONS_CHECK);
         CHECK_SF_ACTIONS = ~skip_sf_actions_check;
     catch
-        CHECK_SF_ACTIONS = 1;
+        CHECK_SF_ACTIONS = ~CoCoSimPreferences.skip_sf_actions_check;
     end
     try
         cocosim_optim = ~evalin('base', nasa_toLustre.utils.ToLustreOptions.SKIP_CODE_OPTIMIZATION);
     catch
-        cocosim_optim = true;
+        cocosim_optim = ~CoCoSimPreferences.skip_optim;
     end
     for i=1:numel(varargin)
         if strcmp(varargin{i}, nasa_toLustre.utils.ToLustreOptions.NODISPLAY)

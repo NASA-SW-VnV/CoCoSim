@@ -11,6 +11,7 @@ function [node, external_nodes, opens, abstractedNodes] = getIntToInt(dt)
     end
     opens = {};
     abstractedNodes = {};
+    external_nodes = {};
     v_max = double(intmax(dt));% we need v_max as double variable
     v_min = double(intmin(dt));% we need v_min as double variable
     nb_int = (v_max - v_min + 1);
@@ -52,11 +53,14 @@ function [node, external_nodes, opens, abstractedNodes] = getIntToInt(dt)
         bodyElts{1} = nasa_toLustre.lustreAst.LustreEq(...
             nasa_toLustre.lustreAst.VarIdExpr('y'), ...
             nasa_toLustre.lustreAst.IteExpr.nestedIteExpr(conds, thens));
+        external_nodes = {strcat('LustMathLib_', 'rem_int_int')};
+        
     else
         bodyElts{1} = nasa_toLustre.lustreAst.LustreComment('Type-casting was disabled. See Tools -> CoCoSim -> Preferences -> NASA compiler preferences.');
         bodyElts{2} =   nasa_toLustre.lustreAst.LustreEq(...
             nasa_toLustre.lustreAst.VarIdExpr('y'), ...
             nasa_toLustre.lustreAst.VarIdExpr('x'));
+        
     end
     
     node = nasa_toLustre.lustreAst.LustreNode();
@@ -65,6 +69,6 @@ function [node, external_nodes, opens, abstractedNodes] = getIntToInt(dt)
     node.setOutputs(nasa_toLustre.lustreAst.LustreVar('y', 'int'));
     node.setBodyEqs(bodyElts);
     node.setIsMain(false);
-    external_nodes = {strcat('LustMathLib_', 'rem_int_int')};
+    
     
 end

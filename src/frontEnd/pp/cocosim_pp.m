@@ -17,8 +17,12 @@ function [new_file_path, failed] = cocosim_pp(model_path, varargin)
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    global cocosim_pp_gen_verif  cocosim_pp_gen_verif_dir;
+    global cocosim_pp_gen_verif  cocosim_pp_gen_verif_dir CoCoSimPreferences;
 
+    if isempty(CoCoSimPreferences)
+        CoCoSimPreferences = cocosim_menu.CoCoSimPreferences.load();
+    end
+    
     nodisplay = 0;
     cocosim_pp_gen_verif = 0;
     cocosim_pp_gen_verif_dir = '';
@@ -29,9 +33,9 @@ function [new_file_path, failed] = cocosim_pp(model_path, varargin)
     try
         skip_pp = evalin('base', 'skip_pp');
     catch
-        skip_pp = 0;
+        skip_pp = CoCoSimPreferences.skip_pp;
     end
-    use_backup = 0 ;
+    use_backup = CoCoSimPreferences.skip_defected_pp ;
     force_pp = 0;
     for i=1:numel(varargin)
     %     disp(varargin{i})
