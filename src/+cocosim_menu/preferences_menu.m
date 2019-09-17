@@ -121,6 +121,9 @@ function schema = getSkip_pp(callbackInfo)
     if ~CoCoSimPreferences.skip_pp
         schema.checked = 'unchecked';
     end
+    if ~PP2Utils.isAlreadyPP(bdroot(gcs))
+        schema.state = 'disabled';
+    end
     schema.callback = @skip_pp;
     schema.userdata = CoCoSimPreferences;
 end
