@@ -22,6 +22,9 @@ classdef CoCoSimPreferences < handle
         %{CoCoBackendType.DED_DIVBYZER,CoCoBackendType.DED_INTOVERFLOW ,...
          %   CoCoBackendType.DED_OUTOFBOUND, CoCoBackendType.DED_OUTMINMAX }; % check CoCoBackendType for Design Error Detection values
         DED_OUTOFBOUND = 'Out of Bound Array Access';
+        
+        % nasa_toLustre compiler: force typecasting of int to int8, int16, ...
+        forceTypeCastingOfInt = true;
     end
     
     methods(Static)

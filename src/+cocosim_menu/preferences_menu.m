@@ -16,6 +16,7 @@ function schema = preferences_menu(callbackInfo)
     
     schema.childrenFcns = {...
         {@getLustreCompiler, CoCoSimPreferences}, ...
+        {@getNASACompilerPreferences, CoCoSimPreferences}, ...
         {@getLustreBackend, CoCoSimPreferences}, ...
         {@getKind2Options, CoCoSimPreferences}, ...
         {@getLustrecBinary, CoCoSimPreferences}, ...
@@ -57,6 +58,37 @@ end
 function setCompilerOption(compilerNameValue, CoCoSimPreferences, varargin)
     CoCoSimPreferences.lustreCompiler = compilerNameValue;
     CoCoSimPreferences.irToLustreCompiler = strcmp(compilerNameValue, 'IOWA');
+    cocosim_menu.CoCoSimPreferences.save(CoCoSimPreferences);
+end
+
+%% NASA Compiler preferences
+function schema = getNASACompilerPreferences(callbackInfo)
+    schema = sl_container_schema;
+    schema.label = 'NASA compiler preferences';
+    schema.statustip = 'NASA compiler preferences';
+    schema.autoDisableWhen = 'Busy';
+    CoCoSimPreferences = callbackInfo.userdata;
+    schema.childrenFcns = {...
+        {@getForceTypecastingOfInt, CoCoSimPreferences}...
+        };
+end
+function schema = getForceTypecastingOfInt(callbackInfo)
+    schema = sl_toggle_schema;
+    schema.label = 'Force type-casting of int to machine type (int8, int16..)';
+    
+    CoCoSimPreferences = callbackInfo.userdata;
+    if CoCoSimPreferences.forceTypeCastingOfInt
+        schema.checked = 'checked';
+    else
+        schema.checked = 'unchecked';
+    end
+    
+    schema.callback = @forceTypecastingOfInt;
+    schema.userdata = CoCoSimPreferences;
+end
+function forceTypecastingOfInt(callbackInfo)
+    CoCoSimPreferences = callbackInfo.userdata;
+    CoCoSimPreferences.forceTypeCastingOfInt = ~ CoCoSimPreferences.forceTypeCastingOfInt;
     cocosim_menu.CoCoSimPreferences.save(CoCoSimPreferences);
 end
 
