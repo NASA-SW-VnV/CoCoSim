@@ -59,7 +59,7 @@ function [ failed ] = toLustreVerify(model_full_path,  const_files, lus_backend,
     
     Observers = find_system(model, ...
         'LookUnderMasks', 'all', 'MaskType', 'Observer');
-    Assertions_list = [Assertions_list; Observers];
+%     Assertions_list = [Assertions_list; Observers];
     
     contractBlocks_list = find_system(model, ...
         'LookUnderMasks', 'all',  'MaskType', 'ContractBlock');
