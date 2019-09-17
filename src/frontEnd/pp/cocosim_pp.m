@@ -49,18 +49,22 @@ function [new_file_path, failed] = cocosim_pp(model_path, varargin)
         end
     end
     failed = 0;
+    already_pp = PP2Utils.isAlreadyPP(model_path);
     if skip_pp
-        display_msg('SKIP_PP flag is given, the pre-processing will be skipped.', MsgType.INFO, 'PP', '');
-        new_file_path = model_path;
-        return;
+        if already_pp
+            display_msg('SKIP_PP flag is given, the pre-processing will be skipped.', MsgType.INFO, 'PP', '');
+            new_file_path = model_path;
+            return;
+        else
+            display_msg('SKIP_PP flag is ignored if the model is not already pre-processed.', MsgType.WARNING, 'PP', '');
+        end
     end
     %% Creat the new model name
     [model_parent, model, ext] = fileparts(model_path);
-    already_pp = false;
+    
     load_system(model_path);
 
-    if PP2Utils.isAlreadyPP(model_path)
-        already_pp = true;
+    if already_pp
         new_model_base = model;
         new_file_path = model_path;
         save_system(model);
