@@ -25,6 +25,13 @@ classdef CoCoSimPreferences < handle
         
         % nasa_toLustre compiler: force typecasting of int to int8, int16, ...
         forceTypeCastingOfInt = true;
+        forceCodeGen = false;
+        skip_sf_actions_check = false;
+        skip_optim = false;
+        skip_unsupportedblocks = false;
+        skip_defected_pp = true;
+        skip_pp = false;
+        %gen_pp_verif = false;
     end
     
     methods(Static)
