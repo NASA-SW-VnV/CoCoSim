@@ -22,7 +22,7 @@ function schema = preferences_menu(callbackInfo)
         {@getLustrecBinary, CoCoSimPreferences}, ...
         {@PreferencesMenu.getVerificationTimeout, CoCoSimPreferences}, ...
         {@getDEDChecks, CoCoSimPreferences}, ...
-        @resetSettings ...
+        {@resetSettings, CoCoSimPreferences} ...
         };
 end
 
@@ -339,10 +339,11 @@ function setCheckOption(checkName, CoCoSimPreferences, varargin)
 end
 
 %% Reset Settings
-function schema = resetSettings(varargin)
+function schema = resetSettings(callbackInfo)
     schema = sl_action_schema;
     schema.label = 'Reset preferences';
     schema.statustip = 'Reset preferences';
     schema.autoDisableWhen = 'Busy';
-    schema.callback = @(x) cocosim_menu.CoCoSimPreferences.delete();
+    CoCoSimPreferences = callbackInfo.userdata;
+    schema.callback = @(x) cocosim_menu.CoCoSimPreferences.deletePreferences(CoCoSimPreferences);
 end

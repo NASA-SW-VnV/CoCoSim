@@ -9,7 +9,7 @@ classdef CoCoSimPreferences < handle
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     properties (Constant)
         % CoCoSim preferences default values
-        
+        preferencesPath = ''; % where preferences will be stored
         modelChecker = 'Kind2';
         irToLustreCompiler = false; %only used by cocosim IOWA
         compositionalAnalysis = true; %Kind2 compositionalAnalysis
@@ -42,9 +42,9 @@ classdef CoCoSimPreferences < handle
         
         function [ CoCoSimPreferences, modified ] = load()
             modified = false;
-            preferencesFile = cocosim_menu.CoCoSimPreferences.getPreferencesMatPath();
-            if exist(preferencesFile, 'file') == 2
-                load(preferencesFile, 'CoCoSimPreferences');
+            preferencesPath = cocosim_menu.CoCoSimPreferences.getPreferencesMatPath();
+            if exist(preferencesPath, 'file') == 2
+                load(preferencesPath, 'CoCoSimPreferences');
             end
             warning('off', 'MATLAB:structOnObject')
             if ~exist('CoCoSimPreferences', 'var')
@@ -68,19 +68,28 @@ classdef CoCoSimPreferences < handle
             end
             % store the last version
             if modified
-                save(preferencesFile, 'CoCoSimPreferences');
+                CoCoSimPreferences.preferencesPath = preferencesPath;
+                save(preferencesPath, 'CoCoSimPreferences');
             end
             warning('on', 'MATLAB:structOnObject')
         end
         
         function save(CoCoSimPreferences)% Ignore warning: the parameter is used by save function
-            preferencesFile = cocosim_menu.CoCoSimPreferences.getPreferencesMatPath();
-            save(preferencesFile, 'CoCoSimPreferences');
+            if isfield(CoCoSimPreferences, 'preferencesPath')
+                save(CoCoSimPreferences.preferencesPath, 'CoCoSimPreferences');
+            else
+                preferencesPath = cocosim_menu.CoCoSimPreferences.getPreferencesMatPath();
+                save(preferencesPath, 'CoCoSimPreferences');
+            end
         end
         
-        function delete()
-            preferencesFile = cocosim_menu.CoCoSimPreferences.getPreferencesMatPath();
-            delete(preferencesFile); 
+        function deletePreferences(CoCoSimPreferences)
+            if isfield(CoCoSimPreferences, 'preferencesPath')
+                delete(CoCoSimPreferences.preferencesPath);
+            else
+                preferencesFile = cocosim_menu.CoCoSimPreferences.getPreferencesMatPath();
+                delete(preferencesFile);
+            end
         end
         function msg = getChangeModelCheckerMsg()
             msg = 'To change the default model checker go to "tools -> CoCoSim -> Preferences -> Lustre Verification Backend".';

@@ -1,27 +1,33 @@
-node imported acos (x: real) returns (y: real) ;
-(*@contract
-     	guarantee (y >= 0.0 and y <= 3.1416);
+(*
+-- DO NOT use contracts to abstract these node. Kind2 does not allow calling nodes with contract inside other contracts
+<Log class="error" source="parse" line="679" column="1">
+  Illegal call to node "sqrt" in the cone of influence of this contract: node sqrt has a contract.
+</Log>
 *)
+node acos (x: real) returns (y: real) ;
+let
+     	assert (y >= 0.0 and y <= 3.1416);
+tel
 node imported acosh (x: real) returns (y: real) ;
-node imported asin (x: real) returns (y: real) ;
-(*@contract
-     	guarantee (y >= -1.5708 and y <= 1.5708);
-*)
+node asin (x: real) returns (y: real) ;
+let
+     	assert (y >= -1.5708 and y <= 1.5708);
+tel
 node imported asinh (x: real) returns (y: real) ;
-node imported atan (x: real) returns (y: real) ;
-(*@contract
-     	guarantee (y >= -1.5708 and y <= 1.5708);
-*)
-node imported atan2(x:real; n: real) returns (y: real) ;
-(*@contract
-     	guarantee (y >= -3.1416 and y <= 3.1416);
-*)
+node atan (x: real) returns (y: real) ;
+let
+     	assert (y >= -1.5708 and y <= 1.5708);
+tel
+node atan2(x:real; n: real) returns (y: real) ;
+let
+     	assert (y >= -3.1416 and y <= 3.1416);
+tel
 node imported atanh (x: real) returns (y: real) ;
 node imported cbrt (x: real) returns (y: real) ;
-node imported cos (x: real) returns (y: real) ;
-(*@contract
-     	guarantee (y >= -1.0 and y <= 1.0);
-*)
+node cos (x: real) returns (y: real) ;
+let
+     	assert (y >= -1.0 and y <= 1.0);
+tel
 node imported cosh (x: real) returns (y: real) ;
 node imported ceil (x: real) returns (y: real) ;
 node imported erf (x: real) returns (y: real) ;
@@ -31,27 +37,27 @@ node imported floor (x: real) returns (y: real) ;
 node imported fmod (x,y: real) returns (z: real) ;
 node imported log (x: real) returns (y: real) ;
 node imported log10 (x: real) returns (y: real) ;
-node imported pow (x:real; n: real) returns (y: real) ;
-(*@contract
-        assume n >= 0.0;
-     	guarantee (n > 1.0) => y > x;
-     	guarantee (n = 1.0) => y = x;
-        guarantee (n < 1.0) => y < x;
-*)
+node pow (x:real; n: real) returns (y: real) ;
+let
+        assert n >= 0.0;
+     	assert (n > 1.0) => y > x;
+     	assert (n = 1.0) => y = x;
+        assert (n < 1.0) => y < x;
+tel
 node imported round (x: real) returns (y: real) ;
-node imported sin (x: real) returns (y: real) ;
-(*@contract
-     	guarantee (y >= -1.0 and y <= 1.0);
-*)
+node sin (x: real) returns (y: real) ;
+let
+   assert (y >= -1.0 and y <= 1.0);
+tel
 node imported sinh (x: real) returns (y: real) ;
-node imported sqrt (x: real) returns (y: real) ;
-(*@contract
-     	assume (x >= 0.0);
-     	guarantee (y >= 0.0);
-     	guarantee (x >= y);
-     	guarantee ((y * y) = x);
-*)
 
+node  sqrt (x: real) returns (y: real) ;
+let
+    assert (x >= 0.0);
+    assert (y >= 0.0);
+    assert (x >= y);
+    assert ((y * y) = x);
+tel
 node imported trunc (x: real) returns (y: real) ;
 node imported tan (x: real) returns (y: real) ;
 node imported tanh (x: real) returns (y: real) ;

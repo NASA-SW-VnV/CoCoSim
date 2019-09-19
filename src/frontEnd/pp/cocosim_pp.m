@@ -17,7 +17,7 @@ function [new_file_path, failed] = cocosim_pp(model_path, varargin)
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    global cocosim_pp_gen_verif  cocosim_pp_gen_verif_dir CoCoSimPreferences;
+    global cocosim_pp_gen_verif  cocosim_pp_gen_verif_dir ;
 
     % 
     CoCoSimPreferences = cocosim_menu.CoCoSimPreferences.load();
