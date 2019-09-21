@@ -8,7 +8,11 @@ function code = getAssumptionExpr(blk, inputs, inport_lus_dt)
     
     %change inputs{1} to cell for code simplicity.
     code = {};
-    if ~iscell(inputs{1})
+    if isempty(inputs)
+        % connected to commented block or not connected
+        code = nasa_toLustre.lustreAst.BoolExpr(true);
+        return;
+    elseif ~iscell(inputs{1})
         inputs{1} = {inputs{1}};
     end
     intervals = evalin('base', blk.intervals);
