@@ -6,7 +6,6 @@ function [codes] = concatenateDimension1(inputs, outputs,in_matrix_dimension)
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    
     sizeD1 = 0;
     for i=1:numel(in_matrix_dimension)
         sizeD1 = sizeD1 + in_matrix_dimension{i}.dims(1);
