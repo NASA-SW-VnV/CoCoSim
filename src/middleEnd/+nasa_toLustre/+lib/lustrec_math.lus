@@ -57,6 +57,22 @@ let
     assert (y >= 0.0);
     assert (x >= y);
     assert ((y * y) = x);
+    assert 0.000 <= x and x <= 1.000 => 0.000 <= y and y <= 1.000;
+    assert 1.000 <= x and x <= 6.880 => 1.000 <= y and y <= 2.620;
+    assert 6.880 <= x and x <= 25.570 => 2.620 <= y and y <= 5.060;
+    assert 25.570 <= x and x <= 68.580 => 5.060 <= y and y <= 8.280;
+    assert 68.580 <= x and x <= 150.800 => 8.280 <= y and y <= 12.280;
+    assert 150.800 <= x and x <= 291.270 => 12.280 <= y and y <= 17.070;
+    assert 291.270 <= x and x <= 512.110 => 17.070 <= y and y <= 22.630;
+    assert 512.110 <= x and x <= 839.140 => 22.630 <= y and y <= 28.970;
+    assert 839.140 <= x and x <= 1302.550 => 28.970 <= y and y <= 36.090;
+    assert 1302.550 <= x and x <= 1935.790 => 36.090 <= y and y <= 44.000;
+    assert 1935.790 <= x and x <= 2775.500 => 44.000 <= y and y <= 52.680;
+    assert 2775.500 <= x and x <= 3862.120 => 52.680 <= y and y <= 62.150;
+    assert 3862.120 <= x and x <= 5240.990 => 62.150 <= y and y <= 72.390;
+    assert 5240.990 <= x and x <= 6959.230 => 72.390 <= y and y <= 83.420;
+    assert 6959.230 <= x and x <= 9069.320 => 83.420 <= y and y <= 95.230;
+    assert 9069.320 <= x and x <= 10000.000 => 95.230 <= y and y <= 100.000;
 tel
 node imported trunc (x: real) returns (y: real) ;
 node imported tan (x: real) returns (y: real) ;
