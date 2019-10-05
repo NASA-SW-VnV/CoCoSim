@@ -55,8 +55,8 @@ node  sqrt (x: real) returns (y: real) ;
 let
     assert (x >= 0.0);
     assert (y >= 0.0);
-    assert (x >= y);
-    assert ((y * y) = x);
+    --assert ((y * y) = x); --
+    assert exists (j:real) x = j*j and j >= 0.0 and y = j;
 tel
 node imported trunc (x: real) returns (y: real) ;
 node imported tan (x: real) returns (y: real) ;
