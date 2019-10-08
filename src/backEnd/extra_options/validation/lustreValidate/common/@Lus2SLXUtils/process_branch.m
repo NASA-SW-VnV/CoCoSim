@@ -19,64 +19,73 @@ function [x2, y2] = process_branch(nodes, new_model_name, node_block_path, blk_e
     x3 = 50;
     y3 = 50;
 
+    branch_struct = blk_exprs.(var{1});
     %% Outputs
-    blk_outputs = blk_exprs.(var{1}).outputs;
+    blk_outputs = branch_struct.outputs;
     [x3, y3] = Lus2SLXUtils.process_outputs(branch_block_path, blk_outputs, ID, x3, y3);
 
     %% Inputs
-    blk_inputs = blk_exprs.(var{1}).inputs;
+    blk_inputs = branch_struct.inputs;
     [x3, y3] = Lus2SLXUtils.process_inputs(branch_block_path, blk_inputs, ID, x3, y3);
 
     %% link outputs from outside
-    outputs = blk_exprs.(var{1}).outputs;
+    outputs = branch_struct.outputs;
     [x2, y4] =Lus2SLXUtils.link_subsys_outputs( node_block_path, branch_block_path, outputs, var, node_name, x2, y2);
 
 
     %% link inputs from outside
-    inputs = blk_exprs.(var{1}).inputs;
+    inputs = branch_struct.inputs;
     [x2, y5] = Lus2SLXUtils.link_subsys_inputs( node_block_path, branch_block_path, inputs, var, node_name, x2, y2);
 
     y2 = max(y4, y5);
 
+    %% check if it's a stateless if/else
+    useSwitch = useSwitchInsteadOfIF(branch_struct);
+    
     %% add IF block with IF expressions
     IF_path = strcat(branch_block_path,'/',ID,'_IF');
-    branches = blk_exprs.(var{1}).branches;
-    branches_names = {};
-    i = 1;
-    for b=fieldnames(branches)'
-        branches_names{i} = branches.(b{1}).guard_value;
-        i = i+1;
-    end
-    % fields expressed as Numbers in Json are translated to xNumber (12 -> x12)
-    % I try here to delete the x in this case.
-    % branches_names_adapted = regexprep(branches_names, '^x(\d+[\.]?\d*)$', '$1');
-
-    %adapt IF expression to the form u==exp.
-    [n, m] = size(branches_names);
-    prefix = cell(n,m);
-    prefix(:,:) = {'u1 == '};
-    ifexp = cellfun(@(x,y) [x  y], prefix, branches_names,'un',0);
-    ifexp = regexprep(ifexp, 'u1 == true', 'u1');
-    ifexp = regexprep(ifexp, 'u1 == false', '~u1');
-    IfExpression = ifexp{1};
-    if numel(ifexp) > 1
-        ElseIfExpressions = strjoin(ifexp(2:end), ', ');
-    else
-        ElseIfExpressions = '';
-    end
-
+    branches = branch_struct.branches;
     y3 = y3 + 150;
-    add_block('simulink/Ports & Subsystems/If',...
-        IF_path,...
-        'IfExpression', IfExpression, ...
-        'ElseIfExpressions', ElseIfExpressions, ...
-        'ShowElse', 'off', ...
-        'Position',[(x3+100) y3 (x3+150) (y3+50)]);
-
+    if useSwitch
+        add_block('simulink/Signal Routing/Switch',...
+            IF_path,...
+            'Criteria', 'u2 ~= 0', ...
+            'Position',[(x3+100) y3 (x3+150) (y3+50)]);
+    else
+        branches_names = {};
+        i = 1;
+        for b=fieldnames(branches)'
+            branches_names{i} = branches.(b{1}).guard_value;
+            i = i+1;
+        end
+        % fields expressed as Numbers in Json are translated to xNumber (12 -> x12)
+        % I try here to delete the x in this case.
+        % branches_names_adapted = regexprep(branches_names, '^x(\d+[\.]?\d*)$', '$1');
+        
+        %adapt IF expression to the form u==exp.
+        [n, m] = size(branches_names);
+        prefix = cell(n,m);
+        prefix(:,:) = {'u1 == '};
+        ifexp = cellfun(@(x,y) [x  y], prefix, branches_names,'un',0);
+        ifexp = regexprep(ifexp, 'u1 == true', 'u1');
+        ifexp = regexprep(ifexp, 'u1 == false', '~u1');
+        IfExpression = ifexp{1};
+        if numel(ifexp) > 1
+            ElseIfExpressions = strjoin(ifexp(2:end), ', ');
+        else
+            ElseIfExpressions = '';
+        end
+        add_block('simulink/Ports & Subsystems/If',...
+            IF_path,...
+            'IfExpression', IfExpression, ...
+            'ElseIfExpressions', ElseIfExpressions, ...
+            'ShowElse', 'off', ...
+            'Position',[(x3+100) y3 (x3+150) (y3+50)]);
+    end
     %% add Guard input
     guard_path = strcat(branch_block_path,'/',ID,'_guard');
-    guard = blk_exprs.(var{1}).guard.value;
-    guard_type = blk_exprs.(var{1}).guard.type;
+    guard = branch_struct.guard.value;
+    guard_type = branch_struct.guard.type;
     guard_adapted = BUtils.adapt_block_name(guard, ID);
     if strcmp(guard_type, 'constant')
         add_block('simulink/Commonly Used Blocks/Constant',...
@@ -84,7 +93,7 @@ function [x2, y2] = process_branch(nodes, new_model_name, node_block_path, blk_e
             'Value', guard,...
             'Position',[x3 y3 (x3+50) (y3+50)]);
         %     set_param(guard_path, 'OutDataTypeStr','Inherit: Inherit via back propagation');
-        dt = blk_exprs.(var{1}).guard.datatype;
+        dt = branch_struct.guard.datatype;
         if isstruct(dt) && isfield(dt, 'kind')
             dt = dt.kind;
         end
@@ -105,7 +114,11 @@ function [x2, y2] = process_branch(nodes, new_model_name, node_block_path, blk_e
     %% link guard to IF block
     DstBlkH = get_param(IF_path,'PortHandles');
     SrcBlkH = get_param(guard_path,'PortHandles');
-    add_line(branch_block_path, SrcBlkH.Outport(1), DstBlkH.Inport(1), 'autorouting', 'on');
+    if useSwitch
+        add_line(branch_block_path, SrcBlkH.Outport(1), DstBlkH.Inport(2), 'autorouting', 'on');
+    else
+        add_line(branch_block_path, SrcBlkH.Outport(1), DstBlkH.Inport(1), 'autorouting', 'on');
+    end
     y3 = y3 + 150;
     x3 = x3 + 300;
     %% branches
@@ -113,24 +126,30 @@ function [x2, y2] = process_branch(nodes, new_model_name, node_block_path, blk_e
     for b=fieldnames(branches)'
         branch_ID = strcat(ID,'_branch_',branches.(b{1}).guard_value);
         branch_path = strcat(branch_block_path,'/',branch_ID);
-        add_block('simulink/Ports & Subsystems/If Action Subsystem',...
-            branch_path,...
-            'Position',[(x3+100) y3 (x3+150) (y3+50)]);
-        delete_line(branch_path, 'In1/1', 'Out1/1');
-        delete_block(strcat(branch_path,'/In1'));
-        delete_block(strcat(branch_path,'/Out1'));
-
-        % link IF with Action subsystem
-        DstBlkH = get_param(branch_path,'PortHandles');
-        SrcBlkH = get_param(IF_path,'PortHandles');
-        add_line(branch_block_path, SrcBlkH.Outport(idx), DstBlkH.Ifaction(1), 'autorouting', 'on');
+        if useSwitch
+            add_block('simulink/Ports & Subsystems/Subsystem',...
+                branch_path,...
+                'Position',[(x3+100) y3 (x3+150) (y3+50)]);
+        else
+            add_block('simulink/Ports & Subsystems/If Action Subsystem',...
+                branch_path,...
+                'Position',[(x3+100) y3 (x3+150) (y3+50)]);
+        end
+        try
+            delete_line(branch_path, 'In1/1', 'Out1/1');
+            delete_block(strcat(branch_path,'/In1'));
+            delete_block(strcat(branch_path,'/Out1'));
+        catch
+        end
+        
 
         % link Sction subsys inputs
         % Outputs
         x4 = 50;
         y4 = 50;
-        blk_outputs = blk_exprs.(var{1}).outputs;
-        [x4, y4] = Lus2SLXUtils.process_outputs(branch_path, blk_outputs, branch_ID, x4, y4, true);
+        blk_outputs = branch_struct.outputs;
+        addSignalConversion = ~useSwitch;
+        [x4, y4] = Lus2SLXUtils.process_outputs(branch_path, blk_outputs, branch_ID, x4, y4, addSignalConversion);
 
         % Inputs
         blk_inputs = branches.(b{1}).inputs;
@@ -142,13 +161,28 @@ function [x2, y2] = process_branch(nodes, new_model_name, node_block_path, blk_e
         branch_exprs = branches.(b{1}).instrs;
         [x4, y4] = Lus2SLXUtils.instrs_process(nodes, new_model_name, branch_path, branch_exprs, branch_ID, x4, y4, xml_trace);
 
+        % link IF with Action subsystem
+        if useSwitch
+            DstBlkH = get_param(IF_path,'PortHandles');
+            SrcBlkH = get_param(branch_path,'PortHandles');
+            if strcmp(branches.(b{1}).guard_value, 'true')
+                add_line(branch_block_path, SrcBlkH.Outport(1), DstBlkH.Inport(1), 'autorouting', 'on');
+            else
+                add_line(branch_block_path, SrcBlkH.Outport(1), DstBlkH.Inport(3), 'autorouting', 'on');
+            end
+        else
+            DstBlkH = get_param(branch_path,'PortHandles');
+            SrcBlkH = get_param(IF_path,'PortHandles');
+            add_line(branch_block_path, SrcBlkH.Outport(idx), DstBlkH.Ifaction(1), 'autorouting', 'on');
+        end
+        
         %
         idx = idx + 1;
         y3 = y3 + 150;
     end
 
     %% Merge outputs
-    outputs = blk_exprs.(var{1}).outputs;
+    outputs = branch_struct.outputs;
     for i=1:numel(outputs)
         output = outputs(i);
         output_adapted = BUtils.adapt_block_name(output, ID);
@@ -160,33 +194,71 @@ function [x2, y2] = process_branch(nodes, new_model_name, node_block_path, blk_e
             'GotoTag',output_adapted,...
             'TagVisibility', 'local', ...
             'Position',[(x3+300) y3 (x3+350) (y3+50)]);
-        if nb_merge==1
+        if useSwitch
             DstBlkH = get_param(output_path, 'PortHandles');
-        else
-            add_block('simulink/Signal Routing/Merge',...
-                merge_path,...
-                'Inputs', num2str(numel(fieldnames(branches))),...
-                'Position',[(x3+200) y3 (x3+250) (y3+50)]);
-            % Merge output
-            SrcBlkH = get_param(merge_path, 'PortHandles');
-            DstBlkH = get_param(output_path, 'PortHandles');
+            SrcBlkH = get_param(IF_path,'PortHandles');
             add_line(branch_block_path, SrcBlkH.Outport(1), DstBlkH.Inport(1), 'autorouting', 'on');
-            % Merge inputs
-            DstBlkH = get_param(merge_path, 'PortHandles');
-        end
-
-
-
-        j = 1;
-        for b=fieldnames(branches)'
-            branch_path = strcat(branch_block_path,'/',ID,'_branch_',branches.(b{1}).guard_value);
-            SrcBlkH = get_param(branch_path,'PortHandles');
-            add_line(branch_block_path, SrcBlkH.Outport(i), DstBlkH.Inport(j), 'autorouting', 'on');
-            j = j + 1;
+            
+        else
+            if nb_merge==1
+                DstBlkH = get_param(output_path, 'PortHandles');
+            else
+                add_block('simulink/Signal Routing/Merge',...
+                    merge_path,...
+                    'Inputs', num2str(numel(fieldnames(branches))),...
+                    'Position',[(x3+200) y3 (x3+250) (y3+50)]);
+                % Merge output
+                SrcBlkH = get_param(merge_path, 'PortHandles');
+                DstBlkH = get_param(output_path, 'PortHandles');
+                add_line(branch_block_path, SrcBlkH.Outport(1), DstBlkH.Inport(1), 'autorouting', 'on');
+                % Merge inputs
+                DstBlkH = get_param(merge_path, 'PortHandles');
+            end
+            
+            
+            
+            j = 1;
+            for b=fieldnames(branches)'
+                branch_path = strcat(branch_block_path,'/',ID,'_branch_',branches.(b{1}).guard_value);
+                SrcBlkH = get_param(branch_path,'PortHandles');
+                add_line(branch_block_path, SrcBlkH.Outport(i), DstBlkH.Inport(j), 'autorouting', 'on');
+                j = j + 1;
+            end
         end
 
         y3 = y3 + 150;
     end
+    %% expand branch subsystem
+    try
+        ExpandNonAtomicSubsystems_pp(branch_block_path);
+        delete(find_system(node_block_path,'FindAll','on','type','annotation' , 'AnnotationType', 'area_annotation'));
+    catch
+    end
 end
 
+%%
+function b = useSwitchInsteadOfIF(branch_struct)
+    b = false;
+    if length(branch_struct.outputs) == 1 ...
+            && length(fieldnames(branch_struct.branches)) == 2
+        branches = branch_struct.branches;
+        branch_names = fieldnames(branches);
+        if ismember('true', branch_names) && ismember('false', branch_names)
+            if length(branches.true.inputs) == 1 ...
+                    && length(branches.true.instrs) == 1 ...
+                    && length(branches.false.inputs) == 1 ...
+                    && length(branches.false.instrs) == 1
+                true_instr = branches.true.instrs;
+                true_instr_names = fieldnames(true_instr);
+                false_instr = branches.false.instrs;
+                false_instr_names = fieldnames(false_instr);
+                b = strcmp(true_instr.(true_instr_names{1}).kind, 'local_assign') ...
+                    && strcmp(true_instr.(true_instr_names{1}).rhs.type, 'variable') ... 
+                    && strcmp(false_instr.(false_instr_names{1}).kind, 'local_assign') ...
+                    && strcmp(false_instr.(false_instr_names{1}).rhs.type, 'variable');
+                
+            end
+        end
+    end
+end
 
