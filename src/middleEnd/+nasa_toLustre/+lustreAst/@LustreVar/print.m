@@ -23,6 +23,9 @@ function code = print(obj, backend)
     if LusBackendType.isPRELUDE(backend) ...
             && ~isempty(obj.rate)
         code = sprintf('%s : %s %s;', id, dt, obj.rate);
+    elseif ~(LusBackendType.isKIND2(backend) || LusBackendType.isJKIND(backend)) ...
+            && ~isempty(obj.clock)
+        code = sprintf('%s : %s when %s;', id, dt, obj.clock);
     else
         code = sprintf('%s : %s;', id, dt);
     end

@@ -87,8 +87,8 @@ classdef SubSystem_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                         end
                         % add offset
                         if outTsOffset ~= 0
-                            normalizedOutT = outTs / parent.CompiledSampleTime(1);
-                            normalizedOutP = outTsOffset / parent.CompiledSampleTime(1);
+                            normalizedOutT = outTs / inTs(1);
+                            normalizedOutP = outTsOffset / inTs(1);
                             for i=1:length(extra_inputs)
                                 extra_inputs{i} = nasa_toLustre.lustreAst.BinaryExpr(...
                                     nasa_toLustre.lustreAst.BinaryExpr.PRELUDE_OFFSET, ...
