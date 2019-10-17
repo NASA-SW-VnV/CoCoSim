@@ -226,7 +226,8 @@ classdef RateTransition_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             obj.addCode( codes );
         end
         %%
-        function options = getUnsupportedOptions(obj, ~, blk, lus_backend, varargin)
+        function options = getUnsupportedOptions(obj, ~, blk, lus_backend, ...
+                ~, main_sampleTime, varargin)
             %% calculated by rateTransition_ir_pp
             InportCompiledSampleTime = blk.InportCompiledSampleTime;
             OutportCompiledSampleTime = blk.OutportCompiledSampleTime;
@@ -234,14 +235,19 @@ classdef RateTransition_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             outTs = OutportCompiledSampleTime(1);
             inTsOffset = InportCompiledSampleTime(2);
             outTsOffset = OutportCompiledSampleTime(2);
-            [type, error_msg] = nasa_toLustre.blocks.RateTransition_To_Lustre.getRateTransferType(blk, inTs, inTsOffset, outTs, outTsOffset );
+            [~, error_msg] = nasa_toLustre.blocks.RateTransition_To_Lustre.getRateTransferType(blk, inTs, inTsOffset, outTs, outTsOffset );
             if ~isempty(error_msg)
                 obj.addUnsupported_options(error_msg);
             end
-            if ~(strcmp(type, 'Copy') && inTs == outTs && inTsOffset == outTsOffset ) ...
+            outTsNormalized = outTs/main_sampleTime(1);
+            outTsOffsetNormalized = outTsOffset/main_sampleTime(1);
+            if ~(nasa_toLustre.utils.SLX2LusUtils.isIgnoredSampleTime(...
+                    outTsNormalized, outTsOffsetNormalized)) ...
                     && ...
                     (LusBackendType.isJKIND(lus_backend)...
                     || LusBackendType.isKIND2(lus_backend))
+                % y = x when C; is not supported by Kind2. It forces "when"
+                % to be used in merge
                 obj.addUnsupported_options(...
                     sprintf('Multi-periodic models and RateTransition block "%s" are not supported by Kind2 and JKind.', ...
                     HtmlItem.addOpenCmd(blk.Origin_path)));

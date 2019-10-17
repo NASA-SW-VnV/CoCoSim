@@ -92,6 +92,8 @@ function [status, errors_msg] = DiscreteStateSpace_pp(model)
                 end
                 set_param(strcat(dss_list{i},'/X0'),...
                     'SampleTime',ST);
+                set_param(strcat(dss_list{i},'/U'),...
+                    'SampleTime',ST);
             catch
                 status = 1;
                 errors_msg{end + 1} = sprintf('DiscreteStateSpace pre-process has failed for block %s', dss_list{i});

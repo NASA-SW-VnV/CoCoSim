@@ -101,7 +101,10 @@ if not(isempty(dzp_list))
             'Value',C);
         set_param(strcat(dzp_list{i},'/D'),...
             'Value',D);
+        % Sample Time
         set_param(strcat(dzp_list{i},'/X0'),...
+            'SampleTime',ST);
+        set_param(strcat(dzp_list{i},'/U'),...
             'SampleTime',ST);
         catch
             status = 1;

@@ -103,6 +103,12 @@ parent = get_param(subsys, 'Parent');
 blockHandles = get_param(subsys,'PortHandles');
 line = get_param(blockHandles.Inport(str2double(portNumber)), 'line');
 srcPortHandle = get_param(line, 'SrcPortHandle');
+srcBlkHanlde = get_param(line, 'SrcBlockHandle');
+if strcmp(get_param(srcBlkHanlde, 'BlockType'), 'Inport')
+    % the case of Inport of subsystem is different sample time than upper
+    % level signal driving it.
+    set_param(srcBlkHanlde, 'SampleTime', sampleTimeSrc);
+end
 delete_line(line);
 subsystemPosition = get_param(subsys, 'Position');
 x = subsystemPosition(3) - 60;
