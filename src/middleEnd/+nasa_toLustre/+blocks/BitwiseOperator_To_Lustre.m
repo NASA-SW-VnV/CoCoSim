@@ -14,10 +14,10 @@ classdef BitwiseOperator_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         function obj = BitwiseOperator_To_Lustre()
             obj.ContentNeedToBeTranslated = false;
         end
-        function  write_code(obj, parent, blk, xml_trace, varargin)
+        function  write_code(obj, parent, blk, xml_trace, ~, ~, main_sampleTime, varargin)
             
             %% Step 1: Get the block outputs names
-            [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+            [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace, main_sampleTime);
             
             %% Step 2: add outputs_dt to the list of variables to be declared
             % in the var section of the node.

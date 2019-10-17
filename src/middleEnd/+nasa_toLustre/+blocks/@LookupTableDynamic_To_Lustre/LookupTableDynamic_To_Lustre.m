@@ -15,7 +15,7 @@ classdef LookupTableDynamic_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre..
         function obj = LookupTableDynamic_To_Lustre()
             obj.ContentNeedToBeTranslated = 0;
         end
-        function  write_code(obj, parent, blk, xml_trace, lus_backend, varargin)
+        function  write_code(obj, parent, blk, xml_trace, lus_backend, ~, main_sampleTime, varargin)
             
             blkParams = ...
                 nasa_toLustre.blocks.Lookup_nD_To_Lustre.getInitBlkParams(...
@@ -23,7 +23,7 @@ classdef LookupTableDynamic_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre..
             
             [outputs, outputs_dt] = ...
                 nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, ...
-                blk, [], xml_trace);
+                blk, [], xml_trace, main_sampleTime);
             obj.addVariable(outputs_dt);
             
             widths = blk.CompiledPortWidths.Inport;

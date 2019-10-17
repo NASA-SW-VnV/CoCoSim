@@ -107,12 +107,12 @@ classdef Assignment_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     
     methods
               
-        function  write_code(obj, parent, blk, xml_trace, varargin)
+        function  write_code(obj, parent, blk, xml_trace, ~, ~, main_sampleTime, varargin)
             
             % share code with Selector_To_Lustre
              isSelector = 0;
             % getBlockInputsOutputs
-            [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+            [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace, main_sampleTime);
             % for the example above (assignment_mixed_port_u_expanded.slx): 
             % outputs = {{'Assignment_1'}    {'Assignment_2'}    {'Assignment_3'}    {'Assignment_4'}    {'Assignment_5'}  {'Assignment_6'}}
             % outputs_dt = {'Assignment_1: real;', 'Assignment_2: real;',

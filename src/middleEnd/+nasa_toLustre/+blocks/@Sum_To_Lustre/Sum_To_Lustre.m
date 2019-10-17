@@ -18,7 +18,7 @@ classdef Sum_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     
     methods
         
-        function  write_code(obj, parent, blk, xml_trace, lus_backend, coco_backend, varargin)
+        function  write_code(obj, parent, blk, xml_trace, lus_backend, coco_backend, main_sampleTime, varargin)
             global  CoCoSimPreferences;
             OutputDataTypeStr = blk.CompiledPortDataTypes.Outport{1};
             AccumDataTypeStr = blk.AccumDataTypeStr;
@@ -32,7 +32,7 @@ classdef Sum_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             isSumBlock = true;
             [codes, outputs_dt, additionalVars, outputs] = ...
                 nasa_toLustre.blocks.Sum_To_Lustre.getSumProductCodes(obj, parent, blk, ...
-                OutputDataTypeStr,isSumBlock,AccumDataTypeStr, xml_trace, lus_backend);
+                OutputDataTypeStr,isSumBlock,AccumDataTypeStr, xml_trace, lus_backend, main_sampleTime);
             
             obj.addCode( codes );
             obj.addVariable(outputs_dt);
@@ -70,7 +70,7 @@ classdef Sum_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     methods(Static)
         [codes, outputs_dt, AdditionalVars, outputs] = getSumProductCodes(...
                 obj, parent, blk, OutputDataTypeStr,isSumBlock, ...
-                AccumDataTypeStr, xml_trace, lus_backend)
+                AccumDataTypeStr, xml_trace, lus_backend, main_sampleTime)
 
         inputs = createBlkInputs(obj, parent, blk, widths, ...
                 AccumDataTypeStr, isSumBlock)

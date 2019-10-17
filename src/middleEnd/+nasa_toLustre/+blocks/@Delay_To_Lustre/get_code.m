@@ -1,6 +1,6 @@
 function [lustre_code, delay_node_code, variables, external_libraries] = ...
         get_code( parent, blk, lus_backend, InitialConditionSource, DelayLengthSource,...
-        DelayLength, DelayLengthUpperLimit, ExternalReset, ShowEnablePort, xml_trace )
+        DelayLength, DelayLengthUpperLimit, ExternalReset, ShowEnablePort, xml_trace, main_sampleTime )
     
     % This function is called from Delay_To_Lustre and UnitDelay_To_Lustre,
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -14,7 +14,7 @@ function [lustre_code, delay_node_code, variables, external_libraries] = ...
     external_libraries = {};
     lustre_code = {};
     delay_node_code = {};
-    [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+    [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace, main_sampleTime);
     
     variables = outputs_dt;
     

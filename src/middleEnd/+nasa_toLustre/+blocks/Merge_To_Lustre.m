@@ -13,7 +13,7 @@ classdef Merge_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     
     methods
         
-        function  write_code(obj, parent, blk, xml_trace, varargin)
+        function  write_code(obj, parent, blk, xml_trace, ~, ~, main_sampleTime, varargin)
             
             %% check if it is supported
             if strcmp(blk.AllowUnequalInputPortWidths, 'on')
@@ -45,7 +45,7 @@ classdef Merge_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 return;
             end
             %% Step 1: Get the block outputs names, 
-            [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+            [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace, main_sampleTime);
             
             %% Step 2: add outputs_dt to the list of variables to be declared
             % in the var section of the node.

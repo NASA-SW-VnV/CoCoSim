@@ -14,7 +14,7 @@ classdef FunctionCallGenerator_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustr
         
         function  write_code(obj, parent, blk, xml_trace,~, ~, main_sampleTime, varargin)
             
-            [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+            [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace, main_sampleTime);
             obj.addVariable(outputs_dt);
             
             digitalsampleTime = blk.CompiledSampleTime(1) / main_sampleTime(1);

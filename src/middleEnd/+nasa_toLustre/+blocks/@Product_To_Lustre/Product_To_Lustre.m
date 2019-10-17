@@ -18,13 +18,13 @@ classdef Product_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     
     methods
         
-        function  write_code(obj, parent, blk, xml_trace, lus_backend, coco_backend, varargin)
+        function  write_code(obj, parent, blk, xml_trace, lus_backend, coco_backend, main_sampleTime, varargin)
             global  CoCoSimPreferences;
             OutputDataTypeStr = blk.CompiledPortDataTypes.Outport{1};
             isSumBlock = false;
             [codes, outputs_dt, additionalVars, outputs] = ...
                 nasa_toLustre.blocks.Sum_To_Lustre.getSumProductCodes(obj, parent, blk, ...
-                OutputDataTypeStr,isSumBlock, OutputDataTypeStr, xml_trace, lus_backend);
+                OutputDataTypeStr,isSumBlock, OutputDataTypeStr, xml_trace, lus_backend, main_sampleTime);
             
             obj.addCode( codes );
             obj.addVariable(outputs_dt);

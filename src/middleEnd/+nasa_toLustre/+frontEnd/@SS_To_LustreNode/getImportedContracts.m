@@ -29,7 +29,7 @@ function imported_contracts = getImportedContracts(...
             end
             %get actual size after inlining.
             [names, ~] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(...
-                parent_ir, srcBlk, x.SrcPort);
+                parent_ir, srcBlk, x.SrcPort, [], main_sampleTime);
             for i=1:numel(names)
                 inputs_src_str{end+1} = sprintf('%.5f_%d', x.SrcBlock, x.SrcPort);
             end
@@ -39,7 +39,7 @@ function imported_contracts = getImportedContracts(...
     for i=1:numel(ss_ir.CompiledPortWidths.Outport)
         %get actual size after inlining.
         [names, ~] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(...
-            parent_ir, ss_ir, i-1);
+            parent_ir, ss_ir, i-1, [], main_sampleTime);
         for j=1:numel(names)
             outputs_src_str{end+1} = sprintf('%.5f_%d', ss_ir.Handle, i-1);
         end
@@ -69,7 +69,7 @@ function imported_contracts = getImportedContracts(...
                 % we may have inputs from the same blk.
                 %get actual size after inlining.
                 [names, ~] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(...
-                    parent_ir, srcBlk, SrcPort);
+                    parent_ir, srcBlk, SrcPort, [], main_sampleTime);
                 I = I(1:numel(names));
                 contract_inputs = [contract_inputs,...
                     node_inputs_withoutDT(I)];

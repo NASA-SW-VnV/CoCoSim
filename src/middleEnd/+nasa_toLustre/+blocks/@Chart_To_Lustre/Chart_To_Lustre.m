@@ -37,7 +37,7 @@ classdef Chart_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 node_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);
             end
             
-            [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+            [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace, main_sampleTime);
             [inputs] =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk);
             [triggerInputs] =nasa_toLustre.utils.SLX2LusUtils.getSubsystemTriggerInputsNames(parent, blk);
             codes = {};

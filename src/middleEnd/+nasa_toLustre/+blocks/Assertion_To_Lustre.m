@@ -11,7 +11,7 @@ classdef Assertion_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     end
     
     methods
-        function  write_code(obj, parent, blk, xml_trace, varargin)
+        function  write_code(obj, parent, blk, xml_trace, ~, ~, main_sampleTime, varargin)
             
             if isfield(blk, 'Enabled') && strcmp(blk.Enabled, 'off')
                 return;

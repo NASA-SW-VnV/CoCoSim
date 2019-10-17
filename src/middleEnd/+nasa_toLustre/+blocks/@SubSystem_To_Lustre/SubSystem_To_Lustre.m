@@ -15,7 +15,7 @@ classdef SubSystem_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 coco_backend, main_sampleTime, varargin)
             
             [outputs, outputs_dt] =...
-                nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+                nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace, main_sampleTime);
             [inputs] =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk);
             node_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);
             codes = {};

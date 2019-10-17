@@ -13,9 +13,9 @@ classdef DotProduct_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     methods
         %% This block is handled by PP (DotProduct_pp.m)
         %TODO : remove this class, or pp function.
-        function  write_code(obj, parent, blk, xml_trace, ~, coco_backend, varargin)
+        function  write_code(obj, parent, blk, xml_trace, ~, coco_backend, main_sampleTime, varargin)
             global  CoCoSimPreferences;
-            [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+            [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace, main_sampleTime);
             
             
             widths = blk.CompiledPortWidths.Inport;

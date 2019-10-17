@@ -8,7 +8,7 @@
 
 %% get block outputs names: inlining dimension
 function [names, names_dt] = getBlockOutputsNames(parent, blk, ...
-        srcPort, xml_trace)
+        srcPort, xml_trace, main_sampleTime)
     % This function return the names of the block
     % outputs.
     % Example : an Inport In with dimension [2, 3] will be
@@ -20,7 +20,7 @@ function [names, names_dt] = getBlockOutputsNames(parent, blk, ...
     % inports. E.g, Outport Out with width 2 -> Out_1, out_2
     blksNamesDefinedByTheirInports = {'Outport', 'Goto'};
     needToLogTraceability = 0;
-    if nargin > 3
+    if nargin > 3 && ~isempty(xml_trace)
         % this function is only called with "xml_trace" variable in
         % Block_To_Lustre classes.
         needToLogTraceability = 1;
@@ -192,14 +192,11 @@ function [names, names_dt] = getBlockOutputsNames(parent, blk, ...
     end
     
     %% set clocks
-    if isfield(blk, 'CompiledSampleTime') ...
-            && isfield(parent, 'CompiledSampleTime')
-        [inTs, ~] = ...
-            nasa_toLustre.utils.SLX2LusUtils.getSSSampleTime(parent.CompiledSampleTime);
+    if isfield(blk, 'CompiledSampleTime') && nargin >= 5
         [outTs, outTsOffset] = ...
             nasa_toLustre.utils.SLX2LusUtils.getSSSampleTime(blk.CompiledSampleTime);
-        normalizedOutT = outTs / inTs(1);
-        normalizedOutP = outTsOffset / inTs(1);
+        normalizedOutT = outTs / main_sampleTime(1);
+        normalizedOutP = outTsOffset / main_sampleTime(1);
         if ~nasa_toLustre.utils.SLX2LusUtils.isIgnoredSampleTime(...
                 normalizedOutT, normalizedOutP)
             clockInName =nasa_toLustre.utils.SLX2LusUtils.clockName(...

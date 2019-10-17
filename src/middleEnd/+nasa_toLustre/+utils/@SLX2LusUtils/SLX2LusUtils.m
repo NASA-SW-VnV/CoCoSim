@@ -32,7 +32,7 @@ classdef SLX2LusUtils
                 extractNodeHeader(parent_ir, blk, is_main_node, ...
                 isEnableORAction, isEnableAndTrigger, isContractBlk, isMatlabFunction, ...
                 main_sampleTime, xml_trace)
-        [names, names_withNoDT] = extract_node_InOutputs_withDT(subsys, type, xml_trace)
+        [names, names_withNoDT] = extract_node_InOutputs_withDT(subsys, type, xml_trace, main_sampleTime)
 
         [node_inputs_cell, node_inputs_withoutDT_cell] = ...
                 getTimeClocksInputs(blk, main_sampleTime, node_inputs_cell, node_inputs_withoutDT_cell)
@@ -47,7 +47,7 @@ classdef SLX2LusUtils
         res = isAbstractedByContract(blk, contract)
         %% get block outputs names: inlining dimension
         [names, names_dt] = getBlockOutputsNames(parent, blk, ...
-                srcPort, xml_trace)
+                srcPort, xml_trace, main_sampleTime)
    
     	[names, names_dt] = blockOutputs(portNumber)
                 %

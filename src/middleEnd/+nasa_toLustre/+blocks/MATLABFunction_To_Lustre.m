@@ -20,7 +20,7 @@ classdef MATLABFunction_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             obj.addExtenal_node(main_node);
             obj.addExtenal_node(external_nodes);
             %% add Matlab Function call
-            [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+            [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace, main_sampletime);
             [inputs] =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk);
             codes = {};
             node_name = main_node.getName();
