@@ -60,13 +60,7 @@ classdef SubSystem_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             extra_inputs{2} = ...
                 nasa_toLustre.lustreAst.VarIdExpr(...
                 nasa_toLustre.utils.SLX2LusUtils.nbStepStr());
-            clocks_list =nasa_toLustre.utils.SLX2LusUtils.getRTClocksSTR(...
-                blk, main_sampleTime);
-            if ~isempty(clocks_list)
-                clocks_var = cellfun(@(x) nasa_toLustre.lustreAst.VarIdExpr(x), ...
-                    clocks_list, 'UniformOutput', 0);
-                extra_inputs = [extra_inputs, clocks_var];
-            end
+            
             try
                 if LusBackendType.isPRELUDE(lus_backend) ...
                         && isfield(blk, 'CompiledSampleTime') ...
@@ -105,7 +99,16 @@ classdef SubSystem_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 me
             end
             inputs = [inputs, extra_inputs];
-            
+            clocks_list =nasa_toLustre.utils.SLX2LusUtils.getRTClocksSTR(...
+                blk, main_sampleTime);
+            if ~LusBackendType.isPRELUDE(lus_backend) && ~isempty(clocks_list)
+                clocks_var = cellfun(@(x) nasa_toLustre.lustreAst.VarIdExpr(x), ...
+                    clocks_list, 'UniformOutput', 0);
+                % add clocks in the begining of the inputs
+                inputs = [clocks_var, inputs];
+                % add clocks in the end of the inputs
+                %extra_inputs = [extra_inputs, clocks_var];
+            end
             %% Check Resettable SS case
             [isResetSubsystem, ResetType] =nasa_toLustre.blocks.SubSystem_To_Lustre.hasResetPort(blk);
             if isResetSubsystem

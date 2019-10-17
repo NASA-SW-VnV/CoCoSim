@@ -23,6 +23,8 @@ function clocks_list = getRTClocksSTR(blk, main_sampleTime)
             end
         end
     end
+    % order clocks by alphabetic order
+    clocks_list = sort(clocks_list);
 end
 
 
