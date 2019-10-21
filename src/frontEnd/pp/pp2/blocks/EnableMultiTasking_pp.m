@@ -87,7 +87,8 @@ for i=1:numel(causes)
                 addRateTransition(subsys, portNumber, sampleTimeDst, sampleTimeSrc);
             catch me
                 display_msg(me.getReport(), MsgType.DEBUG, 'EnableMultiTasking_pp', '');
-                continue;
+                found = false;
+                return;
             end
         case 'MATLAB:MException:MultipleErrors'
             f = fixCauses(c.cause);
@@ -104,10 +105,27 @@ blockHandles = get_param(subsys,'PortHandles');
 line = get_param(blockHandles.Inport(str2double(portNumber)), 'line');
 srcPortHandle = get_param(line, 'SrcPortHandle');
 srcBlkHanlde = get_param(line, 'SrcBlockHandle');
+%stSrc = str2num(sampleTimeSrc);% keep str2num
+stDst = str2num(sampleTimeDst);% keep str2num
 if strcmp(get_param(srcBlkHanlde, 'BlockType'), 'Inport')
     % the case of Inport of subsystem is different sample time than upper
     % level signal driving it.
-    set_param(srcBlkHanlde, 'SampleTime', sampleTimeSrc);
+    stInport = str2num(get_param(srcBlkHanlde, 'SampleTime'));
+    if length(stInport) == 1, stInport(2) = 0; end
+    if length(stDst) == 1, stDst(2) = 0; end
+    if (stInport(1) == -1 || all(stInport == stDst)) ...
+            && ~strcmp(get_param(parent, 'Type'), 'block_diagram')
+        subsys = parent;
+        try
+            parent = get_param(parent, 'Parent');
+        catch
+            parent = fileparts(parent); 
+        end
+        portNumber = get_param(srcBlkHanlde, 'Port');
+        blockHandles = get_param(subsys,'PortHandles');
+        line = get_param(blockHandles.Inport(str2double(portNumber)), 'line');
+        srcPortHandle = get_param(line, 'SrcPortHandle');
+    end
 end
 delete_line(line);
 subsystemPosition = get_param(subsys, 'Position');
@@ -124,8 +142,7 @@ rt_H = add_block('simulink/Signal Attributes/Rate Transition',...
 if rt_H < 0
     return;
 end
-% stSrc = str2num(sampleTimeSrc);% keep str2num
-% stDst = str2num(sampleTimeDst);% keep str2num
+
 % if  stSrc(1) > stDst(1) 
 %     set_param(rt_H, 'Integrity', 'off', 'Deterministic', 'off');
 % end
