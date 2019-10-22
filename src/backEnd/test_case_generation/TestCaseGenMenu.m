@@ -52,7 +52,7 @@ end
 function schema = MCDC(varargin)
     schema = sl_action_schema;
     schema.label = 'MC-DC coverage (Work in progress)';
-    schema.state = 'Disabled';
+%     schema.state = 'Disabled';
     schema.callback = @MCDCCallback;
 end
 

@@ -12,12 +12,23 @@ function [instructionsIDs, inputList]= get_mcdc_instructions(initial_variables_n
     new_variables_names = {};
     for i=1:numel(initial_variables_names)
         %add the current list instructions
-        instructionsIDs{numel(instructionsIDs) + 1} = lhs_instrID_map(initial_variables_names{i});
+        if isKey(lhs_instrID_map, initial_variables_names{i})
+            instructionsIDs{numel(instructionsIDs) + 1} = lhs_instrID_map(initial_variables_names{i});
+        end
+
         %caclulate the dependencies
-        rhs_list = lhs_rhs_map(initial_variables_names{i});
+        if isKey(lhs_rhs_map, initial_variables_names{i})
+            rhs_list = lhs_rhs_map(initial_variables_names{i});
+        else
+            continue;
+        end
         if iscell(rhs_list)
             for j=1:numel(rhs_list)
-                origin_name = originalNamesMap(rhs_list{j});
+                if isKey(originalNamesMap, rhs_list{j})
+                    origin_name = originalNamesMap(rhs_list{j});
+                else
+                    origin_name = '';
+                end
                 if ismember(origin_name, traceable_variables)
                     inputList{numel(inputList) + 1} = rhs_list{j};
                 else
@@ -26,7 +37,11 @@ function [instructionsIDs, inputList]= get_mcdc_instructions(initial_variables_n
                 end
             end
         else
-            origin_name = originalNamesMap(rhs_list);
+            if isKey(originalNamesMap, rhs_list)
+                origin_name = originalNamesMap(rhs_list);
+            else
+                origin_name = '';
+            end
             if ismember(origin_name, traceable_variables)
                 inputList{numel(inputList) + 1} = rhs_list;
             else
@@ -36,7 +51,7 @@ function [instructionsIDs, inputList]= get_mcdc_instructions(initial_variables_n
         end
     end
     if ~isempty(new_variables_names)
-        [instructionsIDs_2, inputList_2]= get_mcdc_instructions(new_variables_names, ...
+        [instructionsIDs_2, inputList_2]= MCDC2SLX.get_mcdc_instructions(new_variables_names, ...
             lhs_instrID_map, lhs_rhs_map, originalNamesMap, traceable_variables);
         instructionsIDs = [instructionsIDs, instructionsIDs_2];
         inputList = [inputList, inputList_2];

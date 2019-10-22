@@ -29,7 +29,8 @@ classdef ContractGuaranteeBlock_To_Lustre < nasa_toLustre.blocks.SubSystem_To_Lu
                 return;
             end
             prop_ID =nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);
-            if LusBackendType.isKIND2(lus_backend)
+            isInsideContract =nasa_toLustre.utils.SLX2LusUtils.isContractBlk(parent);
+            if LusBackendType.isKIND2(lus_backend) && isInsideContract
                 obj.addCode(...
                     nasa_toLustre.lustreAst.ContractGuaranteeExpr(...
                     prop_ID, prop));

@@ -6,7 +6,7 @@
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [names, names_withNoDT] = extract_node_InOutputs_withDT(subsys, type, xml_trace)
+function [names, names_withNoDT] = extract_node_InOutputs_withDT(subsys, type, xml_trace, main_sampleTime)
     %get all blocks names
     fields = fieldnames(subsys.Content);
 
@@ -29,7 +29,9 @@ function [names, names_withNoDT] = extract_node_InOutputs_withDT(subsys, type, x
     names_withNoDT = {};
     for i=1:numel(Portsfields)
         block = subsys.Content.(Portsfields{i});
-        [names_withNoDT_i, names_i] = nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(subsys, block);
+        [names_withNoDT_i, names_i] = ...
+            nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(...
+            subsys, block, [], [], main_sampleTime);
         names = [names, names_i];
         names_withNoDT = [names_withNoDT, names_withNoDT_i];
         % traceability
@@ -47,7 +49,9 @@ function [names, names_withNoDT] = extract_node_InOutputs_withDT(subsys, type, x
             cellfun(@(x) strcmp(subsys.Content.(x).BlockType,'EnablePort'), fields));
         if ~isempty(enablePortsFields) ...
                 && strcmp(subsys.Content.(enablePortsFields{1}).ShowOutputPort, 'on')
-            [names_withNoDT_i, names_i] = nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(subsys, subsys.Content.(enablePortsFields{1}));
+            [names_withNoDT_i, names_i] = ...
+                nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(...
+                subsys, subsys.Content.(enablePortsFields{1}), [], [], main_sampleTime);
             names = [names, names_i];
             names_withNoDT = [names_withNoDT, names_withNoDT_i];
             % traceability
@@ -65,7 +69,9 @@ function [names, names_withNoDT] = extract_node_InOutputs_withDT(subsys, type, x
             cellfun(@(x) strcmp(subsys.Content.(x).BlockType,'TriggerPort'), fields));
         if ~isempty(triggerPortsFields) ...
                 && strcmp(subsys.Content.(triggerPortsFields{1}).ShowOutputPort, 'on')
-            [names_withNoDT_i, names_i] = nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(subsys, subsys.Content.(triggerPortsFields{1}));
+            [names_withNoDT_i, names_i] = ...
+                nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(...
+                subsys, subsys.Content.(triggerPortsFields{1}), [], [], main_sampleTime);
             names = [names, names_i];
             names_withNoDT = [names_withNoDT, names_withNoDT_i];
             % traceability

@@ -31,6 +31,7 @@ function [script, failed] = getAllRequiredFunctionsInOneScript(blk)
     end
     % print % in file
     script = strrep(script, '%', '%%');
+    script = strrep(script, '\', '\\');
     fprintf(fid, script);
     fclose(fid);
     fList = matlab.codetools.requiredFilesAndProducts(func_path);

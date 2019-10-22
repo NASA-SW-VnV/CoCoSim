@@ -30,7 +30,7 @@ function schema = tools_menu(varargin)
     %menue_items{end + 1} = fullfile(backEnd_root, 'generate_invariants','generateInvariantsMenu.m');
     
     %TODO: add documentation of how to use
-    %menue_items{end + 1} = fullfile(backEnd_root, 'importLustreRequirements','importLusReqMenu.m');
+    menue_items{end + 1} = fullfile(backEnd_root, 'importLustreRequirements','importLusReqMenu.m');
     
     menue_items{end + 1} = fullfile(backEnd_root, 'generate_code','generateCodeMenu.m');
     menue_items{end + 1} = fullfile(backEnd_root, 'extra_options','extraOptionsMenu.m');

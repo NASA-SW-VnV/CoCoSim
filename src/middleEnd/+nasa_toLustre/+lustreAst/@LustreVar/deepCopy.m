@@ -6,5 +6,5 @@ function new_obj = deepCopy(obj)
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  
-    new_obj = nasa_toLustre.lustreAst.LustreVar(obj.id, obj.type);
+    new_obj = nasa_toLustre.lustreAst.LustreVar(obj.id, obj.type, obj.rate, obj.clock);
 end

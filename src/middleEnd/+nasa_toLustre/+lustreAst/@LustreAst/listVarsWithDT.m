@@ -24,7 +24,10 @@ function code = listVarsWithDT(vars, backend, forNodeHeader)
     else
         code = vars.print(backend);
     end
-    if forNodeHeader && LusBackendType.isJKIND(backend) && MatlabUtils.endsWith(code, ';')
+    % no ";" in the end of node inputs/outputs for PRELUDE and JKIND
+    if forNodeHeader ...
+            && (LusBackendType.isJKIND(backend) || LusBackendType.isPRELUDE(backend))...
+            && MatlabUtils.endsWith(code, ';')
         code = code(1:end-1);
     end
 end

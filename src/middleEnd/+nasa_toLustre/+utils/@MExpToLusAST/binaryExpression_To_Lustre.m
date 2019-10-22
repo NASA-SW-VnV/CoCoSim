@@ -37,20 +37,18 @@ function [code, exp_dt, dim, extra_code] = binaryExpression_To_Lustre(tree, args
         [code, dim] = nasa_toLustre.utils.MF2LusUtils.mtimesFun_To_Lustre(left, left_dim, right, right_dim);
         return;
     elseif strcmp(tree_type, 'times') % '.*'
-        if length(left_dim) == 1 && left_dim(1) == 1
+        if isempty(left_dim) || (length(left_dim) >= 1 && prod(left_dim) == 1)
             dim = right_dim;
-        elseif length(right_dim) == 1 && right_dim(1) == 1
-            dim = left_dim;
         else
-            %TODO support more than 3 dimensions
             dim = left_dim;
+            %TODO support more than 3 dimensions
         end
         op = nasa_toLustre.lustreAst.BinaryExpr.MULTIPLY;
     elseif strcmp(tree_type, 'mrdivide')... % '/' './'
             || strcmp(tree_type, 'rdivide')
-        if length(left_dim) == 1 && left_dim(1) == 1
+        if isempty(left_dim) || (length(left_dim) >= 1 && prod(left_dim) == 1)
             dim = right_dim;
-        elseif length(right_dim) == 1 && right_dim(1) == 1
+        elseif isempty(right_dim) || (length(right_dim) >= 1 && prod(right_dim) == 1)
             dim = left_dim;
         elseif length(left_dim) <= 2 && length(right_dim) <= 2
             if strcmp(tree_type, 'mrdivide')
@@ -64,14 +62,14 @@ function [code, exp_dt, dim, extra_code] = binaryExpression_To_Lustre(tree, args
         end
         op = nasa_toLustre.lustreAst.BinaryExpr.DIVIDE;
     elseif strcmp(tree_type, 'relopGL') % '<' '>' '<=' '>='
-        if length(left_dim) == 1 && left_dim(1) == 1
+        if isempty(left_dim) || (length(left_dim) >= 1 && prod(left_dim) == 1)
             dim = right_dim;
         else
             dim = left_dim;
         end
         op = tree.operator;
     elseif strcmp(tree_type, 'relopEQ_NE') % '==' '~='
-        if length(left_dim) == 1 && left_dim(1) == 1
+        if isempty(left_dim) || (length(left_dim) >= 1 && prod(left_dim) == 1)
             dim = right_dim;
         else
             dim = left_dim;
@@ -82,7 +80,7 @@ function [code, exp_dt, dim, extra_code] = binaryExpression_To_Lustre(tree, args
             op = nasa_toLustre.lustreAst.BinaryExpr.NEQ;
         end
     elseif ismember(tree_type, {'relopAND', 'relopelAND'}) % '&&' '&'
-        if length(left_dim) == 1 && left_dim(1) == 1
+        if isempty(left_dim) || (length(left_dim) >= 1 && prod(left_dim) == 1)
             dim = right_dim;
         else
             dim = left_dim;
@@ -90,7 +88,7 @@ function [code, exp_dt, dim, extra_code] = binaryExpression_To_Lustre(tree, args
         %TODO relopelAND is bitwise AND
         op = nasa_toLustre.lustreAst.BinaryExpr.AND;
     elseif ismember(tree_type, {'relopOR', 'relopelOR'}) % '||' '|'
-        if length(left_dim) == 1 && left_dim(1) == 1
+        if isempty(left_dim) || (length(left_dim) >= 1 && prod(left_dim) == 1)
             dim = right_dim;
         else
             dim = left_dim;

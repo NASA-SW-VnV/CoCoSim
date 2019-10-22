@@ -6,11 +6,11 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [codes, outputs_dt, AdditionalVars, outputs] = getSumProductCodes(...
         obj, parent, blk, OutputDataTypeStr,isSumBlock, ...
-        AccumDataTypeStr, xml_trace, lus_backend)
+        AccumDataTypeStr, xml_trace, lus_backend, main_sampleTime)
     
     AdditionalVars = {};
     codes = {};
-    [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+    [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace, main_sampleTime);
     widths = blk.CompiledPortWidths.Inport;
     inputs = nasa_toLustre.blocks.Sum_To_Lustre.createBlkInputs(obj, parent, blk, widths, AccumDataTypeStr, isSumBlock);
 

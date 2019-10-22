@@ -8,7 +8,32 @@ classdef Block_Test
         status = generateTests(obj, outputDir)
     end
     methods(Static)
-        
+        function status = generateAllTests(outputDir, deleteIfExists)
+            % Get the list of functions called X_test.m
+            [slx_tests_root, ~, ~] = fileparts(mfilename('fullpath'));
+            functions = dir(fullfile(slx_tests_root , '*_Test.m'));
+            PWD = pwd;
+            cd(slx_tests_root)
+            % loop over the files
+            for i=1:numel(functions)
+                fun_name = functions(i).name(1:end-2);
+                if strcmp(fun_name, 'Block_Test')
+                    continue;
+                end
+                display_msg(['runing ' fun_name], MsgType.INFO, 'Block_Test', '');
+                
+                fh = str2func(fun_name);
+                b = fh();
+                new_outputDir = fullfile(outputDir, strrep(fun_name, '_Test', ''));
+                MatlabUtils.mkdir(new_outputDir);
+                status = b.generateTests(new_outputDir, deleteIfExists);
+                if status
+                    display_msg([fun_name ' Failed'], MsgType.ERROR, 'Block_Test', '');
+                end
+            end
+            cd(PWD);
+            
+        end
         
         %%
         function status = connectBlockToInportsOutports(blk_path)
@@ -137,6 +162,9 @@ classdef Block_Test
                 end
             catch
                 skip = true;
+            end
+            if skip
+                return;
             end
             new_system(mdl_name);
             open_system(mdl_name);

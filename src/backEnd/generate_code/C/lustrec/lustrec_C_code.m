@@ -32,12 +32,13 @@ end
 
 
 command = sprintf('%s %s -I "%s" -d "%s" -node %s "%s"', LUSTREC, LUSTREC_OPTS, LUCTREC_INCLUDE_DIR, output_dir,node_name,  lus_full_path);
+display_msg(['Lustrec command: ', command], MsgType.DEBUG, 'lustrec_C_code', '');
 [~, lustrec_output] = system(command);
 if ~MatlabUtils.contains(lustrec_output, '.. done')
     display_msg('Error Generating C code', Constants.ERROR, 'C Generation', '');
-    display_msg(lustrec_output, MsgType.ERROR, 'Rust Generation', '');
+    display_msg(lustrec_output, MsgType.ERROR, 'C code Generation', '');
 else
     msg = ['C code is generated in :  ' output_dir] ;
-    display_msg(msg, Constants.RESULT, 'C Generation', '');
+    display_msg(msg, Constants.RESULT, 'C code Generation', '');
 end
 end

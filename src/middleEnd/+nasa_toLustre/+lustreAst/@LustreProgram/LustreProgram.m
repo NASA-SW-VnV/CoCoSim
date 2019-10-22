@@ -52,14 +52,14 @@ classdef LustreProgram < nasa_toLustre.lustreAst.LustreAst
         nb_occ = nbOccuranceVar(varargin)
         
         %%
-        code = print(obj, backend)
+        [lus_code, plu_code] = print(obj, backend)
         
-        code = print_lustrec(obj, backend)
+        [lus_code, plu_code] = print_lustrec(obj, backend)
         
         code = print_kind2(obj)
         code = print_zustre(obj)
         code = print_jkind(obj)
-        code = print_prelude(obj)
+        [lus_code, plu_code] = print_prelude(obj)
         
         [lines, alreadyPrinted] = printWithOrder(obj, ...
                 nodesList, nodeName, call_map, alreadyPrinted, lines, backend)

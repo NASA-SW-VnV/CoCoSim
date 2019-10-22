@@ -59,7 +59,7 @@ function [ failed ] = toLustreVerify(model_full_path,  const_files, lus_backend,
     
     Observers = find_system(model, ...
         'LookUnderMasks', 'all', 'MaskType', 'Observer');
-    Assertions_list = [Assertions_list; Observers];
+%     Assertions_list = [Assertions_list; Observers];
     
     contractBlocks_list = find_system(model, ...
         'LookUnderMasks', 'all',  'MaskType', 'ContractBlock');
@@ -89,12 +89,28 @@ function [ failed ] = toLustreVerify(model_full_path,  const_files, lus_backend,
             display_msg('No Property to check.', MsgType.RESULT, 'toLustreVerify', '');
             return;
         end
+        tkind2_start = tic;
         [failed, kind2_out] = Kind2Utils2.runKIND2(...
             nom_lustre_file,...
             top_node_name, ...
             OPTS, KIND2, Z3, timeout, timeout_analysis);
+        tkind2_finish = toc(tkind2_start);
         if failed
             return;
+        end
+        display_msg(sprintf('Total KIND2 running time: %f seconds', tkind2_finish), Constants.RESULT, 'Time', '');
+        % sometimes kind2 give up quickly and give everything as UNKNOWN. 
+        % and we get better results in the second run so we run it twice.
+        if tkind2_finish < 10 ...
+                && MatlabUtils.contains(kind2_out, 'unknown</Answer>') ...
+                && ~MatlabUtils.contains(kind2_out, 'falsifiable</Answer>') ...
+                && ~MatlabUtils.contains(kind2_out, 'valid</Answer>')
+            display_msg('Re-running Kind2', MsgType.INFO, 'toLustreVerify', '');
+            [failed, kind2_out] = Kind2Utils2.runKIND2(...
+                nom_lustre_file,...
+                top_node_name, ...
+                OPTS, KIND2, Z3, timeout, timeout_analysis);
+            if failed, return; end
         end
         mapping_file = xml_trace.json_file_path;
         try

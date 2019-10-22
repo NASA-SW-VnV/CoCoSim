@@ -12,9 +12,9 @@ classdef Trigonometry_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     
     methods
         
-        function  write_code(obj, parent, blk,xml_trace,  varargin)
+        function  write_code(obj, parent, blk,xml_trace,  ~, ~, main_sampleTime, varargin)
             
-            [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+            [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace, main_sampleTime);
             
             obj.addExternal_libraries('LustMathLib_lustrec_math');
             widths = blk.CompiledPortWidths.Inport;

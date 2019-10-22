@@ -9,10 +9,15 @@
 function clocks_list = getRTClocksSTR(blk, main_sampleTime)
     clocks_list = {};
     clocks = blk.CompiledSampleTime;
-    if iscell(clocks) && numel(clocks) > 1
+    if iscell(clocks)
+        cell_clocks = clocks;
+    else
+        cell_clocks{1} = clocks;
+    end
+    if ~isempty(cell_clocks) % && numel(clocks) > 1 % a subsystem can run on [2,0]
         clocks_list = {};
-        for i=1:numel(clocks)
-            T = clocks{i};
+        for i=1:numel(cell_clocks)
+            T = cell_clocks{i};
             if T(1) < 0 || isinf(T(1))
                 continue;
             end
@@ -23,6 +28,8 @@ function clocks_list = getRTClocksSTR(blk, main_sampleTime)
             end
         end
     end
+    % order clocks by alphabetic order
+    clocks_list = sort(clocks_list);
 end
 
 

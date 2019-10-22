@@ -12,10 +12,10 @@ classdef Concatenate_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     
     methods
         
-        function  write_code(obj, parent, blk, xml_trace, varargin)
+        function  write_code(obj, parent, blk, xml_trace, ~, ~, main_sampleTime, varargin)
             
             [outputs, outputs_dt] = ...
-               nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+                nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace, main_sampleTime);
             [inputs,widths] = ...
                 nasa_toLustre.blocks.Concatenate_To_Lustre.getBlockInputsNames_convInType2AccType(obj, parent, blk);
             [blkParams,in_matrix_dimension] = nasa_toLustre.blocks.Concatenate_To_Lustre.readBlkParams(blk);
@@ -31,20 +31,42 @@ classdef Concatenate_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                         MsgType.ERROR, 'Concatenate_To_Lustre', '');
                     return;
                 end
-                
-                codes = cell(1, numel(outputs));
-                inputs_reshaped = {};
-                for i=1:length(in_matrix_dimension)
-                    inputs_reshaped{i} = reshape(inputs{i}, ...
-                        in_matrix_dimension{i}.dims);
+                %% Hamza's method
+                args = {};
+                % reshape inputs to their original dimensions
+                for i=1:length(inputs)
+                    dims = in_matrix_dimension{i}.dims;
+                    if length(dims) == 1
+                        if ConcatenateDimension == 1
+                            dims = [1 dims];
+                        else
+                            dims = [dims 1];
+                        end
+                    end
+                    args{i} = reshape(inputs{i}, dims);
                 end
-                Y = cat(ConcatenateDimension,inputs_reshaped{:});
-                Y_inlined = reshape(Y, [1, numel(Y)]);
-                for i=1:numel(outputs)
-                    codes{i} = nasa_toLustre.lustreAst.LustreEq(outputs{i},...
-                        Y_inlined{i});
-                end
-
+                % concatenate them
+                A = cat(ConcatenateDimension, args{:});
+                A_inlined = reshape(A, [length(outputs) 1]);
+                codes = arrayfun(@(i) nasa_toLustre.lustreAst.LustreEq(outputs{i},...
+                    A_inlined{i}), (1:length(outputs)), 'UniformOutput', 0);
+                %% Khanh's method
+                %                 if numel(in_matrix_dimension) > 7
+                %                     display_msg(sprintf('More than 7 dimensions is not supported in block %s ',...
+                %                         HtmlItem.addOpenCmd(blk.Origin_path)), ...
+                %                         MsgType.ERROR, 'Concatenate_To_Lustre', '');
+                %                     return;
+                %                 end
+                %                 if ConcatenateDimension == 2    %concat matrix in row direction
+                %                     [codes] = nasa_toLustre.blocks.Concatenate_To_Lustre.concatenateDimension2(inputs, outputs,in_matrix_dimension);
+                %                 elseif ConcatenateDimension == 1    %concat matrix in column direction
+                %                     [codes] = nasa_toLustre.blocks.Concatenate_To_Lustre.concatenateDimension1(inputs, outputs,in_matrix_dimension);
+                %                 else
+                %                     display_msg(sprintf('ConcatenateDimension > 2 in block %s',...
+                %                         HtmlItem.addOpenCmd(blk.Origin_path)), ...
+                %                         MsgType.ERROR, 'Constant_To_Lustr', '');
+                %                     return;
+                %                 end
             end
             
             obj.addCode( codes );
@@ -53,17 +75,16 @@ classdef Concatenate_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         
         function options = getUnsupportedOptions(obj, parent, blk, varargin)
             
-            [ConcatenateDimension, ~, status] = ...
+            [~, ~, status] = ...
                 nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(parent, blk, blk.ConcatenateDimension);
             if status
                 obj.addUnsupported_options(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
                     blk.ConcatenateDimension, HtmlItem.addOpenCmd(blk.Origin_path)));
             end
-
-            if ConcatenateDimension > 2
-                obj.addUnsupported_options(sprintf('ConcatenateDimension > 2 in block %s',...
-                        HtmlItem.addOpenCmd(blk.Origin_path)));
-            end
+%             if ConcatenateDimension > 2
+%                 obj.addUnsupported_options(sprintf('ConcatenateDimension > 2 in block %s',...
+%                     HtmlItem.addOpenCmd(blk.Origin_path)));
+%             end
             options = obj.unsupported_options;
         end
         %%

@@ -12,9 +12,10 @@ function schema = generateCodeMenu(callbackInfo)
 
     [gen_root, ~, ~] = fileparts(mfilename('fullpath'));
     menu_items{1} = fullfile(gen_root, 'C', 'CMenu.m');
-    menu_items{2} = fullfile(gen_root, 'Lustre', 'LustreMenu.m');
-    menu_items{3} = fullfile(gen_root, 'Rust', 'RustMenu.m');
-
+    menu_items{2} = fullfile(gen_root, 'Rust', 'RustMenu.m');
+    menu_items{3} = fullfile(gen_root, 'Lustre', 'LustreMenu.m');
+    menu_items{4} = fullfile(gen_root, 'Prelude', 'PreludeMenu.m');
+    
     callbacks = cellfun(@MenuUtils.funPath2Handle, menu_items,...
         'UniformOutput', false);
     schema.childrenFcns = cellfun(@(x) {@MenuUtils.addTryCatch, x}, callbacks, 'UniformOutput', false);

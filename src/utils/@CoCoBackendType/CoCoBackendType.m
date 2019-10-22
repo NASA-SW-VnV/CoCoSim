@@ -13,6 +13,12 @@ classdef CoCoBackendType < handle
         VALIDATION = 'Validation';
         PP_VALIDATION = 'PP_Validation';
         GUIDELINES = 'GUIDELINES';
+        
+        %TESTS_GEN
+        MCDC_TESTS_GEN = 'MCDC_TESTS_GEN';
+        SEAL_TESTS_GEN = 'SEAL_TESTS_GEN';
+        
+        %DED
         DED = 'DesignErrorDetection';
         DED_INTOVERFLOW = 'Integer Overflow';
         DED_DIVBYZER = 'Division By Zero';
@@ -30,6 +36,10 @@ classdef CoCoBackendType < handle
         res = isPPVALIDATION(b)
 
         res = isGUIDELINES(b)
+        
+        res = isMCDCTESTSGEN(b)
+        
+        res = isSEALTESTSGEN(b)
 
         res = isDED(b)
 

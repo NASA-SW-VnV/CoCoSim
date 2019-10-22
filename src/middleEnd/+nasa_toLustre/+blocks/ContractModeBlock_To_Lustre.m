@@ -20,7 +20,7 @@ classdef ContractModeBlock_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         function obj = ContractModeBlock_To_Lustre()
             obj.ContentNeedToBeTranslated = 0;
         end
-        function  write_code(obj, parent, blk, xml_trace, varargin)
+        function  write_code(obj, parent, blk, xml_trace, ~, ~, main_sampleTime, varargin)
             
             if ~nasa_toLustre.utils.SLX2LusUtils.isContractBlk(parent)
                 display_msg(sprintf('Mode block "%s" should not be outside a Contract Subsystem', HtmlItem.addOpenCmd(blk.Origin_path)),...
@@ -71,9 +71,20 @@ classdef ContractModeBlock_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     nasa_toLustre.utils.SLX2LusUtils.node_name_format(parent),...
                     prop_ID, i, 'ensure');
             end
-            
-            blk_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);
-            code = nasa_toLustre.lustreAst.ContractModeExpr(blk_name, requires, ensures);
+            isInsideContract =nasa_toLustre.utils.SLX2LusUtils.isContractBlk(parent);
+            if LusBackendType.isKIND2(lus_backend) && isInsideContract
+                blk_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);
+                code = nasa_toLustre.lustreAst.ContractModeExpr(blk_name, requires, ensures);
+            else
+                A = nasa_toLustre.lustreAst.BinaryExpr.BinaryMultiArgs(...
+                    nasa_toLustre.lustreAst.BinaryExpr.AND, requires);
+                B = nasa_toLustre.lustreAst.BinaryExpr.BinaryMultiArgs(...
+                    nasa_toLustre.lustreAst.BinaryExpr.AND, ensures);
+                prop = nasa_toLustre.lustreAst.BinaryExpr(...
+                    nasa_toLustre.lustreAst.BinaryExpr.IMPLIES, A, B);
+                 obj.addCode(nasa_toLustre.lustreAst.LocalPropertyExpr(...
+                    prop_ID, prop));
+            end
             obj.addCode( code );
             
         end

@@ -7,7 +7,7 @@
 
 function mcdc_node_process(new_model_name, nodes, node, ...
         node_block_path, mdlTraceRoot, block_pos, xml_trace)
-    mcdc_variables_names = mcdcVariables(nodes.(node));
+    mcdc_variables_names = MCDC2SLX.mcdcVariables(nodes.(node));
     display_msg([num2str(numel(mcdc_variables_names)) ' mc-dc conditions has been generated'...
         ' for node ' nodes.(node).original_name], MsgType.INFO, 'mcdc2slx', '');
     if ~isempty(mcdc_variables_names)
@@ -68,10 +68,10 @@ function mcdc_node_process(new_model_name, nodes, node, ...
             originalNamesMap(local.name) = local.original_name;
         end
         % get tracable variables names
-        traceable_variables = SLX2Lus_Trace.get_tracable_variables(mdlTraceRoot,...
+        traceable_variables = nasa_toLustre.utils.SLX2Lus_Trace.get_tracable_variables(mdlTraceRoot,...
             nodes.(node).original_name);
         
-        [instructionsIDs, inputList]= get_mcdc_instructions(mcdc_variables_names, ...
+        [instructionsIDs, inputList]= MCDC2SLX.get_mcdc_instructions(mcdc_variables_names, ...
             lhs_instrID_map, lhs_rhs_map, originalNamesMap, traceable_variables);
         
         % creat mcdc block
@@ -88,11 +88,11 @@ function mcdc_node_process(new_model_name, nodes, node, ...
         
         % Outputs
         
-        [x2, y2] = process_mcdc_outputs(node_block_path, mcdc_variables_names, '', x2, y2);
+        [x2, y2] = MCDC2SLX.process_mcdc_outputs(node_block_path, mcdc_variables_names, '', x2, y2);
         
         
         % Inputs
-        blk_inputs(1) =struct('name', '', 'datatype', '', 'original_name', '');
+        blk_inputs =struct('name', '', 'datatype', '', 'original_name', '');
         for i=1:numel(inputList)
             found = true;
             
@@ -114,12 +114,12 @@ function mcdc_node_process(new_model_name, nodes, node, ...
             end
             if found
                 var_orig_name = originalNamesMap(inputList{i});
-                [block_name, out_port_nb, dimension] = ...
-                    SLX2Lus_Trace.get_SlxBlockName_from_LusVar_UsingXML(...
+                [block_name, port, width, index, isInsideContract, isNotInSimulink, portType] = ...
+                    nasa_toLustre.utils.SLX2Lus_Trace.get_SlxBlockName_from_LusVar_UsingXML(...
                     mdlTraceRoot, nodes.(node).original_name, var_orig_name);
-                
-                xml_trace.add_Input(var_orig_name, block_name, ...
-                    str2num(out_port_nb), str2num(dimension));
+                xml_trace.add_Input(var_orig_name, ...
+                    block_name, port, width, index, isInsideContract, isNotInSimulink, ...
+                    portType);
             end
         end
         [x2, y2] = Lus2SLXUtils.process_inputs(node_block_path, blk_inputs, '', x2, y2);

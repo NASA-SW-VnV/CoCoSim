@@ -78,6 +78,14 @@ function status = transformContract(block)
             continue;
         end
         p = get_param(line, 'SrcPortHandle');
+        try
+            %remove Assume, Guarantee mask
+            %delete mask
+            srcBlk = get_param(line, 'SrcBlockHandle');
+            p2 = Simulink.Mask.get(srcBlk);
+            p2.delete
+        catch
+        end
         pos = get_param(p, 'Position');
         x = pos(1); y = pos(2);
         assertion_path = fullfile(block, strcat('Assertion', num2str(i)));

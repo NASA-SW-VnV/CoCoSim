@@ -18,7 +18,7 @@ classdef SLX2LusUtils
         time_step = nbStepStr()
         it = iterationVariable()
         res = isContractBlk(ss_ir)
-        [lus_path, mat_file] = getLusOutputPath(output_dir, model_name, lus_backend)
+        [lus_path, mat_file, plu_path] = getLusOutputPath(output_dir, model_name, lus_backend)
         %% adapt blocks names to be a valid lustre names.
         str_out = name_format(str)
         
@@ -32,7 +32,7 @@ classdef SLX2LusUtils
                 extractNodeHeader(parent_ir, blk, is_main_node, ...
                 isEnableORAction, isEnableAndTrigger, isContractBlk, isMatlabFunction, ...
                 main_sampleTime, xml_trace)
-        [names, names_withNoDT] = extract_node_InOutputs_withDT(subsys, type, xml_trace)
+        [names, names_withNoDT] = extract_node_InOutputs_withDT(subsys, type, xml_trace, main_sampleTime)
 
         [node_inputs_cell, node_inputs_withoutDT_cell] = ...
                 getTimeClocksInputs(blk, main_sampleTime, node_inputs_cell, node_inputs_withoutDT_cell)
@@ -47,7 +47,7 @@ classdef SLX2LusUtils
         res = isAbstractedByContract(blk, contract)
         %% get block outputs names: inlining dimension
         [names, names_dt] = getBlockOutputsNames(parent, blk, ...
-                srcPort, xml_trace)
+                srcPort, xml_trace, main_sampleTime)
    
     	[names, names_dt] = blockOutputs(portNumber)
                 %
@@ -115,7 +115,8 @@ classdef SLX2LusUtils
         b = isIgnoredSampleTime(st_n, ph_n)
 
         clocks_list = getRTClocksSTR(blk, main_sampleTime)
-
+        
+        [st, ph] = getSSSampleTime(Clocks)
         %% check model compatibility: Variable size signals, Fixed Data types, 
         % main_sample time. ...
         htmlItemMsg = modelCompatibilityCheck(model_name, main_sampleTime)

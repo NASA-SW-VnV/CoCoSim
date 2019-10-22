@@ -12,8 +12,8 @@ classdef UnitDelay_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     
     methods
         
-        function  write_code(obj, parent, blk, xml_trace, lus_backend, ...
-                varargin)
+        function  write_code(obj, parent, blk, xml_trace, lus_backend, ~, ...
+                main_sampleTime, varargin)
             
             InitialConditionSource = 'Dialog';
             DelayLengthSource = 'Dialog';
@@ -24,7 +24,7 @@ classdef UnitDelay_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             [lustre_code, delay_node_code, variables, external_libraries] = ...
                 nasa_toLustre.blocks.Delay_To_Lustre.get_code( parent, blk, ...
                 lus_backend, InitialConditionSource, DelayLengthSource, DelayLength,...
-                DelayLengthUpperLimit, ExternalReset, ShowEnablePort, xml_trace );
+                DelayLengthUpperLimit, ExternalReset, ShowEnablePort, xml_trace, main_sampleTime );
             obj.addVariable(variables);
             obj.addExternal_libraries(external_libraries);
             obj.addExtenal_node(delay_node_code);

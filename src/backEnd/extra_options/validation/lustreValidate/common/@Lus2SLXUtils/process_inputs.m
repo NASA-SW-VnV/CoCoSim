@@ -23,7 +23,9 @@ function [x2, y2] = process_inputs(node_block_path, blk_inputs, ID, x2, y2)
         if strcmp(dt, 'bool')
             set_param(inport_path, 'OutDataTypeStr', 'boolean');
         elseif strcmp(dt, 'int')
-            set_param(inport_path, 'OutDataTypeStr', 'int32');
+            % keep it as inherit for MCDC
+            %TODO: pass type information from Simulink if we have it.
+            %set_param(inport_path, 'OutDataTypeStr', 'int32');
         elseif strcmp(dt, 'real')
             set_param(inport_path, 'OutDataTypeStr', 'double');
         end

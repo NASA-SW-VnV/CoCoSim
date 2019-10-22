@@ -1,3 +1,10 @@
+(*
+-- DO NOT use contracts to abstract these node. Kind2 does not allow calling nodes with contract inside other contracts
+<Log class="error" source="parse" line="679" column="1">
+  Illegal call to node "sqrt" in the cone of influence of this contract: node sqrt has a contract.
+</Log>
+*)
+
 function  real_to_int(x : real;)
 returns(y : int;);
 let
@@ -14,10 +21,8 @@ tel
 
 function  _floor(x : real;)
 returns(y : real;);
-(*@contract
-guarantee (y <= x) and (x < y + 1.0);
-*)
 let
+assert (y <= x) and (x < y + 1.0);
 y = (real (int x));
 tel
 
@@ -29,10 +34,8 @@ tel
 
 function  _ceil(x : real;)
 returns(y : real;);
-(*@contract
-guarantee (y - 1.0 < x) and (x <= y);
-*)
 let
+assert (y - 1.0 < x) and (x <= y);
 y = (real _Ceiling(x));
 tel
 
@@ -48,11 +51,10 @@ tel
 
 function  _round(x : real;)
 returns(y : real;);
-(*@contract
-var abs: real = if (x - y >= 0.0) then x - y else y - x;
-guarantee abs <= 1.0;
-*)
+var abs: real;
 let
+    abs = if (x - y >= 0.0) then x - y else y - x;
+    assert abs <= 1.0;
     y = (real _Round(x));
 tel
 

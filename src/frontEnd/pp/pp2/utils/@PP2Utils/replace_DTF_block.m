@@ -118,6 +118,9 @@ function [] = replace_DTF_block(blk, U_dims_blk,num,denum, blkType )
     end
     set_param(strcat(blk,'/DTFScalar/X0'),...
         'SampleTime',ST);
+    set_param(strcat(blk,'/U'),...
+        'SampleTime',ST);
+    
     set_param(strcat(blk,'/Y'), 'OutMin', OutMin);
     set_param(strcat(blk,'/Y'), 'OutMax', OutMax);
 end

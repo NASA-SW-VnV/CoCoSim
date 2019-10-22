@@ -52,7 +52,7 @@ classdef Inport_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         end
         
         function options = getUnsupportedOptions(obj, parent, blk, ...
-                lus_backend, coco_backend, varargin)
+                lus_backend, coco_backend, main_sampleTime, varargin)
             
             % Outport in first level should not be of type enumeration in
             % case of Validation backend with Lustrec.
@@ -69,6 +69,19 @@ classdef Inport_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     obj.addUnsupported_options(sprintf('Inport %s with Enumeration Type %s is not supported in root level for Validation with Lustrec.', ...
                         HtmlItem.addOpenCmd(blk.Origin_path),...
                         blk.CompiledPortDataTypes.Outport{1}));
+                end
+            end
+            
+            % Inports in root level should have the same model sampleTime
+            if strcmp(parent.BlockType, 'block_diagram')...
+                    && isfield(blk, 'CompiledSampleTime')
+                inST = blk.CompiledSampleTime;
+                if inST(1) ~= 0 && (main_sampleTime(1) ~= inST(1) || main_sampleTime(2) ~= inST(2))
+                    obj.addUnsupported_options(sprintf(['Inport %s with Sample time %s is different from Model sample time %s. CoCosim requires Inports and Outports at root level to have same sample time as the model. '...
+                        'To solve this, set your Inport Sample time to %s and add Rate transition block just after your Inport and set its Sample time to %s.'], ...
+                        HtmlItem.addOpenCmd(blk.Origin_path),...
+                        mat2str(inST), mat2str(main_sampleTime), ...
+                        mat2str(main_sampleTime), mat2str(inST)));
                 end
             end
             options = obj.unsupported_options;

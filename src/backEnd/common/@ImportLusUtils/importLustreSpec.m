@@ -34,7 +34,7 @@ function [new_model_path, status] = importLustreSpec(...
         createNewFile = 0;
     end
     if ~exist('organize_blocks', 'var') || isempty(organize_blocks)
-        organize_blocks = false;
+        organize_blocks = true;
     end
     try
         if bdIsLoaded(base_name)

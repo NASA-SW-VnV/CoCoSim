@@ -5,28 +5,30 @@
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function schema = unsupportedBlocksMenu(callbackInfo)
-schema = sl_action_schema;
-schema.label = 'Check Compatibility';
-schema.statustip = 'Check compatibility of your model with CoCoSim';
-schema.autoDisableWhen = 'Busy';
-
-schema.callback = @UnsupportedFunctionCallback;
+    schema = sl_action_schema;
+    schema.label = 'Check Compatibility';
+    schema.statustip = 'Check compatibility of your model with CoCoSim';
+    schema.autoDisableWhen = 'Busy';
+    
+    schema.callback = @UnsupportedFunctionCallback;
 end
 
 function UnsupportedFunctionCallback(callbackInfo)
-model_full_path = MenuUtils.get_file_name(gcs);
-CoCoSimPreferences = cocosim_menu.CoCoSimPreferences.load();
-if ~strcmp(CoCoSimPreferences.lustreCompiler, 'NASA') 
-    msgbox(...
-        sprintf('Check Compatibiity is only supported by the NASA Lustre compiler.\n Go to Tools -> Preferences -> Lustre Compiler -> NASA Compiler'), 'CoCoSim');
-else
-    try
-        MenuUtils.add_pp_warning(model_full_path);
-        nasa_toLustre.ToLustreUnsupportedBlocks(model_full_path);
-    catch me
-        MenuUtils.handleExceptionMessage(me, 'Check Compatibility');
+    global CoCoSimPreferences;
+    CoCoSimPreferences = cocosim_menu.CoCoSimPreferences.load();
+    CoCoSimPreferences.skip_unsupportedblocks = false;
+    model_full_path = MenuUtils.get_file_name(gcs);
+    if ~strcmp(CoCoSimPreferences.lustreCompiler, 'NASA')
+        msgbox(...
+            sprintf('Check Compatibiity is only supported by the NASA Lustre compiler.\n Go to Tools -> Preferences -> Lustre Compiler -> NASA Compiler'), 'CoCoSim');
+    else
+        try
+            MenuUtils.add_pp_warning(model_full_path);
+            nasa_toLustre.ToLustreUnsupportedBlocks(model_full_path);
+        catch me
+            MenuUtils.handleExceptionMessage(me, 'Check Compatibility');
+        end
     end
-end
 end
 
 
@@ -37,7 +39,7 @@ end
 % schema.label = 'Model';
 % schema.callback = @(x) UnsupportedFunctionCallback(0,'', x);
 % end
-% 
+%
 % function UnsupportedFunctionCallback(isSubsystem, SubsystemPath, callbackInfo)
 % model_full_path = MenuUtils.get_file_name(gcs);
 % if ~isSubsystem
@@ -50,10 +52,10 @@ end
 %     %     unsupportedOptions= nasa_toLustre.ToLustreUnsupportedBlocks(model_full_path, SubsystemName);
 %     msgbox(sprintf('I am running %s', SubsystemPath));
 % end
-% 
+%
 % end
-% 
-% 
+%
+%
 % function schema = CheckSubsystem(SubsystemPath, isAction, callbackInfo)
 % SubsysList = find_system(SubsystemPath, 'SearchDepth',1, 'BlockType', 'SubSystem');
 % SubsysList = SubsysList(~strcmp(SubsysList, SubsystemPath));
@@ -86,9 +88,9 @@ end
 %     end
 %     schema.childrenFcns = callbacks;
 % end
-% 
+%
 % end
-% 
+%
 % function r = hsSubsystems(SubsystemPath)
 % SubsysList = find_system(SubsystemPath, 'SearchDepth',1, 'BlockType', 'SubSystem');
 % SubsysList = SubsysList(~strcmp(SubsysList, SubsystemPath));

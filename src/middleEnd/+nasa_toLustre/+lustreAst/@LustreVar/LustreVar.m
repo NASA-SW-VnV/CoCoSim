@@ -9,10 +9,12 @@ classdef LustreVar < nasa_toLustre.lustreAst.LustreExpr
     properties
         id;%String
         type;%String
+        rate  = ''; %for Prelude
+        clock = ''; %for multi-periodic lustrec
     end
     
     methods
-        function obj = LustreVar(id, type)
+        function obj = LustreVar(id, type, rate, clock)
             if isa(id, 'nasa_toLustre.lustreAst.VarIdExpr')
                 obj.id = id.getId();
             elseif iscell(id) && numel(id) == 1
@@ -24,6 +26,16 @@ classdef LustreVar < nasa_toLustre.lustreAst.LustreExpr
                 obj.type = type{1};
             else
                 obj.type = type;
+            end
+            if nargin < 3
+                obj.rate = '';
+            else
+                obj.rate = rate;
+            end
+            if nargin < 4
+                obj.clock = '';
+            else
+                obj.clock = clock;
             end
         end
         

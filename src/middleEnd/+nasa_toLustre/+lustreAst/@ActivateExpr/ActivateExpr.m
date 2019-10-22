@@ -7,7 +7,7 @@ classdef ActivateExpr < nasa_toLustre.lustreAst.LustreExpr
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     properties
-        nodeName;
+        nodeName;%string
         nodeArgs;
         activate_cond;
         has_restart;
@@ -18,6 +18,7 @@ classdef ActivateExpr < nasa_toLustre.lustreAst.LustreExpr
         function obj = ActivateExpr(nodeName, nodeArgs, activate_cond,...
                 has_restart, restart_cond)
             obj.nodeName = nodeName;
+            
             if ~iscell(nodeArgs)
                 obj.nodeArgs{1} = nodeArgs;
             else

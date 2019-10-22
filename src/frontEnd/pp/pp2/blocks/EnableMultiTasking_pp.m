@@ -20,7 +20,11 @@ catch
     set_param(configSet, 'SolverMode', 'MultiTasking');
     status = 1;
     errors_msg{end + 1} = sprintf('EnableMultiTasking pre-process has failed');
-    
+end
+try
+    set_param(configSet, 'SingleTaskRateTransMsg', 'error');
+    set_param(configSet, 'MultiTaskRateTransMsg', 'error');
+catch
 end
 set_param(configSet, 'AutoInsertRateTranBlk', 'off');
 solveRateTransitions(new_model_base);
@@ -65,11 +69,12 @@ for i=1:numel(causes)
             end
             subsys = tokens{1};
             % get the sample time
-            tokens = regexp(msg, 'The sample time\s+(\d+(\.\d+)?)', 'tokens', 'once');
-            if isempty(tokens)
+            tokens = regexp(msg, '[Tt]he sample time\s+(\d+(\.\d+)?)', 'tokens');
+            if length(tokens) ~= 2 || ~iscell(tokens{1})
                 continue;
             end
-            sampleTime = tokens{1};
+            sampleTimeDst = tokens{1}{1};
+            sampleTimeSrc = tokens{2}{1};
             % get the port number
             tokens = regexp(msg, 'at input port\s+(\d+(\.\d+)?)', 'tokens', 'once');
             if isempty(tokens)
@@ -77,12 +82,13 @@ for i=1:numel(causes)
             end
             portNumber = tokens{1};
             display_msg(sprintf('Add RateTransition with SampleTime %s in input port %s for block %s',...
-                sampleTime, portNumber, subsys), MsgType.INFO, 'EnableMultiTasking_pp', '');
+                sampleTimeDst, portNumber, subsys), MsgType.INFO, 'EnableMultiTasking_pp', '');
             try
-                addRateTransition(subsys, portNumber, sampleTime);
+                addRateTransition(subsys, portNumber, sampleTimeDst, sampleTimeSrc);
             catch me
                 display_msg(me.getReport(), MsgType.DEBUG, 'EnableMultiTasking_pp', '');
-                continue;
+                found = false;
+                return;
             end
         case 'MATLAB:MException:MultipleErrors'
             f = fixCauses(c.cause);
@@ -93,11 +99,34 @@ end
 end
 
 %%
-function addRateTransition(subsys, portNumber, sampleTime)
+function addRateTransition(subsys, portNumber, sampleTimeDst, sampleTimeSrc)
 parent = get_param(subsys, 'Parent');
 blockHandles = get_param(subsys,'PortHandles');
-line = get_param(blockHandles.Inport(str2num(portNumber)), 'line');
+line = get_param(blockHandles.Inport(str2double(portNumber)), 'line');
 srcPortHandle = get_param(line, 'SrcPortHandle');
+srcBlkHanlde = get_param(line, 'SrcBlockHandle');
+%stSrc = str2num(sampleTimeSrc);% keep str2num
+stDst = str2num(sampleTimeDst);% keep str2num
+if strcmp(get_param(srcBlkHanlde, 'BlockType'), 'Inport')
+    % the case of Inport of subsystem is different sample time than upper
+    % level signal driving it.
+    stInport = str2num(get_param(srcBlkHanlde, 'SampleTime'));
+    if length(stInport) == 1, stInport(2) = 0; end
+    if length(stDst) == 1, stDst(2) = 0; end
+    if (stInport(1) == -1 || all(stInport == stDst)) ...
+            && ~strcmp(get_param(parent, 'Type'), 'block_diagram')
+        subsys = parent;
+        try
+            parent = get_param(parent, 'Parent');
+        catch
+            parent = fileparts(parent); 
+        end
+        portNumber = get_param(srcBlkHanlde, 'Port');
+        blockHandles = get_param(subsys,'PortHandles');
+        line = get_param(blockHandles.Inport(str2double(portNumber)), 'line');
+        srcPortHandle = get_param(line, 'SrcPortHandle');
+    end
+end
 delete_line(line);
 subsystemPosition = get_param(subsys, 'Position');
 x = subsystemPosition(3) - 60;
@@ -106,10 +135,19 @@ rateTransBlkName = fullfile(parent, strcat('RateTransition', portNumber));
 rt_H = add_block('simulink/Signal Attributes/Rate Transition',...
     rateTransBlkName, ...
     'MakeNameUnique', 'on', ...
-    'OutPortSampleTime', sampleTime,...
+    'Integrity', 'off', ...
+    'Deterministic', 'off', ...
+    'OutPortSampleTime', sampleTimeDst,...
     'Position',[x y (x+20) (y+20)]);
+if rt_H < 0
+    return;
+end
+
+% if  stSrc(1) > stDst(1) 
+%     set_param(rt_H, 'Integrity', 'off', 'Deterministic', 'off');
+% end
 rt_portsHandles = get_param(rt_H, 'PortHandles');
 add_line(parent, srcPortHandle, rt_portsHandles.Inport(1), 'autorouting', 'on');
-add_line(parent, rt_portsHandles.Outport(1), blockHandles.Inport(str2num(portNumber)), 'autorouting', 'on');
+add_line(parent, rt_portsHandles.Outport(1), blockHandles.Inport(str2double(portNumber)), 'autorouting', 'on');
 
 end

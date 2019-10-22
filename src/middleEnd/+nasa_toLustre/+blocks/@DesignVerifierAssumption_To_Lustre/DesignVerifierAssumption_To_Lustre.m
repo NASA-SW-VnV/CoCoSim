@@ -13,7 +13,7 @@ classdef DesignVerifierAssumption_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lu
         function obj = DesignVerifierAssumption_To_Lustre()
             obj.ContentNeedToBeTranslated = 0;
         end
-        function  write_code(obj, parent, blk, xml_trace, varargin)
+        function  write_code(obj, parent, blk, xml_trace, ~, ~, main_sampleTime, varargin)
             
             [inputs] =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk);
             inport_dt = blk.CompiledPortDataTypes.Inport{1};
@@ -21,7 +21,7 @@ classdef DesignVerifierAssumption_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lu
             if strcmp(blk.outEnabled, 'on')
                 % Assumption block is passing the inputs in case the option
                 % outEnabled is on
-                [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+                [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace, main_sampleTime);
                 obj.addVariable(outputs_dt);
                 codes = cell(1, numel(outputs));
                 for i=1:numel(outputs)

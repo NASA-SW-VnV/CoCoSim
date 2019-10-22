@@ -16,12 +16,13 @@ function schema = preferences_menu(callbackInfo)
     
     schema.childrenFcns = {...
         {@getLustreCompiler, CoCoSimPreferences}, ...
+        {@getNASACompilerPreferences, CoCoSimPreferences}, ...
         {@getLustreBackend, CoCoSimPreferences}, ...
         {@getKind2Options, CoCoSimPreferences}, ...
         {@getLustrecBinary, CoCoSimPreferences}, ...
         {@PreferencesMenu.getVerificationTimeout, CoCoSimPreferences}, ...
         {@getDEDChecks, CoCoSimPreferences}, ...
-        @resetSettings ...
+        {@resetSettings, CoCoSimPreferences} ...
         };
 end
 
@@ -60,6 +61,145 @@ function setCompilerOption(compilerNameValue, CoCoSimPreferences, varargin)
     cocosim_menu.CoCoSimPreferences.save(CoCoSimPreferences);
 end
 
+%% NASA Compiler preferences
+function schema = getNASACompilerPreferences(callbackInfo)
+    schema = sl_container_schema;
+    schema.label = 'NASA compiler preferences';
+    schema.statustip = 'NASA compiler preferences';
+    schema.autoDisableWhen = 'Busy';
+    CoCoSimPreferences = callbackInfo.userdata;
+    schema.childrenFcns = {...
+        {@getForceTypecastingOfInt, CoCoSimPreferences},...
+        {@getSkip_unsupportedblocks, CoCoSimPreferences},...
+        {@getSkip_pp, CoCoSimPreferences},...
+        {@getSkip_defected_pp, CoCoSimPreferences},...
+        {@getSkip_optim, CoCoSimPreferences},...
+        {@getForceCodeGen, CoCoSimPreferences},...
+        {@getSkip_sf_actions_check, CoCoSimPreferences}...
+        };
+end
+%forceTypeCastingOfInt
+function schema = getForceTypecastingOfInt(callbackInfo)
+    schema = sl_toggle_schema;
+    schema.label = 'Force type-casting of int to machine type (int8, int16..).';
+    CoCoSimPreferences = callbackInfo.userdata;
+    schema.checked = 'checked';
+    if ~CoCoSimPreferences.forceTypeCastingOfInt
+        schema.checked = 'unchecked';
+    end
+    schema.callback = @forceTypecastingOfInt;
+    schema.userdata = CoCoSimPreferences;
+end
+function forceTypecastingOfInt(callbackInfo)
+    CoCoSimPreferences = callbackInfo.userdata;
+    CoCoSimPreferences.forceTypeCastingOfInt = ~ CoCoSimPreferences.forceTypeCastingOfInt;
+    cocosim_menu.CoCoSimPreferences.save(CoCoSimPreferences);
+end
+% skip_unsupportedblocks
+function schema = getSkip_unsupportedblocks(callbackInfo)
+    schema = sl_toggle_schema;
+    schema.label = 'Skip compatibility check.';
+    CoCoSimPreferences = callbackInfo.userdata;
+    schema.checked = 'checked';
+    if ~CoCoSimPreferences.skip_unsupportedblocks
+        schema.checked = 'unchecked';
+    end
+    schema.callback = @skip_unsupportedblocks;
+    schema.userdata = CoCoSimPreferences;
+end
+function skip_unsupportedblocks(callbackInfo)
+    CoCoSimPreferences = callbackInfo.userdata;
+    CoCoSimPreferences.skip_unsupportedblocks = ~ CoCoSimPreferences.skip_unsupportedblocks;
+    cocosim_menu.CoCoSimPreferences.save(CoCoSimPreferences);
+end
+%getSkip_pp
+function schema = getSkip_pp(callbackInfo)
+    schema = sl_toggle_schema;
+    schema.label = 'Skip pre-processing (not recommended).';
+    CoCoSimPreferences = callbackInfo.userdata;
+    schema.checked = 'checked';
+    if ~CoCoSimPreferences.skip_pp
+        schema.checked = 'unchecked';
+    end
+    if ~PP2Utils.isAlreadyPP(bdroot(gcs))
+        schema.state = 'disabled';
+    end
+    schema.callback = @skip_pp;
+    schema.userdata = CoCoSimPreferences;
+end
+function skip_pp(callbackInfo)
+    CoCoSimPreferences = callbackInfo.userdata;
+    CoCoSimPreferences.skip_pp = ~ CoCoSimPreferences.skip_pp;
+    cocosim_menu.CoCoSimPreferences.save(CoCoSimPreferences);
+end
+%getSkip_defected_pp
+function schema = getSkip_defected_pp(callbackInfo)
+    schema = sl_toggle_schema;
+    schema.label = 'Skip defected pre-processing blocks (recommended).';
+    CoCoSimPreferences = callbackInfo.userdata;
+    schema.checked = 'checked';
+    if ~CoCoSimPreferences.skip_defected_pp
+        schema.checked = 'unchecked';
+    end
+    schema.callback = @skip_defected_pp;
+    schema.userdata = CoCoSimPreferences;
+end
+function skip_defected_pp(callbackInfo)
+    CoCoSimPreferences = callbackInfo.userdata;
+    CoCoSimPreferences.skip_defected_pp = ~ CoCoSimPreferences.skip_defected_pp;
+    cocosim_menu.CoCoSimPreferences.save(CoCoSimPreferences);
+end
+%getSkip_optim
+function schema = getSkip_optim(callbackInfo)
+    schema = sl_toggle_schema;
+    schema.label = 'Skip Lustre code optimization';
+    CoCoSimPreferences = callbackInfo.userdata;
+    schema.checked = 'checked';
+    if ~CoCoSimPreferences.skip_optim
+        schema.checked = 'unchecked';
+    end
+    schema.callback = @skip_optim;
+    schema.userdata = CoCoSimPreferences;
+end
+function skip_optim(callbackInfo)
+    CoCoSimPreferences = callbackInfo.userdata;
+    CoCoSimPreferences.skip_optim = ~ CoCoSimPreferences.skip_optim;
+    cocosim_menu.CoCoSimPreferences.save(CoCoSimPreferences);
+end
+%getForceCodeGen
+function schema = getForceCodeGen(callbackInfo)
+    schema = sl_toggle_schema;
+    schema.label = 'Force Lustre code Generation (i.e., ignore errors).';
+    CoCoSimPreferences = callbackInfo.userdata;
+    schema.checked = 'checked';
+    if ~CoCoSimPreferences.forceCodeGen
+        schema.checked = 'unchecked';
+    end
+    schema.callback = @forceCodeGen;
+    schema.userdata = CoCoSimPreferences;
+end
+function forceCodeGen(callbackInfo)
+    CoCoSimPreferences = callbackInfo.userdata;
+    CoCoSimPreferences.forceCodeGen = ~ CoCoSimPreferences.forceCodeGen;
+    cocosim_menu.CoCoSimPreferences.save(CoCoSimPreferences);
+end
+%getSkip_sf_actions_check
+function schema = getSkip_sf_actions_check(callbackInfo)
+    schema = sl_toggle_schema;
+    schema.label = 'Skip Stateflow parser check (not recommended).';
+    CoCoSimPreferences = callbackInfo.userdata;
+    schema.checked = 'checked';
+    if ~CoCoSimPreferences.skip_sf_actions_check
+        schema.checked = 'unchecked';
+    end
+    schema.callback = @skip_sf_actions_check;
+    schema.userdata = CoCoSimPreferences;
+end
+function skip_sf_actions_check(callbackInfo)
+    CoCoSimPreferences = callbackInfo.userdata;
+    CoCoSimPreferences.skip_sf_actions_check = ~ CoCoSimPreferences.skip_sf_actions_check;
+    cocosim_menu.CoCoSimPreferences.save(CoCoSimPreferences);
+end
 %% Lustre Backend
 function schema = getLustreBackend(callbackInfo)
     schema = sl_container_schema;
@@ -199,10 +339,11 @@ function setCheckOption(checkName, CoCoSimPreferences, varargin)
 end
 
 %% Reset Settings
-function schema = resetSettings(varargin)
+function schema = resetSettings(callbackInfo)
     schema = sl_action_schema;
     schema.label = 'Reset preferences';
     schema.statustip = 'Reset preferences';
     schema.autoDisableWhen = 'Busy';
-    schema.callback = @(x) cocosim_menu.CoCoSimPreferences.delete();
+    CoCoSimPreferences = callbackInfo.userdata;
+    schema.callback = @(x) cocosim_menu.CoCoSimPreferences.deletePreferences(CoCoSimPreferences);
 end

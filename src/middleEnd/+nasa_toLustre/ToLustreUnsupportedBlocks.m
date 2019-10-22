@@ -18,8 +18,11 @@ function [unsupportedOptions, ...
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    global TOLUSTRE_ENUMS_MAP
+    global TOLUSTRE_ENUMS_MAP CoCoSimPreferences
             
+    if isempty(CoCoSimPreferences)
+        CoCoSimPreferences = cocosim_menu.CoCoSimPreferences.load();
+    end
     %% inputs treatment
     
     narginchk(1, inf);
@@ -33,7 +36,7 @@ function [unsupportedOptions, ...
     try
         skip_unsupportedblocks = evalin('base', 'skip_unsupportedblocks');
     catch
-        skip_unsupportedblocks = 0;
+        skip_unsupportedblocks = CoCoSimPreferences.skip_unsupportedblocks;
     end
     for i=1:numel(varargin)
         if strcmp(varargin{i}, nasa_toLustre.utils.ToLustreOptions.NODISPLAY)

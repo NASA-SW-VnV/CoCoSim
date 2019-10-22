@@ -140,7 +140,7 @@ classdef LustreContract < nasa_toLustre.lustreAst.LustreAst
         
         
         %%
-        code = print(obj, backend)
+        code = print(obj, varargin)
         
         code = print_lustrec(obj)
         

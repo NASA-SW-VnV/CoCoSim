@@ -1,27 +1,33 @@
-node imported acos (x: real) returns (y: real) ;
-(*@contract
-     	guarantee (y >= 0.0 and y <= 3.1416);
+(*
+-- DO NOT use contracts to abstract these node. Kind2 does not allow calling nodes with contract inside other contracts
+<Log class="error" source="parse" line="679" column="1">
+  Illegal call to node "sqrt" in the cone of influence of this contract: node sqrt has a contract.
+</Log>
 *)
+node acos (x: real) returns (y: real) ;
+let
+     	assert (y >= 0.0 and y <= 3.1416);
+tel
 node imported acosh (x: real) returns (y: real) ;
-node imported asin (x: real) returns (y: real) ;
-(*@contract
-     	guarantee (y >= -1.5708 and y <= 1.5708);
-*)
+node asin (x: real) returns (y: real) ;
+let
+     	assert (y >= -1.5708 and y <= 1.5708);
+tel
 node imported asinh (x: real) returns (y: real) ;
-node imported atan (x: real) returns (y: real) ;
-(*@contract
-     	guarantee (y >= -1.5708 and y <= 1.5708);
-*)
-node imported atan2(x:real; n: real) returns (y: real) ;
-(*@contract
-     	guarantee (y >= -3.1416 and y <= 3.1416);
-*)
+node atan (x: real) returns (y: real) ;
+let
+     	assert (y >= -1.5708 and y <= 1.5708);
+tel
+node atan2(x:real; n: real) returns (y: real) ;
+let
+     	assert (y >= -3.1416 and y <= 3.1416);
+tel
 node imported atanh (x: real) returns (y: real) ;
 node imported cbrt (x: real) returns (y: real) ;
-node imported cos (x: real) returns (y: real) ;
-(*@contract
-     	guarantee (y >= -1.0 and y <= 1.0);
-*)
+node cos (x: real) returns (y: real) ;
+let
+     	assert (y >= -1.0 and y <= 1.0);
+tel
 node imported cosh (x: real) returns (y: real) ;
 node imported ceil (x: real) returns (y: real) ;
 node imported erf (x: real) returns (y: real) ;
@@ -31,27 +37,50 @@ node imported floor (x: real) returns (y: real) ;
 node imported fmod (x,y: real) returns (z: real) ;
 node imported log (x: real) returns (y: real) ;
 node imported log10 (x: real) returns (y: real) ;
-node imported pow (x:real; n: real) returns (y: real) ;
-(*@contract
-        assume n >= 0.0;
-     	guarantee (n > 1.0) => y > x;
-     	guarantee (n = 1.0) => y = x;
-        guarantee (n < 1.0) => y < x;
-*)
+node pow (x:real; n: real) returns (y: real) ;
+let
+        assert n >= 0.0;
+     	assert (n > 1.0) => y > x;
+     	assert (n = 1.0) => y = x;
+        assert (n < 1.0) => y < x;
+tel
 node imported round (x: real) returns (y: real) ;
-node imported sin (x: real) returns (y: real) ;
-(*@contract
-     	guarantee (y >= -1.0 and y <= 1.0);
-*)
+node sin (x: real) returns (y: real) ;
+let
+   assert (y >= -1.0 and y <= 1.0);
+tel
 node imported sinh (x: real) returns (y: real) ;
-node imported sqrt (x: real) returns (y: real) ;
-(*@contract
-     	assume (x >= 0.0);
-     	guarantee (y >= 0.0);
-     	guarantee (x >= y);
-     	guarantee ((y * y) = x);
-*)
-
+node  sqrt_lookup_0_10000 (x: real) returns (y: real) ;
+let
+    assert 0.000 <= x and x <= 1.000 => 0.000 <= y and y <= 1.000;
+    assert 1.000 <= x and x <= 6.880 => 1.000 <= y and y <= 2.620;
+    assert 6.880 <= x and x <= 25.570 => 2.620 <= y and y <= 5.060;
+    assert 25.570 <= x and x <= 68.580 => 5.060 <= y and y <= 8.280;
+    assert 68.580 <= x and x <= 150.800 => 8.280 <= y and y <= 12.280;
+    assert 150.800 <= x and x <= 291.270 => 12.280 <= y and y <= 17.070;
+    assert 291.270 <= x and x <= 512.110 => 17.070 <= y and y <= 22.630;
+    assert 512.110 <= x and x <= 839.140 => 22.630 <= y and y <= 28.970;
+    assert 839.140 <= x and x <= 1302.550 => 28.970 <= y and y <= 36.090;
+    assert 1302.550 <= x and x <= 1935.790 => 36.090 <= y and y <= 44.000;
+    assert 1935.790 <= x and x <= 2775.500 => 44.000 <= y and y <= 52.680;
+    assert 2775.500 <= x and x <= 3862.120 => 52.680 <= y and y <= 62.150;
+    assert 3862.120 <= x and x <= 5240.990 => 62.150 <= y and y <= 72.390;
+    assert 5240.990 <= x and x <= 6959.230 => 72.390 <= y and y <= 83.420;
+    assert 6959.230 <= x and x <= 9069.320 => 83.420 <= y and y <= 95.230;
+    assert 9069.320 <= x and x <= 10000.000 => 95.230 <= y and y <= 100.000;
+tel
+node  sqrt (x: real) returns (y: real) ;
+let
+    assert (x >= 0.0);
+    assert (y >= 0.0);
+    assert (x >= y);
+    assert x <= 10000.0 => y = sqrt_lookup_0_10000(x);
+    assert x >  10000.0 => y > 100.0;
+    -- Uncomment one of these if you wanna try better abstraction. But Kind2 can give up and give UNKNOWN answer.
+    --assert ((y * y) = x);
+    --assert exists (j:real) x = j*j and j >= 0.0 and y = j;
+    
+tel
 node imported trunc (x: real) returns (y: real) ;
 node imported tan (x: real) returns (y: real) ;
 node imported tanh (x: real) returns (y: real) ;

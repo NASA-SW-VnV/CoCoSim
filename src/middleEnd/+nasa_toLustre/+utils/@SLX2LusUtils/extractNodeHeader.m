@@ -38,7 +38,7 @@ function [node_name,  node_inputs_cell, node_outputs_cell,...
     %creating inputs
     xml_trace.create_Inputs_Element();
     [node_inputs_cell, node_inputs_withoutDT_cell] = ...
-        nasa_toLustre.utils.SLX2LusUtils.extract_node_InOutputs_withDT(blk, 'Inport', xml_trace);
+        nasa_toLustre.utils.SLX2LusUtils.extract_node_InOutputs_withDT(blk, 'Inport', xml_trace, main_sampleTime);
 
     % add the execution condition if it is a conditionally executed
     % SS
@@ -77,7 +77,7 @@ function [node_name,  node_inputs_cell, node_outputs_cell,...
     % creating outputs
     xml_trace.create_Outputs_Element();
     [node_outputs_cell, node_outputs_withoutDT_cell] =...
-        nasa_toLustre.utils.SLX2LusUtils.extract_node_InOutputs_withDT(blk, 'Outport', xml_trace);
+        nasa_toLustre.utils.SLX2LusUtils.extract_node_InOutputs_withDT(blk, 'Outport', xml_trace, main_sampleTime);
 
     if is_main_node && isempty(node_outputs_cell)
         node_outputs_cell{end+1} = nasa_toLustre.lustreAst.LustreVar(...

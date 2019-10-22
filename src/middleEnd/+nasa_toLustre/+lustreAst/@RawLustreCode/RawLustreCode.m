@@ -48,7 +48,7 @@ classdef RawLustreCode < nasa_toLustre.lustreAst.LustreAst
         
         
         %%
-        code = print(obj, ~)
+        code = print(obj, varargin)
         
         code = print_lustrec(obj)
         

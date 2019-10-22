@@ -12,14 +12,14 @@ classdef Demux_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     
     methods
         
-        function  write_code(obj, parent, blk, xml_trace, varargin)
+        function  write_code(obj, parent, blk, xml_trace, ~, ~, main_sampleTime, varargin)
             
             if strcmp(blk.BusSelectionMode, 'on')
                 display_msg(sprintf('BusSelectionMode on is not supported in block %s',...
                     HtmlItem.addOpenCmd(blk.Origin_path)), ...
                     MsgType.ERROR, 'Demux_To_Lustre', '');
             end
-            [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace);
+            [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace, main_sampleTime);
 
             inputs{1} =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk, 1);
             

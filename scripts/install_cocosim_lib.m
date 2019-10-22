@@ -77,7 +77,7 @@ function isAlreadyUpToDate = cloneOrPull(git_dir, git_url, git_branch)
             return;
         end
     end
-    isAlreadyUpToDate = contains(sys_out{pull_idex}, 'Already up to date.');
+    isAlreadyUpToDate = MatlabUtils.contains(sys_out{pull_idex}, 'Already up to date.');
 end
 %%
 function copyCoCoFiles(force, cocosim_path)
@@ -218,7 +218,7 @@ function copyExternalLibFiles(force, cocosim_path)
     catch ME
         switch ME.identifier
             case 'MATLAB:fileread:cannotOpenFile'
-                fprintf("Patch failed: Can't open file %s", file_path);
+                fprintf('Patch failed: Can''t open file %s', file_path);
             otherwise
                 rethrow(ME)
         end

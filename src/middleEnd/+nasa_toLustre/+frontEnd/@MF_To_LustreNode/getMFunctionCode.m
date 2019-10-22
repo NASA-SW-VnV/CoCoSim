@@ -34,15 +34,24 @@ function [external_nodes, failed] = getMFunctionCode(blkObj, parent,  blk, Input
     if failed, return; end
     
     % Get all functions information before generating code
-    func_nodes = cellfun(@(func) nasa_toLustre.frontEnd.MF_To_LustreNode.getFunHeader(func, blk, fun_data_map(func.name)), ...
-        funcList, 'UniformOutput', 0);
     func_names = cellfun(@(func) func.name, funcList, 'UniformOutput', 0);
-    SF_MF_FUNCTIONS_MAP = containers.Map(func_names, func_nodes);
+    usedFunc = {};
+    func_nodes = {};
+    for i=1:length(func_names)
+        fstruct = funcList{i};
+        if isKey(fun_data_map, fstruct.name)
+            func_nodes{end+1} = nasa_toLustre.frontEnd.MF_To_LustreNode.getFunHeader(...
+                fstruct, blk, fun_data_map(fstruct.name));
+            usedFunc{end+1} = fstruct;
+        end
+    end
+    usedFunctionsNames = cellfun(@(func) func.name, usedFunc, 'UniformOutput', 0);
+    SF_MF_FUNCTIONS_MAP = containers.Map(usedFunctionsNames, func_nodes);
     
     %generate code
     [external_nodes, failed] = cellfun(@(func) ...
         nasa_toLustre.frontEnd.MF_To_LustreNode.getFuncCode(func, fun_data_map(func.name), blkObj, parent, blk), ...
-        funcList, 'UniformOutput', 0);
+        usedFunc, 'UniformOutput', 0);
     failed = all([failed{:}]);
     if ~isempty(MFUNCTION_EXTERNAL_NODES)
         external_nodes = MatlabUtils.concat(external_nodes, MFUNCTION_EXTERNAL_NODES);
