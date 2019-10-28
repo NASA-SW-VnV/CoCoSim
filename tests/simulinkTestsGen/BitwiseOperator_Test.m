@@ -8,8 +8,8 @@ classdef BitwiseOperator_Test < Block_Test
     
     properties
         % properties that will participate in permutations
-        inputDataType = {'int8','uint8','int16','uint16',...
-            'int32','uint32','fixdt(1,16,0)','boolean'};
+        inputDataType = {'int8','uint8','int16',...
+            'uint32','Inherit: auto','boolean'};
         logicop = {'AND','OR','NAND','NOR','XOR','NOT'};
         UseBitMask = {'on','off'};
         BitMaskRealWorld = {'Real World Value','Stored Integer'};

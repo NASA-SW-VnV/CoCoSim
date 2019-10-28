@@ -9,7 +9,7 @@ classdef Bias_Test < Block_Test
     properties
         % properties that will participate in permutations
         inputDataType = {'double','single','int8',...
-            'uint8','int32','uint32','fixdt(1,16,0)'};
+            'uint8','int32','uint32','Inherit: auto'};
         Bias = {'-3.','[-1.5 1 5.]', '[0 5; 5.2 -1]'};
     end
     

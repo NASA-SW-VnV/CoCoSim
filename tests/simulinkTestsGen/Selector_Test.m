@@ -8,7 +8,7 @@ classdef Selector_Test < Block_Test
     
     properties
         % properties that will participate in permutations
-        NumberOfDimensions = {'1','2','3','4','5','6','7'}
+        NumberOfDimensions = {'1','2','3','4'}
         IndexOptionArray =  {...
             'Select all',...
             'Index vector (dialog)',...
@@ -147,7 +147,7 @@ classdef Selector_Test < Block_Test
         function params = getPermutations(obj)
             params = {};
        
-            for pDim = 1 : 4   % pDim: number of ouput dimensions
+            for pDim = 1 : length( obj.NumberOfDimensions ) % pDim: number of ouput dimensions
 
                 for pIndOpt = 1 : length( obj.IndexOptionArray )
 

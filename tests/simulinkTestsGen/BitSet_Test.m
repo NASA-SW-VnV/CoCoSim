@@ -9,7 +9,7 @@ classdef BitSet_Test < Block_Test
     properties
         % properties that will participate in permutations
         inputDataType = {'int8','uint8','int16','uint16',...
-            'int32','uint32','fixdt(1,16,0)','boolean'};
+            'int32','uint32','Inherit: auto','boolean'};
         iBit = {'0','[1 2 4]', '[0 2; 3 4]'};
     end
     

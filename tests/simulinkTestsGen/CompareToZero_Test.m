@@ -9,16 +9,16 @@ classdef CompareToZero_Test < Block_Test
     properties
         % properties that will participate in permutations
         OutDataTypeStr = {'uint8','boolean'};
-        inpDataType = {...
-            'double','single','int8','uint8','int16','uint16','int32',...
-            'uint32','fixdt(1,16,0)',...
-            'fixdt(1,16,2^0,0)','boolean'};        
+       
         relop = {'==','~=','<','<=','>=','>'};
 
     end
     
     properties
         % other properties
+        inpDataType = {...
+            'double','single','int8','uint8','int32',...
+            'uint32','boolean'};         
         ZeroCross = {'off','on'};  
     end
     

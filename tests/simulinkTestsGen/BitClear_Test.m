@@ -9,7 +9,7 @@ classdef BitClear_Test < Block_Test
     properties
         % properties that will participate in permutations
         inputDataType = {'int8','uint8','int16','uint16',...
-            'int32','uint32','fixdt(1,16,0)','boolean'};
+            'int32','uint32','Inherit: auto','boolean'};
         iBit = {'0','[1 2 4]', '[0 2; 3 4]'};
     end
     
@@ -28,8 +28,8 @@ classdef BitClear_Test < Block_Test
             nb_tests = length(params);
             condExecSSPeriod = floor(nb_tests/length(Block_Test.condExecSS));
             for i=1 : nb_tests
-                skipTests = [];
-                if ismember(i,skipTests)
+                skipTests = [1];
+                if ~ismember(i,skipTests)
                     continue;
                 end
                 try

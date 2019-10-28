@@ -149,7 +149,8 @@ classdef Block_Test
         %% create new model
         function [blkPath, mdl_path, skip] = create_new_model(mdl_name, outputDir, deleteIfExists, addCondExecSS, condExecSSIdx)
             skip = false;
-            
+            blkPath = '';
+            mdl_path ='';
             try
                 if bdIsLoaded(mdl_name), bdclose(mdl_name); end
                 mdl_path = fullfile(outputDir, strcat(mdl_name, '.slx'));
@@ -167,7 +168,7 @@ classdef Block_Test
                 return;
             end
             new_system(mdl_name);
-            open_system(mdl_name);
+            %open_system(mdl_name);
             if addCondExecSS
                 if bdIsLoaded('Block_TestLib'), load_system('Block_TestLib'); end
                 if condExecSSIdx > length(Block_Test.condExecSS)
@@ -206,7 +207,7 @@ classdef Block_Test
             if failed
                 display_msg(['Model failed: ' mdl_name], ...
                     MsgType.ERROR, 'generateTests', '');
-                %save_system(mdl_name, mdl_path);
+                save_system(mdl_name, mdl_path);
             else
                 save_system(mdl_name, mdl_path);
             end

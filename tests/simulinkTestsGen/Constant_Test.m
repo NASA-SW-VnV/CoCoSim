@@ -13,8 +13,7 @@ classdef Constant_Test < Block_Test
         Value = {'1','10','[1 2 4]', '[0 2; 3 4]'};
         OutDataTypeStr = {...
             'double','single','int8','uint8','int32',...
-            'uint32','fixdt(1,16,0)',...
-            'fixdt(1,16,2^0,0)'};        
+            'uint32'};        
     end
     
     properties

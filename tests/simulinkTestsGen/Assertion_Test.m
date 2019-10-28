@@ -12,7 +12,7 @@ classdef Assertion_Test < Block_Test
         % inputDataType is not a block parameter
         inputDataType = {'double', 'single','int8',...
             'uint8','int16','uint16','int32', ...
-            'uint32','boolean','fixdt(1,16,0)','fixdt(1,16,2^0,0)'};
+            'uint32','boolean','Inherit: auto'};
       
     end
     
@@ -59,6 +59,8 @@ classdef Assertion_Test < Block_Test
 
                     Block_Test.add_and_connect_block(obj.blkLibPath, blkPath, s);
                     
+                    
+                    
                     %% go over inports
                     try
                         blk_parent = get_param(blkPath, 'Parent');
@@ -78,7 +80,12 @@ classdef Assertion_Test < Block_Test
 
                     failed = Block_Test.setConfigAndSave(mdl_name, mdl_path);
                     if failed, display(s), end
-                
+                    
+                    % Need outport, add sum block and outport 
+                    add_block('simulink/Discontinuities/Saturation', ...
+                        fullfile(blk_parent, 'Satur'), ...
+                        'LowerLimit',lowerLimit,...
+                        'UpperLimit',upperLimit);                   
                     
                 catch me
                     display(s);

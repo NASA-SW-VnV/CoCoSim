@@ -8,19 +8,18 @@ classdef CompareToConstant_Test < Block_Test
     
     properties
         % properties that will participate in permutations
-        OutDataTypeStr = {'uint8','boolean'};
-        inpDataType = {...
-            'double','single','int8','uint8','int16','uint16','int32',...
-            'uint32','fixdt(1,16,0)',...
-            'fixdt(1,16,2^0,0)','boolean'};        
+        OutDataTypeStr = {'uint8','boolean'};       
         relop = {'==','~=','<','<=','>=','>'};
         const = {'-3.4','0.','25'};
-        ZeroCross = {'off','on'};
+
     end
     
     properties
         % other properties
-  
+        ZeroCross = {'off','on'};  
+        inpDataType = {...
+            'double','single','int8','uint8','int16','uint16','int32',...
+            'uint32','boolean'};         
     end
     
     methods
