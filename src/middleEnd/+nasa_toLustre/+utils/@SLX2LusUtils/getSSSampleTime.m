@@ -7,9 +7,9 @@
 
 
 %% Try to calculate Sabsystem sample time using the model
-function [st, ph] = getSSSampleTime(Clocks)
-    st = 1;
-    ph = 0;
+function [st, ph] = getSSSampleTime(Clocks, main_sampleTime)
+    st = main_sampleTime(1);
+    ph = main_sampleTime(2);
     T = [];
     P = [];
     if iscell(Clocks)
@@ -18,7 +18,7 @@ function [st, ph] = getSSSampleTime(Clocks)
             if ~isempty(v) && isnumeric(v)
                 sv = v(1);
                 if numel(v) >= 2, pv = v(2); else, pv = 0; end
-                if ~(isnan(sv) || sv==Inf)
+                if ~(isnan(sv) || sv==Inf || sv < 0)
                     T(end +1) = sv;
                     P(end +1) = pv;
                 end

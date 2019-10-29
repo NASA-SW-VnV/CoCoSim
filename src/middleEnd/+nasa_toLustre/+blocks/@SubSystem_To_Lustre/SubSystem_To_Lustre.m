@@ -66,9 +66,9 @@ classdef SubSystem_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                         && isfield(blk, 'CompiledSampleTime') ...
                         && isfield(parent, 'CompiledSampleTime')
                     [inTs, inTsOffset] = ...
-                        nasa_toLustre.utils.SLX2LusUtils.getSSSampleTime(parent.CompiledSampleTime);
+                        nasa_toLustre.utils.SLX2LusUtils.getSSSampleTime(parent.CompiledSampleTime, main_sampleTime);
                     [outTs, outTsOffset] = ...
-                        nasa_toLustre.utils.SLX2LusUtils.getSSSampleTime(blk.CompiledSampleTime);
+                        nasa_toLustre.utils.SLX2LusUtils.getSSSampleTime(blk.CompiledSampleTime, main_sampleTime);
                     if (outTs ~= inTs || outTsOffset ~= inTsOffset)
                         c = outTs / inTs;
                         if outTs > inTs

@@ -1,4 +1,4 @@
-function [fun_data_map, failed] = getFuncsDataMap(blk, script, ...
+function [fun_data_map, failed] = getFuncsDataMap(parent, blk, script, ...
         functions_struct, Inputs)
     %% run the function for random inputs and get function workspace
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -34,6 +34,34 @@ function [fun_data_map, failed] = getFuncsDataMap(blk, script, ...
     args = cellfun(@(x) ...
         SLXUtils.get_random_values( 1, min, max, ...
         str2num(x.CompiledSize), x.CompiledType{1}), Inputs, 'UniformOutput', 0);
+    Inputs_names = cellfun(@(x) x.Name, Inputs, 'UniformOutput', 0);
+    % add params if exists
+    if nargin(fH) > length(args) ...
+            && isfield(blk, 'Parameters') && ~isempty(blk.Parameters)
+        % Add Parameters
+        for i=1:length(blk.Parameters)
+            param = blk.Parameters{i}.Name;
+            hws = get_param(bdroot(blk.Origin_path), 'ModelWorkspace');
+            if isvarname(param) && hasVariable(hws, param)
+                Value = getVariable(hws, param);
+            else
+                try
+                    Value = evalin('base', param);
+                catch
+                    display_msg(['Parameter ' param ' could not be found for block "' blk.Origin_path '".'],...
+                        MsgType.ERROR, 'MF_To_LustreNode.getFuncsDataMap', '');
+                    failed = true;
+                    return;
+                end
+            end
+            args{end+1} = Value;
+            Inputs_names{end+1} = param;
+        end
+    end
+    %order args
+    I = cellfun(@(x) find(strcmp(x, functions_struct{1}.input_params)), ...
+        Inputs_names, 'UniformOutput', true);
+    args = args(I);
     %call function
     failed = callFunction(fH, args, func_path, blk);
     if failed
@@ -47,7 +75,7 @@ function [fun_data_map, failed] = getFuncsDataMap(blk, script, ...
         if length(CoCoVars) > length(functions_struct)
             display_msg(sprintf('Could not get Information about DataType of variables in block %s.', ...
                 HtmlItem.addOpenCmd(blk.Origin_path)), ...
-                MsgType.DEBUG, 'getFuncsDataMap', '');
+                MsgType.ERROR, 'getFuncsDataMap', '');
             failed = true;
             return;
         end
@@ -65,6 +93,13 @@ function [fun_data_map, failed] = getFuncsDataMap(blk, script, ...
             end
             inputs_names = functions_struct{j}.input_params;
             outputs_names = functions_struct{j}.return_params;
+            if ismember('struct', {vars.class})
+                display_msg(sprintf('Variables of data type "struct" is not supported in block %s.', ...
+                    HtmlItem.addOpenCmd(blk.Origin_path)), ...
+                    MsgType.ERROR, 'getFuncsDataMap', '');
+                failed = true;
+                return;
+            end
             data = arrayfun(@(d) ...
                 buildData(d, inputs_names, outputs_names),vars, 'UniformOutput', 0);
             data_names = arrayfun(@(d) d.name, vars, 'UniformOutput', 0);
@@ -167,6 +202,7 @@ function failed = callFunction(fH, args, func_path, blk, loop_flag)
         loop_flag = false;
     end
     failed = false;
+    
     try
         fH(args{:});
     catch me

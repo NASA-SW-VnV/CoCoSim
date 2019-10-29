@@ -35,10 +35,9 @@ function [script, failed] = getAllRequiredFunctionsInOneScript(blk)
     fprintf(fid, script);
     fclose(fid);
     fList = matlab.codetools.requiredFilesAndProducts(func_path);
-    if numel(fList) > 1
-        for i=2:length(fList)
-            script = sprintf('%s\n%s', script, fileread(fList{i}));
-        end
+    fList = fList(~strcmp(fList, func_path));
+    for i=1:length(fList)
+        script = sprintf('%s\n%s', script, fileread(fList{i}));
     end
 
     try delete(func_path), catch, end

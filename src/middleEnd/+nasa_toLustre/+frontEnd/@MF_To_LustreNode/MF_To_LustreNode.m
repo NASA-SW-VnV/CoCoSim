@@ -18,7 +18,7 @@ classdef MF_To_LustreNode
         [external_nodes, failed] = getMFunctionCode(blkObj, parent,  blk, Inputs)
         [script, failed] = getAllRequiredFunctionsInOneScript(blk)
         [functions, failed] = getFunctionList(blk, script)
-        [data_map, failed] = getFuncsDataMap(blk, script, functions, Inputs)
+        [data_map, failed] = getFuncsDataMap(parent, blk, script, functions, Inputs)
         [fun_node,failed ]  = getFuncCode(func, data_map, blkObj, parent, blk)
         [fun_node] = getFunHeader(func, blk, data_map)
     end

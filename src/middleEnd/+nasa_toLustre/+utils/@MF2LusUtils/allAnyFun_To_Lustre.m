@@ -10,6 +10,9 @@ function [code, exp_dt, dim, extra_code] = allAnyFun_To_Lustre(tree, args, op)
     code = {};
     
     [x, x_dt, x_dim, extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(1), args);
+    if length(x_dim) == 1
+        x_dim = [x_dim, 1];
+    end
     n_dim = numel(x_dim);
     x_new = reshape(x, x_dim);
     

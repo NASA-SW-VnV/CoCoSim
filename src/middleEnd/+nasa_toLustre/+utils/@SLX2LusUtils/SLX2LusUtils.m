@@ -116,7 +116,7 @@ classdef SLX2LusUtils
 
         clocks_list = getRTClocksSTR(blk, main_sampleTime)
         
-        [st, ph] = getSSSampleTime(Clocks)
+        [st, ph] = getSSSampleTime(Clocks, main_sampleTime)
         %% check model compatibility: Variable size signals, Fixed Data types, 
         % main_sample time. ...
         htmlItemMsg = modelCompatibilityCheck(model_name, main_sampleTime)
