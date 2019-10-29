@@ -18,6 +18,8 @@ classdef MF2LusUtils
         
         [code, dim] = mtimesFun_To_Lustre(x, x_dim, y, y_dim)
         
+        [code, exp_dt, dim, extra_code] = maxMinFun_To_Lustre(tree, args, op)
+        
         [code, exp_dt, dim] = numFun_To_Lustre(tree, args)
         
         [while_node] = abstract_statements_block(tree, args, type)

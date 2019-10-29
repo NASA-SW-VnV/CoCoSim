@@ -100,9 +100,10 @@ function [code, dim, extra_code] = parseOtherFunc(tree, args)
             throw(ME);
         end
     else
-        try
+        if evalin('base', sprintf('exist(''%s'', ''var'')', tree.ID))
             % eval in base expression such as
             % A(1,1) or single(1e-18) ...
+            
             exp = tree.text;
             [value, ~, status] = ...
                 nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(args.parent, args.blk, exp);
@@ -119,12 +120,12 @@ function [code, dim, extra_code] = parseOtherFunc(tree, args)
             else
                 code = nasa_toLustre.lustreAst.RealExpr(value);
             end
-        catch me
+        else 
             display_msg(...
                 sprintf('Function "%s" is not handled in Block %s. The code will be abstracted.',...
                 tree.ID, args.blk.Origin_path),...
                 MsgType.WARNING, 'MExpToLusAST.fun_indexing_To_Lustre', '');
-            display_msg(me.getReport(), MsgType.DEBUG, 'MExpToLusAST.fun_indexing_To_Lustre', '');
+            %display_msg(me.getReport(), MsgType.DEBUG, 'MExpToLusAST.fun_indexing_To_Lustre', '');
             ME = MException('COCOSIM:TREE2CODE', ...
                 'Function "%s" is not handled in Block %s',...
                 tree.ID, args.blk.Origin_path);

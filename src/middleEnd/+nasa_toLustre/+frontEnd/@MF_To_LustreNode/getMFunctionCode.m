@@ -29,7 +29,7 @@ function [external_nodes, failed] = getMFunctionCode(blkObj, parent,  blk, Input
     end
     
     % creat DATA_MAP
-    [fun_data_map, failed] = nasa_toLustre.frontEnd.MF_To_LustreNode.getFuncsDataMap(blk, script, ...
+    [fun_data_map, failed] = nasa_toLustre.frontEnd.MF_To_LustreNode.getFuncsDataMap(parent, blk, script, ...
         funcList, Inputs);
     if failed, return; end
     

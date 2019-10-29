@@ -17,8 +17,11 @@ try
 catch
     loops = [];
 end
-code_on=sprintf('%s([], [], [], ''term'')', new_model_base);
-evalin('base',code_on);
+try
+    code_on=sprintf('%s([], [], [], ''term'')', new_model_base);
+    evalin('base',code_on);
+catch
+end
 if numel(loops) > 0
     status = 1;
     errors_msg{end + 1} = sprintf('AlgebraicLoops pre-process has failed for %s (maybe by adding unit Delays)', new_model_base);

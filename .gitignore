@@ -56,3 +56,5 @@ tools/build/
 tools/verifiers/
 test
 scripts/install_cocosim_tmp.sh
+*_PP.slx
+*.slxc

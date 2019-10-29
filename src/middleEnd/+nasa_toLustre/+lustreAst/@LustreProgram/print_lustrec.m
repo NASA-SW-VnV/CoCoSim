@@ -23,7 +23,7 @@ function [lus_code, plu_code] = print_lustrec(obj, backend)
     %types
     types = cellfun(@(x) sprintf('%s', x.print(backend)), obj.types, ...
         'UniformOutput', false);
-    lus_lines = [lus_lines; types];
+    lus_lines = MatlabUtils.concat(lus_lines, types);
     if LusBackendType.isPRELUDE(backend)
         plu_lines = [plu_lines; types];
     end

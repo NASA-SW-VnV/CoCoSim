@@ -20,6 +20,7 @@ classdef MExpToLusDT
         [lusDT, slxDT] = expression_DT(tree, args)
         [lusDT, slxDT] = fun_indexing_DT(tree, args)
         [lusDT, slxDT] = ID_DT(tree, args)
+        [lusDT, slxDT] = ignore_value_DT(varargin)
         [lusDT, slxDT] = matrix_DT(tree, args)
         [lusDT, slxDT] = parenthesedExpression_DT(tree, args)
         [lusDT, slxDT] = struct_indexing_DT(tree, args)

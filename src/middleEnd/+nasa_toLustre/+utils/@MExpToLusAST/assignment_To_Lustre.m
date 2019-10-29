@@ -21,6 +21,7 @@ function [code, assignment_dt, dim, extra_code] = assignment_To_Lustre(tree, arg
             tree.leftExp, args);
         
         args.isLeft = false;
+        args.expected_dim = dim;
         [right, ~, ~, right_extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
             tree.rightExp, args);
         extra_code = MatlabUtils.concat(left_extra_code, right_extra_code);
