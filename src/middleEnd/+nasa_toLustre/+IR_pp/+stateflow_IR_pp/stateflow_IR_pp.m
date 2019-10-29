@@ -57,7 +57,7 @@ function [new_ir, status] = stateflow_IR_pp(old_ir, print_in_file, output_dir)
 
     if print_in_file
         try
-            json_text = json_encode(new_ir);
+            json_text = MatlabUtils.jsonencode(new_ir);
             json_text = regexprep(json_text, '\\/','/');
             fname = fullfile(output_dir, sprintf('%s_SFIR_pp_tmp.json', nasa_toLustre.IR_pp.stateflow_IR_pp.SFIRPPUtils.adapt_root_name(new_ir.Name{1})));
             fname_formatted = fullfile(output_dir, sprintf('%s_SFIR_pp.json', nasa_toLustre.IR_pp.stateflow_IR_pp.SFIRPPUtils.adapt_root_name(new_ir.Name{1})));

@@ -10,6 +10,6 @@ function tree = getExpTree(exp)
     em2json =  cocosim.matlab2IR.EM2JSON;
     IR_string = em2json.StringToIR(exp);
     IR2 = strrep(char(IR_string), '\', '\\');
-    IR = json_decode(IR2);
+    IR = MatlabUtils.jsondecode(IR2);
     tree = IR.statements(1);
 end

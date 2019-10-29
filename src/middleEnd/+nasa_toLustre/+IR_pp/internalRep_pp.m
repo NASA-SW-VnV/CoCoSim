@@ -34,7 +34,7 @@ function [ new_ir, ir_handle_struct_map, ir_json_path ] = internalRep_pp( new_ir
     %% export json
     if json_export
         try
-            ir_encoded = json_encode(new_ir);
+            ir_encoded = MatlabUtils.jsonencode(new_ir);
             ir_encoded = strrep(ir_encoded,'\/','/');
             mdl_name = '';
             if nargin < 3

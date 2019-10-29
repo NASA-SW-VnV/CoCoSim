@@ -62,7 +62,7 @@ classdef SLX2Lus_Trace < handle
             %JSON
             fid= fopen(obj.json_file_path, 'w+');
             if fid~=-1
-                json_model = json_encode(obj.json_struct); 
+                json_model = MatlabUtils.jsonencode(obj.json_struct); 
                 json_model = strrep(json_model,'\/','/');
                 fprintf(fid, '%s\n', json_model);
             end

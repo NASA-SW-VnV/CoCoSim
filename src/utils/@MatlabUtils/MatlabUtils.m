@@ -41,6 +41,10 @@ classdef MatlabUtils
         c2 = cellCartesianProduct(c1)
         %% get package prefix
         path_prefix = getPackagePrefix(f_parent, f_name)
+        
+        %% json encode, decode
+        json = jsondecode(s)
+        json = jsonencode(s)
         %% This function for developers
         % open all files that contains a String
         whoUse(folder, str)

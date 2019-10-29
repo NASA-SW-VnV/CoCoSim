@@ -263,7 +263,7 @@ elseif (tests_method == 4) %4- Prove LUS1 <=> LUS2.
         IN_struct{i} = IN_struct_i;
     end
     if prod(cellfun(@isempty, IN_struct)) ~= 1
-        json_text = json_encode(IN_struct);
+        json_text = MatlabUtils.jsonencode(IN_struct);
         json_text = regexprep(json_text, '\\/','/');
         fname = fullfile(output_dir, 'CounterExamples_tmp.json');
         fname_formatted = fullfile(output_dir, 'CounterExamples.json');
