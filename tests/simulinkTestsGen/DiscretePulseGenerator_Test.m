@@ -31,8 +31,8 @@ classdef DiscretePulseGenerator_Test < Block_Test
             nb_tests = length(params);
             condExecSSPeriod = floor(nb_tests/length(Block_Test.condExecSS));
             for i=1 : nb_tests
-                testId = [24];
-                if ~ismember(i,testId)
+                testId = [];
+                if ismember(i,testId)
                     continue;
                 end
                 try

@@ -25,10 +25,10 @@ classdef DiscreteStateSpace_Test < Block_Test
             mat2str([1.; .2]),mat2str([.5 .6; .7 .8])};
         InitialCondition =  {'0'};
         OutDataTypeStr = {'Inherit: Inherit via internal rule',...
-            'int8','int16','int32','fixdt(1,16,0)'};
+            'int8','int16','int32'};
         inputDataType = {'double', 'single','int8',...
             'uint8','int16','uint16','int32', ...
-            'uint32','boolean','fixdt(1,16,0)','fixdt(1,16,2^0,0)'};   
+            'uint32','boolean'};   
     end
     
     properties

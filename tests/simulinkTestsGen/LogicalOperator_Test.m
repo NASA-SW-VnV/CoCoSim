@@ -15,7 +15,7 @@ classdef LogicalOperator_Test < Block_Test
             'boolean'};
         inputDataType = {'double', 'single','int8',...
             'uint8','int16','uint16','int32', ...
-            'uint32','boolean','fixdt(1,16,0)','fixdt(1,16,2^0,0)'};   
+            'uint32','boolean'};   
     end
     
     properties

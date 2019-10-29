@@ -11,13 +11,15 @@ classdef Delay_Test < Block_Test
         DelayLengthSource = {'Dialog','Input port'};
         DelayLength = {'2','4'};
         InitialConditionSource = {'Dialog','Input port'};
-        inputDataType = {'double', 'single','int8',...
-            'uint8','int16','uint16','int32', ...
-            'uint32','boolean','fixdt(1,16,0)','fixdt(1,16,2^0,0)'};   
+ 
     end
     
     properties
         % other properties
+        inputDataType = {'double', 'single','int8',...
+            'uint8','int16','uint16','int32', ...
+            'uint32','boolean'};  
+        
         DelayLengthUpperLimit = {'100','150'};
         InitialCondition = {'0.0','0.5'};
         ExternalReset = {'None','Rising','Falling','Either',...

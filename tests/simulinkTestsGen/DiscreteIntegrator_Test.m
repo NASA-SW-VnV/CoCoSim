@@ -2,7 +2,7 @@ classdef DiscreteIntegrator_Test < Block_Test
     %DiscreteFirFilter_Test generates test automatically.
     
     properties(Constant)
-        fileNamePrefix = 'DiscreteFirFilter_TestGen';
+        fileNamePrefix = 'DiscreteIntegrator_TestGen';
         blkLibPath = 'simulink/Discrete/Discrete-Time Integrator';
     end
     
@@ -20,10 +20,10 @@ classdef DiscreteIntegrator_Test < Block_Test
         OutDataTypeStr = {...
             'Inherit: Inherit via back propagation','double',...
             'single','int8','uint8','int16','uint16','int32',...
-            'uint32','int64','fixdt(1,16,0)','fixdt(1,16,2^0,0)'};
+            'uint32','int64'};
         inputDataType = {'double', 'single','int8',...
             'uint8','int16','uint16','int32', ...
-            'uint32','boolean','fixdt(1,16,0)','fixdt(1,16,2^0,0)'};   
+            'uint32','boolean'};   
     end
     
     properties
@@ -66,8 +66,8 @@ classdef DiscreteIntegrator_Test < Block_Test
             nb_tests = length(params);
             condExecSSPeriod = floor(nb_tests/length(Block_Test.condExecSS));
             for i=1 : nb_tests
-                skipTests = [10,28,34,46,58,70];
-                if ~ismember(i,skipTests)
+                skipTests = [];
+                if ismember(i,skipTests)
                     continue;
                 end
                 try
