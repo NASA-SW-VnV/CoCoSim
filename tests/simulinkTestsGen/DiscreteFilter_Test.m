@@ -11,11 +11,6 @@ classdef DiscreteFilter_Test < Block_Test
         Numerator = {'[1]','[0.5 .7]'};
         Denominator = {'[1 0.5 2]','[1 0.5 2 1.5]'};
         IC = {'0'};
-        
-        
-        
-        
-        
         ICPrevScaledInput = {'0.0','2.0'};        
         OutDataTypeStr = {'Inherit: Inherit via internal rule',...
             'int8','int16','int32'};
