@@ -161,7 +161,7 @@ function [x2, y2] = process_branch(nodes, new_model_name, node_block_path, blk_e
         branch_exprs = branches.(b{1}).instrs;
         [x4, y4] = Lus2SLXUtils.instrs_process(nodes, new_model_name, branch_path, branch_exprs, branch_ID, x4, y4, xml_trace);
 
-        % link IF with Action subsystem
+        % link IF/Switch with Action subsystem
         if useSwitch
             DstBlkH = get_param(IF_path,'PortHandles');
             SrcBlkH = get_param(branch_path,'PortHandles');
@@ -239,25 +239,29 @@ end
 %%
 function b = useSwitchInsteadOfIF(branch_struct)
     b = false;
+    %TODO: support more than one output
     if length(branch_struct.outputs) == 1 ...
             && length(fieldnames(branch_struct.branches)) == 2
         branches = branch_struct.branches;
         branch_names = fieldnames(branches);
         if ismember('true', branch_names) && ismember('false', branch_names)
-            if length(branches.true.inputs) == 1 ...
-                    && length(branches.true.instrs) == 1 ...
-                    && length(branches.false.inputs) == 1 ...
-                    && length(branches.false.instrs) == 1
-                true_instr = branches.true.instrs;
-                true_instr_names = fieldnames(true_instr);
-                false_instr = branches.false.instrs;
-                false_instr_names = fieldnames(false_instr);
-                b = strcmp(true_instr.(true_instr_names{1}).kind, 'local_assign') ...
-                    && strcmp(true_instr.(true_instr_names{1}).rhs.type, 'variable') ... 
-                    && strcmp(false_instr.(false_instr_names{1}).kind, 'local_assign') ...
-                    && strcmp(false_instr.(false_instr_names{1}).rhs.type, 'variable');
-                
-            end
+            % New
+            b = ~Lus2SLXUtils.instr_mayHaveMemory(branch_struct);
+            % OLD
+%             if length(branches.true.inputs) == 1 ...
+%                     && length(branches.true.instrs) == 1 ...
+%                     && length(branches.false.inputs) == 1 ...
+%                     && length(branches.false.instrs) == 1
+%                 true_instr = branches.true.instrs;
+%                 true_instr_names = fieldnames(true_instr);
+%                 false_instr = branches.false.instrs;
+%                 false_instr_names = fieldnames(false_instr);
+%                 b = strcmp(true_instr.(true_instr_names{1}).kind, 'local_assign') ...
+%                     && strcmp(true_instr.(true_instr_names{1}).rhs.type, 'variable') ... 
+%                     && strcmp(false_instr.(false_instr_names{1}).kind, 'local_assign') ...
+%                     && strcmp(false_instr.(false_instr_names{1}).rhs.type, 'variable');
+%                 
+%             end
         end
     end
 end
