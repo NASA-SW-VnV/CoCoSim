@@ -10,9 +10,10 @@ classdef BinaryExpr < nasa_toLustre.lustreAst.LustreExpr
         op;
         left;
         right;
-        withPar; %with parentheses
-        addEpsilon;
-        epsilon;
+        withPar = true; %with parentheses
+        addEpsilon = false;
+        epsilon = [];
+        operandsDT = ''; % operands DataType
     end
     properties(Constant)
         OR = 'or';
@@ -42,7 +43,7 @@ classdef BinaryExpr < nasa_toLustre.lustreAst.LustreExpr
     end
     methods
         %%
-        function obj = BinaryExpr(op, left, right, withPar, addEpsilon, epsilon)
+        function obj = BinaryExpr(op, left, right, withPar, addEpsilon, epsilon, operandsDT)
             obj.op = op;
             if iscell(left)
                 obj.left = left{1};
@@ -69,6 +70,15 @@ classdef BinaryExpr < nasa_toLustre.lustreAst.LustreExpr
             else
                 obj.epsilon = epsilon;
             end
+            if nargin < 7 || isempty(operandsDT)
+                obj.operandsDT = '';
+                if isa(obj.left, 'nasa_toLustre.lustreAst.RealExpr') ...
+                        || isa(obj.right, 'nasa_toLustre.lustreAst.RealExpr')
+                    obj.operandsDT = 'real';
+                end
+            else
+                obj.operandsDT = operandsDT;
+            end
             % check the object is a valid Lustre AST.
             if ~isa(obj.left, 'nasa_toLustre.lustreAst.LustreExpr') ...
                     || ~isa(obj.right, 'nasa_toLustre.lustreAst.LustreExpr')
@@ -80,7 +90,9 @@ classdef BinaryExpr < nasa_toLustre.lustreAst.LustreExpr
         end
         
         setPar(obj, withPar)
-
+        function setOperandsDT(obj, dt)
+            obj.operandsDT = dt;
+        end
         %% deepCopy
         new_obj = deepCopy(obj)
 
@@ -140,11 +152,14 @@ classdef BinaryExpr < nasa_toLustre.lustreAst.LustreExpr
     methods(Static)
         % Given many args, this function return the binary operation
         % applied on all arguments.
-        function exp = BinaryMultiArgs(op, args, isFirstTime)
+        function exp = BinaryMultiArgs(op, args, operandsDT, isFirstTime)
             
             
-            if nargin < 3
+            if nargin < 4 || isempty(isFirstTime)
                 isFirstTime = 1;
+            end
+            if nargin < 3 || isempty(operandsDT)
+                operandsDT = '';
             end
             if isempty(args) || numel(args) == 1
                 if iscell(args)
@@ -157,14 +172,20 @@ classdef BinaryExpr < nasa_toLustre.lustreAst.LustreExpr
                     args{1}, ...
                     args{2},...
                     false);
+                if ~isempty(operandsDT)
+                    exp.setOperandsDT(operandsDT);
+                end
                 if isFirstTime
                     exp = nasa_toLustre.lustreAst.ParenthesesExpr(exp);
                 end
             else
                 exp = nasa_toLustre.lustreAst.BinaryExpr(op, ...
                     args{1}, ...
-                    nasa_toLustre.lustreAst.BinaryExpr.BinaryMultiArgs(op, args(2:end), false), ...
+                    nasa_toLustre.lustreAst.BinaryExpr.BinaryMultiArgs(op, args(2:end), operandsDT, false), ...
                     false);
+                if ~isempty(operandsDT)
+                    exp.setOperandsDT(operandsDT);
+                end
                 if isFirstTime
                     exp = nasa_toLustre.lustreAst.ParenthesesExpr(exp);
                 end

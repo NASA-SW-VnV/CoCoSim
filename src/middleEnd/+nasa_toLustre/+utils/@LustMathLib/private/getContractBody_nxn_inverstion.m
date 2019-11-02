@@ -23,6 +23,7 @@ function contractBody = getContractBody_nxn_inverstion(n,inputs,outputs)
                 terms{k} = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.MULTIPLY, ...
                     inputs{1,A_index},...
                     outputs{1,A_inv_index});
+                terms{k}.setOperandsDT('real');
             end
             lhs = nasa_toLustre.lustreAst.BinaryExpr.BinaryMultiArgs(nasa_toLustre.lustreAst.BinaryExpr.PLUS,terms);
             if i==j

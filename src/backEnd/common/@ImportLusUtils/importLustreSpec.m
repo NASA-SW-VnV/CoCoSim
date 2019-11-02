@@ -98,17 +98,23 @@ function [new_model_path, status] = importLustreSpec(...
             if use_traceability ...
                     && isfield(mapping_json, original_name) ...
                     && isfield(mapping_json.(original_name), 'model_path')
-                simulink_block_name = mapping_json.(original_name).model_path;
-                simulink_block_name = renamePath(simulink_block_name, base_name, new_model_name);
-                isBdRoot = strcmp(get_param(simulink_block_name, 'Type'), 'block_diagram');
-                if ~isBdRoot && getSimulinkBlockHandle(simulink_block_name) == -1
-                    % model_path in traceability file does not exist.
+                try
+                    simulink_block_name = mapping_json.(original_name).model_path;
+                    simulink_block_name = renamePath(simulink_block_name, base_name, new_model_name);
+                    isBdRoot = strcmp(get_param(simulink_block_name, 'Type'), 'block_diagram');
+                    if ~isBdRoot && getSimulinkBlockHandle(simulink_block_name) == -1
+                        % model_path in traceability file does not exist.
+                        simulink_block_name = renamePath(current_openedSS, base_name, new_model_name);
+                        skip_linking = true;
+                        display_msg(...
+                            sprintf('Model path "%s" for contract %s can not be found. Linking Should be done manually.', ...
+                            mapping_json.(original_name).model_path, original_name), MsgType.WARNING, 'importLustreSpec', '');
+                        
+                    end
+                catch 
+                    % Give the current opened Subsystem
                     simulink_block_name = renamePath(current_openedSS, base_name, new_model_name);
                     skip_linking = true;
-                    display_msg(...
-                        sprintf('Model path "%s" for contract %s can not be found. Linking Should be done manually.', ...
-                        mapping_json.(original_name).model_path, original_name), MsgType.WARNING, 'importLustreSpec', '');
-                    
                 end
             else
                 % Give the current opened Subsystem

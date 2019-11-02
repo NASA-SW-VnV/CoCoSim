@@ -79,11 +79,11 @@ classdef Product_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     end
     
     methods(Static)
-        [codes, AdditionalVars] = matrix_multiply(obj, exp, blk, inputs, outputs, zero, LusOutputDataTypeStr, conv_format )
+        [codes, AdditionalVars] = matrix_multiply(obj, exp, blk, inputs, outputs, zero, LusOutputDataTypeStr, conv_format, operandsDT )
 
         [codes, product_out, addVars] = matrix_multiply_pair(m1_dim, m2_dim, ...
                 input_m1, input_m2, output_m, zero, pair_number,...
-                OutputDT, tmp_prefix, conv_format)
+                OutputDT, tmp_prefix, conv_format, operandsDT)
        
         [new_inputs, invertCodes, AdditionalVars] = invertInputs(obj, exp, inputs, blk, LusOutputDataTypeStr)
 

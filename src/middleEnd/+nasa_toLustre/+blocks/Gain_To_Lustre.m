@@ -80,6 +80,7 @@ classdef Gain_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     code = nasa_toLustre.lustreAst.IteExpr(inputs{1}{j}, gainAst, zero);
                 else
                     code = nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.MULTIPLY, inputs{1}{j}, gainAst);
+                    code.setOperandsDT(lusOutDT);
                 end
                 if ~isempty(to_intxx_conv_format)
                     code = nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(to_intxx_conv_format,code);
