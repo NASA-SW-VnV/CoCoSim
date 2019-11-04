@@ -102,7 +102,7 @@ function [codes, outputs_dt, AdditionalVars, outputs] = getSumProductCodes(...
                 int_divFun = '';
             end
             [codes] = nasa_toLustre.blocks.Sum_To_Lustre.elementWiseSumProduct(exp, ...
-                inputs, outputs, widths, initCode, conv_format, int_divFun);
+                inputs, outputs, widths, initCode, conv_format, int_divFun, operandsDT);
         end
     end
 end

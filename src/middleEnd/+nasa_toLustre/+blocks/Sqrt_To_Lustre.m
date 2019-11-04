@@ -73,6 +73,7 @@ classdef Sqrt_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     code =  nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.DIVIDE, ...
                         one, ...
                         nasa_toLustre.lustreAst.NodeCallExpr('sqrt', inputs{1}{j}));
+                    code.setOperandsDT('real');
                 end
                
                  if ~strcmp(outLusDT, 'real')

@@ -113,9 +113,12 @@ classdef Math_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 
             elseif strcmp(operator, 'reciprocal')
                 for i=1:numel(outputs)
+                    rhs = nasa_toLustre.lustreAst.BinaryExpr(...
+                        nasa_toLustre.lustreAst.BinaryExpr.DIVIDE, ...
+                        one, inputs{1}{i});
+                    rhs.setOperandsDT(outLusDT);
                     codes{i} = nasa_toLustre.lustreAst.LustreEq(...
-                        outputs{i}, ...
-                        nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.DIVIDE, one,inputs{1}{i}));
+                        outputs{i}, rhs);
                 end
                 
             elseif strcmp(operator, 'hypot')

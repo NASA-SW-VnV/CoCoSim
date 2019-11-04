@@ -76,7 +76,7 @@ classdef Sum_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 AccumDataTypeStr, isSumBlock)
 
         [codes] = elementWiseSumProduct(exp, inputs, outputs, ...
-                widths, initCode, conv_format, int_divFun)
+                widths, initCode, conv_format, int_divFun, operandsDT)
 
         [codes] = oneInputSumProduct(parent, blk, outputs, inputs, ...
                 widths, exp, initCode,isSumBlock, conv_format)
