@@ -249,8 +249,13 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, ...
     % copy Kind2 libraries
     if LusBackendType.isKIND2(lus_backend)
         if ismember('lustrec_math', open_list)
+            lib_name = 'lustrec_math.lus';
+            if CoCoSimPreferences.use_more_precise_abstraction
+                lib_name = 'lustrec_math_more_precise_abstraction.lus';
+                open_list{strcmp(open_list, 'lustrec_math')} = 'lustrec_math_more_precise_abstraction';
+            end
             lib_path = fullfile(fileparts(mfilename('fullpath')),...
-                '+lib', 'lustrec_math.lus');
+                '+lib', lib_name);
             copyfile(lib_path, output_dir);
         end
         if ismember('simulink_math_fcn', open_list)

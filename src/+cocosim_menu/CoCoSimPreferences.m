@@ -31,6 +31,7 @@ classdef CoCoSimPreferences < handle
         skip_unsupportedblocks = false;
         skip_defected_pp = true;
         skip_pp = false;
+        use_more_precise_abstraction = false;
         %gen_pp_verif = false;
     end
     
