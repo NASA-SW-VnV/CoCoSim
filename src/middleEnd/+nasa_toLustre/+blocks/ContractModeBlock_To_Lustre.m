@@ -20,7 +20,7 @@ classdef ContractModeBlock_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         function obj = ContractModeBlock_To_Lustre()
             obj.ContentNeedToBeTranslated = 0;
         end
-        function  write_code(obj, parent, blk, xml_trace, ~, ~, main_sampleTime, varargin)
+        function  write_code(obj, parent, blk, xml_trace, lus_backend, ~, main_sampleTime, varargin)
             
             if ~nasa_toLustre.utils.SLX2LusUtils.isContractBlk(parent)
                 display_msg(sprintf('Mode block "%s" should not be outside a Contract Subsystem', HtmlItem.addOpenCmd(blk.Origin_path)),...

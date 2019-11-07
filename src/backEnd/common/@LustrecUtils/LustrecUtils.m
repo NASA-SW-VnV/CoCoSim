@@ -19,7 +19,7 @@ classdef LustrecUtils < handle
         new_mcdc_file = adapt_lustre_file(mcdc_file, dest)
         
         %%
-        report = parseLustrecErrorMessage(message)
+        report = parseLustrecErrorMessage(message, msg_type)
         %%
         [lusi_path, status, lusi_out] = generate_lusi(lus_file_path, LUSTREC )
         %%
