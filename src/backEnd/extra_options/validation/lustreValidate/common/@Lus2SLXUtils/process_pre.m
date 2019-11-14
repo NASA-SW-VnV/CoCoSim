@@ -25,10 +25,8 @@ function [x2, y2] = process_pre(node_block_path, blk_exprs, var, node_name, x2, 
             'Value',rhs_name,...
             'Position',[x2 y2 (x2+50) (y2+50)]);
         %     set_param(rhs_path, 'OutDataTypeStr','Inherit: Inherit via back propagation');
-        dt = blk_exprs.(var{1}).rhs.datatype;
-        if isstruct(dt) && isfield(dt, 'kind')
-            dt = dt.kind;
-        end
+        dt = Lus2SLXUtils.getArgDataType(blk_exprs.(var{1}).rhs);
+        
         if strcmp(dt, 'bool')
             set_param(rhs_path, 'OutDataTypeStr', 'boolean');
         elseif strcmp(dt, 'int')

@@ -51,7 +51,10 @@ classdef Lus2SLXUtils
         %%
         status = AddResettableSubsystemToIfBlock(model)
         %%
-        status = encapsulateWithReset(resetBlock, actionBlock)        
+        status = encapsulateWithReset(resetBlock, actionBlock)   
+        %%
+        dt = getArgDataType(arg)
+        
     end
 end
 

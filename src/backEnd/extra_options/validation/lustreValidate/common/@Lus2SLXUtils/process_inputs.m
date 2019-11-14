@@ -16,7 +16,7 @@ function [x2, y2] = process_inputs(node_block_path, blk_inputs, ID, x2, y2)
         add_block('simulink/Ports & Subsystems/In1',...
             inport_path,...
             'Position',[x2 y2 (x2+50) (y2+50)]);
-        dt = blk_inputs(i).datatype;
+        dt = Lus2SLXUtils.getArgDataType(blk_inputs(i));
         if isstruct(dt) && isfield(dt, 'kind')
             dt = dt.kind;
         end

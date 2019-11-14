@@ -93,10 +93,8 @@ function [x2, y2] = process_branch(nodes, new_model_name, node_block_path, blk_e
             'Value', guard,...
             'Position',[x3 y3 (x3+50) (y3+50)]);
         %     set_param(guard_path, 'OutDataTypeStr','Inherit: Inherit via back propagation');
-        dt = branch_struct.guard.datatype;
-        if isstruct(dt) && isfield(dt, 'kind')
-            dt = dt.kind;
-        end
+        dt = Lus2SLXUtils.getArgDataType(branch_struct.guard);
+        
         if strcmp(dt, 'bool')
             set_param(guard_path, 'OutDataTypeStr', 'boolean');
         elseif strcmp(dt, 'int')
