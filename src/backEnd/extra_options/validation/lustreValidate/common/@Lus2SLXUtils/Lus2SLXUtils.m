@@ -53,7 +53,7 @@ classdef Lus2SLXUtils
         %%
         status = encapsulateWithReset(resetBlock, actionBlock)   
         %%
-        dt = getArgDataType(arg)
+        [dt, dim] = getArgDataType(arg)
         
     end
 end
