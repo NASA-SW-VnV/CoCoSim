@@ -112,6 +112,10 @@ function [ failed ] = toLustreVerify(model_full_path,  const_files, lus_backend,
                 OPTS, KIND2, Z3, timeout, timeout_analysis);
             if failed, return; end
         end
+        % Sometimes the Initial state is unsat
+        if MatlabUtils.contains(kind2_out, 'the system has no reachable states')
+            display_msg('The system has no reachable states.', MsgType.ERROR, 'toLustreVerify', '');
+        end
         mapping_file = xml_trace.json_file_path;
         try
             failed = cocoSpecKind2(nom_lustre_file, mapping_file, kind2_out);
