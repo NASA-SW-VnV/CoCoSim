@@ -1,0 +1,67 @@
+(*
+-- DO NOT use contracts to abstract these node. Kind2 does not allow calling nodes with contract inside other contracts
+<Log class="error" source="parse" line="679" column="1">
+  Illegal call to node "sqrt" in the cone of influence of this contract: node sqrt has a contract.
+</Log>
+*)
+
+node kind2_times(x, y: real) returns (z: real) ;
+    var abs_x, abs_y, abs_z: real;
+let
+    abs_x = if x < 0.0 then -x else x ;
+    abs_y = if y < 0.0 then -y else y ;
+    abs_z = if z < 0.0 then -z else z ;
+    -- Neutral.
+    assert (z = y) = ((x = 1.0) or (y = 0.0)) ;
+    assert (z = x) = ((y = 1.0) or (x = 0.0)) ;
+    -- Absorbing.
+    assert (z = 0.0) = ( (x = 0.0) or (y = 0.0) ) ;
+    -- Sign.
+    assert (z > 0.0) = (
+      ( (x > 0.0) and (y > 0.0) ) or
+      ( (x < 0.0) and (y < 0.0) )
+    ) ;
+    assert (z < 0.0) = (
+      ( (x > 0.0) and (y < 0.0) ) or
+      ( (x < 0.0) and (y > 0.0) )
+    ) ;
+    -- Loose proportionality.
+    assert (abs_z >= abs_y) = ((abs_x >= 1.0) or (y = 0.0)) ;
+    assert (abs_z >= abs_x) = ((abs_y >= 1.0) or (x = 0.0)) ;
+    assert (abs_z <= abs_y) = ((abs_x <= 1.0) or (y = 0.0)) ;
+    assert (abs_z <= abs_x) = ((abs_y <= 1.0) or (x = 0.0)) ;
+    z = x * y ;
+tel
+
+
+
+node kind2_divide(num, den: real) returns (res: real) ;
+    var abs_num, abs_den, abs_res: real;
+let
+    abs_num = if num < 0.0 then -num else num ;
+    abs_den = if den < 0.0 then -den else den ;
+    abs_res = if res < 0.0 then -res else res ;
+    assert not (den = 0.0) ;
+    -- Neutral.
+    assert (res = num) = ((den = 1.0) or (num = 0.0)) ;
+    assert (res = - num) = ((den = - 1.0) or (num = 0.0)) ;
+    -- Absorbing.
+    assert (num = 0.0) = (res = 0.0) ;
+    -- Sign.
+    assert (res > 0.0) = (
+    ( (num > 0.0) and (den > 0.0) ) or
+    ( (num < 0.0) and (den < 0.0) )
+    ) ;
+    assert (res < 0.0) = (
+    ( (num > 0.0) and (den < 0.0) ) or
+    ( (num < 0.0) and (den > 0.0) )
+    ) ;
+    -- Loose proportionality.
+    assert (abs_res >= abs_num) = ((abs_den <= 1.0) or (num = 0.0)) ;
+    assert (abs_res <= abs_num) = ((abs_den >= 1.0) or (num = 0.0)) ;
+    -- Annulation.
+    assert (res = 1.0) = (num = den) ;
+    assert (res = - 1.0) = (num = - den) ;
+    res = num / den ;
+tel
+

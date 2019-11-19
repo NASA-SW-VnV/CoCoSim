@@ -1,4 +1,4 @@
-function [lus_code, plu_code] = print_lustrec(obj, backend)
+function [lus_code, plu_code, ext_lib] = print_lustrec(obj, backend)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -8,6 +8,7 @@ function [lus_code, plu_code] = print_lustrec(obj, backend)
     global ADD_KIND2_TIMES_ABSTRACTION ADD_KIND2_DIVIDE_ABSTRACTION;
     ADD_KIND2_TIMES_ABSTRACTION = false;
     ADD_KIND2_DIVIDE_ABSTRACTION = false;
+    ext_lib = {};
     lus_header_lines = {};
     lus_lines = {};
     plu_lines = {};
@@ -82,12 +83,20 @@ function [lus_code, plu_code] = print_lustrec(obj, backend)
         end
     end
     if ADD_KIND2_TIMES_ABSTRACTION
-        times_node = getKind2TimesNode();
-        lus_header_lines = MatlabUtils.concat(lus_header_lines, times_node);
+        if ~MatlabUtils.contains(lus_header_lines, '"kind2_lib.lus"')
+            %times_node = getKind2TimesNode();
+            %lus_header_lines = MatlabUtils.concat(lus_header_lines, times_node);
+            ext_lib{end+1} = 'kind2_lib';
+            lus_header_lines = ['include "kind2_lib.lus"\n'; lus_header_lines];
+        end
     end
     if ADD_KIND2_DIVIDE_ABSTRACTION
-        divide_node = getKind2TDivideNode();
-        lus_header_lines = MatlabUtils.concat(lus_header_lines, divide_node);
+        if ~MatlabUtils.contains(lus_header_lines, '"kind2_lib.lus"')
+            %             divide_node = getKind2TDivideNode();
+            %             lus_header_lines = MatlabUtils.concat(lus_header_lines, divide_node);
+            ext_lib{end+1} = 'kind2_lib';
+            lus_header_lines = ['include "kind2_lib.lus"\n'; lus_header_lines];
+        end
     end
     lus_lines = MatlabUtils.concat(lus_header_lines, lus_lines);
     lus_code = MatlabUtils.strjoin(lus_lines, '');

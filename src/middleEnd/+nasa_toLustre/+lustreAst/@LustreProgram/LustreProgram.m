@@ -52,9 +52,9 @@ classdef LustreProgram < nasa_toLustre.lustreAst.LustreAst
         nb_occ = nbOccuranceVar(varargin)
         
         %%
-        [lus_code, plu_code] = print(obj, backend)
+        [lus_code, plu_code, ext_lib] = print(obj, backend)
         
-        [lus_code, plu_code] = print_lustrec(obj, backend)
+        [lus_code, plu_code, ext_lib] = print_lustrec(obj, backend)
         
         code = print_kind2(obj)
         code = print_zustre(obj)

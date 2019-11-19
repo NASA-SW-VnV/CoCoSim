@@ -246,7 +246,70 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, ...
         nodes_ast = [external_lib_code, nodes_ast];
     end
     %% create LustreProgram
-    % copy Kind2 libraries
+    
+    
+    keys = TOLUSTRE_ENUMS_MAP.keys();
+    enumsAst = cell(numel(keys), 1);
+    for i=1:numel(keys)
+        enumsAst{i} = nasa_toLustre.lustreAst.EnumTypeExpr(keys{i}, TOLUSTRE_ENUMS_MAP(keys{i}));
+    end
+    if ~isempty(TOLUSTRE_ENUMS_CONV_NODES)
+        nodes_ast = [TOLUSTRE_ENUMS_CONV_NODES, nodes_ast];
+    end
+    nodes_ast = MatlabUtils.removeEmpty(nodes_ast);
+    contracts_ast = MatlabUtils.removeEmpty(contracts_ast);
+    program =  nasa_toLustre.lustreAst.LustreProgram(open_list, enumsAst, nodes_ast, contracts_ast);
+    if cocosim_optim %...
+            % && ~(LusBackendType.isLUSTREC(lus_backend) || LusBackendType.isZUSTRE(lus_backend))
+        % Optimization is not important for Lustrec as the later normalize all expressions. 
+        try program = program.simplify(); catch me, display_msg(me.getReport(), MsgType.DEBUG, 'ToLustre.simplify', ''); end
+    end
+    
+    %% writing code
+    lus_fid = fopen(lustre_file_path, 'a');
+    if lus_fid==-1
+        msg = sprintf('Opening file "%s" is not possible', lustre_file_path);
+        display_msg(msg, MsgType.ERROR, 'ToLustre', '');
+        failed = 1;
+        return;
+    end
+    if LusBackendType.isPRELUDE(lus_backend)
+        plu_fid = fopen(plu_path, 'a');
+        if plu_fid==-1
+            msg = sprintf('Opening file "%s" is not possible', plu_path);
+            display_msg(msg, MsgType.ERROR, 'ToLustre', '');
+            failed = 1;
+            return;
+        end
+    end
+    try
+        [lustrecode, preludeCode, ext_lib] = program.print(lus_backend);
+        open_list = MatlabUtils.concat(open_list, ext_lib);
+        fprintf(lus_fid, '%s', lustrecode);
+        fclose(lus_fid);
+        if LusBackendType.isPRELUDE(lus_backend)
+            fprintf(plu_fid, '%s', preludeCode);
+            fclose(plu_fid);
+        end
+        if COCOSIM_DEV_DEBUG
+            display_msg(strrep(lustrecode, '%', '%%'), MsgType.DEBUG, ...
+                'ToLustre', '');
+            if LusBackendType.isPRELUDE(lus_backend)
+                display_msg('*****PRELUDE CODE *******', MsgType.DEBUG, ...
+                'ToLustre', '');
+                display_msg(strrep(preludeCode, '%', '%%'), MsgType.DEBUG, ...
+                    'ToLustre', '');
+            end
+        end
+    catch me
+        display_msg('Printing Lustre AST to file failed',...
+            MsgType.ERROR, 'write_body', '');
+        display_msg(me.getReport(), MsgType.DEBUG, 'write_body', '');
+        failed = 1;
+        return;
+    end
+    
+    %% copy Kind2 libraries
     if LusBackendType.isKIND2(lus_backend)
         if ismember('lustrec_math', open_list)
             lib_name = 'lustrec_math.lus';
@@ -286,68 +349,6 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, ...
 %             end
 %         end
     end
-    
-    keys = TOLUSTRE_ENUMS_MAP.keys();
-    enumsAst = cell(numel(keys), 1);
-    for i=1:numel(keys)
-        enumsAst{i} = nasa_toLustre.lustreAst.EnumTypeExpr(keys{i}, TOLUSTRE_ENUMS_MAP(keys{i}));
-    end
-    if ~isempty(TOLUSTRE_ENUMS_CONV_NODES)
-        nodes_ast = [TOLUSTRE_ENUMS_CONV_NODES, nodes_ast];
-    end
-    nodes_ast = MatlabUtils.removeEmpty(nodes_ast);
-    contracts_ast = MatlabUtils.removeEmpty(contracts_ast);
-    program =  nasa_toLustre.lustreAst.LustreProgram(open_list, enumsAst, nodes_ast, contracts_ast);
-    if cocosim_optim %...
-            % && ~(LusBackendType.isLUSTREC(lus_backend) || LusBackendType.isZUSTRE(lus_backend))
-        % Optimization is not important for Lustrec as the later normalize all expressions. 
-        try program = program.simplify(); catch me, display_msg(me.getReport(), MsgType.DEBUG, 'ToLustre.simplify', ''); end
-    end
-    
-    %% writing code
-    lus_fid = fopen(lustre_file_path, 'a');
-    if lus_fid==-1
-        msg = sprintf('Opening file "%s" is not possible', lustre_file_path);
-        display_msg(msg, MsgType.ERROR, 'ToLustre', '');
-        failed = 1;
-        return;
-    end
-    if LusBackendType.isPRELUDE(lus_backend)
-        plu_fid = fopen(plu_path, 'a');
-        if plu_fid==-1
-            msg = sprintf('Opening file "%s" is not possible', plu_path);
-            display_msg(msg, MsgType.ERROR, 'ToLustre', '');
-            failed = 1;
-            return;
-        end
-    end
-    try
-        [lustrecode, preludeCode] = program.print(lus_backend);
-        fprintf(lus_fid, '%s', lustrecode);
-        fclose(lus_fid);
-        if LusBackendType.isPRELUDE(lus_backend)
-            fprintf(plu_fid, '%s', preludeCode);
-            fclose(plu_fid);
-        end
-        if COCOSIM_DEV_DEBUG
-            display_msg(strrep(lustrecode, '%', '%%'), MsgType.DEBUG, ...
-                'ToLustre', '');
-            if LusBackendType.isPRELUDE(lus_backend)
-                display_msg('*****PRELUDE CODE *******', MsgType.DEBUG, ...
-                'ToLustre', '');
-                display_msg(strrep(preludeCode, '%', '%%'), MsgType.DEBUG, ...
-                    'ToLustre', '');
-            end
-        end
-    catch me
-        display_msg('Printing Lustre AST to file failed',...
-            MsgType.ERROR, 'write_body', '');
-        display_msg(me.getReport(), MsgType.DEBUG, 'write_body', '');
-        failed = 1;
-        return;
-    end
-    
-    
     %% writing traceability
     xml_trace.write();
     
