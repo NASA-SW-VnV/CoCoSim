@@ -76,6 +76,7 @@ let
     assert (5240.990 <= x and x <= 6959.230) = (72.390 <= y and y <= 83.420);
     assert (6959.230 <= x and x <= 9069.320) = (83.420 <= y and y <= 95.230);
     assert (9069.320 <= x and x <= 10000.000) = (95.230 <= y and y <= 100.000);
+    assert x >=  10000.0 => y >= 100.0;
 tel
 node  sqrt (x: real) returns (y: real) ;
 let
@@ -84,8 +85,7 @@ let
     assert (x > 1.0 ) = (x > y);
     assert (x < 1.0 ) = (y > x);
     assert (x = 1.0 ) = (y = 1.0);
-    assert x <= 10000.0 => y = sqrt_lookup_0_10000(x);
-    assert x >  10000.0 => y > 100.0;
+    assert y = sqrt_lookup_0_10000(x);    
     
 tel
 node imported trunc (x: real) returns (y: real) ;

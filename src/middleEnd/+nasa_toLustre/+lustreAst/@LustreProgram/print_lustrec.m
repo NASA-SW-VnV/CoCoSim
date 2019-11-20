@@ -83,19 +83,17 @@ function [lus_code, plu_code, ext_lib] = print_lustrec(obj, backend)
         end
     end
     if ADD_KIND2_TIMES_ABSTRACTION
-        if ~MatlabUtils.contains(lus_header_lines, '"kind2_lib.lus"')
-            %times_node = getKind2TimesNode();
-            %lus_header_lines = MatlabUtils.concat(lus_header_lines, times_node);
+        if ~any(MatlabUtils.contains(lus_header_lines, 'kind2_lib.lus'))
             ext_lib{end+1} = 'kind2_lib';
-            lus_header_lines = ['include "kind2_lib.lus"\n'; lus_header_lines];
+            lus_header_lines = MatlabUtils.concat({sprintf('include "kind2_lib.lus"\n')},...
+                lus_header_lines);
         end
     end
     if ADD_KIND2_DIVIDE_ABSTRACTION
-        if ~MatlabUtils.contains(lus_header_lines, '"kind2_lib.lus"')
-            %             divide_node = getKind2TDivideNode();
-            %             lus_header_lines = MatlabUtils.concat(lus_header_lines, divide_node);
+        if ~any(MatlabUtils.contains(lus_header_lines, 'kind2_lib.lus'))
             ext_lib{end+1} = 'kind2_lib';
-            lus_header_lines = ['include "kind2_lib.lus"\n'; lus_header_lines];
+            lus_header_lines = MatlabUtils.concat({sprintf('include "kind2_lib.lus"\n')},...
+                lus_header_lines);
         end
     end
     lus_lines = MatlabUtils.concat(lus_header_lines, lus_lines);
@@ -121,66 +119,3 @@ function b = hasPreludeOperator(node)
         || ismember(nasa_toLustre.lustreAst.BinaryExpr.PRELUDE_FBY, operators);
 end
 
-function nodesLines = getKind2TimesNode()
-    nodesLines = {};
-    nodesLines{end+1} = sprintf('%s\n', 'node kind2_times(x, y: real) returns (z: real) ;');
-    nodesLines{end+1} = sprintf('%s\n', 'var abs_x, abs_y, abs_z: real;');
-    nodesLines{end+1} = sprintf('%s\n', 'let');
-    nodesLines{end+1} = sprintf('%s\n', '   abs_x = if x < 0.0 then -x else x ;');
-    nodesLines{end+1} = sprintf('%s\n', '    abs_y = if y < 0.0 then -y else y ;');
-    nodesLines{end+1} = sprintf('%s\n', '    abs_z = if z < 0.0 then -z else z ;');
-    nodesLines{end+1} = sprintf('%s\n', '    -- Neutral.');
-    nodesLines{end+1} = sprintf('%s\n', '    assert (z = y) = ((x = 1.0) or (y = 0.0)) ;');
-    nodesLines{end+1} = sprintf('%s\n', '    assert (z = x) = ((y = 1.0) or (x = 0.0)) ;');
-    nodesLines{end+1} = sprintf('%s\n', '    -- Absorbing.');
-    nodesLines{end+1} = sprintf('%s\n', '    assert (z = 0.0) = ( (x = 0.0) or (y = 0.0) ) ;');
-    nodesLines{end+1} = sprintf('%s\n', '    -- Sign.');
-    nodesLines{end+1} = sprintf('%s\n', '    assert (z > 0.0) = (');
-    nodesLines{end+1} = sprintf('%s\n', '      ( (x > 0.0) and (y > 0.0) ) or');
-    nodesLines{end+1} = sprintf('%s\n', '      ( (x < 0.0) and (y < 0.0) )');
-    nodesLines{end+1} = sprintf('%s\n', '    ) ;');
-    nodesLines{end+1} = sprintf('%s\n', '    assert (z < 0.0) = (');
-    nodesLines{end+1} = sprintf('%s\n', '      ( (x > 0.0) and (y < 0.0) ) or');
-    nodesLines{end+1} = sprintf('%s\n', '      ( (x < 0.0) and (y > 0.0) )');
-    nodesLines{end+1} = sprintf('%s\n', '    ) ;');
-    nodesLines{end+1} = sprintf('%s\n', '    -- Loose proportionality.');
-    nodesLines{end+1} = sprintf('%s\n', '    assert (abs_z >= abs_y) = ((abs_x >= 1.0) or (y = 0.0)) ;');
-    nodesLines{end+1} = sprintf('%s\n', '    assert (abs_z >= abs_x) = ((abs_y >= 1.0) or (x = 0.0)) ;');
-    nodesLines{end+1} = sprintf('%s\n', '    assert (abs_z <= abs_y) = ((abs_x <= 1.0) or (y = 0.0)) ;');
-    nodesLines{end+1} = sprintf('%s\n', '    assert (abs_z <= abs_x) = ((abs_y <= 1.0) or (x = 0.0)) ;');
-    nodesLines{end+1} = sprintf('%s\n', '    z = x * y ;');
-    nodesLines{end+1} = sprintf('%s\n', 'tel');
-end
-
-function nodesLines = getKind2TDivideNode()
-    nodesLines = {};
-    nodesLines{end+1} = sprintf('%s\n', 'node kind2_divide(num, den: real) returns (res: real) ;');
-    nodesLines{end+1} = sprintf('%s\n', 'var abs_num, abs_den, abs_res: real;');
-    nodesLines{end+1} = sprintf('%s\n', 'let');
-    nodesLines{end+1} = sprintf('%s\n', ' abs_num = if num < 0.0 then -num else num ;');
-    nodesLines{end+1} = sprintf('%s\n', ' abs_den = if den < 0.0 then -den else den ;');
-    nodesLines{end+1} = sprintf('%s\n', ' abs_res = if res < 0.0 then -res else res ;');
-    nodesLines{end+1} = sprintf('%s\n', 'assert not (den = 0.0) ;');
-    nodesLines{end+1} = sprintf('%s\n', '-- Neutral.');
-    nodesLines{end+1} = sprintf('%s\n', 'assert (res = num) = ((den = 1.0) or (num = 0.0)) ;');
-    nodesLines{end+1} = sprintf('%s\n', 'assert (res = - num) = ((den = - 1.0) or (num = 0.0)) ;');
-    nodesLines{end+1} = sprintf('%s\n', '-- Absorbing.');
-    nodesLines{end+1} = sprintf('%s\n', 'assert (num = 0.0) = (res = 0.0) ;');
-    nodesLines{end+1} = sprintf('%s\n', '-- Sign.');
-    nodesLines{end+1} = sprintf('%s\n', 'assert (res > 0.0) = (');
-    nodesLines{end+1} = sprintf('%s\n', '  ( (num > 0.0) and (den > 0.0) ) or');
-    nodesLines{end+1} = sprintf('%s\n', '  ( (num < 0.0) and (den < 0.0) )');
-    nodesLines{end+1} = sprintf('%s\n', ') ;');
-    nodesLines{end+1} = sprintf('%s\n', 'assert (res < 0.0) = (');
-    nodesLines{end+1} = sprintf('%s\n', '  ( (num > 0.0) and (den < 0.0) ) or');
-    nodesLines{end+1} = sprintf('%s\n', '  ( (num < 0.0) and (den > 0.0) )');
-    nodesLines{end+1} = sprintf('%s\n', ') ;');
-    nodesLines{end+1} = sprintf('%s\n', '-- Loose proportionality.');
-    nodesLines{end+1} = sprintf('%s\n', 'assert (abs_res >= abs_num) = ((abs_den <= 1.0) or (num = 0.0)) ;');
-    nodesLines{end+1} = sprintf('%s\n', 'assert (abs_res <= abs_num) = ((abs_den >= 1.0) or (num = 0.0)) ;');
-    nodesLines{end+1} = sprintf('%s\n', '-- Annulation.');
-    nodesLines{end+1} = sprintf('%s\n', 'assert (res = 1.0) = (num = den) ;');
-    nodesLines{end+1} = sprintf('%s\n', 'assert (res = - 1.0) = (num = - den) ;');
-    nodesLines{end+1} = sprintf('%s\n', '  res = num / den ;');
-    nodesLines{end+1} = sprintf('%s\n', 'tel');
-end

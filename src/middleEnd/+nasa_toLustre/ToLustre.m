@@ -311,24 +311,33 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, ...
     
     %% copy Kind2 libraries
     if LusBackendType.isKIND2(lus_backend)
+        toLustrePath = fileparts(mfilename('fullpath'));
+        % lustrec_math
         if ismember('lustrec_math', open_list)
             lib_name = 'lustrec_math.lus';
             if CoCoSimPreferences.use_more_precise_abstraction
                 lib_name = 'lustrec_math_more_precise_abstraction.lus';
                 open_list{strcmp(open_list, 'lustrec_math')} = 'lustrec_math_more_precise_abstraction';
             end
-            lib_path = fullfile(fileparts(mfilename('fullpath')),...
-                '+lib', lib_name);
+            lib_path = fullfile(toLustrePath, '+lib', lib_name);
             copyfile(lib_path, output_dir);
         end
+        
+        % simulink_math_fcn
         if ismember('simulink_math_fcn', open_list)
-            lib_path = fullfile(fileparts(mfilename('fullpath')),...
-                '+lib', 'simulink_math_fcn.lus');
+            lib_path = fullfile(toLustrePath, '+lib', 'simulink_math_fcn.lus');
             copyfile(lib_path, output_dir);
         end
+        
+        % conv
         if ismember('conv', open_list)
-            lib_path = fullfile(fileparts(mfilename('fullpath')),...
-                '+lib', 'conv.lus');
+            lib_path = fullfile(toLustrePath, '+lib', 'conv.lus');
+            copyfile(lib_path, output_dir);
+        end
+        
+        % kind2_lib
+        if ismember('kind2_lib', open_list)
+            lib_path = fullfile(toLustrePath, '+lib', 'kind2_lib.lus');
             copyfile(lib_path, output_dir);
         end
     else %lustrec, zustre ... 
