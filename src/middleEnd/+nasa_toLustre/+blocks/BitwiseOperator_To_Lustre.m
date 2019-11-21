@@ -36,27 +36,32 @@ classdef BitwiseOperator_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             for i=1:numInputs
                 % fill the names of the ith input.
                 inputs{i} =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk, i);
-                % if an input has a width lesser than the max_width, we
-                % need to make it equal to the max_width.
+            end
+            
+            if strcmp(blk.UseBitMask, 'on')
+                [bitMaskValue, ~, status] = ...
+                    nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(parent,...
+                    blk, blk.BitMask);
+                
+                if status
+                    display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
+                        blk.BitMask, HtmlItem.addOpenCmd(blk.Origin_path)), ...
+                        MsgType.ERROR, 'Constant_To_Lustre', '');
+                    return;
+                end
+                max_width = max(max_width, numel(bitMaskValue));
+                bitIndex = length(inputs) + 1;
+                for i=1:numel(bitMaskValue)
+                    inputs{bitIndex}{i} = nasa_toLustre.lustreAst.IntExpr(bitMaskValue(i));
+                end
+                numInputs = numInputs + 1;
+            end
+            % if an input has a width lesser than the max_width, we
+            % need to make it equal to the max_width.
+            for i=1:numInputs
                 if numel(inputs{i}) < max_width
                     inputs{i} = arrayfun(@(x) {inputs{i}{1}}, (1:max_width));
                 end
-            end
-            [bitMaskValue, ~, status] = ...
-                nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(parent,...
-                blk, blk.BitMask);
-            if status
-                display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
-                    blk.BitMask, HtmlItem.addOpenCmd(blk.Origin_path)), ...
-                    MsgType.ERROR, 'Constant_To_Lustre', '');
-                return;
-            end
-            if strcmp(blk.UseBitMask, 'on')
-                inputs{end+1} = {nasa_toLustre.lustreAst.IntExpr(bitMaskValue)};
-                if numel(inputs{end}) < max_width
-                    inputs{end} = arrayfun(@(x) {inputs{end}{1}}, (1:max_width));
-                end
-                numInputs = numInputs + 1;
             end
             %% Step 4: start filling the definition of each output
             if MatlabUtils.endsWith(inputDT, 'int8')

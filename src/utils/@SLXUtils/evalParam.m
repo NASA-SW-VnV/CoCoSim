@@ -23,7 +23,7 @@ function [Value, valueDataType, status] = evalParam(modelObj, parent, blk, param
         if ischar(blk)
             blk = get_param(blk, 'Object');
         end
-        if isnumeric(param)
+        if isnumeric(param) 
             % comes from a struct field
             Value = param;
         elseif isempty(regexp(param, '[a-zA-Z]', 'match'))

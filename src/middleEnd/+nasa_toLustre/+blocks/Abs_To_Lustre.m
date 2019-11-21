@@ -20,6 +20,7 @@ classdef Abs_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             
             inputs{1} =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk, 1);
             inport_dt = blk.CompiledPortDataTypes.Inport{1};
+            
             %converts the input data type(s) to
             %its accumulator data type
             RndMeth = blk.RndMeth;
@@ -33,7 +34,7 @@ classdef Abs_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 conv_format = {};
             end
             
-            [lusOutDT, zero] =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(outputDataType);
+            [lusOutDT, ~] =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(outputDataType);
             
             % if output in "int": add final result conversion to intXX
             if strcmp(lusOutDT, 'int') && isempty(conv_format)
@@ -44,7 +45,7 @@ classdef Abs_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     obj.addExternal_libraries(external_lib);
                 end
             end
-            
+            [~, zero] =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(inport_dt);
             codes = cell(1, numel(inputs{1}));
             for j=1:numel(inputs{1})
                 conds = cell(1, 1);
