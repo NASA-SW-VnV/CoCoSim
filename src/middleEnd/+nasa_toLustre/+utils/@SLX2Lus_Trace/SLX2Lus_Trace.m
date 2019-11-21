@@ -73,7 +73,7 @@ classdef SLX2Lus_Trace < handle
             obj.json_struct{end+1} = s;
         end
         % Nodes management
-        function element = create_Node_Element(obj, block_origin_name, ...
+        function element = create_Node_Element(obj, OriginPath, ...
                 node_name, isContract)
             if nargin < 4
                 isContract = 0;
@@ -81,13 +81,13 @@ classdef SLX2Lus_Trace < handle
             %XML
             element = obj.traceDOM.createElement('Node');
             element.setAttribute('NodeName', node_name);
-            element.setAttribute('OriginPath', block_origin_name);
+            element.setAttribute('OriginPath', OriginPath);
             element.setAttribute('IsContract', num2str(isContract));
             obj.traceRootNode.appendChild(element);
             obj.current_node = element;
             %JSON
             s = struct();
-            s.OriginPath = block_origin_name;
+            s.OriginPath = OriginPath;
             if isContract
                 s.ContractName = node_name;
             else
@@ -95,8 +95,75 @@ classdef SLX2Lus_Trace < handle
             end
             obj.addStructMapping(s);
         end
+        %%
+        function node = create_abstractNode_Element(obj, OriginPath, ...
+                node_name, inputs_trace_cell, outputs_trace_cell)
+            isContract = 0;
+            %% node
+            % xml
+            node = obj.traceDOM.createElement('Node');
+            node.setAttribute('NodeName', node_name);
+            node.setAttribute('OriginPath', OriginPath);
+            node.setAttribute('IsContract', num2str(isContract));
+            obj.traceRootNode.appendChild(node);
+            %JSON
+            s = struct();
+            s.OriginPath = OriginPath;
+            if isContract
+                s.ContractName = node_name;
+            else
+                s.NodeName = node_name;
+            end
+            obj.addStructMapping(s);
+            
+            %% inputs
+            node_inputs = obj.traceDOM.createElement('InputList');
+            node.appendChild(node_inputs);
+            for i=1:length(inputs_trace_cell)
+                e = obj.create_Data_Trace_Element('Inport', ...
+                    inputs_trace_cell{i}.VariableName, ...
+                    inputs_trace_cell{i}.OriginPath, ...
+                    inputs_trace_cell{i}.PortNumber,...
+                    inputs_trace_cell{i}.Width, ...
+                    inputs_trace_cell{i}.Index, 0, ...
+                    inputs_trace_cell{i}.IsNotInSimulink, ...
+                    inputs_trace_cell{i}.PortType);
+                node_inputs.appendChild(e);
+                %JSON
+                s = inputs_trace_cell{i};
+                s.NodeName = node_name;
+                s.VariableType = 'Inport';
+                s.PortNumber = num2str(s.PortNumber);
+                s.Width = num2str(s.Width);
+                s.Index = num2str(s.Index);
+                obj.addStructMapping(s);
+            end
+            %% inputs
+            node_outputs = obj.traceDOM.createElement('InputList');
+            node.appendChild(node_outputs);
+            for i=1:length(outputs_trace_cell)
+                e = obj.create_Data_Trace_Element('Outport', ...
+                    outputs_trace_cell{i}.VariableName, ...
+                    outputs_trace_cell{i}.OriginPath, ...
+                    outputs_trace_cell{i}.PortNumber,...
+                    outputs_trace_cell{i}.Width, ...
+                    outputs_trace_cell{i}.Index, 0, ...
+                    outputs_trace_cell{i}.IsNotInSimulink, ...
+                    outputs_trace_cell{i}.PortType);
+                node_outputs.appendChild(e);
+                %JSON
+                s = outputs_trace_cell{i};
+                s.NodeName = node_name;
+                s.VariableType = 'Outport';
+                s.PortNumber = num2str(s.PortNumber);
+                s.Width = num2str(s.Width);
+                s.Index = num2str(s.Index);
+                obj.addStructMapping(s);
+            end
+            
+        end
         
-        % Inputs management
+        %% Inputs management
         function element = create_Inputs_Element(obj)
             element = obj.traceDOM.createElement('InputList');
             obj.current_node.appendChild(element);

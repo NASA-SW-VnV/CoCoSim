@@ -128,14 +128,36 @@ node imported exp (x: real) returns (y: real) ;
 node imported fabs (x: real) returns (y: real) ;
 node imported floor (x: real) returns (y: real) ;
 node imported fmod (x,y: real) returns (z: real) ;
-node imported log (x: real) returns (y: real) ;
-node imported log10 (x: real) returns (y: real) ;
-node pow (x:real; n: real) returns (y: real) ;
+node log (x: real) returns (y: real) ;
 let
-        assert n >= 0.0;
-     	assert (n > 1.0) => y > x;
+    assert (x >= 0.0);
+    assert (x = 2.71828) = (y = 1.0); 
+    assert (x = 1.0) = (y = 0.0); 
+    assert (x > 1.0) = (y > 0.0); 
+    assert (x < 1.0) = (y < 0.0); 
+tel
+node log10 (x: real) returns (y: real) ;
+let
+    assert (x >= 0.0);
+    assert (x = 10.0) = (y = 1.0); 
+    assert (x > 10.0) = (y > 1.0); 
+    assert (x > 1.0 and x < 10.0) = (y > 0.0 and y < 1.0); 
+    assert (x = 1.0) = (y = 0.0); 
+    assert (x < 1.0) = (y < 0.0);  
+tel
+node pow (x:real; n: real) returns (y: real) ;
+var abs_x, abs_y: real;
+let
+        abs_x = if x >= 0.0 then x else -x;
+        abs_y = if y >= 0.0 then y else -y;
+     	assert (n > 1.0 and abs_x < 1.0 ) => abs_y < abs_x;
+        assert (n > 1.0 and abs_x > 1.0 ) => abs_y > abs_x;
      	assert (n = 1.0) => y = x;
-        assert (n < 1.0) => y < x;
+        assert (n = 2.0) => y = x*x;
+        assert (0.0 < n and n < 1.0 and abs_x < 1.0) => abs_y > abs_x;
+        assert (0.0 < n and n < 1.0 and x > 1.0) => y < x;
+        assert (x = 1.0 ) = (y = 1.0);
+        assert (x = 0.0 ) = (y = 0.0);
 tel
 node imported round (x: real) returns (y: real) ;
 

@@ -1,4 +1,4 @@
-function [body, variables, external_nodes, external_libraries] =...
+function [body, variables, external_nodes, external_libraries, abstractedBlocks] =...
         write_body(subsys, main_sampleTime, lus_backend, coco_backend, xml_trace)
     %% Go over SS Content
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -14,7 +14,7 @@ function [body, variables, external_nodes, external_libraries] =...
     body = {};
     external_nodes = {};
     external_libraries = {};
-
+    abstractedBlocks = {};
 
     fields = fieldnames(subsys.Content);
     fields = ...
@@ -24,7 +24,7 @@ function [body, variables, external_nodes, external_libraries] =...
     end
     for i=1:numel(fields)
         blk = subsys.Content.(fields{i});
-        [b, status] = nasa_toLustre.utils.getWriteType(blk);
+        [b, status, type, masktype, sfblockType, ~] = nasa_toLustre.utils.getWriteType(blk);
         if status
             continue;
         end
@@ -44,5 +44,17 @@ function [body, variables, external_nodes, external_libraries] =...
         variables = [variables, b.getVariables()];
         external_nodes = [external_nodes, b.getExternalNodes()];
         external_libraries = [external_libraries, b.getExternalLibraries()];
+        if b.blkIsAbstracted
+            if ~isempty(sfblockType) && ~strcmp(sfblockType, 'NONE')
+                blkType = sfblockType;
+            elseif ~isempty(masktype)
+                blkType = masktype;
+            else
+                blkType = type;
+            end
+            msg = sprintf('Block "%s" with Type "%s".', ...
+                HtmlItem.addOpenCmd(blk.Origin_path), blkType);
+            abstractedBlocks{end+1} = msg;
+        end
     end
 end
