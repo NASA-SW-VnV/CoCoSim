@@ -72,7 +72,9 @@ function [node, external_nodes_i, opens, abstractedNodes] = get_inverse_code(lus
         % define inverse
         for i=1:n
             for j=1:n
-                body{end+1} = nasa_toLustre.lustreAst.LustreEq(ai{i,j},nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.DIVIDE,adj{i,j},det));
+                body{end+1} = nasa_toLustre.lustreAst.LustreEq(ai{i,j},...
+                nasa_toLustre.lustreAst.BinaryExpr(...
+                nasa_toLustre.lustreAst.BinaryExpr.DIVIDE, adj{i,j}, det, [], [], [], 'real'));
             end
         end
     else

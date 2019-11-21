@@ -58,7 +58,7 @@ classdef SLX2LusUtils
         % We need to go over all linked blocks and get their output names
         % in the corresponding port number.
         % Read PortConnectivity documentation for more information.
-        [inputs] = getBlockInputsNames(parent, blk, Port)
+        [inputs, inputs_var] = getBlockInputsNames(parent, blk, Port)
 
         [inputs] = getSubsystemEnableInputsNames(parent, blk)
 

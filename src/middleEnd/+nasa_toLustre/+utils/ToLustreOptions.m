@@ -16,6 +16,7 @@ classdef ToLustreOptions < handle
         SKIP_DEFECTED_PP = 'skip_defected_pp';
         SKIP_PP = 'skip_pp';
         GEN_PP_VERIF = 'gen_pp_verif'; 
+        USE_MORE_PRECISE_ABSTRACTION = 'use_more_precise_abstraction';
     end
     
    

@@ -32,20 +32,31 @@ function [status, errors_msg] = DotProduct_pp(model)
                 SaturateOnIntegerOverflow = get_param(DotProduct_list{i}, 'SaturateOnIntegerOverflow');
                 LockScale = get_param(DotProduct_list{i}, 'LockScale');
                 
+                
+                
                 % set port dimensions: in case one of the inports dimensions is "-1".
-                try
-                    portHandles = get_param(DotProduct_list{i}, 'PortHandles');
-                    dim1 = SLXUtils.getCompiledParam(portHandles.Inport(1), 'CompiledPortDimensions');
-                    dim1 = dim1(2:end);% remove first element that says how many dimensions exists.
-                    port1CompiledDim = mat2str(dim1);
-                    
-                    dim2 = SLXUtils.getCompiledParam(portHandles.Inport(2), 'CompiledPortDimensions');
-                    dim2 = dim2(2:end);% remove first element that says how many dimensions exists.
-                    port2CompiledDim = mat2str(dim2);
-                catch
-                    port1CompiledDim = '-1';
-                    port2CompiledDim = '-1';
-                end
+                % TODO: use a map to save dimensions of all dotproduct in
+                % the model instead of compiling the model many times for
+                % each dotproduct. It take too much time for complex
+                % models.
+                port1CompiledDim = '-1';
+                port2CompiledDim = '-1';
+%                 try
+%                     portHandles = get_param(DotProduct_list{i}, 'PortHandles');
+%                     dim1 = SLXUtils.getCompiledParam(portHandles.Inport(1), 'CompiledPortDimensions');
+%                     dim1 = dim1(2:end);% remove first element that says how many dimensions exists.
+%                     port1CompiledDim = mat2str(dim1);
+%                     
+%                     dim2 = SLXUtils.getCompiledParam(portHandles.Inport(2), 'CompiledPortDimensions');
+%                     dim2 = dim2(2:end);% remove first element that says how many dimensions exists.
+%                     port2CompiledDim = mat2str(dim2);
+%                 catch
+%                     port1CompiledDim = '-1';
+%                     port2CompiledDim = '-1';
+%                 end
+
+
+
                 PP2Utils.replace_one_block(DotProduct_list{i},fullfile('pp_lib',pp_name));
                 set_param(strcat(DotProduct_list{i},'/Product'),...
                     'OutDataTypeStr',outputDataType);

@@ -128,14 +128,6 @@ classdef SubSystem_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         end
         %%
         function options = getUnsupportedOptions(obj, parent, blk, lus_backend, varargin)
-            
-            isInsideContract =nasa_toLustre.utils.SLX2LusUtils.isContractBlk(parent);
-            [outputs, ~] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk);
-            if isInsideContract && numel(outputs) > 1
-                obj.addUnsupported_options(...
-                    sprintf('Subsystem %s has more than one outputs. All Subsystems inside Contract should have one output.', ...
-                    HtmlItem.addOpenCmd(blk.Origin_path)))
-            end
             [isTriggered, ~, TriggerType, ~] = ...
                 nasa_toLustre.blocks.SubSystem_To_Lustre.hasTriggerPort(blk);
             if isTriggered

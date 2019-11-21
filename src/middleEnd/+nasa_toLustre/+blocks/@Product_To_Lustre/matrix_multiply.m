@@ -1,4 +1,4 @@
-function [codes, AdditionalVars] = matrix_multiply(obj, exp, blk, inputs, outputs, zero, LusOutputDataTypeStr, conv_format )
+function [codes, AdditionalVars] = matrix_multiply(obj, exp, blk, inputs, outputs, zero, LusOutputDataTypeStr, conv_format, operandsDT )
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -39,7 +39,7 @@ function [codes, AdditionalVars] = matrix_multiply(obj, exp, blk, inputs, output
         [code, productOutputs, addVar] = nasa_toLustre.blocks.Product_To_Lustre.matrix_multiply_pair(m1_dimension, ...
             m2_dimension, m1_inputs,...
             new_inputs{i+1}, output_m, zero, pair_number,...
-            LusOutputDataTypeStr, tmp_prefix, conv_format);
+            LusOutputDataTypeStr, tmp_prefix, conv_format, operandsDT);
         codes = [codes, code];
         %productOutputs = [productOutputs, tmp_outputs];
         AdditionalVars = [AdditionalVars, addVar];

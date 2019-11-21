@@ -19,6 +19,8 @@ classdef Lus2SLXUtils
         [x2, y2] = instrs_process(nodes, new_model_name, node_block_path, blk_exprs, node_name,  x2, y2, xml_trace)
         specInstrs_process(node_block_path, blk_spec, node_name)
         %%
+        hasMemory = instr_mayHaveMemory(instr)
+        %%
         [x2, y2] = process_outputs(node_block_path, blk_outputs, ID, x2, y2, isBranch)
         %%
         [x2, y2] = process_inputs(node_block_path, blk_inputs, ID, x2, y2)
@@ -49,7 +51,10 @@ classdef Lus2SLXUtils
         %%
         status = AddResettableSubsystemToIfBlock(model)
         %%
-        status = encapsulateWithReset(resetBlock, actionBlock)        
+        status = encapsulateWithReset(resetBlock, actionBlock)   
+        %%
+        [dt, dim] = getArgDataType(arg)
+        
     end
 end
 

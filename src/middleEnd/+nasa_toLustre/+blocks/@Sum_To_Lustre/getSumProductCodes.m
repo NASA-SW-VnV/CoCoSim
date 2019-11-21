@@ -14,6 +14,7 @@ function [codes, outputs_dt, AdditionalVars, outputs] = getSumProductCodes(...
     widths = blk.CompiledPortWidths.Inport;
     inputs = nasa_toLustre.blocks.Sum_To_Lustre.createBlkInputs(obj, parent, blk, widths, AccumDataTypeStr, isSumBlock);
 
+    [operandsDT, ~, ~] =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(AccumDataTypeStr);
     [LusOutputDataTypeStr, zero, one] =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Outport(1));
     if (isSumBlock)
         operator_character = '+';
@@ -75,7 +76,7 @@ function [codes, outputs_dt, AdditionalVars, outputs] = getSumProductCodes(...
         if ~isSumBlock && strcmp(blk.Multiplication, 'Matrix(*)')
             %This is a matrix multiplication, only applies to
             %Product block
-            [codes, AdditionalVars] = nasa_toLustre.blocks.Product_To_Lustre.matrix_multiply(obj, exp, blk, inputs, outputs, zero, LusOutputDataTypeStr, conv_format );
+            [codes, AdditionalVars] = nasa_toLustre.blocks.Product_To_Lustre.matrix_multiply(obj, exp, blk, inputs, outputs, zero, LusOutputDataTypeStr, conv_format, operandsDT );
         else
             % element wise operations / Sum
             % If it is integer division, we need to call the
@@ -101,7 +102,7 @@ function [codes, outputs_dt, AdditionalVars, outputs] = getSumProductCodes(...
                 int_divFun = '';
             end
             [codes] = nasa_toLustre.blocks.Sum_To_Lustre.elementWiseSumProduct(exp, ...
-                inputs, outputs, widths, initCode, conv_format, int_divFun);
+                inputs, outputs, widths, initCode, conv_format, int_divFun, operandsDT);
         end
     end
 end

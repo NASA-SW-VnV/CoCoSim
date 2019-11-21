@@ -223,10 +223,10 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, ...
             nasa_toLustre.lustreAst.IntExpr('1'))));
     end
     is_main_node = 1;
-    [nodes_ast, contracts_ast, external_libraries_i, failed] = recursiveGeneration(...
+    [nodes_ast, contracts_ast, external_libraries_i, abstractedBlocks_i, failed] = recursiveGeneration(...
         model_struct, model_struct, main_sampleTime, is_main_node, lus_backend, coco_backend, xml_trace);
     external_libraries = MatlabUtils.concat(external_libraries, external_libraries_i);
-    
+    abstractedBlocks = [abstractedBlocks, abstractedBlocks_i];
     if ~forceGeneration && failed
         html_path = fullfile(output_dir, strcat(file_name, '_error_messages.html'));
         %HtmlItem.displayErrorMessages(html_path, ERROR_MSG, mode_display);
@@ -246,41 +246,7 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, ...
         nodes_ast = [external_lib_code, nodes_ast];
     end
     %% create LustreProgram
-    % copy Kind2 libraries
-    if LusBackendType.isKIND2(lus_backend)
-        if ismember('lustrec_math', open_list)
-            lib_path = fullfile(fileparts(mfilename('fullpath')),...
-                '+lib', 'lustrec_math.lus');
-            copyfile(lib_path, output_dir);
-        end
-        if ismember('simulink_math_fcn', open_list)
-            lib_path = fullfile(fileparts(mfilename('fullpath')),...
-                '+lib', 'simulink_math_fcn.lus');
-            copyfile(lib_path, output_dir);
-        end
-        if ismember('conv', open_list)
-            lib_path = fullfile(fileparts(mfilename('fullpath')),...
-                '+lib', 'conv.lus');
-            copyfile(lib_path, output_dir);
-        end
-    else %lustrec, zustre ... 
-        % This fix is not needed for lustrec unstable branch. It should be
-        % fixed in lustrec-seal branch as well
-%         if ismember('simulink_math_fcn', open_list) ...
-%                 && ismember('lustrec_math', open_list)
-%             simulink_math_fcn_path = fullfile(LUCTREC_INCLUDE_DIR, ...
-%                 'simulink_math_fcn.lusi');
-%             if exist(simulink_math_fcn_path, 'file')
-%                 ftext = fileread(simulink_math_fcn_path);
-%                 if MatlabUtils.contains(ftext, 'open <lustrec_math>')
-%                     % simulink_math_fcn includes lustrec_math, so remove
-%                     % lustrec_math to avoid double definition of functions
-%                     % error
-%                     open_list = open_list(~strcmp(open_list, 'lustrec_math'));
-%                 end
-%             end
-%         end
-    end
+    
     
     keys = TOLUSTRE_ENUMS_MAP.keys();
     enumsAst = cell(numel(keys), 1);
@@ -317,7 +283,8 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, ...
         end
     end
     try
-        [lustrecode, preludeCode] = program.print(lus_backend);
+        [lustrecode, preludeCode, ext_lib] = program.print(lus_backend);
+        open_list = MatlabUtils.concat(open_list, ext_lib);
         fprintf(lus_fid, '%s', lustrecode);
         fclose(lus_fid);
         if LusBackendType.isPRELUDE(lus_backend)
@@ -342,7 +309,55 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, ...
         return;
     end
     
-    
+    %% copy Kind2 libraries
+    if LusBackendType.isKIND2(lus_backend)
+        toLustrePath = fileparts(mfilename('fullpath'));
+        % lustrec_math
+        if ismember('lustrec_math', open_list)
+            lib_name = 'lustrec_math.lus';
+            if CoCoSimPreferences.use_more_precise_abstraction
+                lib_name = 'lustrec_math_more_precise_abstraction.lus';
+                open_list{strcmp(open_list, 'lustrec_math')} = 'lustrec_math_more_precise_abstraction';
+            end
+            lib_path = fullfile(toLustrePath, '+lib', lib_name);
+            copyfile(lib_path, output_dir);
+        end
+        
+        % simulink_math_fcn
+        if ismember('simulink_math_fcn', open_list)
+            lib_path = fullfile(toLustrePath, '+lib', 'simulink_math_fcn.lus');
+            copyfile(lib_path, output_dir);
+        end
+        
+        % conv
+        if ismember('conv', open_list)
+            lib_path = fullfile(toLustrePath, '+lib', 'conv.lus');
+            copyfile(lib_path, output_dir);
+        end
+        
+        % kind2_lib
+        if ismember('kind2_lib', open_list)
+            lib_path = fullfile(toLustrePath, '+lib', 'kind2_lib.lus');
+            copyfile(lib_path, output_dir);
+        end
+    else %lustrec, zustre ... 
+        % This fix is not needed for lustrec unstable branch. It should be
+        % fixed in lustrec-seal branch as well
+%         if ismember('simulink_math_fcn', open_list) ...
+%                 && ismember('lustrec_math', open_list)
+%             simulink_math_fcn_path = fullfile(LUCTREC_INCLUDE_DIR, ...
+%                 'simulink_math_fcn.lusi');
+%             if exist(simulink_math_fcn_path, 'file')
+%                 ftext = fileread(simulink_math_fcn_path);
+%                 if MatlabUtils.contains(ftext, 'open <lustrec_math>')
+%                     % simulink_math_fcn includes lustrec_math, so remove
+%                     % lustrec_math to avoid double definition of functions
+%                     % error
+%                     open_list = open_list(~strcmp(open_list, 'lustrec_math'));
+%                 end
+%             end
+%         end
+    end
     %% writing traceability
     xml_trace.write();
     
@@ -411,19 +426,21 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, ...
 end
 
 %%
-function [nodes_ast, contracts_ast, external_libraries, error_status] = ...
+function [nodes_ast, contracts_ast, external_libraries, abstractedBlocks, error_status] = ...
         recursiveGeneration(parent, blk, main_sampleTime, is_main_node,...
         lus_backend, coco_backend, xml_trace)
         nodes_ast = {};
     contracts_ast = {};
     external_libraries = {};
+    abstractedBlocks = {};
     error_status = false;
     if isfield(blk, 'Content') && ~isempty(blk.Content) ...
             && ~(isstruct(blk.Content) && isempty(fieldnames(blk.Content)))
         field_names = fieldnames(blk.Content);
         for i=1:numel(field_names)
             
-            [nodes_code_i, contracts_ast_i, external_libraries_i, error_status_i] = ...
+            [nodes_code_i, contracts_ast_i, external_libraries_i, abstractedBlocks_i, ...
+                error_status_i] = ...
                 recursiveGeneration(blk, blk.Content.(field_names{i}),...
                 main_sampleTime, 0, lus_backend, coco_backend, xml_trace);
             if ~isempty(nodes_code_i)
@@ -433,6 +450,7 @@ function [nodes_ast, contracts_ast, external_libraries, error_status] = ...
                 contracts_ast = [ contracts_ast, contracts_ast_i];
             end
             external_libraries = [external_libraries, external_libraries_i];
+            abstractedBlocks = [abstractedBlocks, abstractedBlocks_i];
             error_status = error_status_i || error_status;
         end
         [b, status] = nasa_toLustre.utils.getWriteType(blk);
@@ -440,7 +458,7 @@ function [nodes_ast, contracts_ast, external_libraries, error_status] = ...
             return;
         end
         try
-            [main_node, is_contract, external_nodes, external_libraries_i] ...
+            [main_node, is_contract, external_nodes, external_libraries_i, abstractedBlocks_i] ...
                 = nasa_toLustre.frontEnd.SS_To_LustreNode.subsystem2node(parent, blk, main_sampleTime, ...
                 is_main_node, lus_backend, coco_backend, xml_trace);
         catch me
@@ -451,6 +469,7 @@ function [nodes_ast, contracts_ast, external_libraries, error_status] = ...
             return;
         end
         external_libraries = [external_libraries, external_libraries_i];
+        abstractedBlocks = [abstractedBlocks, abstractedBlocks_i];
         if iscell(external_nodes)
             nodes_ast = [ nodes_ast, external_nodes];
         else

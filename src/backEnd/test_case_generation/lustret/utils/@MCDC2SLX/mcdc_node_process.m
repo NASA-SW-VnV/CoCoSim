@@ -58,13 +58,19 @@ function mcdc_node_process(new_model_name, nodes, node, ...
         
         % get variables original names
         originalNamesMap = containers.Map();
-        for input=nodes.(node).inputs
+        inputs = nodes.(node).inputs;
+        for input_idx=1:length(inputs)
+            input = inputs(input_idx);
             originalNamesMap(input.name) = input.original_name;
         end
-        for output=nodes.(node).outputs
+        outputs = nodes.(node).outputs;
+        for output_idx=1:length(outputs)
+            output = outputs(output_idx);
             originalNamesMap(output.name) = output.original_name;
         end
-        for local=nodes.(node).locals
+        locals = nodes.(node).locals;
+        for local_idx=1:length(locals)
+            local = locals(local_idx);
             originalNamesMap(local.name) = local.original_name;
         end
         % get tracable variables names

@@ -16,10 +16,8 @@ function [x2, y2] = process_inputs(node_block_path, blk_inputs, ID, x2, y2)
         add_block('simulink/Ports & Subsystems/In1',...
             inport_path,...
             'Position',[x2 y2 (x2+50) (y2+50)]);
-        dt = blk_inputs(i).datatype;
-        if isstruct(dt) && isfield(dt, 'kind')
-            dt = dt.kind;
-        end
+        [dt, dim] = Lus2SLXUtils.getArgDataType(blk_inputs(i));
+        
         if strcmp(dt, 'bool')
             set_param(inport_path, 'OutDataTypeStr', 'boolean');
         elseif strcmp(dt, 'int')
@@ -29,7 +27,9 @@ function [x2, y2] = process_inputs(node_block_path, blk_inputs, ID, x2, y2)
         elseif strcmp(dt, 'real')
             set_param(inport_path, 'OutDataTypeStr', 'double');
         end
-
+        if prod(dim) > 1
+            set_param(inport_path, 'PortDimensions', mat2str(dim));
+        end
         %we create a GoTo block for this input
         add_block('simulink/Signal Routing/Goto',...
             inport_output,...

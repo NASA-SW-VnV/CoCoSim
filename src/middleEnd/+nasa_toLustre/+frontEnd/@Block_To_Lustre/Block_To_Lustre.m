@@ -40,7 +40,7 @@ classdef Block_To_Lustre < handle
         ContentNeedToBeTranslated = 1;
         
         
-        
+        blkIsAbstracted = false;
     end
     
     methods (Abstract)

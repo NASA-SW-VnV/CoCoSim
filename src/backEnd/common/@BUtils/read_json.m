@@ -22,6 +22,11 @@ function data = read_json(contract_path)
         warndlg('No cocospec contracts were generated','CoCoSim: Warning');
         return;
     end
-    data = json_decode(filetext);
+    try
+        data = MatlabUtils.jsondecode(filetext);
+    catch ME
+        display_msg(['Could not read file ' contract_path], Constants.ERROR, 'read_json', '');
+        rethrow(ME);
+    end
 end
 

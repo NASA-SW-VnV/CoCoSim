@@ -56,7 +56,9 @@ else
     need_to_compile = true;
     if  exist(json_encode_file, 'file') && exist(json_decode_file, 'file')
         try
-            tree = MatlabUtils.getExpTree('u1 (1 ) >x');
+            json_decode('{"a":1, "b":2}');
+            s = struct('a', 1, 'b', 2);
+            json_encode(s);
             need_to_compile = false;
         catch
         end

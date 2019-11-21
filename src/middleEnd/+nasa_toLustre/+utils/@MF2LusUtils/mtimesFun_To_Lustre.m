@@ -1,4 +1,4 @@
-function [code, dim] = mtimesFun_To_Lustre(x, x_dim, y, y_dim)
+function [code, dim] = mtimesFun_To_Lustre(x, x_dim, y, y_dim, operandsDT)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
@@ -16,11 +16,11 @@ function [code, dim] = mtimesFun_To_Lustre(x, x_dim, y, y_dim)
     if prod(x_dim) == 1
         dim = y_dim;
         code = arrayfun(@(z) nasa_toLustre.lustreAst.BinaryExpr(multi, ...
-            x, y(z), false), 1:numel(y), 'UniformOutput', 0);
+            x, y(z), false, [], [], operandsDT), 1:numel(y), 'UniformOutput', 0);
     elseif prod(y_dim) == 1
         dim = x_dim;
         code = arrayfun(@(z) nasa_toLustre.lustreAst.BinaryExpr(multi, ...
-            x(z), y, false), 1:numel(x), 'UniformOutput', 0);
+            x(z), y, false, [], [], operandsDT), 1:numel(x), 'UniformOutput', 0);
     elseif length(x_dim) <= 2 && length(y_dim) <= 2
         
         x_reshape = reshape(x, x_dim);
@@ -35,7 +35,7 @@ function [code, dim] = mtimesFun_To_Lustre(x, x_dim, y, y_dim)
                     exp{end+1} = nasa_toLustre.lustreAst.BinaryExpr(multi, ...
                         x_reshape(i, k), ...
                         y_reshape(k, j),...
-                        false);
+                        false, [], [], operandsDT);
                 end
                 code_matrix(i,j) = {nasa_toLustre.lustreAst.BinaryExpr.BinaryMultiArgs(plus, exp)};
             end

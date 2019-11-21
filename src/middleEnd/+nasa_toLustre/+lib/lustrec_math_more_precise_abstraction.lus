@@ -1,0 +1,179 @@
+(*
+-- DO NOT use contracts to abstract these node. Kind2 does not allow calling nodes with contract inside other contracts
+<Log class="error" source="parse" line="679" column="1">
+  Illegal call to node "sqrt" in the cone of influence of this contract: node sqrt has a contract.
+</Log>
+*)
+node kind2_pi()
+returns(pi:real)
+let
+    assert 3.14159 < pi and pi < 3.1416;
+    --pi = 3.1416;
+tel
+
+node acos (x: real) returns (y: real) ;
+let
+     	assert (y >= 0.0 and y <= 3.1416);
+tel
+node imported acosh (x: real) returns (y: real) ;
+node asin (x: real) returns (y: real) ;
+let
+     	assert (y >= -1.5708 and y <= 1.5708);
+tel
+node imported asinh (x: real) returns (y: real) ;
+node atan (x: real) returns (y: real) ;
+let
+     	assert (y >= -1.5708 and y <= 1.5708);
+tel
+node atan2(x:real; n: real) returns (y: real) ;
+let
+     	assert (y >= -3.1416 and y <= 3.1416);
+tel
+node imported atanh (x: real) returns (y: real) ;
+node imported cbrt (x: real) returns (y: real) ;
+
+--------------------------------------COS
+node cos (x: real) returns (y: real) ;
+var two_pi, x_mod_2_pi, pi : real;
+let
+    assert (y >= -1.0 and y <= 1.0);
+    pi = kind2_pi();
+    two_pi = 2.0 * pi;
+    x_mod_2_pi = if x > two_pi or x < 0.0 then (real ((int (x*10000.0)) mod (int (two_pi*10000.0)))) / 10000.0 else x;
+    y = cos_0_2_pi(x_mod_2_pi);
+
+tel
+node cos_0_2_pi(x:real)
+returns(y:real);
+var two_pi, pi_over_2, pi, three_pi_over_2 : real;
+let
+    pi_over_2 = pi / 2.0;
+    two_pi = 2.0 * pi;
+    pi = kind2_pi();
+    three_pi_over_2 = 3.0 * pi / 2.0;
+    -- lookup table abstraction
+    assert 0.0 <= x and x < pi => y = cos_0_pi(x); 
+    assert pi <= x and x <= two_pi => y = -cos_0_pi(x - pi); 
+
+tel
+
+node cos_0_pi(x:real)
+returns(y:real);
+let
+assert 0.000 <= x and x <= 0.451 => 0.900 <= y and y <= 1.000;
+assert 0.451 <= x and x <= 0.644 => 0.800 <= y and y <= 0.900;
+assert 0.644 <= x and x <= 0.795 => 0.700 <= y and y <= 0.800;
+assert 0.795 <= x and x <= 0.927 => 0.600 <= y and y <= 0.700;
+assert 0.927 <= x and x <= 1.047 => 0.500 <= y and y <= 0.600;
+assert 1.047 <= x and x <= 1.159 => 0.400 <= y and y <= 0.500;
+assert 1.159 <= x and x <= 1.266 => 0.300 <= y and y <= 0.400;
+assert 1.266 <= x and x <= 1.369 => 0.200 <= y and y <= 0.300;
+assert 1.369 <= x and x <= 1.471 => 0.100 <= y and y <= 0.200;
+assert 1.471 <= x and x <= 1.571 => -0.000 <= y and y <= 0.100;
+assert 1.571 <= x and x <= 1.671 => -0.100 <= y and y <= 0.000;
+assert 1.671 <= x and x <= 1.772 => -0.200 <= y and y <= -0.100;
+assert 1.772 <= x and x <= 1.875 => -0.300 <= y and y <= -0.200;
+assert 1.875 <= x and x <= 1.982 => -0.400 <= y and y <= -0.300;
+assert 1.982 <= x and x <= 2.094 => -0.500 <= y and y <= -0.400;
+assert 2.094 <= x and x <= 2.214 => -0.600 <= y and y <= -0.500;
+assert 2.214 <= x and x <= 2.346 => -0.700 <= y and y <= -0.600;
+assert 2.346 <= x and x <= 2.498 => -0.800 <= y and y <= -0.700;
+assert 2.498 <= x and x <= 2.691 => -0.900 <= y and y <= -0.800;
+assert 2.691 <= x and x <= 3.142 => -1.000 <= y and y <= -0.900;
+tel
+
+--------------------------------------SIN
+node sin (x: real) returns (y: real) ;
+var two_pi, x_mod_2_pi : real;
+let
+    assert (y >= -1.0 and y <= 1.0);
+    two_pi = 2.0 * kind2_pi();
+    x_mod_2_pi = if x > two_pi or x < 0.0 then (real ((int (x*10000.0)) mod (int (two_pi*10000.0)))) / 10000.0 else x;
+    y = sin_0_2_pi(x_mod_2_pi);
+    
+tel
+node sin_0_2_pi(x:real)
+returns(y:real);
+var two_pi, pi_over_2, pi, three_pi_over_2 : real;
+let
+    pi_over_2 = pi / 2.0;
+    two_pi = 2.0 * pi;
+    pi = kind2_pi();
+    three_pi_over_2 = 3.0 * pi / 2.0;
+    assert 0.0 <= x and x < pi_over_2 => y = sin_0_pi_over_2(x); 
+    assert pi_over_2 <= x and x <= pi => y = sin_0_pi_over_2(x + pi_over_2); 
+    assert pi <= x and x <= three_pi_over_2 => y = -sin_0_pi_over_2(x - pi); 
+    assert three_pi_over_2 <= x and x <= two_pi => y = -sin_0_pi_over_2(x - three_pi_over_2); 
+tel
+node sin_0_pi_over_2(x:real)
+returns(y:real);
+let
+assert 1.120 <= x and x <= 1.571 => 0.900 <= y and y <= 1.000;
+assert 0.927 <= x and x <= 1.120 => 0.800 <= y and y <= 0.900;
+assert 0.775 <= x and x <= 0.927 => 0.700 <= y and y <= 0.800;
+assert 0.644 <= x and x <= 0.775 => 0.600 <= y and y <= 0.700;
+assert 0.524 <= x and x <= 0.644 => 0.500 <= y and y <= 0.600;
+assert 0.412 <= x and x <= 0.524 => 0.400 <= y and y <= 0.500;
+assert 0.305 <= x and x <= 0.412 => 0.300 <= y and y <= 0.400;
+assert 0.201 <= x and x <= 0.305 => 0.200 <= y and y <= 0.300;
+assert 0.100 <= x and x <= 0.201 => 0.100 <= y and y <= 0.200;
+assert 0.000 <= x and x <= 0.100 => -0.000 <= y and y <= 0.100;
+tel
+
+---------------------------------------------------------------------------
+node imported cosh (x: real) returns (y: real) ;
+node imported ceil (x: real) returns (y: real) ;
+node imported erf (x: real) returns (y: real) ;
+node imported exp (x: real) returns (y: real) ;
+node imported fabs (x: real) returns (y: real) ;
+node imported floor (x: real) returns (y: real) ;
+node imported fmod (x,y: real) returns (z: real) ;
+node log (x: real) returns (y: real) ;
+let
+    assert (x >= 0.0);
+    assert (x = 2.71828) = (y = 1.0); 
+    assert (x = 1.0) = (y = 0.0); 
+    assert (x > 1.0) = (y > 0.0); 
+    assert (x < 1.0) = (y < 0.0); 
+tel
+node log10 (x: real) returns (y: real) ;
+let
+    assert (x >= 0.0);
+    assert (x = 10.0) = (y = 1.0); 
+    assert (x > 10.0) = (y > 1.0); 
+    assert (x > 1.0 and x < 10.0) = (y > 0.0 and y < 1.0); 
+    assert (x = 1.0) = (y = 0.0); 
+    assert (x < 1.0) = (y < 0.0);  
+tel
+node pow (x:real; n: real) returns (y: real) ;
+var abs_x, abs_y: real;
+let
+        abs_x = if x >= 0.0 then x else -x;
+        abs_y = if y >= 0.0 then y else -y;
+     	assert (n > 1.0 and abs_x < 1.0 ) => abs_y < abs_x;
+        assert (n > 1.0 and abs_x > 1.0 ) => abs_y > abs_x;
+     	assert (n = 1.0) = (y = x);
+        assert (n = 2.0) => y = x*x;
+        assert (0.0 < n and n < 1.0 and abs_x < 1.0) => abs_y > abs_x;
+        assert (0.0 < n and n < 1.0 and x > 1.0) => y < x;
+        assert (x = 1.0 ) = (y = 1.0);
+        assert (x = 0.0 ) = (y = 0.0);
+tel
+node imported round (x: real) returns (y: real) ;
+
+node imported sinh (x: real) returns (y: real) ;
+
+node  sqrt (x: real) returns (y: real) ;
+let
+    assert (x >= 0.0);
+    assert (y >= 0.0);
+    assert (x > 1.0 ) = (x > y);
+    assert (x < 1.0 ) = (y > x);
+    assert (x = 1.0 ) = (y = 1.0);
+    assert ((y * y) = x);
+    --assert exists (j:real) x = j*j and j >= 0.0 and y = j;
+    
+tel
+node imported trunc (x: real) returns (y: real) ;
+node imported tan (x: real) returns (y: real) ;
+node imported tanh (x: real) returns (y: real) ;

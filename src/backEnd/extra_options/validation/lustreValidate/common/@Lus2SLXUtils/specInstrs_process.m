@@ -41,7 +41,11 @@ function specInstrs_process(node_block_path, blk_spec, node_name)
     vport = 1;
     for i=1:length(assumes)
         % add assume block
-        assumePath = BUtils.get_unique_block_name(fullfile(node_block_path,'assume'));
+        assume_name = 'assume';
+        if isfield(assumes(i), 'name') && ~isempty(assumes(i).name)
+            assume_name = assumes(i).name;
+        end
+        assumePath = BUtils.get_unique_block_name(fullfile(node_block_path, assume_name));
         aHandle = add_block('CoCoSimSpecification/assume', ...
             assumePath, ...
             'MakeNameUnique', 'on');
@@ -51,7 +55,11 @@ function specInstrs_process(node_block_path, blk_spec, node_name)
     end
     for i=1:length(guarantees)
         % add guarantee block
-        gPath = BUtils.get_unique_block_name(fullfile(node_block_path,'guarantee'));
+        g_name = 'assume';
+        if isfield(guarantees(i), 'name') && ~isempty(guarantees(i).name)
+            g_name = guarantees(i).name;
+        end
+        gPath = BUtils.get_unique_block_name(fullfile(node_block_path,g_name));
         gHandle = add_block('CoCoSimSpecification/guarantee', ...
             gPath, ...
             'MakeNameUnique', 'on');
@@ -139,8 +147,7 @@ end
 function addRequireEnsureConditions(node_block_path, node_name, rPath, rHandle, requires)
     if isempty(requires)
         % require true;
-        cst_path = BUtils.get_unique_block_name(fullfile(node_block_path, ...
-            strcat(rPath, '_true')));
+        cst_path = BUtils.get_unique_block_name(strcat(rPath, '_true'));
         cHandle = add_block('simulink/Commonly Used Blocks/Constant',...
             cst_path,...
             'MakeNameUnique', 'on',...
@@ -167,7 +174,11 @@ function addRequireEnsureConditions(node_block_path, node_name, rPath, rHandle, 
         %add all requires
         for i=1:length(requires)
             rhs_name = BUtils.adapt_block_name(requires(i).qfexpr.value, node_name);
-            rhs_path = BUtils.get_unique_block_name(strcat(op_path,'_rhs'));
+            if isfield(requires(i), 'name')
+                rhs_path = BUtils.get_unique_block_name(strcat(op_path,requires(i).name));
+            else
+                rhs_path = BUtils.get_unique_block_name(strcat(op_path,'_rhs'));
+            end
             rhsHandle = add_block('simulink/Signal Routing/From',...
                 rhs_path,...
                 'MakeNameUnique', 'on', ...

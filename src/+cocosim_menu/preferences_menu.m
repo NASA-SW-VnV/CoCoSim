@@ -70,6 +70,7 @@ function schema = getNASACompilerPreferences(callbackInfo)
     CoCoSimPreferences = callbackInfo.userdata;
     schema.childrenFcns = {...
         {@getForceTypecastingOfInt, CoCoSimPreferences},...
+        {@useMorePreciseAbstraction, CoCoSimPreferences},...
         {@getSkip_unsupportedblocks, CoCoSimPreferences},...
         {@getSkip_pp, CoCoSimPreferences},...
         {@getSkip_defected_pp, CoCoSimPreferences},...
@@ -93,6 +94,23 @@ end
 function forceTypecastingOfInt(callbackInfo)
     CoCoSimPreferences = callbackInfo.userdata;
     CoCoSimPreferences.forceTypeCastingOfInt = ~ CoCoSimPreferences.forceTypeCastingOfInt;
+    cocosim_menu.CoCoSimPreferences.save(CoCoSimPreferences);
+end
+%useMorePreciseAbstraction
+function schema = useMorePreciseAbstraction(callbackInfo)
+    schema = sl_toggle_schema;
+    schema.label = 'Use more precise abstraction for mathematical functions (sqrt, cos, ...).';
+    CoCoSimPreferences = callbackInfo.userdata;
+    schema.checked = 'checked';
+    if ~CoCoSimPreferences.use_more_precise_abstraction
+        schema.checked = 'unchecked';
+    end
+    schema.callback = @useMorePreciseAbstractionCallback;
+    schema.userdata = CoCoSimPreferences;
+end
+function useMorePreciseAbstractionCallback(callbackInfo)
+    CoCoSimPreferences = callbackInfo.userdata;
+    CoCoSimPreferences.use_more_precise_abstraction = ~ CoCoSimPreferences.use_more_precise_abstraction;
     cocosim_menu.CoCoSimPreferences.save(CoCoSimPreferences);
 end
 % skip_unsupportedblocks

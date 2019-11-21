@@ -98,17 +98,23 @@ function [new_model_path, status] = importLustreSpec(...
             if use_traceability ...
                     && isfield(mapping_json, original_name) ...
                     && isfield(mapping_json.(original_name), 'model_path')
-                simulink_block_name = mapping_json.(original_name).model_path;
-                simulink_block_name = renamePath(simulink_block_name, base_name, new_model_name);
-                isBdRoot = strcmp(get_param(simulink_block_name, 'Type'), 'block_diagram');
-                if ~isBdRoot && getSimulinkBlockHandle(simulink_block_name) == -1
-                    % model_path in traceability file does not exist.
+                try
+                    simulink_block_name = mapping_json.(original_name).model_path;
+                    simulink_block_name = renamePath(simulink_block_name, base_name, new_model_name);
+                    isBdRoot = strcmp(get_param(simulink_block_name, 'Type'), 'block_diagram');
+                    if ~isBdRoot && getSimulinkBlockHandle(simulink_block_name) == -1
+                        % model_path in traceability file does not exist.
+                        simulink_block_name = renamePath(current_openedSS, base_name, new_model_name);
+                        skip_linking = true;
+                        display_msg(...
+                            sprintf('Model path "%s" for contract %s can not be found. Linking Should be done manually.', ...
+                            mapping_json.(original_name).model_path, original_name), MsgType.WARNING, 'importLustreSpec', '');
+                        
+                    end
+                catch 
+                    % Give the current opened Subsystem
                     simulink_block_name = renamePath(current_openedSS, base_name, new_model_name);
                     skip_linking = true;
-                    display_msg(...
-                        sprintf('Model path "%s" for contract %s can not be found. Linking Should be done manually.', ...
-                        mapping_json.(original_name).model_path, original_name), MsgType.WARNING, 'importLustreSpec', '');
-                    
                 end
             else
                 % Give the current opened Subsystem
@@ -182,13 +188,20 @@ function [new_model_path, status] = importLustreSpec(...
                     node_outputs = node_struct.outputs;
                     %link outputs to the subsystem.
                     for node_idx=1:numel(mapping_outputs)
-                        json_index = find(strcmp(node_outputs(node_idx).original_name, mapping_outputs_names), 1);
-                        output_block_name = renamePath(...
-                            mapping_outputs(json_index).variable_path,...
-                            base_name, new_model_name);
-                        ImportLusUtils.link_block_with_its_cocospec(cocospec_block_path, ...
-                            output_block_name, simulink_block_name, ...
-                            parent_block_name, node_idx + length(node_inputs), isBdRoot);
+                        try
+                            json_index = find(strcmp(node_outputs(node_idx).original_name, mapping_outputs_names), 1);
+                            if isempty(json_index)
+                                continue;
+                            end
+                            output_block_name = renamePath(...
+                                mapping_outputs(json_index).variable_path,...
+                                base_name, new_model_name);
+                            ImportLusUtils.link_block_with_its_cocospec(cocospec_block_path, ...
+                                output_block_name, simulink_block_name, ...
+                                parent_block_name, node_idx + length(node_inputs), isBdRoot);
+                        catch
+                            % ignore linking if something wrong happened.
+                        end
                     end
                 catch me
                     % linking failed.

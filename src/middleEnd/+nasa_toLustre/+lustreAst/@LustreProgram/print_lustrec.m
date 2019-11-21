@@ -1,21 +1,25 @@
-function [lus_code, plu_code] = print_lustrec(obj, backend)
+function [lus_code, plu_code, ext_lib] = print_lustrec(obj, backend)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
+    global ADD_KIND2_TIMES_ABSTRACTION ADD_KIND2_DIVIDE_ABSTRACTION;
+    ADD_KIND2_TIMES_ABSTRACTION = false;
+    ADD_KIND2_DIVIDE_ABSTRACTION = false;
+    ext_lib = {};
+    lus_header_lines = {};
     lus_lines = {};
     plu_lines = {};
     plu_code = '';
     %opens
     if (LusBackendType.isKIND2(backend) || LusBackendType.isJKIND(backend))
-        lus_lines = [lus_lines; ...
+        lus_header_lines = [lus_header_lines; ...
             cellfun(@(x) sprintf('include "%s.lus"\n', x), obj.opens, ...
             'UniformOutput', false)];
     else
-        lus_lines = [lus_lines; ...
+        lus_header_lines = [lus_header_lines; ...
             cellfun(@(x) sprintf('#open <%s>\n', x), obj.opens, ...
             'UniformOutput', false)];
     end
@@ -23,7 +27,7 @@ function [lus_code, plu_code] = print_lustrec(obj, backend)
     %types
     types = cellfun(@(x) sprintf('%s', x.print(backend)), obj.types, ...
         'UniformOutput', false);
-    lus_lines = MatlabUtils.concat(lus_lines, types);
+    lus_header_lines = MatlabUtils.concat(lus_header_lines, types);
     if LusBackendType.isPRELUDE(backend)
         plu_lines = [plu_lines; types];
     end
@@ -78,7 +82,21 @@ function [lus_code, plu_code] = print_lustrec(obj, backend)
             end
         end
     end
-    
+    if ADD_KIND2_TIMES_ABSTRACTION
+        if ~any(MatlabUtils.contains(lus_header_lines, 'kind2_lib.lus'))
+            ext_lib{end+1} = 'kind2_lib';
+            lus_header_lines = MatlabUtils.concat({sprintf('include "kind2_lib.lus"\n')},...
+                lus_header_lines);
+        end
+    end
+    if ADD_KIND2_DIVIDE_ABSTRACTION
+        if ~any(MatlabUtils.contains(lus_header_lines, 'kind2_lib.lus'))
+            ext_lib{end+1} = 'kind2_lib';
+            lus_header_lines = MatlabUtils.concat({sprintf('include "kind2_lib.lus"\n')},...
+                lus_header_lines);
+        end
+    end
+    lus_lines = MatlabUtils.concat(lus_header_lines, lus_lines);
     lus_code = MatlabUtils.strjoin(lus_lines, '');
     if LusBackendType.isPRELUDE(backend)
         plu_code = MatlabUtils.strjoin(plu_lines, '');
@@ -100,3 +118,4 @@ function b = hasPreludeOperator(node)
         || ismember(nasa_toLustre.lustreAst.BinaryExpr.PRELUDE_OFFSET, operators) ...
         || ismember(nasa_toLustre.lustreAst.BinaryExpr.PRELUDE_FBY, operators);
 end
+

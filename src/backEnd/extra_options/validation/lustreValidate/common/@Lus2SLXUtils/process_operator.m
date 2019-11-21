@@ -7,18 +7,15 @@
  
 
 function [x2, y2] = process_operator(node_block_path, blk_exprs, var, node_name, x2, y2)
-    if y2 < 30000; y2 = y2 + 150; else, x2 = x2 + 500; y2 = 100; end;
+    if y2 < 30000; y2 = y2 + 150; else, x2 = x2 + 500; y2 = 100; end
 
     ID = BUtils.adapt_block_name(var{1});
     lhs_name = BUtils.adapt_block_name(blk_exprs.(var{1}).lhs, node_name);
     lhs_path = strcat(node_block_path,'/',ID, '_lhs');
     op_path = strcat(node_block_path,'/',ID,'_operator');
     operator = blk_exprs.(var{1}).name;
-
-    dt = blk_exprs.(var{1}).args(1).datatype;
-    if isstruct(dt) && isfield(dt, 'kind')
-        dt = dt.kind;
-    end
+    
+    dt = Lus2SLXUtils.getArgDataType(blk_exprs.(var{1}).args(1));
     if strcmp(dt, 'bool')
         dt =  'boolean';
     elseif strcmp(dt, 'int')
@@ -48,10 +45,8 @@ function [x2, y2] = process_operator(node_block_path, blk_exprs, var, node_name,
                 'Value', local_var,...
                 'Position',[x2 y2 (x2+50) (y2+50)]);
             %         set_param(input_path, 'OutDataTypeStr','Inherit: Inherit via back propagation');
-            dt = blk_exprs.(var{1}).args(inport_number).datatype;
-            if isstruct(dt) && isfield(dt, 'kind')
-                dt = dt.kind;
-            end
+            dt = Lus2SLXUtils.getArgDataType(blk_exprs.(var{1}).args(inport_number));
+            
             if strcmp(dt, 'bool')
                 set_param(input_path, 'OutDataTypeStr', 'boolean');
             elseif strcmp(dt, 'int')

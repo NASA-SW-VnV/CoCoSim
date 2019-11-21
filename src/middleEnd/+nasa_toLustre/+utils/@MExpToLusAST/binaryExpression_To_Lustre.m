@@ -34,7 +34,7 @@ function [code, exp_dt, dim, extra_code] = binaryExpression_To_Lustre(tree, args
         dim = left_dim;
         op = tree.operator;
     elseif strcmp(tree_type, 'mtimes') % '*'
-        [code, dim] = nasa_toLustre.utils.MF2LusUtils.mtimesFun_To_Lustre(left, left_dim, right, right_dim);
+        [code, dim] = nasa_toLustre.utils.MF2LusUtils.mtimesFun_To_Lustre(left, left_dim, right, right_dim, operands_dt);
         return;
     elseif strcmp(tree_type, 'times') % '.*'
         if isempty(left_dim) || (length(left_dim) >= 1 && prod(left_dim) == 1)
@@ -105,7 +105,7 @@ function [code, exp_dt, dim, extra_code] = binaryExpression_To_Lustre(tree, args
     [left, right] = nasa_toLustre.utils.MExpToLusAST.inlineOperands(left, right, tree);
     
     % create code
-    code = arrayfun(@(i) nasa_toLustre.lustreAst.BinaryExpr(op, left{i}, right{i}, false), ...
+    code = arrayfun(@(i) nasa_toLustre.lustreAst.BinaryExpr(op, left{i}, right{i}, false, [], [], operands_dt), ...
         (1:numel(left)), 'UniformOutput', false);
 end
 

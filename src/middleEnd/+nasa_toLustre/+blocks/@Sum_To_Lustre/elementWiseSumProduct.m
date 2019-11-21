@@ -4,7 +4,7 @@
 % All Rights Reserved.
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [codes] = elementWiseSumProduct(exp, inputs, outputs, widths, initCode, conv_format, int_divFun)
+function [codes] = elementWiseSumProduct(exp, inputs, outputs, widths, initCode, conv_format, int_divFun, operandsDT)
     
     codes = cell(1, numel(outputs));
     for i=1:numel(outputs)
@@ -16,7 +16,9 @@ function [codes] = elementWiseSumProduct(exp, inputs, outputs, widths, initCode,
             else
                 code = nasa_toLustre.lustreAst.BinaryExpr(exp(j), ...
                     code, inputs{j}{i}, false);
+                code.setOperandsDT(operandsDT);
             end
+            
         end
         if ~isempty(conv_format)
             code =nasa_toLustre.utils.SLX2LusUtils.setArgInConvFormat(conv_format, code);
