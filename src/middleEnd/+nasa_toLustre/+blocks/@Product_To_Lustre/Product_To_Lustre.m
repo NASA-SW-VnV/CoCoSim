@@ -21,10 +21,24 @@ classdef Product_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         function  write_code(obj, parent, blk, xml_trace, lus_backend, coco_backend, main_sampleTime, varargin)
             global  CoCoSimPreferences;
             OutputDataTypeStr = blk.CompiledPortDataTypes.Outport{1};
+            if ismember('double', blk.CompiledPortDataTypes.Inport)
+                AccumDataTypeStr = 'double';
+            elseif ismember('single', blk.CompiledPortDataTypes.Inport)
+                AccumDataTypeStr = 'single';
+            elseif length(unique(blk.CompiledPortDataTypes.Inport)) == 1
+                AccumDataTypeStr = blk.CompiledPortDataTypes.Inport{1};
+                if strcmp(AccumDataTypeStr, 'boolean')
+                    AccumDataTypeStr = 'uint8';
+                end
+            elseif all(MatlabUtils.contains(blk.CompiledPortDataTypes.Inport, 'int'))
+                AccumDataTypeStr = 'int32';
+            else
+                AccumDataTypeStr = 'double';
+            end
             isSumBlock = false;
             [codes, outputs_dt, additionalVars, outputs] = ...
                 nasa_toLustre.blocks.Sum_To_Lustre.getSumProductCodes(obj, parent, blk, ...
-                OutputDataTypeStr,isSumBlock, OutputDataTypeStr, xml_trace, lus_backend, main_sampleTime);
+                OutputDataTypeStr, isSumBlock,  AccumDataTypeStr, xml_trace, lus_backend, main_sampleTime);
             
             obj.addCode( codes );
             obj.addVariable(outputs_dt);

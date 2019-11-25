@@ -14,8 +14,8 @@ function [codes, outputs_dt, AdditionalVars, outputs] = getSumProductCodes(...
     widths = blk.CompiledPortWidths.Inport;
     inputs = nasa_toLustre.blocks.Sum_To_Lustre.createBlkInputs(obj, parent, blk, widths, AccumDataTypeStr, isSumBlock);
 
-    [operandsDT, ~, ~] =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(AccumDataTypeStr);
-    [LusOutputDataTypeStr, zero, one] =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Outport(1));
+    [operandsDT, zero, one] =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(AccumDataTypeStr);
+    [LusOutputDataTypeStr] =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(blk.CompiledPortDataTypes.Outport(1));
     if (isSumBlock)
         operator_character = '+';
         initCode = zero;

@@ -19,7 +19,7 @@ function eps = getLustrescSlxEps(model_path)
     if hasVariable(hws,'lustrec_slx_eps')
         eps = getVariable(hws,'lustrec_slx_eps');
     else
-        eps = 1e-4;
+        eps = 1e-2;
     end
 end
 
