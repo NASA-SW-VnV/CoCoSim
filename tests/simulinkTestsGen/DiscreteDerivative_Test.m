@@ -1,5 +1,5 @@
 classdef DiscreteDerivative_Test < Block_Test
-    %DiscreteDerivative_Test generates test automatically.
+    %DiscreteDerivative_Test generates test automatically for DiscreteDerivative block
     
     properties(Constant)
         fileNamePrefix = 'DiscreteDerivative_TestGen';

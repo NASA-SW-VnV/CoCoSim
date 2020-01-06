@@ -1,5 +1,5 @@
 classdef Abs_Test < Block_Test
-    %Abs_Test generates test automatically.
+    %Abs_Test generates test automatically for Abs block
     
     properties(Constant)
         fileNamePrefix = 'Abs_TestGen';
