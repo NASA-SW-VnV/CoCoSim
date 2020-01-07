@@ -72,7 +72,7 @@ function [code, exp_dt, dim, extra_code] = arrayAccess_To_Lustre(tree, args)
                         thens{i} = namesAst{i};
                     end
                     thens{n} = namesAst{n};
-                    code{argIdx} = nasa_toLustre.lustreAst.ParenthesesExpr(nasa_toLustre.lustreAst.IteExpr.nestedIteExpr(conds, thens));
+                    code{argIdx} = nasa_toLustre.lustreAst.IteExpr.nestedIteExpr(conds, thens);
                 end
             end
         end
@@ -134,7 +134,7 @@ function [code, exp_dt, dim, extra_code] = arrayAccess_To_Lustre(tree, args)
                         thens{i} = namesAst{i};
                     end
                     thens{n} = namesAst{n};
-                    code{pidx} = nasa_toLustre.lustreAst.ParenthesesExpr(nasa_toLustre.lustreAst.IteExpr.nestedIteExpr(conds, thens));
+                    code{pidx} = nasa_toLustre.lustreAst.IteExpr.nestedIteExpr(conds, thens);
                 end
             end
         end

@@ -185,9 +185,7 @@ end
 function [varId, status] = getVarID(then)
     status = 0;
     varId = {};
-    if isa(then, 'nasa_toLustre.lustreAst.ParenthesesExpr')
-        [varId, status] = getVarID(then.getExp());
-    elseif isa(then, 'nasa_toLustre.lustreAst.VarIdExpr')
+    if isa(then, 'nasa_toLustre.lustreAst.VarIdExpr')
         varId = then;
     else
         status = 1;

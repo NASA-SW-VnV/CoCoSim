@@ -175,9 +175,7 @@ classdef BinaryExpr < nasa_toLustre.lustreAst.LustreExpr
                 if ~isempty(operandsDT)
                     exp.setOperandsDT(operandsDT);
                 end
-                if isFirstTime
-                    exp = nasa_toLustre.lustreAst.ParenthesesExpr(exp);
-                end
+                
             else
                 exp = nasa_toLustre.lustreAst.BinaryExpr(op, ...
                     args{1}, ...
@@ -186,9 +184,7 @@ classdef BinaryExpr < nasa_toLustre.lustreAst.LustreExpr
                 if ~isempty(operandsDT)
                     exp.setOperandsDT(operandsDT);
                 end
-                if isFirstTime
-                    exp = nasa_toLustre.lustreAst.ParenthesesExpr(exp);
-                end
+                
             end
         end
     end
