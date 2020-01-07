@@ -8,52 +8,75 @@ classdef Abs_Test < Block_Test
     
     properties
         % properties that will participate in permutations
-        OutDataTypeStr = {...
-            'Inherit: Inherit via internal rule', ...
-            'Inherit: Inherit via internal rule', ...
-            'Inherit: Inherit via internal rule', ...
-            'Inherit: Inherit via back propagation', ...
-            'Inherit: Same as input',...
-            'double','single','int8','uint8','int8','uint8',...
-            'int16','uint16','int16','uint16',...
-            'int32','uint32','int32','uint32'};
+        inOutDataTypeKeys = {...
+            'Inherit: auto', ...
+            'single',...
+            'double',...
+            'int8', ...
+            'uint8',...
+            'int16',...
+            'uint16'};
+        inOutDataTypeValues = {...
+            {'Inherit: Inherit via internal rule', 'Inherit: Inherit via back propagation', 'Inherit: Same as input', 'double','single','int8','uint8', 'int16','uint16'}, ... %'Inherit: auto'
+            {'Inherit: Inherit via internal rule', 'Inherit: Same as input', 'single'},...        % 'single'
+            {'Inherit: Inherit via internal rule', 'Inherit: Inherit via back propagation', 'double'},...        % 'double'
+            {'Inherit: Inherit via internal rule', 'int8', 'uint8'},...        % 'int8'
+            {'Inherit: Inherit via back propagation', 'int8', 'uint8'},...        % 'uint8'
+            {'Inherit: Same as input', 'int16','uint16'},...        % 'int16'
+            {'Inherit: Inherit via internal rule', 'int16','uint16'}        % 'uint16'
+            };
+        inOutDataTypeMap ; % defined in the constructor
+        
+        %         OutDataTypeStr = {...
+        %             'Inherit: Inherit via internal rule', ...
+        %             'Inherit: Inherit via back propagation', ...
+        %             'Inherit: Same as input',...
+        %             'double','single','int8','uint8','int8','uint8',...
+        %             'int16','uint16','int16','uint16',...
+        %             'int32','uint32','int32','uint32'};
+        %
+        %         inpDataType = {'Inherit: auto', ...
+        %             'Inherit: auto', ...
+        %             'Inherit: auto', ...
+        %             'Inherit: auto', ...
+        %             'single','double','int8', 'uint8','uint8','int8','uint8',...
+        %             'int16','uint16','int16','uint16',...
+        %             'int32','uint32','int32','uint32'};
     end
     
     properties
         % other properties
-        inpDataType = {'Inherit: auto', ...
-            'Inherit: auto', ...
-            'Inherit: auto', ...
-            'Inherit: auto', ...
-            'single','double','int8', 'uint8','uint8','int8','uint8',...
-            'int16','uint16','int16','uint16',...
-            'int32','uint32','int32','uint32'};
-        SampleTime = {'-1'};
-        OutMin = {'0','.5','5'};
-        OutMax = {'0.1','.51','6','8'};
+        
+        %SampleTime = {'-1'};
         RndMeth = {'Ceiling', 'Convergent', 'Floor', 'Nearest', ...
             'Round', 'Simplest', 'Zero'};
-        SaturateOnIntegerOverflow = {'off', 'on'};
+        SaturateOnIntegerOverflow = {'off', 'on', 'on', 'off'};
         LockScale = {'off','on', 'off'};
         ZeroCross = {'off', 'on'};
         
     end
     
+    
     methods
+        % Constructor
+        function obj = Abs_Test()
+            obj.inOutDataTypeMap  = containers.Map(obj.inOutDataTypeKeys, obj.inOutDataTypeValues);
+        end
+    end
+    
+    
+    methods
+        % generateTests
         function status = generateTests(obj, outputDir, deleteIfExists)
             if ~exist('deleteIfExists', 'var')
                 deleteIfExists = true;
             end
             status = 0;
             params = obj.getParams();
-            fstInDims = {'1', '1', '1', '1', '1', '3', '[2,3]'};
+            fstInDims = {'1', '1', '2', '3', '[2,3]', '[3,4,2]'};
             nb_tests = length(params);
             condExecSSPeriod = floor(nb_tests/length(Block_Test.condExecSS));
             for i=1 : nb_tests
-                skipTests = [];
-                if ismember(i,skipTests)
-                    continue;
-                end
                 try
                     s = params{i};
                     %% creat new model
@@ -83,7 +106,6 @@ classdef Abs_Test < Block_Test
                     inport_list = find_system(blk_parent, ...
                         'SearchDepth',1, 'BlockType','Inport');
                     
-                    % rotate over input data type for U
                     set_param(inport_list{1}, ...
                         'OutDataTypeStr',inputDataType);
                     
@@ -107,50 +129,40 @@ classdef Abs_Test < Block_Test
             end
         end
         
-        function params2 = getParams(obj)
+        function new_params = getParams(obj)
             
-            params1 = obj.getPermutations();
-            params2 = cell(1, length(params1));
-            for p1 = 1 : length(params1)
-                s = params1{p1};
-                params2{p1} = s;
+            params = obj.getPermutations();
+            new_params = cell(1, length(params));
+            for i = 1 : length(params)
+                s = params{i};
+                
+                iRound = mod(i, length(obj.RndMeth)) + 1;
+                iSaturate = mod(i, length(obj.SaturateOnIntegerOverflow)) + 1;
+                iLockScale = mod(i, length(obj.LockScale)) + 1;
+                iZeroCross = mod(i, length(obj.ZeroCross)) + 1;
+                
+                s.RndMeth = obj.RndMeth{iRound};
+                s.SaturateOnIntegerOverflow = obj.SaturateOnIntegerOverflow{iSaturate};
+                s.LockScale = obj.LockScale{iLockScale};
+                s.ZeroCross = obj.ZeroCross{iZeroCross};
+                
+                new_params{i} = s;
             end
         end
         
         function params = getPermutations(obj)
             params = {};
-            inpIsIntCount = 0;
-            pInType = 0;
-            for pOutType = 1 : numel(obj.OutDataTypeStr)
-                pInType = mod(pInType,numel(obj.inpDataType)) + 1;
-                if strfind(obj.inpDataType{pInType}, 'int')
-                    inpIsIntCount = inpIsIntCount + 1;
+            inpDataType = obj.inOutDataTypeMap.keys();
+            for inTypeIdx = 1:length(inpDataType)
+                outDataTypeStr = obj.inOutDataTypeMap(inpDataType{inTypeIdx});
+                for outTypeIdx = 1:length(outDataTypeStr)
+                    s = struct();
+                    s.inpDataType = inpDataType{inTypeIdx};
+                    s.OutDataTypeStr = outDataTypeStr{outTypeIdx};
+                    params{end+1} = s;
                 end
-                iRound = mod(inpIsIntCount, ...
-                    length(obj.RndMeth)) + 1;
-                iSaturate = mod(inpIsIntCount, ...
-                    length(obj.SaturateOnIntegerOverflow)) + 1;
-                iOutMin = mod(length(params), ...
-                    length(obj.OutMin)) + 1;
-                iOutMax = mod(length(params), ...
-                    length(obj.OutMax)) + 1;
-                if iOutMax < iOutMin
-                    iOutMax = iOutMin;
-                end
-                s = struct();
-                s.inpDataType = obj.inpDataType{pInType};
-                s.OutDataTypeStr = obj.OutDataTypeStr{pOutType};
-                s.RndMeth = obj.RndMeth{iRound};
-                s.SaturateOnIntegerOverflow = ...
-                    obj.SaturateOnIntegerOverflow{iSaturate};
-                rotate2 = mod(length(params), 2) + 1;
-                s.LockScale = obj.LockScale{rotate2};
-                s.ZeroCross = obj.ZeroCross{rotate2};
-                s.OutMin = obj.OutMin{iOutMin};
-                s.OutMax = obj.OutMax{iOutMax};
-                params{end+1} = s;
-                
             end
+            
         end
         
     end
