@@ -9,14 +9,14 @@ classdef Bias_Test < Block_Test
     properties
         % properties that will participate in permutations
         inputDataType = {'double','single','int8',...
-            'uint8','int32','uint32','Inherit: auto'};
-        Bias = {'-3.','[-1.5 1 5.]', '[0 5; 5.2 -1]'};
+            'uint8','int16','uint16','Inherit: auto'};
+        Bias = {'3.0','[1.5 1 5.0]', '[0 5; 5.2 1]'};
     end
     
     properties
         % other properties
         SaturateOnIntegerOverflow = {'off', 'on'};
-  
+        
     end
     
     methods
@@ -25,14 +25,13 @@ classdef Bias_Test < Block_Test
                 deleteIfExists = true;
             end
             status = 0;
-            params = obj.getParams();                     
+            params = obj.getParams();
             nb_tests = length(params);
             condExecSSPeriod = floor(nb_tests/length(Block_Test.condExecSS));
+            if condExecSSPeriod <= 1
+                condExecSSPeriod = 5;
+            end
             for i=1 : nb_tests
-                skipTests = [];
-                if ismember(i,skipTests)
-                    continue;
-                end
                 try
                     s = params{i};
                     %% creat new model
@@ -52,7 +51,7 @@ classdef Bias_Test < Block_Test
                     inputDims  = s.inputDims;
                     s = rmfield(s,'inputDims');
                     %% add the block
-
+                    
                     Block_Test.add_and_connect_block(obj.blkLibPath, blkPath, s);
                     
                     %% go over inports
@@ -62,18 +61,18 @@ classdef Bias_Test < Block_Test
                         blk_parent = fileparts(blkPath);
                     end
                     inport_list = find_system(blk_parent, ...
-                        'SearchDepth',1, 'BlockType','Inport');                 
+                        'SearchDepth',1, 'BlockType','Inport');
                     
-                    % rotate over input data type 
+                    % rotate over input data type
                     set_param(inport_list{1}, ...
                         'OutDataTypeStr',inpDataType);
                     
                     set_param(inport_list{1}, ...
                         'PortDimensions', inputDims);
-
+                    
                     failed = Block_Test.setConfigAndSave(mdl_name, mdl_path);
                     if failed, display(s), end
-                
+                    
                     
                 catch me
                     display(s);
@@ -85,55 +84,46 @@ classdef Bias_Test < Block_Test
             end
         end
         
-        function params2 = getParams(obj)
-            
-            params1 = obj.getPermutations();
-            params2 = cell(1, length(params1));
-            for p1 = 1 : length(params1)
-                s = params1{p1};                
-                params2{p1} = s;
-            end
-        end
         
-        function params = getPermutations(obj)
+        
+        function params = getParams(obj)
             params = {};
             inpIsIntCount = 0;
-            
+            pBias = 0;
             for pInType = 1 : numel(obj.inputDataType)
-                for pBias = 1 : numel(obj.Bias)
-                    if strfind(obj.inputDataType{pInType}, 'int')
-                        inpIsIntCount = inpIsIntCount + 1;
-                    end
-                    iSaturate = mod(inpIsIntCount, ...
-                        length(obj.SaturateOnIntegerOverflow)) + 1;
-                    s = struct();
-                    s.Bias = obj.Bias{pBias};
-                    s.inputDataType = obj.inputDataType{pInType};
-                    %s.outputDataType = obj.outputDataType{pOutType};
-                    s.SaturateOnIntegerOverflow = ...
-                        obj.SaturateOnIntegerOverflow{iSaturate};
-                    s.inputDims = '1';
-                    params{end+1} = s;
-                    if pBias == 1   % scalar bias, add different input dims
-                        s.inputDims = '[1 3]';
-                        params{end+1} = s;
-                        s.inputDims = '[2 2]';
-                        params{end+1} = s;                        
-                    elseif pBias == 2
-                        s.inputDims = '[1 3]';
-                        params{end+1} = s;       
-%                         s.inputDims = '[3 1]';
-%                         params{end+1} = s;                         
-                    elseif pBias == 3
-                        s.inputDims = '[2 2]';
-                        params{end+1} = s;                         
-                    end
-                    
+                if MatlabUtils.contains(obj.inputDataType{pInType}, 'int')
+                    inpIsIntCount = inpIsIntCount + 1;
                 end
+                iSaturate = mod(inpIsIntCount, ...
+                    length(obj.SaturateOnIntegerOverflow)) + 1;
+                s = struct();
+                pBias = mod(pBias, length(obj.Bias)) + 1;
+                s.Bias = obj.Bias{pBias};
+                s.inputDataType = obj.inputDataType{pInType};
+                %s.outputDataType = obj.outputDataType{pOutType};
+                s.SaturateOnIntegerOverflow = ...
+                    obj.SaturateOnIntegerOverflow{iSaturate};
+                
+                s.inputDims = '1';
+                params{end+1} = s;
+                if pBias == 1   % scalar bias, add different input dims
+                    s.inputDims = '[1 3]';
+                    params{end+1} = s;
+                    s.inputDims = '[2 2]';
+                    params{end+1} = s;
+                elseif pBias == 2
+                    s.inputDims = '[1 3]';
+                    params{end+1} = s;
+                elseif pBias == 3
+                    s.inputDims = '[2 2]';
+                    params{end+1} = s;
+                end
+                
+                
             end
             
         end
-
+        
     end
 end
 
