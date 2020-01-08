@@ -6,7 +6,7 @@ if nargin==0
 end
 
 if nargin < 2
-    version = 'R2016a';
+    version = 'R2016b';
 end
 
 
