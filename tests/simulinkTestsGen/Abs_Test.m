@@ -1,5 +1,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
+% Author: 
+%   Trinh, Khanh V <khanh.v.trinh@nasa.gov>
+%
 % Notices:
 %
 % Copyright © 2019 United States Government as represented by the 
