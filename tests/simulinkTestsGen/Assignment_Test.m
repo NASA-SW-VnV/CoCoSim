@@ -8,7 +8,7 @@ classdef Assignment_Test < Block_Test
     
     properties
         % properties that will participate in permutations
-        NumberOfDimensions = {'1','2','3','4','5','6','7'}
+        NumberOfDimensions = {'1','2','3','4'}
         IndexOptionArray =  {'Assign all','Index vector (dialog)',...
             'Index vector (port)','Starting index (dialog)',...
             'Starting index (port)'};
@@ -34,9 +34,12 @@ classdef Assignment_Test < Block_Test
             params = obj.getParams();
             inputDataType = {'double', 'single', 'double', 'single',...
                 'double', 'single', 'double', 'single',...
-                'int8', 'uint8', 'int16', 'uint16', 'int32', 'uint32'};              
+                'int8', 'uint8', 'int16', 'uint16'};              
             nb_tests = length(params);
             condExecSSPeriod = floor(nb_tests/length(Block_Test.condExecSS));
+            if condExecSSPeriod <= 1
+                condExecSSPeriod = 5;
+            end
             for i=1 : nb_tests
                 skipTests = [];
                 if ismember(i,skipTests)
@@ -183,7 +186,7 @@ classdef Assignment_Test < Block_Test
                 s = struct();
                 s.NumberOfDimensions = num2str(pDim);
                 % odd number: Zero-based index, even: One-based index
-                if mode(pDim,2) == 0
+                if mod(pDim,2) == 0
                     s.IndexMode = 'Zero-based';
                 else
                     s.IndexMode = 'One-based';

@@ -113,6 +113,9 @@ classdef Abs_Test < Block_Test
             fstInDims = {'1', '1', '2', '3', '[2,3]', '[3,4,2]'};
             nb_tests = length(params);
             condExecSSPeriod = floor(nb_tests/length(Block_Test.condExecSS));
+            if condExecSSPeriod <= 1
+                condExecSSPeriod = 5;
+            end
             for i=1 : nb_tests
                 try
                     s = params{i};

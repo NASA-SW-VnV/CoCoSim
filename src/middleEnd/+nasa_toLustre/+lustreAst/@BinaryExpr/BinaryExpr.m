@@ -95,7 +95,7 @@ classdef BinaryExpr < nasa_toLustre.lustreAst.LustreExpr
         end
         %% deepCopy
         new_obj = deepCopy(obj)
-
+        
         %% substituteVars
         new_obj = substituteVars(obj, oldVar, newVar)
         
@@ -103,17 +103,17 @@ classdef BinaryExpr < nasa_toLustre.lustreAst.LustreExpr
             all_obj = [{obj.left}; obj.left.getAllLustreExpr();...
                 {obj.right}; obj.right.getAllLustreExpr()];
         end
-         %% simplify expression
+        %% simplify expression
         new_obj = simplify(obj)
-
+        
         %% nbOcc
         nb_occ = nbOccuranceVar(obj, var)
-
+        
         %% This functions are used for ForIterator block
         [new_obj, varIds] = changePre2Var(obj)
-
+        
         new_obj = changeArrowExp(obj, cond)
-
+        
         %% This function is used by Stateflow function SF_To_LustreNode.getPseudoLusAction
         function varIds = GetVarIds(obj)
             varIds = [obj.left.GetVarIds(), obj.right.GetVarIds()];
@@ -122,7 +122,7 @@ classdef BinaryExpr < nasa_toLustre.lustreAst.LustreExpr
         % This function is used in Stateflow compiler to change from imperative
         % code to Lustre
         [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft, node, data_map)
-
+        
         %% This function is used by KIND2 LustreProgram.print()
         function nodesCalled = getNodesCalled(obj)
             nodesCalled = {};
@@ -132,20 +132,20 @@ classdef BinaryExpr < nasa_toLustre.lustreAst.LustreExpr
             addNodes(obj.left);
             addNodes(obj.right);
         end
- 
+        
         %%
         code = print(obj, backend)
-
+        
         code = print_lustrec(obj, backend)
         
         code = print_kind2(obj)
-
+        
         code = print_zustre(obj)
-
+        
         code = print_jkind(obj)
-
+        
         code = print_prelude(obj)
-
+        
     end
     
     
@@ -186,6 +186,10 @@ classdef BinaryExpr < nasa_toLustre.lustreAst.LustreExpr
                 end
                 
             end
+            if isFirstTime && isa(exp, 'nasa_toLustre.lustreAst.BinaryExpr')
+                exp.setPar(true);
+            end
+            
         end
     end
 end
