@@ -1,5 +1,11 @@
 classdef Block_Test
     %BLOCK_TEST : all other blocks test class inherit from this class
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Copyright (c) 2019 United States Government as represented by the
+    % Administrator of the National Aeronautics and Space Administration.
+    % All Rights Reserved.
+    % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     properties(Constant)
         condExecSS = {'reset', 'trigger', 'enable', 'enable_trigger', 'if'};
     end

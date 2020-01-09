@@ -87,9 +87,8 @@ classdef BitwiseOperator_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             
             % Go over outputs
             if (strcmp(op, 'NAND') || strcmp(op, 'NOR'))...
-                    && numInputs==1
+                    && numInputs ~= 2
                 new_op = op(2:end);%remove N from NAND and NOR
-                scalars = inputs{1};
                 new_fun = sprintf('_%s_Bitwise_%s_%d', new_op, signedStr, intSize);
                 if signed
                     not_fun = sprintf('_NOT_Bitwise_%s', signedStr);
@@ -99,9 +98,22 @@ classdef BitwiseOperator_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 obj.addExternal_libraries(...
                     {strcat('LustMathLib_', new_fun), ...
                     strcat('LustMathLib_', not_fun)});
-                res = nasa_toLustre.lustreAst.NodeCallExpr(not_fun, ...
-                    nasa_toLustre.blocks.MinMax_To_Lustre.recursiveMinMax(new_fun, scalars));
-                codes{1} = nasa_toLustre.lustreAst.LustreEq(outputs{1}, res);
+                for j=1:numel(outputs)
+                    scalars = {};
+                    if numInputs==1
+                        for i=1:numel(inputs{1})
+                            scalars{i} = inputs{1}{i};
+                        end
+                    else
+                        for i=1:numInputs
+                            scalars{i} = inputs{i}{j};
+                        end
+                    end
+                    
+                    res = nasa_toLustre.lustreAst.NodeCallExpr(not_fun, ...
+                        nasa_toLustre.blocks.MinMax_To_Lustre.recursiveMinMax(new_fun, scalars));
+                    codes{j} = nasa_toLustre.lustreAst.LustreEq(outputs{j}, res);
+                end
             else
                 codes = cell(1, numel(outputs));
                 for j=1:numel(outputs)

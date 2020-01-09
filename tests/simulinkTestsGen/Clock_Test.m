@@ -8,14 +8,12 @@ classdef Clock_Test < Block_Test
     
     properties
         % properties that will participate in permutations
-        %OutDataTypeStr = {'double','single'};
-        DisplayTime = {'off'};
         Decimation = {'1','10','100','1000'};
     end
     
     properties
         % other properties
-  
+        %DisplayTime = {'off'};
     end
     
     methods
@@ -24,14 +22,13 @@ classdef Clock_Test < Block_Test
                 deleteIfExists = true;
             end
             status = 0;
-            params = obj.getParams();                     
+            params = obj.getParams();
             nb_tests = length(params);
             condExecSSPeriod = floor(nb_tests/length(Block_Test.condExecSS));
+            if condExecSSPeriod <= 1
+                condExecSSPeriod = 3;
+            end
             for i=1 : nb_tests
-                skipTests = [];
-                if ismember(i,skipTests)
-                    continue;
-                end
                 try
                     s = params{i};
                     %% creat new model
@@ -46,15 +43,13 @@ classdef Clock_Test < Block_Test
                     end
                     
                     %% remove parametres that does not belong to block params
-%                     outDataType = s.outputDataType;
-%                     s = rmfield(s,'outputDataType');
                     %% add the block
-
+                    
                     Block_Test.add_and_connect_block(obj.blkLibPath, blkPath, s);
-
+                    
                     failed = Block_Test.setConfigAndSave(mdl_name, mdl_path);
                     if failed, display(s), end
-                
+                    
                     
                 catch me
                     display(s);
@@ -66,33 +61,15 @@ classdef Clock_Test < Block_Test
             end
         end
         
-        function params2 = getParams(obj)
-            
-            params1 = obj.getPermutations();
-            params2 = cell(1, length(params1));
-            for p1 = 1 : length(params1)
-                s = params1{p1};                
-                params2{p1} = s;
-            end
+        function params = getParams(obj)
+            params = {};
+            for pDecimation = 1:numel(obj.Decimation)
+                s = struct();
+                s.Decimation = obj.Decimation{pDecimation};
+                params{end+1} = s;
+            end            
         end
         
-        function params = getPermutations(obj)
-            params = {};
-            for pDisplayTime = 1 : numel(obj.DisplayTime)
-                for pDecimation = 1:numel(obj.Decimation)
-%                     pOutputDataType = mod(numel(params), ...
-%                         length(obj.OutDataTypeStr)) + 1;
-                    s = struct();
-                    s.DisplayTime = obj.DisplayTime{pDisplayTime};
-                    s.Decimation = obj.Decimation{pDecimation};
-                    %s.OutDataTypeStr = obj.OutDataTypeStr{pOutputDataType};
-                    params{end+1} = s;
-                    
-                end
-            end
-            
-        end
-
     end
 end
 

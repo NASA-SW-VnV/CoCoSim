@@ -3,18 +3,15 @@ classdef CombinatorialLogic_Test < Block_Test
     
     properties(Constant)
         fileNamePrefix = 'CombinatorialLogic_TestGen';
-        blkLibPath = 'simulink/Logic and Bit Operations/Combinatorial Logic ';
+        blkLibPath = sprintf('simulink/Logic and Bit Operations/Combinatorial \nLogic');
     end
     
     properties
         % properties that will participate in permutations
-        inputDataType = {'double','boolean'};
-        TruthTable = {{'[0 0;0 1;0 1;1 0;0 1;1 0;1 0;1 1]'}};
     end
     
     properties
         % other properties
-  
     end
     
     methods
@@ -23,14 +20,13 @@ classdef CombinatorialLogic_Test < Block_Test
                 deleteIfExists = true;
             end
             status = 0;
-            params = obj.getParams();                     
+            params = obj.getParams();
             nb_tests = length(params);
             condExecSSPeriod = floor(nb_tests/length(Block_Test.condExecSS));
+            if condExecSSPeriod <= 1
+                condExecSSPeriod = max(4, floor(nb_tests/3));
+            end
             for i=1 : nb_tests
-                skipTests = [];
-                if ismember(i,skipTests)
-                    continue;
-                end
                 try
                     s = params{i};
                     %% creat new model
@@ -47,9 +43,9 @@ classdef CombinatorialLogic_Test < Block_Test
                     %% remove parametres that does not belong to block params
                     inpDataType = s.inputDataType;
                     s = rmfield(s,'inputDataType');
-
+                    
                     %% add the block
-
+                    
                     Block_Test.add_and_connect_block(obj.blkLibPath, blkPath, s);
                     
                     %% go over inports
@@ -59,18 +55,19 @@ classdef CombinatorialLogic_Test < Block_Test
                         blk_parent = fileparts(blkPath);
                     end
                     inport_list = find_system(blk_parent, ...
-                        'SearchDepth',1, 'BlockType','Inport');                 
+                        'SearchDepth',1, 'BlockType','Inport');
                     
-                    % rotate over input data type 
-                    set_param(inport_list{1}, ...
-                        'OutDataTypeStr',inpDataType);
+                    for inp = 1:length(inport_list)
+                        % rotate over input data type
+                        set_param(inport_list{inp}, ...
+                            'OutDataTypeStr',inpDataType, ...
+                            'OutMin', '0', ...
+                            'OutMax', '1');
+                    end
                     
-                    set_param(inport_list{1}, ...
-                        'PortDimensions', inputDims);
-
                     failed = Block_Test.setConfigAndSave(mdl_name, mdl_path);
                     if failed, display(s), end
-                
+                    
                     
                 catch me
                     display(s);
@@ -82,31 +79,32 @@ classdef CombinatorialLogic_Test < Block_Test
             end
         end
         
-        function params2 = getParams(obj)
+        function params = getParams(obj)
+            params = {};
+            nb_inputs = {1, 2, 3, 4};
+            nb_columns = {1. 2. 3};
+            is_boolean = false;
+            i_nb_columns = 0;
             
-            params1 = obj.getPermutations();
-            params2 = cell(1, length(params1));
-            for p1 = 1 : length(params1)
-                s = params1{p1};                
-                params2{p1} = s;
+            for i = 1:length(nb_inputs)
+                s = struct();
+                i_nb_columns = mod(i_nb_columns, length(nb_columns)) + 1;
+                nb_rows = 2^nb_inputs{i};
+                c = nb_columns{i_nb_columns};
+                is_boolean = not(is_boolean);
+                if is_boolean
+                    s.inputDataType = 'boolean';
+                    M = MatlabUtils.construct_random_integers(1, 0, 1, 'uint8', [nb_rows,c]);
+                else
+                    s.inputDataType = 'boolean';
+                    M = MatlabUtils.construct_random_doubles(1, 0, 1, [nb_rows,c]);
+                end
+                s.TruthTable = mat2str(M);
+                params{end+1} = s;
             end
+            
         end
         
-        function params = getPermutations(obj)
-            params = {};
-            inpIsIntCount = 0;
-            for pInType = 1 : numel(obj.inputDataType)
-                for pTruthTable = 1 : numel(obj.TruthTable)
-                    s = struct();
-                    s.TruthTable = obj.TruthTable{pTruthTable};
-                    s.inputDataType = obj.inputDataType{pInType};
-                    params{end+1} = s;
-                end
-                
-            end
-            
-        end
-
     end
 end
 

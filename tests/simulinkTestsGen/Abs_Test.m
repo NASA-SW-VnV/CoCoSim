@@ -114,7 +114,7 @@ classdef Abs_Test < Block_Test
             nb_tests = length(params);
             condExecSSPeriod = floor(nb_tests/length(Block_Test.condExecSS));
             if condExecSSPeriod <= 1
-                condExecSSPeriod = 5;
+                condExecSSPeriod = floor(nb_tests/3);
             end
             for i=1 : nb_tests
                 try
