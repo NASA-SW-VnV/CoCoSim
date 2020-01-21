@@ -440,7 +440,7 @@ function kind2_parse_version() {
     local version_output=$("$1" --version 2>&1)
 
     debug "'$1 --version':\n$version_output"
-    echo "$version_output" | match "^kind2 ([a-zA-Z0-9]+)?$" 1
+    echo "$version_output" | match "^kind2 ([a-zA-Z0-9\.\-]+)?$" 1
     #echo "$version_output" | match "^kind2 v($version_regex)(\-[0-9]+)?(\-[a-zA-Z0-9]+)?$" 1
 }
 
