@@ -47,7 +47,7 @@ function obj = contractNode_substituteVars(obj)
                 && nasa_toLustre.lustreAst.VarIdExpr.ismemberVar(new_bodyEqs{i}.getLhs(), new_localVars)
             var = new_bodyEqs{i}.getLhs();
             rhs = new_bodyEqs{i}.getRhs();
-            new_var = nasa_toLustre.lustreAst.ParenthesesExpr(rhs.deepCopy());
+            new_var = rhs.deepCopy();
             
             % if rhs class is IteExpr, skip it. To help in debugging.
             if isa(rhs, 'nasa_toLustre.lustreAst.IteExpr')

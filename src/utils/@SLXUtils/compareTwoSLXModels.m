@@ -121,13 +121,13 @@ function [valid, sim_failed, cex_file_path] = compareTwoSLXModels(orig_mdl_path,
 
     
     if valid == 1
-        f_msg = sprintf('Comparaison for model "%s" and model "%s" is  valid \n',...
+        f_msg = sprintf('Pre-Processing Validation: Comparaison for model "%s" and model "%s" is  valid \n',...
             orig_mdl_name, pp_mdl_name);
         display_msg(f_msg, MsgType.RESULT, 'SLXUtils.compareTwoSLXModels', '');
     else
         %% show the counter example
         
-        f_msg = sprintf('Comparaison for model "%s" and model "%s" is not valid \n',...
+        f_msg = sprintf('Pre-Processing Validation: Comparaison for model "%s" and model "%s" is not valid \n',...
             orig_mdl_name, pp_mdl_name);
         display_msg(f_msg, MsgType.RESULT, 'SLXUtils.compareTwoSLXModels', '');
         f_msg = sprintf('Here is the counter example:\n');

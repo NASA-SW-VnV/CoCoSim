@@ -8,7 +8,7 @@ function [Value, valueDataType, status] = evalParam(modelObj, parent, blk, param
     % get the value of a parameter
     % This function should work with IR structure extracted from
     % the Simulink model and used in ToLustre compiler.
-    % It can be used with char parameters as well. We change them
+    % It can be used with char representing the PATH as well. We change them later
     % to objects
     status = 0;
     valueDataType = 'double';
