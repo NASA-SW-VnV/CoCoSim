@@ -1,5 +1,5 @@
-classdef PP2Utils
-    %PP2Utils Summary of this class goes here
+classdef NASAPPUtils
+    %NASAPPUtils Summary of this class goes here
     %   Detailed explanation goes here
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Copyright (c) 2019 United States Government as represented by the

@@ -53,7 +53,7 @@ function [status, errors_msg] = Sin_pp(model)
                     Phase = num2str(2*pi*Offset/Samples);
                 end
                 
-                PP2Utils.replace_one_block(Sin_list{i},fullfile('pp_lib', 'SineWaveFunction'));
+                NASAPPUtils.replace_one_block(Sin_list{i},fullfile('pp_lib', 'SineWaveFunction'));
                 
                 set_param(strcat(Sin_list{i},'/Freq'),...
                     'Value',Frequency);
@@ -66,10 +66,10 @@ function [status, errors_msg] = Sin_pp(model)
                 
                 if strcmp(TimeSource, 'Use simulation time')
                     if str2num(SampleTime) == 0
-                        PP2Utils.replace_one_block(strcat(Sin_list{i},'/In1'),...
+                        NASAPPUtils.replace_one_block(strcat(Sin_list{i},'/In1'),...
                             'simulink/Sources/Clock');
                     else
-                        PP2Utils.replace_one_block(strcat(Sin_list{i},'/In1'),...
+                        NASAPPUtils.replace_one_block(strcat(Sin_list{i},'/In1'),...
                             'simulink/Sources/Digital Clock');
                         set_param(strcat(Sin_list{i},'/In1'),...
                             'SampleTime',SampleTime);

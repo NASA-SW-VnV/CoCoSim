@@ -59,7 +59,7 @@ function [status, errors_msg] = DiscreteStateSpace_pp(model)
                                 MsgType.ERROR, 'DiscreteTransferFcn_pp', '');
                             continue;
                         end
-                        [Phi, Gamma] = PP2Utils.c2d(a, b ,ST);
+                        [Phi, Gamma] = NASAPPUtils.c2d(a, b ,ST);
                         A = mat2str(Phi);
                         B = mat2str(Gamma);
                     catch
@@ -73,7 +73,7 @@ function [status, errors_msg] = DiscreteStateSpace_pp(model)
                     ST = get_param(dss_list{i},'SampleTime');
                 end
                 % replacing
-                PP2Utils.replace_one_block(dss_list{i},'pp_lib/DSS');
+                NASAPPUtils.replace_one_block(dss_list{i},'pp_lib/DSS');
                 % restoring info
                 set_param(strcat(dss_list{i},'/A'),...
                     'Value',A);

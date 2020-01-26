@@ -77,7 +77,7 @@ function [status, errors_msg] = DiscreteTransferFcn_pp(model)
                     end
                 end
                 
-                PP2Utils.replace_DTF_block(dtf_list{i}, U_dims{i},num,denum, 'DiscreteTransferFcn');
+                NASAPPUtils.replace_DTF_block(dtf_list{i}, U_dims{i},num,denum, 'DiscreteTransferFcn');
                 set_param(dtf_list{i}, 'LinkStatus', 'inactive');
             catch
                 status = 1;

@@ -53,7 +53,7 @@ function [new_file_path, failed] = cocosim_pp(model_path, varargin)
         end
     end
     failed = 0;
-    already_pp = PP2Utils.isAlreadyPP(model_path);
+    already_pp = NASAPPUtils.isAlreadyPP(model_path);
     if skip_pp
         if already_pp
             display_msg('SKIP_PP flag is given, the pre-processing will be skipped.', MsgType.INFO, 'PP', '');

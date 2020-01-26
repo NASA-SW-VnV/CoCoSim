@@ -57,7 +57,7 @@ if not(isempty(Gain_list))
             OutMin = get_param(Gain_list{i}, 'OutMin');
             OutMax = get_param(Gain_list{i}, 'OutMax');
             % replace block
-            PP2Utils.replace_one_block(Gain_list{i},fullfile('pp_lib',pp_name));
+            NASAPPUtils.replace_one_block(Gain_list{i},fullfile('pp_lib',pp_name));
             
             % set parameters to constant block
             set_param(strcat(Gain_list{i},'/K'),...

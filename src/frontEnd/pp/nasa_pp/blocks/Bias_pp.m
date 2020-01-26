@@ -24,7 +24,7 @@ function [status, errors_msg] = Bias_pp(model)
                 bias = get_param(Bias_list{i},'Bias');
                 SaturateOnIntegerOverflow = get_param(Bias_list{i},'SaturateOnIntegerOverflow');
                 pp_name = 'bias';
-                PP2Utils.replace_one_block(Bias_list{i},fullfile('pp_lib',pp_name));
+                NASAPPUtils.replace_one_block(Bias_list{i},fullfile('pp_lib',pp_name));
                 set_param(strcat(Bias_list{i},'/bias'),...
                     'Value',bias, ...
                     'OutDataTypeStr', 'Inherit: Inherit via back propagation');

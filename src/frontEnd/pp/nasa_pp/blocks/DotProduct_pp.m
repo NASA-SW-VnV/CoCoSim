@@ -57,7 +57,7 @@ function [status, errors_msg] = DotProduct_pp(model)
 
 
 
-                PP2Utils.replace_one_block(DotProduct_list{i},fullfile('pp_lib',pp_name));
+                NASAPPUtils.replace_one_block(DotProduct_list{i},fullfile('pp_lib',pp_name));
                 set_param(strcat(DotProduct_list{i},'/Product'),...
                     'OutDataTypeStr',outputDataType);
                 set_param(strcat(DotProduct_list{i},'/Product'),...

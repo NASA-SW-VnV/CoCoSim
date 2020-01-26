@@ -33,7 +33,7 @@ if not(isempty(memoryBlk_list))
             StateSignalObject = get_param(memoryBlk_list{i},'StateSignalObject');
             StateStorageClass = get_param(memoryBlk_list{i}, 'StateStorageClass');
             % replace it
-            PP2Utils.replace_one_block(memoryBlk_list{i},'pp_lib/Memory');
+            NASAPPUtils.replace_one_block(memoryBlk_list{i},'pp_lib/Memory');
             unitDelayPath = fullfile(memoryBlk_list{i}, 'U');
             %restore information
             set_param(unitDelayPath ,'InitialCondition', InitialCondition);

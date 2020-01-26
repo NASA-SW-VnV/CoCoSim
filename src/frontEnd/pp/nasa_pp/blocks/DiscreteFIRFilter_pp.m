@@ -56,7 +56,7 @@ function [status, errors_msg] = DiscreteFIRFilter_pp(model)
                 denum = zeros(1,length(num));
                 denum(1) = 1;
 
-                PP2Utils.replace_DTF_block(dFir_list{i}, U_dims{i},num,denum, 'DiscreteFIRFilter');
+                NASAPPUtils.replace_DTF_block(dFir_list{i}, U_dims{i},num,denum, 'DiscreteFIRFilter');
                 set_param(dFir_list{i}, 'LinkStatus', 'inactive');
             catch
                 status = 1;

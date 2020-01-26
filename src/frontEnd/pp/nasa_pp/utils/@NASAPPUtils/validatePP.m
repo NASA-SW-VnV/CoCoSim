@@ -28,9 +28,9 @@ function [pp_valid, pp_sim_failed, cocosim_pp_failed] = validatePP(orig_model_fu
             validate_components(orig_model_full_path, output_dir, options);
         end
     catch ME
-        display_msg('Pre-processing validation failed', MsgType.ERROR, 'PP2Utils.validatePP', '');
-        display_msg(ME.message, MsgType.ERROR, 'PP2Utils.validatePP', '');
-        display_msg(ME.getReport(), MsgType.ERROR, 'PP2Utils.validatePP', '');
+        display_msg('Pre-processing validation failed', MsgType.ERROR, 'NASAPPUtils.validatePP', '');
+        display_msg(ME.message, MsgType.ERROR, 'NASAPPUtils.validatePP', '');
+        display_msg(ME.getReport(), MsgType.ERROR, 'NASAPPUtils.validatePP', '');
         pp_valid = -1;
         pp_sim_failed = -1;
     end
@@ -51,7 +51,7 @@ function validate_components(orig_model_full_path, output_dir, options)
         end
         try
             [pp_valid, pp_sim_failed, cocosim_pp_failed] = ...
-                PP2Utils.validatePP(new_model_path, options, output_dir);
+                NASAPPUtils.validatePP(new_model_path, options, output_dir);
             if ~pp_valid && ~pp_sim_failed && ~cocosim_pp_failed
                 display_msg(['SubSystem ' ss{i} ' is not valid (see Counter example above)'], ...
                     MsgType.RESULT, 'validation', '');

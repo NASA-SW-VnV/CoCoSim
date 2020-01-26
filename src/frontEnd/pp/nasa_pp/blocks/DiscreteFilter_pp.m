@@ -67,7 +67,7 @@ function [status, errors_msg] = DiscreteFilter_pp(model)
                     continue;
                 end
                 
-                PP2Utils.replace_DTF_block(dFilter_list{i}, U_dims{i},num,denum, 'DiscreteFilter');
+                NASAPPUtils.replace_DTF_block(dFilter_list{i}, U_dims{i},num,denum, 'DiscreteFilter');
                 set_param(dFilter_list{i}, 'LinkStatus', 'inactive');
             catch
                 status = 1;
