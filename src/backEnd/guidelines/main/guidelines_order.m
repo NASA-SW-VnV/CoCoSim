@@ -30,7 +30,7 @@ addpath(genpath(fullfile(config_path, 'matlab_guidelines')));
 %   Add 'stateflow/x.m' to guidelines_unhandled_blocks
 % -To impose a specific order of functions calls see later.
 
-% add both std_pp and pp2
+% add both std_pp and nasa_pp
 guidelines_handled_blocks = {'simulink_guidelines/*.m', 'stateflow_guidelines/*.m', 'matlab_guidelines/*.m'};
 % To not call atomic_process we may add it to the following list, or
 % give it an order -1 in guidelines_order_map (see next TODO).

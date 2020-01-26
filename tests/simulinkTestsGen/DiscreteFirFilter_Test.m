@@ -46,11 +46,11 @@ classdef DiscreteFirFilter_Test < Block_Test
     properties
         % properties that will participate in permutations
         CoefSource = {'Dialog parameters','Input port'};
-        Coefficients = {'[0.5 0.5]'};    % vector
+        Coefficients = {'[0.5 0.5]', '[1.3]', '[3, 4, 5]', '[1,2,3,4]'};    % vector
         InitialStates = {'0'};           %scalar or vector 
         OutDataTypeStr = {'Inherit: Same as input',...
             'Inherit: Same as accumulator','int8','uint8','int16',...
-            'uint16','int32','uint32','int64','uint64'};
+            'uint16','int32','uint32'};
         inputDataType = {'double', 'single','int8',...
             'uint8','int16','uint16','int32', ...
             'uint32','boolean'};   
@@ -117,20 +117,20 @@ classdef DiscreteFirFilter_Test < Block_Test
                     end
                     
                     %% remove parametres that does not belong to block params
-                    inpDataType = s.inputDataType;
+                    %inpDataType = s.inputDataType;
                     s = rmfield(s,'inputDataType');
                     %% add the block
 
                     Block_Test.add_and_connect_block(obj.blkLibPath, blkPath, s);
                     
-                    %% go over inports
-                    try
-                        blk_parent = get_param(blkPath, 'Parent');
-                    catch
-                        blk_parent = fileparts(blkPath);
-                    end
-                    inport_list = find_system(blk_parent, ...
-                        'SearchDepth',1, 'BlockType','Inport');
+%                     %% go over inports
+%                     try
+%                         blk_parent = get_param(blkPath, 'Parent');
+%                     catch
+%                         blk_parent = fileparts(blkPath);
+%                     end
+%                     inport_list = find_system(blk_parent, ...
+%                         'SearchDepth',1, 'BlockType','Inport');
                     
                     % rotate over input data type for U
 %                     set_param(inport_list{1}, ...
@@ -154,18 +154,9 @@ classdef DiscreteFirFilter_Test < Block_Test
             end
         end
         
-        function params2 = getParams(obj)
-            
-            params1 = obj.getPermutations();
-            params2 = cell(1, length(params1));
-            for p1 = 1 : length(params1)
-                s = params1{p1};                
-                params2{p1} = s;
-            end
-        end
-        
-        function params = getPermutations(obj)
+        function params = getParams(obj)
             params = {};       
+            iCoefficients = 0;
             for pCoefSource = 1 : numel(obj.CoefSource)
                 for pOutDataTypeStr = 1 : numel(obj.OutDataTypeStr)
                     rotateInputType = mod(length(params), ...
@@ -179,6 +170,10 @@ classdef DiscreteFirFilter_Test < Block_Test
                     s.inputDataType = obj.inputDataType(rotateInputType);
                     s.RndMeth = obj.RndMeth{iRound};
                     s.LockScale = obj.LockScale{rotate2};
+                    if pCoefSource == 1
+                        iCoefficients = mod(iCoefficients, length(obj.Coefficients)) + 1;
+                        s.Coefficients = obj.Coefficients{iCoefficients};
+                    end
                     params{end+1} = s;
                 end
             end

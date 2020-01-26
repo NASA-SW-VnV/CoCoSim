@@ -13,13 +13,13 @@
 %   it is under path CoCoSim/src/frontEnd/pp/std_pp.
 %
 %   We added some pre-processing functions that can be found in
-%   src/frontEnd/pp/pp2.
+%   src/frontEnd/pp/nasa_pp.
 %   In order to re-use the work done in std_pp we created a symbolic folder
-%   "src/frontEnd/pp/main" that combines between "std_pp" and our "pp2".
+%   "src/frontEnd/pp/main" that combines between "std_pp" and our "nasa_pp".
 %
 %   If you need to pre-process a Simulink block that is not pre-processed
 %   or to change how it has been pre-processed. Add your function to
-%   "pp2/blocks" or "std_pp/blocks" and go to "main/pp_config" and follow
+%   "nasa_pp/blocks" or "std_pp/blocks" and go to "main/pp_config" and follow
 %   instructions.
 %% get script path
 config_path = fileparts(mfilename('fullpath'));

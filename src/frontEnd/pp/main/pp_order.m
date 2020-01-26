@@ -23,9 +23,9 @@ if exist(mat_path, 'file')
     priority_pp_map = mat_content.priority_pp_map;
 else
     %% TODO: add imported libraries paths
-    % In our case "main" library import both "std_pp" and "pp2" libraries
+    % In our case "main" library import both "std_pp" and "nasa_pp" libraries
     addpath(genpath(fullfile(config_path, 'std_pp')));
-    addpath(genpath(fullfile(config_path, 'pp2')));
+    addpath(genpath(fullfile(config_path, 'nasa_pp')));
     
     
     %% TODO: add blocks to be pre-processed or to be ignored
@@ -33,19 +33,19 @@ else
     % pre-processing.
     % examples:
     % -To add all supported blocks in `std_pp`, add 'std_pp/blocks/*.m'
-    % -To add all supported blocks in `pp2` except `atomic_process.m`.
-    %   Add 'pp2/blocks/*.m' to pp_handled_blocks and
-    %   Add 'pp2/blocks/atomic_process.m' to pp_unhandled_blocks
+    % -To add all supported blocks in `nasa_pp` except `atomic_process.m`.
+    %   Add 'nasa_pp/blocks/*.m' to pp_handled_blocks and
+    %   Add 'nasa_pp/blocks/atomic_process.m' to pp_unhandled_blocks
     % -To impose a specific order of functions calls see later.
     
-    % add both std_pp and pp2
+    % add both std_pp and nasa_pp
     pp_handled_blocks = {'std_pp/blocks/*.m',...
-        'pp2/blocks/*.m'};
+        'nasa_pp/blocks/*.m'};
     % To not call atomic_process we may add it to the following list, or
     % give it an order -1 in pp_order_map (see next TODO).
     pp_unhandled_blocks = {
-        'pp2/blocks/CompileModelCheck_pp.m',...
-        'pp2/blocks/BlocksPosition_pp.m',...
+        'nasa_pp/blocks/CompileModelCheck_pp.m',...
+        'nasa_pp/blocks/BlocksPosition_pp.m',...
         'std_pp/blocks/product_process.m'};
     %compile process is called in the end of cocosim_pp.
     
@@ -64,7 +64,7 @@ else
         'std_pp/blocks/function_process.m',...
         'std_pp/blocks/from_workspace_process.m', ...
         'std_pp/blocks/gain_process.m', ...
-        'pp2/blocks/Inport_pp.m', ...%No need with the new IR
+        'nasa_pp/blocks/Inport_pp.m', ...%No need with the new IR
         'std_pp/blocks/link_process.m',...
         'std_pp/blocks/lookuptable_process.m', ...
         'std_pp/blocks/lookuptable_nD_process.m', ...
@@ -73,12 +73,12 @@ else
         'std_pp/blocks/product_process.m', ...
         'std_pp/blocks/rate_transition_process.m', ...
         'std_pp/blocks/replace_variables.m', ...
-        'pp2/blocks/SameDataType_pp.m', ...
-        'std_pp/blocks/saturation_process.m',...% it's improved and supported by pp2
+        'nasa_pp/blocks/SameDataType_pp.m', ...
+        'std_pp/blocks/saturation_process.m',...% it's improved and supported by nasa_pp
         'std_pp/blocks/saturation_dynamic_process.m', ...% the pre-processing is not correct, since the block is a masked subsystem, it will be handled as a masked SS.
         'std_pp/blocks/selector_process.m', ...
         'std_pp/blocks/signalbuilder_process.m', ...
-        'pp2/blocks/Sigbuilderblock_pp.m', ...% No need, it is supported in the translator
+        'nasa_pp/blocks/Sigbuilderblock_pp.m', ...% No need, it is supported in the translator
         'std_pp/blocks/to_workspace_process.m',...
         'std_pp/blocks/transfer_function_process.m'}; 
     
@@ -87,15 +87,15 @@ else
     % small number has the highest priority starting from zero
     
     % DO not remove LinkStatus_pp to support as many blocks as possible.
-    pp_order_map(0) = {'pp2/blocks/LinkStatus_pp.m'};
+    pp_order_map(0) = {'nasa_pp/blocks/LinkStatus_pp.m'};
     
     % start by setting sample time to the model sample time so the
     % pre-processing will not messed it up
-    pp_order_map(1) = {'pp2/blocks/SampleTime_pp.m'};
+    pp_order_map(1) = {'nasa_pp/blocks/SampleTime_pp.m'};
     
     
-    pp_order_map(2) = {'pp2/blocks/ModelReference_pp.m'};
-    pp_order_map(3) = {'pp2/blocks/Outport_pp.m'};
+    pp_order_map(2) = {'nasa_pp/blocks/ModelReference_pp.m'};
+    pp_order_map(3) = {'nasa_pp/blocks/Outport_pp.m'};
     
     pp_order_map(10) = {'std_pp/blocks/integrator_process.m'};
     pp_order_map(11) = {'std_pp/blocks/discrete_integrator_process.m'};
@@ -103,37 +103,37 @@ else
     
     % '*.m' means all std_pp functions have the same priority 3,
     % if a function already defined it will keep its highest priority.
-    pp_order_map(20) = {'pp2/blocks/*.m', ...
+    pp_order_map(20) = {'nasa_pp/blocks/*.m', ...
         'std_pp/blocks/*.m'};
     
     pp_order_map(30) = {'std_pp/blocks/goto_process.m'};
-    pp_order_map(31) = {'pp2/blocks/BlocksPosition_pp.m'};
+    pp_order_map(31) = {'nasa_pp/blocks/BlocksPosition_pp.m'};
     %pp_order_map(32) = {};
     
-    pp_order_map(40) = {'pp2/blocks/KindContract_pp.m'};
-    pp_order_map(41) = {'pp2/blocks/ContractBlock_pp.m'};
+    pp_order_map(40) = {'nasa_pp/blocks/KindContract_pp.m'};
+    pp_order_map(41) = {'nasa_pp/blocks/ContractBlock_pp.m'};
     
-    pp_order_map(50) = {'pp2/blocks/DiscreteDerivative_pp.m'};
-    pp_order_map(51) = {'pp2/blocks/SampleTimeMath_pp.m'};
+    pp_order_map(50) = {'nasa_pp/blocks/DiscreteDerivative_pp.m'};
+    pp_order_map(51) = {'nasa_pp/blocks/SampleTimeMath_pp.m'};
     
-    pp_order_map(58) = {'pp2/blocks/DiscreteFIRFilter_pp.m'};
-    pp_order_map(59) = {'pp2/blocks/DiscreteFilter_pp.m'};
-    pp_order_map(60) = {'pp2/blocks/DiscreteTransferFcn_pp.m'};
-    pp_order_map(61) = {'pp2/blocks/ForEach_pp.m'};
+    pp_order_map(58) = {'nasa_pp/blocks/DiscreteFIRFilter_pp.m'};
+    pp_order_map(59) = {'nasa_pp/blocks/DiscreteFilter_pp.m'};
+    pp_order_map(60) = {'nasa_pp/blocks/DiscreteTransferFcn_pp.m'};
+    pp_order_map(61) = {'nasa_pp/blocks/ForEach_pp.m'};
     
     
-    pp_order_map(70) = {'pp2/blocks/SineandCosine_pp.m'};
-    pp_order_map(71) = {'pp2/blocks/ForIterator_pp.m'};%It expands subsystems, it should be called before Atomic_pp
-    pp_order_map(72) = {'pp2/blocks/AtomicSubsystems_pp.m'};
-    pp_order_map(73) = {'pp2/blocks/ExpandNonAtomicSubsystems_pp.m'};
+    pp_order_map(70) = {'nasa_pp/blocks/SineandCosine_pp.m'};
+    pp_order_map(71) = {'nasa_pp/blocks/ForIterator_pp.m'};%It expands subsystems, it should be called before Atomic_pp
+    pp_order_map(72) = {'nasa_pp/blocks/AtomicSubsystems_pp.m'};
+    pp_order_map(73) = {'nasa_pp/blocks/ExpandNonAtomicSubsystems_pp.m'};
     
-    pp_order_map(80) = {'pp2/blocks/Gain_pp.m'};
+    pp_order_map(80) = {'nasa_pp/blocks/Gain_pp.m'};
     
-    pp_order_map(90) = {'pp2/blocks/FixedStepDiscreteSolver_pp.m'};
-    pp_order_map(91) = {'pp2/blocks/AlgebraicLoops_pp.m'};
-    pp_order_map(92) = {'pp2/blocks/EnableMultiTasking_pp.m'};
+    pp_order_map(90) = {'nasa_pp/blocks/FixedStepDiscreteSolver_pp.m'};
+    pp_order_map(91) = {'nasa_pp/blocks/AlgebraicLoops_pp.m'};
+    pp_order_map(92) = {'nasa_pp/blocks/EnableMultiTasking_pp.m'};
     
-    pp_order_map(100) = {'pp2/blocks/CompileModelCheck_pp.m'};
+    pp_order_map(100) = {'nasa_pp/blocks/CompileModelCheck_pp.m'};
     
     [ordered_pp_functions, priority_pp_map]  = ...
         PPConfigUtils.order_pp_functions(pp_order_map, pp_handled_blocks, ...

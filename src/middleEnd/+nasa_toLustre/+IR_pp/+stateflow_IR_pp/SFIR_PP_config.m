@@ -20,7 +20,6 @@
 % -To impose a specific order of functions calls see above.
 global ordered_sfIR_pp_functions priority_sfIR_pp_map;
 
-% add both std_pp and pp2
 lib_path = '+nasa_toLustre/+IR_pp/+stateflow_IR_pp/+stateflow_fields';
 sfIR_pp_handled_functions = {fullfile(lib_path,'*.m')};
 % To not call "funX" we may add it to the following list, or give
