@@ -13,7 +13,10 @@ function node_process(new_model_name, nodes, node, node_block_path, block_pos, x
         MsgType.INFO, 'lus2slx', '');
     x2 = 200;
     y2= -50;
-
+    if MatlabUtils.startsWith(node, '_')
+        % Simulink read json : _max_real is read as x_max_real
+        node = strcat('x', node);
+    end
     if ~isempty(xml_trace)
         xml_trace.create_Node_Element(node_block_path,  nodes.(node).original_name);
     end
