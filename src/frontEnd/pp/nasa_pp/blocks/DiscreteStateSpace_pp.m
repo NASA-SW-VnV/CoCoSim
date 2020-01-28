@@ -52,9 +52,10 @@ function [status, errors_msg] = DiscreteStateSpace_pp(model)
     dss_list = find_system(model, ...
         'LookUnderMasks', 'all', 'BlockType','DiscreteStateSpace');
     dss_list = [dss_list; find_system(model,'BlockType','StateSpace')];
-    compiledInportDim = SLXUtils.getCompiledParam(dss_list, 'CompiledPortDimensions');
-    inportDimMap = containers.Map(dss_list, compiledInportDim);
+    
     if not(isempty(dss_list))
+        compiledInportDim = SLXUtils.getCompiledParam(dss_list, 'CompiledPortDimensions');
+        inportDimMap = containers.Map(dss_list, compiledInportDim);
         display_msg('Replacing DiscreteStateSpace blocks...', MsgType.INFO,...
             'DiscreteStateSpace_pp', '');
         for i=1:length(dss_list)
