@@ -12,8 +12,17 @@ function  [x2, y2] = process_node_call(nodes, new_model_name, node_block_path, b
         calls_map = containers.Map('KeyType', 'char', 'ValueType', 'any');
     end
     if y2 < 30000; y2 = y2 + 150; else, x2 = x2 + 500; y2 = 100; end
-
-    ID = BUtils.adapt_block_name(blk_exprs.(var{1}).name);
+    
+    
+    
+    if MatlabUtils.startsWith(blk_exprs.(var{1}).name, '_')
+        % Simulink read json : _max_real is read as x_max_real
+        node_fieldname = strcat('x', blk_exprs.(var{1}).name);
+    else
+        node_fieldname = blk_exprs.(var{1}).name;
+    end
+    
+    ID = BUtils.adapt_block_name(node_fieldname);
     fcn_path = BUtils.get_unique_block_name(...
         strcat(node_block_path,'/',ID,'_call'));
     if ~isempty(xml_trace)
@@ -26,7 +35,7 @@ function  [x2, y2] = process_node_call(nodes, new_model_name, node_block_path, b
             add_block(fcn_subsys,...
                 fcn_path,...
                 'Position',block_pos);
-            xml_trace.create_Node_Element(fcn_path,  nodes.(blk_exprs.(var{1}).name).original_name);
+            xml_trace.create_Node_Element(fcn_path,  nodes.(node_fieldname).original_name);
         else
             Lus2SLXUtils.node_process(new_model_name, nodes, blk_exprs.(var{1}).name, fcn_path, block_pos, xml_trace);
             calls_map(ID) = fcn_path;

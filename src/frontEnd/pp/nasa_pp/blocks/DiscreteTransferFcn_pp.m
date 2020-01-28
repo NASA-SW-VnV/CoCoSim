@@ -69,10 +69,12 @@ function [status, errors_msg] = DiscreteTransferFcn_pp(model)
                         Hd = c2d(Hc,sampleT);
                         num = Hd.Numerator{:};
                         denum = Hd.Denominator{:};
-                    catch
+                    catch me
                         display_msg(sprintf('block %s is not supported. Please change it to DiscreteTransferFcn',...
                             dtf_list{i}), ...
                             MsgType.ERROR, 'DiscreteTransferFcn_pp', '');
+                        display_msg(me.getReport(), ...
+                            MsgType.DEBUG, 'DiscreteTransferFcn_pp', '');
                         continue
                     end
                 end
