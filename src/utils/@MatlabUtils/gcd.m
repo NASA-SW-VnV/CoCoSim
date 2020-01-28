@@ -46,8 +46,15 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function st = gcd(T)
+%     try
     st = max(T);
     for i=1:numel(T)
+        if T(i) == 0
+            continue
+        end
         st = gcd(st*1e9,T(i)*1e9)/1e9;
     end
+%     catch me
+%         me
+%     end
 end

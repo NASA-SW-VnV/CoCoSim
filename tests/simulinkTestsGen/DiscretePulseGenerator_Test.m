@@ -64,7 +64,7 @@ classdef DiscretePulseGenerator_Test < Block_Test
     
     properties
         % other properties
-        SampleTime = {'-1'};
+        SampleTime = {'0.1'};
     end
     
     methods
@@ -90,6 +90,9 @@ classdef DiscretePulseGenerator_Test < Block_Test
                     mdl_name = sprintf('%s%d', obj.fileNamePrefix, i);
                     addCondExecSS = (mod(i, condExecSSPeriod) == 0);
                     condExecSSIdx = int32(i/condExecSSPeriod);
+                    if addCondExecSS
+                        s.SampleTime = '-1';
+                    end
                     [blkPath, mdl_path, skip] = Block_Test.create_new_model(...
                         mdl_name, outputDir, deleteIfExists, addCondExecSS, ...
                         condExecSSIdx);
@@ -114,7 +117,7 @@ classdef DiscretePulseGenerator_Test < Block_Test
                             'SearchDepth',1, 'BlockType','Inport');
                         if ~isempty(inport_list)
                             NASAPPUtils.replace_one_block(inport_list{1}, 'simulink/Sources/Digital Clock');
-                            set_param(inport_list{1}, 'SampleTime', '0.1');
+                            set_param(inport_list{1}, 'SampleTime', obj.SampleTime{1});
                         end
                     end
                     
@@ -145,7 +148,7 @@ classdef DiscretePulseGenerator_Test < Block_Test
                     s.PulseWidth = obj.PulseWidth{mod(length(params), length(obj.PulseWidth))+1};
                     s.PhaseDelay = obj.PhaseDelay{mod(length(params), length(obj.PhaseDelay))+1};
                     s.VectorParams1D = obj.VectorParams1D{mod(length(params), length(obj.VectorParams1D))+1};
-                    s.SampleTime = '-1';
+                    s.SampleTime = obj.SampleTime{1};
                     params{end+1} = s;
                     
                 end

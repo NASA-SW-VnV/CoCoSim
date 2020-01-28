@@ -54,7 +54,7 @@ classdef DiscreteStateSpace_Test < Block_Test
     
     properties
         % properties that will participate in permutations
-        % A must be an n-by-n matrix, where n is the number of states.
+        % `A must be an n-by-n matrix, where n is the number of states.
         % B must be an n-by-m matrix, where m is the number of inputs.
         % C must be an r-by-n matrix, where r is the number of outputs.
         % D must be an r-by-m matrix.
