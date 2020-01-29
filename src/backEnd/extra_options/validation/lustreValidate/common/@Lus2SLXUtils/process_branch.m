@@ -86,30 +86,36 @@ function [x2, y2] = process_branch(nodes, new_model_name, node_block_path, blk_e
     guard_type = branch_struct.guard.type;
     guard_adapted = BUtils.adapt_block_name(guard, ID);
     if strcmp(guard_type, 'constant')
-        add_block('simulink/Commonly Used Blocks/Constant',...
+        guard_handle = add_block('simulink/Commonly Used Blocks/Constant',...
             guard_path,...
+            'MakeNameUnique', 'on', ...
             'Value', guard,...
             'Position',[x3 y3 (x3+50) (y3+50)]);
         %     set_param(guard_path, 'OutDataTypeStr','Inherit: Inherit via back propagation');
         dt = Lus2SLXUtils.getArgDataType(branch_struct.guard);
         
         if strcmp(dt, 'bool')
-            set_param(guard_path, 'OutDataTypeStr', 'boolean');
+            set_param(guard_handle, 'OutDataTypeStr', 'boolean');
         elseif strcmp(dt, 'int')
-            set_param(guard_path, 'OutDataTypeStr', 'int32');
+            set_param(guard_handle, 'OutDataTypeStr', 'int32');
         elseif strcmp(dt, 'real')
-            set_param(guard_path, 'OutDataTypeStr', 'double');
+            set_param(guard_handle, 'OutDataTypeStr', 'double');
         end
     else
-        add_block('simulink/Signal Routing/From',...
+        try
+        guard_handle = add_block('simulink/Signal Routing/From',...
             guard_path,...
+            'MakeNameUnique', 'on', ...
             'GotoTag',guard_adapted,...
             'TagVisibility', 'local', ...
             'Position',[x3 y3 (x3+50) (y3+50)]);
+        catch me
+            me
+        end
     end
     %% link guard to IF block
     DstBlkH = get_param(IF_path,'PortHandles');
-    SrcBlkH = get_param(guard_path,'PortHandles');
+    SrcBlkH = get_param(guard_handle,'PortHandles');
     if useSwitch
         add_line(branch_block_path, SrcBlkH.Outport(1), DstBlkH.Inport(2), 'autorouting', 'on');
     else
