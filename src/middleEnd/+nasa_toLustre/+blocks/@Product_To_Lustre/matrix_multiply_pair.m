@@ -5,7 +5,7 @@ function [codes, product_out, addVars] = matrix_multiply_pair(m1_dim, m2_dim, ..
     % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
-    % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+    % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>, Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
     
     % adding additional variables for inside matrices.  For

@@ -2,7 +2,7 @@
 % Copyright (c) 2019 United States Government as represented by the
 % Administrator of the National Aeronautics and Space Administration.
 % All Rights Reserved.
-% Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+% Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>, Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [codes, outputs_dt, AdditionalVars, outputs] = getSumProductCodes(...
         obj, parent, blk, OutputDataTypeStr,isSumBlock, ...
@@ -76,6 +76,9 @@ function [codes, outputs_dt, AdditionalVars, outputs] = getSumProductCodes(...
         if ~isSumBlock && strcmp(blk.Multiplication, 'Matrix(*)')
             %This is a matrix multiplication, only applies to
             %Product block
+            %TODO: add accumulator datatype to operands: too complicated when there are
+            %many terms:
+            % Z = int8(int8(int8(x1*y1) + int8(x2*y2)) + int8(x3*y3))
             [codes, AdditionalVars] = nasa_toLustre.blocks.Product_To_Lustre.matrix_multiply(obj, exp, blk, inputs, outputs, zero, LusOutputDataTypeStr, conv_format, operandsDT );
         else
             % element wise operations / Sum
