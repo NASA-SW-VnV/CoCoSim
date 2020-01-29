@@ -42,7 +42,6 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
 function schema = ppMenu(callbackInfo)
     schema = sl_action_schema;
     schema.label = 'Pre-process this model';

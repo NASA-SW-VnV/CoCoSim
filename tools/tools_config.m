@@ -42,7 +42,6 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
 %% LUSTREC, LUCTREC_INCLUDE_DIR, ZUSTRE, Z3, KIND2
 % Configuration file for the backend solvers : Zustre, Kind2, JKind
 % If you need CoCosim for Verification please set the backend solvers

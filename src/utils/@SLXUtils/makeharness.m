@@ -41,8 +41,8 @@
 % cannot be relied upon to generate or error check software being developed. 
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function [new_model_name, status] = makeharness(T, subsys_path, output_dir, postfix_name)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function [new_model_name, status] = makeharness(T, subsys_path, output_dir, postfix_name)
     % the model should be already loaded and subsys_path is the
     % path to the subsystem or the model name.
     if nargin < 4

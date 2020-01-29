@@ -42,7 +42,6 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
 %% Get percentage of tolerance from floiting values between lustrec and SLX
 function eps = getLustrescSlxEps(model_path)
     [~, model, ~ ] = fileparts(model_path);

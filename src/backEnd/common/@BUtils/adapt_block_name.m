@@ -41,8 +41,8 @@
 % cannot be relied upon to generate or error check software being developed. 
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function new_name = adapt_block_name(var_name, ID)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function new_name = adapt_block_name(var_name, ID)
     %     new_name = regexprep(var_name,'^__(\w)','$1');  
     
     var_name = matlab.lang.makeValidName(char(var_name));

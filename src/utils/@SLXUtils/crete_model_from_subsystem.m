@@ -41,8 +41,8 @@
 % cannot be relied upon to generate or error check software being developed. 
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function [new_model_path, new_model_name, status] = ...
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function [new_model_path, new_model_name, status] = ...
         crete_model_from_subsystem(file_name, ss_path, output_dir )
     block_name_adapted = ...
         BUtils.adapt_block_name(MatlabUtils.naming(nasa_toLustre.utils.SLX2LusUtils.name_format(ss_path)));

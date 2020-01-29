@@ -45,7 +45,6 @@ function sl_customization( cm )
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
 cm.addCustomMenuFcn('Simulink:ToolsMenu', @(x) {@cocosim_menu.tools_menu});
 cm.addCustomMenuFcn('Simulink:PreContextMenu',@(x) {@cocosim_menu.precontext_menu});
 end

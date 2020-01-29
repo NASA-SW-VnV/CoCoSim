@@ -41,8 +41,8 @@
 % cannot be relied upon to generate or error check software being developed. 
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function OutOfBoundCheckCode(blk2LusObj, parent, blk, xml_trace, ...
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function OutOfBoundCheckCode(blk2LusObj, parent, blk, xml_trace, ...
         indexPortNames, width, isZeroBased, propID, propIndex)
 
     % calculate Bound dimension

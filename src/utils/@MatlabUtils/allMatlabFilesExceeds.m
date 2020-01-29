@@ -42,7 +42,6 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
 function F = allMatlabFilesExceeds(folder, n)
     mfiles = dir(fullfile(folder,'**', '*.m'));
     if isfield(mfiles, 'folder')

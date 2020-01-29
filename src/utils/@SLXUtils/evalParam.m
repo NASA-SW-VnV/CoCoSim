@@ -41,8 +41,8 @@
 % cannot be relied upon to generate or error check software being developed. 
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function [Value, valueDataType, status] = evalParam(modelObj, parent, blk, param)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function [Value, valueDataType, status] = evalParam(modelObj, parent, blk, param)
     % get the value of a parameter
     % This function should work with IR structure extracted from
     % the Simulink model and used in ToLustre compiler.

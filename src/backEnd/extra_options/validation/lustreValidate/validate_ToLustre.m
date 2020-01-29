@@ -42,7 +42,6 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
 function [res] = ...
         validate_ToLustre(orig_model_full_path, tests_method, model_checker, ...
         show_model, deep_CEX, min_max_constraints, options)

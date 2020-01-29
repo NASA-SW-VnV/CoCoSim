@@ -41,8 +41,8 @@
 % cannot be relied upon to generate or error check software being developed. 
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function [c2] = cellCartesianProduct(c1)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function [c2] = cellCartesianProduct(c1)
     indices = cell(1, numel(c1));   %output variable for ndgrid
     ndgridin = cellfun(@(c) 1:numel(c), c1, 'UniformOutput', false); %input arrays for ndgrid
     [indices{:}] = ndgrid(ndgridin{:}); %get ngrid result

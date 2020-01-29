@@ -42,7 +42,6 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
 %% Check the lustre syntax by Jkind
 function [status, output] = checkSyntaxError(lus_file_path, JLUSTRE2KIND)
     if ~exist(JLUSTRE2KIND, 'file')

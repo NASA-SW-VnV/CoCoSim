@@ -42,7 +42,6 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
 function openAllFilesContainingString(folder, str)
     [~, A] = system(sprintf('find %s | xargs grep "%s" -sl', folder, str), '-echo');
     AA = strsplit(A, '\n');

@@ -42,7 +42,8 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function [status, errors_msg] = DiscreteDerivative_pp(model)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function [status, errors_msg] = DiscreteDerivative_pp(model)
     % DiscreteDerivative_pp searches for DiscreteDerivative_pp blocks and replaces them by a
     % PP-friendly equivalent.
     %   model is a string containing the name of the model to search in

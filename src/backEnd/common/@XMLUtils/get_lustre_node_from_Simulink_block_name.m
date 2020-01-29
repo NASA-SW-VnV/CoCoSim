@@ -41,8 +41,8 @@
 % cannot be relied upon to generate or error check software being developed. 
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function node_name = get_lustre_node_from_Simulink_block_name(trace_file,Simulink_block_name)         
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function node_name = get_lustre_node_from_Simulink_block_name(trace_file,Simulink_block_name)         
 
     if isa(trace_file, 'char')
         DOMNODE = xmlread(trace_file);

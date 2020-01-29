@@ -41,8 +41,8 @@
 % cannot be relied upon to generate or error check software being developed. 
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function html_path = createHtmlListUsingHTMLITEM(title, items_list, html_path, model)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function html_path = createHtmlListUsingHTMLITEM(title, items_list, html_path, model)
     
     [output_dir, ~, ~] = fileparts(html_path);
     if exist(html_path, 'file')

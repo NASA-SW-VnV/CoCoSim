@@ -41,8 +41,8 @@
 % cannot be relied upon to generate or error check software being developed. 
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function [obs_pos] = get_obs_position(parent_subsystem)  
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function [obs_pos] = get_obs_position(parent_subsystem)  
 
     blocks = find_system(parent_subsystem, 'SearchDepth', '1', 'FindAll', 'on', 'Type', 'Block');
     positions = get_param(blocks, 'Position');

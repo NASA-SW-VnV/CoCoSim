@@ -41,8 +41,7 @@
 % cannot be relied upon to generate or error check software being developed. 
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%LUS2SLX translate an EMF json file to Simulink blocks. Every node is translated
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%LUS2SLX translate an EMF json file to Simulink blocks. Every node is translated
 %to a subsystem. If OnlyMainNode is true than only the main node specified
 %in main_node argument will be kept in the final simulink model.
 function [status,...
