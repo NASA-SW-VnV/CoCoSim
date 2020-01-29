@@ -42,7 +42,7 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function [status, errors_msg] = NotConnectedPorts_pp( new_model_base )
+function [status, errors_msg] = NotConnectedPorts_pp( new_model_base )
     %NotConnectedPorts_pp connects not connected ports to Constant or
     %Terminator.
     

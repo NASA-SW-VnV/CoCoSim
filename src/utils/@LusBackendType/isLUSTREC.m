@@ -42,7 +42,7 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function res = isLUSTREC(b)
+function res = isLUSTREC(b)
     
     res = strcmp(b, LusBackendType.LUSTREC);
 end

@@ -42,7 +42,7 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function metaInfo = getModelInfo(title, model)
+function metaInfo = getModelInfo(title, model)
 
     tableItemFormat = '<tr><td align="left">%s:</td><td align="left">%s</td></tr>';
     tableElts = {};

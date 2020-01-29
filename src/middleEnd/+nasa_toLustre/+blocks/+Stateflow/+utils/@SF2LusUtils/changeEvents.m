@@ -2,7 +2,7 @@
 %
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function call = changeEvents(call, EventsNames, E)
+function call = changeEvents(call, EventsNames, E)
     
     args = call.getArgs();
     inputs_Ids = cellfun(@(x) nasa_toLustre.lustreAst.VarIdExpr(x.getId()), ...

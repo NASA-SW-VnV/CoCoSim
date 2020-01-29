@@ -42,7 +42,7 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function install_cocosim_lib(force)
+function install_cocosim_lib(force)
 
     %INSTALL_COCOSIM is doing all the following:
     %   1- Update cocosim repo from git. To get the latest version of cocosim

@@ -42,7 +42,7 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function json = jsonencode(s)
+function json = jsonencode(s)
 %JSONENCODE Summary of this function goes here
 %   Detailed explanation goes here
     try

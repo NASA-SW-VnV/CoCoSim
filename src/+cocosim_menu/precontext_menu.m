@@ -42,7 +42,7 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function schema = precontext_menu(varargin)
+function schema = precontext_menu(varargin)
     %cocoSim_menu Define the custom menu function.
     
     schema = sl_container_schema;

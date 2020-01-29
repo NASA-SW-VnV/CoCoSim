@@ -2,7 +2,7 @@
 %
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function schema = unsupportedBlocksMenu(callbackInfo)
+function schema = unsupportedBlocksMenu(callbackInfo)
     schema = sl_action_schema;
     schema.label = 'Check Compatibility';
     schema.statustip = 'Check compatibility of your model with CoCoSim';

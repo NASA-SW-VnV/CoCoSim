@@ -42,7 +42,7 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function res = isMCDCTESTSGEN(b)
+function res = isMCDCTESTSGEN(b)
     
     res = strcmp(b, CoCoBackendType.MCDC_TESTS_GEN);
 end

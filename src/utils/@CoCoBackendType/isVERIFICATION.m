@@ -42,7 +42,7 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function res = isVERIFICATION(b)
+function res = isVERIFICATION(b)
 
     res = strcmp(b, CoCoBackendType.VERIFICATION);
 end

@@ -42,7 +42,7 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function set_mask_parameters(observer_path)
+function set_mask_parameters(observer_path)
     
     
     load_system(which('CoCoSimSpecification.slx'));

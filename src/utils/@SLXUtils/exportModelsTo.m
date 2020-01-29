@@ -42,7 +42,7 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function exportModelsTo(folder_Path, version)
+function exportModelsTo(folder_Path, version)
 
 if nargin==0
     [file_path, ~, ~] = fileparts(mfilename('fullpath'));

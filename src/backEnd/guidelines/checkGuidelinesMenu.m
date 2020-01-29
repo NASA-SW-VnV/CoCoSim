@@ -2,7 +2,7 @@
 %
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function schema = checkGuidelinesMenu(callbackInfo)
+function schema = checkGuidelinesMenu(callbackInfo)
     schema = sl_action_schema;
     schema.label = 'Check model against guidelines';
     schema.statustip = 'Check model against guidelines ';

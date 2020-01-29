@@ -42,7 +42,7 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function [desc] = get_obs_description()
+function [desc] = get_obs_description()
     
     desc = sprintf('Set an observer for the system.\n');
     desc = [desc sprintf('The annotation type parameter sets the type of observer:\n')];

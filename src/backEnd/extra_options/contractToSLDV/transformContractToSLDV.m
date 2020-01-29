@@ -42,7 +42,7 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function new_model_path = transformContractToSLDV(model_path)
+function new_model_path = transformContractToSLDV(model_path)
     %TRANSFORMCONTRACTTOSLDV transform COCOSPEC contract to SLDV Library:
     %Assertion, Proof, A...  
     

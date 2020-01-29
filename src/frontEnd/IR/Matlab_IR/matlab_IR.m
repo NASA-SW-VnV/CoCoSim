@@ -42,7 +42,7 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function [ fun_ir_path, status ] = matlab_IR( fun_path, dst_path )
+function [ fun_ir_path, status ] = matlab_IR( fun_path, dst_path )
     %matlab_IR exports an internal presentation of matlab function givin in
     %parameters.
 

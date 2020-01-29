@@ -2,7 +2,7 @@
 %
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function schema = importLusReqMenu(callbackInfo)
+function schema = importLusReqMenu(callbackInfo)
     schema = sl_container_schema;
     schema.label = 'Requirements';
     schema.statustip = 'Import/Create Lustre Requirements';

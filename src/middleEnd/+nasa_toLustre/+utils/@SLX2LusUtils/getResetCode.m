@@ -2,7 +2,7 @@
 %
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function [resetCode, status] = getResetCode(...
+function [resetCode, status] = getResetCode(...
         resetType, resetDT, resetInput, zero )
     %
     %

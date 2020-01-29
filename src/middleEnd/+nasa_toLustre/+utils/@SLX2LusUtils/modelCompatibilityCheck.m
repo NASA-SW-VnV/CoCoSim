@@ -2,7 +2,7 @@
 %
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function htmlItemMsg = modelCompatibilityCheck(model_name, main_sampleTime)
+function htmlItemMsg = modelCompatibilityCheck(model_name, main_sampleTime)
     htmlItemMsg = '';
     subtitles = {};
     try

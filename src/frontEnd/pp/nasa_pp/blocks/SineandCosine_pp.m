@@ -42,7 +42,7 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function [status, errors_msg] = SineandCosine_pp(model)
+function [status, errors_msg] = SineandCosine_pp(model)
 % SineandCosine_pp Searches for Sine and Cosine blocks and inline thier
 % contents to avoid algebraic loops.
 %   model is a string containing the name of the model to search in

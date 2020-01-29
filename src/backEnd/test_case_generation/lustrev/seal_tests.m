@@ -2,7 +2,7 @@
 %
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function [ new_model_path, status ] = seal_tests(...
+function [ new_model_path, status ] = seal_tests(...
         model_full_path, exportToWs, mkHarnessMdl, nodisplay )
     %MCDCTOSIMULINK try to bring back the MC-DC conditions to simulink level.
     

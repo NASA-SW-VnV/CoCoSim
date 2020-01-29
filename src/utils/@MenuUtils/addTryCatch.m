@@ -42,7 +42,7 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function output = addTryCatch(callbackInfo)
+function output = addTryCatch(callbackInfo)
 
     funcHandle = callbackInfo.userdata;
     output = [];

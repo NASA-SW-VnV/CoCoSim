@@ -42,7 +42,7 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function schema = extraOptionsMenu(callbackInfo)
+function schema = extraOptionsMenu(callbackInfo)
 
     schema = sl_container_schema;
     schema.label = 'Extra options';

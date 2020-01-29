@@ -42,7 +42,7 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function [status, errors_msg] = AtomicSubsystems_pp( new_model_base )
+function [status, errors_msg] = AtomicSubsystems_pp( new_model_base )
     %ATOMIC_PROCESS change all blocks to be atomic
     % Configure any subsystem to be treated as Atomic
     status = 0;

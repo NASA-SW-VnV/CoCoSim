@@ -42,7 +42,7 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function schema = RustMenu(callbackInfo)
+function schema = RustMenu(callbackInfo)
     schema = sl_action_schema;
     schema.label = 'Rust';
     schema.callback = @RustCallback;

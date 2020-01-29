@@ -42,7 +42,7 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function  [failed, errors_msg]= CompileModelCheck_pp( new_model_base )
+function  [failed, errors_msg]= CompileModelCheck_pp( new_model_base )
 %compile_process check if the model can be compiled or not.
 failed = 0;
 errors_msg = {};

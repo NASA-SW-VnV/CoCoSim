@@ -42,7 +42,7 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function [status, errors_msg] = ModelReference_pp(topLevelModel)
+function [status, errors_msg] = ModelReference_pp(topLevelModel)
     %ModelReference_pp will replace all model reference blocks at all levels
     % within the top level model with SubSystems having the same contents as
     % the referenced model.

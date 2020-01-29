@@ -42,7 +42,7 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function [status, errors_msg] = LinkStatus_pp( new_model_base )
+function [status, errors_msg] = LinkStatus_pp( new_model_base )
 %LinkStatus_pp disable all libraries links. Helps changing and
 %pre-processing the content of these blocks.
 

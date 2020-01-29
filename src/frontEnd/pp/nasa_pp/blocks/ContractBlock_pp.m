@@ -42,7 +42,7 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function [status, errors_msg] = ContractBlock_pp( model )
+function [status, errors_msg] = ContractBlock_pp( model )
     %ContractBlock_pp if the contract is linked to non
     %Subsystem block, this funciton creates subsystem on top of it
     

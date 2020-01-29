@@ -42,7 +42,7 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function [status, errors_msg] = Outport_pp( new_model_base )
+function [status, errors_msg] = Outport_pp( new_model_base )
     %OUTPORT_PROCESS 
     % Check if there is an output in the main block
     status = 0;

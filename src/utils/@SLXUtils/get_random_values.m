@@ -42,7 +42,7 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function Values = get_random_values(nb_steps, min, max, dim, dt)
+function Values = get_random_values(nb_steps, min, max, dim, dt)
     [isBus, bus] = SLXUtils.isSimulinkBus(dt);
     lus_dt =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(dt);
     if isBus

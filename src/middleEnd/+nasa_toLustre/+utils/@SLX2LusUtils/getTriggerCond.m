@@ -2,7 +2,7 @@
 %
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function [resetCode, status] = getTriggerCond(...
+function [resetCode, status] = getTriggerCond(...
         triggerType, triggerDT, triggerInput, zero )
     %This function it differs from getResetCond as the rising/falling
     %conditions are not the same for resettableSubsystem Vs TriggeredSS

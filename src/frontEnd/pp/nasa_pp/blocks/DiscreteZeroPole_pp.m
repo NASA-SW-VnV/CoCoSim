@@ -42,7 +42,7 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function [status, errors_msg] = DiscreteZeroPole_pp(model)
+function [status, errors_msg] = DiscreteZeroPole_pp(model)
 % DiscreteZeroPole_pp searches for DiscreteZeroPole blocks and replaces them by a
 % PP-friendly equivalent.
 %   model is a string containing the name of the model to search in

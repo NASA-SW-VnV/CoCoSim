@@ -42,7 +42,7 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function [status, errors_msg] = Chart_pp( model )
+function [status, errors_msg] = Chart_pp( model )
 %CHART_PROCESS change Action Language of the chart from C to Matlab
 status = 0;
 errors_msg = {};

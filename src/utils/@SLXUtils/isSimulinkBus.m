@@ -42,7 +42,7 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function [isBus, bus] = isSimulinkBus(SignalName, model)
+function [isBus, bus] = isSimulinkBus(SignalName, model)
     bus = [];
     if nargin >= 2
         hws = get_param(model, 'modelworkspace') ;

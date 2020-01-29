@@ -42,7 +42,7 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function path_prefix = getPackagePrefix(f_parent, f_name)
+function path_prefix = getPackagePrefix(f_parent, f_name)
     path_parts = regexp(f_parent, filesep, 'split');
     % keep only package path
     path_partsWithPlusAndAT = path_parts(MatlabUtils.startsWith(path_parts, '+') ...

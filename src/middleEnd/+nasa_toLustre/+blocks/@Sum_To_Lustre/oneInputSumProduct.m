@@ -2,7 +2,7 @@
 %
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function [codes] = oneInputSumProduct(parent, blk, outputs, inputs, ...
+function [codes] = oneInputSumProduct(parent, blk, outputs, inputs, ...
         widths, exp, initCode,isSumBlock, conv_format)
             
             if ~isSumBlock && strcmp(blk.Multiplication, 'Matrix(*)')    % product, 1 input, 1 exp, Matrix(x), matrix remains unchanged.

@@ -42,7 +42,7 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function removeBlocksLinkedToMe(bHandle, removeMe)
+function removeBlocksLinkedToMe(bHandle, removeMe)
     portHandles = get_param(bHandle, 'PortHandles');
     for i=1:length(portHandles.Inport)
         line = get_param(portHandles.Inport(i), 'line');

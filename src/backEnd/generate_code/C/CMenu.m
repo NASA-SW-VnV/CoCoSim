@@ -42,7 +42,7 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function schema = LustreMenu(callbackInfo)
+function schema = LustreMenu(callbackInfo)
 schema = sl_action_schema;
 schema.label = 'C';
 schema.callback = @LusCompilerCallback;

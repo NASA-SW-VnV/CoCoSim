@@ -42,7 +42,7 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function [status, errors_msg] = Sigbuilderblock_pp(model)
+function [status, errors_msg] = Sigbuilderblock_pp(model)
     % Sigbuilderblock_pp searches for Sigbuilderblock_pp blocks and
     % replaces them by Inports
     % Processing Sigbuilderblock blocks

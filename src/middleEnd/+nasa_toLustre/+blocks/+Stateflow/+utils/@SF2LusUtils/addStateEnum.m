@@ -2,7 +2,7 @@
 %
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function [stateEnumType, childAst] = ...
+function [stateEnumType, childAst] = ...
         addStateEnum(state, child, isInner, isJunction, inactive)
     global SF_STATES_ENUMS_MAP;
     

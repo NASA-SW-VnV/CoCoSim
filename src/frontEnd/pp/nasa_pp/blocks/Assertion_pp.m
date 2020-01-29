@@ -42,7 +42,7 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function [status, errors_msg] = Assertion_pp( model )
+function [status, errors_msg] = Assertion_pp( model )
 %Assertion_pp disable all assertions to stop simulation when assertion
 %fails
 status = 0;

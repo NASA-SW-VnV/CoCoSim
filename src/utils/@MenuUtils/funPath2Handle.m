@@ -42,7 +42,7 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function handle = funPath2Handle(fullpath)
+function handle = funPath2Handle(fullpath)
     %% get function handle from its path
 
     oldDir = pwd;

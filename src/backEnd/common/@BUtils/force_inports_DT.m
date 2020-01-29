@@ -42,7 +42,7 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function  force_inports_DT(block_name)  
+function  force_inports_DT(block_name)  
 
     inport_list = find_system(block_name,'BlockType','Inport');
     model = regexp(block_name,'/','split');

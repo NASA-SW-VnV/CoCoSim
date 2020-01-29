@@ -42,7 +42,7 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function [fpath, fname] = get_file_name(gcs)
+function [fpath, fname] = get_file_name(gcs)
     %% get file name from the current opened Simulink model.
 
     fname = bdroot(gcs);

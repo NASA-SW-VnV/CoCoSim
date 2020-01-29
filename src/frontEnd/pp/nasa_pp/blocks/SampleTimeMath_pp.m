@@ -42,7 +42,7 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function [status, errors_msg] = SampleTimeMath_pp(model)
+function [status, errors_msg] = SampleTimeMath_pp(model)
 % SampleTimeMath_PROCESS Searches for SampleTimeMath blocks and replaces them by a
 %  equivalent subsystem.
 %   model is a string containing the name of the model to search in

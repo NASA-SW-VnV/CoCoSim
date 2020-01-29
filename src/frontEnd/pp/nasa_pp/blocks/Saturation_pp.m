@@ -42,7 +42,7 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function [status, errors_msg] = Saturation_pp(model)
+function [status, errors_msg] = Saturation_pp(model)
 % SATURATION_PP changes Saturation block to Min/Max blocks.
 % if Upper limit or Lower limit are Infinite "Inf" they are ignored.
 

@@ -42,7 +42,7 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function res = isCOMPATIBILITY(b)
+function res = isCOMPATIBILITY(b)
 
     
     res = strcmp(b, CoCoBackendType.COMPATIBILITY);

@@ -42,7 +42,7 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%function [status, errors_msg] = ExpandNonAtomicSubsystems_pp( new_model_base )
+function [status, errors_msg] = ExpandNonAtomicSubsystems_pp( new_model_base )
 %expand_sub_process expands all subsystems that are not atomic
 status = 0;
 errors_msg = {};
