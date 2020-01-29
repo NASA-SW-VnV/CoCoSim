@@ -1,11 +1,11 @@
 function [code, exp_dt, dim, extra_code] = mathFun_To_Lustre(tree, args)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2019 United States Government as represented by the
+%    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        
+%        
             
     % Do not forget to update exp_dt in each switch case if needed
     exp_dt = nasa_toLustre.utils.MExpToLusDT.expression_DT(tree, args);
@@ -100,7 +100,8 @@ function [code, exp_dt, dim, extra_code] = mathFun_To_Lustre(tree, args)
                 (1:numel(param)), 'UniformOutput', false);
             exp_dt = expected_param_dt;
             
-            %function with two arguments
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function with two arguments
         case {'rem', 'mod'}
             args.expected_lusDT = '';
             [param1, param1_dt, dim1, extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(1), args);

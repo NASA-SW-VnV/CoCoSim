@@ -2,12 +2,12 @@ classdef Block_To_Lustre < handle
     %Block_To_Lustre an interface for all write blocks classes. Any BlockType_write
     %class inherit from this class.
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2019 United States Government as represented by the
+%    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
+%    
     properties
         
         % the code of the block, e.g. a list of nasa_toLustre.lustreAst.LustreEq;

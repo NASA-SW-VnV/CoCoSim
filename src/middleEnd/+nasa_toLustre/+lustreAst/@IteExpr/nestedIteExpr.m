@@ -1,11 +1,11 @@
 function exp = nestedIteExpr(conds, thens)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2019 United States Government as represented by the
+%    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
- 
+% 
     if numel(thens) ~= numel(conds) + 1
         display_msg('Number of Thens expressions should be equal to Numbers of Conds + 1',...
             MsgType.ERROR, 'IteExpr.nestedIteExpr', '');

@@ -11,12 +11,12 @@ function [new_file_path, failed] = cocosim_pp(model_path, varargin)
     %   model and pre-processed model. In order to prove the pre-processing is
     %   correct.
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2019 United States Government as represented by the
+%    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+%
     global cocosim_pp_gen_verif  cocosim_pp_gen_verif_dir ;
 
     % 
@@ -53,7 +53,7 @@ function [new_file_path, failed] = cocosim_pp(model_path, varargin)
         end
     end
     failed = 0;
-    already_pp = PP2Utils.isAlreadyPP(model_path);
+    already_pp = NASAPPUtils.isAlreadyPP(model_path);
     if skip_pp
         if already_pp
             display_msg('SKIP_PP flag is given, the pre-processing will be skipped.', MsgType.INFO, 'PP', '');

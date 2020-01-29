@@ -1,12 +1,12 @@
 function schema = verifyMenu(varargin)
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2019 United States Government as represented by the
+%    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    schema = sl_action_schema;
+%    schema = sl_action_schema;
     schema.label = 'Prove properties';
     schema.statustip = 'Verify the current model with CoCoSim';
     schema.autoDisableWhen = 'Busy';

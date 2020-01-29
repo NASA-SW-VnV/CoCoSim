@@ -1,12 +1,12 @@
 function [body, vars] = addDirectLookupNodeCode(blkParams,index_node,...
     coords_node,coords_input,Ast_dimJump)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2019 United States Government as represented by the
+%    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
+%    
     % This function carries out the interpolation/extrapolation for the 
     % direct method depending on the user selection for algorithm
     % option.  For the flat option, the value at the lower bounding

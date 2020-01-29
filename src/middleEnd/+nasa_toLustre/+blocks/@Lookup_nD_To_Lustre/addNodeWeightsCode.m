@@ -1,12 +1,12 @@
 function [body, vars, N_shape_node] = ...
     addNodeWeightsCode(node_inputs,coords_node,blkParams,lus_backend)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2019 United States Government as represented by the
+%    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+%
     % This function defines and calculating shape function values for the
     % interpolation point
     InterpMethod = blkParams.InterpMethod;

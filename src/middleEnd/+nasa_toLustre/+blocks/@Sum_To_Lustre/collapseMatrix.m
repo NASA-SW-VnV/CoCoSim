@@ -1,11 +1,11 @@
 function [numelCollapseDim, delta, collapseDims] = collapseMatrix(in_matrix_dimension, CollapseDim)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2019 United States Government as represented by the
+%    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    numelCollapseDim = in_matrix_dimension{1}.dims(CollapseDim);
+%    numelCollapseDim = in_matrix_dimension{1}.dims(CollapseDim);
     matSize = in_matrix_dimension{1}.dims;
 
     subscripts = ones(1,in_matrix_dimension{1}.numDs);

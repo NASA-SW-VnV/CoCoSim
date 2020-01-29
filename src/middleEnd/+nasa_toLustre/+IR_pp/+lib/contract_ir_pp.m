@@ -3,12 +3,12 @@ function [ ir ] = contract_ir_pp( ir )
     %it
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2019 United States Government as represented by the
+%    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    file_path = ir.meta.file_path;
+%    file_path = ir.meta.file_path;
     [~, file_name, ~] = fileparts(file_path);
     field_name = IRUtils.name_format(file_name);
     if ~bdIsLoaded(file_name)

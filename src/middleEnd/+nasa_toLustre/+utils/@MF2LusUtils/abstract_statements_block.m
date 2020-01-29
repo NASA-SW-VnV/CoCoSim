@@ -1,12 +1,12 @@
 function [while_node] = abstract_statements_block(tree, args, type)
     %ABSTRACT_STATEMENTS_BLOCK abstract WHILE, FOR and SWITCH blocks
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2019 United States Government as represented by the
+%    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    persistent counter;
+%    persistent counter;
     if isempty(counter)
         counter = 0;
     end

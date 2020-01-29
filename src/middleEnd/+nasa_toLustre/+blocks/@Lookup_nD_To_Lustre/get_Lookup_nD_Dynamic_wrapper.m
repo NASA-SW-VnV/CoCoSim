@@ -1,12 +1,12 @@
 function extNode = get_Lookup_nD_Dynamic_wrapper(blkParams,inputs,...
     preLookUpExtNode,interpolationExtNode)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2019 United States Government as represented by the
+%    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Lookup_nD
+%    % Lookup_nD
          
     % node header
     wrapper_header.NodeName = sprintf('%s_Lookup_wrapper_node',...

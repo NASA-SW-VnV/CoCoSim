@@ -1,12 +1,12 @@
 function [body, vars,coords_node,index_node] = ...
         addBoundNodeCode(blkParams,Breakpoints,input_coords,lus_backend)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2019 United States Government as represented by the
+%    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %  This function finds the bounding polytop which is required to define
+%    %  This function finds the bounding polytop which is required to define
     %  the shape functions.  For each dimension, there will be 2
     %  breakpoints that surround the coordinate of the interpolation
     %  point in that dimension.  For 2 dimensions, if the table is a
