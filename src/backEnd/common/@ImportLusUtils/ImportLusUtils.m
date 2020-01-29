@@ -42,7 +42,7 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%classdef ImportLusUtils
+classdef ImportLusUtils
     %IMPORTLUSUTILS Summary of this class goes here
     %   Detailed explanation goes here
     

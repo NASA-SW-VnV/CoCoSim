@@ -44,7 +44,7 @@
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%classdef Block_Test
+classdef Block_Test
     %BLOCK_TEST : all other blocks test class inherit from this class
     properties(Constant)
         condExecSS = {'reset', 'trigger', 'enable', 'enable_trigger', 'if'};

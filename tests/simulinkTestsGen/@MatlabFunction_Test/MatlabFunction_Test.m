@@ -35,7 +35,7 @@
 % PERMITTED BY LAW.  RECIPIENT'S SOLE REMEDY FOR ANY SUCH MATTER SHALL BE 
 % THE IMMEDIATE, UNILATERAL TERMINATION OF THIS AGREEMENT.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%classdef MatlabFunction_Test < Block_Test
+classdef MatlabFunction_Test < Block_Test
     %Bias_Test generates test automatically.
     
     properties(Constant)

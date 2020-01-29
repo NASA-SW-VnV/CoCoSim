@@ -49,7 +49,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 <<<<<<< HEAD
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%classdef DiscretePulseGenerator_Test < Block_Test
+classdef DiscretePulseGenerator_Test < Block_Test
 =======
 classdef DiscretePulseGenerator_Test < Block_Test
 >>>>>>> a8a20c9edcb4469c4e0c2104fff2b1416cad1119

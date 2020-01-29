@@ -35,7 +35,7 @@
 % PERMITTED BY LAW.  RECIPIENT'S SOLE REMEDY FOR ANY SUCH MATTER SHALL BE 
 % THE IMMEDIATE, UNILATERAL TERMINATION OF THIS AGREEMENT.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%classdef Assignment_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
+classdef Assignment_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     % Assignment_To_Lustre
     % Y0, U and Y (inputs{1}, inputs{2} and outputs respestively) are
     % inline.  In writing the Lustre code, we loop over the inline outputs.
