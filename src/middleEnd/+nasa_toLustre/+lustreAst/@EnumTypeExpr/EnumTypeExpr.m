@@ -1,12 +1,12 @@
 classdef EnumTypeExpr < nasa_toLustre.lustreAst.LustreExpr
     %EnumTypeExpr: e.g. type Direction = enum {North, South, East, West};
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2019 United States Government as represented by the
+%    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    properties
+%    properties
         enum_name;
         enum_args;
     end

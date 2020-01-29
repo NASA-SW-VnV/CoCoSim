@@ -5,12 +5,12 @@ function [new_ir, status] = stateflow_IR_pp(old_ir, print_in_file, output_dir)
     % This function call SFIR_PP_config to choose which functions to call and
     % in which order
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2019 United States Government as represented by the
+%    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    status = 0;
+%    status = 0;
     if nargin < 3 || isempty(output_dir)
         output_dir = pwd;
     end

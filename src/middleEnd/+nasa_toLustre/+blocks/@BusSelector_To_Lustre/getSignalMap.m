@@ -1,11 +1,11 @@
 function [SignalsInputsMap, OutputSignals] = getSignalMap(obj, blk, inputs)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2019 United States Government as represented by the
+%    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %
+%    %
     persistent Signals_Width_Map_Log;
     if isempty(Signals_Width_Map_Log)
         Signals_Width_Map_Log = containers.Map('KeyType', 'char', 'ValueType', 'int32');

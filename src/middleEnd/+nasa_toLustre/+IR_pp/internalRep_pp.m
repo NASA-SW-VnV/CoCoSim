@@ -2,12 +2,12 @@ function [ new_ir, ir_handle_struct_map, ir_json_path ] = internalRep_pp( new_ir
     %IR_PP pre-process the IR for cocoSim to adapte the IR to the compiler or
     %make some analysis in the IR level.
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2019 United States Government as represented by the
+%    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    if ~exist('json_export', 'var')
+%    if ~exist('json_export', 'var')
         json_export = 0;
     end
     if ~exist('output_dir', 'var')

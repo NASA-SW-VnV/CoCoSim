@@ -1,12 +1,10 @@
 %StateflowTruthTable_To_Lustre: transform Table to graphical function.
 % Then use StateflowGraphicalFunction_To_Lustre
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Copyright (c) 2019 United States Government as represented by the
-% Administrator of the National Aeronautics and Space Administration.
-% All Rights Reserved.
+%
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+%
 function transitionStruct = buildTransitionStruct(ExecutionOrder, destination, C, CAction, srcPath)
     transitionStruct = {};
     transitionStruct.Id = nasa_toLustre.blocks.Stateflow.StateflowTruthTable_To_Lustre.incrementID();

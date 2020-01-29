@@ -1,10 +1,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Copyright (c) 2019 United States Government as represented by the
-% Administrator of the National Aeronautics and Space Administration.
-% All Rights Reserved.
+%
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+%
 function new_obj = deepCopy(obj)
     new_inputs = cellfun(@(x) x.deepCopy(), obj.inputs, 'UniformOutput', 0);
     new_outputs = cellfun(@(x) x.deepCopy(), obj.outputs, 'UniformOutput', 0);

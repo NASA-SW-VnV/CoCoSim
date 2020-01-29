@@ -1,11 +1,11 @@
 function [results, passed, priority] = cocosim_guidelines_jc_0141(model)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2019 United States Government as represented by the
+%    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Francois Conzelmann <francois.conzelmann@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % ORION GN&C MATLAB/Simulink Standards
+%    % ORION GN&C MATLAB/Simulink Standards
     % jc_0141: Use of the Switch block
     priority = 2;
     results = {};

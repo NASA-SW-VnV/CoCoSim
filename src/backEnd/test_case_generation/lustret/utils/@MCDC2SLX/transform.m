@@ -1,10 +1,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Copyright (c) 2019 United States Government as represented by the
-% Administrator of the National Aeronautics and Space Administration.
-% All Rights Reserved.
+%
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%MCDC2SLX translate MC-DC conditions an EMF json file to Simulink blocks.
+%%MCDC2SLX translate MC-DC conditions an EMF json file to Simulink blocks.
 %Every node is translated to a subsystem. If OnlyMainNode is true than only
 %the main node specified
 %in main_node argument will be kept in the final simulink model.

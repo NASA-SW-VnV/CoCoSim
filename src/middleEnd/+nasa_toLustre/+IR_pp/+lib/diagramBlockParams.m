@@ -1,11 +1,11 @@
 function [ ir ] = diagramBlockParams( ir )
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2019 United States Government as represented by the
+%    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %DIAGRAMBLOCKPARAMS Add some parameters to the block diagram missing in the
+%    %DIAGRAMBLOCKPARAMS Add some parameters to the block diagram missing in the
     %original IR
 
     file_path = ir.meta.file_path;

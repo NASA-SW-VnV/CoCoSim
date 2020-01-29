@@ -1,11 +1,11 @@
 function varargout = mcdc_test_gui(varargin)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2019 United States Government as represented by the
+%    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % MCDC_TEST_GUI MATLAB code for mcdc_test_gui.fig
+%    % MCDC_TEST_GUI MATLAB code for mcdc_test_gui.fig
     %      MCDC_TEST_GUI, by itself, creates a new MCDC_TEST_GUI or raises the existing
     %      singleton*.
     %

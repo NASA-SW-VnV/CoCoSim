@@ -2,12 +2,12 @@ function [main_node] = getStatementsBlockAsNode(tree, args, type)
     %ABSTRACT_STATEMENTS_BLOCK generates a seperate node for a block of
     %statements such as content of FOR or WHILE ..
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2019 United States Government as represented by the
+%    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    persistent counter;
+%    persistent counter;
     if isempty(counter)
         counter = 0;
     end

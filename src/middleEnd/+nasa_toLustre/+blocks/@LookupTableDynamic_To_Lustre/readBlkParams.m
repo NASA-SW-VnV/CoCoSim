@@ -1,11 +1,11 @@
 function blkParams = readBlkParams(~,blk,inputs,blkParams)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2019 United States Government as represented by the
+%    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % LookupTableDynamic_To_Lustre
+%    % LookupTableDynamic_To_Lustre
     
     blkParams.lookupTableType = nasa_toLustre.utils.LookupType.LookupDynamic;
     blkParams.tableIsInputPort = true;

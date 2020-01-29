@@ -2,12 +2,12 @@ function [time_array, data_array] = handleOutputAfterFinalValue(...
         time_array, data_array, SampleTime, option)
     % handling blk.OutputAfterFinalValue
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2019 United States Government as represented by the
+%    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
+%    
     t_final = time_array(end)*1.e3;
     if strcmp(option, 'Extrapolation')
         x = [time_array(end-1), time_array(end)];

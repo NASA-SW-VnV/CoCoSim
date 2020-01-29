@@ -1,11 +1,11 @@
 function display_LOG_Messages(html_path, errors_list, warnings_list, debug_list, mode_display)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2019 United States Government as represented by the
+%    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+%
     if mode_display
         Errors = HtmlItem('Errors list:', ...
             cellfun(@(x) HtmlItem(x, {}, 'black', 'red'),...

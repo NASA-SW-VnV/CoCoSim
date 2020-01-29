@@ -1,12 +1,12 @@
 function [body, vars] = addInlineIndexFromArrayIndicesCode(...
         inline_list,element,index, U_LusDt)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2019 United States Government as represented by the
+%    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
+%    
     % This function takes a cell array of VarIdExpr, an VarIdExpr for the
     % index and return an VarIdExpr for the array element of that index
 

@@ -1,11 +1,11 @@
 function [body, vars,L_dimjump] = addDimJumpCode(blkParams)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2019 United States Government as represented by the
+%    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+%
     %  This function defines dimJump.  table breakpoints and values are inline in Lustre, the
     %  interpolation formulation uses index for each dimension.  We
     %  need to get the inline data from the dimension subscript.

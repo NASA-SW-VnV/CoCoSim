@@ -1,12 +1,12 @@
 function [inputs,lusInport_dt] = ...
         getBlockInputsNames_convInType2AccType(obj, parent, blk)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2019 United States Government as represented by the
+%    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+%
     widths = blk.CompiledPortWidths.Inport;
     RndMeth = blk.RndMeth;
     inputs = cell(1, numel(widths));

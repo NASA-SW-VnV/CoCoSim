@@ -1,11 +1,9 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Copyright (c) 2019 United States Government as represented by the
-% Administrator of the National Aeronautics and Space Administration.
-% All Rights Reserved.
+%
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+%
 function [body, outputs, inputs, variables, external_libraries, validDestination_cond, Termination_cond] = ...
         evaluate_Transition(t, data_map, isDefaultTrans, parentPath, ...
         validDestination_cond, Termination_cond, cond_prefix, fullPathT, variables)

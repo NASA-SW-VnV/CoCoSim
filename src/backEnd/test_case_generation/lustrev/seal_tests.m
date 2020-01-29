@@ -1,10 +1,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Copyright (c) 2019 United States Government as represented by the
-% Administrator of the National Aeronautics and Space Administration.
-% All Rights Reserved.
+%
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [ new_model_path, status ] = seal_tests(...
+%function [ new_model_path, status ] = seal_tests(...
         model_full_path, exportToWs, mkHarnessMdl, nodisplay )
     %MCDCTOSIMULINK try to bring back the MC-DC conditions to simulink level.
     

@@ -1,10 +1,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Copyright (c) 2019 United States Government as represented by the
-% Administrator of the National Aeronautics and Space Administration.
-% All Rights Reserved.
+%
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%PP_CONFIG  This is a configuration file for CoCoSim preprocessing. You
+%%PP_CONFIG  This is a configuration file for CoCoSim preprocessing. You
 %   will be able to choose what you want to be preprocessed or to create
 %   your own pre-processing library. 
 %
