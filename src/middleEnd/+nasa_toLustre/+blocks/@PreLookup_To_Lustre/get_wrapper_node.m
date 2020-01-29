@@ -1,12 +1,12 @@
 function extNode =  get_wrapper_node(...
     ~,blk, inputs, outputs,preLookUpExtNode,blkParams)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2019 United States Government as represented by the
+%    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % PreLookup
+%    % PreLookup
     blk_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);
               
     % wrapper header

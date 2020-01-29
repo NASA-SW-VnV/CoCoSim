@@ -1,10 +1,10 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Author: 
+%% Author: 
 %   Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %
 % Notices:
 %
-% Copyright © 2020 United States Government as represented by the 
+% Copyright @ 2020 United States Government as represented by the 
 % Administrator of the National Aeronautics and Space Administration.  All 
 % Rights Reserved.
 %
@@ -43,8 +43,8 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-classdef Block_Test
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%classdef Block_Test
     %BLOCK_TEST : all other blocks test class inherit from this class
     properties(Constant)
         condExecSS = {'reset', 'trigger', 'enable', 'enable_trigger', 'if'};

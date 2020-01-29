@@ -1,10 +1,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Copyright (c) 2019 United States Government as represented by the
-% Administrator of the National Aeronautics and Space Administration.
-% All Rights Reserved.
+%
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function schema = importLusReqMenu(callbackInfo)
+%function schema = importLusReqMenu(callbackInfo)
     schema = sl_container_schema;
     schema.label = 'Requirements';
     schema.statustip = 'Import/Create Lustre Requirements';

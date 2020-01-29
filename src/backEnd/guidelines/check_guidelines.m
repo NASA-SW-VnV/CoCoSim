@@ -7,12 +7,12 @@ function [report_path, status] = check_guidelines(model_path, varargin)
     % Inputs:
     % model_path: The full path to Simulink model.
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2019 United States Government as represented by the
+%    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    status = 0;
+%    status = 0;
 
     mode_display = 1;
     for i=1:numel(varargin)

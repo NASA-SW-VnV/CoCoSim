@@ -1,9 +1,18 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+<<<<<<< HEAD
+%
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 % Notices:
 %
-% Copyright © 2020 United States Government as represented by the
+% Copyright @ 2020 United States Government as represented by the 
+% Administrator of the National Aeronautics and Space Administration.  All 
+=======
+% Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+% Notices:
+%
+% Copyright @ 2020 United States Government as represented by the
 % Administrator of the National Aeronautics and Space Administration.  All
+>>>>>>> a8a20c9edcb4469c4e0c2104fff2b1416cad1119
 % Rights Reserved.
 %
 % Disclaimers
@@ -41,7 +50,7 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [status, errors_msg] = DiscreteStateSpace_pp(model)
+%function [status, errors_msg] = DiscreteStateSpace_pp(model)
     % DiscreteStateSpace_pp Searches for DiscreteStateSpace blocks and replaces them by a
     % PP-friendly equivalent.
     %   model is a string containing the name of the model to search in

@@ -1,12 +1,10 @@
 % Rounds each element of the input signal to the nearest integer towards zero.
 function [node, external_nodes, opens, abstractedNodes] = get__Fix(varargin)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Copyright (c) 2019 United States Government as represented by the
-% Administrator of the National Aeronautics and Space Administration.
-% All Rights Reserved.
+%
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        opens = {};
+%        opens = {};
     abstractedNodes = {};
     % format = '--Rounds number to the nearest integer towards zero.\n';
     % format = [ format ,'node _Fix (x: real)\nreturns(y:int);\nlet\n\t'];

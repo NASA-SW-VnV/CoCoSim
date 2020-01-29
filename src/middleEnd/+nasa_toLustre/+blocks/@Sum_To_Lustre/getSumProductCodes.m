@@ -1,9 +1,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Copyright (c) 2019 United States Government as represented by the
-% Administrator of the National Aeronautics and Space Administration.
-% All Rights Reserved.
-% Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>, Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+%
+% Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>, Trinh, Khanh V <khanh.v.trinh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
 function [codes, outputs_dt, AdditionalVars, outputs] = getSumProductCodes(...
         obj, parent, blk, OutputDataTypeStr,isSumBlock, ...
         AccumDataTypeStr, xml_trace, lus_backend, main_sampleTime)

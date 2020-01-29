@@ -1,11 +1,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Copyright (c) 2019 United States Government as represented by the
-% Administrator of the National Aeronautics and Space Administration.
-% All Rights Reserved.
+%
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 % Notices:
 %
-% Copyright © 2020 United States Government as represented by the 
+% Copyright @ 2020 United States Government as represented by the 
 % Administrator of the National Aeronautics and Space Administration.  All 
 % Rights Reserved.
 %
@@ -44,7 +42,7 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%LUS2SLX translate an EMF json file to Simulink blocks. Every node is translated
+%%LUS2SLX translate an EMF json file to Simulink blocks. Every node is translated
 %to a subsystem. If OnlyMainNode is true than only the main node specified
 %in main_node argument will be kept in the final simulink model.
 function [status,...

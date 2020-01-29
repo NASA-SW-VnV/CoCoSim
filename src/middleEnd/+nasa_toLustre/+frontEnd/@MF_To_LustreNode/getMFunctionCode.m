@@ -1,12 +1,12 @@
 function [external_nodes, failed] = getMFunctionCode(blkObj, parent,  blk, Inputs)
     %GETMFUNCTIONCODE
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2019 United States Government as represented by the
+%    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
+%    
     %
     %
     global SF_MF_FUNCTIONS_MAP MFUNCTION_EXTERNAL_NODES

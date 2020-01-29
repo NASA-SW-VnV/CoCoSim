@@ -1,11 +1,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Copyright (c) 2019 United States Government as represented by the
-% Administrator of the National Aeronautics and Space Administration.
-% All Rights Reserved.
+%
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 % Notices:
 %
-% Copyright © 2020 United States Government as represented by the 
+% Copyright @ 2020 United States Government as represented by the 
 % Administrator of the National Aeronautics and Space Administration.  All 
 % Rights Reserved.
 %
@@ -44,7 +42,7 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+%
 %% LUSTREC, LUCTREC_INCLUDE_DIR, ZUSTRE, Z3, KIND2
 % Configuration file for the backend solvers : Zustre, Kind2, JKind
 % If you need CoCosim for Verification please set the backend solvers

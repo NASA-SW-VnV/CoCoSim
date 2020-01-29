@@ -3,12 +3,12 @@ function [ new_ir, status ] = transitionLabel_SFIR_pp( new_ir )
     %edu.uiowa.chart.transition.TransitionParser.parse as it turns out it fails
     %in our unitTests.
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2019 United States Government as represented by the
+%    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
+%    
     status = false;
     if isfield(new_ir, 'States')
         for i=1:numel(new_ir.States)

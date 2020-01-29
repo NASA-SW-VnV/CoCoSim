@@ -1,10 +1,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Copyright (c) 2019 United States Government as represented by the
-% Administrator of the National Aeronautics and Space Administration.
-% All Rights Reserved.
+%
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%GUIDELINES_CONFIG  This is a configuration file for CoCoSim GUIDELINES. You
+%%GUIDELINES_CONFIG  This is a configuration file for CoCoSim GUIDELINES. You
 %   will be able to choose what you want to be checked or to create
 %   your own guidelines library. 
 %

@@ -2,12 +2,12 @@ function [inputs] = ...
         getBlockInputsNames_convInType2AccType(obj, parent, blk,isSelector)
     %% get block inputs names and also convert input signal data type to accumulated datatype but keep index assignment/selection as int  
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2019 United States Government as represented by the
+%    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
+%    
     if isSelector
         inputIdToConvertToInt = 1;
     else

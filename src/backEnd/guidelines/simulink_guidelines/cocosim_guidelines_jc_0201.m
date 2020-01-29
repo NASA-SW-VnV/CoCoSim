@@ -1,11 +1,11 @@
 function [results, passed, priority] = cocosim_guidelines_jc_0201(model)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2019 United States Government as represented by the
+%    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Khanh Trinh <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % ORION GN&C MATLAB/Simulink Standards
+%    % ORION GN&C MATLAB/Simulink Standards
     % jc_0201: Usable characters in subsystem names
     
     priority = 2;

@@ -1,11 +1,11 @@
 function [actions, conditions] = getAllSFActions(regression_path)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2019 United States Government as represented by the
+%    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %GETALLSFACTIONS goes over a folder and get all state actions and
+%    %GETALLSFACTIONS goes over a folder and get all state actions and
     %transitions actions.
     actions = {};
     conditions = {};

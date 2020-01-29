@@ -1,11 +1,11 @@
 function [code, exp_dt, dim, extra_code] = invFun_To_Lustre(tree, args)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2019 United States Government as represented by the
+%    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Francois Conzelmann <francois.conzelmann@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
+%    
     [x, exp_dt, dim, extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
         tree.parameters(1), args);
     vars = nasa_toLustre.utils.MF2LusUtils.addLocalVars(args, exp_dt, prod(dim));

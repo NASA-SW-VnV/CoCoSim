@@ -1,10 +1,10 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Author: 
+%% Author: 
 %   Trinh, Khanh V <khanh.v.trinh@nasa.gov>
 %
 % Notices:
 %
-% Copyright © 2020 United States Government as represented by the 
+% Copyright @ 2020 United States Government as represented by the 
 % Administrator of the National Aeronautics and Space Administration.  All 
 % Rights Reserved.
 %
@@ -43,8 +43,8 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-classdef CombinatorialLogic_Test < Block_Test
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%classdef CombinatorialLogic_Test < Block_Test
     %CombinatorialLogic_Test generates test automatically.
     
     properties(Constant)

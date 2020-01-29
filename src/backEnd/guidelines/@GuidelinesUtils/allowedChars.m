@@ -2,12 +2,12 @@ function allowedCharList = allowedChars(model,options)
     % This function aided in the searching for allowable characters common in
     % guidelines for names in various Simulink objects.
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2019 United States Government as represented by the
+%    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    fsString = 'find_system(model, ''Regexp'', ''on''';
+%    fsString = 'find_system(model, ''Regexp'', ''on''';
     for i=1:length(options)
         fsString = sprintf('%s, ''%s''',fsString, options{i});
     end

@@ -1,12 +1,12 @@
 function [exp, status] = formatConditionToLustre(obj, cond, inputs_cell, data_map, parent, blk)
     %% new version of parsing Lustre expression.
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2019 United States Government as represented by the
+%    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
+%    
     
     %display_msg(cond, MsgType.DEBUG, 'If_To_Lustre', '');
     expected_dt = 'bool';

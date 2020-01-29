@@ -1,11 +1,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Copyright (c) 2019 United States Government as represented by the
-% Administrator of the National Aeronautics and Space Administration.
-% All Rights Reserved.
+%
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 % Notices:
 %
-% Copyright © 2020 United States Government as represented by the 
+% Copyright @ 2020 United States Government as represented by the 
 % Administrator of the National Aeronautics and Space Administration.  All 
 % Rights Reserved.
 %
@@ -44,7 +42,7 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function schema = generateInvariantsMenu(callbackInfo)
+%function schema = generateInvariantsMenu(callbackInfo)
     schema = sl_container_schema;
     schema.label = 'Generate Invariants (Experimental)';
     schema.statustip = 'Generate the invariants used for safe properties';

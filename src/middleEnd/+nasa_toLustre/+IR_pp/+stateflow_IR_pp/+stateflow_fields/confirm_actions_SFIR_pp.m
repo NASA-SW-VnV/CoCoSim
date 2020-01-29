@@ -2,12 +2,12 @@ function [ new_ir, status ] = confirm_actions_SFIR_pp( new_ir )
     %confirm_actions_SFIR_pp asks the user to confirm if we parsed actions
     %correctly, if not we update them by the user input.
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2019 United States Government as represented by the
+%    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
+%    
     global CHECK_SF_ACTIONS;
     status = 0;
     if ~isempty(CHECK_SF_ACTIONS) && CHECK_SF_ACTIONS == 0

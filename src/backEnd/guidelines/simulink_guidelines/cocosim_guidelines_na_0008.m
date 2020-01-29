@@ -1,12 +1,12 @@
 function [results, passed, priority] = cocosim_guidelines_na_0008(model)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2019 United States Government as represented by the
+%    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Khanh Trinh <khanh.v.trinh@nasa.gov>
     %         Francois Conzelmann <francois.conzelmann@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % ORION GN&C MATLAB/Simulink Standards
+%    % ORION GN&C MATLAB/Simulink Standards
     % na_0008: Display of labels on signals
     
         priority = 3;

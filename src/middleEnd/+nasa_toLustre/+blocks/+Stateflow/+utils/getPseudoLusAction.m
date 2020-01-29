@@ -1,12 +1,12 @@
 function [lus_action, outputs, inputs, external_libraries] = ...
         getPseudoLusAction(expreession, data_map, isCondition, action_parentPath, ignoreOutInputs)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2019 United States Government as represented by the
+%    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  
+%  
     
     if nargin < 3 || isempty(isCondition)
         isCondition = false;

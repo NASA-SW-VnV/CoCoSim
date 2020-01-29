@@ -1,12 +1,12 @@
 function [results, passed, priority] = cocosim_guidelines_jc_0211(model)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2019 United States Government as represented by the
+%    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>,
     %         Khanh Trinh <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % ORION GN&C MATLAB/Simulink Standards
+%    % ORION GN&C MATLAB/Simulink Standards
     % jc_0211: Usable characters for Inport block and Outport block
     
     priority = 2;

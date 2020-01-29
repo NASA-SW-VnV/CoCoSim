@@ -2,12 +2,12 @@ function pp_user_config(fcts_map, ordered_functions)
     %PP_USER_CONFIG  This is a configuration window enable the user to change
     %the default configuration defined in pp_config.
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2019 United States Government as represented by the
+%    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+%
     global ordered_pp_functions priority_pp_map;
     if isempty(ordered_pp_functions)
         pp_config;

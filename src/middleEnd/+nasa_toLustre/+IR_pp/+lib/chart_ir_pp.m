@@ -2,12 +2,12 @@ function [ ir ] = chart_ir_pp( ir )
     %chart_ir_pp adapt stateflow chart to lustref compiler
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2019 United States Government as represented by the
+%    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    file_path = ir.meta.file_path;
+%    file_path = ir.meta.file_path;
     [~, file_name, ~] = fileparts(file_path);
     field_name = IRUtils.name_format(file_name);
     chart_list = find_system(file_name,'LookUnderMasks', 'all',...

@@ -1,11 +1,11 @@
 function [results, passed, priority] = cocosim_guidelines_hisl_0006(model)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2019 United States Government as represented by the
+%    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Francois Conzelmann <francois.conzelmann@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % DO-178C/DO-331 Standard Compliance
+%    % DO-178C/DO-331 Standard Compliance
     % hisl_0006: Usage of While Iterator blocks
     
     priority = 3;

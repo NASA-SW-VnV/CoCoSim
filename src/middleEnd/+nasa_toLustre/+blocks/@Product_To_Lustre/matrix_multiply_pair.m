@@ -2,7 +2,7 @@ function [codes, product_out, addVars] = matrix_multiply_pair(m1_dim, m2_dim, ..
         input_m1, input_m2, output_m, zero, pair_number,...
         OutputDT, tmp_prefix, conv_format, operandsDT)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2019 United States Government as represented by the
+%    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>, Hamza Bourbouh <hamza.bourbouh@nasa.gov>

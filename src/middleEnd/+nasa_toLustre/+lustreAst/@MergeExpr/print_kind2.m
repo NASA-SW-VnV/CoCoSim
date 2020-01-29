@@ -1,11 +1,11 @@
 function code = print_kind2(obj, backend)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2019 United States Government as represented by the
+%    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
- 
+% 
     exprs_cell = cellfun(@(x) sprintf('%s', x.print(backend)),...
         obj.exprs, 'UniformOutput', 0);
     exprs_str = MatlabUtils.strjoin(exprs_cell, ';\n\t\t');

@@ -1,12 +1,12 @@
 classdef ToLustreOptions < handle
     %ToLustreOptions
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2019 United States Government as represented by the
+%    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    properties (Constant)
+%    properties (Constant)
         % ToLustre options
         NODISPLAY = 'nodisplay';
         FORCE_CODE_GEN = 'forceCodeGen';

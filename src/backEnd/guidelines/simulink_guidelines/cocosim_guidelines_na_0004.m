@@ -1,12 +1,12 @@
 function [results, passed, priority] = cocosim_guidelines_na_0004(model)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2019 United States Government as represented by the
+%    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>,
     %         Khanh Trinh <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % ORION GN&C MATLAB/Simulink Standards
+%    % ORION GN&C MATLAB/Simulink Standards
     % na_0004: Simulink model appearance
     
     priority = 3;

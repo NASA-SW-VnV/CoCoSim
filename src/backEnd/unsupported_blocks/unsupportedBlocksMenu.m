@@ -1,10 +1,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Copyright (c) 2019 United States Government as represented by the
-% Administrator of the National Aeronautics and Space Administration.
-% All Rights Reserved.
+%
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function schema = unsupportedBlocksMenu(callbackInfo)
+%function schema = unsupportedBlocksMenu(callbackInfo)
     schema = sl_action_schema;
     schema.label = 'Check Compatibility';
     schema.statustip = 'Check compatibility of your model with CoCoSim';

@@ -11,12 +11,12 @@ function [new_file_path, failed] = cocosim_pp(model_path, varargin)
     %   model and pre-processed model. In order to prove the pre-processing is
     %   correct.
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Copyright (c) 2019 United States Government as represented by the
+%    % Copyright (c) 2019 United States Government as represented by the
     % Administrator of the National Aeronautics and Space Administration.
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+%
     global cocosim_pp_gen_verif  cocosim_pp_gen_verif_dir ;
 
     % 
