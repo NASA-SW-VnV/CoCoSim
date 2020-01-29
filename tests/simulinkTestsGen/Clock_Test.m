@@ -44,7 +44,7 @@
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%classdef Clock_Test < Block_Test
+classdef Clock_Test < Block_Test
     %Clock_Test generates test automatically.
     
     properties(Constant)

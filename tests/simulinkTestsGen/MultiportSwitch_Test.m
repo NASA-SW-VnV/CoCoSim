@@ -44,7 +44,7 @@
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%classdef MultiportSwitch_Test < Block_Test
+classdef MultiportSwitch_Test < Block_Test
     %MultiportSwitch_Test generates test automatically.
     
     properties(Constant)

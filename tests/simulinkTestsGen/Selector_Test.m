@@ -44,7 +44,7 @@
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%classdef Selector_Test < Block_Test
+classdef Selector_Test < Block_Test
     %Selector_Test generates test automatically.
     
     properties(Constant)

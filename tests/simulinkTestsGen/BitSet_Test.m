@@ -44,7 +44,7 @@
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%classdef BitSet_Test < Block_Test
+classdef BitSet_Test < Block_Test
     %BitSet_Test generates test automatically.
     
     properties(Constant)

@@ -44,7 +44,7 @@
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%classdef LookupTableDynamic_Test < Block_Test
+classdef LookupTableDynamic_Test < Block_Test
     %LOOKUPTABLEDYNAMIC_TEST generates test automatically.
     
     properties(Constant)

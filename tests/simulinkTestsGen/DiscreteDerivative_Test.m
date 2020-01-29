@@ -44,7 +44,7 @@
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%classdef DiscreteDerivative_Test < Block_Test
+classdef DiscreteDerivative_Test < Block_Test
     %DiscreteDerivative_Test generates test automatically for DiscreteDerivative block
     
     properties(Constant)

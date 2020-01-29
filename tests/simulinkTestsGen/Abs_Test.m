@@ -43,7 +43,7 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%classdef Abs_Test < Block_Test
+classdef Abs_Test < Block_Test
     %Abs_Test generates test automatically for Abs block
     
     properties(Constant)
