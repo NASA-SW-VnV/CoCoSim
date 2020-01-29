@@ -4,7 +4,7 @@
 %
 % Notices:
 %
-% Copyright � 2020 United States Government as represented by the 
+% Copyright @ 2020 United States Government as represented by the 
 % Administrator of the National Aeronautics and Space Administration.  All 
 % Rights Reserved.
 %
@@ -54,36 +54,50 @@
     
     properties
         % properties that will participate in permutations
+        inDataTypeKeys = {...
+            'Inherit: auto', ...
+            'single',...
+            'double',...
+            'int8', ...
+            'uint8',...
+            'int16'};
+        outDataTypeValues = {...
+            {'Inherit: Inherit via internal rule', 'Inherit: Inherit via back propagation', 'double','single','int8','uint8', 'int16','uint16'}, ... %'Inherit: auto'
+            {'single'},...        % 'single'
+            {'double'},...        % 'double'
+            {'int8', 'int16'},...        % 'int8'
+            {'uint8', 'uint16'},...        % 'uint8'
+            {'int16'}...        % 'int16'
+            };
+        in2OutDTMap ; % defined in the constructor
+    end
+    properties
         IntegratorMethod = {'Integration: Forward Euler',...
             'Integration: Backward Euler','Integration: Trapezoidal',...
             'Accumulation: Forward Euler',...
             'Accumulation: Backward Euler','Accumulation: Trapezoidal'};
         gainval = {'1.0','2.0'};
-        ExternalReset = {'none','rising','falling','either','level',...
+        ExternalReset = {'none', 'none', 'none', ... % increase none cases
+            'rising','falling','either','level',...
             'sampled level'};
         
         
         OutDataTypeStr = {...
             'Inherit: Inherit via back propagation','double',...
-            'single','int8','uint8','int16','uint16','int32',...
-            'uint32','int64'};
+            'single','int8','uint8','int16','uint16'};
         inputDataType = {'double', 'single','int8',...
             'uint8','int16','uint16','int32', ...
             'uint32','boolean'};   
-    end
-    
-    properties
         % other properties
         InitialConditionSource = {'internal','external'};
-        InitialCondition = {'0'};   % scalar or vector
-        InitialConditionSetting = {'State (most efficient)','Output',...
-            'Compatibility'};
-        SampleTime = {'1'};
+        InitialCondition = {'7'};   % scalar or vector
+        InitialConditionSetting = {'State (most efficient)','Output'};
+        SampleTime = {'0.1'};
         LimitOutput =  {'off','on'};
-        UpperSaturationLimit = {'inf'};
-        LowerSaturationLimit = {'inf'};
+        UpperSaturationLimit = {'100'};
+        LowerSaturationLimit = {'5'};
         ShowSaturationPort =  {'off','on'};
-        ShowStatePort =  {'off','on'};
+        ShowStatePort =  {'off','on', 'off'};
         IgnoreLimit =  {'off','on'};
         OutMin = {'0','.5','5'};
         OutMax = {'0.1','.51','6','8'};         
@@ -100,6 +114,13 @@
         
         
     end
+    methods
+        % Constructor
+        function obj = DiscreteIntegrator_Test()
+            obj.in2OutDTMap  = containers.Map(obj.inDataTypeKeys, obj.outDataTypeValues);
+        end
+    end
+    
     
     methods
         function status = generateTests(obj, outputDir, deleteIfExists)
@@ -108,7 +129,7 @@
             end
             status = 0;
             params = obj.getParams();             
-            fstInDims = {'1', '1', '1', '1', '1', '3'};          
+            fstInDims = {'1', '1', '1', '2', '[2,3]'};          
             nb_tests = length(params);
             condExecSSPeriod = floor(nb_tests/length(Block_Test.condExecSS));
             for i=1 : nb_tests
@@ -146,12 +167,12 @@
                         'SearchDepth',1, 'BlockType','Inport');
                     
                     % rotate over input data type for U
-%                     set_param(inport_list{1}, ...
-%                         'OutDataTypeStr',inpDataType);
-%                     
-%                     dim_Idx = mod(i, length(fstInDims)) + 1;
-%                     set_param(inport_list{1}, ...
-%                         'PortDimensions', fstInDims{dim_Idx});
+                    set_param(inport_list{1}, ...
+                        'OutDataTypeStr',inpDataType);
+                    
+                    dim_Idx = mod(i, length(fstInDims)) + 1;
+                    set_param(inport_list{1}, ...
+                        'PortDimensions', fstInDims{dim_Idx});
 
                     failed = Block_Test.setConfigAndSave(mdl_name, mdl_path);
                     if failed, display(s), end
@@ -167,31 +188,64 @@
             end
         end
         
-        function params2 = getParams(obj)
-            
-            params1 = obj.getPermutations();
-            params2 = cell(1, length(params1));
-            for p1 = 1 : length(params1)
-                s = params1{p1};                
-                params2{p1} = s;
-            end
-        end
-        
-        function params = getPermutations(obj)
-            params = {};       
-            for pIntegratorMethod = 1 : numel(obj.IntegratorMethod)
-                for pOutDataTypeStr = 1 : numel(obj.OutDataTypeStr)
-                    rotateInputType = mod(length(params), ...
-                        length(obj.inputDataType)) + 1;
+        function params = getParams(obj)
+            params = {};  
+            inpDataType = obj.in2OutDTMap.keys();
+            for inTypeIdx = 1:length(inpDataType)
+                outDataTypeStr = obj.in2OutDTMap(inpDataType{inTypeIdx});
+                for outTypeIdx = 1:length(outDataTypeStr)
+                    s = struct();
+                    s.inputDataType = inpDataType{inTypeIdx};
+                    s.OutDataTypeStr = outDataTypeStr{outTypeIdx};
+                    
+                    %IntegratorMethod
+                    s.IntegratorMethod = obj.IntegratorMethod{...
+                        mod(length(params), length(obj.IntegratorMethod)) + 1};
+                    
+                    %gainval
+                    s.gainval = obj.gainval{...
+                        mod(length(params), length(obj.gainval)) + 1};
+                    
+                    %ExternalReset
+                    s.ExternalReset = obj.ExternalReset{...
+                        mod(length(params), length(obj.ExternalReset)) + 1};
+                    
+                    %InitialConditionSource
+                    s.InitialConditionSource = obj.InitialConditionSource{...
+                        mod(length(params), length(obj.InitialConditionSource)) + 1};
+                    %InitialCondition
+                    s.InitialCondition = obj.InitialCondition{...
+                        mod(length(params), length(obj.InitialCondition)) + 1};
+                    %InitialConditionSetting
+                    s.InitialConditionSetting = obj.InitialConditionSetting{...
+                        mod(length(params), length(obj.InitialConditionSetting)) + 1};
+                    
+                    %LimitOutput
+                    s.LimitOutput = obj.LimitOutput{...
+                        mod(length(params), length(obj.LimitOutput)) + 1};
+                    %UpperSaturationLimit
+                    s.UpperSaturationLimit = obj.UpperSaturationLimit{...
+                        mod(length(params), length(obj.UpperSaturationLimit)) + 1};
+                    %LowerSaturationLimit
+                    s.LowerSaturationLimit = obj.LowerSaturationLimit{...
+                        mod(length(params), length(obj.LowerSaturationLimit)) + 1};
+                    
+                    %ShowSaturationPort
+                    s.ShowSaturationPort = obj.ShowSaturationPort{...
+                        mod(length(params), length(obj.ShowSaturationPort)) + 1};
+                    %ShowStatePort
+                    s.ShowStatePort = obj.ShowStatePort{...
+                        mod(length(params), length(obj.ShowStatePort)) + 1};
+                    
+                    % RoundMeth
                     iRound = mod(length(params), ...
                         length(obj.RndMeth)) + 1;
-                    rotate2 = mod(length(params), 2) + 1;
-                    s = struct();
-                    s.OutDataTypeStr = obj.OutDataTypeStr{pOutDataTypeStr};
-                    s.IntegratorMethod = obj.IntegratorMethod{pIntegratorMethod};
-                    s.inputDataType = obj.inputDataType(rotateInputType);
                     s.RndMeth = obj.RndMeth{iRound};
-                    s.LockScale = obj.LockScale{rotate2};
+                    %SaturateOnIntegerOverflow
+                    s.SaturateOnIntegerOverflow = obj.SaturateOnIntegerOverflow{...
+                        mod(length(params), length(obj.SaturateOnIntegerOverflow)) + 1};
+                    
+                    
                     params{end+1} = s;
                 end
             end

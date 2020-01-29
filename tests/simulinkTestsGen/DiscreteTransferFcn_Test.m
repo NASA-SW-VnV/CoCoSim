@@ -4,7 +4,7 @@
 %
 % Notices:
 %
-% Copyright � 2020 United States Government as represented by the 
+% Copyright @ 2020 United States Government as represented by the 
 % Administrator of the National Aeronautics and Space Administration.  All 
 % Rights Reserved.
 %
@@ -54,7 +54,7 @@
     
     properties
         % properties that will participate in permutations
-        Numerator = {'[1]','[0.5 .7]'};
+        Numerator = {'[1]','[0.5 0.7]'};
         Denominator = {'[1 0.5 2]','[1 0.5 2 1.5]'};
         InitialStates = {'0','1'};
         OutDataTypeStr = {'Inherit: Inherit via internal rule',...
@@ -72,8 +72,8 @@
         NumCoefMax = {'[]'};
         DenCoefMin = {'[]'};
         DenCoefMax = {'[]'};
-        OutMin = {'0','.5','5'};
-        OutMax = {'0.1','.51','6','8'};                 
+        OutMin = {'0','0.5','5'};
+        OutMax = {'0.1','0.51','6','8'};                 
         StateDataTypeStr = {'Inherit: Same as input','int8','int16',...
             'int32'};
         NumCoefDataTypeStr = {'Inherit: Inherit via internal rule',...

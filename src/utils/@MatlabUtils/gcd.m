@@ -3,7 +3,7 @@
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 % Notices:
 %
-% Copyright � 2020 United States Government as represented by the 
+% Copyright @ 2020 United States Government as represented by the 
 % Administrator of the National Aeronautics and Space Administration.  All 
 % Rights Reserved.
 %
@@ -44,8 +44,15 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 function st = gcd(T)
+%     try
     st = max(T);
     for i=1:numel(T)
-        st = gcd(st*10000,T(i)*10000)/10000;
+        if T(i) == 0
+            continue
+        end
+        st = gcd(st*1e9,T(i)*1e9)/1e9;
     end
+%     catch me
+%         me
+%     end
 end

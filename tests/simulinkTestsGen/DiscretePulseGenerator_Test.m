@@ -1,10 +1,14 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+<<<<<<< HEAD
 %% Author: 
+=======
+% Author:
+>>>>>>> a8a20c9edcb4469c4e0c2104fff2b1416cad1119
 %   Trinh, Khanh V <khanh.v.trinh@nasa.gov>
 %
 % Notices:
 %
-% Copyright � 2020 United States Government as represented by the 
+% Copyright @ 2020 United States Government as represented by the 
 % Administrator of the National Aeronautics and Space Administration.  All 
 % Rights Reserved.
 %
@@ -43,8 +47,12 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+<<<<<<< HEAD
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %classdef DiscretePulseGenerator_Test < Block_Test
+=======
+classdef DiscretePulseGenerator_Test < Block_Test
+>>>>>>> a8a20c9edcb4469c4e0c2104fff2b1416cad1119
     %DiscretePulseGenerator_Test generates test automatically.
     
     properties(Constant)
@@ -53,18 +61,19 @@
     end
     
     properties
-        % properties that will participate in permutations      
+        % properties that will participate in permutations
         PulseType = {'Time based','Sample based'};
+        TimeSource = {'Use simulation time', 'Use simulation time', 'Use external signal'};
         Amplitude = {'1','0.5'};
-        Period =  {'10','.5'};
-        PulseWidth = {'5','15'};
-        PhaseDelay = {'2','0'};
+        Period =  {'10','5'};
+        PulseWidth = {'4','3'};
+        PhaseDelay = {'2','0', '0', '0'};
         VectorParams1D = {'off','on'};
     end
     
     properties
-        % other properties        
-        SampleTime = {'-1'};       
+        % other properties
+        SampleTime = {'0.1'};
     end
     
     methods
@@ -76,6 +85,9 @@
             params = obj.getParams();
             nb_tests = length(params);
             condExecSSPeriod = floor(nb_tests/length(Block_Test.condExecSS));
+            if condExecSSPeriod <= 1
+                condExecSSPeriod = floor(nb_tests/3);
+            end
             for i=1 : nb_tests
                 testId = [];
                 if ismember(i,testId)
@@ -87,6 +99,9 @@
                     mdl_name = sprintf('%s%d', obj.fileNamePrefix, i);
                     addCondExecSS = (mod(i, condExecSSPeriod) == 0);
                     condExecSSIdx = int32(i/condExecSSPeriod);
+                    if addCondExecSS
+                        s.SampleTime = '-1';
+                    end
                     [blkPath, mdl_path, skip] = Block_Test.create_new_model(...
                         mdl_name, outputDir, deleteIfExists, addCondExecSS, ...
                         condExecSSIdx);
@@ -95,21 +110,25 @@
                     end
                     
                     %% remove parametres that does not belong to block params
-                                        
+                    
                     %% add the block
-                                   
+                    
                     Block_Test.add_and_connect_block(obj.blkLibPath, blkPath, s);
                     
-                    %% go over inports
-                    try
-                        blk_parent = get_param(blkPath, 'Parent');
-                    catch
-                        blk_parent = fileparts(blkPath);
+                    if strcmp(s.PulseType, 'Sample based') ...
+                            && strcmp(s.TimeSource, 'Use external signal')
+                        try
+                            blk_parent = get_param(blkPath, 'Parent');
+                        catch
+                            blk_parent = fileparts(blkPath);
+                        end
+                        inport_list = find_system(blk_parent, ...
+                            'SearchDepth',1, 'BlockType','Inport');
+                        if ~isempty(inport_list)
+                            NASAPPUtils.replace_one_block(inport_list{1}, 'simulink/Sources/Digital Clock');
+                            set_param(inport_list{1}, 'SampleTime', obj.SampleTime{1});
+                        end
                     end
-                    inport_list = find_system(blk_parent, ...
-                        'SearchDepth',1, 'BlockType','Inport');
-                    nbInpots = length(inport_list);  
-                    
                     
                     %% set model configuration parameters and save model if it compiles
                     failed = Block_Test.setConfigAndSave(mdl_name, mdl_path);
@@ -124,42 +143,29 @@
             end
         end
         
-        function params2 = getParams(obj)
-            
-            params1 = obj.getPermutations();
-            params2 = cell(1, length(params1));
-            for p1 = 1 : length(params1)
-                s = params1{p1};
-                
-                params2{p1} = s;
-            end
-        end
-        
-        function params = getPermutations(obj)
-            params = {};       
-            for pPulseType = 1 : numel(obj.PulseType)  
-                for pAmplitude = 1:numel(obj.Amplitude)
-                    for pPeriod = 1:numel(obj.Period)
-                        for pPulseWidth = 1 : numel( obj.PulseWidth )
-                            for pPhaseDelay = 1:numel(obj.PhaseDelay)
-                                for pVectorParams1D = 1:numel(obj.VectorParams1D)
-                                    s = struct();
-                                    s.PulseType = obj.PulseType{pPulseType};
-                                    s.Amplitude = obj.Amplitude{pAmplitude};
-                                    s.Period = obj.Period{pPeriod};
-                                    s.PulseWidth = obj.PulseWidth{pPulseWidth};
-                                    s.PhaseDelay = obj.PhaseDelay{pPhaseDelay};
-                                    s.VectorParams1D = obj.VectorParams1D{pVectorParams1D}; 
-                                    params{end+1} = s;
-                                end
-                            end
-                        end                           
-                    end
+        function params = getParams(obj)
+            params = {};
+            for pPulseType = 1 : numel(obj.PulseType)
+                for pTimeSource = 1:numel(obj.TimeSource)
+                    
+                    s = struct();
+                    s.TimeSource = obj.TimeSource{pTimeSource};
+                    s.PulseType = obj.PulseType{pPulseType};
+                    s.Amplitude = obj.Amplitude{...
+                        mod(length(params), length(obj.Amplitude))+1};
+                    s.Period = obj.Period{mod(length(params), length(obj.Period))+1};
+                    s.PulseWidth = obj.PulseWidth{mod(length(params), length(obj.PulseWidth))+1};
+                    s.PhaseDelay = obj.PhaseDelay{mod(length(params), length(obj.PhaseDelay))+1};
+                    s.VectorParams1D = obj.VectorParams1D{mod(length(params), length(obj.VectorParams1D))+1};
+                    s.SampleTime = obj.SampleTime{1};
+                    params{end+1} = s;
+                    
                 end
-                
             end
+            
         end
-
     end
+    
 end
+
 
