@@ -3,12 +3,7 @@ classdef BusCreator_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     %We inline signals, so Bus creator is just passing the input signals,
     %if there is a Bus object, it is inlined as well. The generated Lustre
     %code will be without records or Bus types.
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    % Copyright (c) 2019 United States Government as represented by the
-    % Administrator of the National Aeronautics and Space Administration.
-    % All Rights Reserved.
-    % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
     properties
     end
     
