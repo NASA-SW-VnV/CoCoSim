@@ -1,11 +1,6 @@
 function [lines, alreadyPrinted] = printWithOrder(obj, ...
         nodesList, nodeName, call_map, alreadyPrinted, lines, backend)
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    % Copyright (c) 2019 United States Government as represented by the
-    % Administrator of the National Aeronautics and Space Administration.
-    % All Rights Reserved.
-    % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
     if isKey(call_map, nodeName)
         subNodes = call_map(nodeName);
         for i=1:numel(subNodes)
