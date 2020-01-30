@@ -1,9 +1,5 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-<<<<<<< HEAD
 %% Author: 
-=======
-% Author:
->>>>>>> a8a20c9edcb4469c4e0c2104fff2b1416cad1119
 %   Trinh, Khanh V <khanh.v.trinh@nasa.gov>
 %
 % Notices:
@@ -47,12 +43,7 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-<<<<<<< HEAD
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 classdef DiscretePulseGenerator_Test < Block_Test
-=======
-classdef DiscretePulseGenerator_Test < Block_Test
->>>>>>> a8a20c9edcb4469c4e0c2104fff2b1416cad1119
     %DiscretePulseGenerator_Test generates test automatically.
     
     properties(Constant)

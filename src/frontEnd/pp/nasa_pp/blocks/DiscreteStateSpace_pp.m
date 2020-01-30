@@ -1,18 +1,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-<<<<<<< HEAD
-%
-% Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
-% Notices:
-%
-% Copyright @ 2020 United States Government as represented by the 
-% Administrator of the National Aeronautics and Space Administration.  All 
-=======
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 % Notices:
 %
 % Copyright @ 2020 United States Government as represented by the
 % Administrator of the National Aeronautics and Space Administration.  All
->>>>>>> a8a20c9edcb4469c4e0c2104fff2b1416cad1119
 % Rights Reserved.
 %
 % Disclaimers

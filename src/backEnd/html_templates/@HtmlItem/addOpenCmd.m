@@ -43,7 +43,7 @@
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function htmlCmd = addOpenCmd(blk, shortName)
-%    if nargin < 2
+    if nargin < 2
         shortName = HtmlItem.removeHtmlKeywords(blk);
     end
     htmlCmd = sprintf('<a href="matlab:open_and_hilite_hyperlink (''%s'',''error'')">%s</a>', ...
