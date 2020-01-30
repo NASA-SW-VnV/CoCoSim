@@ -1,4 +1,3 @@
-function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft, node, data_map)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
@@ -42,7 +41,9 @@ function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft, no
 % cannot be relied upon to generate or error check software being developed. 
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft, node, data_map)
+
     new_outputs = cellfun(@(x) x.pseudoCode2Lustre(outputs_map, false, node, data_map), obj.outputs, 'UniformOutput', 0);
     new_obj = nasa_toLustre.lustreAst.ContractImportExpr(obj.name, ...
         obj.inputs, new_outputs);

@@ -1,4 +1,3 @@
-function nb_occ = nbOccuranceVar(obj, var)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
@@ -42,6 +41,8 @@ function nb_occ = nbOccuranceVar(obj, var)
 % cannot be relied upon to generate or error check software being developed. 
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function nb_occ = nbOccuranceVar(obj, var)
+
     nb_occ = obj.left.nbOccuranceVar(var) + obj.right.nbOccuranceVar(var);
 end

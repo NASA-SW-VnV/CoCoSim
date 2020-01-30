@@ -1,4 +1,3 @@
-function new_obj = deepCopy(obj)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
@@ -42,7 +41,9 @@ function new_obj = deepCopy(obj)
 % cannot be relied upon to generate or error check software being developed. 
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function new_obj = deepCopy(obj)
+
     new_requires = cellfun(@(x) x.deepCopy(), obj.requires, ...
         'UniformOutput', 0);
     new_ensures = cellfun(@(x) x.deepCopy(), obj.ensures, ...

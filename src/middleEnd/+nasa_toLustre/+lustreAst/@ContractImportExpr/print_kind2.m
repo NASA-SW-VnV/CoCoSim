@@ -1,4 +1,3 @@
-function code = print_kind2(obj, backend)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
@@ -42,7 +41,9 @@ function code = print_kind2(obj, backend)
 % cannot be relied upon to generate or error check software being developed. 
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function code = print_kind2(obj, backend)
+
     inputs_str = nasa_toLustre.lustreAst.NodeCallExpr.getArgsStr(obj.inputs, backend);
     outputs_str = nasa_toLustre.lustreAst.NodeCallExpr.getArgsStr(obj.outputs, backend);
     code = sprintf('import %s(%s) returns (%s);', ...

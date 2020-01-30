@@ -1,4 +1,3 @@
-function new_obj = changeArrowExp(obj, cond)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
@@ -42,7 +41,9 @@ function new_obj = changeArrowExp(obj, cond)
 % cannot be relied upon to generate or error check software being developed. 
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function new_obj = changeArrowExp(obj, cond)
+
     new_assignments = cellfun(@(x) x.changeArrowExp(cond), obj.assignments, 'UniformOutput', 0);
     new_obj = nasa_toLustre.lustreAst.ConcurrentAssignments(new_assignments);
 end
