@@ -6,7 +6,7 @@ classdef LookupType < handle
     % All Rights Reserved.
     % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    properties (Constant)
+    properties (Constant)
         % Lustre backends
         Lookup_nD = 'Lookup_nD';
         LookupDynamic = 'LookupDynamic';
