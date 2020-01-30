@@ -1,10 +1,5 @@
 function [code, dim] = mtimesFun_To_Lustre(x, x_dim, y, y_dim, operandsDT)
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    % Copyright (c) 2019 United States Government as represented by the
-    % Administrator of the National Aeronautics and Space Administration.
-    % All Rights Reserved.
-    % Author: Francois Conzelmann <francois.conzelmann@nasa.gov>
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 %    
     
     

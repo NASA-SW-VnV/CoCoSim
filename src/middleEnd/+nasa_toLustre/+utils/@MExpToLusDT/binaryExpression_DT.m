@@ -1,12 +1,7 @@
 function [lusDT, slxDT] = binaryExpression_DT(tree, args)
     %BINARYEXPRESSION_DT for arithmetic operation such as +, *, / ...
     % and relational operation
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    % Copyright (c) 2019 United States Government as represented by the
-    % Administrator of the National Aeronautics and Space Administration.
-    % All Rights Reserved.
-    % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
         
     
     tree_type = tree.type;

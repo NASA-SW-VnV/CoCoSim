@@ -1,11 +1,6 @@
 function [code, exp_dt, dim] = numFun_To_Lustre(tree, args)
     % used by zerosFun_To_Lustre and onesFun_To_Lustre
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    % Copyright (c) 2019 United States Government as represented by the
-    % Administrator of the National Aeronautics and Space Administration.
-    % All Rights Reserved.
-    % Author: Francois Conzelmann <francois.conzelmann@nasa.gov>
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 %    c = symvar(tree.text);
     exp_dt = '';
     code = {};
