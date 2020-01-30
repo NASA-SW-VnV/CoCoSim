@@ -5,12 +5,7 @@ classdef DiscretePulseGenerator_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lust
     % else
     %       Y(t) = 0
     % end
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    % Copyright (c) 2019 United States Government as represented by the
-    % Administrator of the National Aeronautics and Space Administration.
-    % All Rights Reserved.
-    % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 %    
     properties
     end

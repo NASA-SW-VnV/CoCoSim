@@ -1,11 +1,6 @@
 classdef DiscreteZeroPole_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     % DiscreteStateSpace_To_Lustre
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    % Copyright (c) 2019 United States Government as represented by the
-    % Administrator of the National Aeronautics and Space Administration.
-    % All Rights Reserved.
-    % Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 %    
     properties
     end
