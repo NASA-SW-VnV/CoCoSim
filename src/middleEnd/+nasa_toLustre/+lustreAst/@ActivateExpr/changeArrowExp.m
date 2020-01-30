@@ -5,7 +5,6 @@ function new_obj = changeArrowExp(obj, cond)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 
     new_args = cellfun(@(x) x.changeArrowExp(cond), obj.nodeArgs, 'UniformOutput', 0);
     if obj.has_restart
         condR = obj.restart_cond.changeArrowExp(cond);

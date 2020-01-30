@@ -7,7 +7,7 @@ classdef SS_To_LustreNode
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    properties
+    properties
     end
     
     methods(Static)

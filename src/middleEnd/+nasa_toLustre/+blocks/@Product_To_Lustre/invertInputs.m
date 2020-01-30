@@ -5,7 +5,7 @@ function [new_inputs, invertCodes, AdditionalVars] = invertInputs(obj, exp, inpu
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     blk_id = sprintf('%.3f', blk.Handle);
     blk_id = strrep(blk_id, '.', '_');
     new_inputs = {};

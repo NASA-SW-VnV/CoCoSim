@@ -6,7 +6,7 @@ function addVariable(obj, varname, ...
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%        
+        
     if iscell(varname)
         obj.variables = [obj.variables, varname];
     else

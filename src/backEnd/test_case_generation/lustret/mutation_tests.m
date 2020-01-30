@@ -8,7 +8,7 @@ function [ T,  harness_model_name, status] = mutation_tests( model_full_path,...
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    status = 0;
+    status = 0;
     harness_model_name = '';
     if ~exist(model_full_path, 'file')
         display_msg(['File not foudn: ' model_full_path],...

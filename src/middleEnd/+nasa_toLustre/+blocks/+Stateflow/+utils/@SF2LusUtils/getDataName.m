@@ -5,7 +5,6 @@ function names = getDataName(d)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
     names = {};
     if isfield(d, 'CompiledSize')
         CompiledSize = str2num(d.CompiledSize);

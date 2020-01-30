@@ -7,7 +7,7 @@ function [b, status, type, masktype, sfblockType, isIgnored] = getWriteType(sub_
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%        
+        
     status = 0;
     isIgnored = 0;
     masktype = '';

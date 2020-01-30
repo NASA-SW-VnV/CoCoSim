@@ -5,6 +5,5 @@ function [lus_code, plu_code] = print_prelude(obj)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 
     [lus_code, plu_code] = obj.print_lustrec(LusBackendType.PRELUDE);
 end

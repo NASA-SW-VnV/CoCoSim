@@ -5,7 +5,6 @@ classdef LustDTLib
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
     %LustDTLib This class is a set of Lustre dataType conversions.
     properties
     end

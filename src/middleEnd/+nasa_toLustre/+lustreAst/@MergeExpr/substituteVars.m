@@ -5,7 +5,6 @@ function obj = substituteVars(obj, oldVar, newVar)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 
     obj.exprs = cellfun(@(x) x.substituteVars(oldVar, newVar), obj.exprs, 'UniformOutput', 0);
     if isa(obj, 'nasa_toLustre.lustreAst.MergeBoolExpr')
         obj.true_expr = obj.true_expr.substituteVars(oldVar, newVar);

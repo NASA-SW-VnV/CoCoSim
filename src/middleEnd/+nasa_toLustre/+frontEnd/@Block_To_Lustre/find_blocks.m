@@ -7,7 +7,7 @@ function blks = find_blocks(ss, varargin)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     
     blks = {};
     doesMatch = true;

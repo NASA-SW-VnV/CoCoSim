@@ -5,7 +5,6 @@ function code = print_lustrec(obj, backend)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 
     exprs_cell = cellfun(@(x) sprintf('%s', x.print(backend)),...
         obj.exprs, 'UniformOutput', 0);
     exprs_str = MatlabUtils.strjoin(exprs_cell, '\n\t\t');

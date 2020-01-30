@@ -6,7 +6,7 @@ function [lus_action, outputs, inputs, external_libraries] = ...
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%  
+
     
     if nargin < 3 || isempty(isCondition)
         isCondition = false;

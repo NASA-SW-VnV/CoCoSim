@@ -6,7 +6,7 @@ classdef LustreVar < nasa_toLustre.lustreAst.LustreExpr
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    properties
+    properties
         id;%String
         type;%String
         rate  = ''; %for Prelude

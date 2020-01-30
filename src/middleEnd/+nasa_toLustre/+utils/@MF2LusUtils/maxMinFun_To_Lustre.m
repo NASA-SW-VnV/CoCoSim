@@ -5,7 +5,7 @@ function [code, exp_dt, dim, extra_code] = maxMinFun_To_Lustre(tree, args, op)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    if length(tree.parameters) > 1
+    if length(tree.parameters) > 1
         ME = MException('COCOSIM:TREE2CODE', ...
             'Function "%s" in expression "%s" has more than 1 argument is not supported in block %s.',...
             tree.ID, tree.text, HtmlItem.addOpenCmd(args.blk.Origin_path));

@@ -5,7 +5,7 @@ function [b, hasNoOutputs, vsBlk] = hasVerificationSubsystem(blk)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     fields = fieldnames(blk.Content);
     fields = ...
         fields(...

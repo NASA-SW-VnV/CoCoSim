@@ -6,7 +6,7 @@ classdef LocalPropertyExpr < nasa_toLustre.lustreAst.PropertyExpr
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    properties
+    properties
     end
     
     methods

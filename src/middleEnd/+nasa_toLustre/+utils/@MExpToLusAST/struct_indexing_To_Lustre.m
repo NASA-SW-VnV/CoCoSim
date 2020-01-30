@@ -5,7 +5,7 @@ function [code, exp_dt, dim, extra_code] = struct_indexing_To_Lustre(tree, args)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%        
+        
             
     % Do not forget to update exp_dt in each switch case if needed
     exp_dt = nasa_toLustre.utils.MExpToLusDT.expression_DT(tree, args);

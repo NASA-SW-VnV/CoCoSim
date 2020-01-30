@@ -6,7 +6,7 @@ function [lines, alreadyPrinted] = printWithOrder(obj, ...
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    if isKey(call_map, nodeName)
+    if isKey(call_map, nodeName)
         subNodes = call_map(nodeName);
         for i=1:numel(subNodes)
             [lines, alreadyPrinted] = obj.printWithOrder( ...

@@ -5,7 +5,7 @@ function [lusDT, slxDT] = fun_indexing_DT(tree, args)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     
     tree_ID = tree.ID;
     switch tree_ID

@@ -5,7 +5,7 @@ function [code, exp_dt, dim, extra_code] = convFun_To_Lustre(tree, args)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     dim = [];
     extra_code = {};
     % Do not forget to update exp_dt in each switch case if needed

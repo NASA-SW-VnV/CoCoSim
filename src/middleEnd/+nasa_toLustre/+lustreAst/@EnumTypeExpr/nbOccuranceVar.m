@@ -5,6 +5,5 @@ function nb_occ = nbOccuranceVar(obj, var)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 
     nb_occ = 0;
 end

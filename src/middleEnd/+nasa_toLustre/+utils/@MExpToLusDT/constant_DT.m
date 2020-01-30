@@ -5,7 +5,7 @@ function [lusDT, slxDT] = constant_DT(tree, varargin)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     if strcmp(tree.dataType, 'Integer') || strcmp(tree.dataType, 'Float')
         %e.g., for matlab "1" is double
         lusDT = 'real';

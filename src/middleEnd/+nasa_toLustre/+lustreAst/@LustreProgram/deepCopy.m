@@ -5,7 +5,6 @@ function new_obj = deepCopy(obj)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 
     new_types = cellfun(@(x) x.deepCopy(), obj.types,...
         'UniformOutput', 0);
     new_nodes = cellfun(@(x) x.deepCopy(), obj.nodes, ...

@@ -7,7 +7,7 @@ function [main_node, external_nodes, external_libraries ] = ...
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     %
     %
     % global varibale mapping between states and their nodes AST.

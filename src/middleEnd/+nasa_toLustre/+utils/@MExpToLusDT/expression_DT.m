@@ -5,7 +5,7 @@ function [lusDT, slxDT] = expression_DT(tree, args)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     
     %this function is extended to be used by If-Block,
     %SwitchCase and Fcn blocks. Also it is used by Stateflow

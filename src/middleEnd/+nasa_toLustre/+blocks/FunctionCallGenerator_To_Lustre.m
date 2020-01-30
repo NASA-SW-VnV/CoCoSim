@@ -6,7 +6,7 @@ classdef FunctionCallGenerator_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustr
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     properties
     end
     

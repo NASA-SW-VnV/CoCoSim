@@ -6,7 +6,7 @@ classdef Observer_To_Lustre < nasa_toLustre.blocks.SubSystem_To_Lustre
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     properties
     end
     

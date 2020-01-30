@@ -5,7 +5,7 @@ function [code, exp_dt, dim, extra_code] = minFun_To_Lustre(tree, args)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    op = nasa_toLustre.lustreAst.BinaryExpr.LTE;
+    op = nasa_toLustre.lustreAst.BinaryExpr.LTE;
     [code, exp_dt, dim, extra_code] = nasa_toLustre.utils.MF2LusUtils.maxMinFun_To_Lustre(...
         tree, args, op);
 end

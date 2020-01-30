@@ -5,7 +5,6 @@ function [new_obj, varIds] = changePre2Var(obj)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 
     [cond, vcondId] = obj.condition.changePre2Var();
     [then, thenCondId] = obj.thenExpr.changePre2Var();
     [elseE, elseCondId] = obj.ElseExpr.changePre2Var();

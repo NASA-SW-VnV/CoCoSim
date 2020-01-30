@@ -6,7 +6,7 @@ classdef RawLustreCode < nasa_toLustre.lustreAst.LustreAst
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    properties
+    properties
         code
         name
     end

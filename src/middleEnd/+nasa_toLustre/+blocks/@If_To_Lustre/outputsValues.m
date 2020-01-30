@@ -5,7 +5,7 @@ function exp  = outputsValues(outputsNumber, outputIdx)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     
     values = arrayfun(@(x) nasa_toLustre.lustreAst.BoolExpr('false'), (1:outputsNumber),...
         'UniformOutput', 0);

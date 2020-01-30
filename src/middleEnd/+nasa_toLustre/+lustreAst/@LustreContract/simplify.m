@@ -5,7 +5,7 @@ function new_obj = simplify(obj)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    new_obj = obj.substituteVars();
+    new_obj = obj.substituteVars();
     new_localEqs = cellfun(@(x) x.simplify(), new_obj.bodyEqs, ...
         'UniformOutput', 0);
     new_obj.setBodyEqs(new_localEqs);

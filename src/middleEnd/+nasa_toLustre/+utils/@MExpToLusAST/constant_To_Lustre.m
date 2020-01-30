@@ -5,7 +5,7 @@ function [code, exp_dt, dim, extra_code] = constant_To_Lustre(tree, args)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    code = {};
+    code = {};
     exp_dt = args.expected_lusDT;
     dim = [1 1];
     extra_code = {};

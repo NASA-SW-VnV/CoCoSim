@@ -17,7 +17,7 @@ function [ T, coverage_percentage, status ] = lustret_test_mutation( model_full_
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    global KIND2 ZUSTRE Z3;
+    global KIND2 ZUSTRE Z3;
     if isempty(KIND2) || isempty(ZUSTRE)
         tools_config;
     end

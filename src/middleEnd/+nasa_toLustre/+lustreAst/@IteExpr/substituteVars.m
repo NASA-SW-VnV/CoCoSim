@@ -5,7 +5,7 @@ function obj = substituteVars(obj, oldVar, newVar)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     obj.condition = obj.condition.substituteVars(oldVar, newVar);
     obj.thenExpr = obj.thenExpr.substituteVars(oldVar, newVar);
     obj.ElseExpr = obj.ElseExpr.substituteVars(oldVar, newVar);

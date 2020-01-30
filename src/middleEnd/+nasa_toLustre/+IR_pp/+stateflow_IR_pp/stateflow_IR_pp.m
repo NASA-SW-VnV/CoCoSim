@@ -10,7 +10,7 @@ function [new_ir, status] = stateflow_IR_pp(old_ir, print_in_file, output_dir)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    status = 0;
+    status = 0;
     if nargin < 3 || isempty(output_dir)
         output_dir = pwd;
     end

@@ -5,7 +5,6 @@ function new_obj = simplify(obj)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 
     new_states = cell(1, numel(obj.states));
     for i=1:numel(obj.states)
         new_states{i} = obj.states{i}.simplify();

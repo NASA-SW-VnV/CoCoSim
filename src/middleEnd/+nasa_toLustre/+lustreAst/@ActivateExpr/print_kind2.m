@@ -5,7 +5,7 @@ function code = print_kind2(obj, backend)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     args_str = nasa_toLustre.lustreAst.NodeCallExpr.getArgsStr(obj.nodeArgs, backend);
     if obj.has_restart
         code = sprintf('(activate %s every %s restart every %s)(%s)', ...

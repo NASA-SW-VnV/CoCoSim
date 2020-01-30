@@ -5,7 +5,6 @@ function lines = getLustreEq(obj, lines, backend)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 
         for i=1:numel(obj.bodyEqs)
         eq = obj.bodyEqs{i};
         if ~isa(eq, 'nasa_toLustre.lustreAst.LustreEq')

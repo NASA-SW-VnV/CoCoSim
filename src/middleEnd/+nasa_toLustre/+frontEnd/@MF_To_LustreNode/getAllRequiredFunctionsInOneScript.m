@@ -6,7 +6,7 @@ function [script, failed] = getAllRequiredFunctionsInOneScript(blk)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     %
     %
     failed = false;

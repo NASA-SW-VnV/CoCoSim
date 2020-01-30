@@ -6,7 +6,7 @@ classdef MergeBoolExpr < nasa_toLustre.lustreAst.MergeExpr
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    properties
+    properties
         true_expr;
         addWhentrue;
         false_expr;

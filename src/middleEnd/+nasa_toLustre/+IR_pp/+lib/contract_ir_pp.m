@@ -8,7 +8,7 @@ function [ ir ] = contract_ir_pp( ir )
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    file_path = ir.meta.file_path;
+    file_path = ir.meta.file_path;
     [~, file_name, ~] = fileparts(file_path);
     field_name = IRUtils.name_format(file_name);
     if ~bdIsLoaded(file_name)

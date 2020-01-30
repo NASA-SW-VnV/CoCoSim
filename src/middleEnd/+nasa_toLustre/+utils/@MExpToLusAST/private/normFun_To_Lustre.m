@@ -5,7 +5,7 @@ function [code, exp_dt, dim, extra_code] = normFun_To_Lustre(tree, args)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     dim = [1 1];
     [~, ~, x_dim, ~] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(1),args);
     if isa(tree.parameters, 'struct')

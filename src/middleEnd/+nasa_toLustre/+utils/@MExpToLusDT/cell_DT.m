@@ -5,7 +5,7 @@ function [lusDT, slxDT] = cell_DT(varargin)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     lusDT = '';
     slxDT = '';
 end

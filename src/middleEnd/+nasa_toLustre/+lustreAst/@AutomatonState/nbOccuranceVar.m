@@ -5,7 +5,7 @@ function nb_occ = nbOccuranceVar(varargin)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    %% nbOccuranceVar ignored in Automaton
+    %% nbOccuranceVar ignored in Automaton
 
     nb_occ = 0;
 end

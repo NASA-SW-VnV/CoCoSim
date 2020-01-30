@@ -5,7 +5,6 @@ function new_obj = deepCopy(obj)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 
     new_args = cellfun(@(x) x.deepCopy(), obj.args, 'UniformOutput', 0);
     new_obj = nasa_toLustre.lustreAst.NodeCallExpr(obj.nodeName, new_args);
 end

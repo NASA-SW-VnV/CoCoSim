@@ -5,7 +5,7 @@ function code = ifElseCode(obj, parent, blk, outputs, inputs, inports_dt, IfExp)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     
     % Go over outputs
     nbOutputs=numel(outputs);

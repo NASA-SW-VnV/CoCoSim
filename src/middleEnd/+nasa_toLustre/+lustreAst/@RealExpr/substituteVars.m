@@ -5,5 +5,5 @@ function obj = substituteVars(obj, varargin)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    %nothing to do
+    %nothing to do
 end

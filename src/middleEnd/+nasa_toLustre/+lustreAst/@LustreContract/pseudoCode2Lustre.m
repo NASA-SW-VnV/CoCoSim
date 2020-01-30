@@ -5,7 +5,6 @@ function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft, no
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 
     if obj.islocalContract
         %Only import contracts are supported for the moment.
         for i=1:numel(obj.bodyEqs)

@@ -6,7 +6,7 @@ function TriggerinputExp = getTriggerValue(Cond, triggerInput, TriggerType, Trig
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     
     if strcmp(TriggerBlockDt, 'real')
         %suffix = '.0';

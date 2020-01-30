@@ -5,7 +5,7 @@ function extNode = get_read_table_node(blk_name, U_inputs, U_LusDt)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    % This function generate Lustre external node that will return T[i] for a
+    % This function generate Lustre external node that will return T[i] for a
     % given table T and index i.
     
     % header for external node

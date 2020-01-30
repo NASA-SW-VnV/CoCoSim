@@ -5,8 +5,7 @@ function [new_obj, varIds] = changePre2Var(obj)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 
-        v = obj.expr;
+    v = obj.expr;
     if strcmp(obj.op, nasa_toLustre.lustreAst.UnaryExpr.PRE) && isa(v, 'nasa_toLustre.lustreAst.VarIdExpr')
         varIds{1} = v;
         new_obj = nasa_toLustre.lustreAst.VarIdExpr(strcat('_pre_', v.getId()));

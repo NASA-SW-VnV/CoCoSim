@@ -5,7 +5,6 @@ function new_obj = simplify(obj)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 
     new_lhs = obj.lhs.simplify();
     new_rhs = obj.rhs.simplify();
     new_obj = nasa_toLustre.lustreAst.LustreEq(new_lhs, new_rhs);

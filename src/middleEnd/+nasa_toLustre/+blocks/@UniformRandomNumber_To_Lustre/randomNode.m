@@ -5,7 +5,7 @@ function node = randomNode(blk_name, minimum, maximum, r, lus_backend)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     
     node = nasa_toLustre.lustreAst.LustreNode();
     node.setName(blk_name);

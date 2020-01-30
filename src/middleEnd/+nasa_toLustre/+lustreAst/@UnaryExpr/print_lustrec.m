@@ -5,7 +5,6 @@ function code = print_lustrec(obj, backend)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 
     if obj.withPar
         code = sprintf('(%s (%s))', ...
             obj.op, ...

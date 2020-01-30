@@ -5,6 +5,5 @@ function code = print_kind2(obj)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 
     code = obj.print_lustrec(LusBackendType.KIND2);
 end

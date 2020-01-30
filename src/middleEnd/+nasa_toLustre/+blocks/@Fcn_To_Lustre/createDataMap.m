@@ -5,7 +5,7 @@ function data_map = createDataMap(inputs, inputs_dt)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     data_map = containers.Map('KeyType', 'char', 'ValueType', 'char');
     for i=1:numel(inputs)
         for j=1:numel(inputs{i})

@@ -5,7 +5,7 @@ function transitions = getAllTransitions(SFContent)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     transitions = {};
     for i=1:numel(SFContent.States)
         transitions = [transitions, ...

@@ -5,7 +5,6 @@ function new_obj = simplify(obj)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 
         new_cond = obj.condition.simplify();
     new_then = obj.thenExpr.simplify();
     new_else = obj.ElseExpr.simplify();

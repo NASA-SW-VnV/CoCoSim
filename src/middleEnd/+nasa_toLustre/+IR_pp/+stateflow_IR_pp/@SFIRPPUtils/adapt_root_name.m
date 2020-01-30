@@ -5,7 +5,6 @@ function new_name = adapt_root_name(name)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
     new_name = regexprep(...
         nasa_toLustre.utils.SLX2LusUtils.name_format(name), '/', '_');
 end

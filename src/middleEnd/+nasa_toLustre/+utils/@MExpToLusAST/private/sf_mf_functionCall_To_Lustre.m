@@ -5,7 +5,7 @@ function [code, extra_code] = sf_mf_functionCall_To_Lustre(tree, args)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    % G    
+    % G    
     
     global SF_MF_FUNCTIONS_MAP ;
     extra_code = {};

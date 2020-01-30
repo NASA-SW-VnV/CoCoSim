@@ -5,7 +5,7 @@ function [blk, Inputs, Outputs] = creatInportsOutports(blk)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     content = struct();
     if isfield(blk, 'Inputs')
         Inputs = blk.Inputs;

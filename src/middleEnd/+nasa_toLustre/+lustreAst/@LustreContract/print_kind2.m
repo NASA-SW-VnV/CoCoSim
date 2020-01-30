@@ -5,7 +5,6 @@ function code = print_kind2(obj, backend)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 
     lines = {};
     if ~isempty(obj.metaInfo)
         if ischar(obj.metaInfo)

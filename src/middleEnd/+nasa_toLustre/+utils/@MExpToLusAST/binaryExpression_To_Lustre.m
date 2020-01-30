@@ -5,7 +5,7 @@ function [code, exp_dt, dim, extra_code] = binaryExpression_To_Lustre(tree, args
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     
     
     tree_type = tree.type;

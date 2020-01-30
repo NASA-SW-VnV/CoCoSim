@@ -7,7 +7,7 @@ classdef RelationalOperator_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    properties
+    properties
     end
     
     methods

@@ -15,7 +15,7 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, ...
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    %
+    %
     %
     
     %% global variables

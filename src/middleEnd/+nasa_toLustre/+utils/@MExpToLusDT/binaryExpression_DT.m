@@ -7,7 +7,7 @@ function [lusDT, slxDT] = binaryExpression_DT(tree, args)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%        
+        
     
     tree_type = tree.type;
     switch tree_type

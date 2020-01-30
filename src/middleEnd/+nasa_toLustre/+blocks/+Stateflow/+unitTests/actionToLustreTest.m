@@ -8,7 +8,7 @@ function notSupportedActions = actionToLustreTest()
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     notSupportedActions = {};
     P = fileparts(mfilename('fullpath'));
     mat_file = fullfile(P, 'scripts', 'sfdemosActions.mat');

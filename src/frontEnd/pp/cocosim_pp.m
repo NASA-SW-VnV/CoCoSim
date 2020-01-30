@@ -16,7 +16,6 @@ function [new_file_path, failed] = cocosim_pp(model_path, varargin)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
     global cocosim_pp_gen_verif  cocosim_pp_gen_verif_dir ;
 
     % 

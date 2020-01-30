@@ -10,7 +10,7 @@ function [codes, node_name, inputs, ExecutionCondVar] = ...
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     
     codes = {};
     node_name = strcat(node_name, '_condExecSS');

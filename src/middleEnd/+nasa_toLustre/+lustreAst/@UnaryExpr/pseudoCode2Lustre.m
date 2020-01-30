@@ -5,7 +5,6 @@ function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft, no
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 
     %UnaryExpr is always on the right of an Equation
     [new_expr, ~] = obj.expr.pseudoCode2Lustre(outputs_map, false, node, data_map);
     new_obj = nasa_toLustre.lustreAst.UnaryExpr(obj.op,...

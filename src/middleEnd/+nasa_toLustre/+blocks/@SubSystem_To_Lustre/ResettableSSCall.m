@@ -7,7 +7,7 @@ function [codes, ResetCondVar] = ResettableSSCall(parent, blk, ...
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     
     ResetCondName = sprintf('ResetCond_of_%s', blk_name);
     ResetCondVar = nasa_toLustre.lustreAst.LustreVar(ResetCondName, 'bool');

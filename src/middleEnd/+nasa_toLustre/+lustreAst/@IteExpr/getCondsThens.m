@@ -5,7 +5,6 @@ function [conds, thens] = getCondsThens(exp)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 
         conds = {};
     thens = {};
     

@@ -7,7 +7,7 @@ function imported_contracts = getImportedContracts(...
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     %
     %
     % contracts may have differents signature of the node imported

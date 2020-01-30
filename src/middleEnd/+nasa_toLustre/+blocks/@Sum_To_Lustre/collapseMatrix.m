@@ -5,7 +5,7 @@ function [numelCollapseDim, delta, collapseDims] = collapseMatrix(in_matrix_dime
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    numelCollapseDim = in_matrix_dimension{1}.dims(CollapseDim);
+    numelCollapseDim = in_matrix_dimension{1}.dims(CollapseDim);
     matSize = in_matrix_dimension{1}.dims;
 
     subscripts = ones(1,in_matrix_dimension{1}.numDs);

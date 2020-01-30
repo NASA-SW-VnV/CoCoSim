@@ -6,7 +6,7 @@ function [delay_node] = getDelayNode(node_name, ...
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     
     %node header
     [ u_DT, ~ ] =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt( u_DT);

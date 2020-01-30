@@ -9,7 +9,7 @@ function [new_ir, status] = chart_name_SFIR_pp(new_ir, isSF)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     
     status = 0;
     if nargin < 2

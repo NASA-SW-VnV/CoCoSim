@@ -5,7 +5,7 @@ function [inputs, inports_dt] = getInputs(parent, blk)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     
     widths = blk.CompiledPortWidths.Inport;
     inputs = cell(1, numel(widths));

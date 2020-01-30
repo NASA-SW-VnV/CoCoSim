@@ -5,7 +5,7 @@ function [codes, AdditionalVars] = matrix_multiply(obj, exp, blk, inputs, output
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     
     % check that the number of columns of 1st input matrix is equalled
     % to the number of rows of the 2nd matrix

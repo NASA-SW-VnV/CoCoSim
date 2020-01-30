@@ -5,7 +5,7 @@ function [lusDT, slxDT] = ID_DT(tree, args)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    data_map = args.data_map;
+    data_map = args.data_map;
     inputs = args.inputs;
     isSimulink = args.isSimulink;
     

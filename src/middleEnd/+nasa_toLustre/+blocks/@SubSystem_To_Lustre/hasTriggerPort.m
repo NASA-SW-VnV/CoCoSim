@@ -5,7 +5,7 @@ function [b, ShowOutputPortIsOn, TriggerType, TriggerDT] = hasTriggerPort(blk)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     if isfield(blk, 'Content')
         fields = fieldnames(blk.Content);
         fields = ...

@@ -5,7 +5,7 @@ function [lusDT, slxDT] = ignore_value_DT(varargin)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     lusDT = '';
     slxDT = '';
 end

@@ -7,7 +7,7 @@ function name = blkTypeFormat(name)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     name = strrep(name, ' ', '');
     name = strrep(name, '-', '');
 end

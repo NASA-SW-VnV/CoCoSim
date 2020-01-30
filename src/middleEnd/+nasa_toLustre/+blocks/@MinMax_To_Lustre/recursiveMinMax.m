@@ -5,7 +5,7 @@ function res = recursiveMinMax(op, inputs)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     
     n = numel(inputs);
     if n == 1

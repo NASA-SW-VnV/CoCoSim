@@ -8,7 +8,7 @@ function [ new_ir, status ] = transitionLabel_SFIR_pp( new_ir )
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     status = false;
     if isfield(new_ir, 'States')
         for i=1:numel(new_ir.States)

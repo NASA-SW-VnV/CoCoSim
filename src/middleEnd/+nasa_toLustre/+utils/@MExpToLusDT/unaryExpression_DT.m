@@ -5,7 +5,7 @@ function [lusDT, slxDT] = unaryExpression_DT(tree, args)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     %unaryExpression_DT for unaryOperator :  '&' | '*' | '+' | '-' | '~' | '!'
     
     if strcmp(tree.operator, '~') || strcmp(tree.operator, '!')

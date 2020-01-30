@@ -5,7 +5,7 @@ function [b, StatesWhenEnabling] = hasActionPort(blk)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     if isfield(blk, 'Content')
         fields = fieldnames(blk.Content);
         fields = ...

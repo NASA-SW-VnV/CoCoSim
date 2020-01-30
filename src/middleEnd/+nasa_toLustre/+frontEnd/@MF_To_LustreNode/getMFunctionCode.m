@@ -6,7 +6,7 @@ function [external_nodes, failed] = getMFunctionCode(blkObj, parent,  blk, Input
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     %
     %
     global SF_MF_FUNCTIONS_MAP MFUNCTION_EXTERNAL_NODES

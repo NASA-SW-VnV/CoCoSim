@@ -5,7 +5,7 @@ function [outputs, inputs] = getInOutputsFromAction(lus_action, isCondition, dat
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     if nargin < 5 || isempty(isMatlab)
         isMatlab = false;
     end

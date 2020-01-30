@@ -5,7 +5,7 @@ function [code, dt, dim, extra_code] = ID_To_Lustre(tree, args)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     dim = [];
     extra_code = {};
     if ischar(tree)

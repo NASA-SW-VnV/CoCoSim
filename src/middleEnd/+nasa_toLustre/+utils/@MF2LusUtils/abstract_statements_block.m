@@ -6,7 +6,7 @@ function [while_node] = abstract_statements_block(tree, args, type)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    persistent counter;
+    persistent counter;
     if isempty(counter)
         counter = 0;
     end

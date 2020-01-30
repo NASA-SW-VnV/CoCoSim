@@ -5,7 +5,7 @@ function [lus_code, plu_code, ext_lib] = print_lustrec(obj, backend)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    global ADD_KIND2_TIMES_ABSTRACTION ADD_KIND2_DIVIDE_ABSTRACTION;
+    global ADD_KIND2_TIMES_ABSTRACTION ADD_KIND2_DIVIDE_ABSTRACTION;
     ADD_KIND2_TIMES_ABSTRACTION = false;
     ADD_KIND2_DIVIDE_ABSTRACTION = false;
     ext_lib = {};

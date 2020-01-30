@@ -5,7 +5,6 @@ function args_str = getArgsStr(args, backend)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 
     %             try
     if numel(args) > 1 || iscell(args)
         if numel(args) >= 1 && iscell(args{1})

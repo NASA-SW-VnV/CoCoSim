@@ -9,7 +9,7 @@ function [lustre_code, delay_node_code, variables, external_libraries] = ...
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     %initialize outputs
     external_libraries = {};
     lustre_code = {};

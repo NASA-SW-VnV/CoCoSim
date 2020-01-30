@@ -5,7 +5,6 @@ function action_Array = split_actions(actions)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
     if ~isempty(actions) && iscell(actions)
         actions = actions(~strcmp(actions, ''));
         actions = MatlabUtils.strjoin(actions, '\n');

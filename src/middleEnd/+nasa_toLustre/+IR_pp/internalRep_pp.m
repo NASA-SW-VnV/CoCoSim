@@ -7,7 +7,7 @@ function [ new_ir, ir_handle_struct_map, ir_json_path ] = internalRep_pp( new_ir
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    if ~exist('json_export', 'var')
+    if ~exist('json_export', 'var')
         json_export = 0;
     end
     if ~exist('output_dir', 'var')

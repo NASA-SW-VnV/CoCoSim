@@ -6,7 +6,7 @@ classdef LustreContract < nasa_toLustre.lustreAst.LustreAst
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    properties
+    properties
         metaInfo;%String
         name; %String
         inputs; %list of Vars

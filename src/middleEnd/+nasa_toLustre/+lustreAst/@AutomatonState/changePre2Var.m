@@ -5,7 +5,7 @@ function [new_obj, varIds] = changePre2Var(obj)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    %% This functions are used for ForIterator block
+    %% This functions are used for ForIterator block
 
     new_obj = obj;
     varIds = {};

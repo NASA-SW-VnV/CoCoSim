@@ -5,7 +5,7 @@ function [code, exp_dt, dim, extra_code] = for_block_To_Lustre(tree, args)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    global MFUNCTION_EXTERNAL_NODES
+    global MFUNCTION_EXTERNAL_NODES
     
     
     code = {};

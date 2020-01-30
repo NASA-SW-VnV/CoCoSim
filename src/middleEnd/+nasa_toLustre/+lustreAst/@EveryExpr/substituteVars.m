@@ -5,7 +5,6 @@ function obj = substituteVars(obj, oldVar, newVar)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 
     obj.nodeArgs = cellfun(@(x) x.substituteVars(oldVar, newVar), obj.nodeArgs, 'UniformOutput', 0);
     obj.cond = obj.cond.substituteVars(oldVar, newVar);
 end

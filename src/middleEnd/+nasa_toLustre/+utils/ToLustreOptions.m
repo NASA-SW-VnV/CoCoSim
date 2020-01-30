@@ -6,7 +6,7 @@ classdef ToLustreOptions < handle
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    properties (Constant)
+    properties (Constant)
         % ToLustre options
         NODISPLAY = 'nodisplay';
         FORCE_CODE_GEN = 'forceCodeGen';

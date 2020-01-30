@@ -7,7 +7,7 @@ function [body, variables, external_nodes, external_libraries, abstractedBlocks]
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%         
+         
     %
     %
     variables = {};

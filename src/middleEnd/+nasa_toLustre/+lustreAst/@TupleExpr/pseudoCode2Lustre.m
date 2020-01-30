@@ -5,7 +5,6 @@ function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft, no
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 
     new_args = cell(numel(obj.args), 1);
     for i=1:numel(obj.args)
         [new_args{i}, outputs_map] = ...

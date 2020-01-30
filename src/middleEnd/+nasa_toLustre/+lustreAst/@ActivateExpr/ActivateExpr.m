@@ -6,7 +6,7 @@ classdef ActivateExpr < nasa_toLustre.lustreAst.LustreExpr
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    properties
+    properties
         nodeName;%string
         nodeArgs;
         activate_cond;

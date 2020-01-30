@@ -5,7 +5,7 @@ function code = print_lustrec(obj, backend)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    code = '';
+    code = '';
     try
         lhs_str = obj.lhs.print(backend);
         rhs_str = obj.rhs.print(backend);

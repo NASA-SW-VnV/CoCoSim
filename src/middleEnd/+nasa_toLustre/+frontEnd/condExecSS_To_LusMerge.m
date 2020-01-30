@@ -11,7 +11,7 @@ function [ external_nodes] = condExecSS_To_LusMerge( parent_ir, ss_ir, lus_backe
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    %
+    %
     %
     
     

@@ -5,7 +5,7 @@ function new_assignements = addInnerCond(lus_eqts, isInnerLusVar, orig_exp, stat
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     
         new_assignements = cell(numel(lus_eqts), 1);
     for i=1:numel(lus_eqts)

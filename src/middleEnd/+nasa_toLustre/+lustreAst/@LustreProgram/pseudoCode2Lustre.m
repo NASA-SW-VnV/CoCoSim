@@ -5,7 +5,6 @@ function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, varargin)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 
     %it is not used by stateflow.
     new_obj = obj;
 end

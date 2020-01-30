@@ -5,7 +5,7 @@ function [code, exp_dt, dim, extra_code] = cosdFun_To_Lustre(tree, args)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     x_text = tree.parameters(1).text;
     expr = sprintf("cos((%s)*pi/180)", x_text);
     new_tree = MatlabUtils.getExpTree(expr);

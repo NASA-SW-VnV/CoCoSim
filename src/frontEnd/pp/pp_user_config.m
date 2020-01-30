@@ -7,7 +7,6 @@ function pp_user_config(fcts_map, ordered_functions)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
     global ordered_pp_functions priority_pp_map;
     if isempty(ordered_pp_functions)
         pp_config;

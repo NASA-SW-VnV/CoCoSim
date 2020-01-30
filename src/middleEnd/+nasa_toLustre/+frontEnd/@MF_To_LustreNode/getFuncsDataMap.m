@@ -7,7 +7,7 @@ function [fun_data_map, failed] = getFuncsDataMap(parent, blk, script, ...
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     %
     %
     fun_data_map = containers.Map('KeyType', 'char', 'ValueType', 'any');

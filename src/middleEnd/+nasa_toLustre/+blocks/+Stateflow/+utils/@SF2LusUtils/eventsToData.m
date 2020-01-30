@@ -6,7 +6,7 @@ function data = eventsToData(event_s)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     data = cell(numel(event_s), 1);
     for i=1:numel(event_s)
         data{i} = event_s{i};

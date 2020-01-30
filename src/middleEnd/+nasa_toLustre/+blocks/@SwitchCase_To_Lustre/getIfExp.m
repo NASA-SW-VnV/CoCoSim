@@ -5,7 +5,7 @@ function IfExp = getIfExp(obj, blk)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     CaseConditions = eval(blk.CaseConditions);
     IfExp = cell(1, numel(CaseConditions));
     for i=1:numel(CaseConditions)

@@ -5,7 +5,6 @@ function [new_obj, varIds] = changePre2Var(obj)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 
     varIds = {};
     [new_lhs, VarIdlhs] = obj.lhs.changePre2Var();
     varIds = [varIds, VarIdlhs];

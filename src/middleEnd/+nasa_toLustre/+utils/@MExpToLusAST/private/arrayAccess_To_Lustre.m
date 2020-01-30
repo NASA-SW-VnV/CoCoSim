@@ -5,7 +5,7 @@ function [code, exp_dt, dim, extra_code] = arrayAccess_To_Lustre(tree, args)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     % This function should be only called from fun_indexing_To_Lustre.m
     %Array access
     code = {};

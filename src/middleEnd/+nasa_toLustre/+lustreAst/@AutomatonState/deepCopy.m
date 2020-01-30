@@ -5,7 +5,7 @@ function new_obj = deepCopy(obj)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    new_local_vars = cellfun(@(x) x.deepCopy(), obj.local_vars, 'UniformOutput', 0);
+    new_local_vars = cellfun(@(x) x.deepCopy(), obj.local_vars, 'UniformOutput', 0);
 
     new_strongTrans = cellfun(@(x) x.deepCopy(), obj.strongTrans, 'UniformOutput', 0);
 

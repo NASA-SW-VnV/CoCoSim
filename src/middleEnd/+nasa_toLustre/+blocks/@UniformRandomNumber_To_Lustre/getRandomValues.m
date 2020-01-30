@@ -5,7 +5,7 @@ function r_str = getRandomValues(r, i)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     
     if i == numel(r)
         r_str = nasa_toLustre.lustreAst.RealExpr(r(i));

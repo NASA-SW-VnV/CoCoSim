@@ -11,7 +11,7 @@ function [ main_node] = condExecSS_To_LusAutomaton( parent_ir, ss_ir, ...
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    %
+    %
     %
     
     

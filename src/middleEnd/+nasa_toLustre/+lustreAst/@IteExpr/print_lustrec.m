@@ -5,7 +5,6 @@ function code = print_lustrec(obj, backend)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 
     if obj.OneLine
         code = sprintf('(if %s then %s else %s)', ...
             obj.condition.print(backend),...

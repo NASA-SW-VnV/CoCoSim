@@ -5,7 +5,7 @@ function addExtenal_node(obj, nodeAst)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     if iscell(nodeAst)
         obj.external_nodes = [obj.external_nodes, nodeAst];
     elseif ~ischar(nodeAst) && numel(nodeAst) > 1

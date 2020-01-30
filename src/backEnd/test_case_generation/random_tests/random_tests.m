@@ -7,7 +7,7 @@ function [ T,  new_model_name] = random_tests( model_full_path, nb_steps, IMIN, 
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     if ~exist(model_full_path, 'file')
         display_msg(['File not foudn: ' model_full_path],...
             MsgType.ERROR, 'random_tests', '');

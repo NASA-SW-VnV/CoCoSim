@@ -5,7 +5,6 @@ function code = print_lustrec(obj, backend)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 
     code = sprintf('(%s)', ...
         nasa_toLustre.lustreAst.NodeCallExpr.getArgsStr(obj.args, backend));
 end

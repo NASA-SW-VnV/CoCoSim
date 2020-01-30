@@ -5,7 +5,7 @@ function [SignalsInputsMap, AssignedSignals] = getSignalMap(obj, blk, inputs)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     % everything is inlined
     InportDimensions = blk.CompiledPortDimensions.Inport;
     InputSignals = blk.InputSignals;

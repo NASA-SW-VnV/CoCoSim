@@ -6,7 +6,7 @@ function schema = verifyMenu(varargin)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    schema = sl_action_schema;
+    schema = sl_action_schema;
     schema.label = 'Prove properties';
     schema.statustip = 'Verify the current model with CoCoSim';
     schema.autoDisableWhen = 'Busy';

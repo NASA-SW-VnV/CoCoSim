@@ -5,7 +5,6 @@ function [new_function_list, failed] = getFunctionList(blk, script)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
     %
     %
     em2json =  cocosim.matlab2IR.EM2JSON;

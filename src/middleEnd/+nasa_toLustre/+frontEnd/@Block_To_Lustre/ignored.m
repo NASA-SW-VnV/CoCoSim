@@ -8,7 +8,7 @@ function b = ignored(blk)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     % add blocks that will be ignored because they are supported
     % somehow implicitly or not important for Code generation and Verification.
     blksIgnored = {'Terminator', 'Scope', 'Display', ...

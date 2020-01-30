@@ -5,5 +5,5 @@ function res = isContentNeedToBeTranslated(obj)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    res = obj.ContentNeedToBeTranslated;
+    res = obj.ContentNeedToBeTranslated;
 end

@@ -5,7 +5,7 @@ function new_obj = simplify(obj)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    %% simplify expression
+    %% simplify expression
 
     new_local_vars = cellfun(@(x) x.simplify(), obj.local_vars, 'UniformOutput', 0);
 

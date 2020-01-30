@@ -18,7 +18,7 @@ function [unsupportedOptions, ...
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    global TOLUSTRE_ENUMS_MAP CoCoSimPreferences
+    global TOLUSTRE_ENUMS_MAP CoCoSimPreferences
             
     if isempty(CoCoSimPreferences)
         CoCoSimPreferences = cocosim_menu.CoCoSimPreferences.load();

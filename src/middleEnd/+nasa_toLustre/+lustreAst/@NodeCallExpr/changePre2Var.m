@@ -5,7 +5,6 @@ function [new_obj, varIds] = changePre2Var(obj)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 
     varIds = {};
     new_args = cell(numel(obj.args), 1);
     for i=1:numel(obj.args)

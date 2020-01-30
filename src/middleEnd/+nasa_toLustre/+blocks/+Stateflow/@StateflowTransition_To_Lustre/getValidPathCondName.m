@@ -6,7 +6,6 @@ function varName = getValidPathCondName()
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
     varName = '_FOUND_VALID_PATH';
 end
 

@@ -7,7 +7,6 @@ function [ main_node, isContractBlk, external_nodes, external_libraries, abstrac
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
     %BLOCK_TO_LUSTRE create a lustre node for every Simulink subsystem within
     %subsys_struc.
     %INPUTS:

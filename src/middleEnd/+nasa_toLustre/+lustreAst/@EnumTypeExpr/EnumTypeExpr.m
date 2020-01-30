@@ -6,7 +6,7 @@ classdef EnumTypeExpr < nasa_toLustre.lustreAst.LustreExpr
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    properties
+    properties
         enum_name;
         enum_args;
     end

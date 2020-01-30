@@ -5,7 +5,7 @@ function code = getAssumptionExpr(blk, inputs, inport_lus_dt)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     %change inputs{1} to cell for code simplicity.
     code = {};
     if isempty(inputs)

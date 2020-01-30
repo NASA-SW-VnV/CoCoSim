@@ -7,7 +7,6 @@ function [main_node, iterator_node] = forIteratorNode(main_node, variables,...
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
     %
     %
     % this node will be called many times using many

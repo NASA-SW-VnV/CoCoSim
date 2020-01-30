@@ -5,7 +5,7 @@ function [lusDT, slxDT] = parenthesedExpression_DT(tree, args)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     
     [lusDT, slxDT] = nasa_toLustre.utils.MExpToLusDT.expression_DT(tree.expression, args);
 end

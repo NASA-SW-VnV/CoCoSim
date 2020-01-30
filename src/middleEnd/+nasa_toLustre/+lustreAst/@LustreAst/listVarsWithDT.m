@@ -5,7 +5,7 @@ function code = listVarsWithDT(vars, backend, forNodeHeader)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    if nargin < 3
+    if nargin < 3
         forNodeHeader = false;
     end
     if iscell(vars)

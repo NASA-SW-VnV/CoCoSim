@@ -5,6 +5,5 @@ function obj = substituteVars(obj)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 
     obj = nasa_toLustre.lustreAst.LustreNode.contractNode_substituteVars(obj);
 end

@@ -5,7 +5,7 @@ function [ ir ] = diagramBlockParams( ir )
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    %DIAGRAMBLOCKPARAMS Add some parameters to the block diagram missing in the
+    %DIAGRAMBLOCKPARAMS Add some parameters to the block diagram missing in the
     %original IR
 
     file_path = ir.meta.file_path;

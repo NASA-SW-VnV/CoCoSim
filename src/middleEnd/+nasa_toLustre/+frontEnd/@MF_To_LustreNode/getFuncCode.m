@@ -5,7 +5,7 @@ function [fun_node,failed ]  = getFuncCode(func, data_map, blkObj, parent, blk)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    global VISITED_VARIABLES;
+    global VISITED_VARIABLES;
     VISITED_VARIABLES = {};
     statements = func.statements;
     expected_dt = '';

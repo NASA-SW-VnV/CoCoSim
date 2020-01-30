@@ -6,7 +6,6 @@ function unique_name = getUniqueName(object, id)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
     global SF_STATES_PATH_MAP SF_JUNCTIONS_PATH_MAP;
     if ischar(object)
         name = object;

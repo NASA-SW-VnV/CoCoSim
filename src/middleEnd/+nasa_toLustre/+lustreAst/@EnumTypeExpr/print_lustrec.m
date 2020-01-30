@@ -5,7 +5,6 @@ function code = print_lustrec(obj, backend)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 
     args_str = nasa_toLustre.lustreAst.NodeCallExpr.getArgsStr(obj.enum_args, backend);
     code = sprintf('type %s = enum {%s};\n', obj.enum_name, args_str);
 end

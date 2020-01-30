@@ -6,7 +6,7 @@ function [ err, output_dir] = lustret_mutation_generation( lus_full_path, nb_mut
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     if ~exist('nb_mutants_max', 'var')
         nb_mutants_max = 500;
     end

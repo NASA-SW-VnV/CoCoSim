@@ -5,7 +5,7 @@ function addUnsupported_options(obj, option)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     if iscell(option)
         obj.unsupported_options = [obj.unsupported_options, option];
     else

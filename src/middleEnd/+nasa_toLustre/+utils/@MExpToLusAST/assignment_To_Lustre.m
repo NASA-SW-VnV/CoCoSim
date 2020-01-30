@@ -5,7 +5,7 @@ function [code, assignment_dt, dim, extra_code] = assignment_To_Lustre(tree, arg
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    global VISITED_VARIABLES MFUNCTION_EXTERNAL_NODES;
+    global VISITED_VARIABLES MFUNCTION_EXTERNAL_NODES;
     code = {};
     dim = [];
     extra_code = {};

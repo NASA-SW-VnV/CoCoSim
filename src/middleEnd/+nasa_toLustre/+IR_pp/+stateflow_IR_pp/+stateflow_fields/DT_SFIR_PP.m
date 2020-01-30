@@ -7,7 +7,7 @@ function [ new_ir, status ] = DT_SFIR_PP( new_ir )
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     
     status = 0;
     if isfield(new_ir, 'Data')

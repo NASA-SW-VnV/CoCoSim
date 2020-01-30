@@ -9,7 +9,7 @@ function inputSignalsInlined = inlineInputSignals(InputSignals, main_cell, prefi
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     if nargin < 2
         main_cell = 1;
     end

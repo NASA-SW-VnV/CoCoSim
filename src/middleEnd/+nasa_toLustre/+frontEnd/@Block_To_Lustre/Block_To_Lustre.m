@@ -7,7 +7,7 @@ classdef Block_To_Lustre < handle
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     properties
         
         % the code of the block, e.g. a list of nasa_toLustre.lustreAst.LustreEq;

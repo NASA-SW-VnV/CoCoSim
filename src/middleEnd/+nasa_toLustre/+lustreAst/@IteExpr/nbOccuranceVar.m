@@ -5,7 +5,6 @@ function nb_occ = nbOccuranceVar(obj, var)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 
     nb_occ = obj.condition.nbOccuranceVar(var) ...
         + obj.thenExpr.nbOccuranceVar(var)...
         + obj.ElseExpr.nbOccuranceVar(var);

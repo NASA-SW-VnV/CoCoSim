@@ -5,7 +5,7 @@ function [node, external_nodes, opens, abstractedNodes] = getIntToInt(dt)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    global CoCoSimPreferences
+    global CoCoSimPreferences
     if isempty(CoCoSimPreferences)
         CoCoSimPreferences.forceTypeCastingOfInt = true;
     end

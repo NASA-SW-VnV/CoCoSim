@@ -6,7 +6,6 @@ function ordered = orderObjects(objects, fieldName)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
     if nargin == 1
         fieldName = 'Path';
     end

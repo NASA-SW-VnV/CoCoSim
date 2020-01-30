@@ -6,7 +6,7 @@ classdef ContractRequireBlock_To_Lustre < nasa_toLustre.blocks.SubSystem_To_Lust
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     properties
     end
     

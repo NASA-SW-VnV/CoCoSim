@@ -7,7 +7,7 @@ classdef PropertyExpr < nasa_toLustre.lustreAst.LustreExpr
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    %
+    %
     properties
         id; %String
         exp; %LustreExp

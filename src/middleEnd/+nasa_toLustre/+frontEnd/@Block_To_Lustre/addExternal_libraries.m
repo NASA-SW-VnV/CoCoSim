@@ -5,7 +5,7 @@ function addExternal_libraries(obj, lib)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     if isempty(lib)
         return;
     elseif iscell(lib)

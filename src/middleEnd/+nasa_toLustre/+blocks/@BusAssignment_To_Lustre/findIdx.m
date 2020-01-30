@@ -5,7 +5,7 @@ function idx = findIdx(VarIds, var)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    varNames = cellfun(@(x) x.getId(), VarIds, 'UniformOutput', 0);
+    varNames = cellfun(@(x) x.getId(), VarIds, 'UniformOutput', 0);
     varName = var.getId();
     idx = strcmp(varNames, varName);
 end

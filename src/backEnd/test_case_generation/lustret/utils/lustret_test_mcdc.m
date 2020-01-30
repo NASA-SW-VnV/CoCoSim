@@ -7,7 +7,6 @@ function [ T ] = lustret_test_mcdc( lus_full_path, node_name, output_dir)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
 
     T = [];
     if nargin < 2

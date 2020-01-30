@@ -5,7 +5,6 @@ function new_obj = simplify(obj)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 
     new_args = cellfun(@(x) x.simplify(), obj.nodeArgs, 'UniformOutput', 0);
     if obj.has_restart
         restart_cond = obj.restart_cond.simplify();

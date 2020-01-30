@@ -6,7 +6,7 @@ function [Value, valueDataType, status] = ...
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     model_name = regexp(blk.Origin_path, filesep, 'split');
     model_name = model_name{1};
     [Value, valueDataType, status] = ...

@@ -5,7 +5,6 @@ function U = uniqueVars(vars)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 
     Ids = cellfun(@(x) x.getId(), ...
         vars, 'UniformOutput', false);
     [~, I] = unique(Ids);

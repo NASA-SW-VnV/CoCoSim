@@ -5,7 +5,6 @@ function obj = substituteVars(obj, oldVar, newVar)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 
     obj.lhs = obj.lhs;
     obj.rhs = obj.rhs.substituteVars(oldVar, newVar);
 end

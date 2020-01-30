@@ -5,7 +5,6 @@ function vars = getDataVars(d_list)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
     
     vars = {};
     for i=1:numel(d_list)

@@ -5,7 +5,7 @@ function ExecutionCondName = getExecutionCondName(blk)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     
     blk_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);
     ExecutionCondName = sprintf('ExecutionCond_of_%s', blk_name);

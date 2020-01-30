@@ -7,7 +7,7 @@ function [main_node] = getStatementsBlockAsNode(tree, args, type)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    persistent counter;
+    persistent counter;
     if isempty(counter)
         counter = 0;
     end

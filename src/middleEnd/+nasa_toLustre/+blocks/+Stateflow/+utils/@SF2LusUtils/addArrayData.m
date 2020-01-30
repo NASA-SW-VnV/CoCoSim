@@ -5,7 +5,7 @@ function SF_DATA_MAP = addArrayData(SF_DATA_MAP, d_list)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     
     for i=1:numel(d_list)
         names = nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getDataName(d_list{i});

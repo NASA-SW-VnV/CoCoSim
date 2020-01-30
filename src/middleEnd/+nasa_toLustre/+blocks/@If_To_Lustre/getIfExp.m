@@ -5,7 +5,7 @@ function IfExp = getIfExp(blk)
     % All Rights Reserved.
     % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+    
     IfExp{1} =  blk.IfExpression;
     elseExp = split(blk.ElseIfExpressions, ',');
     IfExp = [IfExp; elseExp];
