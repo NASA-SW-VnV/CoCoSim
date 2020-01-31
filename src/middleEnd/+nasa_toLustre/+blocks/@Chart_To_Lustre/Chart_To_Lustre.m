@@ -178,6 +178,17 @@ classdef Chart_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     HtmlItem.addOpenCmd(blk.Origin_path)));
             end
             
+            %% add unsupported Data types:
+            for i = 1 : length(SFContent.Data)
+                d = SFContent.Data{i};
+                if MatlabUtils.contains(d.Datatype, 'Enum:') ...
+                        || MatlabUtils.contains(d.Datatype, 'Bus:')...
+                        || MatlabUtils.contains(d.Datatype, 'fixdt')
+                    obj.addUnsupported_options(...
+                        sprintf('Data %s Scope %s Port %d in chart %s has unsupported Data Type "%s". Work in progress!' ,....
+                        d.Name, d.Scope, d.Port, HtmlItem.addOpenCmd(blk.Origin_path), d.Datatype));
+                end
+            end
             %% get all events types and check for function call.
 %             events = SFContent.Events;
 %             for i=1:numel(events)

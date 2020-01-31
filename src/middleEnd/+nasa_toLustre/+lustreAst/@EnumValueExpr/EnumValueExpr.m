@@ -57,6 +57,11 @@ classdef EnumValueExpr < nasa_toLustre.lustreAst.LustreExpr
                 obj.enum_name = enum_name;
             end
         end
+        
+        function enum_name = getValue(obj)
+            enum_name = obj.enum_name; 
+        end
+        
         new_obj = deepCopy(obj)
         %% simplify expression
         new_obj = simplify(obj)

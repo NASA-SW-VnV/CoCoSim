@@ -55,7 +55,10 @@ function schema = tools_menu(varargin)
     backEnd_root = fullfile(src_root, 'backEnd');
     menue_items = {};
     menue_items{end + 1} = fullfile(backEnd_root, 'unsupported_blocks','unsupportedBlocksMenu.m');
-    menue_items{end + 1} = fullfile(backEnd_root, 'guidelines','checkGuidelinesMenu.m');
+    
+    % TODO: Improve Materialize Html report to not depend on online js
+    % files
+%     menue_items{end + 1} = fullfile(backEnd_root, 'guidelines','checkGuidelinesMenu.m');
     menue_items{end + 1} = fullfile(backEnd_root, 'verification','verifyMenu.m');
     menue_items{end + 1} = fullfile(backEnd_root, 'designErrorDetection','dedMenu.m');
     

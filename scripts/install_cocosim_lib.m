@@ -242,26 +242,28 @@ function copyExternalLibFiles(force, cocosim_path)
     end
     
     %TODO add patch to break word
-    file_path  = fullfile(cocosim_path, destinations{3}, 'materialize/css/materialize.css');
-    fprintf('Patching %s\n', file_path);
-    try
-        file_content = fileread(file_path);
-        rule = regexp(file_content, '\n\.collapsible-header \{');
-        expr_list = strfind(file_content, 'word-break: break-all;');
-        expr = expr_list(expr_list > rule);
-        new_expr = 'word-break: break-word;';
-        file_content(expr:expr+numel(new_expr)-1) = new_expr;
-        fID = fopen(file_path, 'w');
-        fwrite(fID, file_content);
-        fclose(fID);
-    catch ME
-        switch ME.identifier
-            case 'MATLAB:fileread:cannotOpenFile'
-                fprintf('Patch failed: Can''t open file %s', file_path);
-            otherwise
-                rethrow(ME)
-        end
-    end
+    % I changed it in the original file
+    
+%     file_path  = fullfile(cocosim_path, destinations{3}, 'materialize/css/materialize.css');
+%     fprintf('Patching %s\n', file_path);
+%     try
+%         file_content = fileread(file_path);
+%         rule = regexp(file_content, '\n\.collapsible-header \{');
+%         expr_list = strfind(file_content, 'word-break: break-all;');
+%         expr = expr_list(expr_list > rule);
+%         new_expr = 'word-break: break-word;';
+%         file_content(expr:expr+numel(new_expr)-1) = new_expr;
+%         fID = fopen(file_path, 'w');
+%         fwrite(fID, file_content);
+%         fclose(fID);
+%     catch ME
+%         switch ME.identifier
+%             case 'MATLAB:fileread:cannotOpenFile'
+%                 fprintf('Patch failed: Can''t open file %s', file_path);
+%             otherwise
+%                 rethrow(ME)
+%         end
+%     end
 end
 %%
 function install_tools(cocosim_path)

@@ -66,10 +66,10 @@ function html_path = createHtmlListUsingHTMLITEM(title, items_list, html_path, m
     if exist(materialize_path, 'dir')
         copyfile(materialize_path, output_dir);
     else
-        css_online = 'href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css"';
+        css_online = 'href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"';
         html_text = strrep(html_text, 'href="materialize.css"', css_online);
-        js_online = 'src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"';
-        html_text = strrep(html_text, 'src="materialize.css"', js_online);
+        js_online = 'src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"';
+        html_text = strrep(html_text, 'src="js/materialize.min.js"', js_online);
     end
     % add model Info
     if nargin == 4
