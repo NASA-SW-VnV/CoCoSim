@@ -53,14 +53,12 @@ end
 
 function verifCallback(varargin)
     try
-        clear;
         model_full_path = MenuUtils.get_file_name(gcs);
         [ CoCoSimPreferences ] = cocosim_menu.CoCoSimPreferences.load();
         warning('off')
         MenuUtils.add_pp_warning(model_full_path);
         if strcmp(CoCoSimPreferences.lustreCompiler, 'NASA')
             toLustreVerify(model_full_path, [], CoCoSimPreferences.lustreBackend);
-            
         else
             if LusBackendType.isKIND2(CoCoSimPreferences.lustreBackend)
                 assignin('base', 'SOLVER', 'K');

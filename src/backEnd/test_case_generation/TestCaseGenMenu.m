@@ -71,7 +71,7 @@ end
 %%
 function schema = Mutation(varargin)
     schema = sl_action_schema;
-    schema.label = 'Mutation based testing (Work in progress)';
+    schema.label = 'Mutation based testing (Experimental)';
     schema.state = 'Disabled';
     schema.callback = @MutationCallback;
 end
@@ -89,7 +89,7 @@ end
 %%
 function schema = MCDC(varargin)
     schema = sl_action_schema;
-    schema.label = 'MC-DC coverage (Work in progress)';
+    schema.label = 'MC-DC coverage (Experimental)';
 %     schema.state = 'Disabled';
     schema.callback = @MCDCCallback;
 end

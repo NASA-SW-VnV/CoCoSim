@@ -47,18 +47,21 @@ function [ new_model_path, status ] = mcdc_tests(...
     %MCDCTOSIMULINK try to bring back the MC-DC conditions to simulink level.
     
     global KIND2 Z3 LUSTRET; 
+    new_model_path = model_full_path;
+    
     if isempty(KIND2)
         tools_config;
     end
     if ~exist(KIND2,'file')
-        errordlg(sprintf('KIND2 model checker is not found in %s. Please set KIND2 path in tools_config.m', KIND2));
+        errordlg(sprintf('KIND2 model checker is not found in %s. Please set KIND2 path in tools_config.m under tools folder.', KIND2));
         status = 1;
         return;
     end
     status = BUtils.check_files_exist(LUSTRET);
     if status
         msg = 'LUSTRET not found, please configure tools_config file under tools folder';
-        display_msg(msg, MsgType.ERROR, 'mcdc_tests', '');
+        errordlg(msg);
+        status = 1;
         return;
     end
     
@@ -81,8 +84,7 @@ function [ new_model_path, status ] = mcdc_tests(...
     [model_parent_path, slx_file_name, ~] = fileparts(model_full_path);
     display_msg(['Generating mc-dc coverage Model for : ' slx_file_name],...
         MsgType.INFO, 'mutation_tests', '');
-    status = 0;
-    new_model_path = model_full_path;
+    
     
     % Compile model
     try

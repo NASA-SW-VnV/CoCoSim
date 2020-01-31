@@ -1,17 +1,51 @@
 #!/bin/bash
+###########################################################
+#
+# Author: Maxime Arthaud <maxime.arthaud@nasa.gov>, 
+#         Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+# Notices:
+#
+# Copyright @ 2020 United States Government as represented by the 
+# Administrator of the National Aeronautics and Space Administration.  All 
+# Rights Reserved.
+#
+# Disclaimers
+#
+# No Warranty: THE SUBJECT SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY 
+# WARRANTY OF ANY KIND, EITHER EXPRESSED, IMPLIED, OR STATUTORY, INCLUDING,
+# BUT NOT LIMITED TO, ANY WARRANTY THAT THE SUBJECT SOFTWARE WILL CONFORM 
+# TO SPECIFICATIONS, ANY IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS 
+# FOR A PARTICULAR PURPOSE, OR FREEDOM FROM INFRINGEMENT, ANY WARRANTY THAT
+# THE SUBJECT SOFTWARE WILL BE ERROR FREE, OR ANY WARRANTY THAT 
+# DOCUMENTATION, IF PROVIDED, WILL CONFORM TO THE SUBJECT SOFTWARE. THIS 
+# AGREEMENT DOES NOT, IN ANY MANNER, CONSTITUTE AN ENDORSEMENT BY 
+# GOVERNMENT AGENCY OR ANY PRIOR RECIPIENT OF ANY RESULTS, RESULTING 
+# DESIGNS, HARDWARE, SOFTWARE PRODUCTS OR ANY OTHER APPLICATIONS RESULTING 
+# FROM USE OF THE SUBJECT SOFTWARE.  FURTHER, GOVERNMENT AGENCY DISCLAIMS 
+# ALL WARRANTIES AND LIABILITIES REGARDING THIRD-PARTY SOFTWARE, IF PRESENT 
+# IN THE ORIGINAL SOFTWARE, AND DISTRIBUTES IT "AS IS."
+#
+# Waiver and Indemnity:  RECIPIENT AGREES TO WAIVE ANY AND ALL CLAIMS 
+# AGAINST THE UNITED STATES GOVERNMENT, ITS CONTRACTORS AND SUBCONTRACTORS, 
+# AS WELL AS ANY PRIOR RECIPIENT.  IF RECIPIENT'S USE OF THE SUBJECT 
+# SOFTWARE RESULTS IN ANY LIABILITIES, DEMANDS, DAMAGES, EXPENSES OR 
+# LOSSES ARISING FROM SUCH USE, INCLUDING ANY DAMAGES FROM PRODUCTS BASED 
+# ON, OR RESULTING FROM, RECIPIENT'S USE OF THE SUBJECT SOFTWARE, RECIPIENT 
+# SHALL INDEMNIFY AND HOLD HARMLESS THE UNITED STATES GOVERNMENT, ITS 
+# CONTRACTORS AND SUBCONTRACTORS, AS WELL AS ANY PRIOR RECIPIENT, TO THE 
+# EXTENT PERMITTED BY LAW.  RECIPIENT'S SOLE REMEDY FOR ANY SUCH MATTER 
+# SHALL BE THE IMMEDIATE, UNILATERAL TERMINATION OF THIS AGREEMENT.
+# 
+# Notice: The accuracy and quality of the results of running CoCoSim 
+# directly corresponds to the quality and accuracy of the model and the 
+# requirements given as inputs to CoCoSim. If the models and requirements 
+# are incorrectly captured or incorrectly input into CoCoSim, the results 
+# cannot be relied upon to generate or error check software being developed. 
+# Simply stated, the results of CoCoSim are only as good as
+# the inputs given to CoCoSim.
+###########################################################
 
 ################################################################################
-#
-# Installation script for cocosim dependencies (lustrec, zustre, kind2).
-#
-# Author: Maxime Arthaud <maxime.arthaud@nasa.gov>, Hamza Bourbouh <hamza.bourbouh@nasa.gov>
-#
-# Copyright (c) 2019 United States Government as represented by the
-# Administrator of the National Aeronautics and Space Administration.
-# All Rights Reserved.
-#
-################################################################################
-#
 # This script assumes the operating system provides:
 #   bash, basename, dirname, mkdir, touch, sed, date
 #
@@ -48,8 +82,10 @@ else
     njobs=1
 fi
 
-zustre_url="https://github.com/coco-team/zustre.git"
-zustre_branch="master"
+# Zustre is disabled at the moment
+# zustre_url="https://github.com/coco-team/zustre.git"
+# zustre_branch="master"
+
 kind2_url="https://github.com/kind2-mc/kind2.git"
 kind2_branch="develop"
 
@@ -74,8 +110,8 @@ while [[ $1 ]]; do
         --jobs)           shift; njobs=$1;;
         --lustrec-url)    shift; lustrec_url=$1;;
         --lustrec-branch) shift; lustrec_branch=$1;;
-        --zustre-url)     shift; zustre_url=$1;;
-        --zustre-branch)  shift; zustre_branch=$1;;
+        #--zustre-url)     shift; zustre_url=$1;;
+        #--zustre-branch)  shift; zustre_branch=$1;;
         --kind2-url)      shift; kind2_url=$1;;
         --kind2-branch)   shift; kind2_branch=$1;;
         *)                error "unrecognized option: $1"; short_help; exit 2;;
@@ -101,10 +137,10 @@ elif [[ -z "$lustrec_url" ]]; then
     error "missing argument --lustrec-url"; short_help; exit 2
 elif [[ -z "$lustrec_branch" ]]; then
     error "missing argument --lustrec-branch"; short_help; exit 2
-elif [[ -z "$zustre_url" ]]; then
-    error "missing argument --zustre-url"; short_help; exit 2
-elif [[ -z "$zustre_branch" ]]; then
-    error "missing argument --zustre-branch"; short_help; exit 2
+# elif [[ -z "$zustre_url" ]]; then
+#     error "missing argument --zustre-url"; short_help; exit 2
+# elif [[ -z "$zustre_branch" ]]; then
+#     error "missing argument --zustre-branch"; short_help; exit 2
 elif [[ -z "$kind2_url" ]]; then
     error "missing argument --kind2-url"; short_help; exit 2
 elif [[ -z "$kind2_branch" ]]; then
@@ -500,6 +536,9 @@ progress_run opam install -y  ocamlfind ocamlbuild ocamlgraph fmt logs topkg cmd
 progress_run opam pin add z3 4.8.1
 progress_run opam install z3
 
+# install menhir
+progress_run opam install menhir
+
 ################
 # Check menhir #
 ################
@@ -561,55 +600,55 @@ fi
 ##################
 # Install spacer for Zustre #
 ##################
-spacer_failed=0
-if [[ -x "$install_dir/spacer/bin/z3" ]]; then
-    progress "Using already built ${cgreen}spacer"
-else
-    progress "Installing ${cgreen}spacer${coff}${cbold} from upstream repository"
-    git_clone "https://bitbucket.org/spacer/code.git" "spacer"\
-        "$build_dir/spacer"
+# spacer_failed=0
+# if [[ -x "$install_dir/spacer/bin/z3" ]]; then
+#     progress "Using already built ${cgreen}spacer"
+# else
+#     progress "Installing ${cgreen}spacer${coff}${cbold} from upstream repository"
+#     git_clone "https://bitbucket.org/spacer/code.git" "spacer"\
+#         "$build_dir/spacer"
 
-    cd "$build_dir/spacer"
+#     cd "$build_dir/spacer"
 
-    progress_run python scripts/mk_make.py \
-        --prefix="$install_dir/spacer" || {
-        error_configure spacer;
-        spacer_failed=1;
-    }
-    if (( ! spacer_failed )); then
-        cd "$build_dir/spacer/build"
-        progress_run make || {
-            error_make spacer;
-            spacer_failed=1;
-        }
-    fi
-    if (( ! spacer_failed )); then
-        progress_run make install || {
-            error_install spacer;
-            spacer_failed=1;
-        }
-    fi
-fi
-if (( ! spacer_failed )); then
-    #prepend_path "$install_dir/spacer/bin" # do not prepend_path for z3 binary of spacer. We'll use the one of z3 as default one.
-    prepend_python_path "$install_dir/spacer/lib/python"*"/dist-packages"
-    if [[ ! -x "$install_dir/spacer/bin/z3" ]]; then
-        error_msg "spacer is not properly installed"
-        spacer_failed=1
-    fi
+#     progress_run python scripts/mk_make.py \
+#         --prefix="$install_dir/spacer" || {
+#         error_configure spacer;
+#         spacer_failed=1;
+#     }
+#     if (( ! spacer_failed )); then
+#         cd "$build_dir/spacer/build"
+#         progress_run make || {
+#             error_make spacer;
+#             spacer_failed=1;
+#         }
+#     fi
+#     if (( ! spacer_failed )); then
+#         progress_run make install || {
+#             error_install spacer;
+#             spacer_failed=1;
+#         }
+#     fi
+# fi
+# if (( ! spacer_failed )); then
+#     #prepend_path "$install_dir/spacer/bin" # do not prepend_path for z3 binary of spacer. We'll use the one of z3 as default one.
+#     prepend_python_path "$install_dir/spacer/lib/python"*"/dist-packages"
+#     if [[ ! -x "$install_dir/spacer/bin/z3" ]]; then
+#         error_msg "spacer is not properly installed"
+#         spacer_failed=1
+#     fi
 
-    if (( ! spacer_failed )); then
-        version=$(spacer_parse_version "$install_dir/spacer/bin/z3") || {
-            error_parse_version spacer;
-            spacer_failed=1;
-        }
-    fi
-    if (( ! spacer_failed )); then
-        success "${cgreen}spacer $version${coff}${cbold} successfully installed"
-    fi
-else
-    error_msg "Skipping spacer: spacer installation, failed"
-fi
+#     if (( ! spacer_failed )); then
+#         version=$(spacer_parse_version "$install_dir/spacer/bin/z3") || {
+#             error_parse_version spacer;
+#             spacer_failed=1;
+#         }
+#     fi
+#     if (( ! spacer_failed )); then
+#         success "${cgreen}spacer $version${coff}${cbold} successfully installed"
+#     fi
+# else
+#     error_msg "Skipping spacer: spacer installation, failed"
+# fi
 
 ##################
 # Install Z3 #
@@ -720,7 +759,7 @@ fi
 ##################
 # Install zustre #
 ##################
-zustre_failed=0
+# zustre_failed=0
 # if [ $lustrec_failed -eq 1 -o $spacer_failed -eq 1 ]; then
 #     error_msg "Skipping Zustre: dependancies Lustrec or spacer installation has failed"
 # else
@@ -833,9 +872,9 @@ else
         if (( ! kind2_failed )); then
             success "${cgreen}kind2 $version${coff}${cbold} successfully installed"
 
-            if [[ -f "$build_dir/zustre/tests/two_counters.lus" ]]; then
+            if [[ -f "$build_dir/kind2/examples/two_counters.lus" ]]; then
                 progress "Testing kind2 on a simple example"
-                kind2_output=$(run_log_debug kind2 "$build_dir/zustre/tests/two_counters.lus" 2>&1)
+                kind2_output=$(run_log_debug kind2 "$build_dir/kind2/examples/two_counters.lus" 2>&1)
                 (( verbose >= 1 )) && echo "$kind2_output"
                 [[ $kind2_output == *"Success"* ]] || {
                     error_test kind2;
@@ -871,6 +910,6 @@ if [ $lustrec_failed -eq 1 -o $kind2_failed -eq 1 ]; then
 else
     success "Main cocosim dependencies have been successfully installed"
 fi
-info "To use cocosim dependencies lustrec, zustre, kind2. first run:"
+info "To use cocosim dependencies lustrec, kind2. first run:"
 info "$ $source_cmd $install_dir/activate"
 info "You should consider adding this in your .bashrc"

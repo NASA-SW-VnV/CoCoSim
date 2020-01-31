@@ -46,8 +46,24 @@ function [ T,  harness_model_name, status] = mutation_tests( model_full_path,...
         exportToWs, mkHarnessMdl, nb_steps, IMIN, IMAX, max_nb_test, min_coverage)
     %mutation_tests Summary of this function goes here
     %   Detailed explanation goes here
-    status = 0;
+    global KIND2 LUSTRET; 
     harness_model_name = '';
+    if isempty(KIND2)
+        tools_config;
+    end
+    if ~exist(KIND2,'file')
+        errordlg(sprintf('KIND2 model checker is not found in %s. Please set KIND2 path in tools_config.m under tools folder.', KIND2));
+        status = 1;
+        return;
+    end
+    status = BUtils.check_files_exist(LUSTRET);
+    if status
+        msg = 'LUSTRET not found, please configure tools_config file under tools folder';
+        errordlg(msg);
+        status = 1;
+        return;
+    end
+    
     if ~exist(model_full_path, 'file')
         display_msg(['File not foudn: ' model_full_path],...
             MsgType.ERROR, 'mutation_tests', '');
