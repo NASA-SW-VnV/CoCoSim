@@ -52,7 +52,8 @@ disp('**********************************')
 disp('... Starting cocoSim configuration')
 [cocoSim_root, ~, ~] = fileparts(mfilename('fullpath'));
 addpath(fullfile(cocoSim_root, 'scripts'));
-install_cocosim_lib();
+% Enable this to update cocosim repo, or call it directly from workspace
+% install_cocosim_lib();
 cocosim_config;
 warning('off');
 sl_refresh_customizations;
