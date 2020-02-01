@@ -44,7 +44,7 @@
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [new_obj, varIds] = pseudoCode2Lustre(obj, data_map)
-        varIds = {};
+    varIds = {};
     outputs_map = containers.Map('KeyType', 'char', 'ValueType', 'int32');
 
     %initialize outputs_map

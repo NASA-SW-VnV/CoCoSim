@@ -45,7 +45,11 @@
 function [body, variables, external_nodes, external_libraries, abstractedBlocks] =...
         write_body(subsys, main_sampleTime, lus_backend, coco_backend, xml_trace)
     %% Go over SS Content
-
+    global CoCoSimPreferences
+    
+    if isempty(CoCoSimPreferences)
+        CoCoSimPreferences = cocosim_menu.CoCoSimPreferences.load();
+    end
          
     %
     %
@@ -70,9 +74,23 @@ function [body, variables, external_nodes, external_libraries, abstractedBlocks]
         try
             b.write_code(subsys, blk, xml_trace, lus_backend, coco_backend, main_sampleTime);
         catch me
-            display_msg(sprintf('Translation to Lustre of block %s has failed.', HtmlItem.addOpenCmd(blk.Origin_path)),...
-                MsgType.ERROR, 'write_body', '');
             display_msg(me.getReport(), MsgType.DEBUG, 'write_body', '');
+            msg = sprintf('Translation to Lustre of block %s has failed.', HtmlItem.addOpenCmd(blk.Origin_path));
+            if LusBackendType.isKIND2(CoCoSimPreferences.lustreBackend) ...
+                    && CoCoSimPreferences.abstract_unsupported_blocks
+                try
+                    display_msg(sprintf('%s. It will be abstracted',msg),...
+                        MsgType.WARNING, 'write_body', '');
+                    fun_name = 'nasa_toLustre.blocks.AbstractBlock_To_Lustre';
+                    h = str2func(fun_name);
+                    b = h();
+                    b.write_code(subsys, blk, xml_trace, lus_backend, coco_backend, main_sampleTime);
+                catch
+                    display_msg(msg, MsgType.ERROR, 'write_body', '');
+                end
+            else
+                display_msg(msg, MsgType.ERROR, 'write_body', '');
+            end
         end
         code = b.getCode();
         if iscell(code)

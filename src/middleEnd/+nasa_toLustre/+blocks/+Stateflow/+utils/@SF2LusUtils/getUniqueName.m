@@ -1,7 +1,13 @@
 function unique_name = getUniqueName(object, id)
     %% Get unique short name
-
+    
     global SF_STATES_PATH_MAP SF_JUNCTIONS_PATH_MAP;
+    if isempty(SF_STATES_PATH_MAP)
+        SF_STATES_PATH_MAP = containers.Map('KeyType', 'char', 'ValueType', 'any');
+    end
+    if isempty(SF_JUNCTIONS_PATH_MAP)
+        SF_JUNCTIONS_PATH_MAP = containers.Map('KeyType', 'char', 'ValueType', 'any');
+    end
     if ischar(object)
         name = object;
         if nargin == 1

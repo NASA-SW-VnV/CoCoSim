@@ -43,9 +43,7 @@
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 classdef AbstractBlock_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
-    % This is a template for the user to follow for developping a specific
-    % block to Lustre.
-
+    % This class is used to abstract unsupported blocks
     
     properties
     end

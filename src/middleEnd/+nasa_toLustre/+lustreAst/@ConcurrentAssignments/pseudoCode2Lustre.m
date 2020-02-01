@@ -43,8 +43,11 @@
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [new_obj, outputs_map] = pseudoCode2Lustre(obj, outputs_map, isLeft, node, data_map)
-
-    old_outputs_map = containers.Map(outputs_map.keys, outputs_map.values);
+    if isempty(outputs_map.keys)
+        old_outputs_map = containers.Map();
+    else
+        old_outputs_map = containers.Map(outputs_map.keys, outputs_map.values);
+    end
     new_assignments = cell(numel(obj.assignments), 1);
     for i=1:numel(obj.assignments)
         if isa(obj.assignments{i}, 'nasa_toLustre.lustreAst.LustreEq')
