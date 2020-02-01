@@ -59,14 +59,7 @@ function res = print_using_html5(obj, level)
         Textcolor = obj.text_color;
     end
 
-    if strcmp(obj.icon_color, 'red')
-            iconCode = sprintf('<i class="material-icons red-text"><h%d>do_not_disturb_on<h%d></i>', level, level);
-    elseif strcmp(obj.icon_color, 'green')
-        iconCode = sprintf('<i class="material-icons green-text"><h%d>check_circle<h%d></i>', level, level);
-    else
-        iconCode = '';
-    end            
-
+    iconCode = '';
     %             if isempty(obj.subtitles)
     dropDownCode = '';
     %             else
@@ -77,7 +70,7 @@ function res = print_using_html5(obj, level)
     if isempty(obj.subtitles)
         res = sprintf('<li>\n%s\n</li>', header);
     else
-        res = sprintf('<li>\n%s\n<ul >\n', ...
+        res = sprintf('<li>\n%s\n<ul style="list-style-type:disc;">\n', ...
             header);
         for i=1:numel(obj.subtitles)
             res = [res ' ' obj.subtitles{i}.print(level + 1)];

@@ -189,6 +189,18 @@ classdef SubSystem_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                         ResetType, HtmlItem.addOpenCmd(blk.Origin_path)));
                 end
             end
+            % TruthTable and others are of blockType Subsystem but with no content.
+            % They should be supported directly to Lustre
+            if isempty(fieldnames(blk.Content)) && isfield(blk, 'SFBlockType') ...
+                    && ~isempty(blk.SFBlockType)
+                obj.addUnsupported_options(sprintf('Block "%s" with Type "%s" is not supported', ...
+                    HtmlItem.addOpenCmd(blk.Origin_path), blk.SFBlockType));
+            end
+            if isempty(fieldnames(blk.Content)) && isfield(blk, 'MaskType') ...
+                    && ~isempty(blk.MaskType)
+                obj.addUnsupported_options(sprintf('Block "%s" with Type "%s" is not supported', ...
+                    HtmlItem.addOpenCmd(blk.Origin_path), blk.MaskType));
+            end
             % add your unsuported options list here
             options =obj.unsupported_options;
         end
