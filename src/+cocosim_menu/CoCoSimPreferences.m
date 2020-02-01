@@ -67,6 +67,7 @@ classdef CoCoSimPreferences < handle
         skip_sf_actions_check = false;
         skip_optim = false;
         skip_unsupportedblocks = false;
+        abstract_unsupported_blocks = true;
         skip_defected_pp = true;
         skip_pp = false;
         use_more_precise_abstraction = false;

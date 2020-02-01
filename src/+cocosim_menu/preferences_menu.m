@@ -110,6 +110,7 @@ function schema = getNASACompilerPreferences(callbackInfo)
         {@getForceTypecastingOfInt, CoCoSimPreferences},...
         {@useMorePreciseAbstraction, CoCoSimPreferences},...
         {@getSkip_unsupportedblocks, CoCoSimPreferences},...
+        {@getAbstract_unsupported_blocks_forverification, CoCoSimPreferences}, ...
         {@getSkip_pp, CoCoSimPreferences},...
         {@getSkip_defected_pp, CoCoSimPreferences},...
         {@getSkip_optim, CoCoSimPreferences},...
@@ -168,6 +169,26 @@ function skip_unsupportedblocks(callbackInfo)
     CoCoSimPreferences.skip_unsupportedblocks = ~ CoCoSimPreferences.skip_unsupportedblocks;
     cocosim_menu.CoCoSimPreferences.save(CoCoSimPreferences);
 end
+
+%getAbstract_unsupported_blocks_forverification
+function schema = getAbstract_unsupported_blocks_forverification(callbackInfo)
+    schema = sl_toggle_schema;
+    schema.label = 'Abstract unsupported blocks for verification (Kind2).';
+    CoCoSimPreferences = callbackInfo.userdata;
+    schema.checked = 'checked';
+    if ~CoCoSimPreferences.abstract_unsupported_blocks
+        schema.checked = 'unchecked';
+    end
+    schema.callback = @abstract_unsupported_blocks_forverification;
+    schema.userdata = CoCoSimPreferences;
+end
+function abstract_unsupported_blocks_forverification(callbackInfo)
+    CoCoSimPreferences = callbackInfo.userdata;
+    CoCoSimPreferences.abstract_unsupported_blocks = ~ CoCoSimPreferences.abstract_unsupported_blocks;
+    cocosim_menu.CoCoSimPreferences.save(CoCoSimPreferences);
+end
+
+
 %getSkip_pp
 function schema = getSkip_pp(callbackInfo)
     schema = sl_toggle_schema;
@@ -256,6 +277,8 @@ function skip_sf_actions_check(callbackInfo)
     CoCoSimPreferences.skip_sf_actions_check = ~ CoCoSimPreferences.skip_sf_actions_check;
     cocosim_menu.CoCoSimPreferences.save(CoCoSimPreferences);
 end
+
+
 %% Lustre Backend
 function schema = getLustreBackend(callbackInfo)
     schema = sl_container_schema;
