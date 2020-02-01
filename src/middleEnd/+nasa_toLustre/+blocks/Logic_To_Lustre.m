@@ -47,7 +47,7 @@ classdef Logic_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     % supporting: AND, OR, NAND, NOR, XOR, NXOR, NOT
     
 
-%    properties
+    properties
     end
     
     methods

@@ -44,8 +44,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 classdef Sqrt_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     % Sqrt_To_Lustre:
-
-%    properties
+    
+    properties
         
     end
     
