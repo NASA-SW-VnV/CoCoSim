@@ -41,7 +41,8 @@
 % cannot be relied upon to generate or error check software being developed. 
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Chart Node
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Chart Node
 function [main_node, external_nodes]  = write_ChartNode(parent, blk, chart, dataAndEvents, events)
     
     global SF_STATES_NODESAST_MAP;

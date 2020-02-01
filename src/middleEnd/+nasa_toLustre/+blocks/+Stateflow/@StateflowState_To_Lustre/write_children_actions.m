@@ -41,7 +41,8 @@
 % cannot be relied upon to generate or error check software being developed. 
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% write_children_actions
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% write_children_actions
 function [actions, outputs, inputs] = ...
         write_children_actions(state, actionType)
     

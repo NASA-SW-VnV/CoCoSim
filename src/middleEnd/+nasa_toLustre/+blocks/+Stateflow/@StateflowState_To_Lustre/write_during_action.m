@@ -41,7 +41,8 @@
 % cannot be relied upon to generate or error check software being developed. 
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DURING ACTION
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% DURING ACTION
 function [main_node, external_libraries] = ...
         write_during_action(state, data_map)
     

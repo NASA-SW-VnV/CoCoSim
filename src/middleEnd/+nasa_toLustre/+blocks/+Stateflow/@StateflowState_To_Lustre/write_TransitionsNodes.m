@@ -41,9 +41,9 @@
 % cannot be relied upon to generate or error check software being developed. 
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% InnerTransitions and  OuterTransitions Nodes
-function  [external_nodes, external_libraries ] = ...
-        write_TransitionsNodes(state, data_map)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% InnerTransitions and  OuterTransitions Nodes
+function  [external_nodes, external_libraries ] = write_TransitionsNodes(state, data_map)
     
     external_nodes = {};
     [node, external_libraries] = ...

@@ -44,7 +44,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function ep = calculate_eps(BP, j)
 
-%    if ~isnumeric(BP)
+   if ~isnumeric(BP)
         ep = [];
         return;
     end
