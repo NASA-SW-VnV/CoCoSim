@@ -57,7 +57,8 @@ if not(isempty(chartArr))
             chart = chartArr(i);
             display_msg(chart.Name, Constants.INFO, 'Chart_pp', '');
             chart.set('ActionLanguage', 'MATLAB');
-        catch
+        catch me
+            display_msg(me.getReport(), MsgType.DEBUG, 'Chart_pp', '');
             status = 1;
             errors_msg{end + 1} = sprintf('Chart pre-process has failed for block %s', chartArr(i).Name);
             continue;
