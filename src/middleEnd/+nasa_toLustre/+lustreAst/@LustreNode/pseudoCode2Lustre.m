@@ -1,4 +1,3 @@
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
@@ -96,8 +95,9 @@ function [new_obj, varIds] = pseudoCode2Lustre(obj, data_map)
                 out_DT);
         end
     end
-    tobeRemoved = {};
-    for i=1:numel(obj.localVars)
+    tobeRemoved = [];
+    nbVars = length(obj.localVars);
+    for i=1:nbVars
         out_name = obj.localVars{i}.getId();
         out_DT = obj.localVars{i}.getDT();
         if ~isKey(outputs_map, out_name)
@@ -105,7 +105,7 @@ function [new_obj, varIds] = pseudoCode2Lustre(obj, data_map)
         end
         last_Idx = outputs_map(out_name);
         if last_Idx >= 1
-            tobeRemoved{end+1} = obj.localVars{i};
+            tobeRemoved(end+1) = i;
         end
         for j=1:last_Idx
             obj.addVar(...
@@ -114,10 +114,9 @@ function [new_obj, varIds] = pseudoCode2Lustre(obj, data_map)
         end
         
     end
-    for i=1:length(tobeRemoved)
-        obj.localVars =...
-               nasa_toLustre.lustreAst.LustreVar.removeVar(obj.localVars, tobeRemoved{i});
-    end
+    % remove tobeRemoved vars
+    obj.localVars(tobeRemoved) = [];
+
     % construct the node
     new_obj = nasa_toLustre.lustreAst.LustreNode(obj.metaInfo, obj.name, obj.inputs, ...
         obj.outputs, new_localContract, obj.localVars, new_bodyEqs, ...

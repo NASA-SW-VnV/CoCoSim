@@ -1,4 +1,3 @@
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
@@ -45,43 +44,49 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function [Termination_cond, body, outputs, variables] = ...
-        updateTerminationCond(Termination_cond, condName, trans_cond, ...
+        updateTerminationCond(Termination_cond, varName, trans_cond, ...
         body, outputs, variables, addToVariables)
     
+    % keep truck of last var counter to speed up the lookup of already defined
+    % variables
+    %TODO: use hash map for variables instead to speedup the lookup
+    persistent var_counter
+    if isempty(var_counter)
+        var_counter = 1;
+    end
     if addToVariables
-        if nasa_toLustre.lustreAst.VarIdExpr.ismemberVar(condName, variables)
-            i = 1;
-            new_condName = strcat(condName, num2str(i));
+        if nasa_toLustre.lustreAst.VarIdExpr.ismemberVar(varName, variables)
+            new_condName = strcat(varName, num2str(var_counter));
             while(nasa_toLustre.lustreAst.VarIdExpr.ismemberVar(new_condName, variables))
-                i = i + 1;
-                new_condName = strcat(condName, num2str(i));
+                var_counter = var_counter + 1;
+                new_condName = strcat(varName, num2str(var_counter));
             end
-            condName = new_condName;
+            varName = new_condName;
         end
     end
     if isempty(Termination_cond)
         if isempty(trans_cond)
             body{end+1} = ...
-                nasa_toLustre.lustreAst.LustreEq(nasa_toLustre.lustreAst.VarIdExpr(condName), nasa_toLustre.lustreAst.BoolExpr('true'));
+                nasa_toLustre.lustreAst.LustreEq(nasa_toLustre.lustreAst.VarIdExpr(varName), nasa_toLustre.lustreAst.BoolExpr('true'));
         else
             body{end+1} = ...
-                nasa_toLustre.lustreAst.LustreEq(nasa_toLustre.lustreAst.VarIdExpr(condName), trans_cond);
+                nasa_toLustre.lustreAst.LustreEq(nasa_toLustre.lustreAst.VarIdExpr(varName), trans_cond);
         end
     else
         if isempty(trans_cond)
             body{end+1} = ...
-                nasa_toLustre.lustreAst.LustreEq(nasa_toLustre.lustreAst.VarIdExpr(condName), nasa_toLustre.lustreAst.BoolExpr('true'));
+                nasa_toLustre.lustreAst.LustreEq(nasa_toLustre.lustreAst.VarIdExpr(varName), nasa_toLustre.lustreAst.BoolExpr('true'));
         else
             body{end+1} = ...
-                nasa_toLustre.lustreAst.LustreEq(nasa_toLustre.lustreAst.VarIdExpr(condName), ...
+                nasa_toLustre.lustreAst.LustreEq(nasa_toLustre.lustreAst.VarIdExpr(varName), ...
                 nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.OR, Termination_cond, trans_cond));
         end
     end
-    Termination_cond = nasa_toLustre.lustreAst.VarIdExpr(condName);
+    Termination_cond = nasa_toLustre.lustreAst.VarIdExpr(varName);
     if addToVariables
-        variables{end+1} = nasa_toLustre.lustreAst.LustreVar(condName, 'bool');
+        variables{end+1} = nasa_toLustre.lustreAst.LustreVar(varName, 'bool');
     else
-        outputs{end+1} = nasa_toLustre.lustreAst.LustreVar(condName, 'bool');
+        outputs{end+1} = nasa_toLustre.lustreAst.LustreVar(varName, 'bool');
     end
 end
 

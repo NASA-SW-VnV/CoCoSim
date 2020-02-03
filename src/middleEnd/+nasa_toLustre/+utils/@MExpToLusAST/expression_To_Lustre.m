@@ -123,5 +123,5 @@ function [code, exp_dt, dim, extra_code] = expression_To_Lustre(tree, args)
 %         me
 %     end
     if ~isempty(output_dt), exp_dt = output_dt; end
-    
+    if length(dim) == 1 && dim == 1, dim = [1,1]; end
 end

@@ -1,4 +1,3 @@
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
@@ -46,7 +45,7 @@
 
 function  [main_node, external_nodes, external_libraries ] = ...
         write_Action(T, data_map, source_state, type, isDefaultTrans)
-    
+    global SF_STATES_NODESAST_MAP
     main_node = {};
     external_nodes = {};
     external_libraries = {};
@@ -56,6 +55,14 @@ function  [main_node, external_nodes, external_libraries ] = ...
     else
         t_act_node_name = nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.getTranActionNodeName(T, source_state, isDefaultTrans);
         action = T.TransitionAction;
+    end
+    if isKey(SF_STATES_NODESAST_MAP, t_act_node_name)
+        %Node already defined.
+        %TODO: investigate why nodes are twice generated, specially the
+        %ones inside Stateflow Functions. I assume the chart has access to
+        %the content of the Function, therefore they are defined twice in
+        %Internal Representation.
+        return;
     end
     if isDefaultTrans
         suffix = 'Default Transition';

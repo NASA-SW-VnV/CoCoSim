@@ -43,28 +43,25 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Get unique short name
-function unique_name = getUniqueName(object, src, isDefaultTrans)
-    
-    if nargin < 2
-        src = T.Source;
+% Get unique Variable name for every new condition Action.
+function var_name = getCondActNewVarName(T)
+    persistent vars_counter_map;
+    if isempty(vars_counter_map)
+        vars_counter_map = containers.Map('KeyType', 'char', 'ValueType', 'uint16');
     end
-    if nargin < 3
-        if isempty(src)
-            isDefaultTrans = true;
-        else
-            isDefaultTrans = false;
-        end
-    end
-    dst = object.Destination;
-    id_str = sprintf('%.0f', object.ExecutionOrder);
-    if isDefaultTrans
-        sourceName = '_DefaultTransition';
+    src = T.Source;
+    if isempty(src)
+        isDefaultTrans = true;
     else
-        sourceName = nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getUniqueName(src);
+        isDefaultTrans = false;
     end
-    unique_name = sprintf('%s_To_%s_ExecutionOrder%s',...
-        sourceName, ...
-        nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getUniqueName(dst), id_str );
-
+    transition_prefix = ...
+        nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.getTransName(T, src, isDefaultTrans);
+    var_name = sprintf('%s_Cond', transition_prefix);
+    if isKey(vars_counter_map, var_name)
+        vars_counter_map(var_name) = vars_counter_map(var_name) + 1;
+    else
+        vars_counter_map(var_name) = 1;
+    end
+    var_name = strcat(var_name, num2str(vars_counter_map(var_name)));
 end

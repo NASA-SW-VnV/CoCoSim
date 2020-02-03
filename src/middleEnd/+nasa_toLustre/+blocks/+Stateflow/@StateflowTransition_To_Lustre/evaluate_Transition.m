@@ -94,16 +94,19 @@ function [body, outputs, inputs, variables, external_libraries, validDestination
     % add condition variable so the condition action can not change
     % the truth value of the condition.
     if ~isempty(trans_cond)
-        condName = nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.getCondActionName(t);
-        if nasa_toLustre.lustreAst.VarIdExpr.ismemberVar(condName, variables)
-            i = 1;
-            new_condName = strcat(condName, num2str(i));
-            while(nasa_toLustre.lustreAst.VarIdExpr.ismemberVar(new_condName, variables))
-                i = i + 1;
-                new_condName = strcat(condName, num2str(i));
-            end
-            condName = new_condName;
-        end
+        condName = nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.getCondActNewVarName(t);
+        % No need for the following code: It takes too much time when
+        % variables is huge list. I changed getCondActNewVarName to return
+        % unique name at each call.
+%         if nasa_toLustre.lustreAst.VarIdExpr.ismemberVar(condName, variables)
+%             i = 1;
+%             new_condName = strcat(condName, num2str(i));
+%             while(nasa_toLustre.lustreAst.VarIdExpr.ismemberVar(new_condName, variables))
+%                 i = i + 1;
+%                 new_condName = strcat(condName, num2str(i));
+%             end
+%             condName = new_condName;
+%         end
         body{end+1} = nasa_toLustre.lustreAst.LustreEq(nasa_toLustre.lustreAst.VarIdExpr(condName), trans_cond);
         trans_cond = nasa_toLustre.lustreAst.VarIdExpr(condName);
         variables{end+1} = nasa_toLustre.lustreAst.LustreVar(condName, 'bool');
@@ -162,10 +165,10 @@ function [body, outputs, inputs, variables, external_libraries, validDestination
                 if isempty(transitions2)
                     %the junction has no outgoing transitions
                     %update termination condition
-                    condName = nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.getTerminationCondName();
+                    termVarName = nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.getTerminationCondName();
                     [Termination_cond, body, outputs, variables] = ...
                         nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.updateTerminationCond(...
-                        Termination_cond, condName, trans_cond, body, outputs, variables, true);
+                        Termination_cond, termVarName, trans_cond, body, outputs, variables, true);
                 else
                     %the junction has outgoing transitions
                     %Repeat the algorithm
@@ -219,17 +222,17 @@ function [body, outputs, inputs, variables, external_libraries, validDestination
     inputs = [inputs, inputs_i];
 
     %update termination condition
-    condName = nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.getTerminationCondName();
+    termVarName = nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.getTerminationCondName();
     [Termination_cond, body, outputs, variables] = ...
         nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.updateTerminationCond(...
-        Termination_cond, condName, trans_cond, body, outputs, variables, true);
+        Termination_cond, termVarName, trans_cond, body, outputs, variables, true);
     %validDestination_cond only updated if the final destination is a state
 
     if ~isDefaultTrans
-        condName = nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.getValidPathCondName();
+        termVarName = nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.getValidPathCondName();
         [validDestination_cond, body, outputs, variables] = ...
             nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.updateTerminationCond(...
-            validDestination_cond, condName, trans_cond, body, outputs, variables, false);
+            validDestination_cond, termVarName, trans_cond, body, outputs, variables, false);
     end
 end
 

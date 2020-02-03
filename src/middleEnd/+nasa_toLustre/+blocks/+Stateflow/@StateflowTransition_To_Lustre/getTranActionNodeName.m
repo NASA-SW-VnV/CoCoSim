@@ -55,7 +55,7 @@ function node_name = getTranActionNodeName(T, src, isDefaultTrans)
         end
     end
     transition_prefix = ...
-        nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.getUniqueName(T, src, isDefaultTrans);
+        nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.getTransName(T, src, isDefaultTrans);
     node_name = sprintf('%s_Tran_Act', transition_prefix);
 end
 

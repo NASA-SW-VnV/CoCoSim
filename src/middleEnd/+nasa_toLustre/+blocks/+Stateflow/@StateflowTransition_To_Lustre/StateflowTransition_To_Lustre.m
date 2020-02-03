@@ -127,9 +127,9 @@ classdef StateflowTransition_To_Lustre
         parent = getParent(child)
 
         %% Get unique short name
-        unique_name = getUniqueName(object, src, isDefaultTrans)
+        unique_name = getTransName(object, src, isDefaultTrans)
 
-        node_name = getCondActionName(T)
+        node_name = getCondActNewVarName(T)
 
         node_name = getCondActionNodeName(T, src, isDefaultTrans)
 

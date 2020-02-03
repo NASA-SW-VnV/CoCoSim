@@ -53,7 +53,7 @@ function full_path_trace = get_full_path_trace(transitions, isDefaultTrans)
             transition_name{i} = 'Default_Transition';
         else
             transition_name{i} = ...
-                nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.getUniqueName(transition, transition.Source);
+                nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.getTransName(transition, transition.Source);
         end
     end
     full_path_trace = MatlabUtils.strjoin(transition_name,', ');

@@ -156,6 +156,9 @@ function [main_node, external_libraries] = ...
     inputs = nasa_toLustre.lustreAst.LustreVar.uniqueVars(inputs);
     main_node.setOutputs(outputs);
     main_node.setInputs(inputs);
+    if ~isempty(variables)
+        main_node.setLocalVars(variables);
+    end
     SF_STATES_NODESAST_MAP(act_node_name) = main_node;
 end
 
