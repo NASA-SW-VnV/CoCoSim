@@ -1,6 +1,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-% Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+% Author: Trinh, Khanh V <khanh.v.trinh@nasa.gov>, 
+%   Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 % Notices:
 %
 % Copyright @ 2020 United States Government as represented by the 
