@@ -89,7 +89,7 @@ classdef SLXUtils
             show_models)
         %% terminate simulation if the model is in compile mode
         terminate(modelName)
-        
+        bdclose(last_closed_model)
         %% compare two models
         [valid, sim_failed, cex_file_path] = compareTwoSLXModels(orig_mdl_path, pp_mdl_path, min_max_constraints, show_models)
         %%

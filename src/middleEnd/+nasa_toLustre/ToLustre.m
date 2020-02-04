@@ -492,7 +492,7 @@ function [nodes_ast, contracts_ast, external_libraries, abstractedBlocks, error_
             abstractedBlocks = [abstractedBlocks, abstractedBlocks_i];
             error_status = error_status_i || error_status;
         end
-        [b, status] = nasa_toLustre.utils.getWriteType(blk);
+        [b, status] = nasa_toLustre.utils.getWriteType(blk, lus_backend);
         if status || ~b.isContentNeedToBeTranslated()
             return;
         end

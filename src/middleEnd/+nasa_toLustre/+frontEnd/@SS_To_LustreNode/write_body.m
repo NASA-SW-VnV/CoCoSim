@@ -67,7 +67,7 @@ function [body, variables, external_nodes, external_libraries, abstractedBlocks]
     end
     for i=1:numel(fields)
         blk = subsys.Content.(fields{i});
-        [b, status, type, masktype, sfblockType, ~] = nasa_toLustre.utils.getWriteType(blk);
+        [b, status, type, masktype, sfblockType, ~] = nasa_toLustre.utils.getWriteType(blk, lus_backend);
         if status
             continue;
         end

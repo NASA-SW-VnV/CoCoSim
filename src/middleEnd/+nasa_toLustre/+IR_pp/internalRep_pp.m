@@ -60,7 +60,7 @@ function [ new_ir, ir_handle_struct_map, ir_json_path ] = internalRep_pp( new_ir
     if isstruct(functions) && isfield(functions, 'name')
         cd(lib_dir);
         for i=1:numel(functions)
-            display_msg(['runing ' functions(i).name(1:end-2)], MsgType.INFO, 'internalRep_pp', '');
+            display_msg(['runing ' functions(i).name(1:end-2)], MsgType.INFO, 'internalRep_pp', '', 1);
             fun_name = sprintf('nasa_toLustre.IR_pp.lib.%s', functions(i).name(1:end-2));
             fh = str2func(fun_name);
             new_ir = fh(new_ir);

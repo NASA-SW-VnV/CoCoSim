@@ -67,7 +67,7 @@ function [Value, valueDataType, status] = evalParam(modelObj, parent, blk, param
         
         %% case 1: numeric param. e.g., comes from a struct field
         if isnumeric(param) || islogical(param)
-            [Value, valueDataType, status] = postprocessValue(param);
+            [Value, valueDataType, status] = postprocessValue(blk, param);
             return;
         end
         
@@ -95,7 +95,7 @@ function [Value, valueDataType, status] = evalParam(modelObj, parent, blk, param
             hws = modelObj.ModelWorkspace ;
             if isvarname(param) && hasVariable(hws, param)
                 Value = getVariable(hws, param);
-                [Value, valueDataType, status] = postprocessValue(Value);
+                [Value, valueDataType, status] = postprocessValue(blk, Value);
                 return;
             end
         catch
@@ -108,7 +108,7 @@ function [Value, valueDataType, status] = evalParam(modelObj, parent, blk, param
             v = get_param(parent.Handle, 'MaskWSVariables');
             getMaskValue = containers.Map({v.Name}', {v.Value}');
             Value = getMaskValue(param);
-            [Value, valueDataType, status] = postprocessValue(Value);
+            [Value, valueDataType, status] = postprocessValue(blk, Value);
             return;
         catch
             % It is not a Mask workspace variable, continue
@@ -159,7 +159,7 @@ function [Value, valueDataType, status] = evalParam(modelObj, parent, blk, param
                     SLXUtils.evalParam(modelObj, parent, blk, Value);
                 return;
             end
-            [Value, valueDataType, status] = postprocessValue(Value);
+            [Value, valueDataType, status] = postprocessValue(blk, Value);
             return;
             
         catch me
@@ -207,7 +207,7 @@ function [Value, valueDataType, status] = evalParam(modelObj, parent, blk, param
     end
 end
 
-function [newValue, valueDataType, status] = postprocessValue(Value)
+function [newValue, valueDataType, status] = postprocessValue(blk, Value)
     status = 0;
     valueDataType = class(Value);
     newValue = Value;
@@ -219,19 +219,30 @@ function [newValue, valueDataType, status] = postprocessValue(Value)
         else
             valueDataType = Value.DataType;
         end
+    elseif isa(Value, 'timeseries')
+        valueDataType = class(Value);
+        newValue = Value;
+        return;
     elseif isstruct(Value)
-        fields = fieldnames(Value);
-        newValue = [];
-        for i=1:length(fields)
-            [Value_i, ~, status] = ...
-                SLXUtils.evalParam(modelObj, parent, blk, Value.(fields{i}));
-            if status
-                %                 display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
-                %                     Value.(fields{i}), blk), ...
-                %                     MsgType.ERROR, 'SLXUtils.evalParam', '');
-                return;
+        % For block such as FromWorkSpace need the variable as struct
+        if strcmp(blk.BlockType, 'FromWorkspace')
+            valueDataType = class(Value);
+            newValue = Value;
+            return;
+        else
+            fields = fieldnames(Value);
+            newValue = [];
+            for i=1:length(fields)
+                [Value_i, ~, status] = ...
+                    SLXUtils.evalParam(modelObj, parent, blk, Value.(fields{i}));
+                if status
+                    %                 display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
+                    %                     Value.(fields{i}), blk), ...
+                    %                     MsgType.ERROR, 'SLXUtils.evalParam', '');
+                    return;
+                end
+                newValue = MatlabUtils.concat(newValue, double(Value_i));
             end
-            newValue = MatlabUtils.concat(newValue, double(Value_i));
         end
     elseif isnumeric(Value) || islogical(Value)
         valueDataType = class(Value);

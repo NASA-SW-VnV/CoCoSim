@@ -42,7 +42,7 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [b, status, type, masktype, sfblockType, isIgnored] = getWriteType(sub_blk)
+function [b, status, type, masktype, sfblockType, isIgnored] = getWriteType(sub_blk, lus_backend)
     % getWriteType returns the handle of class corresponding to blockType/MaskType
     % of the block in parameter.
     global CoCoSimPreferences
@@ -119,7 +119,7 @@ function [b, status, type, masktype, sfblockType, isIgnored] = getWriteType(sub_
     end
     
     % Check if abstraction is allowed
-    if LusBackendType.isKIND2(CoCoSimPreferences.lustreBackend) ...
+    if LusBackendType.isKIND2(lus_backend) ...
             && CoCoSimPreferences.abstract_unsupported_blocks
         try
             fun_name = 'nasa_toLustre.blocks.AbstractBlock_To_Lustre';

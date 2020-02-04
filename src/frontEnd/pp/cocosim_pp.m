@@ -94,11 +94,11 @@ function [new_file_path, failed] = cocosim_pp(model_path, varargin)
     already_pp = NASAPPUtils.isAlreadyPP(model_path);
     if skip_pp
         if already_pp
-            display_msg('SKIP_PP flag is given, the pre-processing will be skipped.', MsgType.INFO, 'PP', '');
+            display_msg('SKIP_PP flag is given, the pre-processing will be skipped.', MsgType.WARNING, 'PP', '', 0);
             new_file_path = model_path;
             return;
         else
-            display_msg('SKIP_PP flag is ignored if the model is not already pre-processed.', MsgType.WARNING, 'PP', '');
+            display_msg('SKIP_PP flag is ignored if the model is not already pre-processed.', MsgType.WARNING, 'PP', '', 0);
         end
     end
     %% Creat the new model name
@@ -120,7 +120,7 @@ function [new_file_path, failed] = cocosim_pp(model_path, varargin)
         save_system(model, new_file_path);
     end
 
-    display_msg(['Loading ' new_file_path ], MsgType.INFO, 'PP', '');
+    display_msg(['Loading ' new_file_path ], MsgType.INFO, 'PP', '', 0);
     load_system(new_file_path);
     
     % DO not remove to support as many blocks as possible.
@@ -142,7 +142,7 @@ function [new_file_path, failed] = cocosim_pp(model_path, varargin)
             [Y2, M2, D2, H2, MN2, S2] = datevec(pp_datenum);
             % we ignore seconds
             if Y <= Y2 && M <= M2 && D <= D2 && H <= H2 && MN <= MN2 && abs(S - S2) <= 15
-                display_msg('Skipping pre-processing step. No modifications have been made to the model.', MsgType.RESULT, 'PP', '');
+                display_msg('Skipping pre-processing step. No modifications have been made to the model.', MsgType.RESULT, 'PP', '', 0);
                 if ~nodisplay
                     open(new_file_path);
                 end
@@ -168,7 +168,7 @@ function [new_file_path, failed] = cocosim_pp(model_path, varargin)
         hws.assignin('already_pp', 1);
     end
 
-    display_msg('Loading libraries', MsgType.INFO, 'PP', '');
+    display_msg('Loading libraries', MsgType.INFO, 'PP', '', 0);
     if ~bdIsLoaded('gal_lib'); load_system('gal_lib.slx'); end
     if ~bdIsLoaded('pp_lib'); load_system('pp_lib.slx'); end
 
@@ -182,6 +182,7 @@ function [new_file_path, failed] = cocosim_pp(model_path, varargin)
     %% sort functions calls
     oldDir = pwd;
     warning off
+    display_msg('Start Pre-processing the model', MsgType.INFO, 'PP', '', 0);
     for i=1:numel(ordered_pp_functions)
         [dirname, func_name, ~] = fileparts(ordered_pp_functions{i});
         cd(dirname);
@@ -191,7 +192,7 @@ function [new_file_path, failed] = cocosim_pp(model_path, varargin)
         end
         fh = str2func(func_name);
         try
-            display_msg(['runing ' func2str(fh)], MsgType.INFO, 'PP', '');
+            display_msg(['runing ' func2str(fh)], MsgType.INFO, 'PP', '', 1);
             if nargout(fh) == 2
                 [~, errors_msg] = fh(new_model_base);
                 for j=1:numel(errors_msg)
@@ -241,7 +242,7 @@ function [new_file_path, failed] = cocosim_pp(model_path, varargin)
     end
     % Exporting the model to the mdl CoCoSim compatible file format
 
-    display_msg('Saving simplified model', MsgType.INFO, 'PP', '');
+    display_msg('Saving simplified model', MsgType.INFO, 'PP', '', 0);
 
 
 

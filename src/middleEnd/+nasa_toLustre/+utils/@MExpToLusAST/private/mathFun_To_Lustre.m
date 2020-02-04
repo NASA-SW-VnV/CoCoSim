@@ -139,8 +139,7 @@ function [code, exp_dt, dim, extra_code] = mathFun_To_Lustre(tree, args)
                 (1:numel(param)), 'UniformOutput', false);
             exp_dt = expected_param_dt;
             
-            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function with two arguments
+            %function with two arguments
         case {'rem', 'mod'}
             args.expected_lusDT = '';
             [param1, param1_dt, dim1, extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(1), args);

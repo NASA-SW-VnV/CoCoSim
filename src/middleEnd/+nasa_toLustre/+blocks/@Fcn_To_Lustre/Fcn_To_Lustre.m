@@ -52,9 +52,12 @@ classdef Fcn_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
     methods
         
         
-        function  status = write_code(obj, parent, blk, xml_trace, ~, ~, main_sampleTime, varargin)
+        function  status = write_code(obj, parent, blk, xml_trace, ~, ~, ...
+                main_sampleTime, varargin)
             
-            [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace, main_sampleTime);
+            [outputs, outputs_dt] = ...
+                nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(...
+                parent, blk, [], xml_trace, main_sampleTime);
             
             
             inputs{1} =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk, 1);
@@ -90,9 +93,10 @@ classdef Fcn_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             
         end
         %%
-        function options = getUnsupportedOptions(obj, parent, blk, varargin)
+        function options = getUnsupportedOptions(obj, parent, blk, ...
+                lus_backend, coco_backend, main_sampleTime, varargin)
             % calling write_code because this block manipulate Expressions.
-            status = obj.write_code(parent, blk, [], varargin);
+            status = obj.write_code(parent, blk, [], lus_backend, coco_backend, main_sampleTime, varargin{:});
             if status
                 obj.addUnsupported_options(sprintf('ParseError  character unsupported  %s in block %s', ...
                     blk.Expr, HtmlItem.addOpenCmd(blk.Origin_path)));
