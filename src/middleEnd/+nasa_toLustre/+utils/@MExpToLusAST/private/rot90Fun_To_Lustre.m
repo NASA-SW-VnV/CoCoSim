@@ -44,7 +44,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [code, exp_dt, dim, extra_code] = rot90Fun_To_Lustre(tree, args)
 
-%    
     N = 1;
     [X, exp_dt, X_dim, extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(1),args);
     X = reshape(X, X_dim);

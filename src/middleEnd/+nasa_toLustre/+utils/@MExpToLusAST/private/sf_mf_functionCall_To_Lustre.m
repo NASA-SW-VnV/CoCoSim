@@ -43,8 +43,6 @@
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [code, extra_code] = sf_mf_functionCall_To_Lustre(tree, args)
-
-    % G    
     
     global SF_MF_FUNCTIONS_MAP ;
     extra_code = {};

@@ -44,7 +44,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [code, exp_dt, dim, extra_code] = pascalFun_To_Lustre(tree, args)
 
-%    
     args.expected_lusDT = 'int';
     [X, ~, ~, extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(1),args);
     

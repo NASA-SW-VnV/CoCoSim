@@ -44,7 +44,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [code, exp_dt, dim, extra_code] = rdivideFun_To_Lustre(tree, args)
 
-%    
     if isa(tree.parameters, 'struct')
         params = arrayfun(@(i) tree.parameters(i), 1:length(tree.parameters), 'UniformOutput', 0);
     else
