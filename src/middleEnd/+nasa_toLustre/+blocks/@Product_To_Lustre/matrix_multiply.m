@@ -69,7 +69,11 @@ function [codes, AdditionalVars] = matrix_multiply(obj, exp, blk, inputs, output
         else
             m1_inputs = productOutputs;
             m1_dim.dims(1,1) = in_matrix_dimension{1}.dims(1,1);
-            m1_dim.dims(1,2) = in_matrix_dimension{i}.dims(1,2);
+            if length(in_matrix_dimension{i}.dims) > 1
+                m1_dim.dims(1,2) = in_matrix_dimension{i}.dims(1,2);
+            else
+                m1_dim.dims(1,2) = 1;
+            end
             m1_dimension = m1_dim;
         end
         if i==numel(in_matrix_dimension)-1

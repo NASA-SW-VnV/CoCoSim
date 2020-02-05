@@ -80,7 +80,7 @@ function [new_ir, status] = stateflow_IR_pp(old_ir, print_in_file, output_dir)
         package_prefix = MatlabUtils.getPackagePrefix(dirname, func_name);
         fh = str2func(sprintf('%s.%s', package_prefix, func_name));
         try
-            display_msg(['runing ' func2str(fh)], MsgType.INFO, 'Stateflow_IRPP', '');
+            display_msg(['runing ' func2str(fh)], MsgType.INFO, 'Stateflow_IRPP', '', 1);
             [new_ir, status] = fh(new_ir);
             if status
                  display_msg('Stateflow_IR_PP has been interrupted', MsgType.ERROR, 'Stateflow_IRPP', '');

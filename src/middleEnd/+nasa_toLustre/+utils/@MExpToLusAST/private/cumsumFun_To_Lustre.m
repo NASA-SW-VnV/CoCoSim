@@ -54,9 +54,10 @@ function [code, exp_dt, dim, extra_code] = cumsumFun_To_Lustre(tree, args)
     if isrow(x), x = x'; end
 
     if length(dim) > 2 % TODO support multi-dimension input
-        ME = MException('COCOSIM:TREE2CODE', ...
-            'Function cumsum in expression "%s" first argument is %d-dimension, more than 2 is not supported.',...
+        msg = sprintf('Function cumsum in expression "%s" first argument is %d-dimension, more than 2 is not supported.',...
             tree.text, numel(x_dim));
+        display_msg(msg, MsgType.ERROR, 'cumsumFun_To_Lustre', '');
+        ME = MException('COCOSIM:TREE2CODE', msg);
         throw(ME);
     end
     

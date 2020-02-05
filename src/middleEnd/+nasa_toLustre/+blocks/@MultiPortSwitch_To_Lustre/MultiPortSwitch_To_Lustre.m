@@ -73,6 +73,7 @@ classdef MultiPortSwitch_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             elseif strcmp(blk.DataPortOrder, 'Specify indices')
                 display_msg(sprintf('Specify indices is not supported  in block %s',...
                     HtmlItem.addOpenCmd(blk.Origin_path)), MsgType.ERROR, 'MultiportSwitch_To_Lustre', '');
+                return;
             end
             
             codes = cell(1, numel(outputs) + 1); 
