@@ -1,4 +1,3 @@
-function [node, external_nodes_i, opens, abstractedNodes] = get_conv(lus_backend)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
@@ -43,6 +42,7 @@ function [node, external_nodes_i, opens, abstractedNodes] = get_conv(lus_backend
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function [node, external_nodes_i, opens, abstractedNodes] = get_conv(lus_backend)
     opens = {'conv'};
     abstractedNodes = {};
     if ~LusBackendType.isLUSTREC(lus_backend)

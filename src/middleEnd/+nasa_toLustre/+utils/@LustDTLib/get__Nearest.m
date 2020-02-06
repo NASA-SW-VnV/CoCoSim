@@ -1,6 +1,3 @@
-% Nearest Rounds number to the nearest representable value.
-%If a tie occurs, rounds toward positive infinity. Equivalent to the Fixed-Point Designer nearest function.
-function [node, external_nodes, opens, abstractedNodes] = get__Nearest(varargin)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
@@ -45,7 +42,10 @@ function [node, external_nodes, opens, abstractedNodes] = get__Nearest(varargin)
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        opens = {};
+% Nearest Rounds number to the nearest representable value.
+%If a tie occurs, rounds toward positive infinity. Equivalent to the Fixed-Point Designer nearest function.
+function [node, external_nodes, opens, abstractedNodes] = get__Nearest(varargin)
+    opens = {};
     abstractedNodes = {};
     % format = '--Rounds number to the nearest representable value.\n--If a tie occurs, rounds toward positive infinity\n ';
     % format = [ format ,'node _Nearest (x: real)\nreturns(y:int);\nlet\n\t'];

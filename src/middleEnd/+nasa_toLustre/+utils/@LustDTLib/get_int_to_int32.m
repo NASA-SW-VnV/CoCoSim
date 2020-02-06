@@ -1,4 +1,3 @@
-function [node, external_nodes_i, opens, abstractedNodes] = get_int_to_int32(varargin)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
@@ -43,5 +42,7 @@ function [node, external_nodes_i, opens, abstractedNodes] = get_int_to_int32(var
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function [node, external_nodes_i, opens, abstractedNodes] = get_int_to_int32(varargin)
+
     [node, external_nodes_i, opens, abstractedNodes] = getIntToInt('int32');
 end

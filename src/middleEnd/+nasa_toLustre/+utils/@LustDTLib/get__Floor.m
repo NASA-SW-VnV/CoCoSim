@@ -1,4 +1,3 @@
-function [node, external_nodes, opens, abstractedNodes] = get__Floor(lus_backend, varargin)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
@@ -43,6 +42,7 @@ function [node, external_nodes, opens, abstractedNodes] = get__Floor(lus_backend
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function [node, external_nodes, opens, abstractedNodes] = get__Floor(lus_backend, varargin)
     if LusBackendType.isKIND2(lus_backend)
         abstractedNodes = {};
                 opens = {};

@@ -41,7 +41,8 @@
 % cannot be relied upon to generate or error check software being developed. 
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%PP_CONFIG  This is a configuration file for CoCoSim preprocessing. You
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%PP_CONFIG  This is a configuration file for CoCoSim preprocessing. You
 %   will be able to choose what you want to be preprocessed or to create
 %   your own pre-processing library. 
 %

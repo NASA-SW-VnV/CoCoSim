@@ -50,7 +50,7 @@ function [report_path, status] = check_guidelines(model_path, varargin)
     % See guidelines_config for more details.
     % Inputs:
     % model_path: The full path to Simulink model.
-%    status = 0;
+    status = 0;
 
     mode_display = 1;
     for i=1:numel(varargin)

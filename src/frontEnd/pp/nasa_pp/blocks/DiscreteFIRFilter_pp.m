@@ -42,7 +42,6 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [status, errors_msg] = DiscreteFIRFilter_pp(model)
     % DiscreteFIRFilter_pp searches for DiscreteFIRFilter_pp blocks and replaces them by a
     % PP-friendly equivalent.

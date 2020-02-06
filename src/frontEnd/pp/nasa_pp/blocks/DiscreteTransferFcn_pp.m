@@ -42,7 +42,6 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [status, errors_msg] = DiscreteTransferFcn_pp(model)
     % DiscreteTransferFcn_pp searches for DiscreteTransferFcn_pp blocks and replaces them by a
     % PP-friendly equivalent.

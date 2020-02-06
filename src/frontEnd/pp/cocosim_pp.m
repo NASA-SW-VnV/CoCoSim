@@ -102,7 +102,7 @@ function [new_file_path, failed] = cocosim_pp(model_path, varargin)
         end
     end
     %% Creat the new model name
-    [model_parent, model, ext] = fileparts(model_path);
+    [model_parent, model, ~] = fileparts(model_path);
     
     load_system(model_path);
 

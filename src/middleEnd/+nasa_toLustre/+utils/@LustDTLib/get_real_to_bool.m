@@ -1,4 +1,3 @@
-function [node, external_nodes_i, opens, abstractedNodes] = get_real_to_bool(varargin)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
@@ -43,5 +42,7 @@ function [node, external_nodes_i, opens, abstractedNodes] = get_real_to_bool(var
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function [node, external_nodes_i, opens, abstractedNodes] = get_real_to_bool(varargin)
+
     [node, external_nodes_i, opens, abstractedNodes] = getToBool('real');
 end

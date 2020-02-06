@@ -47,7 +47,7 @@ function [code, exp_dt, dim, extra_code] = struct_indexing_To_Lustre(tree, args)
         
             
     % Do not forget to update exp_dt in each switch case if needed
-    exp_dt = nasa_toLustre.utils.MExpToLusDT.expression_DT(tree, args);
+    %exp_dt = nasa_toLustre.utils.MExpToLusDT.expression_DT(tree, args);
     tree_ID = tree.ID;
     dim = [];
     extra_code = {};

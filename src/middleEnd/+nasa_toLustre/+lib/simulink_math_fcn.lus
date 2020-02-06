@@ -4,21 +4,19 @@
   Illegal call to node "sqrt" in the cone of influence of this contract: node sqrt has a contract.
 </Log>
 *)
-node  abs_real(x : real;)
-returns(y : real;);
-let
-y = if (x >= 0.0) then
-    x
-    else (- x);
-tel
+
 node rem_real(x : real;
      	y : real;)
 returns(z : real;);
+var abs_x, abs_y, abs_z: real;
 let
+    abs_x = if (x >= 0.0) then x else -x;
+    abs_y = if (y >= 0.0) then y else -y;
+    abs_z = if (z >= 0.0) then z else -z;
     assert ((x = 0.0) => (z = 0.0));
     assert ((y = 0.0) => (z = x));
-    assert ((abs_real(x) < abs_real(y)) => (z = x));
-    assert (abs_real(z) < abs_real(y));
+    assert ((abs_x < abs_y) => (z = x));
+    assert (abs_z < abs_y);
     --sign(z) = sign(x)
     assert ((x > 0.0) => (z >= 0.0));
     assert ((x < 0.0) => (z <= 0.0));

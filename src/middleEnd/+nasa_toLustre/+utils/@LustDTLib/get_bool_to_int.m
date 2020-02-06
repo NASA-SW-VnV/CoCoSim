@@ -1,4 +1,3 @@
-function [node, external_nodes_i, opens, abstractedNodes] = get_bool_to_int(varargin)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
@@ -43,5 +42,6 @@ function [node, external_nodes_i, opens, abstractedNodes] = get_bool_to_int(vara
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function [node, external_nodes_i, opens, abstractedNodes] = get_bool_to_int(varargin)
     [node, external_nodes_i, opens, abstractedNodes] = getBoolTo('int');
 end

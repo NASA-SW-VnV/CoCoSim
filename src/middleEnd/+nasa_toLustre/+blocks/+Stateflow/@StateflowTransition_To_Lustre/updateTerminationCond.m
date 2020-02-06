@@ -50,19 +50,28 @@ function [Termination_cond, body, outputs, variables] = ...
     % keep truck of last var counter to speed up the lookup of already defined
     % variables
     %TODO: use hash map for variables instead to speedup the lookup
-    persistent var_counter
-    if isempty(var_counter)
-        var_counter = 1;
+    persistent vars_counter_map;
+    if isempty(vars_counter_map)
+        vars_counter_map = containers.Map('KeyType', 'char', 'ValueType', 'uint16');
     end
     if addToVariables
-        if nasa_toLustre.lustreAst.VarIdExpr.ismemberVar(varName, variables)
-            new_condName = strcat(varName, num2str(var_counter));
-            while(nasa_toLustre.lustreAst.VarIdExpr.ismemberVar(new_condName, variables))
-                var_counter = var_counter + 1;
-                new_condName = strcat(varName, num2str(var_counter));
-            end
-            varName = new_condName;
+        
+        if isKey(vars_counter_map, varName)
+            vars_counter_map(varName) = vars_counter_map(varName) + 1;
+        else
+            vars_counter_map(varName) = 1;
         end
+        varName = strcat(varName, num2str(vars_counter_map(varName)));
+        
+        %Too slow
+%         if nasa_toLustre.lustreAst.VarIdExpr.ismemberVar(varName, variables)
+%             new_condName = strcat(varName, num2str(var_counter));
+%             while(nasa_toLustre.lustreAst.VarIdExpr.ismemberVar(new_condName, variables))
+%                 var_counter = var_counter + 1;
+%                 new_condName = strcat(varName, num2str(var_counter));
+%             end
+%             varName = new_condName;
+%         end
     end
     if isempty(Termination_cond)
         if isempty(trans_cond)

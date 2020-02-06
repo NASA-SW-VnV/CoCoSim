@@ -1,5 +1,3 @@
-% Rounds each element of the input signal to the nearest integer towards zero.
-function [node, external_nodes, opens, abstractedNodes] = get__Fix(varargin)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
@@ -43,7 +41,10 @@ function [node, external_nodes, opens, abstractedNodes] = get__Fix(varargin)
 % cannot be relied upon to generate or error check software being developed. 
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%        opens = {};
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Rounds each element of the input signal to the nearest integer towards zero.
+function [node, external_nodes, opens, abstractedNodes] = get__Fix(varargin)
+    opens = {};
     abstractedNodes = {};
     % format = '--Rounds number to the nearest integer towards zero.\n';
     % format = [ format ,'node _Fix (x: real)\nreturns(y:int);\nlet\n\t'];

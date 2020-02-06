@@ -1,8 +1,3 @@
-classdef MCDC2SLX
-%MCDC2SLX translate MC-DC conditions in EMF json file to Simulink blocks.
-%Every node is translated to a subsystem. If OnlyMainNode is true than only
-%the main node specified
-%in main_node argument will be kept in the final simulink model.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
@@ -46,7 +41,14 @@ classdef MCDC2SLX
 % cannot be relied upon to generate or error check software being developed. 
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    properties
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+classdef MCDC2SLX
+%MCDC2SLX translate MC-DC conditions in EMF json file to Simulink blocks.
+%Every node is translated to a subsystem. If OnlyMainNode is true than only
+%the main node specified
+%in main_node argument will be kept in the final simulink model.
+    properties
     end
     
     methods(Static)

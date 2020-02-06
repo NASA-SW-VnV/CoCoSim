@@ -48,7 +48,7 @@ function [transitionNode, external_libraries] = ...
         getTransitionsNode(T, data_map, parentPath, ...
         isDefaultTrans, ...
         node_name, comment)
-    global SF_STATES_NODESAST_MAP;
+    global SF_STATES_NODESAST_MAP CoCoSimPreferences;
     
     transitionNode = {};
     external_libraries = {};
@@ -59,19 +59,49 @@ function [transitionNode, external_libraries] = ...
     if isempty(T)
         return;
     end
+    transitionNode = nasa_toLustre.lustreAst.LustreNode();
+    transitionNode.setName(node_name);
+    transitionNode.setMetaInfo(comment);
+    %is_imported  = false;
     % create body
-    [body, outputs, inputs, variables, external_libraries] = ...
-        nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.transitions_code(T, data_map, ...
-        isDefaultTrans, parentPath, {}, {}, {}, {}, {});
-
+%     try
+        [body, outputs, inputs, variables, external_libraries, ...
+            ~, ~, hasJunctionLoop] = ...
+            nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.transitions_code(T, data_map, ...
+            isDefaultTrans, parentPath, {}, {}, {}, {}, {});
+%     catch me
+%         % Junctions Loop detection
+%         if strcmp(me.identifier, 'COCOSIM:SF:JUNCTIONS_LOOP')
+%             display_msg(me.message, MsgType.ERROR,...
+%                 'getTransitionsNode', '');
+%         else
+%             display_msg(me.getReport(), MsgType.DEBUG, ...
+%                 'getTransitionsNode', '');
+%         end
+%         if CoCoSimPreferences.abstract_unsupported_blocks
+%             is_imported = true;
+%             transitionNode.setIsImported(true);
+%             outputs = {};
+%             inputs = {};
+%             body = {};
+%             variables = {};
+%             external_libraries = {};
+%         else
+%             return
+%         end
+%     end
+    if hasJunctionLoop ...
+            && CoCoSimPreferences.abstract_unsupported_blocks
+        transitionNode.setIsImported(true);
+    end
+         
     if isempty(outputs)
+        transitionNode = {};
         return;
     end
 
     % creat node
-    transitionNode = nasa_toLustre.lustreAst.LustreNode();
-    transitionNode.setName(node_name);
-    transitionNode.setMetaInfo(comment);
+    
     transitionNode.setBodyEqs(body);
     outputs = nasa_toLustre.lustreAst.LustreVar.uniqueVars(outputs);
     inputs = nasa_toLustre.lustreAst.LustreVar.uniqueVars(inputs);

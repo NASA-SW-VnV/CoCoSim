@@ -48,7 +48,6 @@ failed = 0;
 errors_msg = {};
 
 try
-    failed = 0;
     code_on=sprintf('%s([], [], [], ''compile'')', new_model_base);
     warning off;
     evalin('base',code_on);

@@ -1,4 +1,3 @@
-function [node, external_nodes_i, opens, abstractedNodes] = get_int_to_uint32_saturate(varargin)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
@@ -43,5 +42,6 @@ function [node, external_nodes_i, opens, abstractedNodes] = get_int_to_uint32_sa
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function [node, external_nodes_i, opens, abstractedNodes] = get_int_to_uint32_saturate(varargin)
     [node, external_nodes_i, opens, abstractedNodes] = getIntToIntSaturate('uint32');
 end

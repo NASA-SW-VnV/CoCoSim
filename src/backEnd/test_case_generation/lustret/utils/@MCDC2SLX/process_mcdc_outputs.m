@@ -45,7 +45,7 @@
 function [x2, y2] = process_mcdc_outputs(node_block_path, blk_outputs, ID, x2, y2)
     if ~bdIsLoaded('pp_lib'); load_system('pp_lib.slx'); end
     for i=1:numel(blk_outputs)
-        if y2 < 30000; y2 = y2 + 150; else x2 = x2 + 500; y2 = 100; end
+        if y2 < 30000; y2 = y2 + 150; else, x2 = x2 + 500; y2 = 100; end
         if isfield(blk_outputs(i), 'name')
             var_name = BUtils.adapt_block_name(blk_outputs(i).name, ID);
         else

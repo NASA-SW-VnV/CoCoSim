@@ -43,7 +43,7 @@ function [node, external_nodes, opens, abstractedNodes] = getXORBitwiseUnsigned(
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        opens = {};
+    opens = {};
     abstractedNodes = {};
     external_nodes = {};
     

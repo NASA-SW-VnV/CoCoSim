@@ -42,15 +42,7 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [code, dt, dim, extra_code] = matrix_To_Lustre(tree, args)
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    % Copyright (c) 2019 United States Government as represented by the
-    % Administrator of the National Aeronautics and Space Administration.
-    % All Rights Reserved.
-    % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
-    %         Francois Conzelmann <francois.conzelmann@nasa.gov>
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    
+function [code, dt, dim, extra_code] = matrix_To_Lustre(tree, args) 
     dt = nasa_toLustre.utils.MExpToLusDT.expression_DT(tree, args);
     extra_code = {};
     if isstruct(tree.rows)

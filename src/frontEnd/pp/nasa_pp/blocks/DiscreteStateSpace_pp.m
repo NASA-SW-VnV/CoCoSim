@@ -41,7 +41,6 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [status, errors_msg] = DiscreteStateSpace_pp(model)
     % DiscreteStateSpace_pp Searches for DiscreteStateSpace blocks and replaces them by a
     % PP-friendly equivalent.

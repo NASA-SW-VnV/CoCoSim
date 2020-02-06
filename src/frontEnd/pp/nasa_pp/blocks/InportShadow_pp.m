@@ -49,8 +49,8 @@ errors_msg = {};
 display_msg('Processing InportShadow blocks', MsgType.INFO, 'PP', '');
 
 inportShadow_list = find_system(new_model_base,'LookUnderMasks', 'all', 'BlockType','InportShadow');
-model = regexp(new_model_base,'/','split');
-model = model{1};
+% model = regexp(new_model_base,'/','split');
+% model = model{1};
 if ~isempty(inportShadow_list)
     for i=1:numel(inportShadow_list)
         try

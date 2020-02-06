@@ -1,8 +1,3 @@
-% Round Rounds number to the nearest representable value.
-% If a tie occurs, rounds positive numbers toward positive infinity
-% and rounds negative numbers toward negative infinity.
-% Equivalent to the Fixed-Point Designer round function.
-function [node, external_nodes, opens, abstractedNodes] = get__Round(lus_backend, varargin)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
@@ -47,6 +42,12 @@ function [node, external_nodes, opens, abstractedNodes] = get__Round(lus_backend
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Round Rounds number to the nearest representable value.
+% If a tie occurs, rounds positive numbers toward positive infinity
+% and rounds negative numbers toward negative infinity.
+% Equivalent to the Fixed-Point Designer round function.
+function [node, external_nodes, opens, abstractedNodes] = get__Round(lus_backend, varargin)
+
     if LusBackendType.isKIND2(lus_backend)
                 opens = {};
         abstractedNodes = {};

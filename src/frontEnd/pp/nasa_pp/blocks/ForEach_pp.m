@@ -160,8 +160,11 @@ function [] = expand_ForEach(model, blk)
         delete_block(For_Eachblock);
         %add selectors
         for inport_idx=1:nb_inports
-            if iscell(portsDimnesions), inport_dim = portsDimnesions{inport_idx};
-            else inport_dim = portsDimnesions; end
+            if iscell(portsDimnesions)
+                inport_dim = portsDimnesions{inport_idx};
+            else
+                inport_dim = portsDimnesions; 
+            end
             NumberOfDimensions = inport_dim(1);
             InputPartitionDim = InputPartitionDimensions(inport_idx);
             InputPartitionWidth = InputPartitionWidths(inport_idx);

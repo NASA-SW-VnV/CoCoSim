@@ -77,7 +77,7 @@ function [new_model_name, status] = makeharness(T, subsys_path, output_dir, post
         compiledPortDataTypes = get_param(Inportsblocks,'CompiledPortDataTypes');
         compiledPortwidths = get_param(Inportsblocks,'CompiledPortWidths');
         compiledPortDimensions = get_param(Inportsblocks,'CompiledPortDimensions');
-        InportsDTs = cellfun(@(x) x.Outport, compiledPortDataTypes);
+        %InportsDTs = cellfun(@(x) x.Outport, compiledPortDataTypes);
         term_cmd = strcat(modelName, '([],[],[],''term'')');
         eval (term_cmd);
         InportsWidths = cellfun(@(x) x.Outport, compiledPortwidths);
