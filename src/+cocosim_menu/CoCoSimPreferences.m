@@ -115,7 +115,8 @@ classdef CoCoSimPreferences < handle
         end
         
         function save(CoCoSimPreferences)% Ignore warning: the parameter is used by save function
-            if isfield(CoCoSimPreferences, 'preferencesPath')
+            if isfield(CoCoSimPreferences, 'preferencesPath')...
+                    && exist(CoCoSimPreferences.preferencesPath, 'file') 
                 save(CoCoSimPreferences.preferencesPath, 'CoCoSimPreferences');
             else
                 preferencesPath = cocosim_menu.CoCoSimPreferences.getPreferencesMatPath();
@@ -124,11 +125,14 @@ classdef CoCoSimPreferences < handle
         end
         
         function deletePreferences(CoCoSimPreferences)
-            if isfield(CoCoSimPreferences, 'preferencesPath')
+            if isfield(CoCoSimPreferences, 'preferencesPath') ...
+                    && exist(CoCoSimPreferences.preferencesPath, 'file') 
                 delete(CoCoSimPreferences.preferencesPath);
             else
                 preferencesFile = cocosim_menu.CoCoSimPreferences.getPreferencesMatPath();
-                delete(preferencesFile);
+                if exist(preferencesFile, 'file') 
+                    delete(preferencesFile);
+                end
             end
         end
         function msg = getChangeModelCheckerMsg()
