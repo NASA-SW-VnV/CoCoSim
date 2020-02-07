@@ -1,6 +1,3 @@
-function sl_customization( cm )
-%sl_customization Register custom menu function.
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
@@ -45,6 +42,8 @@ function sl_customization( cm )
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function sl_customization( cm )
+%sl_customization Register custom menu function.
 cm.addCustomMenuFcn('Simulink:ToolsMenu', @(x) {@cocosim_menu.tools_menu});
 cm.addCustomMenuFcn('Simulink:PreContextMenu',@(x) {@cocosim_menu.precontext_menu});
 end

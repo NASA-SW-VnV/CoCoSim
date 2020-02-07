@@ -1,5 +1,7 @@
 CoCoSim
 =======
+[![License](https://img.shields.io/badge/license-NOSA%201.3-blue.svg)](LICENSE.pdf)
+[![Release](https://img.shields.io/badge/release-v3.0-orange.svg)](https://github.com/NASA-SW-VnV/CoCoSim/releases/)
 
 CoCoSim is an automated analysis and code generation framework for
 Simulink and Stateflow models. Specifically, CoCoSim can be used to
