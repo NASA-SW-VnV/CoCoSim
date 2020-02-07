@@ -332,12 +332,12 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, ...
         end
         if COCOSIM_DEV_DEBUG
             display_msg(strrep(lustrecode, '%', '%%'), MsgType.DEBUG, ...
-                'ToLustre', '');
+                'ToLustre', '', 3);
             if LusBackendType.isPRELUDE(lus_backend)
                 display_msg('*****PRELUDE CODE *******', MsgType.DEBUG, ...
                 'ToLustre', '');
                 display_msg(strrep(preludeCode, '%', '%%'), MsgType.DEBUG, ...
-                    'ToLustre', '');
+                    'ToLustre', '', 3);
             end
         end
     catch me

@@ -60,6 +60,7 @@ function schema = preferences_menu(callbackInfo)
         {@getLustrecBinary, CoCoSimPreferences}, ...
         {@PreferencesMenu.getVerificationTimeout, CoCoSimPreferences}, ...
         {@getDEDChecks, CoCoSimPreferences}, ...
+        {@getVerbose, CoCoSimPreferences}, ...
         {@resetSettings, CoCoSimPreferences} ...
         };
 end
@@ -414,6 +415,50 @@ function setCheckOption(checkName, CoCoSimPreferences, varargin)
     else
         CoCoSimPreferences.dedChecks{end+1} = checkName;
     end
+    cocosim_menu.CoCoSimPreferences.save(CoCoSimPreferences);
+end
+
+%% Verbose options
+function schema = getVerbose(callbackInfo)
+    schema = sl_container_schema;
+    schema.label = 'Verbose level';
+    schema.statustip = 'Verbose level';
+    schema.autoDisableWhen = 'Busy';
+    
+    CoCoSimPreferences = callbackInfo.userdata;
+    
+    options = {0, 1, 2, 3};
+    callbacks = cell(1, length(options));
+    for i=1:length(options)
+        callbacks{i} = @(x) verboseCallback(options{i}, ...
+            CoCoSimPreferences, x);
+    end
+    schema.childrenFcns = callbacks;
+end
+
+function schema = verboseCallback(v, CoCoSimPreferences, varargin)
+    schema = sl_toggle_schema;
+    schema.label = num2str(v);
+    try
+        ws_v = evalin('base', 'cocosim_verbose');
+    catch
+        assignin('base', 'cocosim_verbose', CoCoSimPreferences.cocosim_verbose);
+        ws_v = CoCoSimPreferences.cocosim_verbose;
+    end
+        
+    if v == ws_v
+        schema.checked = 'checked';
+    else
+        schema.checked = 'unchecked';
+    end
+    
+    schema.callback = @(x) setVerboseOption(v, ...
+        CoCoSimPreferences, x);
+end
+
+function setVerboseOption(v, CoCoSimPreferences, varargin)
+    CoCoSimPreferences.cocosim_verbose = v;
+    assignin('base', 'cocosim_verbose', v);
     cocosim_menu.CoCoSimPreferences.save(CoCoSimPreferences);
 end
 

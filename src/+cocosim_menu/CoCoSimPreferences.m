@@ -72,6 +72,8 @@ classdef CoCoSimPreferences < handle
         skip_pp = false;
         use_more_precise_abstraction = false;
         %gen_pp_verif = false;
+        
+        cocosim_verbose = 0;
     end
     
     methods(Static)

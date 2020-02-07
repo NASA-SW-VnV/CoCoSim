@@ -130,8 +130,8 @@ function mcdc_node_process(new_model_name, nodes, node, ...
         set_param(node_block_path, 'Position', block_pos);
         
         % Outputs
-        
-        [x2, y2] = MCDC2SLX.process_mcdc_outputs(node_block_path, mcdc_variables_names, '', x2, y2);
+        ID = strcat('a',strrep(num2str(get_param(node_block_path, 'Handle')), '.', '_'));
+        [x2, y2] = MCDC2SLX.process_mcdc_outputs(node_block_path, mcdc_variables_names, ID, x2, y2);
         
         
         % Inputs
