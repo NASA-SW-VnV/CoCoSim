@@ -103,4 +103,3 @@ To start using follow these steps or watch https://youtu.be/dcs8GOeFI9c:
 
 .. [1]
    https://www.mathworks.com/help/simulink/model-reference.html
->>>>>>> 33751cd1584294015f5d021e51682f427cdebad9
