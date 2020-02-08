@@ -53,6 +53,9 @@ function [status, errors_msg] = BlocksPosition_pp( model, depth )
     if ~exist('depth', 'var')
         limitedDepth = false;
         depth = 100000;
+        display_msg(...
+            sprintf('organizing block "%s" positions. This process may take few seconds.',model),...
+            MsgType.INFO, 'BlocksPosition_pp', '', 0);
     end
     %Take the list of all blocks that has no outport so they can be at one
     %level. Blocks such Outports, displays ...
@@ -63,7 +66,7 @@ function [status, errors_msg] = BlocksPosition_pp( model, depth )
         % Methode 1: call Auto Layout
         display_msg(...
             sprintf('organizing block "%s" positions. This process may take few seconds.',model),...
-            MsgType.INFO, 'BlocksPosition_pp', '');
+            MsgType.INFO, 'BlocksPosition_pp', '', 1);
         external_lib.AutoLayout.AutoLayout(model)
     catch
         % If Method 1 failed: Use my version of Auto Layout.
@@ -73,7 +76,7 @@ function [status, errors_msg] = BlocksPosition_pp( model, depth )
                 if isempty(DstBlkH.Outport)
                     display_msg(...
                         sprintf('organizing block "%s" and its linked blocks',allBlocks{i}),...
-                        MsgType.INFO, 'BlocksPosition_pp', '');
+                        MsgType.INFO, 'BlocksPosition_pp', '', 1);
                     levels_map = organize(get_param(allBlocks{i}, 'Handle'), 0, levels_map);
                 end
             catch
@@ -156,7 +159,7 @@ function levels_map = organize(block_handle, level, levels_map)
             srcBlocks(numel(srcBlocks) + 1) = src;
             display_msg(...
                 sprintf('organizing block "%s" and its linked blocks',get_param(src, 'Name')),...
-                MsgType.INFO, 'organize', '');
+                MsgType.INFO, 'organize', '', 1);
             levels_map = organize(src, level + 1, levels_map);
         end
         srcPortHandle = get_param(l, 'SrcPortHandle');
