@@ -35,15 +35,17 @@ An Html report should be generated containing guidelines devided in three catego
 
 ### **Requirements formal verification example**:
 
-1. To test an example with properties: `open examples/demo/ABC.slx`
+1. To test an example with properties: `open examples/demo/ABC.slx`. The example is described in the following figure.
+![](images/ABC.png)
 2. Set your default model checker in `Tools -> CoCoSim -> Preferences -> Verification Backend`. Currently, only [Kind2](https://github.com/kind2-mc/kind2) is supported.
 3. Enable or Disable Compositional setting for Kind2 in `Tools -> CoCoSim -> Preferences -> Kind2 Preferences -> Compositional Analysis`. Read more about Compositional Analysis in the 
-[user manual](doc/cocosim_user_manual.pdf).
+[user manual](cocosim_user_manual.pdf).
 4. You can set other preferences such as `Verification Timeout`, `CoCoSim Verbosity`, `Compiler Preferences` ... in `Tools -> CoCoSim -> Preferences`.
 5. Under the `Tools -> CoCoSim` menu choose `Prove properties`.
 
 
-### Test-case generation example:
+
+<!-- ### Test-case generation example:
 
 1. To test an example with properties: `open examples/test_generation/mcdc_test.slx`
-2. Under the `Tools -> CoCoSim` menu choose `Test-case generation using...`.
+2. Under the `Tools -> CoCoSim` menu choose `Test-case generation using...`. -->
