@@ -17,7 +17,7 @@ At startup, MATLAB automatically executes, if it exists on the MATLAB search pat
 3. Under the `Tools -> CoCoSim` menu choose `Check Compatibility`.
 
 The checking compatibility does not guarantee that the model is fully supported but it detects the blocks/options we already know we do not support.
-You may have other error messages that a specific block is not supported.
+You may have other error messages that a specific block is not supported later on on the compilation step.
 In addition the compatibility is performed for Verification, a model can be supported for verification and not for code generation.
 
 <!-- You will get an HTML report with Unsupported blocks. In this example, the chart block is not supported for the reason "Event "dummyEvent" in chart bacteriaPopulationStateflow_PP/bacteriaPopulation/bacteriaPopulation with "Function call" Trigger is not supported.".
@@ -40,11 +40,10 @@ An Html report should be generated containing guidelines devided in three catego
 ![](figures/ABC.png)
 
 2. Set your default model checker in `Tools -> CoCoSim -> Preferences -> Verification Backend`. Currently, only [Kind2](https://github.com/kind2-mc/kind2) is supported.
-3. Enable or Disable Compositional setting for Kind2 in `Tools -> CoCoSim -> Preferences -> Kind2 Preferences -> Compositional Analysis`. Read more about Compositional Analysis in the 
-[CoCoSim manual](cocosim_user_manual.pdf).
+3. Enable or Disable Compositional setting for Kind2 in `Tools -> CoCoSim -> Preferences -> Kind2 Preferences -> Compositional Analysis`. Read more about [Compositional analysis](https://github.com/coco-team/cocoSim2/blob/master/doc/compositionalAnalysis.md).
 4. You can set other preferences such as `Verification Timeout`, `CoCoSim Verbosity`, `Compiler Preferences` ... in `Tools -> CoCoSim -> Preferences`.
 5. Under the `Tools -> CoCoSim` menu choose `Prove properties`.
-
+6. Results are reported back, read more about [Visualization of Verification Results](https://github.com/coco-team/cocoSim2/blob/master/doc/verificationVisualization.md)
 
 ### **Design Error Detection**:
 Under the `Tools -> CoCoSim` menu choose `Design Error Detection`.\
