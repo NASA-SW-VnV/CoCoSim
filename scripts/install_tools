@@ -533,11 +533,11 @@ progress_run eval `opam config env` || error_install opam
 progress_run opam update
 progress_run opam install -y  ocamlfind ocamlbuild ocamlgraph fmt logs topkg cmdliner num yojson zarith|| error_install ocaml
 # install z3 for lustreC
-progress_run opam pin add z3 4.8.1
-progress_run opam install z3
+progress_run opam pin add -y z3 4.8.1
+progress_run opam install -y z3
 
 # install menhir
-progress_run opam install menhir
+progress_run opam install -y menhir
 
 ################
 # Check menhir #
@@ -729,6 +729,10 @@ else
             error_configure lustrec; lustrec_failed=1;
         }
     fi
+    # There is an error with mkdir of src/_build.
+    # The following is to git rid of that error
+    rm -rf src/_build/ || {}
+	
     if (( ! lustrec_failed )); then
         progress_run make || {
             error_make lustrec; lustrec_failed=1;
@@ -752,6 +756,8 @@ if (( ! lustrec_failed )); then
     }
     if (( ! lustrec_failed )); then
         success "${cgreen}lustrec $version${coff}${cbold} successfully installed"
+    else
+	error_msg "Please remove $install_dir/bin/lustrec and run the script again"
     fi
 else
     error_msg "Skipping Lustrec: lustrec installation, failed"
@@ -882,6 +888,9 @@ else
                 }
             fi
         fi
+	if (( kind2_failed )); then
+	    error_msg "Please remove $install_dir/bin/kind2 and run the script again"
+	fi
     else
         error_msg "Skipping Kind2: kind2 installation, failed"
     fi
