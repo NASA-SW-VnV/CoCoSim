@@ -273,41 +273,45 @@ function install_tools(cocosim_path)
         % the user has at least one of the tools.
         return;
     end
-    scripts_path = fullfile(cocosim_path, 'scripts');
     
-    if ispc
-        installation_path = fullfile(cocosim_path, 'doc', 'installation.md');
-        fprintf('ONLY kind2 can be used in Windows. follow the instructions <a href="matlab: open %s">here</a>\n', installation_path) ;
-        return;
-    elseif ismac
-        % create executable script adapted to the user.
-        tmp_sh = fullfile(scripts_path, 'install_cocosim_tmp.sh');
-        fid = fopen(tmp_sh,'w+');
-        if fid < 0
-            fprintf('Can not creat file %s\n', tmp_sh) ;
-            fprintf('Please run the following commands in your terminal.\n' );
-            fprintf('>> cd %s\n', scripts_path) ;
-            fprintf('>> ./install_cocosim\n' );
-            return;
-        end
-        fprintf(fid, 'cd %s;\n', scripts_path);
-        fprintf(fid, './install_cocosim');
-        fclose(fid);
-        [status,~] = system(sprintf('chmod +x %s', tmp_sh), '-echo');
-        if status
-            fprintf('Can not chmod file %s to executable\n', tmp_sh) ;
-            return;
-        end
-        [status,~] = system(sprintf('open -a Terminal %s', tmp_sh), '-echo');
-        if status
-            fprintf('Can not launch executable %s\n', tmp_sh) ;
-            return;
-        end
+    scripts_path = fullfile(cocosim_path, 'scripts');
+    fprintf('Please run the following commands in your terminal.\n' );
+    fprintf('>> cd %s\n', scripts_path);
+    fprintf('>> ./install_cocosim\n');
         
-    else
-        % Unix case
-        fprintf('Please run the following commands in your terminal.\n' );
-        fprintf('>> cd %s\n', scripts_path);
-        fprintf('>> ./install_cocosim\n');
-    end
+%     if ispc
+%         installation_path = fullfile(cocosim_path, 'doc', 'installation.md');
+%         fprintf('ONLY kind2 can be used in Windows. follow the instructions <a href="matlab: open %s">here</a>\n', installation_path) ;
+%         return;
+%     elseif ismac
+%         % create executable script adapted to the user.
+%         tmp_sh = fullfile(scripts_path, 'install_cocosim_tmp.sh');
+%         fid = fopen(tmp_sh,'w+');
+%         if fid < 0
+%             fprintf('Can not creat file %s\n', tmp_sh) ;
+%             fprintf('Please run the following commands in your terminal.\n' );
+%             fprintf('>> cd %s\n', scripts_path) ;
+%             fprintf('>> ./install_cocosim\n' );
+%             return;
+%         end
+%         fprintf(fid, 'cd %s;\n', scripts_path);
+%         fprintf(fid, './install_cocosim');
+%         fclose(fid);
+%         [status,~] = system(sprintf('chmod +x %s', tmp_sh), '-echo');
+%         if status
+%             fprintf('Can not chmod file %s to executable\n', tmp_sh) ;
+%             return;
+%         end
+%         [status,~] = system(sprintf('open -a Terminal %s', tmp_sh), '-echo');
+%         if status
+%             fprintf('Can not launch executable %s\n', tmp_sh) ;
+%             return;
+%         end
+%         
+%     else
+%         % Unix case
+%         fprintf('Please run the following commands in your terminal.\n' );
+%         fprintf('>> cd %s\n', scripts_path);
+%         fprintf('>> ./install_cocosim\n');
+%     end
 end
