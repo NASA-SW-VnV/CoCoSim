@@ -63,7 +63,7 @@ Solution of some common issues with CoCoSim are [here](doc/TROUBLESHOOTING.md)
 Khanh Trinh (NASA Ames - USA)
 
 * Past Contributors: \
-[Temesghen Kahsai](http://www.lememta.info/), Francois Conzelmann (NASA Ames - USA)
+[Temesghen Kahsai](http://www.lememta.info/), Maxime Arthaud (NASA Ames - USA), Francois Conzelmann (NASA Ames - USA)
 
 
 **Publications**
