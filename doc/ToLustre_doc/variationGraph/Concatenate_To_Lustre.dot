@@ -1,0 +1,26 @@
+digraph Concatenate {
+        rankdir=UD;
+        size="8,5"
+        node [shape = polygon, sides=5];
+        Concatenate [shape=ellipse];
+        read_inputs_outputs [shape=box];
+        readBlkParams [shape=box];
+        concatenateVector [shape=box];
+        concatenateDimension2  [shape=box];
+        concatenateDimension1  [shape=box];
+
+
+        Concatenate -> read_inputs_outputs 
+        read_inputs_outputs -> readBlkParams 
+        readBlkParams -> isVectorMode
+        isVectorMode -> concatenateVector
+
+        readBlkParams -> isMultidimensionArrayMode
+        isMultidimensionArrayMode -> isConcatenateDimension1
+        isConcatenateDimension1 -> concatenateDimension1 
+
+        isMultidimensionArrayMode -> isConcatenateDimension2
+        isConcatenateDimension2 -> concatenateDimension2
+
+
+}

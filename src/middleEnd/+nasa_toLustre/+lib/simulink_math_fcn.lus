@@ -1,0 +1,40 @@
+(*
+-- DO NOT use contracts to abstract these node. Kind2 does not allow calling nodes with contract inside other contracts
+<Log class="error" source="parse" line="679" column="1">
+  Illegal call to node "sqrt" in the cone of influence of this contract: node sqrt has a contract.
+</Log>
+*)
+
+node rem_real(x : real;
+     	y : real;)
+returns(z : real;);
+var abs_x, abs_y, abs_z: real;
+let
+    abs_x = if (x >= 0.0) then x else -x;
+    abs_y = if (y >= 0.0) then y else -y;
+    abs_z = if (z >= 0.0) then z else -z;
+    assert ((x = 0.0) => (z = 0.0));
+    assert ((y = 0.0) => (z = x));
+    assert ((abs_x < abs_y) => (z = x));
+    assert (abs_z < abs_y);
+    --sign(z) = sign(x)
+    assert ((x > 0.0) => (z >= 0.0));
+    assert ((x < 0.0) => (z <= 0.0));
+tel
+
+node mod_real(x : real;
+     	y : real;)
+returns(z : real;);
+let
+    assert ((x = 0.0) => (z = 0.0));
+    assert ((y = 0.0) => (z = x));
+    --sign(x) = sign(y) and abs(x) < abs(y)
+    assert (((0.0 < x) and (x < y)) => (z = x));
+    assert (((y < x) and (x < 0.0)) => (z = x));
+    --sign(x) <> sign(y) and abs(x) < abs(y)
+    assert (((0.0 < x) and (x < (- y))) => (z = (x + y)));
+    assert ((((- y) < x) and (x < 0.0)) => (z = (x + y)));
+    --sign(z) = sign(y) and abs(z) < abs(y)
+    assert ((y > 0.0) => ((0.0 <= z) and (z < y)));
+    assert ((y < 0.0) => ((y < z) and (z <= 0.0)));
+tel

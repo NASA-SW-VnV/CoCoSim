@@ -1,0 +1,87 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+% Notices:
+%
+% Copyright @ 2020 United States Government as represented by the 
+% Administrator of the National Aeronautics and Space Administration.  All 
+% Rights Reserved.
+%
+% Disclaimers
+%
+% No Warranty: THE SUBJECT SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY 
+% WARRANTY OF ANY KIND, EITHER EXPRESSED, IMPLIED, OR STATUTORY, INCLUDING,
+% BUT NOT LIMITED TO, ANY WARRANTY THAT THE SUBJECT SOFTWARE WILL CONFORM 
+% TO SPECIFICATIONS, ANY IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS 
+% FOR A PARTICULAR PURPOSE, OR FREEDOM FROM INFRINGEMENT, ANY WARRANTY THAT
+% THE SUBJECT SOFTWARE WILL BE ERROR FREE, OR ANY WARRANTY THAT 
+% DOCUMENTATION, IF PROVIDED, WILL CONFORM TO THE SUBJECT SOFTWARE. THIS 
+% AGREEMENT DOES NOT, IN ANY MANNER, CONSTITUTE AN ENDORSEMENT BY 
+% GOVERNMENT AGENCY OR ANY PRIOR RECIPIENT OF ANY RESULTS, RESULTING 
+% DESIGNS, HARDWARE, SOFTWARE PRODUCTS OR ANY OTHER APPLICATIONS RESULTING 
+% FROM USE OF THE SUBJECT SOFTWARE.  FURTHER, GOVERNMENT AGENCY DISCLAIMS 
+% ALL WARRANTIES AND LIABILITIES REGARDING THIRD-PARTY SOFTWARE, IF PRESENT 
+% IN THE ORIGINAL SOFTWARE, AND DISTRIBUTES IT "AS IS."
+%
+% Waiver and Indemnity:  RECIPIENT AGREES TO WAIVE ANY AND ALL CLAIMS 
+% AGAINST THE UNITED STATES GOVERNMENT, ITS CONTRACTORS AND SUBCONTRACTORS, 
+% AS WELL AS ANY PRIOR RECIPIENT.  IF RECIPIENT'S USE OF THE SUBJECT 
+% SOFTWARE RESULTS IN ANY LIABILITIES, DEMANDS, DAMAGES, EXPENSES OR 
+% LOSSES ARISING FROM SUCH USE, INCLUDING ANY DAMAGES FROM PRODUCTS BASED 
+% ON, OR RESULTING FROM, RECIPIENT'S USE OF THE SUBJECT SOFTWARE, RECIPIENT 
+% SHALL INDEMNIFY AND HOLD HARMLESS THE UNITED STATES GOVERNMENT, ITS 
+% CONTRACTORS AND SUBCONTRACTORS, AS WELL AS ANY PRIOR RECIPIENT, TO THE 
+% EXTENT PERMITTED BY LAW.  RECIPIENT'S SOLE REMEDY FOR ANY SUCH MATTER 
+% SHALL BE THE IMMEDIATE, UNILATERAL TERMINATION OF THIS AGREEMENT.
+% 
+% Notice: The accuracy and quality of the results of running CoCoSim 
+% directly corresponds to the quality and accuracy of the model and the 
+% requirements given as inputs to CoCoSim. If the models and requirements 
+% are incorrectly captured or incorrectly input into CoCoSim, the results 
+% cannot be relied upon to generate or error check software being developed. 
+% Simply stated, the results of CoCoSim are only as good as
+% the inputs given to CoCoSim.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function [new_function_list, failed] = getFunctionList(blk, script)
+
+    %
+    %
+    em2json =  cocosim.matlab2IR.EM2JSON;
+    IR_string = em2json.StringToIR(script);
+    IR = json_decode(char(IR_string));
+    failed = false;
+    if isstruct(IR) && isfield(IR, 'functions')
+        functions = IR.functions;
+    else
+        display_msg(sprintf('Parser failed for Matlab function in block %s', ...
+                HtmlItem.addOpenCmd(blk.Origin_path)),...
+                MsgType.WARNING, 'getMFunctionCode', '');
+        failed = 1;
+        return;
+    end
+    % We do not support nested functions
+    new_function_list = {};
+    for i=1:length(functions)
+        if ~isfield(functions(i), 'statements')
+            continue;
+        end
+        statements = functions(i).statements;
+        if isstruct(statements)
+            types = arrayfun(@(x) x.type, statements, 'UniformOutput', 0);
+            %remove functions from statements
+            functions(i).statements(strcmp(types, 'function')) = [];
+            new_function_list{end+1} = functions(i);
+            new_funcs = statements(strcmp(types, 'function'));
+            new_function_list = MatlabUtils.concat(new_function_list, ...
+                arrayfun(@(x) {x}, new_funcs));
+        else
+            types = cellfun(@(x) x.type, statements, 'UniformOutput', 0);
+            %remove functions from statements
+            functions(i).statements(strcmp(types, 'function')) = [];
+            new_function_list{end+1} = functions(i);
+            new_funcs = statements(strcmp(types, 'function'));
+            new_function_list = MatlabUtils.concat(new_function_list, new_funcs);
+        end
+        
+    end
+end

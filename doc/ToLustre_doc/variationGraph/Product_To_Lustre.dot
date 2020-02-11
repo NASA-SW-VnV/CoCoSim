@@ -1,0 +1,34 @@
+digraph Product {
+        rankdir=UD;
+        size="8,5"
+        node [shape = polygon, sides=5];
+        Product [shape=ellipse];
+        ProductOutputDataTypeStr [shape=box];
+        NOT_SUPPORTED [shape=box, color=red];
+        oneInputSumProductCodes [shape=box];
+        matrix_multiply [shape=box];
+        expand_InputsOutputsExpression_initialization[shape=box];
+        elementWiseSumProduct [shape=box];
+
+        
+        Product -> is_not_SumBlock;
+        is_not_SumBlock -> ProductOutputDataTypeStr;
+        ProductOutputDataTypeStr -> expand_InputsOutputsExpression_initialization;
+
+        expand_InputsOutputsExpression_initialization -> is_1_input
+        is_1_input -> is_1_expression
+        is_1_expression -> oneInputSumProductCodes
+
+        expand_InputsOutputsExpression_initialization -> is_Matrix_multiplication; 
+        is_Matrix_multiplication -> expression_contains_division;
+        expression_contains_division -> NOT_SUPPORTED;
+
+        is_Matrix_multiplication -> matrix_multiply
+
+        expand_InputsOutputsExpression_initialization -> is_not_1_expression;
+        is_not_1_expression -> is_Element_Wise;
+
+        expand_InputsOutputsExpression_initialization -> is_not_1_input;
+        is_not_1_input -> is_Element_Wise;
+        is_Element_Wise -> elementWiseSumProduct;
+}

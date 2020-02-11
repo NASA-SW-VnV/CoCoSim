@@ -1,0 +1,21 @@
+digraph Selector {
+        rankdir=UD;
+        size="8,5"
+        node [shape = polygon, sides=5];
+
+
+        Selector_main [shape=ellipse];
+        NoInputPort [shape=ellipse];
+        getWriteCodeForNonPortInput [shape=box];
+        getWriteCodeForPortInput [shape=box];
+        InputPort [shape=ellipse];
+        defineMapInd [shape=box];
+
+        Selector_main -> defineMapInd
+        defineMapInd -> InputPort
+        defineMapInd -> NoInputPort
+        NoInputPort -> getWriteCodeForNonPortInput
+        InputPort -> getWriteCodeForPortInput
+
+
+}

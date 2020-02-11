@@ -1,0 +1,83 @@
+#!/bin/bash
+
+###########################################################
+#
+# Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
+# Notices:
+#
+# Copyright @ 2020 United States Government as represented by the 
+# Administrator of the National Aeronautics and Space Administration.  All 
+# Rights Reserved.
+#
+# Disclaimers
+#
+# No Warranty: THE SUBJECT SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY 
+# WARRANTY OF ANY KIND, EITHER EXPRESSED, IMPLIED, OR STATUTORY, INCLUDING,
+# BUT NOT LIMITED TO, ANY WARRANTY THAT THE SUBJECT SOFTWARE WILL CONFORM 
+# TO SPECIFICATIONS, ANY IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS 
+# FOR A PARTICULAR PURPOSE, OR FREEDOM FROM INFRINGEMENT, ANY WARRANTY THAT
+# THE SUBJECT SOFTWARE WILL BE ERROR FREE, OR ANY WARRANTY THAT 
+# DOCUMENTATION, IF PROVIDED, WILL CONFORM TO THE SUBJECT SOFTWARE. THIS 
+# AGREEMENT DOES NOT, IN ANY MANNER, CONSTITUTE AN ENDORSEMENT BY 
+# GOVERNMENT AGENCY OR ANY PRIOR RECIPIENT OF ANY RESULTS, RESULTING 
+# DESIGNS, HARDWARE, SOFTWARE PRODUCTS OR ANY OTHER APPLICATIONS RESULTING 
+# FROM USE OF THE SUBJECT SOFTWARE.  FURTHER, GOVERNMENT AGENCY DISCLAIMS 
+# ALL WARRANTIES AND LIABILITIES REGARDING THIRD-PARTY SOFTWARE, IF PRESENT 
+# IN THE ORIGINAL SOFTWARE, AND DISTRIBUTES IT "AS IS."
+#
+# Waiver and Indemnity:  RECIPIENT AGREES TO WAIVE ANY AND ALL CLAIMS 
+# AGAINST THE UNITED STATES GOVERNMENT, ITS CONTRACTORS AND SUBCONTRACTORS, 
+# AS WELL AS ANY PRIOR RECIPIENT.  IF RECIPIENT'S USE OF THE SUBJECT 
+# SOFTWARE RESULTS IN ANY LIABILITIES, DEMANDS, DAMAGES, EXPENSES OR 
+# LOSSES ARISING FROM SUCH USE, INCLUDING ANY DAMAGES FROM PRODUCTS BASED 
+# ON, OR RESULTING FROM, RECIPIENT'S USE OF THE SUBJECT SOFTWARE, RECIPIENT 
+# SHALL INDEMNIFY AND HOLD HARMLESS THE UNITED STATES GOVERNMENT, ITS 
+# CONTRACTORS AND SUBCONTRACTORS, AS WELL AS ANY PRIOR RECIPIENT, TO THE 
+# EXTENT PERMITTED BY LAW.  RECIPIENT'S SOLE REMEDY FOR ANY SUCH MATTER 
+# SHALL BE THE IMMEDIATE, UNILATERAL TERMINATION OF THIS AGREEMENT.
+# 
+# Notice: The accuracy and quality of the results of running CoCoSim 
+# directly corresponds to the quality and accuracy of the model and the 
+# requirements given as inputs to CoCoSim. If the models and requirements 
+# are incorrectly captured or incorrectly input into CoCoSim, the results 
+# cannot be relied upon to generate or error check software being developed. 
+# Simply stated, the results of CoCoSim are only as good as
+# the inputs given to CoCoSim.
+###########################################################
+####### Utils ###############
+source bash_utils
+
+####### Machine #############
+unameOut="$(uname -s)"
+case "${unameOut}" in
+    Darwin*)    machine="osx";;
+    *)          machine="linux"
+esac
+####### Global Variables ####
+install_dir="../tools/verifiers/$machine"
+install_dir=$(abs_path "$install_dir")
+build_dir="../tools/build"
+build_dir=$(abs_path "$build_dir")
+lustrec_url="https://cavale.enseeiht.fr/git/lustrec"
+#lustrec_url="https://github.com/coco-team/lustrec.git"
+lustrec_branch="cocosim_master"
+kind2_url="https://github.com/kind2-mc/kind2.git"
+kind2_branch="develop"
+
+git_dir="$build_dir/github"
+
+cocosim_url="https://github.com/coco-team/cocoSim2.git"
+cocosim_branch="cocosim_nasa"
+
+
+cocoSim2_dir=$(abs_path "..")
+
+####### Installing Zustre, Kind2 ########
+
+#if [[ -a "$install_dir/spacer/bin/z3" && -a "$install_dir/zustre/bin/zustre" && -a "$install_dir/kind2/bin/kind2" ]]; then
+#    success "z3, Zustre, Kind2 successfully installed in $install_dir"
+#else
+    /bin/bash install_tools --prefix=$install_dir --builddir=$build_dir  --lustrec-url=$lustrec_url --lustrec-branch=$lustrec_branch
+#fi
+
+

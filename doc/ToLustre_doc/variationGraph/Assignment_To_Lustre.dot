@@ -1,0 +1,69 @@
+digraph Assignment {
+        rankdir=UD;
+        size="8,5"
+        node [shape = polygon, sides=5];
+
+
+        Assignment_main [shape=ellipse];
+        U_Input_Is_Scalar [shape=ellipse];
+        U_Input_Is_Matrix [shape=ellipse];
+        NoInputPort [shape=ellipse];
+        getWriteCodeForNonPortInput [shape=box];
+        getWriteCodeForPortInput [shape=box];
+        InputPort [shape=ellipse];
+        Inititalize_using_input_port_Y0 [shape=ellipse];
+        Specify_size_for_each_table_dimension [shape=ellipse];
+        NOT_SUPPORTED [shape=box, color=red];
+        defineMapInd [shape=box];
+
+
+        NoInputPort1 [shape=ellipse, label=NoInputPort];
+        InputPort1 [shape=ellipse, label=InputPort];
+        
+        expand_U [shape=box];
+        U_Dialogue_Width_Is_More_Than_1 [shape=ellipse];
+        U_Dialogue_Width_Is_1 [shape=ellipse];
+
+        expanded_U [shape=ellipse];
+
+        
+
+
+        Assignment_main -> U_Input_Is_Matrix 
+        Assignment_main -> U_Input_Is_Scalar
+
+        //U_Input_Is_Scalar case
+        U_Input_Is_Scalar -> NoInputPort1
+        U_Input_Is_Scalar -> InputPort1
+        InputPort1 -> expand_U
+        //U_Input_Is_Matrix case 
+        NoInputPort -> getWriteCodeForNonPortInput
+        expanded_U -> defineMapInd
+        U_Input_Is_Matrix -> defineMapInd
+        defineMapInd ->  InputPort
+        defineMapInd ->  NoInputPort
+        InputPort ->  Inititalize_using_input_port_Y0
+        Inititalize_using_input_port_Y0 ->  getWriteCodeForPortInput
+
+        InputPort ->  Specify_size_for_each_table_dimension
+        Specify_size_for_each_table_dimension ->  NOT_SUPPORTED
+
+        NoInputPort1 -> U_Dialogue_Width_Is_1
+        U_Dialogue_Width_Is_1 -> defineMapInd
+
+        NoInputPort1 -> U_Dialogue_Width_Is_More_Than_1
+        U_Dialogue_Width_Is_More_Than_1 ->  expand_U
+        expand_U ->  expanded_U
+
+
+
+        
+        
+
+
+
+
+
+
+
+}
