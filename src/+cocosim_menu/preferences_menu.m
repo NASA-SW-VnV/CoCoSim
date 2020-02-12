@@ -122,10 +122,10 @@ end
 %forceTypeCastingOfInt
 function schema = getForceTypecastingOfInt(callbackInfo)
     schema = sl_toggle_schema;
-    schema.label = 'Force type-casting of int to machine type (int8, int16..).';
+    schema.label = 'Abstract Integer machine types (int8, int16..) by Z ([-oo, +oo]).';
     CoCoSimPreferences = callbackInfo.userdata;
     schema.checked = 'checked';
-    if ~CoCoSimPreferences.forceTypeCastingOfInt
+    if CoCoSimPreferences.forceTypeCastingOfInt
         schema.checked = 'unchecked';
     end
     schema.callback = @forceTypecastingOfInt;
