@@ -654,6 +654,7 @@ fi
 # Install Z3 #
 ##################
 z3_failed=0
+chmod +x "$install_dir/z3/bin/z3" 2>/dev/null || {}
 if [[ -x "$install_dir/z3/bin/z3" ]]; then
     progress "Using already built ${cgreen}z3"
 else
@@ -689,6 +690,7 @@ if (( ! z3_failed )); then
     if [[ -x "$install_dir/z3/bin/z3" ]]; then
         # update z3 binary by original z3 and not spacer.
         cp "$install_dir/z3/bin/z3" "$install_dir/bin/z3"
+	chmod +x "$install_dir/bin/z3" 2>/dev/null || {}
     fi
     command_exists z3 || {
         error_msg "z3 is not properly installed";
@@ -710,6 +712,7 @@ fi
 # Install lustrec #
 ###################
 lustrec_failed=0
+chmod +x "$install_dir/bin/lustrec" 2>/dev/null || {}
 if [[ -x "$install_dir/bin/lustrec" ]]; then
     progress "Using already built ${cgreen}lustrec"
 else
@@ -842,6 +845,7 @@ kind2_failed=0
 if (( menhir_failed )); then
     error_msg "Skipping Kind2: dependancy menhir installation has failed"
 else
+    chmod +x "$install_dir/bin/kind2" 2>/dev/null || {}
     if [[ -x "$install_dir/bin/kind2" ]]; then
         progress "Using already built ${cgreen}kind2"
     else
