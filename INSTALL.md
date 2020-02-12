@@ -45,12 +45,14 @@ The script may require some dependencies, please install them and run the script
 1. Clone this cocosim repository in your local machine (develop branch).
 
 2. Download External Matlab Libraries:
-    * Open your Matlab and navigate to `cocosim` then run `start_cocosim` from the Matlab Command window.
-    * Run `install_cocosim_lib(true)` from the Matlab Command window. \
+   
+    * Open your Matlab and navigate to `cocosim/scripts` run `install_cocosim_lib(true)` from the Matlab Command window. \
     Function `cocosim2/scripts/install_cocosim_lib.m` is responsible of copying all required external libraries to the right destination in our repository.
     It needs `git` to clones external repositories from github and copy some of their code on the
     right place on CoCoSim.
     Read function `cocosim2/scripts/install_cocosim_lib.m` to know what are the external libraries are copied to cocosim2 to do it manually in case the function failed for internet connection or `git` issues.
+
+     * Navigate back to `cocosim` then run `start_cocosim` from the Matlab Command window.
 
 3. In your terminal, go first to `scripts` folder in `cocosim` and run the `install_cocosim` script.
     ```
