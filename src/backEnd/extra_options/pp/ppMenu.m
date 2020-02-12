@@ -51,7 +51,7 @@ end
 
 function PPCallback(callbackInfo)
 try
-    model_full_path = MenuUtils.get_file_name(gcs) ;
+    model_full_path = coco_nasa_utils.MenuUtils.get_file_name(gcs) ;
     [new_file_path, status] = cocosim_pp(model_full_path);
     if status
         return;

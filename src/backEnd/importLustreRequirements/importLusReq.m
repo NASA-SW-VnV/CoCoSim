@@ -55,7 +55,7 @@ function new_model_path = importLusReq(current_openedSS, lusFilePath, mappingPat
         errordlg(sprintf('Lustre file %s can not be Found', lusFilePath));
         return;
     end
-    if ~(MatlabUtils.endsWith(lusFilePath, '.lus') || MatlabUtils.endsWith(lusFilePath, '.lusi'))
+    if ~(coco_nasa_utils.MatlabUtils.endsWith(lusFilePath, '.lus') || coco_nasa_utils.MatlabUtils.endsWith(lusFilePath, '.lusi'))
         errordlg('Lustre file extension should be ".lus"');
         return;
     end
@@ -76,7 +76,7 @@ function new_model_path = importLusReq(current_openedSS, lusFilePath, mappingPat
     
     [model_dir, file_name, ~] = fileparts(model_full_path);
     output_dir = fullfile(model_dir, 'cocosim_output', file_name);
-    if ~exist(output_dir, 'dir'); MatlabUtils.mkdir(output_dir); end
+    if ~exist(output_dir, 'dir'); coco_nasa_utils.MatlabUtils.mkdir(output_dir); end
     
     
     % check syntax

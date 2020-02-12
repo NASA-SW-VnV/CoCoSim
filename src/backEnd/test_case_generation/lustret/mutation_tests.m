@@ -100,13 +100,13 @@ function [ T,  harness_model_name, status] = mutation_tests( model_full_path,...
     load_system(model_full_path);
     %% Compile model
     [lus_full_path, xml_trace, is_unsupported, ~, ~, pp_model_full_path] = ...
-        nasa_toLustre.ToLustre(model_full_path, [], LusBackendType.LUSTREC);
+        nasa_toLustre.ToLustre(model_full_path, [], coco_nasa_utils.LusBackendType.LUSTREC);
     if is_unsupported
         display_msg('Model is not supported', MsgType.ERROR, 'validation', '');
         return;
     end
     [output_dir, lus_file_name, ~] = fileparts(lus_full_path);
-    node_name = MatlabUtils.fileBase(lus_file_name);%remove .LUSTREC/.KIND2 from name.
+    node_name = coco_nasa_utils.MatlabUtils.fileBase(lus_file_name);%remove .LUSTREC/.KIND2 from name.
     try
         [ T, ~, status ] = lustret_test_mutation( pp_model_full_path, ...
             lus_full_path, ...
@@ -142,7 +142,7 @@ function [ T,  harness_model_name, status] = mutation_tests( model_full_path,...
     
     if mkHarnessMdl
         if ~exist(output_dir, 'dir'), mkdir(output_dir); end
-        harness_model_name = SLXUtils.makeharness(T, slx_file_name, output_dir, '_mutations');
+        harness_model_name = coco_nasa_utils.SLXUtils.makeharness(T, slx_file_name, output_dir, '_mutations');
     end
 end
 

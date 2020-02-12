@@ -49,13 +49,13 @@ function code = print_kind2(obj, backend)
         require{j} = sprintf('%s', ...
             obj.requires{j}.print(backend));
     end
-    require = MatlabUtils.strjoin(require, '');
+    require = coco_nasa_utils.MatlabUtils.strjoin(require, '');
 
     ensure = {};
     for j=1:numel(obj.ensures)
         ensure{j} = sprintf('%s', ...
             obj.ensures{j}.print(backend));
     end
-    ensure = MatlabUtils.strjoin(ensure, '');
+    ensure = coco_nasa_utils.MatlabUtils.strjoin(ensure, '');
     code = sprintf('\tmode %s(\n%s%s\t);\n', obj.name, require, ensure);
 end

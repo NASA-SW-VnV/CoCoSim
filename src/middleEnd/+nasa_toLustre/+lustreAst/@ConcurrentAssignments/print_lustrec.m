@@ -45,5 +45,5 @@
 function code = print_lustrec(obj, backend)
 
     lines = cellfun(@(x) x.print(backend), obj.assignments, 'UniformOutput', 0);
-    code = MatlabUtils.strjoin(lines, '\n\t');
+    code = coco_nasa_utils.MatlabUtils.strjoin(lines, '\n\t');
 end

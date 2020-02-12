@@ -81,14 +81,14 @@ function [node, external_nodes_i, opens, abstractedNodes] = get_inverse_code(lus
             outputs{counter} = nasa_toLustre.lustreAst.LustreVar(ai{i,j},'real');
         end
     end
-    if LusBackendType.isKIND2(lus_backend)
+    if coco_nasa_utils.LusBackendType.isKIND2(lus_backend)
         contractBody = getContractBody_nxn_inverstion(n,inline_a,inline_ai);
         contract = nasa_toLustre.lustreAst.LustreContract();
         contract.setBodyEqs(contractBody);
         node.setLocalContract(contract);
     end
     % inversion and contract
-    if  n > 4 || LusBackendType.isKIND2(lus_backend)
+    if  n > 4 || coco_nasa_utils.LusBackendType.isKIND2(lus_backend)
         node.setIsImported(true);
         abstractedNodes = {sprintf('Inverse Matrix of dimension %d', n)};
     elseif n <= 4

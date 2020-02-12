@@ -79,7 +79,7 @@ elseif show_models && ~isempty(model_full_path)
 end
 [lus_dir, lus_fname, ~] = fileparts(lus_file_path);
 if ~exist('main_node_name', 'var') || isempty(main_node_name)
-    main_node_name = MatlabUtils.fileBase(lus_fname);
+    main_node_name = coco_nasa_utils.MatlabUtils.fileBase(lus_fname);
 end
 if ~exist('output_dir', 'var') || isempty(output_dir)
     output_dir = lus_dir;
@@ -138,7 +138,7 @@ else
     IMIN = -300;
     IMAX = 300;
 end
-eps = SLXUtils.getLustrescSlxEps(model_full_path);
+eps = coco_nasa_utils.SLXUtils.getLustrescSlxEps(model_full_path);
 T = [];
 %% equivalence testing
 if tests_method == 2
@@ -301,7 +301,7 @@ elseif (tests_method == 4) %4- Prove LUS1 <=> LUS2.
         IN_struct{i} = IN_struct_i;
     end
     if prod(cellfun(@isempty, IN_struct)) ~= 1
-        json_text = MatlabUtils.jsonencode(IN_struct);
+        json_text = coco_nasa_utils.MatlabUtils.jsonencode(IN_struct);
         json_text = regexprep(json_text, '\\/','/');
         fname = fullfile(output_dir, 'CounterExamples_tmp.json');
         fname_formatted = fullfile(output_dir, 'CounterExamples.json');

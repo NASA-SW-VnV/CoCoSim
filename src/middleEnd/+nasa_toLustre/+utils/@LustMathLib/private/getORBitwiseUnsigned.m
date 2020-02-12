@@ -85,7 +85,7 @@ function [node, external_nodes, opens, abstractedNodes] = getORBitwiseUnsigned(n
             nasa_toLustre.lustreAst.IntExpr(2))...
             );
     end
-    %code = MatlabUtils.strjoin(code, ' \n\t+ ');
+    %code = coco_nasa_utils.MatlabUtils.strjoin(code, ' \n\t+ ');
     rhs = nasa_toLustre.lustreAst.BinaryExpr.BinaryMultiArgs(nasa_toLustre.lustreAst.BinaryExpr.PLUS, args);
     node_name = strcat('_OR_Bitwise_Unsigned_', num2str(n));
     

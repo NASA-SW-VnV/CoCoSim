@@ -55,7 +55,7 @@ function [failed] = replace_one_block(block,new_block)
             'MakeNameUnique', 'on', ...
             'Orientation',Orient, ...
             'Position',Size);
-        if MatlabUtils.startsWith(new_block, 'pp_lib/')
+        if coco_nasa_utils.MatlabUtils.startsWith(new_block, 'pp_lib/')
             set_param(block, 'LinkStatus', 'inactive');
         end
     catch

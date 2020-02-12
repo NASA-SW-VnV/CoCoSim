@@ -58,7 +58,7 @@ function specInstrs_process(node_block_path, blk_spec, node_name)
         'modePorts', num2str(length(modes)));
     
     % remove connected blocks to validator that are added by its callback
-    SLXUtils.removeBlocksLinkedToMe(vHandle, false);
+    coco_nasa_utils.SLXUtils.removeBlocksLinkedToMe(vHandle, false);
     %make sure all porthandles are -1
     vPortConnectivity = get_param(vHandle, 'PortConnectivity');
     srcBlocks = {vPortConnectivity.SrcBlock};

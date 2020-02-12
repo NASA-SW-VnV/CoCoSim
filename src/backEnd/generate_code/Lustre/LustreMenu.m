@@ -60,13 +60,13 @@ end
 function schema = getLustrec(varargin)
     schema = sl_action_schema;
     schema.label = 'For C code generation';
-    schema.callback =  @(x) LusCompilerCallback(LusBackendType.LUSTREC, x);
+    schema.callback =  @(x) LusCompilerCallback(coco_nasa_utils.LusBackendType.LUSTREC, x);
 end
 
 function LusCompilerCallback(bckend, ~)
     try
-        mdl_full_path = MenuUtils.get_file_name(gcs);
-        MenuUtils.add_pp_warning(mdl_full_path);
+        mdl_full_path = coco_nasa_utils.MenuUtils.get_file_name(gcs);
+        coco_nasa_utils.MenuUtils.add_pp_warning(mdl_full_path);
         CoCoSimPreferences = cocosim_menu.CoCoSimPreferences.load();
         if strcmp(CoCoSimPreferences.lustreCompiler, 'IOWA') 
             cocoSpecCompiler(mdl_full_path);

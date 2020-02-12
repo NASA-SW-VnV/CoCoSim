@@ -73,8 +73,8 @@ function [code, dt, dim, extra_code] = matrix_To_Lustre(tree, args)
                 args.expected_lusDT = code_dt{i, j};
                 [code_i, ~, ~, extra_code_i] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
                     v, args);
-                extra_code = MatlabUtils.concat(extra_code, extra_code_i);
-                code = MatlabUtils.concat(code, code_i);
+                extra_code = coco_nasa_utils.MatlabUtils.concat(extra_code, extra_code_i);
+                code = coco_nasa_utils.MatlabUtils.concat(code, code_i);
             end
         end
         dim = [1 length(code)];
@@ -87,7 +87,7 @@ function [code, dt, dim, extra_code] = matrix_To_Lustre(tree, args)
                 args.expected_lusDT = code_dt{i, j};
                 [code_j, ~, code_dim, extra_code_i] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
                     v, args);
-                extra_code = MatlabUtils.concat(extra_code, extra_code_i);
+                extra_code = coco_nasa_utils.MatlabUtils.concat(extra_code, extra_code_i);
                 if isrow(code_j), code_j = code_j'; end
                 code_j = reshape(code_j, code_dim);
                 code_i = [code_i, code_j];

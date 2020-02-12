@@ -44,5 +44,5 @@
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function code = print_kind2(obj)
-    code = obj.print(LusBackendType.KIND2);
+    code = obj.print(coco_nasa_utils.LusBackendType.KIND2);
 end

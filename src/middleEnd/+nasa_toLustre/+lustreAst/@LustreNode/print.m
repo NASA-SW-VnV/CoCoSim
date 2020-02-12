@@ -55,7 +55,7 @@ function code = print(obj, backend, inPreludeFile)
     %% metaInfo
     if ~isempty(obj.metaInfo)
         if ischar(obj.metaInfo)
-            if LusBackendType.isPRELUDE(backend) && inPreludeFile
+            if coco_nasa_utils.LusBackendType.isPRELUDE(backend) && inPreludeFile
                 lines{end + 1} = sprintf('--%s\n',...
                     strrep(obj.metaInfo, newline, '--'));
             else
@@ -67,7 +67,7 @@ function code = print(obj, backend, inPreludeFile)
         end
     end
     %% PRELUDE for main node
-    if LusBackendType.isPRELUDE(backend) ...
+    if coco_nasa_utils.LusBackendType.isPRELUDE(backend) ...
             && inPreludeFile...
             && obj.isMain
         for i=1:length(obj.inputs)
@@ -84,13 +84,13 @@ function code = print(obj, backend, inPreludeFile)
         isImported_str = '';
     end
     semicolon =';';
-    if LusBackendType.isPRELUDE(backend) && inPreludeFile
+    if coco_nasa_utils.LusBackendType.isPRELUDE(backend) && inPreludeFile
         semicolon = '';
     end
     nodeName = obj.name;
     %PRELUDE does not support "_" in the begining of the word.
-    if LusBackendType.isPRELUDE(backend) ...
-            && MatlabUtils.startsWith(nodeName, '_')
+    if coco_nasa_utils.LusBackendType.isPRELUDE(backend) ...
+            && coco_nasa_utils.MatlabUtils.startsWith(nodeName, '_')
         nodeName = sprintf('x%s', nodeName);
     end
     lines{end + 1} = sprintf('node %s %s(%s)\nreturns(%s)%s\n', ...
@@ -104,7 +104,7 @@ function code = print(obj, backend, inPreludeFile)
     end
 
     if obj.isImported
-        code = MatlabUtils.strjoin(lines, '');
+        code = coco_nasa_utils.MatlabUtils.strjoin(lines, '');
         return;
     end
 
@@ -124,5 +124,5 @@ function code = print(obj, backend, inPreludeFile)
 
     end
     lines{end+1} = sprintf('tel\n');
-    code = MatlabUtils.strjoin(lines, '');
+    code = coco_nasa_utils.MatlabUtils.strjoin(lines, '');
 end

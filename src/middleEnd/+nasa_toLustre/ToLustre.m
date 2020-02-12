@@ -93,7 +93,7 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, ...
         lus_backend = CoCoSimPreferences.lustreBackend;
     end
     if nargin < 4 || isempty(coco_backend)
-        coco_backend = CoCoBackendType.VALIDATION;
+        coco_backend = coco_nasa_utils.CoCoBackendType.VALIDATION;
     end
     try
         forceGeneration = evalin('base', nasa_toLustre.utils.ToLustreOptions.FORCE_CODE_GEN);
@@ -150,7 +150,7 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, ...
         [output_dir, lus_fname, ~] = fileparts(lustre_file_path);
         [lustre_file_path, mat_file] = ...
             nasa_toLustre.utils.SLX2LusUtils.getLusOutputPath(output_dir, ...
-            MatlabUtils.fileBase(lus_fname), lus_backend);
+            coco_nasa_utils.MatlabUtils.fileBase(lus_fname), lus_backend);
         if exist(lustre_file_path, 'file') ...
                 && BUtils.isLastModified(model_path, lustre_file_path) ...
                 && exist(mat_file, 'file')
@@ -207,7 +207,7 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, ...
         nasa_toLustre.utils.SLX2LusUtils.getLusOutputPath(output_dir, file_name, lus_backend);
     %% Create Meta informations
     create_file_meta_info(lustre_file_path);
-    if LusBackendType.isPRELUDE(lus_backend)
+    if coco_nasa_utils.LusBackendType.isPRELUDE(lus_backend)
         create_file_meta_info(plu_path);
     end
     %% Create traceability informations in XML format
@@ -235,7 +235,7 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, ...
     model_struct = ir_struct.(main_fieldName);
     main_sampleTime = model_struct.CompiledSampleTime;
     external_libraries = {};
-    if LusBackendType.isPRELUDE(lus_backend)
+    if coco_nasa_utils.LusBackendType.isPRELUDE(lus_backend)
         % no computation is allowed in prelude file
         external_libraries{end+1} = 'getNbStep';
         external_libraries{end+1} = 'getTimeStep';
@@ -264,7 +264,7 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, ...
     is_main_node = 1;
     [nodes_ast, contracts_ast, external_libraries_i, abstractedBlocks_i, failed] = recursiveGeneration(...
         model_struct, model_struct, main_sampleTime, is_main_node, lus_backend, coco_backend, xml_trace);
-    external_libraries = MatlabUtils.concat(external_libraries, external_libraries_i);
+    external_libraries = coco_nasa_utils.MatlabUtils.concat(external_libraries, external_libraries_i);
     abstractedBlocks = [abstractedBlocks, abstractedBlocks_i];
     if ~forceGeneration && failed
         html_path = fullfile(output_dir, strcat(file_name, '_error_messages.html'));
@@ -295,11 +295,11 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, ...
     if ~isempty(TOLUSTRE_ENUMS_CONV_NODES)
         nodes_ast = [TOLUSTRE_ENUMS_CONV_NODES, nodes_ast];
     end
-    nodes_ast = MatlabUtils.removeEmpty(nodes_ast);
-    contracts_ast = MatlabUtils.removeEmpty(contracts_ast);
+    nodes_ast = coco_nasa_utils.MatlabUtils.removeEmpty(nodes_ast);
+    contracts_ast = coco_nasa_utils.MatlabUtils.removeEmpty(contracts_ast);
     program =  nasa_toLustre.lustreAst.LustreProgram(open_list, enumsAst, nodes_ast, contracts_ast);
     if cocosim_optim %...
-            % && ~(LusBackendType.isLUSTREC(lus_backend) || LusBackendType.isZUSTRE(lus_backend))
+            % && ~(coco_nasa_utils.LusBackendType.isLUSTREC(lus_backend) || coco_nasa_utils.LusBackendType.isZUSTRE(lus_backend))
         % Optimization is not important for Lustrec as the later normalize all expressions. 
         try program = program.simplify(); catch me, display_msg(me.getReport(), MsgType.DEBUG, 'ToLustre.simplify', ''); end
     end
@@ -312,7 +312,7 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, ...
         failed = 1;
         return;
     end
-    if LusBackendType.isPRELUDE(lus_backend)
+    if coco_nasa_utils.LusBackendType.isPRELUDE(lus_backend)
         plu_fid = fopen(plu_path, 'a');
         if plu_fid==-1
             msg = sprintf('Opening file "%s" is not possible', plu_path);
@@ -323,17 +323,17 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, ...
     end
     try
         [lustrecode, preludeCode, ext_lib] = program.print(lus_backend);
-        open_list = MatlabUtils.concat(open_list, ext_lib);
+        open_list = coco_nasa_utils.MatlabUtils.concat(open_list, ext_lib);
         fprintf(lus_fid, '%s', lustrecode);
         fclose(lus_fid);
-        if LusBackendType.isPRELUDE(lus_backend)
+        if coco_nasa_utils.LusBackendType.isPRELUDE(lus_backend)
             fprintf(plu_fid, '%s', preludeCode);
             fclose(plu_fid);
         end
         if COCOSIM_DEV_DEBUG
             display_msg(strrep(lustrecode, '%', '%%'), MsgType.DEBUG, ...
                 'ToLustre', '', 3);
-            if LusBackendType.isPRELUDE(lus_backend)
+            if coco_nasa_utils.LusBackendType.isPRELUDE(lus_backend)
                 display_msg('*****PRELUDE CODE *******', MsgType.DEBUG, ...
                 'ToLustre', '');
                 display_msg(strrep(preludeCode, '%', '%%'), MsgType.DEBUG, ...
@@ -349,7 +349,7 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, ...
     end
     
     %% copy Kind2 libraries
-    if LusBackendType.isKIND2(lus_backend)
+    if coco_nasa_utils.LusBackendType.isKIND2(lus_backend)
         toLustrePath = fileparts(mfilename('fullpath'));
         % lustrec_math
         if ismember('lustrec_math', open_list)
@@ -388,7 +388,7 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, ...
 %                 'simulink_math_fcn.lusi');
 %             if exist(simulink_math_fcn_path, 'file')
 %                 ftext = fileread(simulink_math_fcn_path);
-%                 if MatlabUtils.contains(ftext, 'open <lustrec_math>')
+%                 if coco_nasa_utils.MatlabUtils.contains(ftext, 'open <lustrec_math>')
 %                     % simulink_math_fcn includes lustrec_math, so remove
 %                     % lustrec_math to avoid double definition of functions
 %                     % error
@@ -405,12 +405,12 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, ...
     ToLustre_datenum_map(model_path) = lustre_file_path;
     
     %% check lustre syntax
-    if ~LusBackendType.isPRELUDE(lus_backend) 
-        if LusBackendType.isKIND2(lus_backend)
+    if ~coco_nasa_utils.LusBackendType.isPRELUDE(lus_backend) 
+        if coco_nasa_utils.LusBackendType.isKIND2(lus_backend)
             [syntax_status, output] = Kind2Utils2.checkSyntaxError(lustre_file_path, KIND2, Z3);
-        elseif LusBackendType.isLUSTREC(lus_backend)
+        elseif coco_nasa_utils.LusBackendType.isLUSTREC(lus_backend)
             [~, syntax_status, output] = LustrecUtils.generate_lusi(lustre_file_path, LUSTREC );
-        elseif LusBackendType.isJKIND(lus_backend)
+        elseif coco_nasa_utils.LusBackendType.isJKIND(lus_backend)
             [syntax_status, output] = JKindUtils.checkSyntaxError(lustre_file_path, JLUSTRE2KIND);
         else
             syntax_status = 0;
@@ -454,7 +454,7 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, ...
     
     msg = sprintf('Lustre File generated:%s', lustre_file_path);
     display_msg(msg, MsgType.RESULT, 'ToLustre', '');
-    if LusBackendType.isPRELUDE(lus_backend)
+    if coco_nasa_utils.LusBackendType.isPRELUDE(lus_backend)
         msg = sprintf('PRELUDE File generated:%s', plu_path);
         display_msg(msg, MsgType.RESULT, 'ToLustre', '');
     end

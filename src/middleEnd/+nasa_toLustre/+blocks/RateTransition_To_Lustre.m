@@ -72,7 +72,7 @@ classdef RateTransition_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             % detect Rate type (see documentation)
             
             [type, error_msg] = nasa_toLustre.blocks.RateTransition_To_Lustre.getRateTransferType(blk, inTs, inTsOffset, outTs, outTsOffset );
-            if ~LusBackendType.isPRELUDE(lus_backend) && ~isempty(error_msg)
+            if ~coco_nasa_utils.LusBackendType.isPRELUDE(lus_backend) && ~isempty(error_msg)
                 display_msg(error_msg, MsgType.ERROR, 'RateTransition_To_Lustre', '');
                 return;
             end
@@ -81,7 +81,7 @@ classdef RateTransition_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             init_cond =nasa_toLustre.utils.SLX2LusUtils.getInitialOutput(parent, blk,...
                 blk.InitialCondition, outputDataType, nb_outputs);
             codes = {};
-            if LusBackendType.isPRELUDE(lus_backend)
+            if coco_nasa_utils.LusBackendType.isPRELUDE(lus_backend)
                 %% Using Prelude syntax
                 codes = cell(1, length(outputs));
                 rhs = cell(1, length(inputs));
@@ -202,7 +202,7 @@ classdef RateTransition_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                             nasa_toLustre.lustreAst.VarIdExpr(localVars{i}.getId()),...
                             clockOutVar)), ...
                             (1:numel(outputs)), 'un', 0);
-                        codes = MatlabUtils.concat(codes1, codes2);
+                        codes = coco_nasa_utils.MatlabUtils.concat(codes1, codes2);
                     end
                     
                 else
@@ -259,7 +259,7 @@ classdef RateTransition_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                             clockOutVar)), ...
                             (1:numel(outputs)), 'un', 0);
                     end
-                    codes = MatlabUtils.concat(codes1, codes2);
+                    codes = coco_nasa_utils.MatlabUtils.concat(codes1, codes2);
                 end
             end
             obj.addCode( codes );
@@ -283,8 +283,8 @@ classdef RateTransition_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             if ~(nasa_toLustre.utils.SLX2LusUtils.isIgnoredSampleTime(...
                     outTsNormalized, outTsOffsetNormalized)) ...
                     && ...
-                    (LusBackendType.isJKIND(lus_backend)...
-                    || LusBackendType.isKIND2(lus_backend))
+                    (coco_nasa_utils.LusBackendType.isJKIND(lus_backend)...
+                    || coco_nasa_utils.LusBackendType.isKIND2(lus_backend))
                 % y = x when C; is not supported by Kind2. It forces "when"
                 % to be used in merge
                 obj.addUnsupported_options(...

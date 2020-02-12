@@ -97,16 +97,16 @@ classdef Selector_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             obj.addVariable(outputs_dt);
             
             %% Design Error Detection Backend code:
-            if isPortIndex && CoCoBackendType.isDED(coco_backend)
+            if isPortIndex && coco_nasa_utils.CoCoBackendType.isDED(coco_backend)
                 blk_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);
                 
-                if ismember(CoCoBackendType.DED_OUTOFBOUND, ...
+                if ismember(coco_nasa_utils.CoCoBackendType.DED_OUTOFBOUND, ...
                         CoCoSimPreferences.dedChecks)
                     % Add properties related to Out of bound array access.
                     U_dim = in_matrix_dimension{1}.dims;
                     port_idx = 2;
                     for i=1:numel(blk.IndexOptionArray)
-                        if MatlabUtils.contains(blk.IndexOptionArray{i}, '(port)')
+                        if coco_nasa_utils.MatlabUtils.contains(blk.IndexOptionArray{i}, '(port)')
                             propID = sprintf('%s_OUTOFBOUND_%d',...
                                 blk_name, i);
                             if strcmp(blk.IndexMode, 'Zero-based')

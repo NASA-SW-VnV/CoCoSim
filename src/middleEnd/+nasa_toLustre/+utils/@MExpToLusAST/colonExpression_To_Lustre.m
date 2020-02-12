@@ -55,7 +55,7 @@ function [code, exp_dt, dim, extra_code] = colonExpression_To_Lustre(tree, args)
                 tree.leftExp.rightExp, args);
             [right, right_dt, ~, right_extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
                 tree.rightExp, args);
-            extra_code = MatlabUtils.concat(left_extra_code, middle_extra_code, right_extra_code);
+            extra_code = coco_nasa_utils.MatlabUtils.concat(left_extra_code, middle_extra_code, right_extra_code);
 
             upper_dt = nasa_toLustre.utils.MExpToLusDT.upperDT(left_dt, right_dt);
             exp_dt = nasa_toLustre.utils.MExpToLusDT.upperDT(upper_dt, middle_dt);
@@ -76,7 +76,7 @@ function [code, exp_dt, dim, extra_code] = colonExpression_To_Lustre(tree, args)
         
     elseif count(tree.text, ':') == 1
         if ~isfield(tree, 'leftExp') && ~isfield(tree, 'rightExp')
-            t = MatlabUtils.getExpTree('u(1:end)');
+            t = coco_nasa_utils.MatlabUtils.getExpTree('u(1:end)');
             tree = t.parameters(1);
         end
         c = symvar(tree.text);
@@ -89,7 +89,7 @@ function [code, exp_dt, dim, extra_code] = colonExpression_To_Lustre(tree, args)
                     tree.leftExp, args);
                 [right, right_dt, ~, right_extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
                     tree.rightExp, args);
-                extra_code = MatlabUtils.concat(left_extra_code, right_extra_code);
+                extra_code = coco_nasa_utils.MatlabUtils.concat(left_extra_code, right_extra_code);
 
                 exp_dt = nasa_toLustre.utils.MExpToLusDT.upperDT(left_dt, right_dt);
                 if isa(left{1}, 'nasa_toLustre.lustreAst.IntExpr') || ...
@@ -97,7 +97,7 @@ function [code, exp_dt, dim, extra_code] = colonExpression_To_Lustre(tree, args)
                     left_value = left{1}.value;
                 else
                     try
-                        left_value = eval(left{1}.print(LusBackendType.LUSTREC));
+                        left_value = eval(left{1}.print(coco_nasa_utils.LusBackendType.LUSTREC));
                     catch
                         ME = MException('COCOSIM:TREE2CODE', ...
                             'Expression "%s" only support constant input',...
@@ -110,7 +110,7 @@ function [code, exp_dt, dim, extra_code] = colonExpression_To_Lustre(tree, args)
                     right_value = right{1}.value;
                 else
                     try
-                        right_value = eval(right{1}.print(LusBackendType.LUSTREC));
+                        right_value = eval(right{1}.print(coco_nasa_utils.LusBackendType.LUSTREC));
                     catch
                         ME = MException('COCOSIM:TREE2CODE', ...
                             'Expression "%s" only support constant input',...

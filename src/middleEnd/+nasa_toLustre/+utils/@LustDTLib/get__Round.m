@@ -48,7 +48,7 @@
 % Equivalent to the Fixed-Point Designer round function.
 function [node, external_nodes, opens, abstractedNodes] = get__Round(lus_backend, varargin)
 
-    if LusBackendType.isKIND2(lus_backend)
+    if coco_nasa_utils.LusBackendType.isKIND2(lus_backend)
                 opens = {};
         abstractedNodes = {};
         external_nodes = {'LustDTLib__Floor', 'LustDTLib__Ceiling'};

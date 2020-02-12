@@ -61,7 +61,7 @@ function data = read_json(contract_path)
         return;
     end
     try
-        data = MatlabUtils.jsondecode(filetext);
+        data = coco_nasa_utils.MatlabUtils.jsondecode(filetext);
     catch ME
         display_msg(['Could not read file ' contract_path], Constants.ERROR, 'read_json', '');
         rethrow(ME);

@@ -68,5 +68,5 @@ function code = print_lustrec(obj, backend)
         lines{end+1} = sprintf('\tuntil %s\n', ...
             obj.weakTrans{i}.print(backend));
     end
-    code = MatlabUtils.strjoin(lines, '');
+    code = coco_nasa_utils.MatlabUtils.strjoin(lines, '');
 end

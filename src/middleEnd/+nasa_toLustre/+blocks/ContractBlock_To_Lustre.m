@@ -54,7 +54,7 @@ classdef ContractBlock_To_Lustre < nasa_toLustre.blocks.SubSystem_To_Lustre
         
         function  write_code(obj, parent, blk, xml_trace, lus_backend, ...
                 coco_backend, main_sampleTime, varargin)
-            if LusBackendType.isKIND2(lus_backend)
+            if coco_nasa_utils.LusBackendType.isKIND2(lus_backend)
                 % Contracts Subsystems willl be ignored as they will be
                 % imported in the node definition of the associate Simulink
                 % Subsystem. See SS_To_LustreNode.subsystem2node function

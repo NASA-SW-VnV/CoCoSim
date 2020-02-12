@@ -52,13 +52,13 @@ function obj = contractNode_substituteVars(obj)
     end
     new_localVars = obj.localVars;
     varsDT = cellfun(@(x) x.getDT(), new_localVars, 'un', 0);
-    clockVars = new_localVars(MatlabUtils.contains(varsDT, 'clock'));
+    clockVars = new_localVars(coco_nasa_utils.MatlabUtils.contains(varsDT, 'clock'));
     clockVarIDs = cellfun(@(x) x.getId(), clockVars, 'UniformOutput', false);
     % include ConcurrentAssignments as normal Eqts
     new_bodyEqs = {};
     for i=1:numel(obj.bodyEqs)
         if isa(obj.bodyEqs{i}, 'nasa_toLustre.lustreAst.ConcurrentAssignments')
-            new_bodyEqs = MatlabUtils.concat(new_bodyEqs, ...
+            new_bodyEqs = coco_nasa_utils.MatlabUtils.concat(new_bodyEqs, ...
                 obj.bodyEqs{i}.getAssignments());
         elseif ~isempty(obj.bodyEqs{i})
             new_bodyEqs{end+1} = obj.bodyEqs{i};
@@ -67,7 +67,7 @@ function obj = contractNode_substituteVars(obj)
     %ignore simplification if there is automaton
     
     all_body_obj = cellfun(@(x) x.getAllLustreExpr(), new_bodyEqs, 'un',0);
-    all_body_obj = MatlabUtils.concat(all_body_obj{:});
+    all_body_obj = coco_nasa_utils.MatlabUtils.concat(all_body_obj{:});
     all_objClass = cellfun(@(x) class(x), all_body_obj, 'UniformOutput', false);
     if ismember('nasa_toLustre.lustreAst.LustreAutomaton', all_objClass)
         return;

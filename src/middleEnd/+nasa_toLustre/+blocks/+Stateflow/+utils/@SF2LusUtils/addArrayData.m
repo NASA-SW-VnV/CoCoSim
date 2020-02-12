@@ -51,7 +51,7 @@ function SF_DATA_MAP = addArrayData(SF_DATA_MAP, d_list)
         if numel(names) > 1
             try
                 [InitialValue, ~, ~] = ...
-                    SLXUtils.evalParam(gcs, [], [], d_list{i}.InitialValue);
+                    coco_nasa_utils.SLXUtils.evalParam(gcs, [], [], d_list{i}.InitialValue);
             catch
                 InitialValue = 0;
             end

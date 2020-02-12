@@ -111,7 +111,7 @@ classdef ContractModeBlock_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     prop_ID, i, 'ensure');
             end
             isInsideContract =nasa_toLustre.utils.SLX2LusUtils.isContractBlk(parent);
-            if LusBackendType.isKIND2(lus_backend) && isInsideContract
+            if coco_nasa_utils.LusBackendType.isKIND2(lus_backend) && isInsideContract
                 blk_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);
                 code = nasa_toLustre.lustreAst.ContractModeExpr(blk_name, requires, ensures);
             else

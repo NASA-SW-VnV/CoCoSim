@@ -67,7 +67,7 @@ function [res] = ...
     %% define parameters if not given by the user
     [model_path, file_name, ~] = fileparts(char(orig_model_full_path));
     if ~exist('min_max_constraints', 'var') || isempty(min_max_constraints)
-        min_max_constraints = SLXUtils.constructInportsMinMaxConstraints(orig_model_full_path, -300, 300);
+        min_max_constraints = coco_nasa_utils.SLXUtils.constructInportsMinMaxConstraints(orig_model_full_path, -300, 300);
     end
     
     if ~exist('deep_CEX', 'var') || isempty(deep_CEX)
@@ -94,18 +94,18 @@ function [res] = ...
         options{end+1} = nasa_toLustre.utils.ToLustreOptions.NODISPLAY;
     end
     
-    stopAtPPValidation = ismember(CoCoBackendType.PP_VALIDATION, options);
+    stopAtPPValidation = ismember(coco_nasa_utils.CoCoBackendType.PP_VALIDATION, options);
     
     addpath(model_path);
     %% generate lustre code
     try
         f_msg = sprintf('Compiling model "%s" to Lustre\n',file_name);
         display_msg(f_msg, MsgType.RESULT, 'validation', '');
-        %GUIUtils.update_status('Runing CocoSim');
+        
         [res.lus_file_path, xml_trace, res.ToLustre_failed, ...
             unsupportedOptions, ~, pp_model_full_path, res.ir_json_path] = ...
-            nasa_toLustre.ToLustre(orig_model_full_path, [], LusBackendType.LUSTREC, ...
-            CoCoBackendType.VALIDATION, options{:});
+            nasa_toLustre.ToLustre(orig_model_full_path, [], coco_nasa_utils.LusBackendType.LUSTREC, ...
+            coco_nasa_utils.CoCoBackendType.VALIDATION, options{:});
         res.is_unsupported = ~isempty(unsupportedOptions);
         if res.is_unsupported || res.ToLustre_failed
             display_msg('Model is not supported', MsgType.ERROR, 'validation', '');
@@ -136,7 +136,7 @@ function [res] = ...
         [res.orig_VS_pp_valid, ...
             res.orig_VS_pp_simulation_failed, ...
             res.orig_VS_pp_cex_file_path] = ...
-            SLXUtils.compareTwoSLXModels(orig_model_full_path, pp_model_full_path,...
+            coco_nasa_utils.SLXUtils.compareTwoSLXModels(orig_model_full_path, pp_model_full_path,...
             min_max_constraints, show_model);
     catch ME
         display_msg(ME.message, MsgType.ERROR, 'validation', '');
@@ -215,7 +215,7 @@ function validate_components(file_path,file_name,block_path,  lus_file_path,...
         display_msg(['Validating SubSystem ' ss{i}], MsgType.INFO, 'validation', '');
         node_name = nasa_toLustre.utils.SLX2Lus_Trace.get_lustre_node_from_Simulink_block_name(xml_trace, ss{i});
         if ~strcmp(node_name, '')
-            [new_model_path, ~, status] = SLXUtils.crete_model_from_subsystem(file_name, ss{i}, output_dir );
+            [new_model_path, ~, status] = coco_nasa_utils.SLXUtils.crete_model_from_subsystem(file_name, ss{i}, output_dir );
             if status
                 continue;
             end
@@ -266,7 +266,7 @@ function validate_componentsV2(file_path, file_name, block_path, output_dir, ...
         end
         display_msg(['Validating SubSystem ' ss{i}], MsgType.INFO, 'validation', '');
         if ~bdIsLoaded(mdl_name),load_system(file_path);end
-        [new_model_path, ~, status] = SLXUtils.crete_model_from_subsystem(file_name, ss{i}, output_dir );
+        [new_model_path, ~, status] = coco_nasa_utils.SLXUtils.crete_model_from_subsystem(file_name, ss{i}, output_dir );
         if status
             continue;
         end

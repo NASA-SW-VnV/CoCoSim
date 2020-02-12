@@ -45,7 +45,7 @@
 function [node, external_nodes_i, opens, abstractedNodes] = get_int_div_Ceiling(lus_backend, varargin)
         opens = {};
     abstractedNodes = {};
-    if LusBackendType.isJKIND(lus_backend)
+    if coco_nasa_utils.LusBackendType.isJKIND(lus_backend)
         %Jkind does not support mod operator between variables
         external_nodes_i = {};
         bodyElts{1} = nasa_toLustre.lustreAst.LustreEq(...

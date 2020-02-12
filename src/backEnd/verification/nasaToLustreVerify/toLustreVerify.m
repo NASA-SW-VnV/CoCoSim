@@ -48,13 +48,13 @@ function [ failed ] = toLustreVerify(model_full_path,  const_files, lus_backend,
     if isempty(KIND2)
         tools_config;
     end
-    if LusBackendType.isKIND2(lus_backend) && ~exist(KIND2,'file')
+    if coco_nasa_utils.LusBackendType.isKIND2(lus_backend) && ~exist(KIND2,'file')
         errordlg(sprintf(['KIND2 model checker is not found in "%s".\n'...
             'Please set KIND2 path in tools_config.m script under tools folder.\n'...
             'If you want to generate Lustre code for verification, '...
             'do tools -> CoCoSim -> Generate code -> Lustre -> For Verification.'], KIND2));
         return;
-    elseif ~LusBackendType.isKIND2(lus_backend)
+    elseif ~coco_nasa_utils.LusBackendType.isKIND2(lus_backend)
         errordlg(['Only KIND2 currently is supported for NASA compiler. '...
             'To change compiler or Lustre model checker go to '...
             'Tools -> CoCoSim -> Preferences -> Simulink to Lustre Compiler.']);
@@ -64,7 +64,7 @@ function [ failed ] = toLustreVerify(model_full_path,  const_files, lus_backend,
         const_files = {};
     end
     if nargin < 3 || isempty(lus_backend)
-        lus_backend = LusBackendType.KIND2;
+        lus_backend = coco_nasa_utils.LusBackendType.KIND2;
     end
 
     % Get start time
@@ -73,7 +73,7 @@ function [ failed ] = toLustreVerify(model_full_path,  const_files, lus_backend,
     [nom_lustre_file, xml_trace, failed, ~, ...
         ~, pp_model_full_path] = ...
         nasa_toLustre.ToLustre(model_full_path, const_files,...
-        lus_backend, CoCoBackendType.VERIFICATION, varargin);
+        lus_backend, coco_nasa_utils.CoCoBackendType.VERIFICATION, varargin);
 
     if failed 
         return;
@@ -108,7 +108,7 @@ function [ failed ] = toLustreVerify(model_full_path,  const_files, lus_backend,
     contractBlocks_list = find_system(model, ...
         'LookUnderMasks', 'all',  'MaskType', 'ContractBlock');
 
-    if LusBackendType.isKIND2(lus_backend)
+    if coco_nasa_utils.LusBackendType.isKIND2(lus_backend)
         if ~isempty(Assertions_list) && ~isempty(contractBlocks_list)
             display_msg('Having both Assertion/Proof blocks and contracts are not supported in KIND2.', MsgType.ERROR, 'toLustreVerify', '');
             return;
@@ -146,9 +146,9 @@ function [ failed ] = toLustreVerify(model_full_path,  const_files, lus_backend,
         % sometimes kind2 give up quickly and give everything as UNKNOWN. 
         % and we get better results in the second run so we run it twice.
         if tkind2_finish < 10 ...
-                && MatlabUtils.contains(kind2_out, 'unknown</Answer>') ...
-                && ~MatlabUtils.contains(kind2_out, 'falsifiable</Answer>') ...
-                && ~MatlabUtils.contains(kind2_out, 'valid</Answer>')
+                && coco_nasa_utils.MatlabUtils.contains(kind2_out, 'unknown</Answer>') ...
+                && ~coco_nasa_utils.MatlabUtils.contains(kind2_out, 'falsifiable</Answer>') ...
+                && ~coco_nasa_utils.MatlabUtils.contains(kind2_out, 'valid</Answer>')
             display_msg('Re-running Kind2', MsgType.INFO, 'toLustreVerify', '');
             [failed, kind2_out] = Kind2Utils2.runKIND2(...
                 nom_lustre_file,...
@@ -157,7 +157,7 @@ function [ failed ] = toLustreVerify(model_full_path,  const_files, lus_backend,
             if failed, return; end
         end
         % Sometimes the Initial state is unsat
-        if MatlabUtils.contains(kind2_out, 'the system has no reachable states')
+        if coco_nasa_utils.MatlabUtils.contains(kind2_out, 'the system has no reachable states')
             display_msg('The system has no reachable states.', MsgType.ERROR, 'toLustreVerify', '');
         end
         mapping_file = xml_trace.json_file_path;

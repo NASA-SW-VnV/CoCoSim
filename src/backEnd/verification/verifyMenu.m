@@ -53,24 +53,24 @@ end
 
 function verifCallback(varargin)
     try
-        model_full_path = MenuUtils.get_file_name(gcs);
+        model_full_path = coco_nasa_utils.MenuUtils.get_file_name(gcs);
         [ CoCoSimPreferences ] = cocosim_menu.CoCoSimPreferences.load();
         warning('off')
-        MenuUtils.add_pp_warning(model_full_path);
+        coco_nasa_utils.MenuUtils.add_pp_warning(model_full_path);
         if strcmp(CoCoSimPreferences.lustreCompiler, 'NASA')
             toLustreVerify(model_full_path, [], CoCoSimPreferences.lustreBackend);
         else
-            if LusBackendType.isKIND2(CoCoSimPreferences.lustreBackend)
+            if coco_nasa_utils.LusBackendType.isKIND2(CoCoSimPreferences.lustreBackend)
                 assignin('base', 'SOLVER', 'K');
-            elseif LusBackendType.isJKIND(CoCoSimPreferences.lustreBackend)
+            elseif coco_nasa_utils.LusBackendType.isJKIND(CoCoSimPreferences.lustreBackend)
                 assignin('base', 'SOLVER', 'J');
-            elseif LusBackendType.isZUSTRE(CoCoSimPreferences.lustreBackend)
+            elseif coco_nasa_utils.LusBackendType.isZUSTRE(CoCoSimPreferences.lustreBackend)
                 assignin('base', 'SOLVER', 'Z');
             end
             VerificationMenu.runCoCoSim;
         end
         warning('on')
     catch me
-        MenuUtils.handleExceptionMessage(me, 'Prove properties');
+        coco_nasa_utils.MenuUtils.handleExceptionMessage(me, 'Prove properties');
     end
 end

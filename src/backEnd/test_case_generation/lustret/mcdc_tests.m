@@ -94,13 +94,13 @@ function [ new_model_path, status ] = mcdc_tests(...
         end
         [lus_full_path, xml_trace, is_unsupported, ~, ~, pp_model_full_path] = ...
             nasa_toLustre.ToLustre(model_full_path, [], ...
-            LusBackendType.LUSTREC, [], options{:});
+            coco_nasa_utils.LusBackendType.LUSTREC, [], options{:});
         if is_unsupported
             display_msg('Model is not supported', MsgType.ERROR, 'validation', '');
             return;
         end
         [output_dir, lus_file_name, ~] = fileparts(lus_full_path);
-        main_node = MatlabUtils.fileBase(lus_file_name);%remove .LUSTREC/.KIND2 from name.
+        main_node = coco_nasa_utils.MatlabUtils.fileBase(lus_file_name);%remove .LUSTREC/.KIND2 from name.
         [~, slx_file_name, ~] = fileparts(pp_model_full_path);
         load_system(pp_model_full_path);
     catch ME
@@ -124,7 +124,7 @@ function [ new_model_path, status ] = mcdc_tests(...
     
     try
         % generate test cases that covers the MC-DC conditions
-        new_mcdc_file = LustrecUtils.adapt_lustre_file(mcdc_file, LusBackendType.KIND2);
+        new_mcdc_file = LustrecUtils.adapt_lustre_file(mcdc_file, coco_nasa_utils.LusBackendType.KIND2);
         [syntax_status, output] = Kind2Utils2.checkSyntaxError(new_mcdc_file, KIND2, Z3);
         if syntax_status
             display_msg(output, MsgType.DEBUG, 'mcdc_tests', '');
@@ -227,7 +227,7 @@ function [ new_model_path, status ] = mcdc_tests(...
     
     %% Create harness model
     try
-        new_model_path = SLXUtils.makeharness(T, new_model_name, model_parent_path, '_harness');
+        new_model_path = coco_nasa_utils.SLXUtils.makeharness(T, new_model_name, model_parent_path, '_harness');
         close_system(new_model_name, 0)
         if ~nodisplay
             open(new_model_path);
@@ -323,7 +323,7 @@ function [status] = addMCDCBlocksToSLX(new_model_path, slx_file_name, new_model_
                         srcPortHandle = get_param(line, 'SrcPortHandle');
                     end
                     % take too much to compile model for many times
-                    %                     compiledBusType = SLXUtils.getCompiledParam(srcPortHandle, ...
+                    %                     compiledBusType = coco_nasa_utils.SLXUtils.getCompiledParam(srcPortHandle, ...
                     %                         'CompiledBusType');
                     %                     if ~strcmp(compiledBusType,'NOT_BUS')
                     %                         continue;

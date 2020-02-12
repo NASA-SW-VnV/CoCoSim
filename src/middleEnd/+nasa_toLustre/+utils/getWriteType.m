@@ -119,7 +119,7 @@ function [b, status, type, masktype, sfblockType, isIgnored] = getWriteType(sub_
     end
     
     % Check if abstraction is allowed
-    if LusBackendType.isKIND2(lus_backend) ...
+    if coco_nasa_utils.LusBackendType.isKIND2(lus_backend) ...
             && CoCoSimPreferences.abstract_unsupported_blocks
         try
             fun_name = 'nasa_toLustre.blocks.AbstractBlock_To_Lustre';

@@ -81,11 +81,11 @@ function [status, errors_msg] = DotProduct_pp(model)
                 port2CompiledDim = '-1';
 %                 try
 %                     portHandles = get_param(DotProduct_list{i}, 'PortHandles');
-%                     dim1 = SLXUtils.getCompiledParam(portHandles.Inport(1), 'CompiledPortDimensions');
+%                     dim1 = coco_nasa_utils.SLXUtils.getCompiledParam(portHandles.Inport(1), 'CompiledPortDimensions');
 %                     dim1 = dim1(2:end);% remove first element that says how many dimensions exists.
 %                     port1CompiledDim = mat2str(dim1);
 %                     
-%                     dim2 = SLXUtils.getCompiledParam(portHandles.Inport(2), 'CompiledPortDimensions');
+%                     dim2 = coco_nasa_utils.SLXUtils.getCompiledParam(portHandles.Inport(2), 'CompiledPortDimensions');
 %                     dim2 = dim2(2:end);% remove first element that says how many dimensions exists.
 %                     port2CompiledDim = mat2str(dim2);
 %                 catch

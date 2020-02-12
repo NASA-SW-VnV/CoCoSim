@@ -55,7 +55,7 @@ function schema = generateCodeMenu(callbackInfo)
     menu_items{3} = fullfile(gen_root, 'Lustre', 'LustreMenu.m');
     menu_items{4} = fullfile(gen_root, 'Prelude', 'PreludeMenu.m');
     
-    callbacks = cellfun(@MenuUtils.funPath2Handle, menu_items,...
+    callbacks = cellfun(@coco_nasa_utils.MenuUtils.funPath2Handle, menu_items,...
         'UniformOutput', false);
-    schema.childrenFcns = cellfun(@(x) {@MenuUtils.addTryCatch, x}, callbacks, 'UniformOutput', false);
+    schema.childrenFcns = cellfun(@(x) {@coco_nasa_utils.MenuUtils.addTryCatch, x}, callbacks, 'UniformOutput', false);
 end

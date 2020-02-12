@@ -63,10 +63,10 @@ end
 % end
 
 function LusCompilerCallback(callbackInfo)
-model_full_path = MenuUtils.get_file_name(gcs);
-MenuUtils.add_pp_warning(model_full_path);
+model_full_path = coco_nasa_utils.MenuUtils.get_file_name(gcs);
+coco_nasa_utils.MenuUtils.add_pp_warning(model_full_path);
 [lus_full_path, ~, status, ~] = ...
-    nasa_toLustre.ToLustre(model_full_path, [], LusBackendType.LUSTREC);
+    nasa_toLustre.ToLustre(model_full_path, [], coco_nasa_utils.LusBackendType.LUSTREC);
 if status 
     return;
 end
@@ -82,6 +82,6 @@ end
 % end
 % 
 % function SimulinkCompilerCallback(callbackInfo)
-% model_full_path = MenuUtils.get_file_name(gcs);
+% model_full_path = coco_nasa_utils.MenuUtils.get_file_name(gcs);
 % rtwbuild_C_code(model_full_path);
 % end

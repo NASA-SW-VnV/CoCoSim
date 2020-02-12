@@ -293,12 +293,12 @@ classdef Lookup_nD_Test < Block_Test
                         
                         s3 = s2;
                         if i1 == 1
-                            T = MatlabUtils.construct_random_doubles(1, 0, 127, [5 1]);
+                            T = coco_nasa_utils.MatlabUtils.construct_random_doubles(1, 0, 127, [5 1]);
                             table = mat2str(T);
                             dim = 5;
                         elseif i1 == 2
                             dim = [3, 5];
-                            T = MatlabUtils.construct_random_doubles(1, 0, 127, [3, 5]);
+                            T = coco_nasa_utils.MatlabUtils.construct_random_doubles(1, 0, 127, [3, 5]);
                             table = mat2str(T);
                         elseif i1 == 3
                             table = 'reshape(repmat([4 5 6 7 8;16 19 20 21 22;10 18 23 24 25],1,2),[2,5,3])';
@@ -352,7 +352,7 @@ classdef Lookup_nD_Test < Block_Test
                                 s3.TableDataTypeStr = tableDataTypeStr;
                                 
                                 for d =1:length(dim)
-                                    B = sort(MatlabUtils.construct_random_doubles(1, 0, 100, [dim(d) 1]));
+                                    B = sort(coco_nasa_utils.MatlabUtils.construct_random_doubles(1, 0, 100, [dim(d) 1]));
                                     % to make it strictly monotonically increasing after conversion to its run-time data type
                                     B = B + (1:dim(d))';
                                     s3.(sprintf('BreakpointsForDimension%d', d)) = mat2str(B);
@@ -368,7 +368,7 @@ classdef Lookup_nD_Test < Block_Test
                                 end
                                 LUTObj.BreakpointsSpecification = obj.BreakpointsSpecification{i5};
                                 for d =1:length(dim)
-                                    LUTObj.Breakpoints(d).Value = sort(MatlabUtils.construct_random_doubles(1, 0, 127, [dim(d) 1]));
+                                    LUTObj.Breakpoints(d).Value = sort(coco_nasa_utils.MatlabUtils.construct_random_doubles(1, 0, 127, [dim(d) 1]));
                                     if ~startsWith(breakpointsForDimension1DataTypeStr, 'Inherit')
                                         LUTObj.Breakpoints(d).DataType = breakpointsForDimension1DataTypeStr;
                                     elseif strcmp(s.InterpMethod, 'Nearest')
@@ -384,7 +384,7 @@ classdef Lookup_nD_Test < Block_Test
                                 s3.Table = table;
                                 s3.TableDataTypeStr = tableDataTypeStr;
                                 for d =1:length(dim)
-                                    B = MatlabUtils.construct_random_doubles(1, 0, 127, 1);
+                                    B = coco_nasa_utils.MatlabUtils.construct_random_doubles(1, 0, 127, 1);
                                     s3.(sprintf('BreakpointsForDimension%dFirstPoint', d)) = num2str(B);
                                     s3.(sprintf('BreakpointsForDimension%dSpacing', d)) = '1.5';
                                     s3.(sprintf('BreakpointsForDimension%dDataTypeStr', d)) = breakpointsForDimension1DataTypeStr;
@@ -399,7 +399,7 @@ classdef Lookup_nD_Test < Block_Test
                                 end
                                 LUTObj.BreakpointsSpecification = obj.BreakpointsSpecification{i5};
                                 for d =1:length(dim)
-                                    LUTObj.Breakpoints(d).FirstPoint = MatlabUtils.construct_random_doubles(1, 0, 127, 1);
+                                    LUTObj.Breakpoints(d).FirstPoint = coco_nasa_utils.MatlabUtils.construct_random_doubles(1, 0, 127, 1);
                                     LUTObj.Breakpoints(d).Spacing = 1.5;
                                     if ~startsWith(breakpointsForDimension1DataTypeStr, 'Inherit')
                                         LUTObj.Breakpoints(d).DataType = breakpointsForDimension1DataTypeStr;

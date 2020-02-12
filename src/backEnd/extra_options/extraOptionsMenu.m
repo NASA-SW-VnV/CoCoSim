@@ -56,7 +56,7 @@ function schema = extraOptionsMenu(callbackInfo)
     %     options_items{4} = fullfile(validation_root, 'validation','validationMenu.m');
     options_items{4} = fullfile(validation_root, 'validation', 'lustreValidate', 'lusValidateMenu.m');
 
-    callbacks = cellfun(@MenuUtils.funPath2Handle, options_items,...
+    callbacks = cellfun(@coco_nasa_utils.MenuUtils.funPath2Handle, options_items,...
         'UniformOutput', false);
-    schema.childrenFcns = cellfun(@(x) {@MenuUtils.addTryCatch, x}, callbacks, 'UniformOutput', false);
+    schema.childrenFcns = cellfun(@(x) {@coco_nasa_utils.MenuUtils.addTryCatch, x}, callbacks, 'UniformOutput', false);
 end

@@ -88,7 +88,7 @@ classdef UniformRandomNumber_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             obj.addExtenal_node(nasa_toLustre.blocks.UniformRandomNumber_To_Lustre.randomNode(blk_name, minimum, maximum, r, lus_backend));
             
             codes = {};
-            if LusBackendType.isKIND2(lus_backend)
+            if coco_nasa_utils.LusBackendType.isKIND2(lus_backend)
                 codes{1} = nasa_toLustre.lustreAst.LustreEq(outputs{1}, ...
                     nasa_toLustre.lustreAst.NodeCallExpr(blk_name, nasa_toLustre.lustreAst.BoolExpr('true')));
             else
@@ -109,7 +109,7 @@ classdef UniformRandomNumber_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         
         function options = getUnsupportedOptions(obj, parent, blk, lus_backend, varargin)
             
-            if LusBackendType.isJKIND(lus_backend)
+            if coco_nasa_utils.LusBackendType.isJKIND(lus_backend)
                 obj.addUnsupported_options(sprintf(...
                     ['Block "%s" is not supported by JKind model checker.', ...
                 'This optiont is supported by the other model checks. ', ...
@@ -120,7 +120,7 @@ classdef UniformRandomNumber_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         end
         %%
         function is_Abstracted = isAbstracted(obj, ~, ~, lus_backend, varargin)
-            is_Abstracted = LusBackendType.isKIND2(lus_backend);
+            is_Abstracted = coco_nasa_utils.LusBackendType.isKIND2(lus_backend);
         end
     end
     methods(Static)

@@ -5,7 +5,7 @@
 % Author: Hamza Bourbouh <hamza.bourbouh@nasa.gov>
 % Notices:
 %
-% Copyright © 2020 United States Government as represented by the
+% Copyright ï¿½ 2020 United States Government as represented by the
 % Administrator of the National Aeronautics and Space Administration.  All
 % Rights Reserved.
 %
@@ -57,14 +57,14 @@ function [status, errors_msg] = Gain_pp(model)
     if not(isempty(Gain_list))
         display_msg('Replacing Gain blocks...', MsgType.INFO,...
             'Gain_pp', '');
-        allCompiledDT = SLXUtils.getCompiledParam(Gain_list, 'CompiledPortDataTypes');
-        %compiledInportDim = SLXUtils.getCompiledParam(Gain_list, 'CompiledPortDimensions');
+        allCompiledDT = coco_nasa_utils.SLXUtils.getCompiledParam(Gain_list, 'CompiledPortDataTypes');
+        %compiledInportDim = coco_nasa_utils.SLXUtils.getCompiledParam(Gain_list, 'CompiledPortDimensions');
         for i=1:length(Gain_list)
             try
                 display_msg(Gain_list{i}, MsgType.INFO, ...
                     'Gain_pp', '');
                 gain = get_param(Gain_list{i},'Gain');
-                [gain_value, ~, status] = SLXUtils.evalParam(...
+                [gain_value, ~, status] = coco_nasa_utils.SLXUtils.evalParam(...
                     model, ...
                     get_param(Gain_list{i}, 'Parent'), ...
                     Gain_list{i}, ...
@@ -80,8 +80,8 @@ function [status, errors_msg] = Gain_pp(model)
                         || strcmp(ParamDataTypeStr, 'Inherit: Inherit via internal rule')
                     cstDataType = 'Inherit: Inherit from ''Constant value''';
                 elseif strcmp(ParamDataTypeStr, 'Inherit: Same as input')
-                    if MatlabUtils.contains(CompiledPortDataTypes.Inport{1}, 'fix') ... % sfix, ufix
-                            || MatlabUtils.contains(CompiledPortDataTypes.Inport{1}, 'flt') %flts, fltu
+                    if coco_nasa_utils.MatlabUtils.contains(CompiledPortDataTypes.Inport{1}, 'fix') ... % sfix, ufix
+                            || coco_nasa_utils.MatlabUtils.contains(CompiledPortDataTypes.Inport{1}, 'flt') %flts, fltu
                         cstDataType = 'Inherit: Inherit via back propagation';
                     else
                         cstDataType = CompiledPortDataTypes.Inport{1};
@@ -90,12 +90,12 @@ function [status, errors_msg] = Gain_pp(model)
                     cstDataType = ParamDataTypeStr;
                 end
                 
-                if MatlabUtils.contains(CompiledPortDataTypes.Outport{1}, 'fix') ... % sfix, ufix
-                        || MatlabUtils.contains(CompiledPortDataTypes.Outport{1}, 'flt') %flts, fltu
+                if coco_nasa_utils.MatlabUtils.contains(CompiledPortDataTypes.Outport{1}, 'fix') ... % sfix, ufix
+                        || coco_nasa_utils.MatlabUtils.contains(CompiledPortDataTypes.Outport{1}, 'flt') %flts, fltu
                     productDataType = get_param(Gain_list{i}, 'OutDataTypeStr');
                     %cstDataType = 'Inherit: Inherit from ''Constant value''';
                 elseif strcmp(CompiledPortDataTypes.Inport{1}, 'boolean') ...
-                        && ~MatlabUtils.contains(CompiledPortDataTypes.Outport{1}, 'fix')
+                        && ~coco_nasa_utils.MatlabUtils.contains(CompiledPortDataTypes.Outport{1}, 'fix')
                     productDataType = CompiledPortDataTypes.Outport{1};
                     %cstDataType = 'Inherit: Inherit from ''Constant value''';
                 else
@@ -133,8 +133,8 @@ function [status, errors_msg] = Gain_pp(model)
                 
                 % set parameters to inport: if not set Simulink might give different
                 % datatype for the inport than the original model.
-                if ~(MatlabUtils.contains(CompiledPortDataTypes.Inport{1}, 'fix') ... % sfix, ufix
-                        || MatlabUtils.contains(CompiledPortDataTypes.Inport{1}, 'flt')) %flts, fltu
+                if ~(coco_nasa_utils.MatlabUtils.contains(CompiledPortDataTypes.Inport{1}, 'fix') ... % sfix, ufix
+                        || coco_nasa_utils.MatlabUtils.contains(CompiledPortDataTypes.Inport{1}, 'flt')) %flts, fltu
                     set_param(strcat(Gain_list{i},'/u'),...
                         'OutDataTypeStr',CompiledPortDataTypes.Inport{1});
                 end

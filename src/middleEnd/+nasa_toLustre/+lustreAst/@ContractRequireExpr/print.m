@@ -45,7 +45,7 @@
 function code = print(obj, backend)
 
     
-    if LusBackendType.isPRELUDE(backend)
+    if coco_nasa_utils.LusBackendType.isPRELUDE(backend)
         code = obj.print_prelude();
     else
         code = sprintf('\t\trequire %s;\n', ...

@@ -140,10 +140,10 @@ classdef CombinatorialLogic_Test < Block_Test
                 is_boolean = not(is_boolean);
                 if is_boolean
                     s.inputDataType = 'boolean';
-                    M = MatlabUtils.construct_random_integers(1, 0, 1, 'uint8', [nb_rows,c]);
+                    M = coco_nasa_utils.MatlabUtils.construct_random_integers(1, 0, 1, 'uint8', [nb_rows,c]);
                 else
                     s.inputDataType = 'boolean';
-                    M = MatlabUtils.construct_random_doubles(1, 0, 1, [nb_rows,c]);
+                    M = coco_nasa_utils.MatlabUtils.construct_random_doubles(1, 0, 1, [nb_rows,c]);
                 end
                 s.TruthTable = mat2str(M);
                 params{end+1} = s;

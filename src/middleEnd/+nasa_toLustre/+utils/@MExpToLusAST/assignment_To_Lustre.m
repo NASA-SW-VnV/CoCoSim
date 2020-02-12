@@ -63,7 +63,7 @@ function [code, assignment_dt, dim, extra_code] = assignment_To_Lustre(tree, arg
         args.expected_dim = dim;
         [right, ~, ~, right_extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
             tree.rightExp, args);
-        extra_code = MatlabUtils.concat(left_extra_code, right_extra_code);
+        extra_code = coco_nasa_utils.MatlabUtils.concat(left_extra_code, right_extra_code);
     catch me
         display_msg(...
             sprintf('Expression "%s" is not handled in Block %s. The code will be abstracted.',...
@@ -160,9 +160,9 @@ function [code, assignment_dt, dim, extra_code] = assignment_To_Lustre(tree, arg
     if length(left) == 1 ...
             && isa(left{1}, 'nasa_toLustre.lustreAst.TupleExpr')
         left_args = left{1}.getArgs();
-        VISITED_VARIABLES = MatlabUtils.concat(VISITED_VARIABLES, left_args);
+        VISITED_VARIABLES = coco_nasa_utils.MatlabUtils.concat(VISITED_VARIABLES, left_args);
     else
-        VISITED_VARIABLES = MatlabUtils.concat(VISITED_VARIABLES, left);
+        VISITED_VARIABLES = coco_nasa_utils.MatlabUtils.concat(VISITED_VARIABLES, left);
     end
     
     

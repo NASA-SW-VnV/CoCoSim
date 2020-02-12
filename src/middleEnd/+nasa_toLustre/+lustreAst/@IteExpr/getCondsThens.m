@@ -56,6 +56,6 @@ function [conds, thens] = getCondsThens(exp)
     thens{1} = exp.getThenExpr();
     elseExp = exp.getElseExpr();
     [conds_i, thens_i] = nasa_toLustre.lustreAst.IteExpr.getCondsThens(elseExp);
-    conds = MatlabUtils.concat(conds, conds_i);
-    thens = MatlabUtils.concat(thens, thens_i);
+    conds = coco_nasa_utils.MatlabUtils.concat(conds, conds_i);
+    thens = coco_nasa_utils.MatlabUtils.concat(thens, thens_i);
 end

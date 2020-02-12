@@ -73,7 +73,7 @@ end
 function [E, expr2] = parseEvent(expr1)
     E = '';
     % e.g. Set | Resume
-    if ~MatlabUtils.contains(expr1, '[') && ~MatlabUtils.contains(expr1, '{') && ~MatlabUtils.contains(expr1, '/')
+    if ~coco_nasa_utils.MatlabUtils.contains(expr1, '[') && ~coco_nasa_utils.MatlabUtils.contains(expr1, '{') && ~coco_nasa_utils.MatlabUtils.contains(expr1, '/')
         % e.g. Set | Resume
         [~, ~, expr2] = nasa_toLustre.utils.Fcn_Exp_Parser.parse(expr1);
         if numel(expr2) < numel(expr1)

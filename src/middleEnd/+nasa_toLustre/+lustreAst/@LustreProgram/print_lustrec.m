@@ -53,7 +53,7 @@ function [lus_code, plu_code, ext_lib] = print_lustrec(obj, backend)
     plu_lines = {};
     plu_code = '';
     %opens
-    if (LusBackendType.isKIND2(backend) || LusBackendType.isJKIND(backend))
+    if (coco_nasa_utils.LusBackendType.isKIND2(backend) || coco_nasa_utils.LusBackendType.isJKIND(backend))
         lus_header_lines = [lus_header_lines; ...
             cellfun(@(x) sprintf('include "%s.lus"\n', x), obj.opens, ...
             'UniformOutput', false)];
@@ -66,19 +66,19 @@ function [lus_code, plu_code, ext_lib] = print_lustrec(obj, backend)
     %types
     types = cellfun(@(x) sprintf('%s', x.print(backend)), obj.types, ...
         'UniformOutput', false);
-    lus_header_lines = MatlabUtils.concat(lus_header_lines, types);
-    if LusBackendType.isPRELUDE(backend)
+    lus_header_lines = coco_nasa_utils.MatlabUtils.concat(lus_header_lines, types);
+    if coco_nasa_utils.LusBackendType.isPRELUDE(backend)
         plu_lines = [plu_lines; types];
     end
     
     % contracts and nodes
-    if LusBackendType.isKIND2(backend)
+    if coco_nasa_utils.LusBackendType.isKIND2(backend)
         nodesList = [obj.nodes, obj.contracts];
     else
         nodesList = obj.nodes;
     end
     
-    if LusBackendType.isKIND2(backend)
+    if coco_nasa_utils.LusBackendType.isKIND2(backend)
         call_map = containers.Map('KeyType', 'char', ...
             'ValueType', 'any');
         for i=1:numel(nodesList)
@@ -102,7 +102,7 @@ function [lus_code, plu_code, ext_lib] = print_lustrec(obj, backend)
             if isempty(nodesList{i})
                 continue;
             end
-            if LusBackendType.isPRELUDE(backend) ...
+            if coco_nasa_utils.LusBackendType.isPRELUDE(backend) ...
                     && isa( nodesList{i}, 'nasa_toLustre.lustreAst.LustreNode')
                 if hasPreludeOperator(nodesList{i})
                     plu_lines{end+1} = sprintf('%s\n', ...
@@ -110,7 +110,7 @@ function [lus_code, plu_code, ext_lib] = print_lustrec(obj, backend)
                 else
                     
                     lus_lines{end+1} = sprintf('%s\n', ...
-                        nodesList{i}.print(LusBackendType.LUSTREC));
+                        nodesList{i}.print(coco_nasa_utils.LusBackendType.LUSTREC));
                     plu_lines{end+1} = sprintf('%s\n', ...
                         nodesList{i}.print_preludeImportedNode());
                     
@@ -122,23 +122,23 @@ function [lus_code, plu_code, ext_lib] = print_lustrec(obj, backend)
         end
     end
     if ADD_KIND2_TIMES_ABSTRACTION
-        if ~any(MatlabUtils.contains(lus_header_lines, 'kind2_lib.lus'))
+        if ~any(coco_nasa_utils.MatlabUtils.contains(lus_header_lines, 'kind2_lib.lus'))
             ext_lib{end+1} = 'kind2_lib';
-            lus_header_lines = MatlabUtils.concat({sprintf('include "kind2_lib.lus"\n')},...
+            lus_header_lines = coco_nasa_utils.MatlabUtils.concat({sprintf('include "kind2_lib.lus"\n')},...
                 lus_header_lines);
         end
     end
     if ADD_KIND2_DIVIDE_ABSTRACTION
-        if ~any(MatlabUtils.contains(lus_header_lines, 'kind2_lib.lus'))
+        if ~any(coco_nasa_utils.MatlabUtils.contains(lus_header_lines, 'kind2_lib.lus'))
             ext_lib{end+1} = 'kind2_lib';
-            lus_header_lines = MatlabUtils.concat({sprintf('include "kind2_lib.lus"\n')},...
+            lus_header_lines = coco_nasa_utils.MatlabUtils.concat({sprintf('include "kind2_lib.lus"\n')},...
                 lus_header_lines);
         end
     end
-    lus_lines = MatlabUtils.concat(lus_header_lines, lus_lines);
-    lus_code = MatlabUtils.strjoin(lus_lines, '');
-    if LusBackendType.isPRELUDE(backend)
-        plu_code = MatlabUtils.strjoin(plu_lines, '');
+    lus_lines = coco_nasa_utils.MatlabUtils.concat(lus_header_lines, lus_lines);
+    lus_code = coco_nasa_utils.MatlabUtils.strjoin(lus_lines, '');
+    if coco_nasa_utils.LusBackendType.isPRELUDE(backend)
+        plu_code = coco_nasa_utils.MatlabUtils.strjoin(plu_lines, '');
     end
 end
 
@@ -148,7 +148,7 @@ function b = hasPreludeOperator(node)
         return;
     end
     all_body_obj = cellfun(@(x) x.getAllLustreExpr(), node.bodyEqs, 'un',0);
-    all_body_obj = MatlabUtils.concat(all_body_obj{:});
+    all_body_obj = coco_nasa_utils.MatlabUtils.concat(all_body_obj{:});
     all_objClass = cellfun(@(x) class(x), all_body_obj, 'UniformOutput', false);
     BinaryExprObjects = all_body_obj(strcmp(all_objClass, 'nasa_toLustre.lustreAst.BinaryExpr'));
     operators = cellfun(@(x) x.op, BinaryExprObjects, 'UniformOutput', false);

@@ -59,7 +59,7 @@ function [status, errors_msg] = DiscreteTransferFcn_pp(model)
             'DiscreteTransferFcn_pp', '');
         
         
-        U_dims = SLXUtils.tf_get_U_dims(model, 'DiscreteTransferFcn_pp', dtf_list);
+        U_dims = coco_nasa_utils.SLXUtils.tf_get_U_dims(model, 'DiscreteTransferFcn_pp', dtf_list);
         
         %% pre-processing blocks
         for i=1:length(dtf_list)
@@ -73,7 +73,7 @@ function [status, errors_msg] = DiscreteTransferFcn_pp(model)
                 % Obtaining z-expression parameters
                 % get denominator
                 denum_str = get_param(dtf_list{i}, 'Denominator');
-                [denum, ~, status] = SLXUtils.evalParam(...
+                [denum, ~, status] = coco_nasa_utils.SLXUtils.evalParam(...
                     model, ...
                     get_param(dtf_list{i}, 'Parent'), ...
                     dtf_list{i}, ...
@@ -87,7 +87,7 @@ function [status, errors_msg] = DiscreteTransferFcn_pp(model)
                 
                 % get numerator
                 num_str = get_param(dtf_list{i},'Numerator');
-                [num, ~, status] = SLXUtils.evalParam(...
+                [num, ~, status] = coco_nasa_utils.SLXUtils.evalParam(...
                     model, ...
                     get_param(dtf_list{i}, 'Parent'), ...
                     dtf_list{i}, ...
@@ -103,7 +103,7 @@ function [status, errors_msg] = DiscreteTransferFcn_pp(model)
                 if strcmp(blocktype, 'TransferFcn')
                     try
                         Hc = tf(num, denum);
-                        sampleT = SLXUtils.getModelCompiledSampleTime(model);
+                        sampleT = coco_nasa_utils.SLXUtils.getModelCompiledSampleTime(model);
                         Hd = c2d(Hc,sampleT);
                         num = Hd.Numerator{:};
                         denum = Hd.Denominator{:};

@@ -107,7 +107,7 @@ function  [x2, y2] = process_local_assign(node_block_path, blk_exprs, var, node_
         IndexParamArray = flip(IndexParamArray);
         IndexOptionsCell = flip(IndexOptionsCell);
         idx_port_handles = flip(idx_port_handles);
-        IndexOptions = MatlabUtils.strjoin(IndexOptionsCell, ',');
+        IndexOptions = coco_nasa_utils.MatlabUtils.strjoin(IndexOptionsCell, ',');
         NumberOfDimensions = length(IndexParamArray);
         selector_path = BUtils.get_unique_block_name(strcat(node_block_path,'/',ID,'_rhs_selector'));
         add_block('simulink/Signal Routing/Selector',...

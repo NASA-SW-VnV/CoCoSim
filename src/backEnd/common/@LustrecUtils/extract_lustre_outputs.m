@@ -70,7 +70,7 @@ function status = extract_lustre_outputs(...
         return
     else
         % remove *simu_in* files
-        MatlabUtils.reg_delete(binary_dir, '*simu.in*');
-        MatlabUtils.reg_delete(binary_dir, '*simu.out*');
+        coco_nasa_utils.MatlabUtils.reg_delete(binary_dir, '*simu.in*');
+        coco_nasa_utils.MatlabUtils.reg_delete(binary_dir, '*simu.out*');
     end
 end

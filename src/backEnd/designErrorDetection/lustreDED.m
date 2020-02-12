@@ -49,26 +49,26 @@ function [ failed ] = lustreDED(model_full_path,  const_files, lus_backend, vara
         const_files = {};
     end
     if nargin < 3 || isempty(lus_backend)
-        lus_backend = LusBackendType.KIND2;
+        lus_backend = coco_nasa_utils.LusBackendType.KIND2;
     end
     
     if isempty(KIND2)
         tools_config;
     end
-    if LusBackendType.isKIND2(lus_backend) && ~exist(KIND2,'file')
+    if coco_nasa_utils.LusBackendType.isKIND2(lus_backend) && ~exist(KIND2,'file')
         errordlg(sprintf(['KIND2 model checker is not found in "%s".\n'...
             'Please set KIND2 path in tools_config.m script.'], KIND2));
         return;
-    elseif ~LusBackendType.isKIND2(lus_backend)
+    elseif ~coco_nasa_utils.LusBackendType.isKIND2(lus_backend)
         errordlg(['Only KIND2 currently is supported for NASA compiler. '...
             'To change compiler or Lustre model checker go to '...
             'Tools -> CoCoSim -> Preferences -> Simulink to Lustre Compiler.']);
         return;
     end
     
-    coco_backend = CoCoBackendType.DED;
+    coco_backend = coco_nasa_utils.CoCoBackendType.DED;
     
-    if ~LusBackendType.isKIND2(lus_backend)
+    if ~coco_nasa_utils.LusBackendType.isKIND2(lus_backend)
         display_msg(['Design error detection is only supported by KIND2 model checker.'...
             ' To set Kind2 as default one, go to tools -> CoCoSim -> Preferences -> Lustre Backend -> Kind2'],...
             MsgType.ERROR, 'toLustreVerify', '');

@@ -61,7 +61,7 @@ function [ ir ] = diagramBlockParams( ir )
         end
 
         if ~isfield(ir.(field_name), 'CompiledSampleTime')
-            [st, ph, Clocks] = SLXUtils.getModelCompiledSampleTime(file_name);
+            [st, ph, Clocks] = coco_nasa_utils.SLXUtils.getModelCompiledSampleTime(file_name);
             ir.(field_name).CompiledSampleTime = [st, ph];
             ir.(field_name).AllCompiledSampleTimes = Clocks;
         end

@@ -52,7 +52,7 @@ function schema = validationMenu(callbackInfo)
 
     [validation_root, ~, ~] = fileparts(mfilename('fullpath'));
     validation_items{1} = fullfile(validation_root, 'lustreValidate', 'lusValidateMenu.m');
-    schema.childrenFcns = cellfun(@MenuUtils.funPath2Handle, validation_items,...
+    schema.childrenFcns = cellfun(@coco_nasa_utils.MenuUtils.funPath2Handle, validation_items,...
                         'UniformOutput', false);
 
 end

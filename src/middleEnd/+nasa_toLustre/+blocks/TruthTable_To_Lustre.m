@@ -73,7 +73,7 @@ classdef TruthTable_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             obj.addVariable(outputs_dt);
             [inputs, ~] = nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk);
             if length(inputs) > 1
-                inputs = MatlabUtils.concat(inputs) ;
+                inputs = coco_nasa_utils.MatlabUtils.concat(inputs) ;
             end
             codes{1} = nasa_toLustre.lustreAst.LustreEq(outputs,...
                 nasa_toLustre.lustreAst.NodeCallExpr(main_node.getName(), inputs));

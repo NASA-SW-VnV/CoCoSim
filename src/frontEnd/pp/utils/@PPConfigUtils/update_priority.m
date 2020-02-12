@@ -47,7 +47,7 @@ function ordered_fcts_map = update_priority(ordered_fcts_map, pp_order_map)
         v_list = pp_order_map(key);
         for i=1:numel(v_list)
             [library_path, fname,ext] = fileparts(v_list{i});
-            if MatlabUtils.contains(fname, '*')
+            if coco_nasa_utils.MatlabUtils.contains(fname, '*')
                 files_struct = what(library_path);
                 if ~isempty(files_struct)
                     library_path = files_struct.path;

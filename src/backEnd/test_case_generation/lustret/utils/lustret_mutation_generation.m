@@ -52,7 +52,7 @@ function [ err, output_dir] = lustret_mutation_generation( lus_full_path, nb_mut
     err = 0;
     generation_start = tic;
     [file_parent, file_name, ~] = fileparts(lus_full_path);
-    node_name = MatlabUtils.fileBase(file_name);
+    node_name = coco_nasa_utils.MatlabUtils.fileBase(file_name);
     output_dir = fullfile(file_parent, strcat(file_name,'_mutants'));
     if ~exist(output_dir, 'dir')
         mkdir(output_dir);

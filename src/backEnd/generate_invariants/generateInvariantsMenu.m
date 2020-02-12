@@ -59,7 +59,7 @@ end
 
 
 function zustreInvCallback(callbackInfo)
-    model_full_path = MenuUtils.get_file_name(gcs);
+    model_full_path = coco_nasa_utils.MenuUtils.get_file_name(gcs);
     simulink_name = gcs;
     contract_name = [simulink_name '_COCOSPEC'];
     emf_name = [simulink_name '_EMF'];

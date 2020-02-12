@@ -68,7 +68,7 @@ function [status, new_name_path, emf_path, xml_trace] = construct_EMF_model(...
 
     [~, lus_fname, ~] = fileparts(lus_file_path);
     %generate simulink model
-    if ~strcmp(MatlabUtils.fileBase(lus_fname), node_name)
+    if ~strcmp(coco_nasa_utils.MatlabUtils.fileBase(lus_fname), node_name)
         new_model_name = BUtils.adapt_block_name(strcat(lus_fname,'_',node_name));
     else
         new_model_name = BUtils.adapt_block_name(strcat(lus_fname,'_EMF'));

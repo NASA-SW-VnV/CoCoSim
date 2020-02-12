@@ -44,5 +44,5 @@
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function code = print_zustre(obj)
-    code = obj.print(LusBackendType.ZUSTRE);
+    code = obj.print(coco_nasa_utils.LusBackendType.ZUSTRE);
 end

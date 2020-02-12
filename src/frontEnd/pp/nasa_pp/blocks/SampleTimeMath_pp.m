@@ -61,7 +61,7 @@ if not(isempty(SampleTimeMath_list))
             weightValue = get_param(SampleTimeMath_list{i},'weightValue' );
             SaturateOnIntegerOverflow = get_param(SampleTimeMath_list{i},'SaturateOnIntegerOverflow');
             try
-                dt = SLXUtils.getCompiledParam(SampleTimeMath_list{i}, 'CompiledPortDataTypes');
+                dt = coco_nasa_utils.SLXUtils.getCompiledParam(SampleTimeMath_list{i}, 'CompiledPortDataTypes');
                 inDataType = dt.Inport{1};
                 OutDataTypeStr = dt.Outport{1};
             catch
@@ -69,7 +69,7 @@ if not(isempty(SampleTimeMath_list))
                 OutDataTypeStr = get_param(SampleTimeMath_list{i}, 'OutDataTypeStr');
             end
             try
-                model_sample = SLXUtils.getModelCompiledSampleTime(model);
+                model_sample = coco_nasa_utils.SLXUtils.getModelCompiledSampleTime(model);
                 if   model_sample==0 || isnan(model_sample) || model_sample==Inf
                     model_sample = 0.2;
                 end

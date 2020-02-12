@@ -85,8 +85,8 @@ classdef Constant_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             obj.addCode( codes );
             
             %% Design Error Detection Backend code:
-            if CoCoBackendType.isDED(coco_backend)
-                if ismember(CoCoBackendType.DED_OUTMINMAX, ...
+            if coco_nasa_utils.CoCoBackendType.isDED(coco_backend)
+                if ismember(coco_nasa_utils.CoCoBackendType.DED_OUTMINMAX, ...
                         CoCoSimPreferences.dedChecks)
                     DEDUtils.OutMinMaxCheckCode(obj, parent, blk, outputs, lus_outputDataType, xml_trace);
                 end

@@ -60,7 +60,7 @@ function [status, errors_msg] = ModelReference_pp(topLevelModel)
             try
                 mdlRefName = get_param( mdlRefsHandles(k) , 'ModelName' );
                 mdlName =  get_param( mdlRefsHandles(k) , 'Name' );
-                %[CompiledPortDataTypes] = SLXUtils.getCompiledParam(mdlRefsHandles(k), 'CompiledPortDataTypes');
+                %[CompiledPortDataTypes] = coco_nasa_utils.SLXUtils.getCompiledParam(mdlRefsHandles(k), 'CompiledPortDataTypes');
                 % if HasBusPort(CompiledPortDataTypes)
                 %     display_msg([mdlRefName ' will be handled directly in the compiler ToLustre as it has Bus Ports.'], MsgType.INFO, 'ModelReference_pp', '');
                 %     mdlRefIgnored = 1;

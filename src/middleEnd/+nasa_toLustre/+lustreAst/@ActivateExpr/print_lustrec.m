@@ -48,12 +48,12 @@ function code = print_lustrec(obj, backend)
         nasa_toLustre.lustreAst.BinaryExpr.WHEN, x, obj.activate_cond), ...
         obj.nodeArgs, 'un', 0);
     args_str_cell = cellfun(@(x) x.print(backend), args_clocked, 'un', 0);
-    args_str = MatlabUtils.strjoin(args_str_cell, ', ');
+    args_str = coco_nasa_utils.MatlabUtils.strjoin(args_str_cell, ', ');
     nodeName = obj.nodeName;
     
     %PRELUDE does not support "_" in the begining of the word.
-    if LusBackendType.isPRELUDE(backend) ...
-            && MatlabUtils.startsWith(nodeName, '_')
+    if coco_nasa_utils.LusBackendType.isPRELUDE(backend) ...
+            && coco_nasa_utils.MatlabUtils.startsWith(nodeName, '_')
         nodeName = sprintf('x%s', nodeName);
     end
     if obj.has_restart

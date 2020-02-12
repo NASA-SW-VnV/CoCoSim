@@ -86,7 +86,7 @@ classdef LustDTLib
         % this one for "Rounding" Simulink block, it is different from Floor by
         % returning a real instead of int.
         function [node, external_nodes, opens, abstractedNodes] = get__floor(lus_backend, varargin)
-            if LusBackendType.isKIND2(lus_backend)
+            if coco_nasa_utils.LusBackendType.isKIND2(lus_backend)
                 abstractedNodes = {};
                                 opens = {};
                 external_nodes = {};
@@ -128,7 +128,7 @@ classdef LustDTLib
         % this one for "Rounding" block, it is different from Ceiling by
         % returning a real instead of int.
         function [node, external_nodes, opens, abstractedNodes] = get__ceil(lus_backend, varargin)
-            if LusBackendType.isKIND2(lus_backend)
+            if coco_nasa_utils.LusBackendType.isKIND2(lus_backend)
                                 opens = {};
                 abstractedNodes = {};
                 external_nodes = {'LustDTLib__Ceiling'};
@@ -171,7 +171,7 @@ classdef LustDTLib
         % this one for "Rounding" block, it is different from Round by
         % returning a real instead of int.
         function [node, external_nodes, opens, abstractedNodes] = get__round(lus_backend, varargin)
-            if LusBackendType.isKIND2(lus_backend)
+            if coco_nasa_utils.LusBackendType.isKIND2(lus_backend)
                                 opens = {};
                 abstractedNodes = {};
                 external_nodes = {'LustMathLib_abs_real', 'LustDTLib__Round'};

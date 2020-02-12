@@ -59,8 +59,8 @@ function [results, passed, priority] = cocosim_guidelines_jm_0010(model)
         line = get_param(portHandles.Outport, 'line');
         lineName = get_param(line, 'Name');
         portname = get_param(portBlocks{i}, 'Name');
-        if ~MatlabUtils.startsWith(portname, lineName)
-            if ~MatlabUtils.endsWith(portname, lineName)
+        if ~coco_nasa_utils.MatlabUtils.startsWith(portname, lineName)
+            if ~coco_nasa_utils.MatlabUtils.endsWith(portname, lineName)
                 failedList{end+1} = portBlocks{i};
             end
         end
@@ -78,8 +78,8 @@ function [results, passed, priority] = cocosim_guidelines_jm_0010(model)
         line = get_param(portHandles.Inport, 'line');
         lineName = get_param(line, 'Name');
         portname = get_param(portBlocks{i}, 'Name');
-        if ~MatlabUtils.startsWith(portname, lineName)
-            if ~MatlabUtils.endsWith(portname, lineName)
+        if ~coco_nasa_utils.MatlabUtils.startsWith(portname, lineName)
+            if ~coco_nasa_utils.MatlabUtils.endsWith(portname, lineName)
                 failedList{end+1} = portBlocks{i};
             end
         end

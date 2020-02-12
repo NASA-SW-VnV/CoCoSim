@@ -217,7 +217,7 @@ function [outputs, inputs, body, variables] = write_state_body(state)
             if isChart
                 % entry action condition is concurrent with
                 % substates nodes call.
-                body = MatlabUtils.concat(children_actions(2:end),...
+                body = coco_nasa_utils.MatlabUtils.concat(children_actions(2:end),...
                     children_actions(1));
             else
                 body = [body, children_actions];

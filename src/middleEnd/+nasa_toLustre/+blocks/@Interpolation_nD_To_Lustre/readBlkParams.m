@@ -108,7 +108,7 @@ function blkParams = readBlkParams(~,parent,blk,blkParams)
                 end
             elseif strcmp(T_dt, 'double') ...
                     || strcmp(T_dt, 'single') ...
-                    || MatlabUtils.contains(T_dt, 'int')
+                    || coco_nasa_utils.MatlabUtils.contains(T_dt, 'int')
                 T = cast(T, T_dt);
             end
     end

@@ -76,12 +76,12 @@ function schema = tools_menu(varargin)
     menue_items{end + 1} = fullfile(backEnd_root, 'extra_options','extraOptionsMenu.m');
     menue_items{end + 1} = @cocosim_menu.preferences_menu;
 
-    iif = MatlabUtils.iif();
+    iif = coco_nasa_utils.MatlabUtils.iif();
     obj2Handle = @(x) iif( isa(x, 'function_handle'), @() x, ...
-        true, @() MenuUtils.funPath2Handle(x));
+        true, @() coco_nasa_utils.MenuUtils.funPath2Handle(x));
     callbacks = cellfun(obj2Handle, menue_items,...
         'UniformOutput', false);
-    schema.childrenFcns = cellfun(@(x) {@MenuUtils.addTryCatch, x}, callbacks, 'UniformOutput', false);
+    schema.childrenFcns = cellfun(@(x) {@coco_nasa_utils.MenuUtils.addTryCatch, x}, callbacks, 'UniformOutput', false);
 
 end
 

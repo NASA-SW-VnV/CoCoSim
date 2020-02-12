@@ -50,7 +50,7 @@ function generate_rust(lus_full_path, output_dir)
         output_dir = fullfile(lus_path, strcat(fname, '_rust_code'));
     end
     if ~exist(output_dir, 'dir')
-        MatlabUtils.mkdir(output_dir);
+        coco_nasa_utils.MatlabUtils.mkdir(output_dir);
     end
     tools_config;
 
@@ -63,7 +63,7 @@ function generate_rust(lus_full_path, output_dir)
     command = sprintf('%s --compile true --z3_bin %s --output_dir %s --check_implem false %s', KIND2, Z3, output_dir, lus_full_path);
     display_msg(['KIND2_COMMAND ' command], MsgType.INFO, 'generate_rust', '');
     [status, rust_output] = system(command);
-    if status~=20 && ~MatlabUtils.contains(rust_output, 'Success')
+    if status~=20 && ~coco_nasa_utils.MatlabUtils.contains(rust_output, 'Success')
         display_msg('Error Generating Rust code', MsgType.ERROR, 'Rust Generation', '');
         display_msg(rust_output, MsgType.ERROR, 'Rust Generation', '');
     else

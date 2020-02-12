@@ -52,7 +52,7 @@ end
 
 function IRCallback(callbackInfo)
     try
-        model_full_path = MenuUtils.get_file_name(gcs) ;
+        model_full_path = coco_nasa_utils.MenuUtils.get_file_name(gcs) ;
         cocosim_IR( model_full_path, 1 );
 
         [parent, file_name, ~] = fileparts(model_full_path);

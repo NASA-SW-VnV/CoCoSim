@@ -44,5 +44,5 @@
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function code = print_lustrec(obj)
-    code = obj.print(LusBackendType.LUSTREC);
+    code = obj.print(coco_nasa_utils.LusBackendType.LUSTREC);
 end        

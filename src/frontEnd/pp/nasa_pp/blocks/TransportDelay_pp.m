@@ -55,14 +55,14 @@ function [status, errors_msg] = TransportDelay_pp(model)
         'LookUnderMasks','all', 'BlockType','TransportDelay');
     if not(isempty(tdlyBlk_list))
         display_msg('Processing TransportDelay blocks...', MsgType.INFO, 'TransportDelay_pp', ''); 
-        main_sampleTime = SLXUtils.getModelCompiledSampleTime(model);
+        main_sampleTime = coco_nasa_utils.SLXUtils.getModelCompiledSampleTime(model);
         for i=1:length(tdlyBlk_list)
             display_msg(tdlyBlk_list{i}, MsgType.INFO, 'TransportDelay_pp', ''); 
             try
             % get block informations
             InitialOutput = get_param(tdlyBlk_list{i},'InitialOutput' );
             DelayTime = get_param(tdlyBlk_list{i}, 'DelayTime');
-            [delayTime, ~, status] = SLXUtils.evalParam(...
+            [delayTime, ~, status] = coco_nasa_utils.SLXUtils.evalParam(...
                 model, ...
                 get_param(tdlyBlk_list{i}, 'Parent'), ...
                 tdlyBlk_list{i}, ...

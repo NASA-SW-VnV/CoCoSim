@@ -104,7 +104,7 @@ function [IDs] = getAssignmentLeftIDs(tree)
             nb_columns = numel(rows{1});
             for j=1:nb_columns
                     v = rows{1}(j);
-                    IDs = MatlabUtils.concat(IDs, ...
+                    IDs = coco_nasa_utils.MatlabUtils.concat(IDs, ...
                         nasa_toLustre.utils.MF2LusUtils.getAssignmentLeftIDs(v));
             end
     end

@@ -61,13 +61,13 @@ function [pp_valid, pp_sim_failed, cocosim_pp_failed] = validatePP(orig_model_fu
             pp_sim_failed = 0;
         else
             [pp_valid, pp_sim_failed] = ...
-                SLXUtils.compareTwoSLXModels(orig_model_full_path, pp_model_full_path);
+                coco_nasa_utils.SLXUtils.compareTwoSLXModels(orig_model_full_path, pp_model_full_path);
         end
         if validateSubcomponents && ~pp_valid && ~pp_sim_failed
             if nargin < 3
                 [mdl_dir, mdl_name, ~] = fileparts(orig_model_full_path);
                 output_dir = fullfile(mdl_dir, 'cocosim_output', mdl_name);
-                MatlabUtils.mkdir(output_dir);
+                coco_nasa_utils.MatlabUtils.mkdir(output_dir);
             end
             validate_components(orig_model_full_path, output_dir, options);
         end
@@ -88,7 +88,7 @@ function validate_components(orig_model_full_path, output_dir, options)
     
     for i=1:numel(ss)
         display_msg(['Validating SubSystem ' ss{i}], MsgType.INFO, 'validation', '');
-        [new_model_path, ~, status] = SLXUtils.crete_model_from_subsystem(...
+        [new_model_path, ~, status] = coco_nasa_utils.SLXUtils.crete_model_from_subsystem(...
             mdl_name, ss{i}, output_dir );
         if status
             continue;

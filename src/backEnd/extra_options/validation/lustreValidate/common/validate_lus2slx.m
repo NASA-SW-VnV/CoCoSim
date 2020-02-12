@@ -54,7 +54,7 @@ function [valid, ...
 %testing or equivalence checking.
 [lus_dir, lus_fname, ~] = fileparts(lus_file_path);
 if nargin < 2 || isempty(main_node)
-    main_node = BUtils.adapt_block_name(MatlabUtils.fileBase(lus_fname));
+    main_node = BUtils.adapt_block_name(coco_nasa_utils.MatlabUtils.fileBase(lus_fname));
 end
 if ~exist('tests_method', 'var')
     tests_method = 1;
@@ -111,7 +111,7 @@ for node_idx =1:numel(emf_nodes_names)
     original_name = nodes.(name).original_name;
     pattern = strcat('(node|function)\s+',original_name,'\s*\(');
     tokens = regexp(lusi_text, pattern,'match');
-    if ~isempty(tokens) && ~(MatlabUtils.endsWith(original_name, '_unless') || MatlabUtils.endsWith(original_name, '_handler_until'))
+    if ~isempty(tokens) && ~(coco_nasa_utils.MatlabUtils.endsWith(original_name, '_unless') || coco_nasa_utils.MatlabUtils.endsWith(original_name, '_handler_until'))
         nodes_names{numel(nodes_names) + 1} = name;
     end
 end
@@ -251,7 +251,7 @@ for i=1:numel(ss)
     origin_ss = regexprep(ss{i}, strcat('^',file_name,'/'), strcat(base_name,'_emf/'));
     node_name = SLX2Lus_Trace.get_lustre_node_from_Simulink_block_name(trace_file_name,origin_ss);
     if ~strcmp(node_name, '')
-        [new_model_path, ~] = SLXUtils.crete_model_from_subsystem(file_name, ss{i}, output_dir );
+        [new_model_path, ~] = coco_nasa_utils.SLXUtils.crete_model_from_subsystem(file_name, ss{i}, output_dir );
         try
             [valid, ~, ~, ~] = compare_slx_lus(new_model_path, lus_file_path, node_name, output_dir, tests_method, model_checker);
             if ~valid

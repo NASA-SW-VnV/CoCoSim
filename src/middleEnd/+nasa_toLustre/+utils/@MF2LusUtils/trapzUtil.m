@@ -57,13 +57,13 @@ function [first_arg, second_arg, m, n, y, perm, pre_exp, extra_code] = trapzUtil
     end
     if length(tree.parameters) >= 2
         [y, ~, y_dim, extra_code_i] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(2), args);
-        extra_code = MatlabUtils.concat(extra_code, extra_code_i);
+        extra_code = coco_nasa_utils.MatlabUtils.concat(extra_code, extra_code_i);
         y = reshape(y, y_dim);
         second_arg = params{2}.text;
     end
     if length(tree.parameters) >= 3
         [dimension, ~, ~, extra_code_i] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(3), args);
-        extra_code = MatlabUtils.concat(extra_code, extra_code_i);
+        extra_code = coco_nasa_utils.MatlabUtils.concat(extra_code, extra_code_i);
     end
     
     if length(tree.parameters) == 3 % cumtrapz(x, y, dim)

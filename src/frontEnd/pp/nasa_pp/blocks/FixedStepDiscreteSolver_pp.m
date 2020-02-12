@@ -50,7 +50,7 @@ function  [status, errors_msg] = FixedStepDiscreteSolver_pp( new_model_base )
     try
         configSet = getActiveConfigSet(new_model_base);
         set_param(configSet, 'Solver', 'FixedStepDiscrete');
-        st = SLXUtils.getModelCompiledSampleTime(new_model_base);
+        st = coco_nasa_utils.SLXUtils.getModelCompiledSampleTime(new_model_base);
         if st == 0
             % no discrete block in the model
             % set sample time to 0.1

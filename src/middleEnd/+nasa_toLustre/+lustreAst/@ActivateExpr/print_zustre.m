@@ -44,5 +44,5 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function code = print_zustre(obj)
 
-    code = obj.print_lustrec(LusBackendType.ZUSTRE);
+    code = obj.print_lustrec(coco_nasa_utils.LusBackendType.ZUSTRE);
 end

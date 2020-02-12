@@ -165,7 +165,7 @@ function status = encapsulateWithReset(resetBlock, actionBlock)
                 expIdx = portNumber - 1; % remove If condition
                 if iscell(elseExp)
                     condition = elseExp{expIdx};
-                elseif MatlabUtils.contains(elseExp, ',')
+                elseif coco_nasa_utils.MatlabUtils.contains(elseExp, ',')
                     elseExp = split(elseExp, ',');
                     condition = elseExp{expIdx};
                 else

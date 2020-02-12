@@ -71,7 +71,7 @@ classdef Block_Test
                 fh = str2func(fun_name);
                 b = fh();
                 new_outputDir = fullfile(outputDir, strrep(fun_name, '_Test', ''));
-                MatlabUtils.mkdir(new_outputDir);
+                coco_nasa_utils.MatlabUtils.mkdir(new_outputDir);
                 status = b.generateTests(new_outputDir, deleteIfExists);
                 if status
                     display_msg([fun_name ' Failed'], MsgType.ERROR, 'Block_Test', '');

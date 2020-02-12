@@ -46,7 +46,7 @@ function action_Array = split_actions(actions)
 
     if ~isempty(actions) && iscell(actions)
         actions = actions(~strcmp(actions, ''));
-        actions = MatlabUtils.strjoin(actions, '\n');
+        actions = coco_nasa_utils.MatlabUtils.strjoin(actions, '\n');
     end
     % clean actions from comments 
     actions = regexprep(actions, '/\*.+\*/', '');

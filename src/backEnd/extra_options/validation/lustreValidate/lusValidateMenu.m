@@ -74,7 +74,7 @@ try
         msgbox(...
             sprintf('This Functionality is only supported by the NASA Lustre compiler.\n Go to Tools -> Preferences -> Lustre Compiler -> NASA Compiler'), 'CoCoSim');
     else
-        model_full_path = MenuUtils.get_file_name(gcs) ;
+        model_full_path = coco_nasa_utils.MenuUtils.get_file_name(gcs) ;
         validate_ToLustre(model_full_path, tests_method, 'KIND2', ...
             1);
     end

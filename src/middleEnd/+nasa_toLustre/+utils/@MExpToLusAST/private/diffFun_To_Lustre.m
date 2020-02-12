@@ -65,7 +65,7 @@ function [code, exp_dt, dim, extra_code] = diffFun_To_Lustre(tree, args)
     if length(tree.parameters) > 1
         if strcmp(tree.parameters{2}.type, 'constant')
             [n, ~, ~, extra_code_i] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(2), args);
-            extra_code = MatlabUtils.concat(extra_code, extra_code_i);
+            extra_code = coco_nasa_utils.MatlabUtils.concat(extra_code, extra_code_i);
             recursive = n{1}.value;
         else
             ME = MException('COCOSIM:TREE2CODE', ...
@@ -78,7 +78,7 @@ function [code, exp_dt, dim, extra_code] = diffFun_To_Lustre(tree, args)
     if length(tree.parameters) > 2
         if strcmp(tree.parameters{2}.type, 'constant')
             [n, ~, ~, extra_code_i] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(3), args);
-            extra_code = MatlabUtils.concat(extra_code, extra_code_i);
+            extra_code = coco_nasa_utils.MatlabUtils.concat(extra_code, extra_code_i);
             dimension = n{1}.value;
         else
             ME = MException('COCOSIM:TREE2CODE', ...
@@ -130,7 +130,7 @@ function [code, exp_dt, dim, extra_code] = diffFun_To_Lustre(tree, args)
             end
         end
         
-        new_tree = MatlabUtils.getExpTree(expr);
+        new_tree = coco_nasa_utils.MatlabUtils.getExpTree(expr);
         
         [code, exp_dt, dim, extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(new_tree, args);
     end

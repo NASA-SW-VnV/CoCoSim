@@ -45,7 +45,7 @@
 function ordered_fcts_map = extract_fcts(ordered_fcts_map, map, lowest_priority)
     for i=1:numel(map)
         [library_path, fname,ext] = fileparts(map{i});
-        if MatlabUtils.contains(fname, '*')
+        if coco_nasa_utils.MatlabUtils.contains(fname, '*')
             files_struct = what(library_path);
             if ~isempty(files_struct)
                 library_path = files_struct.path;

@@ -50,11 +50,11 @@ end
 
 
 function RustCallback(callbackInfo)
-    model_full_path = MenuUtils.get_file_name(gcs);
+    model_full_path = coco_nasa_utils.MenuUtils.get_file_name(gcs);
     try
-        MenuUtils.add_pp_warning(model_full_path);
+        coco_nasa_utils.MenuUtils.add_pp_warning(model_full_path);
         [lus_full_path, ~, status, ~] = ...
-            nasa_toLustre.ToLustre(model_full_path, [], LusBackendType.KIND2);
+            nasa_toLustre.ToLustre(model_full_path, [], coco_nasa_utils.LusBackendType.KIND2);
         if status
             return;
         end

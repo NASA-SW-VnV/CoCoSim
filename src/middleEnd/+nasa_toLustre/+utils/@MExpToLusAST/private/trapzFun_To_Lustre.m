@@ -75,7 +75,7 @@ function [code, exp_dt, dim, extra_code] = trapzFun_To_Lustre(tree, args)
     modified_var.CompiledSize = new_size;
     args.data_map(second_arg) = modified_var;
     
-    new_tree = MatlabUtils.getExpTree(expr);
+    new_tree = coco_nasa_utils.MatlabUtils.getExpTree(expr);
     code = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(new_tree, args);
     
     % restore data map state
@@ -89,9 +89,9 @@ function [code, exp_dt, dim, extra_code] = trapzFun_To_Lustre(tree, args)
     exp_dt = 'real';
     
     if ~strcmp(pre_exp, "")
-        pre_tree = MatlabUtils.getExpTree(pre_exp);
+        pre_tree = coco_nasa_utils.MatlabUtils.getExpTree(pre_exp);
         pre_code = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(pre_tree, args);
-        extra_code = MatlabUtils.concat(extra_code, pre_code);
+        extra_code = coco_nasa_utils.MatlabUtils.concat(extra_code, pre_code);
     end
     
     

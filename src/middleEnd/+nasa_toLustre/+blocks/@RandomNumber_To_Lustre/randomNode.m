@@ -50,7 +50,7 @@ function node = randomNode(blk_name, r, lus_backend)
     node.setName(blk_name);
     node.setInputs(nasa_toLustre.lustreAst.LustreVar('b', 'bool'));
     node.setOutputs(nasa_toLustre.lustreAst.LustreVar('r', 'real'));
-    if LusBackendType.isKIND2(lus_backend)
+    if coco_nasa_utils.LusBackendType.isKIND2(lus_backend)
         node.setIsImported(true);
     else
         node.setBodyEqs(nasa_toLustre.lustreAst.LustreEq(nasa_toLustre.lustreAst.VarIdExpr('r'), ...

@@ -66,7 +66,7 @@ function [code, exp_dt, dim, extra_code] = binaryExpression_To_Lustre(tree, args
         tree.leftExp, args);
     [right, ~, right_dim, right_extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
         tree.rightExp, args);
-    extra_code = MatlabUtils.concat(left_extra_code, right_extra_code);
+    extra_code = coco_nasa_utils.MatlabUtils.concat(left_extra_code, right_extra_code);
 
     % Get Operator
     if strcmp(tree_type, 'plus_minus') % '+' '-'
@@ -158,7 +158,7 @@ function [code, exp_dt, dim, extra_code] = getPowerCode(tree, args)
         tree.leftExp, args);
     [right, ~, right_dim, right_extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
         tree.rightExp, args);
-    extra_code = MatlabUtils.concat(left_extra_code, right_extra_code);
+    extra_code = coco_nasa_utils.MatlabUtils.concat(left_extra_code, right_extra_code);
     if numel(left) > 1 && strcmp(tree_type, 'mpower')
         ME = MException('COCOSIM:TREE2CODE', ...
             'Expression "%s" has a power of matrix is not supported.',...

@@ -65,10 +65,10 @@ function [code, extra_code] = sf_mf_functionCall_To_Lustre(tree, args)
             [f_args, dt, ~, extra_code_i] = ...
                 nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
                 parameters{i}, args);
-            extra_code = MatlabUtils.concat(extra_code, extra_code_i);
+            extra_code = coco_nasa_utils.MatlabUtils.concat(extra_code, extra_code_i);
             f_args = nasa_toLustre.utils.MExpToLusDT.convertDT(args.blkObj, f_args, dt, params_dt{dt_idx});
             dt_idx = dt_idx + length(f_args);
-            params_ast = MatlabUtils.concat(params_ast, f_args);
+            params_ast = coco_nasa_utils.MatlabUtils.concat(params_ast, f_args);
         end
         if numel(node_inputs) == numel(params_ast)
             code = nasa_toLustre.lustreAst.NodeCallExpr(actionNodeAst.getName(), params_ast);

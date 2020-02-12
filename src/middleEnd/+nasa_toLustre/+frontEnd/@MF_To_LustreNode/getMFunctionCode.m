@@ -93,7 +93,7 @@ function [external_nodes, failed] = getMFunctionCode(blkObj, parent,  blk, Input
         usedFunc, 'UniformOutput', 0);
     failed = all([failed{:}]);
     if ~isempty(MFUNCTION_EXTERNAL_NODES)
-        external_nodes = MatlabUtils.concat(external_nodes, MFUNCTION_EXTERNAL_NODES);
+        external_nodes = coco_nasa_utils.MatlabUtils.concat(external_nodes, MFUNCTION_EXTERNAL_NODES);
     end
 end
 

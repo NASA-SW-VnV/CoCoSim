@@ -53,10 +53,10 @@ end
 function dedCallback(~)
     try
         [ CoCoSimPreferences ] = cocosim_menu.CoCoSimPreferences.load();
-        model_full_path = MenuUtils.get_file_name(gcs);
-        MenuUtils.add_pp_warning(model_full_path);
+        model_full_path = coco_nasa_utils.MenuUtils.get_file_name(gcs);
+        coco_nasa_utils.MenuUtils.add_pp_warning(model_full_path);
         lustreDED(model_full_path, [], CoCoSimPreferences.lustreBackend);
     catch me
-        MenuUtils.handleExceptionMessage(me, 'Design Error Detection');
+        coco_nasa_utils.MenuUtils.handleExceptionMessage(me, 'Design Error Detection');
     end
 end

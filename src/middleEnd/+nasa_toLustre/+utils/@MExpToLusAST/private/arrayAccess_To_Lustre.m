@@ -144,10 +144,10 @@ function [code, exp_dt, dim, extra_code] = arrayAccess_To_Lustre(tree, args)
                 end
                 [cell_params{i}, ~, ~, extra_code_i] = ...
                     nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(parameters{i}, args);
-                extra_code = MatlabUtils.concat(extra_code, extra_code_i);
+                extra_code = coco_nasa_utils.MatlabUtils.concat(extra_code, extra_code_i);
             end
             dim = arrayfun(@(i) length(cell_params{i}), 1:length(cell_params));
-            params_list = MatlabUtils.cellCartesianProduct(cell_params);
+            params_list = coco_nasa_utils.MatlabUtils.cellCartesianProduct(cell_params);
             [nbR, ~] = size(params_list);
             for pidx = 1:nbR
                 params = params_list(pidx, :);

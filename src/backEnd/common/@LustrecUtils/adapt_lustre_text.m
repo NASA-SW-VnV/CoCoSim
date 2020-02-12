@@ -54,7 +54,7 @@ function t = adapt_lustre_text(t, lusBackend, output_dir)
     t = regexprep(t, '%', '%%');
     t = regexprep(t, '\\', '\\\');
     t = regexprep(t, '!=', '<>');
-    if strcmp(lusBackend, LusBackendType.KIND2)
+    if strcmp(lusBackend, coco_nasa_utils.LusBackendType.KIND2)
         t = regexprep(t, '\(\*! /coverage/mcdc/', '(* /coverage/mcdc/');
         t = regexprep(t, '\(\*! PROPERTY:', '(*!PROPERTY');
         nasa_toLustre_path = fileparts(which('nasa_toLustre.ToLustre'));

@@ -45,7 +45,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function code = print_preludeImportedNode(obj)
     lines = {};
-    backend = LusBackendType.PRELUDE;
+    backend = coco_nasa_utils.LusBackendType.PRELUDE;
     %% metaInfo
     if ~isempty(obj.metaInfo)
         if ischar(obj.metaInfo)
@@ -57,7 +57,7 @@ function code = print_preludeImportedNode(obj)
     end
     nodeName = obj.name;
     %PRELUDE does not support "_" in the begining of the word.
-    if MatlabUtils.startsWith(nodeName, '_')
+    if coco_nasa_utils.MatlabUtils.startsWith(nodeName, '_')
         nodeName = sprintf('x%s', nodeName);
     end
     lines{end + 1} = sprintf('imported node %s(%s)\nreturns(%s) wcet 1;\n', ...
@@ -65,5 +65,5 @@ function code = print_preludeImportedNode(obj)
         nasa_toLustre.lustreAst.LustreAst.listVarsWithDT(obj.inputs, backend, true), ...
         nasa_toLustre.lustreAst.LustreAst.listVarsWithDT(obj.outputs, backend, true));
     
-    code = MatlabUtils.strjoin(lines, '');
+    code = coco_nasa_utils.MatlabUtils.strjoin(lines, '');
 end

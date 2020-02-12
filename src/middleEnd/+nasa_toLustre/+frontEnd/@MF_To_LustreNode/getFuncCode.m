@@ -76,12 +76,12 @@ function [fun_node,failed ]  = getFuncCode(func, data_map, blkObj, parent, blk)
             if ~isempty(extra_code)
                 [vars, ~] = nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getInOutputsFromAction(extra_code, ...
                     false, data_map, s.text, true);
-                variables = MatlabUtils.concat(variables, vars);
+                variables = coco_nasa_utils.MatlabUtils.concat(variables, vars);
             end
             [vars, ~] = nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getInOutputsFromAction(lusCode, ...
                 false, data_map, s.text, true);
-            variables = MatlabUtils.concat(variables, vars);
-            body = MatlabUtils.concat(body, extra_code, lusCode);
+            variables = coco_nasa_utils.MatlabUtils.concat(variables, vars);
+            body = coco_nasa_utils.MatlabUtils.concat(body, extra_code, lusCode);
         catch me
             if strcmp(me.identifier, 'COCOSIM:STATEFLOW')
                 display_msg(me.message, MsgType.WARNING, 'getMFunctionCode', '');

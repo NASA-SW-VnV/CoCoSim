@@ -53,7 +53,7 @@ function [new_ir, status] = stateflow_IR_pp(old_ir, print_in_file, output_dir)
     if nargin < 3 || isempty(output_dir)
         output_dir = pwd;
     end
-    MatlabUtils.mkdir(output_dir);
+    coco_nasa_utils.MatlabUtils.mkdir(output_dir);
     if nargin < 2 || isempty(print_in_file)
         print_in_file = 0;
     end
@@ -77,7 +77,7 @@ function [new_ir, status] = stateflow_IR_pp(old_ir, print_in_file, output_dir)
     %% sort functions calls
     for i=1:numel(ordered_sfIR_pp_functions)
         [dirname, func_name, ~] = fileparts(ordered_sfIR_pp_functions{i});
-        package_prefix = MatlabUtils.getPackagePrefix(dirname, func_name);
+        package_prefix = coco_nasa_utils.MatlabUtils.getPackagePrefix(dirname, func_name);
         fh = str2func(sprintf('%s.%s', package_prefix, func_name));
         try
             display_msg(['runing ' func2str(fh)], MsgType.INFO, 'Stateflow_IRPP', '', 1);
@@ -96,7 +96,7 @@ function [new_ir, status] = stateflow_IR_pp(old_ir, print_in_file, output_dir)
 
     if print_in_file
         try
-            json_text = MatlabUtils.jsonencode(new_ir);
+            json_text = coco_nasa_utils.MatlabUtils.jsonencode(new_ir);
             json_text = regexprep(json_text, '\\/','/');
             fname = fullfile(output_dir, sprintf('%s_SFIR_pp_tmp.json', nasa_toLustre.IR_pp.stateflow_IR_pp.SFIRPPUtils.adapt_root_name(new_ir.Name{1})));
             fname_formatted = fullfile(output_dir, sprintf('%s_SFIR_pp.json', nasa_toLustre.IR_pp.stateflow_IR_pp.SFIRPPUtils.adapt_root_name(new_ir.Name{1})));

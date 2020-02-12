@@ -76,7 +76,7 @@ function [ Lustre_type, zero, one, isBus, isEnum, hasEnum] = ...
                 hasEnum = true;
                 Lustre_type = lower(slx_dt);
             else 
-                isBus = SLXUtils.isSimulinkBus(char(slx_dt));
+                isBus = coco_nasa_utils.SLXUtils.isSimulinkBus(char(slx_dt));
                 if isBus
                     Lustre_type = nasa_toLustre.utils.SLX2LusUtils.getLustreTypesFromBusObject(char(slx_dt));
                 else

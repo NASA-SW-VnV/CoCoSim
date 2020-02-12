@@ -99,7 +99,7 @@ function err = compile_lustre_to_Cbinary(lus_file_path, ...
     display_msg(msg, MsgType.INFO, 'compile_lustre_to_Cbinary', '');
     [err, make_out] = system(command);
     
-    if MatlabUtils.contains(make_out, 'unrecognized command line option ‘-fbracket-depth')
+    if coco_nasa_utils.MatlabUtils.contains(make_out, 'unrecognized command line option ‘-fbracket-depth')
         GCC_FLAGS = 'gcc -O0 -Wno-all ';
         makefile_OPTS = sprintf('BINNAME="%s" GCC="%s"', binary_name, GCC_FLAGS);
         command = sprintf('make %s -f "%s"',makefile_OPTS, makefile_name);

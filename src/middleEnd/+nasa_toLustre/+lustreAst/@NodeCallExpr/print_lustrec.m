@@ -46,8 +46,8 @@ function code = print_lustrec(obj, backend)
 
     nodeName = obj.nodeName;
     %PRELUDE does not support "_" in the begining of the word.
-    if LusBackendType.isPRELUDE(backend) ...
-            && MatlabUtils.startsWith(nodeName, '_')
+    if coco_nasa_utils.LusBackendType.isPRELUDE(backend) ...
+            && coco_nasa_utils.MatlabUtils.startsWith(nodeName, '_')
         nodeName = sprintf('x%s', nodeName);
     end
     code = sprintf('%s(%s)', ...

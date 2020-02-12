@@ -44,7 +44,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function code = print_prelude(obj)
 
-    code = obj.print_lustrec(LusBackendType.PRELUDE);
+    code = obj.print_lustrec(coco_nasa_utils.LusBackendType.PRELUDE);
 end
 
 

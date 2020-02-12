@@ -73,7 +73,7 @@ function [ T, coverage_percentage, status ] = lustret_test_mutation( model_full_
     [~, slx_file_name, ~] = fileparts(model_full_path);
 
     if  ~exist('node_name', 'var')|| isempty(node_name)
-        node_name = MatlabUtils.fileBase(lus_file_name);
+        node_name = coco_nasa_utils.MatlabUtils.fileBase(lus_file_name);
     end
     if  ~exist('nb_steps', 'var')|| isempty(nb_steps)
         nb_steps = 100;
@@ -91,7 +91,7 @@ function [ T, coverage_percentage, status ] = lustret_test_mutation( model_full_
         Min_coverage = 100;
     end
     if ~exist('model_checker', 'var') || isempty(model_checker)
-        model_checker = LusBackendType.KIND2;
+        model_checker = coco_nasa_utils.LusBackendType.KIND2;
     end
     if ~exist('nb_mutants_max', 'var')|| isempty(nb_mutants_max)
         nb_mutants_max = 500;
@@ -99,7 +99,7 @@ function [ T, coverage_percentage, status ] = lustret_test_mutation( model_full_
     Pwd = pwd;
 
     %% check lustre syntax is supported by lustrec and Kind2/Zustre
-    if strcmp(model_checker, LusBackendType.KIND2)
+    if strcmp(model_checker, coco_nasa_utils.LusBackendType.KIND2)
         if ~exist(KIND2,'file')
             errordlg(sprintf('KIND2 model checker is not found in %s. Please set KIND2 path in tools_config.m', KIND2));
             status = 1;
@@ -265,7 +265,7 @@ function [ T, coverage_percentage, status ] = lustret_test_mutation( model_full_
     display_msg('Generating random tests', MsgType.INFO, 'lustret_test_mutation', '');
     nb_test = 0;
 
-    [inports_slx, ~] = SLXUtils.get_model_inputs_info(model_full_path);
+    [inports_slx, ~] = coco_nasa_utils.SLXUtils.get_model_inputs_info(model_full_path);
     inports = main_node_struct.inputs;
     %adapt inports_lus DataType
     k=0;
@@ -284,7 +284,7 @@ function [ T, coverage_percentage, status ] = lustret_test_mutation( model_full_
     nb_radnom_test = min(2, MAX_nb_test);
     while (numel(verification_files) > 0 ) && (nb_test < nb_radnom_test) && (coverage_percentage < Min_coverage)
         display_msg(['running test number ' num2str(nb_test) ], MsgType.INFO, 'lustret_test_mutation', '');
-        [input_struct, ~, ~] = SLXUtils.get_random_test(slx_file_name, inports, nb_steps,IMAX, IMIN);
+        [input_struct, ~, ~] = coco_nasa_utils.SLXUtils.get_random_test(slx_file_name, inports, nb_steps,IMAX, IMIN);
         lustre_input_values = LustrecUtils.getLustreInputValuesFormat(input_struct, nb_steps);
         good_test = false;
         for i=1:numel(verification_files)
@@ -301,7 +301,7 @@ function [ T, coverage_percentage, status ] = lustret_test_mutation( model_full_
             end
             cd(binary_dir);
             txt  = fileread('outputs_values');
-            if MatlabUtils.contains(txt, '''OK'': ''0''')
+            if coco_nasa_utils.MatlabUtils.contains(txt, '''OK'': ''0''')
                 verification_files{i} = '';
                 good_test = true;
             end
@@ -350,7 +350,7 @@ function [ T, coverage_percentage, status ] = lustret_test_mutation( model_full_
             end
             cd(binary_dir);
             txt  = fileread(outputs_fname);
-            if MatlabUtils.contains(txt, '''OK'': ''0''')
+            if coco_nasa_utils.MatlabUtils.contains(txt, '''OK'': ''0''')
                 verification_files{i} = '';
                 if i <= file_idx
                     file_idx = file_idx - 1;

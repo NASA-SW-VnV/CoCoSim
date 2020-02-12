@@ -60,11 +60,11 @@ end
 
 function RandomCallback(varargin)
     try
-        model_full_path = MenuUtils.get_file_name(gcs);
-        MenuUtils.add_pp_warning(model_full_path);
+        model_full_path = coco_nasa_utils.MenuUtils.get_file_name(gcs);
+        coco_nasa_utils.MenuUtils.add_pp_warning(model_full_path);
         randomTestGui('model_full_path',model_full_path);
     catch ME
-        MenuUtils.handleExceptionMessage(ME, 'Test-case generation');
+        coco_nasa_utils.MenuUtils.handleExceptionMessage(ME, 'Test-case generation');
     end
 end
 
@@ -78,11 +78,11 @@ end
 
 function MutationCallback(varargin)
     try
-        model_full_path = MenuUtils.get_file_name(gcs);
-        MenuUtils.add_pp_warning(model_full_path);
+        model_full_path = coco_nasa_utils.MenuUtils.get_file_name(gcs);
+        coco_nasa_utils.MenuUtils.add_pp_warning(model_full_path);
         mutation_test_gui('model_full_path',model_full_path);
     catch ME
-        MenuUtils.handleExceptionMessage(ME, 'Test-case generation');
+        coco_nasa_utils.MenuUtils.handleExceptionMessage(ME, 'Test-case generation');
     end
 end
 
@@ -96,10 +96,10 @@ end
 
 function MCDCCallback(varargin)
     try
-        model_full_path = MenuUtils.get_file_name(gcs);
-        MenuUtils.add_pp_warning(model_full_path);
+        model_full_path = coco_nasa_utils.MenuUtils.get_file_name(gcs);
+        coco_nasa_utils.MenuUtils.add_pp_warning(model_full_path);
         mcdc_test_gui('model_full_path',model_full_path);
     catch ME
-        MenuUtils.handleExceptionMessage(ME, 'Test-case generation');
+        coco_nasa_utils.MenuUtils.handleExceptionMessage(ME, 'Test-case generation');
     end
 end

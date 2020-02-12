@@ -84,7 +84,7 @@ function [valid,...
             return;
         end
     else
-        st = SLXUtils.getModelCompiledSampleTime(slx_file_name);
+        st = coco_nasa_utils.SLXUtils.getModelCompiledSampleTime(slx_file_name);
         if st > 0
             time = (0:st:100)';
         else
@@ -144,10 +144,10 @@ function [valid,...
 
     msg = sprintf('Simulating model "%s"\n',slx_file_name);
     display_msg(msg, MsgType.INFO, 'validation', '');
-    %GUIUtils.update_status('Simulating model');
+    
     try
         % Simulate the model
-        simOut = SLXUtils.simulate_model(slx_file_name, ...
+        simOut = coco_nasa_utils.SLXUtils.simulate_model(slx_file_name, ...
             input_dataSet, ...
             simulation_step,...
             stop_time,...
@@ -181,7 +181,7 @@ function [valid,...
         end
 
         % compare Simulin outputs and Lustre outputs
-        %GUIUtils.update_status('Compare Simulink outputs and lustrec outputs');
+        
 
         
         assignin('base','yout',yout);
@@ -198,7 +198,7 @@ function [valid,...
 
         if ~valid
             %% show the counter example
-            %GUIUtils.update_status('Translation is not valid');
+            
             f_msg = sprintf('translation for model "%s" is not valid \n',slx_file_name);
             display_msg(f_msg, MsgType.RESULT, 'validation', '');
             f_msg = sprintf('Here is the counter example:\n');
@@ -210,7 +210,7 @@ function [valid,...
             f_msg = sprintf('The difference between outputs %s is :%2.10f\%\n',diff_name, diff);
             display_msg(f_msg, MsgType.RESULT, 'CEX', '');
         else
-            %GUIUtils.update_status('Translation is valid');
+            
             msg = sprintf('Translation for model "%s" is valid \n',slx_file_name);
             display_msg(msg, MsgType.RESULT, 'CEX', '');
         end

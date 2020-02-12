@@ -53,7 +53,7 @@ classdef ContractValidatorBlock_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lust
         
         function  write_code(obj, parent, blk, xml_trace, lus_backend, ...
                 ~, main_sampleTime, varargin)
-            if LusBackendType.isKIND2(lus_backend)
+            if coco_nasa_utils.LusBackendType.isKIND2(lus_backend)
                 % Validator block willl be ignored as it will be
                 % supported in its contract
                 return;

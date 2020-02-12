@@ -288,8 +288,8 @@ function schema = getLustreBackend(callbackInfo)
     schema.autoDisableWhen = 'Busy';
     CoCoSimPreferences = callbackInfo.userdata;
     
-    backendNames = {LusBackendType.KIND2, LusBackendType.JKIND, ...
-        LusBackendType.ZUSTRE};
+    backendNames = {coco_nasa_utils.LusBackendType.KIND2, coco_nasa_utils.LusBackendType.JKIND, ...
+        coco_nasa_utils.LusBackendType.ZUSTRE};
     callbacks = cell(1, length(backendNames));
     for i=1:length(backendNames)
         callbacks{i} = @(x) lustreBackendCallback(backendNames{i}, ...
@@ -301,7 +301,7 @@ end
 function schema = lustreBackendCallback(backendName, CoCoSimPreferences, varargin)
     schema = sl_toggle_schema;
     schema.label = backendName;
-    if ~strcmp(backendName, LusBackendType.KIND2)
+    if ~strcmp(backendName, coco_nasa_utils.LusBackendType.KIND2)
         schema.state = 'Disabled';
         schema.label = strcat(backendName, ' (Currently unsupported)');
     else
@@ -381,8 +381,8 @@ function schema = getDEDChecks(callbackInfo)
     schema.statustip = 'Design Error Detection';
     schema.autoDisableWhen = 'Busy';
     CoCoSimPreferences = callbackInfo.userdata;
-    checksNames = {CoCoBackendType.DED_DIVBYZER,CoCoBackendType.DED_INTOVERFLOW ,...
-        CoCoBackendType.DED_OUTOFBOUND, CoCoBackendType.DED_OUTMINMAX };
+    checksNames = {coco_nasa_utils.CoCoBackendType.DED_DIVBYZER,coco_nasa_utils.CoCoBackendType.DED_INTOVERFLOW ,...
+        coco_nasa_utils.CoCoBackendType.DED_OUTOFBOUND, coco_nasa_utils.CoCoBackendType.DED_OUTMINMAX };
     callbacks = cell(1, length(checksNames));
     for i=1:length(checksNames)
         callbacks{i} = @(x) checkNameCallback(checksNames{i}, ...
@@ -393,7 +393,7 @@ end
 
 function schema = checkNameCallback(checkName, CoCoSimPreferences, varargin)
     schema = sl_toggle_schema;
-    if ~strcmp(checkName, CoCoBackendType.DED_OUTMINMAX)
+    if ~strcmp(checkName, coco_nasa_utils.CoCoBackendType.DED_OUTMINMAX)
         schema.state = 'Disabled';
         schema.label = strcat(checkName, ' (Work in progress)');
     else

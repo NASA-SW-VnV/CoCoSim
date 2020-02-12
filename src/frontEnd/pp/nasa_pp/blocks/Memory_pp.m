@@ -54,7 +54,7 @@ if not(isempty(memoryBlk_list))
     display_msg('Processing Memory blocks...', MsgType.INFO, 'Memory_pp', '');
     validDT = {'double', 'single', 'int8', 'uint8', 'int16', 'uint16', ...
         'int32', 'uint32', 'boolean'};
-    allCompiledDT = SLXUtils.getCompiledParam(memoryBlk_list, 'CompiledPortDataTypes');
+    allCompiledDT = coco_nasa_utils.SLXUtils.getCompiledParam(memoryBlk_list, 'CompiledPortDataTypes');
     for i=1:length(memoryBlk_list)
         display_msg(memoryBlk_list{i}, MsgType.INFO, 'Memory_pp', '');
         try

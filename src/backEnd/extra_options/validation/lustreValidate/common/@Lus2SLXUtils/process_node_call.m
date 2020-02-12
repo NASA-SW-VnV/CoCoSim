@@ -52,7 +52,7 @@ function  [x2, y2] = process_node_call(nodes, new_model_name, node_block_path, b
     
     
     
-    if MatlabUtils.startsWith(blk_exprs.(var{1}).name, '_')
+    if coco_nasa_utils.MatlabUtils.startsWith(blk_exprs.(var{1}).name, '_')
         % Simulink read json : _max_real is read as x_max_real
         node_fieldname = strcat('x', blk_exprs.(var{1}).name);
     else

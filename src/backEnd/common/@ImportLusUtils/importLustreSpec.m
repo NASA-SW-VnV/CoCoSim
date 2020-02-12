@@ -268,7 +268,7 @@ function [new_model_path, status] = importLustreSpec(...
 end
 
 function new_blockPath = renamePath(blkPath, oldModelName, NewModelName)
-    if MatlabUtils.contains(blkPath, '/')
+    if coco_nasa_utils.MatlabUtils.contains(blkPath, '/')
         new_blockPath = regexprep(blkPath, strcat('^',oldModelName,'/(\w)'),strcat(NewModelName,'/$1'));
     else
         new_blockPath = NewModelName;
