@@ -41,20 +41,40 @@
 % cannot be relied upon to generate or error check software being developed. 
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-function signal_values = getSignalValuesInlinedUsingTime(ds, t)
-    signal_values = [];
-    if isa(ds, 'timeseries')
-        signal_values = double(ds.getsampleusingtime(t).Data);
-        signal_values = reshape(signal_values, [numel(signal_values), 1]);
-    elseif isa(ds, 'struct')
-        fields = fieldnames(ds);
-        for i=1:numel(ds)
-            for j=1:numel(fields)
-                signal_values = [signal_values ; ...
-                    LustrecUtils.getSignalValuesInlinedUsingTime(ds(i).(fields{j}), t)];
-            end
-        end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+classdef Kind2Utils
+    %KIND2UTILS Summary of this class goes here
+    %   Detailed explanation goes here
+    properties
     end
+    
+    methods(Static = true)
+        %% Check the lustre syntax
+        [status, output] = checkSyntaxError(lus_file_path, KIND2, Z3)
+        %% run kind2 with arguments
+        [status, solver_output] = runKIND2(...
+                verif_lus_path,...
+                node, ...
+                OPTS, KIND2, Z3, timeout, timeout_analysis)
+        %% run compositional modular verification usin Kind2
+        [valid, IN_struct] = extractKind2CEX(...
+                verif_lus_path,...
+                output_dir,...
+                node, ...
+                OPTS, KIND2, Z3)
+
+        [valid, IN_struct] = extract_Kind2_Comp_Verif_answer(...
+                lus_full_path, ...
+                solver_output, ...
+                file_name, ...
+                output_dir)
+        
+        [IN_struct, time_max] = Kind2CEXTostruct(...
+                node_struct, ...
+                cex_xml, ...
+                node_name)
+
+    end
+    
 end
+

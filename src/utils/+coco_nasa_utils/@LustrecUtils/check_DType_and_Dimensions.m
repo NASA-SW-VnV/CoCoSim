@@ -42,61 +42,45 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-%% run kind2 with arguments
-function [status, solver_output] = runKIND2(...
-    verif_lus_path,...
-    node, ...
-    OPTS, KIND2, Z3, timeout, timeout_analysis)
 
+%% construct_EMF_verif_model
+function status = check_DType_and_Dimensions(slx_file_name)
     status = 0;
+    sys_list = find_system(slx_file_name, 'LookUnderMasks', 'all',...
+        'RegExp', 'on', 'OutDataTypeStr', '[u]?int(8|16)');
+    if ~isempty(sys_list)
+        msg = sprintf('Model contains integers ports differens than int32.');
+        msg = [msg, 'Lus2slx current version support only int32 dataType'];
+        display_msg(msg, MsgType.ERROR, ...
+            'coco_nasa_utils.LustrecUtils.check_DType_and_Dimensions','');
+        status = 1;
+        return;
+    end
+    % Dimensions should be less than 2
+    inport_list = find_system(slx_file_name, 'SearchDepth', 1, 'BlockType', 'Inport');
+    try
+        code_on=sprintf('%s([], [], [], ''compile'')', slx_file_name);
+        eval(code_on);
+    catch
+    end
+    dimensions = get_param(inport_list, 'CompiledPortDimensions');
+    outport_dimensions = cellfun(@(x) x.Outport, dimensions, 'un', 0);
+    for i=1:numel(outport_dimensions)
+        dim = outport_dimensions{i};
+        if numel(dim) > 3
 
-    if nargin < 1
-        error('Missing arguments to function call: Kind2Utils2.runKIND2')
-    end
-    %
 
-    %
-    if ~exist('OPTS', 'var')
-        OPTS = '';
-    end
-    if nargin >= 2 && ~isempty(node)
-        OPTS = sprintf('%s --lus_main %s', OPTS, node);
-    end
-    if nargin >= 7 && ~isempty(timeout_analysis)
-        OPTS = sprintf('%s --timeout_analysis %d', OPTS, timeout_analysis);
-    end
-    %
-    if nargin < 4
-        tools_config;
-        status = coco_nasa_utils.MatlabUtils.check_files_exist(KIND2, Z3);
-        if status
-            display_msg(['KIND2 or Z3 not found :' KIND2 ', ' Z3],...
-                MsgType.DEBUG, 'LustrecUtils.run_verif', '');
-            return;
+            msg = sprintf('Invalid inport dimension "%s" with dimension %s: Lus2slx functions does not support dimension > 2.',...
+                inport_list{i}, num2str(dim));
+            display_msg(msg, MsgType.ERROR, ...
+                'coco_nasa_utils.LustrecUtils.check_DType_and_Dimensions','');
+            status = 1;
+            break;
+
+
         end
     end
-    %
-    if ~exist('timeout', 'var') || isempty(timeout)
-        CoCoSimPreferences = cocosim_menu.CoCoSimPreferences.load();
-        if isfield(CoCoSimPreferences, 'verificationTimeout')
-            timeout = num2str(CoCoSimPreferences.verificationTimeout);
-        else
-            timeout = '120';
-        end
-    elseif isnumeric(timeout)
-        timeout = num2str(timeout);
-    end
-
-    command = sprintf('%s -xml  --z3_bin %s --timeout %s %s "%s"',...
-        KIND2, Z3, timeout, OPTS,  verif_lus_path);
-    display_msg(['KIND2_COMMAND ' command],...
-        MsgType.DEBUG, 'Kind2Utils2.run_verif', '');
-
-    [~, solver_output] = system(command, '-echo' );
-    display_msg(...
-        solver_output,...
-        MsgType.DEBUG,...
-        'Kind2Utils2.run_verif',...
-        '');
-
+    code_off=sprintf('%s([], [], [], ''term'')', slx_file_name);
+    eval(code_off);
 end
+

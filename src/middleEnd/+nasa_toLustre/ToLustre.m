@@ -407,11 +407,11 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, ...
     %% check lustre syntax
     if ~coco_nasa_utils.LusBackendType.isPRELUDE(lus_backend) 
         if coco_nasa_utils.LusBackendType.isKIND2(lus_backend)
-            [syntax_status, output] = Kind2Utils2.checkSyntaxError(lustre_file_path, KIND2, Z3);
+            [syntax_status, output] = coco_nasa_utils.Kind2Utils.checkSyntaxError(lustre_file_path, KIND2, Z3);
         elseif coco_nasa_utils.LusBackendType.isLUSTREC(lus_backend)
-            [~, syntax_status, output] = LustrecUtils.generate_lusi(lustre_file_path, LUSTREC );
+            [~, syntax_status, output] = coco_nasa_utils.LustrecUtils.generate_lusi(lustre_file_path, LUSTREC );
         elseif coco_nasa_utils.LusBackendType.isJKIND(lus_backend)
-            [syntax_status, output] = JKindUtils.checkSyntaxError(lustre_file_path, JLUSTRE2KIND);
+            [syntax_status, output] = coco_nasa_utils.JKindUtils.checkSyntaxError(lustre_file_path, JLUSTRE2KIND);
         else
             syntax_status = 0;
             output = '';

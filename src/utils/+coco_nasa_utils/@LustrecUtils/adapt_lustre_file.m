@@ -41,25 +41,24 @@
 % cannot be relied upon to generate or error check software being developed. 
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
-function number_of_inputs = getNumberOfInputsInlinedFromDataSet(ds, nb_steps)
-    number_of_inputs = 0;
-    if isa(ds, 'Simulink.SimulationData.Dataset')
-        for i=1:numel(ds.getElementNames)
-            number_of_inputs = number_of_inputs + ...
-                LustrecUtils.getNumberOfInputsInlinedFromDataSet(ds{i}.Values, nb_steps);
-        end
-    elseif isa(ds, 'timeseries')
-        dim = ds.getdatasamplesize;
-        number_of_inputs = nb_steps*(prod(dim));
-    elseif isa(ds, 'struct')
-        fields = fieldnames(ds);
-        for i=1:numel(ds)
-            for j=1:numel(fields)
-                number_of_inputs = number_of_inputs + ...
-                    LustrecUtils.getNumberOfInputsInlinedFromDataSet(ds(i).(fields{j}), nb_steps);
-            end
-        end
+function new_mcdc_file = adapt_lustre_file(mcdc_file, lusBackend)
+    % adapt lustre code
+    if nargin < 2
+        lusBackend = '';
+    end
+    if ~exist(mcdc_file, 'file')
+        display_msg(['File not found ' mcdc_file], MsgType.ERROR, 'adapt_lustre_file', '');
+        return;
+    end
+    [output_dir, lus_file_name, ~] = fileparts(mcdc_file);
+    new_mcdc_file = fullfile(output_dir,strcat( lus_file_name, '_adapted.lus'));
+    fid = fopen(new_mcdc_file, 'w');
+    if fid > 0
+        fprintf(fid, '%s', coco_nasa_utils.LustrecUtils.adapt_lustre_text(fileread(mcdc_file), lusBackend, output_dir));
+        fclose(fid);
+    else
+        new_mcdc_file = mcdc_file;
     end
 end

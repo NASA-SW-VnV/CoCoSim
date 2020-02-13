@@ -82,12 +82,12 @@ status = coco_nasa_utils.MatlabUtils.check_files_exist(LUSTREC, LUCTREC_INCLUDE_
 if status
     return;
 end
-[emf_path, status] = LustrecUtils.generate_emf(lus_file_path, output_dir, LUSTREC, LUSTREC_OPTS, LUCTREC_INCLUDE_DIR);
+[emf_path, status] = coco_nasa_utils.LustrecUtils.generate_emf(lus_file_path, output_dir, LUSTREC, LUSTREC_OPTS, LUCTREC_INCLUDE_DIR);
 if status
     return;
 end
 %% generate Lusi file
-[lusi_path, status] = LustrecUtils.generate_lusi(lus_file_path, LUSTREC );
+[lusi_path, status] = coco_nasa_utils.LustrecUtils.generate_lusi(lus_file_path, LUSTREC );
 if status
     return;
 end

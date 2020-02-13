@@ -65,14 +65,14 @@ function [valid, cex_msg, diff_name, diff_value, sim_failed] = ...
     isComparingAgainstLustre = ~isempty(lus_outs);
     out_width = zeros(numberOfOutputs,1);
     for k=1:numberOfOutputs
-        out_width(k) = LustrecUtils.getSignalWidth(yout1{k}.Values);
+        out_width(k) = coco_nasa_utils.LustrecUtils.getSignalWidth(yout1{k}.Values);
     end
     first_comparaison = true;
     for i=1:numel(time)
         cex_msg{end+1} = sprintf('*****time : %f**********\n',time(i));
         cex_msg{end+1} = sprintf('*****inputs: \n');
         for j=1:numberOfInports
-            in = LustrecUtils.getSignalValuesInlinedUsingTime(input_dataSet{j}.Values, time(i));
+            in = coco_nasa_utils.LustrecUtils.getSignalValuesInlinedUsingTime(input_dataSet{j}.Values, time(i));
             in_width = numel(in);
             name = input_dataSet{j}.Name;
             for jk=1:in_width
@@ -82,9 +82,9 @@ function [valid, cex_msg, diff_name, diff_value, sim_failed] = ...
         cex_msg{end+1} = sprintf('*****outputs: \n');
         found_output = false;
         for k=1:numberOfOutputs
-            yout1_values = LustrecUtils.getSignalValuesInlinedUsingTime(yout1{k}.Values, time(i));
+            yout1_values = coco_nasa_utils.LustrecUtils.getSignalValuesInlinedUsingTime(yout1{k}.Values, time(i));
             if ~isComparingAgainstLustre
-                yout2_values = LustrecUtils.getSignalValuesInlinedUsingTime(yout2{k}.Values, time(i));
+                yout2_values = coco_nasa_utils.LustrecUtils.getSignalValuesInlinedUsingTime(yout2{k}.Values, time(i));
             end
             if isempty(yout1_values) || (~isComparingAgainstLustre && isempty(yout2_values))
                 % signal is not defined in the current timestep

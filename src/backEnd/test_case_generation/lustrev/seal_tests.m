@@ -110,13 +110,13 @@ function [ new_model_path, status ] = seal_tests(...
     end
     
     % generate seal file
-    [seal_file, status] = LustrecUtils.generateLustrevSealFile(lus_full_path, output_dir, main_node, LUSTREV, LUCTREC_INCLUDE_DIR);
+    [seal_file, status] = coco_nasa_utils.LustrecUtils.generateLustrevSealFile(lus_full_path, output_dir, main_node, LUSTREV, LUCTREC_INCLUDE_DIR);
     if status
         return;
     end
     % Generate MCDC lustre file from Simulink model Lustre file
     try
-        mcdc_file = LustrecUtils.generate_MCDCLustreFile(seal_file, output_dir);
+        mcdc_file = coco_nasa_utils.LustrecUtils.generate_MCDCLustreFile(seal_file, output_dir);
     catch ME
         display_msg(['MCDC generation failed for lustre file ' lus_full_path],...
             MsgType.ERROR, 'mcdcToSimulink', '');
@@ -127,15 +127,15 @@ function [ new_model_path, status ] = seal_tests(...
     
     try
         % generate test cases that covers the MC-DC conditions
-        new_mcdc_file = LustrecUtils.adapt_lustre_file(mcdc_file, coco_nasa_utils.LusBackendType.KIND2);
-        [syntax_status, output] = Kind2Utils2.checkSyntaxError(new_mcdc_file, KIND2, Z3);
+        new_mcdc_file = coco_nasa_utils.LustrecUtils.adapt_lustre_file(mcdc_file, coco_nasa_utils.LusBackendType.KIND2);
+        [syntax_status, output] = coco_nasa_utils.Kind2Utils.checkSyntaxError(new_mcdc_file, KIND2, Z3);
         if syntax_status
             display_msg(output, MsgType.DEBUG, 'seal_tests', '');
             display_msg('This model is not compatible for MC-DC generation.', MsgType.RESULT, 'mcdcToSimulink', '');
             status = 1;
             return;
         end
-        [~, T] = Kind2Utils2.extractKind2CEX(new_mcdc_file, output_dir, main_node, ...
+        [~, T] = coco_nasa_utils.Kind2Utils.extractKind2CEX(new_mcdc_file, output_dir, main_node, ...
             ' --slice_nodes false --check_subproperties true ');
         
         if isempty(T)

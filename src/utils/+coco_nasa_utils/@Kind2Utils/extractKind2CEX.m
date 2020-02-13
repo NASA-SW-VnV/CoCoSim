@@ -42,49 +42,51 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%% run compositional modular verification usin Kind2
+function [valid, IN_struct] = extractKind2CEX(...
+    verif_lus_path,...
+    output_dir,...
+    node, ...
+    OPTS, KIND2, Z3)
 
-function [node_struct,...
-        status] = extract_node_struct_using_lusi(lus_file_path,...
-        node_name,...
-        LUSTREC)
-    node_struct = [];
-    [lusi_path, status] = ...
-        LustrecUtils.generate_lusi(lus_file_path, LUSTREC );
+    IN_struct = [];
+    valid = -1;
+    if nargin < 1
+        error('Missing arguments to function call: coco_nasa_utils.Kind2Utils.extractKind2CEX')
+    end
+    if ~exist('OPTS', 'var')
+        OPTS = '';
+    end
+    if ~exist('KIND2', 'var') || ~exist('Z3', 'var')
+        tools_config;
+        status = coco_nasa_utils.MatlabUtils.check_files_exist(KIND2, Z3);
+        if status
+            display_msg(['KIND2 or Z3 not found :' KIND2 ', ' Z3],...
+                MsgType.DEBUG, 'coco_nasa_utils.LustrecUtils.run_verif', '');
+            return;
+        end
+    end
+
+    [file_dir, file_name, ~] = fileparts(verif_lus_path);
+    if nargin < 2 || isempty(output_dir)
+        output_dir = file_dir;
+    end
+
+    PWD = pwd;
+    cd(output_dir);
+    [status, solver_output] = coco_nasa_utils.Kind2Utils.runKIND2(...
+        verif_lus_path,...
+        node, ...
+        OPTS, KIND2, Z3);
     if status
-        display_msg(sprintf('Could not extract node %s information for file %s\n', ...
-            node_name, lus_file_path), MsgType.Error, 'extract_node_struct', '');
         return;
     end
-    lusi_text = fileread(lusi_path);
-    vars = '(\s*\w+\s*:\s*(int|real|bool);?)+';
-    pattern = strcat(...
-        '(node|function)\s+',...
-        node_name,...
-        '\s*\(',...
-        vars,...
-        '\)\s*returns\s*\(',...
-        vars,'\);');
-    tokens = regexp(lusi_text, pattern,'match');
-    if isempty(tokens)
-        status = 1;
-        display_msg(sprintf('Could not extract node %s information for file %s\n', ...
-            node_name, lus_file_path),...
-            MsgType.ERROR, 'extract_node_struct_using_lusi', '');
-        return;
-    end
-    tokens = regexp(tokens{1}, vars,'match');
-    inputs = regexp(tokens{1}, ';', 'split');
-    outputs = regexp(tokens{2}, ';', 'split');
+    [valid, IN_struct] = ...
+        coco_nasa_utils.Kind2Utils.extract_Kind2_Comp_Verif_answer(...
+        verif_lus_path, ...
+        solver_output,...
+        file_name,  output_dir);
 
-    for i=1:numel(inputs)
-        tokens = regexp(inputs{i}, '\w+','match');
-        node_struct.inputs(i).name = tokens{1};
-        node_struct.inputs(i).datatype = tokens{2};
-    end
-    for i=1:numel(outputs)
-        tokens = regexp(outputs{i}, '\w+','match');
-        node_struct.outputs(i).name = tokens{1};
-        node_struct.outputs(i).datatype = tokens{2};
-    end
+    cd(PWD);
+
 end
-

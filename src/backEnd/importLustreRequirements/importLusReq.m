@@ -80,7 +80,7 @@ function new_model_path = importLusReq(current_openedSS, lusFilePath, mappingPat
     
     
     % check syntax
-    [~, syntax_status, output] = LustrecUtils.generate_lusi(lusFilePath, LUSTREC );
+    [~, syntax_status, output] = coco_nasa_utils.LustrecUtils.generate_lusi(lusFilePath, LUSTREC );
     if syntax_status && ~isempty(output)
         display_msg('Lustre Syntax check has failed for contract code. The parsing error is the following:', MsgType.ERROR, 'TOLUSTRE', '');
         [~, lustre_file_base, ~] = fileparts(lusFilePath);
@@ -89,12 +89,12 @@ function new_model_path = importLusReq(current_openedSS, lusFilePath, mappingPat
         return;
     end
     % generate json file of lustre
-    [lus_IR_path, status] = LustrecUtils.generate_emf(lusFilePath, output_dir);
+    [lus_IR_path, status] = coco_nasa_utils.LustrecUtils.generate_emf(lusFilePath, output_dir);
     if status
         display_msg('Could not export Lustre AST.', MsgType.ERROR, 'importLusReq', '');
         return;
     end
-    [new_model_path, status] = ImportLusUtils.importLustreSpec(...
+    [new_model_path, status] = coco_nasa_utils.ImportLusUtils.importLustreSpec(...
         current_openedSS,...
         lus_IR_path,...
         mappingPath, ...

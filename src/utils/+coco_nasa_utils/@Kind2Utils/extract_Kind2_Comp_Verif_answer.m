@@ -72,7 +72,7 @@ function [valid, IN_struct] = extract_Kind2_Comp_Verif_answer(...
     fid = fopen(tmp_file, 'w');
     if fid == -1
         display_msg(['Couldn''t create file ' tmp_file],...
-            MsgType.ERROR, 'Kind2Utils2.extract_answer', '');
+            MsgType.ERROR, 'Kind2Utils.extract_answer', '');
         return;
     end
     fprintf(fid, solver_output);
@@ -80,7 +80,7 @@ function [valid, IN_struct] = extract_Kind2_Comp_Verif_answer(...
     if strfind(solver_output,'Wallclock timeout')
         msg = sprintf('Solver Result reached TIMEOUT. Check %s', ...
             tmp_file);
-        display_msg(msg, MsgType.RESULT, 'Kind2Utils2.extract_answer', '');
+        display_msg(msg, MsgType.RESULT, 'Kind2Utils.extract_answer', '');
         return;
     end
 
@@ -89,7 +89,7 @@ function [valid, IN_struct] = extract_Kind2_Comp_Verif_answer(...
     catch
         msg = sprintf('Can not read file %s', ...
             tmp_file);
-        display_msg(msg, MsgType.ERROR, 'Kind2Utils2.extract_answer', '');
+        display_msg(msg, MsgType.ERROR, 'Kind2Utils.extract_answer', '');
         return
     end
     xAnalysis = xDoc.getElementsByTagName('Analysis');
@@ -97,7 +97,7 @@ function [valid, IN_struct] = extract_Kind2_Comp_Verif_answer(...
     nbUnsafe = 0;
     for idx_analys=0:xAnalysis.getLength-1
         node_name = char(xAnalysis.item(idx_analys).getAttribute('top'));
-        [main_node_struct, status] = LustrecUtils.extract_node_struct(lus_full_path, node_name);
+        [main_node_struct, status] = coco_nasa_utils.LustrecUtils.extract_node_struct(lus_full_path, node_name);
         if status
             return;
         end
@@ -126,7 +126,7 @@ function [valid, IN_struct] = extract_Kind2_Comp_Verif_answer(...
                 if xml_cex.getLength > 0
                     CEX_XML = xml_cex;
                     [IN_struct_i, ~] =...
-                        Kind2Utils2.Kind2CEXTostruct(main_node_struct, ...
+                        coco_nasa_utils.Kind2Utils.Kind2CEXTostruct(main_node_struct, ...
                         CEX_XML, node_name);
                     IN_struct = [IN_struct, IN_struct_i];
                 else
@@ -141,14 +141,14 @@ function [valid, IN_struct] = extract_Kind2_Comp_Verif_answer(...
             end
             msg = sprintf('Solver Result for node %s of property %s is %s', ...
                 node_name, prop_name, answer);
-            display_msg(msg, MsgType.INFO, 'Kind2Utils2.extract_answer', '');
+            display_msg(msg, MsgType.INFO, 'Kind2Utils.extract_answer', '');
         end
     end
     msg = sprintf('Number of properties SAFE are %d', ...
         nbSafe);
-    display_msg(msg, MsgType.INFO, 'Kind2Utils2.extract_answer', '');
+    display_msg(msg, MsgType.INFO, 'Kind2Utils.extract_answer', '');
     msg = sprintf('Number of properties UNSAFE are %d', ...
         nbUnsafe);
-    display_msg(msg, MsgType.INFO, 'Kind2Utils2.extract_answer', '');
+    display_msg(msg, MsgType.INFO, 'Kind2Utils.extract_answer', '');
 end
 

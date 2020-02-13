@@ -41,15 +41,20 @@
 % cannot be relied upon to generate or error check software being developed. 
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-%% Check the lustre syntax
-function [status, output] = checkSyntaxError(lus_file_path, KIND2, Z3)
-    command = sprintf('%s --enable interpreter -xml  "%s" --timeout 60 --z3_bin %s ',...
-        KIND2,  lus_file_path, Z3);
-    display_msg(['KIND2_COMMAND ' command],...
-        MsgType.DEBUG, 'Kind2Utils2.checkSyntaxError', '');
-    [status, output] = system(command);
-    if status == 20
-        status = 0;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function signal_values = getSignalValuesInlinedUsingTime(ds, t)
+    signal_values = [];
+    if isa(ds, 'timeseries')
+        signal_values = double(ds.getsampleusingtime(t).Data);
+        signal_values = reshape(signal_values, [numel(signal_values), 1]);
+    elseif isa(ds, 'struct')
+        fields = fieldnames(ds);
+        for i=1:numel(ds)
+            for j=1:numel(fields)
+                signal_values = [signal_values ; ...
+                    coco_nasa_utils.LustrecUtils.getSignalValuesInlinedUsingTime(ds(i).(fields{j}), t)];
+            end
+        end
     end
 end

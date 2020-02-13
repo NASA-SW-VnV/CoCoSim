@@ -42,33 +42,71 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-function [main_node_struct, ...
-        status] = extract_node_struct_using_emf(...
-        lus_file_path,...
-        main_node_name,...
-        LUSTREC, ...
-        LUCTREC_INCLUDE_DIR)
-    main_node_struct = [];
-    [contract_path, status] = LustrecUtils.generate_emf(...
-        lus_file_path, '', LUSTREC, '', LUCTREC_INCLUDE_DIR);
 
-    if status==0
-        % extract main node struct from EMF
-        data = coco_nasa_utils.MatlabUtils.read_json(contract_path);
-        nodes = data.nodes;
-        nodes_names = fieldnames(nodes)';
-        orig_names = arrayfun(@(x)  nodes.(x{1}).original_name,...
-            nodes_names, 'UniformOutput', false);
-        idx_main_node = find(ismember(orig_names, main_node_name));
-        if isempty(idx_main_node)
-            display_msg(...
-                ['Node ' main_node_name ' does not exist in EMF ' contract_path], ...
-                MsgType.ERROR, 'Validation', '');
-            status = 1;
+%% run Zustre or kind2 on verification file
+function [answer, IN_struct, time_max] = run_verif(...
+        verif_lus_path,...
+        inports, ...
+        output_dir,...
+        node_name,...
+        Backend)
+    IN_struct = [];
+    time_max = 0;
+    answer = '';
+    if nargin < 1
+        error('Missing arguments to function call: coco_nasa_utils.LustrecUtils.run_verif')
+    end
+    [file_dir, file_name, ~] = fileparts(verif_lus_path);
+    if nargin < 3 || isempty(output_dir)
+        output_dir = file_dir;
+    end
+    if nargin < 4 || isempty(node_name)
+        node_name = 'top';
+    end
+    if nargin < 5 || isempty(Backend)
+        Backend = 'KIND2';
+    end
+    timeout = '600';
+    cd(output_dir);
+    tools_config;
+
+    if strcmp(Backend, 'ZUSTRE') || strcmp(Backend, 'Z')
+        status = coco_nasa_utils.MatlabUtils.check_files_exist(ZUSTRE);
+        if status
             return;
         end
-        main_node_struct = nodes.(nodes_names{idx_main_node});
+        command = sprintf('%s "%s" --node %s --xml  --matlab --timeout %s --save ',...
+            ZUSTRE, verif_lus_path, node_name, timeout);
+        display_msg(['ZUSTRE_COMMAND ' command],...
+            MsgType.DEBUG,...
+            'coco_nasa_utils.LustrecUtils.run_verif',...
+            '');
+
+    elseif strcmp(Backend, 'KIND2') || strcmp(Backend, 'K')
+        status = coco_nasa_utils.MatlabUtils.check_files_exist(KIND2, Z3);
+        if status
+            return;
+        end
+        command = sprintf('%s --z3_bin %s -xml --timeout %s --lus_main %s "%s"',...
+            KIND2, Z3, timeout, node_name, verif_lus_path);
+        display_msg(['KIND2_COMMAND ' command],...
+            MsgType.DEBUG, 'coco_nasa_utils.LustrecUtils.run_verif', '');
 
     end
+    [~, solver_output] = system(command);
+    display_msg(...
+        solver_output,...
+        MsgType.DEBUG,...
+        'coco_nasa_utils.LustrecUtils.run_verif',...
+        '');
+    [answer, CEX_XML] = ...
+        coco_nasa_utils.LustrecUtils.extract_answer(...
+        solver_output,...
+        Backend,  file_name, node_name,  output_dir);
+    if strcmp(answer, 'UNSAFE') && ~isempty(CEX_XML)
+        [IN_struct, time_max] =...
+            coco_nasa_utils.LustrecUtils.cexTostruct(CEX_XML, node_name, inports);
+    end
+
 end
 

@@ -42,71 +42,61 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%% run kind2 with arguments
+function [status, solver_output] = runKIND2(...
+    verif_lus_path,...
+    node, ...
+    OPTS, KIND2, Z3, timeout, timeout_analysis)
 
-%% run Zustre or kind2 on verification file
-function [answer, IN_struct, time_max] = run_verif(...
-        verif_lus_path,...
-        inports, ...
-        output_dir,...
-        node_name,...
-        Backend)
-    IN_struct = [];
-    time_max = 0;
-    answer = '';
+    status = 0;
+
     if nargin < 1
-        error('Missing arguments to function call: LustrecUtils.run_verif')
+        error('Missing arguments to function call: coco_nasa_utils.Kind2Utils.runKIND2')
     end
-    [file_dir, file_name, ~] = fileparts(verif_lus_path);
-    if nargin < 3 || isempty(output_dir)
-        output_dir = file_dir;
-    end
-    if nargin < 4 || isempty(node_name)
-        node_name = 'top';
-    end
-    if nargin < 5 || isempty(Backend)
-        Backend = 'KIND2';
-    end
-    timeout = '600';
-    cd(output_dir);
-    tools_config;
+    %
 
-    if strcmp(Backend, 'ZUSTRE') || strcmp(Backend, 'Z')
-        status = coco_nasa_utils.MatlabUtils.check_files_exist(ZUSTRE);
-        if status
-            return;
-        end
-        command = sprintf('%s "%s" --node %s --xml  --matlab --timeout %s --save ',...
-            ZUSTRE, verif_lus_path, node_name, timeout);
-        display_msg(['ZUSTRE_COMMAND ' command],...
-            MsgType.DEBUG,...
-            'LustrecUtils.run_verif',...
-            '');
-
-    elseif strcmp(Backend, 'KIND2') || strcmp(Backend, 'K')
+    %
+    if ~exist('OPTS', 'var')
+        OPTS = '';
+    end
+    if nargin >= 2 && ~isempty(node)
+        OPTS = sprintf('%s --lus_main %s', OPTS, node);
+    end
+    if nargin >= 7 && ~isempty(timeout_analysis)
+        OPTS = sprintf('%s --timeout_analysis %d', OPTS, timeout_analysis);
+    end
+    %
+    if nargin < 4
+        tools_config;
         status = coco_nasa_utils.MatlabUtils.check_files_exist(KIND2, Z3);
         if status
+            display_msg(['KIND2 or Z3 not found :' KIND2 ', ' Z3],...
+                MsgType.DEBUG, 'coco_nasa_utils.LustrecUtils.run_verif', '');
             return;
         end
-        command = sprintf('%s --z3_bin %s -xml --timeout %s --lus_main %s "%s"',...
-            KIND2, Z3, timeout, node_name, verif_lus_path);
-        display_msg(['KIND2_COMMAND ' command],...
-            MsgType.DEBUG, 'LustrecUtils.run_verif', '');
-
     end
-    [~, solver_output] = system(command);
+    %
+    if ~exist('timeout', 'var') || isempty(timeout)
+        CoCoSimPreferences = cocosim_menu.CoCoSimPreferences.load();
+        if isfield(CoCoSimPreferences, 'verificationTimeout')
+            timeout = num2str(CoCoSimPreferences.verificationTimeout);
+        else
+            timeout = '120';
+        end
+    elseif isnumeric(timeout)
+        timeout = num2str(timeout);
+    end
+
+    command = sprintf('%s -xml  --z3_bin %s --timeout %s %s "%s"',...
+        KIND2, Z3, timeout, OPTS,  verif_lus_path);
+    display_msg(['KIND2_COMMAND ' command],...
+        MsgType.DEBUG, 'coco_nasa_utils.Kind2Utils.run_verif', '');
+
+    [~, solver_output] = system(command, '-echo' );
     display_msg(...
         solver_output,...
         MsgType.DEBUG,...
-        'LustrecUtils.run_verif',...
+        'coco_nasa_utils.Kind2Utils.run_verif',...
         '');
-    [answer, CEX_XML] = ...
-        LustrecUtils.extract_answer(...
-        solver_output,...
-        Backend,  file_name, node_name,  output_dir);
-    if strcmp(answer, 'UNSAFE') && ~isempty(CEX_XML)
-        [IN_struct, time_max] =...
-            LustrecUtils.cexTostruct(CEX_XML, node_name, inports);
-    end
 
 end
-

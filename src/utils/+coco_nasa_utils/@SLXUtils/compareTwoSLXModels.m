@@ -90,7 +90,7 @@ function [valid, sim_failed, cex_file_path] = compareTwoSLXModels(orig_mdl_path,
     end
     numberOfInports = numel(input_dataSet.getElementNames);
     if numberOfInports >= 1
-        time = LustrecUtils.getTimefromDataset(input_dataSet);
+        time = coco_nasa_utils.LustrecUtils.getTimefromDataset(input_dataSet);
         if isempty(time)
             msg = sprintf('Input Signals should be of class Simulink.SimulationData.Dataset');
             display_msg(msg, MsgType.ERROR, 'coco_nasa_utils.SLXUtils.compareTwoSLXModels', '');
@@ -155,7 +155,7 @@ function [valid, sim_failed, cex_file_path] = compareTwoSLXModels(orig_mdl_path,
     
     %% compare both outputs
     [valid, cex_msg, diff_name, diff_value, sim_failed] = ...
-        LustrecUtils.compare_slx_out_with_lusORslx_out(...
+        coco_nasa_utils.LustrecUtils.compare_slx_out_with_lusORslx_out(...
         input_dataSet, ...
         yout1,...
         yout2, ...
@@ -181,7 +181,7 @@ function [valid, sim_failed, cex_file_path] = compareTwoSLXModels(orig_mdl_path,
         coco_nasa_utils.MatlabUtils.mkdir(directory);
         cex_file_path = fullfile(directory, strcat('cex_orig_vs_pp_', char(t), '.txt'));
         
-        LustrecUtils.show_CEX(cex_msg, cex_file_path );
+        coco_nasa_utils.LustrecUtils.show_CEX(cex_msg, cex_file_path );
         f_msg = sprintf('The difference between outputs %s is :%2.10f\%\n',diff_name, diff_value);
         display_msg(f_msg, MsgType.RESULT, 'CEX', '');
     end

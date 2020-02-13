@@ -42,18 +42,61 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-
-function width = getSignalWidth(ds)
-    width = 0;
-    if isa(ds, 'timeseries')
-        width = prod(ds.getdatasamplesize);
-    elseif isa(ds, 'struct')
-        fields = fieldnames(ds);
-        for i=1:numel(ds)
-            for j=1:numel(fields)
-                width = width + ...
-                    LustrecUtils.getSignalWidth(ds(i).(fields{j}));
-            end
+%% node inputs outputs
+function [node_struct,...
+        status] = extract_node_struct(lus_file_path,...
+        node_name,...
+        LUSTREC,...
+        LUCTREC_INCLUDE_DIR)
+    
+    % Using lustre file
+    try
+        [node_struct, status] = coco_nasa_utils.LustrecUtils.extract_node_struct_using_lusFile(lus_file_path, node_name);
+    catch me
+        display_msg(me.getReport(), MsgType.DEBUG, 'extract_node_struct', '');
+        status = 1;
+    end
+    if status==0
+        return;
+    end
+    
+    
+    if nargin < 3
+        tools_config;
+        status = coco_nasa_utils.MatlabUtils.check_files_exist(LUSTREC, LUCTREC_INCLUDE_DIR);
+        if status
+            err = sprintf('Binary "%s" and directory "%s" not found ',LUSTREC, LUCTREC_INCLUDE_DIR);
+            display_msg(err, MsgType.ERROR, 'generate_lusi', '');
+            return;
         end
     end
+    
+    % Using lusi file
+    try
+        [node_struct, status] = ...
+            coco_nasa_utils.LustrecUtils.extract_node_struct_using_lusi(...
+            lus_file_path, node_name, LUSTREC);
+    catch
+        status = 1;
+    end
+    if status==0
+        return;
+    end
+    
+    % Using emf file
+    try
+        [node_struct, status] = ...
+            coco_nasa_utils.LustrecUtils.extract_node_struct_using_emf(...
+            lus_file_path, node_name, LUSTREC, LUCTREC_INCLUDE_DIR);
+    catch
+        status = 1;
+    end
+    if status==0
+        return;
+    end
+
+    
+    
+    
 end
+

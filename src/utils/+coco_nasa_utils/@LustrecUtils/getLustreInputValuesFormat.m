@@ -47,8 +47,8 @@
 function [lustre_input_values, status] = getLustreInputValuesFormat(...
         input_dataSet, time, node_struct)
     nb_steps = length(time);
-    %number_of_inputs_For_AllSimulation = LustrecUtils.getNumberOfInputsInlinedFromDataSet(input_dataSet, nb_steps);
-    number_of_inputs  = LustrecUtils.getNumberOfInputsInlinedFromDataSet(input_dataSet, 1);
+    %number_of_inputs_For_AllSimulation = coco_nasa_utils.LustrecUtils.getNumberOfInputsInlinedFromDataSet(input_dataSet, nb_steps);
+    number_of_inputs  = coco_nasa_utils.LustrecUtils.getNumberOfInputsInlinedFromDataSet(input_dataSet, 1);
     status = 0;
     lustre_input_values = [];
     addTimeStep = false;
@@ -74,7 +74,7 @@ function [lustre_input_values, status] = getLustreInputValuesFormat(...
             else
                 % has clock inputs. Not supported for the moment.
                 display_msg('Number of inputs in Lustre node does not match the number of inputs in Simulink', ...
-                    MsgType.ERROR, 'LustrecUtils.getLustreInputValuesFormat', '');
+                    MsgType.ERROR, 'coco_nasa_utils.LustrecUtils.getLustreInputValuesFormat', '');
                 status = 1;
                 return;
             end
@@ -86,8 +86,8 @@ function [lustre_input_values, status] = getLustreInputValuesFormat(...
         lustre_input_values = [];
         for i=1:nb_steps
             for j=1:numel(input_dataSet.getElementNames)
-                %[signal_values, width] = LustrecUtils.inline_array(input_dataSet.signals(j), i-1);
-                signal_values = LustrecUtils.getSignalValuesInlinedUsingTime(input_dataSet{j}.Values, time(i));
+                %[signal_values, width] = coco_nasa_utils.LustrecUtils.inline_array(input_dataSet.signals(j), i-1);
+                signal_values = coco_nasa_utils.LustrecUtils.getSignalValuesInlinedUsingTime(input_dataSet{j}.Values, time(i));
                 width = length(signal_values);
                 lustre_input_values(end+1:end+width) = signal_values;
             end

@@ -41,62 +41,23 @@
 % cannot be relied upon to generate or error check software being developed. 
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-%% node inputs outputs
-function [node_struct,...
-        status] = extract_node_struct(lus_file_path,...
-        node_name,...
-        LUSTREC,...
-        LUCTREC_INCLUDE_DIR)
-    
-    % Using lustre file
-    try
-        [node_struct, status] = LustrecUtils.extract_node_struct_using_lusFile(lus_file_path, node_name);
-    catch me
-        display_msg(me.getReport(), MsgType.DEBUG, 'extract_node_struct', '');
-        status = 1;
-    end
-    if status==0
-        return;
-    end
-    
-    
-    if nargin < 3
-        tools_config;
-        status = coco_nasa_utils.MatlabUtils.check_files_exist(LUSTREC, LUCTREC_INCLUDE_DIR);
-        if status
-            err = sprintf('Binary "%s" and directory "%s" not found ',LUSTREC, LUCTREC_INCLUDE_DIR);
-            display_msg(err, MsgType.ERROR, 'generate_lusi', '');
-            return;
-        end
-    end
-    
-    % Using lusi file
-    try
-        [node_struct, status] = ...
-            LustrecUtils.extract_node_struct_using_lusi(...
-            lus_file_path, node_name, LUSTREC);
-    catch
-        status = 1;
-    end
-    if status==0
-        return;
-    end
-    
-    % Using emf file
-    try
-        [node_struct, status] = ...
-            LustrecUtils.extract_node_struct_using_emf(...
-            lus_file_path, node_name, LUSTREC, LUCTREC_INCLUDE_DIR);
-    catch
-        status = 1;
-    end
-    if status==0
-        return;
-    end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    
-    
-    
+%% compare Simulin outputs and Lustre outputs
+function [valid, cex_msg, diff_name, diff_value] = ...
+        compare_Simu_outputs_with_Lus_outputs(...
+        input_dataSet, ...
+        yout,...
+        outputs_array, ...
+        eps, ...
+        time)
+    [valid, cex_msg, diff_name, diff_value, ~] = ...
+        coco_nasa_utils.LustrecUtils.compare_slx_out_with_lusORslx_out(...
+        input_dataSet, ...
+        yout,...
+        [], ...
+        outputs_array, ...
+        eps, ...
+        time);
 end
 

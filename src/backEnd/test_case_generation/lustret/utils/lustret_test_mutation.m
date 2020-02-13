@@ -105,7 +105,7 @@ function [ T, coverage_percentage, status ] = lustret_test_mutation( model_full_
             status = 1;
             return;
         end
-        [syntax_status, output] = Kind2Utils2.checkSyntaxError(lus_full_path, KIND2, Z3);
+        [syntax_status, output] = coco_nasa_utils.Kind2Utils.checkSyntaxError(lus_full_path, KIND2, Z3);
         if syntax_status
             display_msg(output, MsgType.DEBUG, 'lustret_test_mutation', '');
             display_msg('This model is not compatible for Mutation based test generation. Work in progress!',...
@@ -232,7 +232,7 @@ function [ T, coverage_percentage, status ] = lustret_test_mutation( model_full_
     end
     node_name_mutant = strcat(node_name, '_mutant');
     % get main node signature
-    main_node_struct = LustrecUtils.extract_node_struct(lus_full_path, node_name, LUSTREC, LUCTREC_INCLUDE_DIR);
+    main_node_struct = coco_nasa_utils.LustrecUtils.extract_node_struct(lus_full_path, node_name, LUSTREC, LUCTREC_INCLUDE_DIR);
 
     verification_files = {};
     nb_err = 0;
@@ -241,13 +241,13 @@ function [ T, coverage_percentage, status ] = lustret_test_mutation( model_full_
             MsgType.INFO, 'lustret_mutation_generation', '');
         mutant_file_path = mutants_paths{i};
         try
-            verif_lus_path = LustrecUtils.create_mutant_verif_file(...
+            verif_lus_path = coco_nasa_utils.LustrecUtils.create_mutant_verif_file(...
                 lus_full_path, mutant_file_path, main_node_struct, node_name, node_name_mutant, model_checker);
         catch
             continue;
         end
         [Verif_dir, ~, ~] = fileparts(verif_lus_path);
-        err = LustrecUtils.compile_lustre_to_Cbinary(verif_lus_path, 'top_verif' ,Verif_dir,  LUSTREC, LUSTREC_OPTS, LUCTREC_INCLUDE_DIR);
+        err = coco_nasa_utils.LustrecUtils.compile_lustre_to_Cbinary(verif_lus_path, 'top_verif' ,Verif_dir,  LUSTREC, LUSTREC_OPTS, LUCTREC_INCLUDE_DIR);
         if err
             nb_err = nb_err + 1;
             if nb_err >= 4
@@ -285,16 +285,16 @@ function [ T, coverage_percentage, status ] = lustret_test_mutation( model_full_
     while (numel(verification_files) > 0 ) && (nb_test < nb_radnom_test) && (coverage_percentage < Min_coverage)
         display_msg(['running test number ' num2str(nb_test) ], MsgType.INFO, 'lustret_test_mutation', '');
         [input_struct, ~, ~] = coco_nasa_utils.SLXUtils.get_random_test(slx_file_name, inports, nb_steps,IMAX, IMIN);
-        lustre_input_values = LustrecUtils.getLustreInputValuesFormat(input_struct, nb_steps);
+        lustre_input_values = coco_nasa_utils.LustrecUtils.getLustreInputValuesFormat(input_struct, nb_steps);
         good_test = false;
         for i=1:numel(verification_files)
             [binary_dir, verif_file_name, ~] = fileparts(verification_files{i});
-            status_i = LustrecUtils.printLustreInputValues(lustre_input_values,...
+            status_i = coco_nasa_utils.LustrecUtils.printLustreInputValues(lustre_input_values,...
                 binary_dir, 'inputs_values');
             if status_i
                 continue;
             end
-            status_i = LustrecUtils.extract_lustre_outputs(verif_file_name,...
+            status_i = coco_nasa_utils.LustrecUtils.extract_lustre_outputs(verif_file_name,...
                 binary_dir, 'top_verif', 'inputs_values', 'outputs_values');
             if status_i
                 continue;
@@ -325,12 +325,12 @@ function [ T, coverage_percentage, status ] = lustret_test_mutation( model_full_
         display_msg(['running model checker ' model_checker ' on file ' verification_files{file_idx} ], ...
             MsgType.INFO, 'lustret_test_mutation', '');
 
-        [~, input_struct, time_step] = LustrecUtils.run_verif(verification_files{file_idx}, inports, [], 'top_verif',  model_checker);
+        [~, input_struct, time_step] = coco_nasa_utils.LustrecUtils.run_verif(verification_files{file_idx}, inports, [], 'top_verif',  model_checker);
         if isempty(input_struct)
             file_idx = file_idx +1;
             continue;
         end
-        lustre_input_values = LustrecUtils.getLustreInputValuesFormat(input_struct, time_step+1);
+        lustre_input_values = coco_nasa_utils.LustrecUtils.getLustreInputValuesFormat(input_struct, time_step+1);
         good_test = false;
         name_parts = regexp(verification_files{file_idx}, '\.', 'split');
         last_part = name_parts{end-1};
@@ -338,12 +338,12 @@ function [ T, coverage_percentage, status ] = lustret_test_mutation( model_full_
         outputs_fname = strcat(last_part, 'outputs_values');
         for i=1:numel(verification_files)
             [binary_dir, verif_file_name, ~] = fileparts(verification_files{i});
-            status = LustrecUtils.printLustreInputValues(lustre_input_values,...
+            status = coco_nasa_utils.LustrecUtils.printLustreInputValues(lustre_input_values,...
                 binary_dir, inputs_fname);
             if status
                 continue;
             end
-            status = LustrecUtils.extract_lustre_outputs(verif_file_name,...
+            status = coco_nasa_utils.LustrecUtils.extract_lustre_outputs(verif_file_name,...
                 binary_dir, 'top_verif', inputs_fname, outputs_fname);
             if status
                 continue;
