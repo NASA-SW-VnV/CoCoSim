@@ -55,7 +55,7 @@ function [ new_model_path, status ] = seal_tests(...
         status = 1;
         return;
     end
-    status = BUtils.check_files_exist(LUSTRET, LUSTREV, LUCTREC_INCLUDE_DIR);
+    status = coco_nasa_utils.MatlabUtils.check_files_exist(LUSTRET, LUSTREV, LUCTREC_INCLUDE_DIR);
     if status
         msg = 'LUSTRET or LUSTREV not found, please configure "tools_config" file under tools folder';
         display_msg(msg, MsgType.ERROR, 'seal_tests', '');

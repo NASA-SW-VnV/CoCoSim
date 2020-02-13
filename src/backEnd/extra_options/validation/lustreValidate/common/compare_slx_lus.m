@@ -257,7 +257,7 @@ if (tests_method == 3)
 elseif (tests_method == 4) %4- Prove LUS1 <=> LUS2.
     tools_config;
     
-    status = BUtils.check_files_exist(KIND2, Z3);
+    status = coco_nasa_utils.MatlabUtils.check_files_exist(KIND2, Z3);
     if status
         display_msg(['KIND2 not found :' KIND2],...
             MsgType.DEBUG, 'LustrecUtils.run_verif', '');

@@ -50,7 +50,7 @@ function [status, new_name_path] = construct_EMF_verif_model(slx_file_name,...
         return;
     end
     tools_config;
-    status = BUtils.check_files_exist(LUSTREC, LUCTREC_INCLUDE_DIR);
+    status = coco_nasa_utils.MatlabUtils.check_files_exist(LUSTREC, LUCTREC_INCLUDE_DIR);
     if status
         return;
     end
@@ -65,7 +65,7 @@ function [status, new_name_path] = construct_EMF_verif_model(slx_file_name,...
         return;
     end
     %generate simulink model
-    new_model_name = BUtils.adapt_block_name(strcat(slx_file_name,'_Verif'));
+    new_model_name = coco_nasa_utils.SLXUtils.adapt_block_name(strcat(slx_file_name,'_Verif'));
     clear lus2slx
     [status, new_name_path, ~] = lus2slx(emf_path, output_dir, new_model_name, node_name, 0, 1);
     if status
@@ -74,7 +74,7 @@ function [status, new_name_path] = construct_EMF_verif_model(slx_file_name,...
     %2- Create Simulink model containing both SLX1 and SLX2
     load_system(new_name_path);
 
-    emf_sub_path = fullfile(new_model_name, BUtils.adapt_block_name(node_name));
+    emf_sub_path = fullfile(new_model_name, coco_nasa_utils.SLXUtils.adapt_block_name(node_name));
     emf_pos = get_param(emf_sub_path, 'Position');
     % copy contents of slx_file to a subsytem
     original_sub_path = fullfile(new_model_name, 'original');

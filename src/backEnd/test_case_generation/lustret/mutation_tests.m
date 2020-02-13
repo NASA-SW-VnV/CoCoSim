@@ -56,7 +56,7 @@ function [ T,  harness_model_name, status] = mutation_tests( model_full_path,...
         status = 1;
         return;
     end
-    status = BUtils.check_files_exist(LUSTRET);
+    status = coco_nasa_utils.MatlabUtils.check_files_exist(LUSTRET);
     if status
         msg = 'LUSTRET not found, please configure tools_config file under tools folder';
         errordlg(msg);

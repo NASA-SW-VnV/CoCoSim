@@ -80,7 +80,7 @@ function [new_model_path, status] = importLustreSpec(...
         end
         bdclose('all')
         new_model_path = '';
-        data = BUtils.read_json(lus_json_path);
+        data = coco_nasa_utils.MatlabUtils.read_json(lus_json_path);
         
         
         
@@ -110,7 +110,7 @@ function [new_model_path, status] = importLustreSpec(...
         
         %get tracability
         if use_traceability
-            mapping_json = BUtils.read_json(fret_trace_file);
+            mapping_json = coco_nasa_utils.MatlabUtils.read_json(fret_trace_file);
         end
         nb_coco = 0;
         
@@ -170,7 +170,7 @@ function [new_model_path, status] = importLustreSpec(...
             %for having a good order of blocks
             
             if isBdRoot
-                position  = BUtils.get_obs_position(new_model_name);
+                position  = coco_nasa_utils.SLXUtils.get_obs_position(new_model_name);
             else
                 position  = get_param(simulink_block_name,'Position');
             end
@@ -186,7 +186,7 @@ function [new_model_path, status] = importLustreSpec(...
                 n = n + 1;
                 y = y+250;
             end
-            node_subsystem = strcat(translated_nodes, '/', BUtils.adapt_block_name(node_name));
+            node_subsystem = strcat(translated_nodes, '/', coco_nasa_utils.SLXUtils.adapt_block_name(node_name));
             add_block(node_subsystem,...
                 cocospec_block_path,...
                 'Position',[(x+100) y (x+250) (y+150)]);

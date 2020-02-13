@@ -57,7 +57,7 @@ function [ new_model_path, status ] = mcdc_tests(...
         status = 1;
         return;
     end
-    status = BUtils.check_files_exist(LUSTRET);
+    status = coco_nasa_utils.MatlabUtils.check_files_exist(LUSTRET);
     if status
         msg = 'LUSTRET not found, please configure tools_config file under tools folder';
         errordlg(msg);
@@ -266,7 +266,7 @@ function [status] = addMCDCBlocksToSLX(new_model_path, slx_file_name, new_model_
         %for having a good order of blocks
         try
             if isBaseName
-                position  = BUtils.get_obs_position(new_model_name);
+                position  = coco_nasa_utils.SLXUtils.get_obs_position(new_model_name);
             else
                 position  = get_param(simulink_block_name,'Position');
             end

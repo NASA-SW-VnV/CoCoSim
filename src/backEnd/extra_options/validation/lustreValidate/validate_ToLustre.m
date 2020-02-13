@@ -129,7 +129,7 @@ function [res] = ...
     
     %% for data types
     % no need in new compiler
-    % BUtils.force_inports_DT(file_name);
+    % coco_nasa_utils.SLXUtils.force_inports_DT(file_name);
     %% launch validation
     % validate pre-processing
     try

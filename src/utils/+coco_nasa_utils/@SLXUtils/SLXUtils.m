@@ -50,63 +50,89 @@ classdef SLXUtils
     end
     
     methods (Static = true)
+        %% Model related helpers
         
-        %% Try to calculate Block sample time using the model
+        % getModelCompiledSampleTime
         [st, ph, Clocks] = getModelCompiledSampleTime(file_name)
         
-        %% get the value of a parameter
-        [Value, valueDataType, status] = evalParam(modelObj, parent, blk, param)
-        
-        %% export models to other Simulink older releases
+        % export models to other Simulink older releases
         exportModelsTo(folder_Path, version);
         
-        %% Get compiled params: CompiledPortDataTypes ...
-        [res] = getCompiledParam(h, param)
-        %% run constants files
+        % run constants files
         run_constants_files(const_files)
         
-        %% Get percentage of tolerance from floiting values between lustrec and SLX
+        % Get percentage of tolerance from floiting values between lustrec and SLX
         eps = getLustrescSlxEps(model_path)
-        %%
+        
+        %
         [model_inputs_struct, inputEvents_names] = get_model_inputs_info(model_full_path)
-        %%
-        [isBus, bus] = isSimulinkBus(SignalName, model)
-        %%
+        
+        %
         min_max_constraints = constructInportsMinMaxConstraints(model_full_path, IMIN_DEFAULT, IMAX_DEFAULT)
-        %% create random vector test
+        
+        % create random vector test
         [ds, simulation_step, stop_time] = ...
             get_random_test(slx_file_name, inports, nb_steps,IMAX, IMIN)
         
         values = get_random_values_InTimeSeries(time, min, max, dim, dt)
         Values = get_random_values(nb_steps, min, max, dim, dt)
         
-        %% Simulate the model
+        % Simulate the model
         simOut = simulate_model(slx_file_name, ...
             input_dataset, ...
             simulation_step,...
             stop_time,...
             numberOfInports,...
             show_models)
-        %% terminate simulation if the model is in compile mode
+        
+        % terminate simulation if the model is in compile mode
         terminate(modelName)
         bdclose(last_closed_model)
-        %% compare two models
+        
+        % compare two models
         [valid, sim_failed, cex_file_path] = compareTwoSLXModels(orig_mdl_path, pp_mdl_path, min_max_constraints, show_models)
-        %%
+        
+        
+        %% Block related helpers
+        
+        
+        % Block queries helper:
+        out = getBlockNameFromPath(nomsim)
+        % get the value of a parameter
+        [Value, valueDataType, status] = evalParam(modelObj, parent, blk, param)
+        % Get compiled params: CompiledPortDataTypes ...
+        [res] = getCompiledParam(h, param)
+        %
+        U_dims = tf_get_U_dims(model, pp_name, blkList)
+        % get Observer position
+        [obs_pos] = get_obs_position(parent_subsystem)
+        
+        
+        % Block creation helpers:
+        new_name = adapt_block_name(var_name, ID)
+        block_path  = makeBlockNameUnique(block_path)
+        
+        
+        % Block transformation helpers:
+        % crete_model_from_subsystem
         [new_model_path, new_model_name, status] = ...
             crete_model_from_subsystem(file_name, ss_path, output_dir )
-        
-        %%
-        [new_model_name, status] = makeharness(T, subsys_path, output_dir, postfix_name)
-        
-        %%
-        U_dims = tf_get_U_dims(model, pp_name, blkList)
-        
-        %%
+        % createSubsystemFromBlk
         status = createSubsystemFromBlk(blk_path)
-        
-        %%
+        %
+        [new_model_name, status] = makeharness(T, subsys_path, output_dir, postfix_name)
+        %
         removeBlocksLinkedToMe(bHandle, removeMe)
+        
+        force_inports_DT(block_name)
+        
+        
+        
+        
+        %% Signals related helpers
+        %
+        [isBus, bus] = isSimulinkBus(SignalName, model)
+        
         
     end
     

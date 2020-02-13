@@ -54,7 +54,7 @@ function [main_node_struct, ...
 
     if status==0
         % extract main node struct from EMF
-        data = BUtils.read_json(contract_path);
+        data = coco_nasa_utils.MatlabUtils.read_json(contract_path);
         nodes = data.nodes;
         nodes_names = fieldnames(nodes)';
         orig_names = arrayfun(@(x)  nodes.(x{1}).original_name,...

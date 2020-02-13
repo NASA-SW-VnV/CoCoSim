@@ -48,7 +48,7 @@ function [status, new_name_path, emf_path, xml_trace] = construct_EMF_model(...
     tools_config;
     new_name_path = '';
     xml_trace = [];
-    status = BUtils.check_files_exist(LUSTREC, LUCTREC_INCLUDE_DIR);
+    status = coco_nasa_utils.MatlabUtils.check_files_exist(LUSTREC, LUCTREC_INCLUDE_DIR);
     if status
         return;
     end
@@ -69,9 +69,9 @@ function [status, new_name_path, emf_path, xml_trace] = construct_EMF_model(...
     [~, lus_fname, ~] = fileparts(lus_file_path);
     %generate simulink model
     if ~strcmp(coco_nasa_utils.MatlabUtils.fileBase(lus_fname), node_name)
-        new_model_name = BUtils.adapt_block_name(strcat(lus_fname,'_',node_name));
+        new_model_name = coco_nasa_utils.SLXUtils.adapt_block_name(strcat(lus_fname,'_',node_name));
     else
-        new_model_name = BUtils.adapt_block_name(strcat(lus_fname,'_EMF'));
+        new_model_name = coco_nasa_utils.SLXUtils.adapt_block_name(strcat(lus_fname,'_EMF'));
     end
     clear lus2slx
     [status, new_name_path, xml_trace] = lus2slx(emf_path, output_dir, new_model_name, node_name, organize_blocks, 1);
@@ -82,7 +82,7 @@ function [status, new_name_path, emf_path, xml_trace] = construct_EMF_model(...
     %2- Create Simulink model containing both SLX1 and SLX2
     load_system(new_name_path);
 
-    main_block_path = strcat(new_model_name,'/', BUtils.adapt_block_name(node_name));
+    main_block_path = strcat(new_model_name,'/', coco_nasa_utils.SLXUtils.adapt_block_name(node_name));
     portHandles = get_param(main_block_path, 'PortHandles');
     nb_inports = numel(portHandles.Inport);
     nb_outports = numel(portHandles.Outport);

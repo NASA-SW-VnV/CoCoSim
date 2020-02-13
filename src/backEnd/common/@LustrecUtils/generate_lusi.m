@@ -48,7 +48,7 @@ function [lusi_path, status, lusi_out] = generate_lusi(lus_file_path, LUSTREC )
     lusi_out = '';
     [lus_dir, lus_fname, ~] = fileparts(lus_file_path);
     lusi_path = fullfile(lus_dir,strcat(lus_fname, '.lusi'));
-    if BUtils.isLastModified(lus_file_path, lusi_path)
+    if coco_nasa_utils.MatlabUtils.isLastModified(lus_file_path, lusi_path)
         msg = sprintf('Lusi file "%s" already generated. It will be used.\n',lusi_path);
         display_msg(msg, MsgType.DEBUG, 'generate_lusi', '');
         status = 0;

@@ -42,11 +42,9 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function block_path  = get_unique_block_name(block_path) 
-
-    n= 1;
-    while getSimulinkBlockHandle(block_path) ~= -1
-        block_path = strcat(block_path, num2str(n));
-    end
+function out = getBlockNameFromPath(nomsim)
+    %% Get the block name from path  
+    
+    [a,~]=regexp (nomsim, filesep, 'split');
+    out = a{end};
 end
-

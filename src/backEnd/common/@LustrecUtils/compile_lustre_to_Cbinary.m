@@ -51,7 +51,7 @@ function err = compile_lustre_to_Cbinary(lus_file_path, ...
         LUCTREC_INCLUDE_DIR)
     if nargin < 4
         tools_config;
-        err = BUtils.check_files_exist(LUSTREC, LUCTREC_INCLUDE_DIR);
+        err = coco_nasa_utils.MatlabUtils.check_files_exist(LUSTREC, LUCTREC_INCLUDE_DIR);
         if err
             msg = sprintf('Binary "%s" and directory "%s" not found ',LUSTREC, LUCTREC_INCLUDE_DIR);
             display_msg(msg, MsgType.ERROR, 'generate_lusi', '');
@@ -63,7 +63,7 @@ function err = compile_lustre_to_Cbinary(lus_file_path, ...
     binary_name = fullfile(output_dir,...
         strcat(file_name,'_', node_name));
     % generate C code
-    if BUtils.isLastModified(lus_file_path, binary_name)
+    if coco_nasa_utils.MatlabUtils.isLastModified(lus_file_path, binary_name)
         err = 0;
         display_msg(['file ' binary_name ' has been already generated.'],...
             MsgType.DEBUG, 'compile_lustre_to_Cbinary', '');

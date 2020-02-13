@@ -46,7 +46,7 @@
 function [x2, y2] = process_branch(nodes, new_model_name, node_block_path, blk_exprs, var, node_name, x2, y2, xml_trace)
     if y2 < 30000; y2 = y2 + 150; else, x2 = x2 + 500; y2 = 100; end;
 
-    ID = BUtils.adapt_block_name(var{1});
+    ID = coco_nasa_utils.SLXUtils.adapt_block_name(var{1});
     branch_block_path = fullfile(node_block_path, ID);
     add_block('built-in/Subsystem', branch_block_path,...
         'Position',[(x2+200) y2 (x2+250) (y2+50)]);
@@ -123,7 +123,7 @@ function [x2, y2] = process_branch(nodes, new_model_name, node_block_path, blk_e
     guard_path = strcat(branch_block_path,'/',ID,'_guard');
     guard = branch_struct.guard.value;
     guard_type = branch_struct.guard.type;
-    guard_adapted = BUtils.adapt_block_name(guard, ID);
+    guard_adapted = coco_nasa_utils.SLXUtils.adapt_block_name(guard, ID);
     if strcmp(guard_type, 'constant')
         add_block('simulink/Commonly Used Blocks/Constant',...
             guard_path,...
@@ -220,7 +220,7 @@ function [x2, y2] = process_branch(nodes, new_model_name, node_block_path, blk_e
     outputs = branch_struct.outputs;
     for i=1:numel(outputs)
         output = outputs(i);
-        output_adapted = BUtils.adapt_block_name(output, ID);
+        output_adapted = coco_nasa_utils.SLXUtils.adapt_block_name(output, ID);
         merge_path = strcat(branch_block_path,'/',output_adapted,'_merge');
         output_path = strcat(branch_block_path,'/',output_adapted,'_merged');
         nb_merge = numel(fieldnames(branches));

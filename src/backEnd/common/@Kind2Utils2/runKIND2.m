@@ -68,7 +68,7 @@ function [status, solver_output] = runKIND2(...
     %
     if nargin < 4
         tools_config;
-        status = BUtils.check_files_exist(KIND2, Z3);
+        status = coco_nasa_utils.MatlabUtils.check_files_exist(KIND2, Z3);
         if status
             display_msg(['KIND2 or Z3 not found :' KIND2 ', ' Z3],...
                 MsgType.DEBUG, 'LustrecUtils.run_verif', '');

@@ -71,7 +71,7 @@ function [answer, IN_struct, time_max] = run_verif(...
     tools_config;
 
     if strcmp(Backend, 'ZUSTRE') || strcmp(Backend, 'Z')
-        status = BUtils.check_files_exist(ZUSTRE);
+        status = coco_nasa_utils.MatlabUtils.check_files_exist(ZUSTRE);
         if status
             return;
         end
@@ -83,7 +83,7 @@ function [answer, IN_struct, time_max] = run_verif(...
             '');
 
     elseif strcmp(Backend, 'KIND2') || strcmp(Backend, 'K')
-        status = BUtils.check_files_exist(KIND2, Z3);
+        status = coco_nasa_utils.MatlabUtils.check_files_exist(KIND2, Z3);
         if status
             return;
         end

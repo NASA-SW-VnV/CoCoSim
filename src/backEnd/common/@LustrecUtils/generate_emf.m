@@ -50,7 +50,7 @@ function [emf_path, status] = ...
         LUCTREC_INCLUDE_DIR)
     if nargin < 4
         tools_config;
-        status = BUtils.check_files_exist(LUSTREC, LUCTREC_INCLUDE_DIR);
+        status = coco_nasa_utils.MatlabUtils.check_files_exist(LUSTREC, LUCTREC_INCLUDE_DIR);
         if status
             err = sprintf('Binary "%s" and directory "%s" not found ',LUSTREC, LUCTREC_INCLUDE_DIR);
             display_msg(err, MsgType.ERROR, 'generate_lusi', '');
@@ -64,7 +64,7 @@ function [emf_path, status] = ...
 
     if ~exist(output_dir, 'dir'); mkdir(output_dir); end
     emf_path = fullfile(output_dir,strcat(lus_fname, '.json'));
-    if BUtils.isLastModified(lus_file_path, emf_path)
+    if coco_nasa_utils.MatlabUtils.isLastModified(lus_file_path, emf_path)
         status = 0;
         msg = sprintf('emf file "%s" already generated. It will be used.\n',emf_path);
         display_msg(msg, MsgType.DEBUG, 'generate_emf', '');

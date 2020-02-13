@@ -44,12 +44,12 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
 function [x2, y2] = link_subsys_inputs( parent_path, subsys_block_path, inputs, var, node_name, x2, y2)
-    [~, ID, ~] = fileparts(subsys_block_path);%BUtils.adapt_block_name(var{1});
+    [~, ID, ~] = fileparts(subsys_block_path);%coco_nasa_utils.SLXUtils.adapt_block_name(var{1});
     DstBlkH = get_param(subsys_block_path,'PortHandles');
     for i=1:numel(inputs)
         input = inputs(i).name;
-        input_adapted = BUtils.adapt_block_name(input, node_name);
-        input_path = BUtils.get_unique_block_name(...
+        input_adapted = coco_nasa_utils.SLXUtils.adapt_block_name(input, node_name);
+        input_path = coco_nasa_utils.SLXUtils.makeBlockNameUnique(...
             strcat(parent_path,'/',ID,'_In',num2str(i)));
         add_block('simulink/Signal Routing/From',...
             input_path,...

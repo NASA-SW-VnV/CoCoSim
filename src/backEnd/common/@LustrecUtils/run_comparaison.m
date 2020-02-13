@@ -104,7 +104,7 @@ function [valid,...
 
     % Copile the lustre code to C
     tools_config;
-    status = BUtils.check_files_exist(LUSTREC, LUCTREC_INCLUDE_DIR);
+    status = coco_nasa_utils.MatlabUtils.check_files_exist(LUSTREC, LUCTREC_INCLUDE_DIR);
     if status
         return;
     end

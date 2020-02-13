@@ -46,10 +46,10 @@
 function  [x2, y2] = process_reset(node_block_path, blk_exprs, var, node_name, x2, y2)
     if y2 < 30000; y2 = y2 + 150; else, x2 = x2 + 500; y2 = 100; end
 
-    ID = BUtils.adapt_block_name(var{1});
-    lhs_name = BUtils.adapt_block_name(blk_exprs.(var{1}).lhs, node_name);
-    lhs_path = BUtils.get_unique_block_name(strcat(node_block_path,'/',ID, '_lhs'));
-    rhs_path = BUtils.get_unique_block_name(strcat(node_block_path,'/',ID,'_rhs'));
+    ID = coco_nasa_utils.SLXUtils.adapt_block_name(var{1});
+    lhs_name = coco_nasa_utils.SLXUtils.adapt_block_name(blk_exprs.(var{1}).lhs, node_name);
+    lhs_path = coco_nasa_utils.SLXUtils.makeBlockNameUnique(strcat(node_block_path,'/',ID, '_lhs'));
+    rhs_path = coco_nasa_utils.SLXUtils.makeBlockNameUnique(strcat(node_block_path,'/',ID,'_rhs'));
 
 
     rhs_name = blk_exprs.(var{1}).rhs;

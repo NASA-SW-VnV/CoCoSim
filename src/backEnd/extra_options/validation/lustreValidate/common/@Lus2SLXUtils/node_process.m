@@ -44,7 +44,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
 function node_process(new_model_name, nodes, node, node_block_path, block_pos, xml_trace)
-    node_name = BUtils.adapt_block_name(node);
+    node_name = coco_nasa_utils.SLXUtils.adapt_block_name(node);
     display_msg(...
         sprintf('Processing node "%s" ',node_name),...
         MsgType.INFO, 'lus2slx', '');

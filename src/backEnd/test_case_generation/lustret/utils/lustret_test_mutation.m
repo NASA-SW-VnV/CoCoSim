@@ -178,7 +178,7 @@ function [ T, coverage_percentage, status ] = lustret_test_mutation( model_full_
 
     %% create verification file compile to C binary all mutations
     tools_config;
-    status = BUtils.check_files_exist(LUSTREC, LUCTREC_INCLUDE_DIR);
+    status = coco_nasa_utils.MatlabUtils.check_files_exist(LUSTREC, LUCTREC_INCLUDE_DIR);
     if status
         msg = 'LUSTREC not found, please configure tools_config file under tools folder';
         display_msg(msg, MsgType.ERROR, 'lustret_test_mutation', '');
@@ -192,7 +192,7 @@ function [ T, coverage_percentage, status ] = lustret_test_mutation( model_full_
     else
         load_system(model_full_path);
         node_map = containers.Map('KeyType', 'char', 'ValueType', 'char');
-        mutants_summary = BUtils.read_json(mutants_report);
+        mutants_summary = coco_nasa_utils.MatlabUtils.read_json(mutants_report);
         for i=1:numel(mutants_files)
             eq_lhs = mutants_summary.(mutants_files(i).name).eq_lhs;
             if strcmp(eq_lhs, 'xxnb_step') || strcmp(eq_lhs, 'xxtime_step')

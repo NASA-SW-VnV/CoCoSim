@@ -65,9 +65,16 @@ classdef MatlabUtils
         reg_delete(basedir, reg_exp)% delete files using regular expressions:e.g. rm *_PP.slx
         % Concat cell array with a specific delimator
         joinedStr = strjoin(str, delimiter)
+        
+        %% advanced structures
         f = map()
         f = mapc()
         f = iif()
+        
+        %% files helpers:
+        status = check_files_exist(varargin)
+        res = isLastModified(old_file1, new_file2)
+        
         %% create random vectors
         vector = construct_random_integers(nb_iterations, IMIN, IMAX, dt, dim)
         vector = construct_random_booleans(nb_iterations, IMIN, IMAX, dim)
@@ -76,19 +83,19 @@ classdef MatlabUtils
         %% cell cartesian product
         c2 = cartesian(varargin)
         c2 = cellCartesianProduct(c1)
+        
         %% get package prefix
         path_prefix = getPackagePrefix(f_parent, f_name)
         
         %% json encode, decode
+        data = read_json(file_path)
         json = jsondecode(s)
         json = jsonencode(s)
+        
         %% This function for developers
         % open all files that contains a String
         whoUse(folder, str)
         openAllFilesContainingString(folder, str)
-        
-        
-        
         count = getNbLines(file)
         F = allMatlabFilesExceeds(folder, n)
         [pList, found, alreadyHandled] = requiredProducts(filepath, alreadyHandled);

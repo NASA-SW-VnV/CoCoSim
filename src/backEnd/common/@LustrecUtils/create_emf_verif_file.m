@@ -55,8 +55,8 @@ function [verif_lus_path, nodes_list] = create_emf_verif_file(...
     verif_lus_path = fullfile(...
         output_dir, strcat(coco_lus_file_name, '_verif.lus'));
 
-    if BUtils.isLastModified(coco_lus_fpath, verif_lus_path) ...
-            && BUtils.isLastModified(lus_file_path, verif_lus_path)
+    if coco_nasa_utils.MatlabUtils.isLastModified(coco_lus_fpath, verif_lus_path) ...
+            && coco_nasa_utils.MatlabUtils.isLastModified(lus_file_path, verif_lus_path)
         display_msg(...
             ['file ' verif_lus_path ' has been already generated'],...
             MsgType.DEBUG,...
@@ -75,14 +75,14 @@ function [verif_lus_path, nodes_list] = create_emf_verif_file(...
 
 
     tools_config;
-    status = BUtils.check_files_exist(LUSTREC, LUCTREC_INCLUDE_DIR);
+    status = coco_nasa_utils.MatlabUtils.check_files_exist(LUSTREC, LUCTREC_INCLUDE_DIR);
     UseLusi = true;
     if status
         UseLusi = false;
     end
 
 
-    data = BUtils.read_json(emf_path);
+    data = coco_nasa_utils.MatlabUtils.read_json(emf_path);
     nodes = data.nodes;
     emf_nodes_names = fieldnames(nodes)';
     for node_idx =1:numel(emf_nodes_names)

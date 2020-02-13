@@ -46,9 +46,9 @@
 function [seal_file, status] = generateLustrevSealFile(lus_full_path, output_dir, main_node, LUSTREV, LUCTREC_INCLUDE_DIR)
     [~, lus_file_name, ~] = fileparts(lus_full_path);
     seal_file = '';
-    if nargin < 5 || BUtils.check_files_exist(LUSTREV, LUCTREC_INCLUDE_DIR)
+    if nargin < 5 || coco_nasa_utils.MatlabUtils.check_files_exist(LUSTREV, LUCTREC_INCLUDE_DIR)
         tools_config;
-        status = BUtils.check_files_exist(LUSTREV);
+        status = coco_nasa_utils.MatlabUtils.check_files_exist(LUSTREV);
         if status
             msg = 'LUSTRET not found, please configure tools_config file under tools folder';
             display_msg(msg, MsgType.ERROR, 'generateLustrevSealFile', '');

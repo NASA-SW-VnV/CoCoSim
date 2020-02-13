@@ -46,7 +46,7 @@
 function [mcdc_file] = generate_MCDCLustreFile(lus_full_path, output_dir)
     [~, lus_file_name, ~] = fileparts(lus_full_path);
     tools_config;
-    status = BUtils.check_files_exist(LUSTRET);
+    status = coco_nasa_utils.MatlabUtils.check_files_exist(LUSTRET);
     if status
         msg = 'LUSTRET not found, please configure tools_config file under tools folder';
         display_msg(msg, MsgType.ERROR, 'generate_MCDCLustreFile', '');

@@ -41,38 +41,18 @@
 % cannot be relied upon to generate or error check software being developed. 
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-classdef BUtils    
-    %BUTILS Summary of this class goes here
-    %   Detailed explanation goes here 
-    
-    properties
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function [obs_pos] = get_obs_position(parent_subsystem)  
+% Get the contract/Observer best position where to create it.
+
+    blocks = find_system(parent_subsystem, 'SearchDepth', '1', 'FindAll', 'on', 'Type', 'Block');
+    positions = get_param(blocks, 'Position');
+    max_x = 0;
+    max_y = 0;
+    for idx_pos=1:numel(positions)
+        max_x = max(max_x, positions{idx_pos}(1));
+        max_y = max(max_y, positions{idx_pos}(2));
     end
-    
-    methods (Static = true)
-        
-        [obs_pos] = get_obs_position(parent_subsystem)
-
-        %%
-        new_name = adapt_block_name(var_name, ID)
-
-        %%
-        block_path  = get_unique_block_name(block_path)
-
-        %% Get the block name from path
-        out = naming_alone(nomsim)
-
-        %%
-        data = read_json(contract_path)
-
-        %%
-         force_inports_DT(block_name)
-
-        res = isLastModified(old_file1, new_file2)
-
-        status = check_files_exist(varargin)
-
-    end
-    
+    obs_pos = [max_x max_y (max_x + 150) (max_y + 60)];
 end
 

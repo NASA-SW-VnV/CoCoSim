@@ -44,11 +44,11 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
 function [x2, y2] = link_subsys_outputs( parent_path, subsys_block_path, outputs, var,node_name,  x2, y2, isBranch, branchIdx)
-    [~, ID, ~] = fileparts(subsys_block_path);%BUtils.adapt_block_name(var{1});
+    [~, ID, ~] = fileparts(subsys_block_path);%coco_nasa_utils.SLXUtils.adapt_block_name(var{1});
     SrcBlkH = get_param(subsys_block_path,'PortHandles');
     for i=1:numel(outputs)
         output = outputs(i);
-        output_adapted = BUtils.adapt_block_name(output,node_name);
+        output_adapted = coco_nasa_utils.SLXUtils.adapt_block_name(output,node_name);
         if exist('isBranch','var') && isBranch
             output_adapted = strcat(output_adapted, '_branch_', num2str(branchIdx));
         end

@@ -61,7 +61,7 @@ end
 
 
 tools_config;
-status = BUtils.check_files_exist(LUSTREC, LUCTREC_INCLUDE_DIR);
+status = coco_nasa_utils.MatlabUtils.check_files_exist(LUSTREC, LUCTREC_INCLUDE_DIR);
 if status
     msg = 'LUSTREC not found, please configure tools_config file under tools folder';
     display_msg(msg, MsgType.ERROR, 'lustrec_C_code', '');

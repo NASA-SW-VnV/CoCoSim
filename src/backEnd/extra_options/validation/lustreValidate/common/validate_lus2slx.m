@@ -54,7 +54,7 @@ function [valid, ...
 %testing or equivalence checking.
 [lus_dir, lus_fname, ~] = fileparts(lus_file_path);
 if nargin < 2 || isempty(main_node)
-    main_node = BUtils.adapt_block_name(coco_nasa_utils.MatlabUtils.fileBase(lus_fname));
+    main_node = coco_nasa_utils.SLXUtils.adapt_block_name(coco_nasa_utils.MatlabUtils.fileBase(lus_fname));
 end
 if ~exist('tests_method', 'var')
     tests_method = 1;
@@ -78,7 +78,7 @@ sim_failed = -1;
 output_dir = fullfile(lus_dir, 'cocosim_tmp', lus_fname);
 %% generate EMF
 tools_config;
-status = BUtils.check_files_exist(LUSTREC, LUCTREC_INCLUDE_DIR);
+status = coco_nasa_utils.MatlabUtils.check_files_exist(LUSTREC, LUCTREC_INCLUDE_DIR);
 if status
     return;
 end
@@ -101,7 +101,7 @@ end
 [~, translated_nodes, ~] = fileparts(translated_nodes_path);
 load_system(translated_nodes_path);
 
-data = BUtils.read_json(emf_path);
+data = coco_nasa_utils.MatlabUtils.read_json(emf_path);
 nodes = data.nodes;
 emf_nodes_names = fieldnames(nodes)';
 lusi_text = fileread(lusi_path);
@@ -122,21 +122,21 @@ for node_idx =0:numel(nodes_names)
     if node_idx==0
         if ismember(main_node, orig_names)
             idx = ismember(orig_names, main_node);
-            node_name = BUtils.adapt_block_name(nodes_names{idx});
+            node_name = coco_nasa_utils.SLXUtils.adapt_block_name(nodes_names{idx});
             original_node_name = orig_names{idx};
         else
             continue;
         end
     else
         original_node_name = nodes.(nodes_names{node_idx}).original_name;
-        node_name = BUtils.adapt_block_name(nodes_names{node_idx});
+        node_name = coco_nasa_utils.SLXUtils.adapt_block_name(nodes_names{node_idx});
         if strcmp(original_node_name, main_node)
             continue;
         end
     end
     %% extract the main node Subsystem
     base_name = regexp(lus_fname,'\.','split');
-    new_model_name = BUtils.adapt_block_name(strcat(base_name{1},'_', node_name));
+    new_model_name = coco_nasa_utils.SLXUtils.adapt_block_name(strcat(base_name{1},'_', node_name));
     new_name = fullfile(output_dir, strcat(new_model_name,'.slx'));
     if exist(new_name,'file')
         if bdIsLoaded(new_model_name)

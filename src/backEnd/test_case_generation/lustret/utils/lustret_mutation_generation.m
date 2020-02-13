@@ -60,7 +60,7 @@ function [ err, output_dir] = lustret_mutation_generation( lus_full_path, nb_mut
         mutant_path = fullfile(...
             output_dir, ...
             strcat(file_name, '.mutant.n',num2str(nb_mutants_max),'.lus'));
-        if BUtils.isLastModified(lus_full_path, mutant_path)
+        if coco_nasa_utils.MatlabUtils.isLastModified(lus_full_path, mutant_path)
             err = 0;
             display_msg('mutants have been already generated', MsgType.DEBUG, 'Validation', '');
             return;
@@ -68,7 +68,7 @@ function [ err, output_dir] = lustret_mutation_generation( lus_full_path, nb_mut
     end
 
     tools_config;
-    status = BUtils.check_files_exist(LUSTRET, LUCTREC_INCLUDE_DIR);
+    status = coco_nasa_utils.MatlabUtils.check_files_exist(LUSTRET, LUCTREC_INCLUDE_DIR);
     if status
         msg = 'LUSTREC not found, please configure tools_config file under tools folder';
         display_msg(msg, MsgType.ERROR, 'lustret_mutation_generation', '');
