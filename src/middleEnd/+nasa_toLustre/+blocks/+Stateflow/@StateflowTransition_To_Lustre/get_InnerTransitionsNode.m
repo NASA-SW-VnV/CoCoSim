@@ -51,7 +51,12 @@ function [transitionNode, external_libraries] = ...
     external_libraries = {};
     parentPath = state.Path;
     stateParent = fileparts(state.Path);
-    if isempty(stateParent)
+    if isfield(state, 'isChart')
+        isChart =  state.isChart;
+    else
+        isChart = isempty(stateParent);
+    end
+    if isChart
         %main chart
         return;
     end

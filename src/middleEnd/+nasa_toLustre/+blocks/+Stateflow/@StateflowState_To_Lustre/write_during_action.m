@@ -54,7 +54,12 @@ function [main_node, external_libraries] = ...
     inputs = {};
 
     parentName = fileparts(state.Path);
-    if isempty(parentName)
+    if isfield(state, 'isChart')
+        isChart =  state.isChart;
+    else
+        isChart = isempty(parentName);
+    end
+    if isChart
         %main chart
         return;
     end

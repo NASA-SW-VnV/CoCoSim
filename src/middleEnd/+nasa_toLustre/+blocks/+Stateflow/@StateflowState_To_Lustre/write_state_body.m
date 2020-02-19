@@ -51,9 +51,10 @@ function [outputs, inputs, body, variables] = write_state_body(state)
     body = {};
     children_actions = {};
     parentPath = fileparts(state.Path);
-    isChart = false;
-    if isempty(parentPath)
-        isChart = true;
+    if isfield(state, 'isChart')
+        isChart =  state.isChart;
+    else
+        isChart = isempty(parentPath);
     end
     idStateVar = nasa_toLustre.lustreAst.VarIdExpr(...
             nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getStateIDName(state));

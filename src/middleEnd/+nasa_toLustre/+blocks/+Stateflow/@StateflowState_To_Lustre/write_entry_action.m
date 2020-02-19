@@ -54,10 +54,10 @@ function [main_node, external_libraries] = ...
     inputs = {};
     %set state as active
     parentName = fileparts(state.Path);
-    isChart = false;
-    if isempty(parentName)
-        %main chart
-        isChart = true;
+    if isfield(state, 'isChart')
+        isChart =  state.isChart;
+    else
+        isChart = isempty(parentName);
     end
     if ~isChart
         if ~isKey(SF_STATES_PATH_MAP, parentName)
