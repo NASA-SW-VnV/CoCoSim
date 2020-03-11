@@ -91,7 +91,7 @@ classdef MatlabUtils
         data = read_json(file_path)
         json = jsondecode(s)
         json = jsonencode(s)
-        
+        [status, json_fpath] = json_export(var, output_dir, json_fname)
         %% This function for developers
         % open all files that contains a String
         whoUse(folder, str)

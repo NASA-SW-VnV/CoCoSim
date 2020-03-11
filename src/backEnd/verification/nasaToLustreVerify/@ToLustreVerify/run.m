@@ -109,7 +109,7 @@ function [ failed ] = run(model_full_path,  const_files, lus_backend, varargin)
         'LookUnderMasks', 'all',  'MaskType', 'ContractBlock');
     
     if coco_nasa_utils.LusBackendType.isKIND2(lus_backend)
-        failed = run_kind2(model, nom_lustre_file, xml_trace, ...
+        failed = ToLustreVerify.run_kind2(model, nom_lustre_file, xml_trace, ...
             top_node_name, Assertions_list, contractBlocks_list, KIND2, Z3);
     else
         if ~isempty(Assertions_list)

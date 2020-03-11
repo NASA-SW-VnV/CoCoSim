@@ -98,7 +98,7 @@ function failed = run_kind2(model, nom_lustre_file, xml_trace, ...
     end
     mapping_file = xml_trace.json_file_path;
     try
-        failed = cocoSpecKind2(nom_lustre_file, mapping_file, kind2_out);
+        [failed, verificationResults] = cocoSpecKind2(nom_lustre_file, mapping_file, kind2_out);
         if failed
             return;
         end
