@@ -51,6 +51,7 @@ function schema = precontext_menu(varargin)
     schema.autoDisableWhen = 'Busy';
     
     schema.childrenFcns = {@verificationResultPrecontextMenu, ...
+        @attachContract,...
         @MiscellaneousMenu.replaceInportsWithSignalBuilders, ...
         @getAutoLayoutTool};
     
@@ -73,6 +74,27 @@ function schema = verificationResultPrecontextMenu(varargin)
     end
 end
 %%
+function schema = attachContract(varargin)
+    schema = sl_action_schema;
+    schema.label = 'Attach Contract to selected block';
+    schema.statustip = 'Attach Contract to the selected Block/Subsystem';
+    schema.autoDisableWhen = 'Busy';
+    MyBlocks = find_system(gcs,'Selected','on');
+    
+    if length(MyBlocks) > 1 || isempty(MyBlocks) ...
+            || strcmp(get_param(MyBlocks{1}, 'BlockType'), 'Inport') ...
+            || strcmp(get_param(MyBlocks{1}, 'BlockType'), 'Outport')
+        schema.state = 'Disabled';
+    else
+        schema.state = 'Enabled';
+    end
+    
+    schema.callback = @(x) attachContractCallback(x, MyBlocks);
+end
+function attachContractCallback(callbackinfo, MyBlocks)
+    fprintf('%s was selected\n', MyBlocks{1});
+end
+%%
 function schema = getAutoLayoutTool(callbackinfo)
     schema = sl_action_schema;
     schema.label = 'Auto Layout';
@@ -81,5 +103,9 @@ function schema = getAutoLayoutTool(callbackinfo)
 end
 
 function AutoLayoutToolCallback(callbackInfo)
-    external_lib.AutoLayout.AutoLayout(gcs);
+    try
+        Simulink.BlockDiagram.arrangeSystem(gcs);
+    catch
+        external_lib.AutoLayout.AutoLayout(gcs);
+    end
 end

@@ -71,7 +71,7 @@ function [ failed ] = lustreDED(model_full_path,  const_files, lus_backend, vara
     if ~coco_nasa_utils.LusBackendType.isKIND2(lus_backend)
         display_msg(['Design error detection is only supported by KIND2 model checker.'...
             ' To set Kind2 as default one, go to tools -> CoCoSim -> Preferences -> Lustre Backend -> Kind2'],...
-            MsgType.ERROR, 'toLustreVerify', '');
+            MsgType.ERROR, 'lustreDED', '');
         return;
     end
     % Get start time
@@ -132,8 +132,8 @@ function [ failed ] = lustreDED(model_full_path,  const_files, lus_backend, vara
             VerificationMenu.displayHtmlVerificationResultsCallbackCode(model, verificationResults);
         end
     catch me
-        display_msg(me.getReport(), MsgType.DEBUG, 'toLustreVerify', '');
-        display_msg('Something went wrong in Verification.', MsgType.ERROR, 'toLustreVerify', '');
+        display_msg(me.getReport(), MsgType.DEBUG, 'lustreDED', '');
+        display_msg('Something went wrong in Verification.', MsgType.ERROR, 'lustreDED', '');
     end
     %% report
     
