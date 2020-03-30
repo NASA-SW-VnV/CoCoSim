@@ -44,7 +44,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [ failed ] = toLustreVerify(model_full_path,  const_files, lus_backend, varargin)
 
-    global KIND2 Z3;
+    global KIND2;
     if isempty(KIND2)
         tools_config;
     end
@@ -137,7 +137,7 @@ function [ failed ] = toLustreVerify(model_full_path,  const_files, lus_backend,
         [failed, kind2_out] = Kind2Utils2.runKIND2(...
             nom_lustre_file,...
             top_node_name, ...
-            OPTS, KIND2, Z3, timeout, timeout_analysis);
+            OPTS, KIND2, timeout, timeout_analysis);
         tkind2_finish = toc(tkind2_start);
         if failed
             return;
@@ -153,7 +153,7 @@ function [ failed ] = toLustreVerify(model_full_path,  const_files, lus_backend,
             [failed, kind2_out] = Kind2Utils2.runKIND2(...
                 nom_lustre_file,...
                 top_node_name, ...
-                OPTS, KIND2, Z3, timeout, timeout_analysis);
+                OPTS, KIND2, timeout, timeout_analysis);
             if failed, return; end
         end
         % Sometimes the Initial state is unsat

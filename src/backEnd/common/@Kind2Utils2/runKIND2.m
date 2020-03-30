@@ -46,19 +46,31 @@
 function [status, solver_output] = runKIND2(...
     verif_lus_path,...
     node, ...
-    OPTS, KIND2, Z3, timeout, timeout_analysis)
+    OPTS, KIND2, timeout, timeout_analysis)
 
+    global Z3 YICES2
     status = 0;
 
     if nargin < 1
         error('Missing arguments to function call: Kind2Utils2.runKIND2')
     end
     %
-
+    
     %
     if ~exist('OPTS', 'var')
         OPTS = '';
     end
+    
+    CoCoSimPreferences = cocosim_menu.CoCoSimPreferences.load();
+    if isfield(CoCoSimPreferences, 'kind2SmtSolver') ...
+            && strcmp(CoCoSimPreferences.kind2SmtSolver, 'Z3')
+        solver = Z3;
+        OPTS = sprintf('%s --smt_solver Z3 --z3_bin %s', OPTS, Z3);
+    else
+        solver = YICES2;
+        OPTS = sprintf('%s --smt_solver Yices2 --yices2_bin %s', OPTS, YICES2);
+    end
+    
     if nargin >= 2 && ~isempty(node)
         OPTS = sprintf('%s --lus_main %s', OPTS, node);
     end
@@ -68,9 +80,9 @@ function [status, solver_output] = runKIND2(...
     %
     if nargin < 4
         tools_config;
-        status = BUtils.check_files_exist(KIND2, Z3);
+        status = BUtils.check_files_exist(KIND2, solver);
         if status
-            display_msg(['KIND2 or Z3 not found :' KIND2 ', ' Z3],...
+            display_msg(['KIND2 or Z3/Yices2 not found :' KIND2 ', ' solver],...
                 MsgType.DEBUG, 'LustrecUtils.run_verif', '');
             return;
         end
@@ -87,8 +99,8 @@ function [status, solver_output] = runKIND2(...
         timeout = num2str(timeout);
     end
 
-    command = sprintf('%s -xml  --z3_bin %s --timeout %s %s "%s"',...
-        KIND2, Z3, timeout, OPTS,  verif_lus_path);
+    command = sprintf('%s -xml  --timeout %s %s "%s"',...
+        KIND2, timeout, OPTS,  verif_lus_path);
     display_msg(['KIND2_COMMAND ' command],...
         MsgType.DEBUG, 'Kind2Utils2.run_verif', '');
 

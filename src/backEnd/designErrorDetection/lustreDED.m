@@ -44,7 +44,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [ failed ] = lustreDED(model_full_path,  const_files, lus_backend, varargin)
 
-    global KIND2 Z3;
+    global KIND2;
     if nargin < 2 || isempty(const_files)
         const_files = {};
     end
@@ -116,7 +116,7 @@ function [ failed ] = lustreDED(model_full_path,  const_files, lus_backend, vara
     [failed, kind2_out] = Kind2Utils2.runKIND2(...
         nom_lustre_file,...
         top_node_name, ...
-        OPTS, KIND2, Z3, timeout, timeout_analysis);
+        OPTS, KIND2, timeout, timeout_analysis);
     if failed
         return;
     end
