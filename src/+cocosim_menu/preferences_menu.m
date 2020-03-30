@@ -333,10 +333,46 @@ function schema = getKind2Options(callbackInfo)
     
     schema.childrenFcns = {...
         {@PreferencesMenu.getCompositionalAnalysis, CoCoSimPreferences}, ...
-        {@PreferencesMenu.getKind2Binary, CoCoSimPreferences}
+        {@PreferencesMenu.getKind2Binary, CoCoSimPreferences},...
+        {@getKind2Solver, CoCoSimPreferences}
         };
 end
 
+function schema = getKind2Solver(callbackInfo)
+    schema = sl_container_schema;
+    schema.label = 'Smt Solver';
+    schema.statustip = 'Smt Solver';
+    schema.autoDisableWhen = 'Busy';
+    
+    CoCoSimPreferences = callbackInfo.userdata;
+    
+    options = {'Z3', 'Yices2'};
+    callbacks = cell(1, length(options));
+    for i=1:length(options)
+        callbacks{i} = @(x) kind2SolverCallback(options{i}, ...
+            CoCoSimPreferences, x);
+    end
+    schema.childrenFcns = callbacks;
+    
+end
+function schema = kind2SolverCallback(name, CoCoSimPreferences, varargin)
+    schema = sl_toggle_schema;
+    schema.label = name;
+    schema.label = name;
+    if strcmp(name, CoCoSimPreferences.kind2SmtSolver)
+        schema.checked = 'checked';
+    else
+        schema.checked = 'unchecked';
+    end
+    
+    schema.callback = @(x) setkind2SolverOption(name, ...
+        CoCoSimPreferences, x);
+end
+
+function setkind2SolverOption(name, CoCoSimPreferences, varargin)
+    CoCoSimPreferences.kind2SmtSolver = name;
+    cocosim_menu.CoCoSimPreferences.save(CoCoSimPreferences);
+end
 %% Lustrec options
 function schema = getLustrecBinary(callbackInfo)
     schema = sl_container_schema;
