@@ -58,7 +58,7 @@ function verifCallback(varargin)
         warning('off')
         coco_nasa_utils.MenuUtils.add_pp_warning(model_full_path);
         if strcmp(CoCoSimPreferences.lustreCompiler, 'NASA')
-            ToLustreVerify.run(model_full_path, [], CoCoSimPreferences.lustreBackend);
+            coco_nasa_verify.ToLustreVerify.run(model_full_path, [], CoCoSimPreferences.lustreBackend);
         else
             if coco_nasa_utils.LusBackendType.isKIND2(CoCoSimPreferences.lustreBackend)
                 assignin('base', 'SOLVER', 'K');

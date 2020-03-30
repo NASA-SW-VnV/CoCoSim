@@ -91,7 +91,6 @@ function [ new_ir, ir_handle_struct_map, ir_json_path ] = internalRep_pp( new_ir
             [~, ir_json_path] = coco_nasa_utils.MatlabUtils.json_export(...
                 new_ir, output_dir, json_fname);
             
-            
         catch me
             display_msg(me.getReport(), MsgType.DEBUG, 'internalRep_pp', '');
         end

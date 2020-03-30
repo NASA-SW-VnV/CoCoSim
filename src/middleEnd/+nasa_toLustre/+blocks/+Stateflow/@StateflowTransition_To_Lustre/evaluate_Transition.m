@@ -95,20 +95,8 @@ function [body, outputs, inputs, variables, external_libraries, ...
     end
     % add condition variable so the condition action can not change
     % the truth value of the condition.
-    if ~isempty(trans_cond)
+    if ~isempty(trans_cond) && ~isa(trans_cond, 'nasa_toLustre.lustreAst.VarIdExpr')
         condName = nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.getCondActNewVarName(t);
-        % No need for the following code: It takes too much time when
-        % variables is huge list. I changed getCondActNewVarName to return
-        % unique name at each call.
-%         if nasa_toLustre.lustreAst.VarIdExpr.ismemberVar(condName, variables)
-%             i = 1;
-%             new_condName = strcat(condName, num2str(i));
-%             while(nasa_toLustre.lustreAst.VarIdExpr.ismemberVar(new_condName, variables))
-%                 i = i + 1;
-%                 new_condName = strcat(condName, num2str(i));
-%             end
-%             condName = new_condName;
-%         end
         body{end+1} = nasa_toLustre.lustreAst.LustreEq(nasa_toLustre.lustreAst.VarIdExpr(condName), trans_cond);
         trans_cond = nasa_toLustre.lustreAst.VarIdExpr(condName);
         variables{end+1} = nasa_toLustre.lustreAst.LustreVar(condName, 'bool');
@@ -168,16 +156,16 @@ function [body, outputs, inputs, variables, external_libraries, ...
                     %the junction has no outgoing transitions
                     %update termination condition
                     termVarName = nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.getTerminationCondName();
-                    [Termination_cond, body, outputs, variables] = ...
+                    [Termination_cond, body, outputs] = ...
                         nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.updateTerminationCond(...
-                        Termination_cond, termVarName, trans_cond, body, outputs, variables, true);
+                        Termination_cond, termVarName, trans_cond, body, outputs, false);
                 else
                     %the junction has outgoing transitions
                     %Repeat the algorithm
                     
                     [body_i, outputs_i, inputs_i, variables, ...
                         external_libraries_i, ...
-                        validDestination_cond, Termination_cond, hasJunctionLoop] = ...
+                        validDestination_cond, Termination_cond_i, hasJunctionLoop] = ...
                         nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.transitions_code(...
                         transitions2, data_map, isDefaultTrans, ...
                         parentPath, ...
@@ -188,6 +176,23 @@ function [body, outputs, inputs, variables, external_libraries, ...
                     outputs = [outputs, outputs_i];
                     inputs = [inputs, inputs_i];
                     external_libraries = [external_libraries, external_libraries_i];
+                    
+                    if ~hasJunctionLoop && ...
+                            ~isempty(Termination_cond_i) && ...
+                            has_clear_path_to_final_destination(transitions2)
+                        % To optimize the termination condition. If the
+                        % branch has clear path to final destination with
+                        % no conditions, then the termination condition is
+                        % the current trans_cond.
+                        %update termination condition
+                        %Termination_cond = trans_cond;
+                        termVarName = nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.getTerminationCondName();
+                        [Termination_cond, body, outputs] = ...
+                            nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.updateTerminationCond(...
+                            Termination_cond, termVarName, trans_cond, body, outputs, false);
+                    else
+                        Termination_cond = Termination_cond_i;
+                    end
                 end
                 return;
             end
@@ -227,16 +232,53 @@ function [body, outputs, inputs, variables, external_libraries, ...
 
     %update termination condition
     termVarName = nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.getTerminationCondName();
-    [Termination_cond, body, outputs, variables] = ...
+    [Termination_cond, body, outputs] = ...
         nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.updateTerminationCond(...
-        Termination_cond, termVarName, trans_cond, body, outputs, variables, true);
+        Termination_cond, termVarName, trans_cond, body, outputs, false);
+    
     %validDestination_cond only updated if the final destination is a state
-
     if ~isDefaultTrans
         termVarName = nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.getValidPathCondName();
-        [validDestination_cond, body, outputs, variables] = ...
+        [validDestination_cond, body, outputs] = ...
             nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.updateTerminationCond(...
-            validDestination_cond, termVarName, trans_cond, body, outputs, variables, false);
+            validDestination_cond, termVarName, trans_cond, body, outputs, true);
     end
 end
 
+
+function res = has_clear_path_to_final_destination(transitions)
+global SF_JUNCTIONS_PATH_MAP
+res = false;
+if isempty(transitions)
+    res = true;
+    return
+end
+n = length(transitions);
+for i = 1:n
+    t = transitions{i};
+    if isempty(t.Condition) && isempty(t.Event)
+        destination = t.Destination;
+        if strcmp(destination.Type,'Junction')
+            %the destination is a junction
+            if isKey(SF_JUNCTIONS_PATH_MAP, destination.Name)
+                hobject = SF_JUNCTIONS_PATH_MAP(destination.Name);
+                if strcmp(hobject.Type, 'HISTORY')
+                    res = true;
+                    return
+                else
+                    %Does the junction have any outgoing transitions?
+                    transitions2 = ...
+                        nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.orderObjects(...
+                        SF_JUNCTIONS_PATH_MAP(destination.Name).OuterTransitions, ...
+                        'ExecutionOrder');
+                    res = res || ...
+                        has_clear_path_to_final_destination(transitions2);
+                end
+            end
+        else
+            res = true;
+            return
+        end
+    end
+end
+end

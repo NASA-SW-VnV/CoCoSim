@@ -54,7 +54,7 @@ function [body, outputs, inputs, variables, external_libraries, ...
     inputs = {};
     external_libraries = {};
     hasJunctionLoop = false;
-    n = numel(transitions);
+    n = length(transitions);
     fullPathIDs = cellfun(@(x) x.Id, fullPathT, 'un', true);
     for i=1:n
         % detect if there is closed loop in Junctions,

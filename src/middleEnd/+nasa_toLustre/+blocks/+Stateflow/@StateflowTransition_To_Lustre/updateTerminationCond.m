@@ -42,9 +42,40 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function [Termination_cond, body, outputs] = ...
+        updateTerminationCond(Termination_cond, varName, trans_cond, ...
+        body, outputs, addToOutputs)
+    % keep truck of last var counter to speed up the lookup of already defined
+    % variables
+    %TODO: use hash map for variables instead to speedup the lookup
+    
+    if isempty(Termination_cond)
+        if isempty(trans_cond)
+            Termination_cond = nasa_toLustre.lustreAst.BoolExpr('true');
+        else
+            Termination_cond = trans_cond;
+        end
+    else
+        if isempty(trans_cond)
+            Termination_cond = nasa_toLustre.lustreAst.BoolExpr('true');
+        else
+            Termination_cond = ...
+                nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.OR, Termination_cond, trans_cond);
+        end
+    end
+    
+    if addToOutputs
+        % add to outputs of FoundValidPath output
+        body{end+1} = ...
+            nasa_toLustre.lustreAst.LustreEq(nasa_toLustre.lustreAst.VarIdExpr(varName), Termination_cond);
+        outputs{end+1} = nasa_toLustre.lustreAst.LustreVar(varName, 'bool');
+    end
+end
+
+
 
 function [Termination_cond, body, outputs, variables] = ...
-        updateTerminationCond(Termination_cond, varName, trans_cond, ...
+        updateTerminationCondV1(Termination_cond, varName, trans_cond, ...
         body, outputs, variables, addToVariables)
     
     % keep truck of last var counter to speed up the lookup of already defined
@@ -62,16 +93,7 @@ function [Termination_cond, body, outputs, variables] = ...
             vars_counter_map(varName) = 1;
         end
         varName = strcat(varName, num2str(vars_counter_map(varName)));
-        
-        %Too slow
-%         if nasa_toLustre.lustreAst.VarIdExpr.ismemberVar(varName, variables)
-%             new_condName = strcat(varName, num2str(var_counter));
-%             while(nasa_toLustre.lustreAst.VarIdExpr.ismemberVar(new_condName, variables))
-%                 var_counter = var_counter + 1;
-%                 new_condName = strcat(varName, num2str(var_counter));
-%             end
-%             varName = new_condName;
-%         end
+
     end
     if isempty(Termination_cond)
         if isempty(trans_cond)

@@ -102,10 +102,93 @@ function failed = run_kind2(model, nom_lustre_file, xml_trace, ...
         if failed
             return;
         end
-        VerificationMenu.displayHtmlVerificationResultsCallbackCode(model)
+        export_verif_results(model, verificationResults, xml_trace);
+        VerificationMenu.displayHtmlVerificationResultsCallbackCode(model);
     catch me
         display_msg(me.getReport(), MsgType.DEBUG, 'toLustreVerify.run_kind2', '');
         display_msg('Something went wrong in Verification.', MsgType.ERROR, 'toLustreVerify.run_kind2', '');
     end
     
+end
+
+
+%%
+function export_verif_results(model, verificationResults, xml_trace)
+    try
+        % pre-process verificationResults
+        % change Lustre names to Simulink names
+        res = pp_verif_results(verificationResults, xml_trace);
+        %% export to json
+        json_fname = strcat(model,'_KIND2_verificationResults_', strrep(datestr(now), ' ', '-'),'.json');
+        [output_dir, ~, ~] = fileparts(xml_trace.xml_file_path);
+        [~, json_path] = coco_nasa_utils.MatlabUtils.json_export(...
+            res, output_dir, json_fname);
+        display_msg(sprintf('Verification results are exported to Json file: %s', json_path),...
+            MsgType.RESULT, 'run_kind2', '');
+    catch me
+        display_msg(me.getReport(), MsgType.DEBUG, 'toLustreVerify.run_kind2', '');
+    end
+end
+
+%%
+function res = pp_verif_results(verificationResults, xml_trace)
+    res = struct();
+    res.modePath = xml_trace.model_full_path;
+    Nodes = containers.Map();
+    for i = 1 : length(verificationResults.analysisResults)
+        s = verificationResults.analysisResults{i};
+        r = struct();
+        r.top = s.top;
+        r.abstract = s.abstract;
+        r.assumptions = lus_nodes_to_slx_path(s.assumptions, xml_trace);
+        r.properties = cellfun(@(x) pp_property(x, xml_trace), s.properties,...
+            'UniformOutput', 0);
+        if isKey(Nodes, s.top)
+            Nodes(s.top) = coco_nasa_utils.MatlabUtils.concat(Nodes(s.top), r);
+        else
+            Nodes(s.top) = {r};
+        end
+    end
+    res.analysisResults = Nodes;
+end
+
+function res = pp_property(prop, xml_trace)
+    res = prop;
+    if isfield(prop, 'counterExample')
+        res.counterExample = pp_counterExample(prop.counterExample, xml_trace);
+    end
+end
+
+function res = pp_counterExample(cex, xml_trace)
+    res = pp_node(cex.node, xml_trace);
+    function node = pp_node(cex_node, xml_trace)
+        node = struct();
+        nodeName = lus_nodes_to_slx_path(cex_node.name, xml_trace);
+        if length(nodeName) == 1
+            node.name = nodeName{1};
+        else
+            node.name = cex_node.name;
+        end
+        node.timeSteps = cex_node.timeSteps;
+        node.streams = cex_node.streams;
+        node.nodes = {};
+        if isfield(cex_node, 'nodes')
+            for i = 1:length(cex_node.nodes)
+                node.nodes{i} = pp_node(cex_node.nodes{i}, xml_trace);
+            end
+        end
+    end
+    
+end
+
+
+function paths = lus_nodes_to_slx_path(string, xml_trace)
+    t = regexp(string, '\w+', 'match');
+    paths = {};
+    for i = 1 : length(t)
+        if isKey(xml_trace.nodes_map, t{i})
+            elt = xml_trace.nodes_map(t{i});
+            paths{end+1} = char(elt.getAttribute('OriginPath'));
+        end
+    end
 end
