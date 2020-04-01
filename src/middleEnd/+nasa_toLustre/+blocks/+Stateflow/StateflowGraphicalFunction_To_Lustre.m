@@ -87,7 +87,7 @@ classdef StateflowGraphicalFunction_To_Lustre
             for i=1:numel(junctions)
                 try
                     [external_nodes_i, external_libraries_i ] = ...
-                        nasa_toLustre.blocks.Stateflow.StateflowJunction_To_Lustre.write_code(junctions{i}, data_map);
+                        nasa_toLustre.blocks.Stateflow.StateflowJunction_To_Lustre.write_OuterTransActions(junctions{i}, data_map);
                     external_nodes = [external_nodes, external_nodes_i];
                     external_libraries = [external_libraries, external_libraries_i];
                 catch me

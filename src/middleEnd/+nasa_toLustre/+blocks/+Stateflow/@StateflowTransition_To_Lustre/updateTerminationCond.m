@@ -47,7 +47,6 @@ function [Termination_cond, body, outputs] = ...
         body, outputs, addToOutputs)
     % keep truck of last var counter to speed up the lookup of already defined
     % variables
-    %TODO: use hash map for variables instead to speedup the lookup
     
     if isempty(Termination_cond)
         if isempty(trans_cond)
@@ -69,11 +68,12 @@ function [Termination_cond, body, outputs] = ...
         body{end+1} = ...
             nasa_toLustre.lustreAst.LustreEq(nasa_toLustre.lustreAst.VarIdExpr(varName), Termination_cond);
         outputs{end+1} = nasa_toLustre.lustreAst.LustreVar(varName, 'bool');
+        Termination_cond = nasa_toLustre.lustreAst.VarIdExpr(varName);
     end
 end
 
 
-
+%% Old version
 function [Termination_cond, body, outputs, variables] = ...
         updateTerminationCondV1(Termination_cond, varName, trans_cond, ...
         body, outputs, variables, addToVariables)

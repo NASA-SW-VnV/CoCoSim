@@ -50,9 +50,19 @@ classdef StateflowJunction_To_Lustre
     end
     
     methods(Static)
+        %%
+        function options = getUnsupportedOptions(varargin)
+            %TODO: check for loops in junctions: get outer transitions, get all their
+            %possible destinations names and check in junction name is one of possible
+            %destination.
+            options = {};
+        end
+        function is_Abstracted = isAbstracted(varargin)
+            is_Abstracted = false;
+        end
         
         function  [external_nodes, external_libraries ] = ...
-                write_code(junction, data_map)
+                write_OuterTransActions(junction, data_map)
             
             external_nodes = {};
             external_libraries = {};
@@ -66,16 +76,11 @@ classdef StateflowJunction_To_Lustre
             end            
             
         end
-        %%
-        function options = getUnsupportedOptions(varargin)
-            %TODO: check for loops in junctions: get outer transitions, get all their
-            %possible destinations names and check in junction name is one of possible
-            %destination.
-            options = {};
-        end
-        function is_Abstracted = isAbstracted(varargin)
-            is_Abstracted = false;
-        end
+        
+        
+        
+        [transitionNode, external_libraries] = ...
+            get_OuterTransitionsNode(junction, data_map)
         
     end
     
