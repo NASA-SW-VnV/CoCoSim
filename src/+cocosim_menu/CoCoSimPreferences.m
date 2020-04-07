@@ -48,10 +48,13 @@ classdef CoCoSimPreferences < handle
     properties (Constant)
         % CoCoSim preferences default values
         preferencesPath = ''; % where preferences will be stored
-        modelChecker = 'Kind2';
+        
         irToLustreCompiler = false; %only used by cocosim IOWA
+        modelChecker = 'Kind2';
         compositionalAnalysis = true; %Kind2 compositionalAnalysis
         kind2Binary = 'Local';% possible values are {'Kind2 web service', 'Docker', 'Local'}
+        kind2SmtSolver = 'Z3'; % possible values are {'Z3', 'Yices2'};
+        
         lustrecBinary = 'Local';% possible values are {'Docker', 'Local'}
         verificationTimeout = 1200; % In seconds
         lustreCompiler = 'NASA';% possible values are {'NASA', 'IOWA'}

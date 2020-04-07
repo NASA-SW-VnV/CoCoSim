@@ -44,7 +44,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [ failed ] = run(model_full_path,  const_files, lus_backend, varargin)
     
-    global KIND2 Z3;
+    global KIND2;
     if isempty(KIND2)
         tools_config;
     end
@@ -110,7 +110,7 @@ function [ failed ] = run(model_full_path,  const_files, lus_backend, varargin)
     
     if coco_nasa_utils.LusBackendType.isKIND2(lus_backend)
         failed = coco_nasa_verify.ToLustreVerify.run_kind2(model, nom_lustre_file, xml_trace, ...
-            top_node_name, Assertions_list, contractBlocks_list, KIND2, Z3);
+            top_node_name, Assertions_list, contractBlocks_list, KIND2);
     else
         if ~isempty(Assertions_list)
             display_msg('Verification of Assertion blocks is only supported by KIND2 model checker.', MsgType.ERROR, 'toLustreVerify.run', '');
