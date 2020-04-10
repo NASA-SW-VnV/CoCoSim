@@ -45,7 +45,7 @@
 function [fun_node,failed ]  = getFuncCode(func, data_map, blkObj, parent, blk)
 
     global VISITED_VARIABLES;
-    VISITED_VARIABLES = {};
+    VISITED_VARIABLES = containers.Map();
     statements = func.statements;
     expected_dt = '';
     isSimulink = false;

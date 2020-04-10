@@ -52,6 +52,7 @@ classdef MExpToLusAST
         % use alphabetic order.
         [code, lusDT, dim, extra_code] = assignment_To_Lustre(tree, args)
         [code, lusDT, dim, extra_code] = binaryExpression_To_Lustre(tree, args)
+        [code, lusDT, dim, extra_code] = clear_exp_To_Lustre(tree, args)
         [code, lusDT, dim, extra_code] = colonExpression_To_Lustre(tree, args)
         [code, lusDT, dim, extra_code] = constant_To_Lustre(tree, args)
         [code, lusDT, dim, extra_code] = end_To_Lustre(tree, args)

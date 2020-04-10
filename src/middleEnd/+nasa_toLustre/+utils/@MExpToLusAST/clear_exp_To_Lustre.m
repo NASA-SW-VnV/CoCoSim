@@ -41,44 +41,18 @@
 % cannot be relied upon to generate or error check software being developed. 
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Chart Node
-function [main_node, external_nodes]  = write_ChartNode(parent, blk, chart, dataAndEvents, events)
-    
-    global SF_STATES_NODESAST_MAP;
-    external_nodes = {};
-    Scopes = cellfun(@(x) x.Scope, ...
-        events, 'UniformOutput', false);
-    inputEvents = nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.orderObjects(...
-        events(strcmp(Scopes, 'Input')), 'Port');
-    if ~isempty(inputEvents)
-        %create a node that do the multi call for each event
-        eventNode  = ...
-            nasa_toLustre.blocks.Stateflow.StateflowState_To_Lustre.write_ChartNodeWithEvents(...
-            chart, inputEvents);
-        external_nodes{1} = eventNode;
-    end
-    [outputs, inputs, variable, body] = ...
-        nasa_toLustre.blocks.Stateflow.StateflowState_To_Lustre.write_chart_body(...
-        parent, blk, chart, dataAndEvents, inputEvents);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function [code, dt, dim, extra_code] = clear_exp_To_Lustre(tree, args)
 
-    %create the node
-    node_name = ...
-       nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);
-    main_node = nasa_toLustre.lustreAst.LustreNode();
-    main_node.setName(node_name);
-    comment = nasa_toLustre.lustreAst.LustreComment(sprintf('Chart Node: %s', chart.Origin_path),...
-        true);
-    main_node.setMetaInfo(comment);
-    main_node.setBodyEqs(body);            
-    main_node.setOutputs(outputs);
-    if isempty(inputs)
-        inputs{1} = ...
-            nasa_toLustre.lustreAst.LustreVar(nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.virtualVarStr(), 'bool');
+    if ~args.isMatlabFun && isKey(args.data_map, 'clear')
+        % used as a variable
+        [code, dt, dim, extra_code] = ....
+            nasa_toLustre.utils.MExpToLusAST.ID_To_Lustre('clear', args);
+    else
+        % not supported
+        code = {};
+        dt = '';
+        dim = [];
+        extra_code = {};
     end
-    main_node.setInputs(inputs);
-
-    main_node.setLocalVars(variable);
-    SF_STATES_NODESAST_MAP(node_name) = main_node;
 end
-

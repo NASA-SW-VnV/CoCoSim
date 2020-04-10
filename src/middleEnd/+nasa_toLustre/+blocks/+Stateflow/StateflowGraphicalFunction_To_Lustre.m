@@ -146,11 +146,15 @@ classdef StateflowGraphicalFunction_To_Lustre
                 main_node.setInputs(func_inputs);
                 if numel(func_inputs) < numel(computed_inputs)
                     bodyEqs = main_node.getBodyEqs();
+                    func_inputs_IDs = cellfun(@(x) x.getId(), func_inputs, 'UniformOutput', false);
+                    func_inputs_Map = containers.Map(func_inputs_IDs, func_inputs);
+                    func_outputs_IDs = cellfun(@(x) x.getId(), func_outputs, 'UniformOutput', false);
+                    func_outputs_Map = containers.Map(func_outputs_IDs, func_outputs);
                     for i=1:numel(computed_inputs)
-                        if nasa_toLustre.lustreAst.VarIdExpr.ismemberVar(computed_inputs{i}, func_inputs)
+                        if isKey(func_inputs_Map, computed_inputs{i}.getId())
                             continue;
                         end
-                        if nasa_toLustre.lustreAst.VarIdExpr.ismemberVar(computed_inputs{i}, func_outputs)
+                        if isKey(func_outputs_Map, computed_inputs{i}.getId())
                             % substitute first occurance of the variable by zero
                             var = nasa_toLustre.lustreAst.VarIdExpr(computed_inputs{i}.getId());
                             var_dt = computed_inputs{i}.getDT();

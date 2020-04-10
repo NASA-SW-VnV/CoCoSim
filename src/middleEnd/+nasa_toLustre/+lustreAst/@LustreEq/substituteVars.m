@@ -42,8 +42,12 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function obj = substituteVars(obj, oldVar, newVar)
-
-    obj.lhs = obj.lhs;
+function obj = substituteVars(obj, oldVar, newVar, substitueLeft)
+    if nargin < 4
+        substitueLeft = false;
+    end
+    if substitueLeft
+        obj.lhs = obj.lhs.substituteVars(oldVar, newVar);
+    end
     obj.rhs = obj.rhs.substituteVars(oldVar, newVar);
 end

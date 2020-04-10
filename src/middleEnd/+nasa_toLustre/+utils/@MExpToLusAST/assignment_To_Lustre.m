@@ -45,6 +45,9 @@
 function [code, assignment_dt, dim, extra_code] = assignment_To_Lustre(tree, args)
 
     global VISITED_VARIABLES MFUNCTION_EXTERNAL_NODES;
+    if isempty(VISITED_VARIABLES)
+        VISITED_VARIABLES = containers.Map();
+    end
     code = {};
     dim = [];
     extra_code = {};
@@ -127,7 +130,7 @@ function [code, assignment_dt, dim, extra_code] = assignment_To_Lustre(tree, arg
         end
         init = cell(1, length(left_args));
         for i=1:length(left_args)
-            if nasa_toLustre.lustreAst.VarIdExpr.ismemberVar(left_args{i}, VISITED_VARIABLES)
+            if  isKey(VISITED_VARIABLES, left_args{i}.getId())
                 init{i} = left_args{i};
             else % if first time
                 if strcmp(left_exp_dt, 'int')
@@ -157,14 +160,20 @@ function [code, assignment_dt, dim, extra_code] = assignment_To_Lustre(tree, arg
     end
     
     %% update VISITED_VARIABLES
-    if length(left) == 1 ...
-            && isa(left{1}, 'nasa_toLustre.lustreAst.TupleExpr')
-        left_args = left{1}.getArgs();
-        VISITED_VARIABLES = coco_nasa_utils.MatlabUtils.concat(VISITED_VARIABLES, left_args);
-    else
-        VISITED_VARIABLES = coco_nasa_utils.MatlabUtils.concat(VISITED_VARIABLES, left);
-    end
     
+    if args.isMatlabFun
+        if length(left) == 1 ...
+                && isa(left{1}, 'nasa_toLustre.lustreAst.TupleExpr')
+            left_args = left{1}.getArgs();
+        else
+            left_args = left;
+        end
+        for i=1:length(left_args)
+            if ~isKey(VISITED_VARIABLES, left_args{i}.getId())
+                VISITED_VARIABLES(left_args{i}.getId()) = left_args{i};
+            end
+        end
+    end
     
     %% Creat code
     if  numel(left) == numel(right)
