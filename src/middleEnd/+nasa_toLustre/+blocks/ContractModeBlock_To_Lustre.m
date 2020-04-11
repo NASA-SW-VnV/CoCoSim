@@ -114,17 +114,18 @@ classdef ContractModeBlock_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             if coco_nasa_utils.LusBackendType.isKIND2(lus_backend) && isInsideContract
                 blk_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);
                 code = nasa_toLustre.lustreAst.ContractModeExpr(blk_name, requires, ensures);
+                obj.addCode( code );
             else
                 A = nasa_toLustre.lustreAst.BinaryExpr.BinaryMultiArgs(...
-                    nasa_toLustre.lustreAst.BinaryExpr.AND, requires);
+                    nasa_toLustre.lustreAst.BinaryExpr.AND, inputs{1});
                 B = nasa_toLustre.lustreAst.BinaryExpr.BinaryMultiArgs(...
-                    nasa_toLustre.lustreAst.BinaryExpr.AND, ensures);
+                    nasa_toLustre.lustreAst.BinaryExpr.AND, inputs{2});
                 prop = nasa_toLustre.lustreAst.BinaryExpr(...
                     nasa_toLustre.lustreAst.BinaryExpr.IMPLIES, A, B);
                  obj.addCode(nasa_toLustre.lustreAst.LocalPropertyExpr(...
                     prop_ID, prop));
             end
-            obj.addCode( code );
+            
             
         end
         
