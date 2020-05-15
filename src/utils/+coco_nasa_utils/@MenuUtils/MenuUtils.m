@@ -69,7 +69,9 @@ classdef MenuUtils
         html_path = createHtmlListUsingHTMLITEM(title, items_list, html_path, model)
 
         metaInfo = getModelInfo(title, model)
-
+        
+        %% attach contract
+        [status] = attach_contract(blk)
     end
     
 end

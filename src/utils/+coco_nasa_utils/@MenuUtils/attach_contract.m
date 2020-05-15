@@ -41,49 +41,64 @@
 % cannot be relied upon to generate or error check software being developed.
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [status, errors_msg] = BlockName_pp(model)
-    % BlockName_pp Replaces all non alphabetic/numeric characters with underscore.
-    status = 0;
-    errors_msg = {};
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function [status] = attach_contract(blk)
+    %ATTACH_CONTRACT attach CoCoSpec Contract to the blk, encapsulate both
+    %blk and contract in a masked Subsystem.
     
-    % Processing all blocks
-    %do not use findAll, on , that includes lines and ports.
-    block_list = find_system(model,'LookUnderMasks', 'all', 'Regexp','on','Name','\W', 'LinkStatus', 'none');
-    block_handles = get_param(block_list, 'Handle');
-    if not(isempty(block_handles))
-        display_msg('Processing special characters in block names...', Constants.INFO, ...
-            'BlockName_pp', '');
-        for i=1:length(block_handles)
-            try
-                path = fullfile(get_param(block_handles{i}, 'Parent'), get_param(block_handles{i}, 'Name'));
-                display_msg(path, Constants.INFO, 'BlockName_pp', '');
-                name = get_param(block_handles{i},'Name');
-                %remove / before callingnasa_toLustre.utils.SLX2LusUtils.name_format
-                new_name = strrep(name, '/', '_');
-                new_name = nasa_toLustre.utils.SLX2LusUtils.name_format(new_name);
-                if length(new_name) > 50
-                    new_name = new_name(1:50);
-                end
-                changeName(block_handles{i}, new_name);
-            catch me
-                display_msg(me.getReport(), MsgType.DEBUG, 'PP', '');
-                status = 1;
-                errors_msg{end + 1} = sprintf('BlockName pre-process has failed for block %s', path);
-                continue;
-            end
-        end
-        display_msg('Done\n\n', Constants.INFO, 'BlockName_pp', '');
+    %Check if the block is not a Subsyste. Contracts should be attached to subsystems.
+    %Create a subsystem from block if needed.
+    blkH = get_param(blk, 'Handle');
+    [status, blkH]= encapsulate_block(blkH);
+    if status
+        errordlg('Failed to attach contract to the subsystem %s', blk)
     end
+    %add a masked subsystem encapsulating the block and the contract.
+    [status, maskBlk] = coco_nasa_utils.SLXUtils.createSubsystemFromBlk(blkH);
+    if status
+        errordlg('Failed to attach contract to the subsystem %s', blk)
+    end
+    add_abstraction_mask(maskBlk)
+    
+    
 end
-
-function changeName(bH, name)
+function add_abstraction_mask(maskBlk)
+    set_param(maskBlk, 'TreatAsAtomicUnit', 'on');
+    p = Simulink.Mask.create(maskBlk);
+    p.set('Type', 'CoCoAbstractedSubsystem',...
+        'Display', ...
+        'text(0.5, 0.5, ''{\bf\fontsize{20}Abstracted Subsystem}'', ''hor'', ''center'', ''texmode'',''on'');');
+    p.addParameter('Type','checkbox','Prompt','Use contract as an abstraction (the implementation will not be generated).',...
+        'Name','useAbstraction');
+    
+end
+function [status, newblk] = encapsulate_block(blkH)
+    status = 0;
+    blkObj = get_param(blkH, 'Object');
+    blkType = get_param(blkH, 'BlockType');
     try
-        set_param(bH,'Name',name);
-    catch me
-        if strcmp(me.identifier, 'Simulink:blocks:DupBlockName')
-            name = strcat(name, '2');
-            changeName(bH, name);
-        end
+        mskType = get_param(blkH, 'MaskType');
+    catch
+        mskType = '';
     end
+    try
+        sfBlkType = get_param(blkH, 'SFBlockType');
+    catch
+        sfBlkType = '';
+    end
+    portType = arrayfun(@(x) {x.Type}, blkObj.PortConnectivity);
+    if ~ ( strcmp(blkType, 'SubSystem') ...
+            && strcmp(mskType, '') ...
+            && (strcmp(sfBlkType, '') || strcmp(sfBlkType, 'NONE')) ...
+            && ~ismember('enable', portType)...
+            && ~ismember('trigger', portType)...
+            && ~ismember('state', portType)...
+            && isempty(find_system(blkH, 'BlockType', 'ForIterator'))...
+            )
+        % if it is not Subsystem, we need to create a Subsystem on top of it
+        [status, newblk] = coco_nasa_utils.SLXUtils.createSubsystemFromBlk(blkH);
+    else
+        newblk = blkH;
+    end
+    
 end

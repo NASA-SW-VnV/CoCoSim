@@ -42,8 +42,9 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function status = createSubsystemFromBlk(blk_path)
+function [status, ss_handle] = createSubsystemFromBlk(blk_path)
     status = 0;
+    ss_handle = -1;
     try
         blk_name = get_param(blk_path, 'Name');
         try
@@ -58,6 +59,8 @@ function status = createSubsystemFromBlk(blk_path)
             else
                 l = -1;
             end
+            orient=get_param(h,'orientation');
+            pos=get_param(h,'position');
             obj = get_param( bdroot(blk_path), 'Object');
             obj.localCreateSubSystem(h);
 
@@ -69,9 +72,16 @@ function status = createSubsystemFromBlk(blk_path)
             l = get_param(dstPortHandle, 'line');
             srcPortH = get_param(l, 'SrcPortHandle');
             subsystemPath = get_param(srcPortH, 'Parent');
-            set_param(subsystemPath, 'Name', blk_name);
+            ss_handle = get_param(subsystemPath, 'Handle');
+            set_param(ss_handle, 'Name', blk_name);            
+            
+            % make same positiona and oritentation
+            set_param(ss_handle, 'orientation', orient);
+            set_param(ss_handle, 'position', pos);
             return;
-        catch
+        catch me
+            display_msg(me.getReport(), MsgType.DEBUG, ...
+                'SLXUtils.createSubsystemFromBlk', '');
             %we will do it manually
         end
         % No need for this function in R2017b. But we do it for R2015b
@@ -112,7 +122,7 @@ function status = createSubsystemFromBlk(blk_path)
         end
         orient=get_param(blk_path,'orientation');
         pos=get_param(blk_path,'position');
-        delete_block(blk_path);
+        %delete_block(blk_path);
         BlocksPosition_pp(ss_path, 0)
         set_param(ss_handle, 'orientation', orient);
         set_param(ss_handle, 'position', pos);

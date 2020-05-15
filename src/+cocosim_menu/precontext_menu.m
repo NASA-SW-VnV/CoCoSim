@@ -80,7 +80,9 @@ function schema = attachContract(varargin)
     schema.statustip = 'Attach Contract to the selected Block/Subsystem';
     schema.autoDisableWhen = 'Busy';
     MyBlocks = find_system(gcs,'Selected','on');
-    
+    if length(MyBlocks)==2 && strcmp(MyBlocks{1}, gcs)
+        MyBlocks = MyBlocks(2);
+    end
     if length(MyBlocks) > 1 || isempty(MyBlocks) ...
             || strcmp(get_param(MyBlocks{1}, 'BlockType'), 'Inport') ...
             || strcmp(get_param(MyBlocks{1}, 'BlockType'), 'Outport')
@@ -91,8 +93,9 @@ function schema = attachContract(varargin)
     
     schema.callback = @(x) attachContractCallback(x, MyBlocks);
 end
-function attachContractCallback(callbackinfo, MyBlocks)
-    fprintf('%s was selected\n', MyBlocks{1});
+function attachContractCallback(~, MyBlocks)
+    %fprintf('%s was selected\n', MyBlocks{1});
+    coco_nasa_utils.MenuUtils.attach_contract(MyBlocks{1});
 end
 %%
 function schema = getAutoLayoutTool(callbackinfo)

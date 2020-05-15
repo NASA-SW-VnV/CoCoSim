@@ -72,5 +72,8 @@ function str_out = name_format(str)
     str_out = regexprep(str_out, '/(\d+)', '/_$1');
     % for anything missing from previous cases.
     str_out = regexprep(str_out, '[^a-zA-Z0-9_/]', '_');
+    
+    % if it starts with non alphabet character add "x"
+    str_out = regexprep(str_out, '^([^a-zA-Z])', 'x$1');
 end
 

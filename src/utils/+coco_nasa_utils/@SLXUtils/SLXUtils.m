@@ -118,7 +118,7 @@ classdef SLXUtils
         [new_model_path, new_model_name, status] = ...
             crete_model_from_subsystem(file_name, ss_path, output_dir )
         % createSubsystemFromBlk
-        status = createSubsystemFromBlk(blk_path)
+        [status, ss_handle] = createSubsystemFromBlk(blk_path)
         %
         [new_model_name, status] = makeharness(T, subsys_path, output_dir, postfix_name)
         %
