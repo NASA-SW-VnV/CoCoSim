@@ -69,7 +69,9 @@ classdef SubSystem_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             if isempty(blk.CompiledPortWidths.Outport) ...
                     && isfield(blk, 'MaskType') ...
                     && strcmp(blk.MaskType, 'VerificationSubsystem')
-                outputs{1} = nasa_toLustre.lustreAst.VarIdExpr(strcat(node_name, '_virtual'));
+                vname = strcat(node_name, '_virtual');
+                outputs{1} = nasa_toLustre.lustreAst.VarIdExpr(vname);
+                obj.addVariable(nasa_toLustre.lustreAst.LustreVar(vname, 'bool'));
             end
             %% Check Enable, Trigger, Action case
             [isEnabledSubsystem, EnableShowOutputPortIsOn] = ...
@@ -135,7 +137,7 @@ classdef SubSystem_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     end
                 end
             catch me
-                me
+                %me
             end
             inputs = [inputs, extra_inputs];
             clocks_list =nasa_toLustre.utils.SLX2LusUtils.getRTClocksSTR(...
