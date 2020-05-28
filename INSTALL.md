@@ -40,7 +40,7 @@ In your terminal, go first to `scripts` folder in `cocosim` and run the `install
 The script may require some dependencies, please install them and run the script again.
 
 
-#### Use developer version
+#### Using Github source code
 
 1. Clone this cocosim repository in your local machine (develop branch).
 
@@ -50,13 +50,13 @@ The script may require some dependencies, please install them and run the script
     Function `cocosim2/scripts/install_cocosim_lib.m` is responsible of copying all required external libraries to the right destination in our repository.
     It needs `git` to clones external repositories from github and copy some of their code on the
     right place on CoCoSim.
-    Read function `cocosim2/scripts/install_cocosim_lib.m` to know what are the external libraries are copied to cocosim2 to do it manually in case the function failed for internet connection or `git` issues.
+    In case the function failed for internet connection or `git` issues, Read function `cocosim2/scripts/install_cocosim_lib.m` to know what are the external libraries are copied to cocosim2 to do it manually.
 
      * Navigate back to `cocosim` then run `start_cocosim` from the Matlab Command window.
 
 3. In your terminal, go first to `scripts` folder in `cocosim` and run the `install_cocosim` script.
     ```
-    >cd CoCoSim/scripts
+    >cd scripts
     >./install_cocosim 
     ```
 
