@@ -60,7 +60,7 @@ build_dir="../tools/build"
 build_dir=$(abs_path "$build_dir")
 lustrec_url="https://cavale.enseeiht.fr/git/lustrec"
 #lustrec_url="https://github.com/coco-team/lustrec.git"
-lustrec_branch="cocosim_master"
+lustrec_branch="unstable"
 kind2_url="https://github.com/kind2-mc/kind2.git"
 kind2_branch="develop"
 
