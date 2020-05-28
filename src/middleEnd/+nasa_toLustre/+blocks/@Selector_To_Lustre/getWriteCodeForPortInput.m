@@ -64,7 +64,7 @@ function [codes] = getWriteCodeForPortInput(obj,blk,numOutDims,inputs,outputs,in
     
     % pass to Lustre ind
     for i=1:numel(ind)
-        if ~MatlabUtils.contains(blk.IndexOptionArray{i}, '(port)')
+        if ~coco_nasa_utils.MatlabUtils.contains(blk.IndexOptionArray{i}, '(port)')
             for j=1:numel(ind{i})
                 v_name =  nasa_toLustre.lustreAst.VarIdExpr(...
                     sprintf('%s_ind_dim_%d_%d',...

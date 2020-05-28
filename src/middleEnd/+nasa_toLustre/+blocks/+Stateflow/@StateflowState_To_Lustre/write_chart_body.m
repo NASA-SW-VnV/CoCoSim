@@ -161,13 +161,15 @@ function [outputs, inputs, variables, body] = write_chart_body(...
     end
 
     %state IDs
-    allVars = MatlabUtils.concat(variables, outputs, inputs);
+    allVars = coco_nasa_utils.MatlabUtils.concat(variables, outputs, inputs);
+    IDs = cellfun(@(x) x.getId(), allVars, 'UniformOutput', false);
+    allVars_Map = containers.Map(IDs, allVars);
     nodeCall_inputs_Names = cellfun(@(x) x.getId(), ...
         nodeCall_inputs_Ids, 'UniformOutput', false);
     for i=1:numel(nodeCall_inputs_Names)
         v_name = nodeCall_inputs_Names{i};
-        if ~nasa_toLustre.lustreAst.VarIdExpr.ismemberVar(v_name, allVars)
-            if MatlabUtils.endsWith(v_name, ...
+        if ~isKey(allVars_Map, v_name) 
+            if coco_nasa_utils.MatlabUtils.endsWith(v_name, ...
                     nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getStateIDSuffix())
                 %State ID
                 v_type = strrep(v_name, ...
@@ -202,11 +204,13 @@ function [outputs, inputs, variables, body] = write_chart_body(...
     %update outputs names
     nodeCall_outputs_Names = cellfun(@(x) x.getId(), ...
         nodeCall_outputs_Ids, 'UniformOutput', false);
-    allVars = MatlabUtils.concat(variables, outputs, inputs);
+    allVars = coco_nasa_utils.MatlabUtils.concat(variables, outputs, inputs);
+    IDs = cellfun(@(x) x.getId(), allVars, 'UniformOutput', false);
+    allVars_Map = containers.Map(IDs, allVars);
     for i=1:numel(nodeCall_outputs_Names)
         v_name = nodeCall_outputs_Names{i};
-        if ~nasa_toLustre.lustreAst.VarIdExpr.ismemberVar(v_name, allVars)
-            if MatlabUtils.endsWith(v_name, ...
+        if ~isKey(allVars_Map, v_name) 
+            if coco_nasa_utils.MatlabUtils.endsWith(v_name, ...
                     nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getStateIDSuffix())
                 v_type = strrep(v_name, ...
                     nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getStateIDSuffix(), ...
@@ -253,6 +257,27 @@ function [outputs, inputs, variables, body] = write_chart_body(...
             body{end+1} = nasa_toLustre.lustreAst.LustreEq(nasa_toLustre.lustreAst.VarIdExpr(d_name), IC_Var);
         end
     end
-
+    
+    % add suffix to inputs/outputs to avoid variable names using Lustre
+    % keywords: e.g., mode
+    for i = 1:length(inputs)
+        new_v = inputs{i}.deepCopy();
+        new_v.setId(strcat(new_v.getId(), '__0'));
+        new_vID = nasa_toLustre.lustreAst.VarIdExpr(new_v.getId());
+        for j = 1:length(body)
+            body{j}.substituteVars(inputs{i}, new_vID);
+        end
+        inputs{i} = new_v;
+    end
+    for i = 1:length(outputs)
+        new_v = outputs{i}.deepCopy();
+        new_v.setId(strcat(new_v.getId(), '__2'));
+        new_vID = nasa_toLustre.lustreAst.VarIdExpr(new_v.getId());
+        substitueLeft = true;
+        for j = 1:length(body)
+            body{j}.substituteVars(outputs{i}, new_vID, substitueLeft);
+        end
+        outputs{i} = new_v;
+    end
 end
 

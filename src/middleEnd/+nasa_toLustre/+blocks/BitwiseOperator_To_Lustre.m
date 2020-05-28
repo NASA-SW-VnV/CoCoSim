@@ -103,9 +103,9 @@ classdef BitwiseOperator_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 end
             end
             %% Step 4: start filling the definition of each output
-            if MatlabUtils.endsWith(inputDT, 'int8')
+            if coco_nasa_utils.MatlabUtils.endsWith(inputDT, 'int8')
                 intSize = 8;
-            elseif MatlabUtils.endsWith(inputDT, 'int16')
+            elseif coco_nasa_utils.MatlabUtils.endsWith(inputDT, 'int16')
                 intSize = 16;
             else
                 intSize = 32;

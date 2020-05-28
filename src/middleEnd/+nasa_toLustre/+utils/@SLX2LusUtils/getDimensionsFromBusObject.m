@@ -55,7 +55,7 @@ function in_matrix_dimension = getDimensionsFromBusObject(busName)
     for i=1:numel(elems)
         dt = elems(i).DataType;
         dt = strrep(dt, 'Bus: ', '');
-        isBus = SLXUtils.isSimulinkBus(char(dt));
+        isBus = coco_nasa_utils.SLXUtils.isSimulinkBus(char(dt));
 
         if isBus
             dt = regexprep(dt, 'Bus:\s*', '');

@@ -45,5 +45,5 @@
 function code = print_jkind(obj)
 
     %TODO Not supported by jkind
-    code = obj.print_lustrec(LusBackendType.JKIND);
+    code = obj.print_lustrec(coco_nasa_utils.LusBackendType.JKIND);
 end

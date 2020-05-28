@@ -55,7 +55,7 @@ function [lus_dt] = SignalHierarchyLusDT(blk, SignalHierarchy)
         end
         SignalName = SignalHierarchy.SignalName;
         if isempty(SignalHierarchy.SignalName) ...
-                || SLXUtils.isSimulinkBus(SignalHierarchy.BusObject)
+                || coco_nasa_utils.SLXUtils.isSimulinkBus(SignalHierarchy.BusObject)
             SignalName = SignalHierarchy.BusObject;
         end
         if isempty(SignalName)
@@ -78,7 +78,7 @@ function [lus_dt] = SignalHierarchyLusDT(blk, SignalHierarchy)
                 return;
             end
         end
-        isBus = SLXUtils.isSimulinkBus(SignalName);
+        isBus = coco_nasa_utils.SLXUtils.isSimulinkBus(SignalName);
         if isBus
             lus_dt =...
                 nasa_toLustre.utils.SLX2LusUtils.getLustreTypesFromBusObject(SignalName);
@@ -107,10 +107,10 @@ function [lus_dt] = SignalHierarchyLusDT(blk, SignalHierarchy)
                     srcBk, ...
                     get_param(p(i), 'PortNumber'));
             elseif numel(p) >= 1
-                compiledDT = SLXUtils.getCompiledParam(p(1), 'CompiledPortDataType');
+                compiledDT = coco_nasa_utils.SLXUtils.getCompiledParam(p(1), 'CompiledPortDataType');
                 [lus_dt, ~, ~, ~] = ...
                     nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(compiledDT);
-                CompiledPortWidth = SLXUtils.getCompiledParam(p(1), 'CompiledPortWidth');
+                CompiledPortWidth = coco_nasa_utils.SLXUtils.getCompiledParam(p(1), 'CompiledPortWidth');
                 if iscell(lus_dt) && numel(lus_dt) < CompiledPortWidth
                     lus_dt = arrayfun(@(x) lus_dt{1}, (1:CompiledPortWidth), ...
                         'UniformOutput', 0);

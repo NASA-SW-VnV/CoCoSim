@@ -60,7 +60,7 @@ classdef SubSystem_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             codes = {};
             isInsideContract =nasa_toLustre.utils.SLX2LusUtils.isContractBlk(parent);
             
-            if isInsideContract && numel(outputs) > 1 && LusBackendType.isKIND2(lus_backend)
+            if isInsideContract && numel(outputs) > 1 && coco_nasa_utils.LusBackendType.isKIND2(lus_backend)
                 display_msg(...
                     sprintf('Subsystem %s has more than one outputs. All Subsystems inside Contract should have one output.', ...
                     HtmlItem.addOpenCmd(blk.Origin_path)), MsgType.ERROR, 'SubSystem_To_Lustre', '')
@@ -69,7 +69,9 @@ classdef SubSystem_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             if isempty(blk.CompiledPortWidths.Outport) ...
                     && isfield(blk, 'MaskType') ...
                     && strcmp(blk.MaskType, 'VerificationSubsystem')
-                outputs{1} = nasa_toLustre.lustreAst.VarIdExpr(strcat(node_name, '_virtual'));
+                vname = strcat(node_name, '_virtual');
+                outputs{1} = nasa_toLustre.lustreAst.VarIdExpr(vname);
+                obj.addVariable(nasa_toLustre.lustreAst.LustreVar(vname, 'bool'));
             end
             %% Check Enable, Trigger, Action case
             [isEnabledSubsystem, EnableShowOutputPortIsOn] = ...
@@ -101,7 +103,7 @@ classdef SubSystem_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 nasa_toLustre.utils.SLX2LusUtils.nbStepStr());
             
             try
-                if LusBackendType.isPRELUDE(lus_backend) ...
+                if coco_nasa_utils.LusBackendType.isPRELUDE(lus_backend) ...
                         && isfield(blk, 'CompiledSampleTime') ...
                         && isfield(parent, 'CompiledSampleTime')
                     [inTs, inTsOffset] = ...
@@ -135,12 +137,12 @@ classdef SubSystem_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     end
                 end
             catch me
-                me
+                %me
             end
             inputs = [inputs, extra_inputs];
             clocks_list =nasa_toLustre.utils.SLX2LusUtils.getRTClocksSTR(...
                 blk, main_sampleTime);
-            if ~LusBackendType.isPRELUDE(lus_backend) && ~isempty(clocks_list)
+            if ~coco_nasa_utils.LusBackendType.isPRELUDE(lus_backend) && ~isempty(clocks_list)
                 clocks_var = cellfun(@(x) nasa_toLustre.lustreAst.VarIdExpr(x), ...
                     clocks_list, 'UniformOutput', 0);
                 % add clocks in the begining of the inputs
@@ -177,7 +179,7 @@ classdef SubSystem_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             end
             [isResetSubsystem, ResetType] =nasa_toLustre.blocks.SubSystem_To_Lustre.hasResetPort(blk);
             if isResetSubsystem
-                if LusBackendType.isJKIND(lus_backend)
+                if coco_nasa_utils.LusBackendType.isJKIND(lus_backend)
                     obj.addUnsupported_options(sprintf(...
                         ['Block "%s" is not supported by JKind model checker.', ...
                         ' The block has a "reset" option that resets the Subsystem internal memories. ', ...

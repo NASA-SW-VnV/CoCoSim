@@ -68,10 +68,10 @@ function [st, ph] = getSSSampleTime(Clocks, main_sampleTime)
             return;
         end
         if prod(P/P(1)) == 1
-            st = MatlabUtils.gcd(T);
+            st = coco_nasa_utils.MatlabUtils.gcd(T);
             ph = mod(P(1), st);
         else
-            st = MatlabUtils.gcd([T, P]);
+            st = coco_nasa_utils.MatlabUtils.gcd([T, P]);
             ph = 0;
         end
     else

@@ -55,7 +55,7 @@ function new_model_path = importLusReq(current_openedSS, lusFilePath, mappingPat
         errordlg(sprintf('Lustre file %s can not be Found', lusFilePath));
         return;
     end
-    if ~(MatlabUtils.endsWith(lusFilePath, '.lus') || MatlabUtils.endsWith(lusFilePath, '.lusi'))
+    if ~(coco_nasa_utils.MatlabUtils.endsWith(lusFilePath, '.lus') || coco_nasa_utils.MatlabUtils.endsWith(lusFilePath, '.lusi'))
         errordlg('Lustre file extension should be ".lus"');
         return;
     end
@@ -76,11 +76,11 @@ function new_model_path = importLusReq(current_openedSS, lusFilePath, mappingPat
     
     [model_dir, file_name, ~] = fileparts(model_full_path);
     output_dir = fullfile(model_dir, 'cocosim_output', file_name);
-    if ~exist(output_dir, 'dir'); MatlabUtils.mkdir(output_dir); end
+    if ~exist(output_dir, 'dir'); coco_nasa_utils.MatlabUtils.mkdir(output_dir); end
     
     
     % check syntax
-    [~, syntax_status, output] = LustrecUtils.generate_lusi(lusFilePath, LUSTREC );
+    [~, syntax_status, output] = coco_nasa_utils.LustrecUtils.generate_lusi(lusFilePath, LUSTREC );
     if syntax_status && ~isempty(output)
         display_msg('Lustre Syntax check has failed for contract code. The parsing error is the following:', MsgType.ERROR, 'TOLUSTRE', '');
         [~, lustre_file_base, ~] = fileparts(lusFilePath);
@@ -89,12 +89,12 @@ function new_model_path = importLusReq(current_openedSS, lusFilePath, mappingPat
         return;
     end
     % generate json file of lustre
-    [lus_IR_path, status] = LustrecUtils.generate_emf(lusFilePath, output_dir);
+    [lus_IR_path, status] = coco_nasa_utils.LustrecUtils.generate_emf(lusFilePath, output_dir);
     if status
         display_msg('Could not export Lustre AST.', MsgType.ERROR, 'importLusReq', '');
         return;
     end
-    [new_model_path, status] = ImportLusUtils.importLustreSpec(...
+    [new_model_path, status] = coco_nasa_utils.ImportLusUtils.importLustreSpec(...
         current_openedSS,...
         lus_IR_path,...
         mappingPath, ...

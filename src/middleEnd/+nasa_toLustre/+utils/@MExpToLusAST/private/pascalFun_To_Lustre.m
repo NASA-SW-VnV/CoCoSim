@@ -58,7 +58,7 @@ function [code, exp_dt, dim, extra_code] = pascalFun_To_Lustre(tree, args)
     if (length(tree.parameters) > 2)
         args.expected_lusDT = 'int';
         [N, ~, ~, extra_code_i] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(2),args);
-        extra_code = MatlabUtils.concat(extra_code, extra_code_i);
+        extra_code = coco_nasa_utils.MatlabUtils.concat(extra_code, extra_code_i);
         if isempty(N) || (~isa(N{1}, 'nasa_toLustre.lustreAst.IntExpr'))
             ME = MException('COCOSIM:TREE2CODE', ...
                 'Second argument in function pascal in expression "%s" should be a constant.',...

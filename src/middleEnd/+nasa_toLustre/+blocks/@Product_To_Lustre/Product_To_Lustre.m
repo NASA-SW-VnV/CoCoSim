@@ -69,7 +69,7 @@ classdef Product_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 if strcmp(AccumDataTypeStr, 'boolean')
                     AccumDataTypeStr = 'uint8';
                 end
-            elseif all(MatlabUtils.contains(blk.CompiledPortDataTypes.Inport, 'int'))
+            elseif all(coco_nasa_utils.MatlabUtils.contains(blk.CompiledPortDataTypes.Inport, 'int'))
                 AccumDataTypeStr = 'int32';
             else
                 AccumDataTypeStr = 'double';
@@ -84,8 +84,8 @@ classdef Product_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             obj.addVariable(additionalVars);
             
             %% Design Error Detection Backend code:
-            if CoCoBackendType.isDED(coco_backend)
-                if ismember(CoCoBackendType.DED_OUTMINMAX, ...
+            if coco_nasa_utils.CoCoBackendType.isDED(coco_backend)
+                if ismember(coco_nasa_utils.CoCoBackendType.DED_OUTMINMAX, ...
                         CoCoSimPreferences.dedChecks)
                     lusOutDT =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(OutputDataTypeStr);
                     DEDUtils.OutMinMaxCheckCode(obj, parent, blk, outputs, lusOutDT, xml_trace);
@@ -99,10 +99,10 @@ classdef Product_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             
             % add your unsuported options list here
             if (strcmp(blk.Multiplication, 'Matrix(*)')...
-                    && MatlabUtils.contains(blk.Inputs, '/') )
+                    && coco_nasa_utils.MatlabUtils.contains(blk.Inputs, '/') )
                 for i=1:numel(blk.Inputs)
                     if strcmp(blk.Inputs(i), '/')
-                        if LusBackendType.isKIND2(lus_backend)
+                        if coco_nasa_utils.LusBackendType.isKIND2(lus_backend)
                             if blk.CompiledPortWidths.Inport(i) > 49
                                 obj.addUnsupported_options(...
                                     sprintf(['Option Matrix(*) with division is not supported in block %s in inport %d. ', ...

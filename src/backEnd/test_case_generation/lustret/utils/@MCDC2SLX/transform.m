@@ -77,9 +77,9 @@ function [status,...
     base_name = regexp(cocospec_name,'\.','split');
     if ~exist('new_model_name', 'var') || isempty(new_model_name)
         if onlyMainNode
-            new_model_name = BUtils.adapt_block_name(strcat(base_name{1}, '_mcdc_', main_node));
+            new_model_name = coco_nasa_utils.SLXUtils.adapt_block_name(strcat(base_name{1}, '_mcdc_', main_node));
         else
-            new_model_name = BUtils.adapt_block_name(strcat(base_name{1}, '_mcdc_nodes'));
+            new_model_name = coco_nasa_utils.SLXUtils.adapt_block_name(strcat(base_name{1}, '_mcdc_nodes'));
         end
     end
     
@@ -101,7 +101,7 @@ function [status,...
         output_dir = coco_dir;
     end
     
-    data = BUtils.read_json(json_path);
+    data = coco_nasa_utils.MatlabUtils.read_json(json_path);
     
     if ~exist(output_dir, 'dir')
         mkdir(output_dir);
@@ -145,13 +145,13 @@ function [status,...
         end
         node_idx = ismember(nodes_names, main_node);
         node_name = emf_fieldnames{node_idx};
-        node_block_path = fullfile(new_model_name, BUtils.adapt_block_name(main_node));
+        node_block_path = fullfile(new_model_name, coco_nasa_utils.SLXUtils.adapt_block_name(main_node));
         block_pos = [(x+100) y (x+250) (y+50)];
         MCDC2SLX.mcdc_node_process(new_model_name, nodes, node_name, node_block_path, mdlTraceRoot, block_pos, mcdc_trace);
     else
         for node = emf_fieldnames
             try
-                node_name = BUtils.adapt_block_name(node{1});
+                node_name = coco_nasa_utils.SLXUtils.adapt_block_name(node{1});
                 display_msg(...
                     sprintf('Processing node "%s" ',node_name),...
                     MsgType.INFO, 'MCDC2SLX', '');

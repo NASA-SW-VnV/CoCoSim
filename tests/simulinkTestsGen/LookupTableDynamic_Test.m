@@ -213,9 +213,9 @@ classdef LookupTableDynamic_Test < Block_Test
                 s.LookUpMeth = obj.LookUpMeth{pLookUpMethog};
                 for pInputType = 1:numel(obj.inputDataType)
                     s.inputDataType = obj.inputDataType{pInputType};
-                    B = MatlabUtils.construct_random_doubles(1, 0, 127, [5 1]);
+                    B = coco_nasa_utils.MatlabUtils.construct_random_doubles(1, 0, 127, [5 1]);
 %                     if pInputType==1
-%                         B = MatlabUtils.construct_random_doubles(1, 0, 127, [5 1]);
+%                         B = coco_nasa_utils.MatlabUtils.construct_random_doubles(1, 0, 127, [5 1]);
 %                     else
 %                         B = [0, 2, 5, 8, 20];
 %                     end

@@ -63,7 +63,7 @@ function [main_node] = getStatementsBlockAsNode(tree, args, type)
             s = statements{i};
         end
         [lusCode, ~, ~, extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(s, args);
-        body = MatlabUtils.concat(body, extra_code, lusCode);
+        body = coco_nasa_utils.MatlabUtils.concat(body, extra_code, lusCode);
         if ~isempty(extra_code)
             [outputs_i, inputs_i] = nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getInOutputsFromAction(lusCode, ...
                 false, args.data_map, s.text, true);

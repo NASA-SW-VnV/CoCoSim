@@ -65,11 +65,12 @@ function  [external_nodes, external_libraries ] = ...
     for i=1:numel(T)
         addNodes(T{i}, true)
     end
-    [node,  external_libraries_i] = ...
+    [node,  external_nodes_i, external_libraries_i] = ...
         nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.get_DefaultTransitionsNode(state, data_map);
     if ~isempty(node)
         external_nodes{end+1} = node;
     end
+    external_nodes = [external_nodes, external_nodes_i];
     external_libraries = [external_libraries, external_libraries_i];
 
     % Create State actions as external nodes that will be called by the states nodes.

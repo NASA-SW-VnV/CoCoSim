@@ -79,7 +79,7 @@ function [ main_node, isContractBlk, external_nodes, external_libraries, abstrac
     %%
 
     if isContractBlk ...
-            && (~LusBackendType.isKIND2(lus_backend) )
+            && (~coco_nasa_utils.LusBackendType.isKIND2(lus_backend) )
         %generate contracts only for KIND2 lus_backend
         % For other backends, a contract will be considered as a node
         % containing sub properties.
@@ -140,7 +140,7 @@ function [ main_node, isContractBlk, external_nodes, external_libraries, abstrac
                     %    clk_name, st_n, ph_n), body];
                     c{end+1} = clk_name;
                     % add clocks in the begining of the variables
-                    variables = MatlabUtils.concat({nasa_toLustre.lustreAst.LustreVar(...
+                    variables = coco_nasa_utils.MatlabUtils.concat({nasa_toLustre.lustreAst.LustreVar(...
                         clk_name, 'bool clock')}, variables);
                 end
             end
@@ -161,8 +161,8 @@ function [ main_node, isContractBlk, external_nodes, external_libraries, abstrac
     if isfield(ss_ir, 'ContractNodeNames')
         contractImports = nasa_toLustre.frontEnd.SS_To_LustreNode.getImportedContracts(...
                 parent_ir, ss_ir, main_sampleTime, node_inputs_withoutDT_cell, node_outputs_withoutDT_cell);
-        if ~CoCoBackendType.isDED(coco_backend) && (LusBackendType.isKIND2(lus_backend) ...
-                || LusBackendType.isLUSTREC(lus_backend))
+        if ~coco_nasa_utils.CoCoBackendType.isDED(coco_backend) && (coco_nasa_utils.LusBackendType.isKIND2(lus_backend) ...
+                || coco_nasa_utils.LusBackendType.isLUSTREC(lus_backend))
             %import contract
             contract = nasa_toLustre.lustreAst.LustreContract('', '', {}, {}, {}, ...
                 contractImports, true);
@@ -173,7 +173,7 @@ function [ main_node, isContractBlk, external_nodes, external_libraries, abstrac
 %             % subProperties.
 %             for i=1:length(contractImports)
 %                 contract_name = contractImports{i}.name;
-%                 contract_input = MatlabUtils.concat(contractImports{i}.inputs, ...
+%                 contract_input = coco_nasa_utils.MatlabUtils.concat(contractImports{i}.inputs, ...
 %                     contractImports{i}.outputs);
 %                 varId = nasa_toLustre.lustreAst.VarIdExpr(...
 %                     strcat(contract_name, '_virtual'));
@@ -204,7 +204,7 @@ function [ main_node, isContractBlk, external_nodes, external_libraries, abstrac
         sprintf('Original block name: %s', ss_ir.Origin_path), true);
     %main_node = sprintf('%s\n%s\n%s\n%s\nlet\n\t%s\ntel\n',...
     %    comment, node_header, contract, variables_str, body);
-    if isContractBlk && LusBackendType.isKIND2(lus_backend)
+    if isContractBlk && coco_nasa_utils.LusBackendType.isKIND2(lus_backend)
         % add time_step and nb_step assumptions
         if ~isempty(TOLUSTRE_NB_STEP_ASTEQ)
             body{end+1} = nasa_toLustre.lustreAst.ContractAssumeExpr('NB_STEP', ...
@@ -247,7 +247,7 @@ function [ main_node, isContractBlk, external_nodes, external_libraries, abstrac
             external_nodes_i = nasa_toLustre.frontEnd.condExecSS_To_LusMerge(parent_ir, ss_ir, lus_backend,...
                 hasEnablePort, hasActionPort, hasTriggerPort, isContractBlk, ...
                 main_sampleTime, xml_trace);
-            external_nodes = MatlabUtils.concat(external_nodes, external_nodes_i);
+            external_nodes = coco_nasa_utils.MatlabUtils.concat(external_nodes, external_nodes_i);
         end
     end
 

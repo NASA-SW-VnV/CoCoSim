@@ -65,5 +65,5 @@ function is_parent = isParent(Parent,child)
         %in destination struct, Name refers to Path. IR problem
         ParentPath = Parent.Name;
     end
-    is_parent = MatlabUtils.startsWith(childPath, ParentPath);
+    is_parent = coco_nasa_utils.MatlabUtils.startsWith(childPath, ParentPath);
 end

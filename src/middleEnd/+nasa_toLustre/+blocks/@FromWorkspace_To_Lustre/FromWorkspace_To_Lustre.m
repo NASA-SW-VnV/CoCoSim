@@ -157,12 +157,12 @@ classdef FromWorkspace_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 lowerOP = nasa_toLustre.lustreAst.BinaryExpr.GTE;
                 lowerCond = nasa_toLustre.lustreAst.BinaryExpr(...
                     lowerOP, simTime, t, [],...
-                    LusBackendType.isLUSTREC(lus_backend), epsilon);
+                    coco_nasa_utils.LusBackendType.isLUSTREC(lus_backend), epsilon);
                 
                 upperOP = nasa_toLustre.lustreAst.BinaryExpr.LT;
                 upperCond = nasa_toLustre.lustreAst.BinaryExpr(...
                     upperOP, simTime, t_plus_1, [], ...
-                    LusBackendType.isLUSTREC(lus_backend), epsilon);
+                    coco_nasa_utils.LusBackendType.isLUSTREC(lus_backend), epsilon);
                 
                 outputs_conds{end+1} = nasa_toLustre.lustreAst.BinaryExpr(...
                     nasa_toLustre.lustreAst.BinaryExpr.AND, lowerCond, upperCond);
@@ -221,7 +221,7 @@ classdef FromWorkspace_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 outputs_conds{end+1} = nasa_toLustre.lustreAst.BinaryExpr(...
                     nasa_toLustre.lustreAst.BinaryExpr.EQ, ...
                     simTime, ...
-                    t, [], LusBackendType.isLUSTREC(lus_backend), epsilon);
+                    t, [], coco_nasa_utils.LusBackendType.isLUSTREC(lus_backend), epsilon);
                 thens = cell(1, length(outputs));
                 for outIdx = 1:length(outputs)
                     thens{outIdx} = nasa_toLustre.utils.SLX2LusUtils.num2LusExp(...
@@ -321,7 +321,7 @@ classdef FromWorkspace_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 end
             end
             % add abs real for epsilon comparaison if backend is LUstrec
-            if LusBackendType.isLUSTREC(lus_backend)
+            if coco_nasa_utils.LusBackendType.isLUSTREC(lus_backend)
                 obj.addExternal_libraries('LustMathLib_abs_real');
             end
         end

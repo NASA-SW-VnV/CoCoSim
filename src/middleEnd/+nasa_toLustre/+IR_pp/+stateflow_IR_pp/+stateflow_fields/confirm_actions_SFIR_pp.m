@@ -107,9 +107,9 @@ function states = adapt_states(states)
     for i=1:numel(states)
         statePath = states{i}.Path;
         if isfield(states{i}, 'LabelString')...
-                && ( MatlabUtils.contains(states{i}.LabelString, ':') ...
-                || MatlabUtils.contains(states{i}.LabelString, ';')  ...%the case of one action without (en:|entry:) prefix
-                || MatlabUtils.contains(states{i}.LabelString, '='))
+                && ( coco_nasa_utils.MatlabUtils.contains(states{i}.LabelString, ':') ...
+                || coco_nasa_utils.MatlabUtils.contains(states{i}.LabelString, ';')  ...%the case of one action without (en:|entry:) prefix
+                || coco_nasa_utils.MatlabUtils.contains(states{i}.LabelString, '='))
             display_msg(...
                 sprintf('We need your confirmation on state actions of the State\n %s:', ...
                 statePath),...
@@ -123,13 +123,13 @@ function states = adapt_states(states)
             for j=1:numel(states_fields)
                 f = states_fields{j};
                 if isfield(states{i}.Actions, f) ...
-                        && MatlabUtils.contains(states{i}.LabelString, states_keywords{j})
+                        && coco_nasa_utils.MatlabUtils.contains(states{i}.LabelString, states_keywords{j})
                     if isempty(states{i}.Actions.(f))
                         action = 'not defined';
                     else
                         action = states{i}.Actions.(f);
                         if iscell(action)
-                            action = MatlabUtils.strjoin(action, '\n');
+                            action = coco_nasa_utils.MatlabUtils.strjoin(action, '\n');
                         end
                     end
                     display_msg(...
@@ -145,7 +145,7 @@ function states = adapt_states(states)
                 for j=1:numel(states_fields)
                     f = states_fields{j};
                     if isfield(states{i}.Actions, f) ...
-                            && MatlabUtils.contains(states{i}.LabelString, states_keywords{j})
+                            && coco_nasa_utils.MatlabUtils.contains(states{i}.LabelString, states_keywords{j})
                         prompt = sprintf('Provide the correct %s action (hit enter if not required):', f);
                         str = input(prompt,'s');
                         if ~isempty(str)
@@ -180,7 +180,7 @@ function transitions = adapt_transitions(transitions, statePath, transitionType)
                     else
                         action = transitions{i}.(f);
                         if iscell(action)
-                            action = MatlabUtils.strjoin(action, '\n');
+                            action = coco_nasa_utils.MatlabUtils.strjoin(action, '\n');
                         end
                     end
                     display_msg(...

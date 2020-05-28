@@ -46,7 +46,7 @@
 function lustrec_C_code(lus_full_path, output_dir, node_name)
 
 [lus_path, fname, ~] = fileparts(lus_full_path);
-fname = MatlabUtils.fileBase(fname);
+fname = coco_nasa_utils.MatlabUtils.fileBase(fname);
 if nargin < 2
     output_dir = fullfile(lus_path, strcat(fname, '_lustrec_C_code'));
 end
@@ -61,7 +61,7 @@ end
 
 
 tools_config;
-status = BUtils.check_files_exist(LUSTREC, LUCTREC_INCLUDE_DIR);
+status = coco_nasa_utils.MatlabUtils.check_files_exist(LUSTREC, LUCTREC_INCLUDE_DIR);
 if status
     msg = 'LUSTREC not found, please configure tools_config file under tools folder';
     display_msg(msg, MsgType.ERROR, 'lustrec_C_code', '');
@@ -72,7 +72,7 @@ end
 command = sprintf('%s %s -I "%s" -d "%s" -node %s "%s"', LUSTREC, LUSTREC_OPTS, LUCTREC_INCLUDE_DIR, output_dir,node_name,  lus_full_path);
 display_msg(['Lustrec command: ', command], MsgType.DEBUG, 'lustrec_C_code', '');
 [~, lustrec_output] = system(command);
-if ~MatlabUtils.contains(lustrec_output, '.. done')
+if ~coco_nasa_utils.MatlabUtils.contains(lustrec_output, '.. done')
     display_msg('Error Generating C code', Constants.ERROR, 'C Generation', '');
     display_msg(lustrec_output, MsgType.ERROR, 'C code Generation', '');
 else

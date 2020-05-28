@@ -111,7 +111,7 @@ function [names, names_dt] = getBlockOutputsNames(parent, blk, ...
                 % this is the case of virtual bus, we need to do back
                 % propagation to find the real datatypes
                 if isfield(blk, 'BusObject') && ~isempty(blk.BusObject)
-                    isBus = SLXUtils.isSimulinkBus(blk.BusObject);
+                    isBus = coco_nasa_utils.SLXUtils.isSimulinkBus(blk.BusObject);
                     
                     if isBus
                         lus_dt =...

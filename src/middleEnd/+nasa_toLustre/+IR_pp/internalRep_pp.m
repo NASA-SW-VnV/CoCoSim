@@ -73,8 +73,7 @@ function [ new_ir, ir_handle_struct_map, ir_json_path ] = internalRep_pp( new_ir
     %% export json
     if json_export
         try
-            ir_encoded = MatlabUtils.jsonencode(new_ir);
-            ir_encoded = strrep(ir_encoded,'\/','/');
+            
             mdl_name = '';
             if nargin < 3
                 if isfield(new_ir, 'meta') && isfield(new_ir.meta, 'file_path')
@@ -88,24 +87,10 @@ function [ new_ir, ir_handle_struct_map, ir_json_path ] = internalRep_pp( new_ir
                 end
             end
             
-            json_name = 'IR_pp_tmp.json';
-            json_path = fullfile(output_dir, json_name);
-            fid = fopen(json_path, 'w');
-            fprintf(fid, '%s\n', ir_encoded);
-            fclose(fid);
+            json_fname = strcat('IR_pp_', mdl_name,'.json');
+            [~, ir_json_path] = coco_nasa_utils.MatlabUtils.json_export(...
+                new_ir, output_dir, json_fname);
             
-            ir_json_path = fullfile(output_dir, strcat('IR_pp_', mdl_name,'.json'));
-            cmd = ['cat ' json_path ' | python -mjson.tool > ' ir_json_path];
-            try
-                [status, output] = system(cmd);
-                if status==0
-                    system(['rm ' json_path]);
-                else
-                    warning('IR_PP json file couldn''t be formatted see error:\n%s\n',...
-                        output);
-                end
-            catch
-            end
         catch me
             display_msg(me.getReport(), MsgType.DEBUG, 'internalRep_pp', '');
         end

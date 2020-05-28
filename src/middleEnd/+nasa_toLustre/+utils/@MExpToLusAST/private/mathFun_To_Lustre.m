@@ -78,7 +78,7 @@ function [code, exp_dt, dim, extra_code] = mathFun_To_Lustre(tree, args)
                 tree.parameters(1), args);
             [param2, ~, dim2, extra_code_i] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
                 tree.parameters(2), args);
-            extra_code = MatlabUtils.concat(extra_code, extra_code_i);
+            extra_code = coco_nasa_utils.MatlabUtils.concat(extra_code, extra_code_i);
             if numel(dim1) > numel(dim2)
                 dim = dim1;
             else
@@ -100,7 +100,7 @@ function [code, exp_dt, dim, extra_code] = mathFun_To_Lustre(tree, args)
                 tree.parameters(1), args);
             [param2, ~, dim2, extra_code_i] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
                 tree.parameters(2), args);
-            extra_code = MatlabUtils.concat(extra_code, extra_code_i);
+            extra_code = coco_nasa_utils.MatlabUtils.concat(extra_code, extra_code_i);
             % sqrt(x*x, y*y)
             param1 = arrayfun(@(i) nasa_toLustre.lustreAst.BinaryExpr(nasa_toLustre.lustreAst.BinaryExpr.MULTIPLY, param1{i}, param1{i}, [], [], [], 'real'), ...
                 (1:numel(param1)), 'UniformOutput', false);
@@ -144,7 +144,7 @@ function [code, exp_dt, dim, extra_code] = mathFun_To_Lustre(tree, args)
             args.expected_lusDT = '';
             [param1, param1_dt, dim1, extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(1), args);
             [param2, param2_dt, dim2, extra_code_i] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(2), args);
-            extra_code = MatlabUtils.concat(extra_code, extra_code_i);
+            extra_code = coco_nasa_utils.MatlabUtils.concat(extra_code, extra_code_i);
             params_Dt = nasa_toLustre.utils.MExpToLusDT.upperDT(param1_dt, param2_dt);
             if strcmp(params_Dt, 'int')
                 fun_name = strcat(tree_ID, '_int_int');

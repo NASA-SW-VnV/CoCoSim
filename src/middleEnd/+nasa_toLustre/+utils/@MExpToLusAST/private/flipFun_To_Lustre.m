@@ -51,7 +51,7 @@ function [code, exp_dt, dim, extra_code] = flipFun_To_Lustre(tree, args)
     if (length(tree.parameters) > 1)
         args.expected_lusDT = 'int';
         [Y, ~, ~, extra_code_i] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(2),args);
-        extra_code = MatlabUtils.concat(extra_code, extra_code_i);
+        extra_code = coco_nasa_utils.MatlabUtils.concat(extra_code, extra_code_i);
         if isempty(Y) || (~isa(Y{1}, 'nasa_toLustre.lustreAst.IntExpr'))
             ME = MException('COCOSIM:TREE2CODE', ...
                 'Second argument in function flip in expression "%s" should be a constant.',...

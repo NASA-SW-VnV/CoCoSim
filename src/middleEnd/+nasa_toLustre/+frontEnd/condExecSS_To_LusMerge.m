@@ -184,7 +184,7 @@ function [body, variables_cell] =...
     % Jkind Syntax:
     % (node_outputs_withoutDT) = condact(_isEnabled, originalNodeName(inputs), 0.0(*Initial Condition for first output*), 0.0(*Initial Condition for Second output*));
     
-    if LusBackendType.isJKIND(lus_backend)
+    if coco_nasa_utils.LusBackendType.isJKIND(lus_backend)
         if is_restart
             %Jkind does not have an operator to restart a node memory
             display_msg(sprintf(['Block "%s" is not supported by JKind model checker.', ...
@@ -208,7 +208,7 @@ function [body, variables_cell] =...
         end
         
     else
-        if LusBackendType.isKIND2(lus_backend)
+        if coco_nasa_utils.LusBackendType.isKIND2(lus_backend)
             isEnabledVar =...
                 nasa_toLustre.lustreAst.VarIdExpr(activate_cond);
         else
@@ -223,7 +223,7 @@ function [body, variables_cell] =...
         if is_restart
             reset_cond = nasa_toLustre.utils.SLX2LusUtils.getResetCode(...
                 'rising', 'bool', isEnabledVar );
-            if LusBackendType.isKIND2(lus_backend)
+            if coco_nasa_utils.LusBackendType.isKIND2(lus_backend)
                 restart_cond = reset_cond;
             else
                 reset_clock_var_name = strcat(activate_cond, '_reset_clock');

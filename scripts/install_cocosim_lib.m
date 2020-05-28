@@ -101,7 +101,7 @@ function isAlreadyUpToDate = cloneOrPull(git_dir, git_url, git_branch)
             sprintf('git pull origin %s', git_branch)};
         pull_idex = 2;
     else
-        MatlabUtils.mkdir(git_dir);
+        coco_nasa_utils.MatlabUtils.mkdir(git_dir);
         cd(git_dir)
         commands = {' git init; touch .gitconfig; git config --local http.sslverify false', ...
             sprintf('git remote add -f origin %s', git_url), ...
@@ -116,7 +116,7 @@ function isAlreadyUpToDate = cloneOrPull(git_dir, git_url, git_branch)
             return;
         end
     end
-    isAlreadyUpToDate = MatlabUtils.contains(sys_out{pull_idex}, 'Already up to date.');
+    isAlreadyUpToDate = coco_nasa_utils.MatlabUtils.contains(sys_out{pull_idex}, 'Already up to date.');
 end
 %%
 function copyCoCoFiles(force, cocosim_path)
@@ -176,10 +176,10 @@ function copyCoCoFiles(force, cocosim_path)
         fprintf('Copying files from tools/build/github/cocosim/%s to %s\n', sources{i}, destinations{i}) ;
         dst_path = fullfile(cocosim_path, destinations{i});
         if ~exist(dst_path, 'file') && ~exist(dst_path, 'dir')
-            if MatlabUtils.contains(dst_path, '.')
-                MatlabUtils.mkdir(fileparts(dst_path));
+            if coco_nasa_utils.MatlabUtils.contains(dst_path, '.')
+                coco_nasa_utils.MatlabUtils.mkdir(fileparts(dst_path));
             else
-                MatlabUtils.mkdir(dst_path);
+                coco_nasa_utils.MatlabUtils.mkdir(dst_path);
             end
         end
         [SUCCESS,MESSAGE,~] = copyfile(fullfile(coco_git_dir, sources{i}), dst_path);
@@ -229,10 +229,10 @@ function copyExternalLibFiles(force, cocosim_path)
         fprintf('Copying files from tools/build/github/externalLib/%s to %s\n', sources{i}, destinations{i}) ;
         dst_path = fullfile(cocosim_path, destinations{i});
         if ~exist(dst_path, 'file') && ~exist(dst_path, 'dir')
-            if MatlabUtils.contains(dst_path, '.')
-                MatlabUtils.mkdir(fileparts(dst_path));
+            if coco_nasa_utils.MatlabUtils.contains(dst_path, '.')
+                coco_nasa_utils.MatlabUtils.mkdir(fileparts(dst_path));
             else
-                MatlabUtils.mkdir(dst_path);
+                coco_nasa_utils.MatlabUtils.mkdir(dst_path);
             end
         end
         [SUCCESS,MESSAGE,~] = copyfile(fullfile(externalLibs_git_dir, sources{i}), dst_path);

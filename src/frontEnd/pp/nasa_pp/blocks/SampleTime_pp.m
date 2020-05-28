@@ -51,7 +51,7 @@ function [status, errors_msg] = SampleTime_pp(new_model_base)
     errors_msg = {};
     
     try
-        [st, ~] = SLXUtils.getModelCompiledSampleTime(new_model_base);
+        [st, ~] = coco_nasa_utils.SLXUtils.getModelCompiledSampleTime(new_model_base);
         configSet = getActiveConfigSet(new_model_base);
         if st > 0
             set_param(configSet, 'SolverType', 'Fixed-step');

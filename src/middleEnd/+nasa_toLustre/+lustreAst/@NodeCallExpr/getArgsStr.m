@@ -51,7 +51,7 @@ function args_str = getArgsStr(args, backend)
         else
             args_cell = cellfun(@(x) x.print(backend), args, 'UniformOutput', 0);
         end
-        args_str = MatlabUtils.strjoin(args_cell, ', ');
+        args_str = coco_nasa_utils.MatlabUtils.strjoin(args_cell, ', ');
     elseif numel(args) == 1
         args_str = args.print(backend);
     else

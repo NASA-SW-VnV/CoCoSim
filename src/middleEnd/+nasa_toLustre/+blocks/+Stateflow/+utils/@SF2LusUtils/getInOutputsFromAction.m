@@ -61,8 +61,8 @@ function [outputs, inputs] = getInOutputsFromAction(lus_action, isCondition, dat
             if isa(assignments{act_idx}, 'nasa_toLustre.lustreAst.ConcurrentAssignments')
                 [outputs_i, inputs_i] = nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.getInOutputsFromAction(...
                     assignments(act_idx), isCondition, data_map, expression);
-                outputs = MatlabUtils.concat(outputs, outputs_i);
-                inputs = MatlabUtils.concat(inputs, inputs_i);
+                outputs = coco_nasa_utils.MatlabUtils.concat(outputs, outputs_i);
+                inputs = coco_nasa_utils.MatlabUtils.concat(inputs, inputs_i);
                 continue;
             elseif~isa(assignments{act_idx}, 'nasa_toLustre.lustreAst.LustreEq')
                 if isMatlab

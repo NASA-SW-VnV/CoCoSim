@@ -130,7 +130,7 @@ classdef Trigonometry_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
         end
         %%
         function is_Abstracted = isAbstracted(obj, ~, ~, lus_backend, varargin)
-            is_Abstracted = LusBackendType.isKIND2(lus_backend);
+            is_Abstracted = coco_nasa_utils.LusBackendType.isKIND2(lus_backend);
         end
     end
     

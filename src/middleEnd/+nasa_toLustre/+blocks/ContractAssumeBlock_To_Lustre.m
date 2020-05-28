@@ -69,7 +69,7 @@ classdef ContractAssumeBlock_To_Lustre < nasa_toLustre.blocks.SubSystem_To_Lustr
             end
             prop_ID =nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);
             isInsideContract =nasa_toLustre.utils.SLX2LusUtils.isContractBlk(parent);
-            if LusBackendType.isKIND2(lus_backend) && isInsideContract
+            if coco_nasa_utils.LusBackendType.isKIND2(lus_backend) && isInsideContract
                 obj.addCode(...
                     nasa_toLustre.lustreAst.ContractAssumeExpr(prop_ID, prop));
             else

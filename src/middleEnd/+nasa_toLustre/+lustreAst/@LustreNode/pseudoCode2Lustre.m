@@ -43,6 +43,7 @@
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [new_obj, varIds] = pseudoCode2Lustre(obj, data_map)
+    % This function is used by Stateflow chart and Matlab Function
     varIds = {};
     outputs_map = containers.Map('KeyType', 'char', 'ValueType', 'int32');
 
@@ -95,6 +96,12 @@ function [new_obj, varIds] = pseudoCode2Lustre(obj, data_map)
                 out_DT);
         end
     end
+    % add __0 to the inputs. e.g., Lustre keyword mode => mode_0
+    for i=1:numel(obj.inputs)
+        obj.inputs{i} = nasa_toLustre.lustreAst.LustreVar(...
+            strcat(obj.inputs{i}.getId(), '__0'), obj.inputs{i}.getDT());
+    end
+    
     tobeRemoved = [];
     nbVars = length(obj.localVars);
     for i=1:nbVars

@@ -60,16 +60,27 @@ classdef ContractModeBlock_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             obj.ContentNeedToBeTranslated = 0;
         end
         function  write_code(obj, parent, blk, xml_trace, lus_backend, ~, main_sampleTime, varargin)
+            % There are two versions of Mode Block, this code is handling
+            % both.
             
             if ~nasa_toLustre.utils.SLX2LusUtils.isContractBlk(parent)
                 display_msg(sprintf('Mode block "%s" should not be outside a Contract Subsystem', HtmlItem.addOpenCmd(blk.Origin_path)),...
                     MsgType.ERROR, 'ContractModeBlock_To_Lustre', '');
                 return;
             end
+            
             widths = blk.CompiledPortWidths.Inport;
             nb_inputs = numel(widths);
             inputs = cell(1, nb_inputs);
-            
+            if isfield(blk, 'requirePorts') && isfield(blk, 'ensurePorts')
+                % This is NASA version of Mode block
+                nb_requires = str2num(blk.requirePorts);
+                nb_ensures = str2num(blk.ensurePorts);
+            else
+                % This is IOWA version of Mode block
+                nb_requires = 1;
+                nb_ensures = 1;
+            end
             for i=1:nb_inputs
                 inputs{i} =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk, i);
                 
@@ -94,37 +105,44 @@ classdef ContractModeBlock_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     end
                 end
             end
-            requires = cell(1, length(inputs{1}));
-            for i=1:length(inputs{1})
-                requires{i} = nasa_toLustre.lustreAst.ContractRequireExpr(inputs{1}{i});
+            requires = {};
+            for i=1:nb_requires
+                for j=1:length(inputs{i})
+                    requires{end+1} = nasa_toLustre.lustreAst.ContractRequireExpr(inputs{i}{j});
+                end
             end
             ensure_blk = nasa_toLustre.utils.SLX2LusUtils.getpreBlock(parent, blk, 2);
-            prop_ID =nasa_toLustre.utils.SLX2LusUtils.node_name_format(ensure_blk);
+            prop_ID = nasa_toLustre.utils.SLX2LusUtils.node_name_format(ensure_blk);
             
-            ensures = cell(1, length(inputs{2}));
-            for i=1:length(inputs{2})
-                ensures{i} = nasa_toLustre.lustreAst.ContractEnsureExpr(prop_ID, inputs{2}{i});
-                %prop_ID_i = sprintf('%s_%d', prop_ID, i);
+            ensures = {};
+            for i=nb_requires+1:length(inputs)
+                for j=1:length(inputs{i})
+                    ensures{end+1} = nasa_toLustre.lustreAst.ContractEnsureExpr(prop_ID, inputs{i}{j});
+                end
+                ensure_blk = nasa_toLustre.utils.SLX2LusUtils.getpreBlock(parent, blk, i);
+                prop_ID = nasa_toLustre.utils.SLX2LusUtils.node_name_format(ensure_blk);
                 xml_trace.add_Property(...
                     ensure_blk.Origin_path, ...
                     nasa_toLustre.utils.SLX2LusUtils.node_name_format(parent),...
                     prop_ID, i, 'ensure');
             end
+            
             isInsideContract =nasa_toLustre.utils.SLX2LusUtils.isContractBlk(parent);
-            if LusBackendType.isKIND2(lus_backend) && isInsideContract
+            if coco_nasa_utils.LusBackendType.isKIND2(lus_backend) && isInsideContract
                 blk_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);
                 code = nasa_toLustre.lustreAst.ContractModeExpr(blk_name, requires, ensures);
+                obj.addCode( code );
             else
                 A = nasa_toLustre.lustreAst.BinaryExpr.BinaryMultiArgs(...
-                    nasa_toLustre.lustreAst.BinaryExpr.AND, requires);
+                    nasa_toLustre.lustreAst.BinaryExpr.AND, inputs{1});
                 B = nasa_toLustre.lustreAst.BinaryExpr.BinaryMultiArgs(...
-                    nasa_toLustre.lustreAst.BinaryExpr.AND, ensures);
+                    nasa_toLustre.lustreAst.BinaryExpr.AND, inputs{2});
                 prop = nasa_toLustre.lustreAst.BinaryExpr(...
                     nasa_toLustre.lustreAst.BinaryExpr.IMPLIES, A, B);
                  obj.addCode(nasa_toLustre.lustreAst.LocalPropertyExpr(...
                     prop_ID, prop));
             end
-            obj.addCode( code );
+            
             
         end
         

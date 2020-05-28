@@ -93,10 +93,10 @@ function IDs = modifiedVars(tree)
     end
     for i=1:length(tree_statements)
         if strcmp(tree_statements{i}.type, 'assignment')
-            IDs = MatlabUtils.concat(IDs, ...
+            IDs = coco_nasa_utils.MatlabUtils.concat(IDs, ...
                 nasa_toLustre.utils.MF2LusUtils.getAssignmentLeftIDs(tree_statements{i}));
         elseif isfield(tree_statements{i}, 'statements')
-            IDs = MatlabUtils.concat(IDs, modifiedVars(tree_statements{i}));
+            IDs = coco_nasa_utils.MatlabUtils.concat(IDs, modifiedVars(tree_statements{i}));
         end
     end
 end

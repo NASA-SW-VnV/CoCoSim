@@ -52,7 +52,7 @@ end
 
 function contractToSLDV(varargin)
     try
-        model_full_path = MenuUtils.get_file_name(gcs) ;
+        model_full_path = coco_nasa_utils.MenuUtils.get_file_name(gcs) ;
         transformContractToSLDV( model_full_path );
     catch ME
         display_msg(ME.getReport(), MsgType.DEBUG,'IRMenu','');

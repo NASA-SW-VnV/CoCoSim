@@ -90,7 +90,7 @@ classdef StateflowTruthTable_To_Lustre
                         cond{end+1} = sprintf('~(%s)', c.Condition);
                     end
                 end
-                cond_str = MatlabUtils.strjoin(cond, ' && ');
+                cond_str = coco_nasa_utils.MatlabUtils.strjoin(cond, ' && ');
                 actions = {};
                 for j = 1 : numel(table.Decisions{i}.Actions)
                     idx = table.Decisions{i}.Actions{j};
@@ -98,7 +98,7 @@ classdef StateflowTruthTable_To_Lustre
                         actions{end+1} = actions_index_map(idx);
                     end
                 end
-                actions_str = MatlabUtils.strjoin(actions, '\n');
+                actions_str = coco_nasa_utils.MatlabUtils.strjoin(actions, '\n');
                 junc =  nasa_toLustre.blocks.Stateflow.StateflowTruthTable_To_Lustre.buildJunctionStruct(tablePath);
                 junc.OuterTransitions{1} = nasa_toLustre.blocks.Stateflow.StateflowTruthTable_To_Lustre.buildTransitionStruct(1, ...
                     beforeFinalJunction, cond_str, actions_str, junc.Path);

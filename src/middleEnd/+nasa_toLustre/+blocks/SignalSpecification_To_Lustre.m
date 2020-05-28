@@ -66,8 +66,8 @@ classdef SignalSpecification_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             
             
             %% Design Error Detection Backend code:
-            if CoCoBackendType.isDED(coco_backend)
-                if ismember(CoCoBackendType.DED_OUTMINMAX, ...
+            if coco_nasa_utils.CoCoBackendType.isDED(coco_backend)
+                if ismember(coco_nasa_utils.CoCoBackendType.DED_OUTMINMAX, ...
                         CoCoSimPreferences.dedChecks)
                     outputDataType = blk.CompiledPortDataTypes.Outport{1};
                     lusOutDT =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(outputDataType);

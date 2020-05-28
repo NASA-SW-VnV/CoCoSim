@@ -43,7 +43,7 @@
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [node, external_nodes, opens, abstractedNodes] = get__Ceiling(lus_backend, varargin)
-    if LusBackendType.isKIND2(lus_backend)
+    if coco_nasa_utils.LusBackendType.isKIND2(lus_backend)
                 opens = {};
         abstractedNodes = {};
         external_nodes = {'LustDTLib__Floor'};

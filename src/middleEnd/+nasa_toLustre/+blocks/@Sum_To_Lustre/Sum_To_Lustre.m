@@ -78,8 +78,8 @@ classdef Sum_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             obj.addVariable(additionalVars);
             
             %% Design Error Detection Backend code:
-            if CoCoBackendType.isDED(coco_backend)
-                if ismember(CoCoBackendType.DED_OUTMINMAX, ...
+            if coco_nasa_utils.CoCoBackendType.isDED(coco_backend)
+                if ismember(coco_nasa_utils.CoCoBackendType.DED_OUTMINMAX, ...
                         CoCoSimPreferences.dedChecks)
                     lusOutDT =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(OutputDataTypeStr);
                     DEDUtils.OutMinMaxCheckCode(obj, parent, blk, outputs, lusOutDT, xml_trace);

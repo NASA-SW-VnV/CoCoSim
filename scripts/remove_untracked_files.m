@@ -77,7 +77,7 @@ if status==0
     parents = parents(II);
     parents = parents(cellfun(@(x) isdir(x), parents));
     % remove empty folders
-    cellfun(@(x) MatlabUtils.rmdir(x), parents);
+    cellfun(@(x) coco_nasa_utils.MatlabUtils.rmdir(x), parents);
 else
     fprintf('Git status command can not be run see error:\n%s\n', git_output);
 end

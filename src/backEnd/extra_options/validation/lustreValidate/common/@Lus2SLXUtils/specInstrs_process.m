@@ -49,7 +49,7 @@ function specInstrs_process(node_block_path, blk_spec, node_name)
     guarantees = blk_spec.guarantees;
     modes = blk_spec.modes;
     % add validator
-    vPath = BUtils.get_unique_block_name(fullfile(node_block_path,'validator'));
+    vPath = coco_nasa_utils.SLXUtils.makeBlockNameUnique(fullfile(node_block_path,'validator'));
     vHandle = add_block('CoCoSimSpecification/contract/validator', ...
         vPath, ...
         'MakeNameUnique', 'on', ...
@@ -58,7 +58,7 @@ function specInstrs_process(node_block_path, blk_spec, node_name)
         'modePorts', num2str(length(modes)));
     
     % remove connected blocks to validator that are added by its callback
-    SLXUtils.removeBlocksLinkedToMe(vHandle, false);
+    coco_nasa_utils.SLXUtils.removeBlocksLinkedToMe(vHandle, false);
     %make sure all porthandles are -1
     vPortConnectivity = get_param(vHandle, 'PortConnectivity');
     srcBlocks = {vPortConnectivity.SrcBlock};
@@ -67,7 +67,7 @@ function specInstrs_process(node_block_path, blk_spec, node_name)
         % there is a connection that is not removed
     end
     % add validator output
-    output_path = BUtils.get_unique_block_name(fullfile(node_block_path,'valid'));
+    output_path = coco_nasa_utils.SLXUtils.makeBlockNameUnique(fullfile(node_block_path,'valid'));
     outHandle = add_block('simulink/Ports & Subsystems/Out1',...
         output_path);
     SrcBlkH = get_param(vHandle,'PortHandles');
@@ -82,7 +82,7 @@ function specInstrs_process(node_block_path, blk_spec, node_name)
         if isfield(assumes(i), 'name') && ~isempty(assumes(i).name)
             assume_name = assumes(i).name;
         end
-        assumePath = BUtils.get_unique_block_name(fullfile(node_block_path, assume_name));
+        assumePath = coco_nasa_utils.SLXUtils.makeBlockNameUnique(fullfile(node_block_path, assume_name));
         aHandle = add_block('CoCoSimSpecification/assume', ...
             assumePath, ...
             'MakeNameUnique', 'on');
@@ -96,7 +96,7 @@ function specInstrs_process(node_block_path, blk_spec, node_name)
         if isfield(guarantees(i), 'name') && ~isempty(guarantees(i).name)
             g_name = guarantees(i).name;
         end
-        gPath = BUtils.get_unique_block_name(fullfile(node_block_path,g_name));
+        gPath = coco_nasa_utils.SLXUtils.makeBlockNameUnique(fullfile(node_block_path,g_name));
         gHandle = add_block('CoCoSimSpecification/guarantee', ...
             gPath, ...
             'MakeNameUnique', 'on');
@@ -115,8 +115,8 @@ function process_assumeGuarantee(node_block_path, gPath, gStruct, vHandle, vPort
     createInportOutport(gPath);
     
     % add outside connection
-    rhs_name = BUtils.adapt_block_name(gStruct.qfexpr.value, node_name);
-    rhs_path = BUtils.get_unique_block_name(strcat(gPath,'_rhs'));
+    rhs_name = coco_nasa_utils.SLXUtils.adapt_block_name(gStruct.qfexpr.value, node_name);
+    rhs_path = coco_nasa_utils.SLXUtils.makeBlockNameUnique(strcat(gPath,'_rhs'));
     add_block('simulink/Signal Routing/From',...
         rhs_path,...
         'GotoTag',rhs_name,...
@@ -138,7 +138,7 @@ function process_mode(node_block_path, mode, vHandle, vPortNumber, node_name)
     ensures = mode.ensure;
     
     % add mode block
-    mPath = BUtils.get_unique_block_name(fullfile(node_block_path, mode_id));
+    mPath = coco_nasa_utils.SLXUtils.makeBlockNameUnique(fullfile(node_block_path, mode_id));
     mHandle = add_block('CoCoSimSpecification/mode', ...
         mPath, ...
         'MakeNameUnique', 'on');
@@ -149,7 +149,7 @@ function process_mode(node_block_path, mode, vHandle, vPortNumber, node_name)
     add_line(node_block_path, SrcBlkH.Outport(1), DstBlkH.Inport(vPortNumber), 'autorouting', 'on');
     
     % add require block
-    rPath = BUtils.get_unique_block_name(fullfile(node_block_path, ...
+    rPath = coco_nasa_utils.SLXUtils.makeBlockNameUnique(fullfile(node_block_path, ...
         strcat(mode_id, '_require')));
     rHandle = add_block('CoCoSimSpecification/require', ...
         rPath, ...
@@ -162,7 +162,7 @@ function process_mode(node_block_path, mode, vHandle, vPortNumber, node_name)
     add_line(node_block_path, SrcBlkH.Outport(1), DstBlkH.Inport(1), 'autorouting', 'on');
     
     % add ensure block
-    ePath = BUtils.get_unique_block_name(fullfile(node_block_path, ...
+    ePath = coco_nasa_utils.SLXUtils.makeBlockNameUnique(fullfile(node_block_path, ...
         strcat(mode_id, '_ensure')));
     eHandle = add_block('CoCoSimSpecification/ensure', ...
         ePath, ...
@@ -184,7 +184,7 @@ end
 function addRequireEnsureConditions(node_block_path, node_name, rPath, rHandle, requires)
     if isempty(requires)
         % require true;
-        cst_path = BUtils.get_unique_block_name(strcat(rPath, '_true'));
+        cst_path = coco_nasa_utils.SLXUtils.makeBlockNameUnique(strcat(rPath, '_true'));
         cHandle = add_block('simulink/Commonly Used Blocks/Constant',...
             cst_path,...
             'MakeNameUnique', 'on',...
@@ -195,7 +195,7 @@ function addRequireEnsureConditions(node_block_path, node_name, rPath, rHandle, 
         DstBlkH = get_param(rHandle, 'PortHandles');
         add_line(node_block_path, SrcBlkH.Outport(1), DstBlkH.Inport(1), 'autorouting', 'on');
     else
-        op_path = BUtils.get_unique_block_name(strcat(rPath, '_cond'));
+        op_path = coco_nasa_utils.SLXUtils.makeBlockNameUnique(strcat(rPath, '_cond'));
         
         opHandle = add_block('simulink/Logic and Bit Operations/Logical Operator',...
             op_path, ...
@@ -210,11 +210,11 @@ function addRequireEnsureConditions(node_block_path, node_name, rPath, rHandle, 
         
         %add all requires
         for i=1:length(requires)
-            rhs_name = BUtils.adapt_block_name(requires(i).qfexpr.value, node_name);
+            rhs_name = coco_nasa_utils.SLXUtils.adapt_block_name(requires(i).qfexpr.value, node_name);
             if isfield(requires(i), 'name')
-                rhs_path = BUtils.get_unique_block_name(strcat(op_path,requires(i).name));
+                rhs_path = coco_nasa_utils.SLXUtils.makeBlockNameUnique(strcat(op_path,requires(i).name));
             else
-                rhs_path = BUtils.get_unique_block_name(strcat(op_path,'_rhs'));
+                rhs_path = coco_nasa_utils.SLXUtils.makeBlockNameUnique(strcat(op_path,'_rhs'));
             end
             rhsHandle = add_block('simulink/Signal Routing/From',...
                 rhs_path,...

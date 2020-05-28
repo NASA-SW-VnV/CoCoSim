@@ -78,7 +78,7 @@ classdef MatlabFunction_Test < Block_Test
                             obj.supportedFun{f}, i);
                         addCondExecSS = false;
                         new_output_dir = fullfile(outputDir, obj.supportedFun{f});
-                        MatlabUtils.mkdir(new_output_dir);
+                        coco_nasa_utils.MatlabUtils.mkdir(new_output_dir);
                         [blkPath, mdl_path, skip] = Block_Test.create_new_model(...
                             mdl_name, new_output_dir, deleteIfExists, addCondExecSS);
                         if skip

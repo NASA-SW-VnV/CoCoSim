@@ -65,7 +65,7 @@ function [status, errors_msg] = Relay_pp(model)
             %check for Enumeration
             outputDT = get_param(Relay_list{i},'OutDataTypeStr' );
             isEnum = false;
-            if MatlabUtils.startsWith(outputDT, 'Enum:')
+            if coco_nasa_utils.MatlabUtils.startsWith(outputDT, 'Enum:')
                 isEnum = true;
                 InitialOutput = OffOutputValue;
             end

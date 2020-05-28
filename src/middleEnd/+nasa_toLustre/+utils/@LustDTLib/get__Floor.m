@@ -43,7 +43,7 @@
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [node, external_nodes, opens, abstractedNodes] = get__Floor(lus_backend, varargin)
-    if LusBackendType.isKIND2(lus_backend)
+    if coco_nasa_utils.LusBackendType.isKIND2(lus_backend)
         abstractedNodes = {};
                 opens = {};
         external_nodes = {};

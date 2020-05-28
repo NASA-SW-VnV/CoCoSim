@@ -144,7 +144,7 @@ classdef MExpToLusDT
                     new_output_dt = output_dt{i};
                 end
             catch me
-                display_msg(sprintf('I could not cast expression: %s\n', code{1}.print(LusBackendType.LUSTREC)), ...
+                display_msg(sprintf('I could not cast expression: %s\n', code{1}.print(coco_nasa_utils.LusBackendType.LUSTREC)), ...
                     MsgType.DEBUG, 'MExpToLusDT.convertDT', '')
                 display_msg(me.getReport(), MsgType.DEBUG, 'MExpToLusDT.convertDT', '');
                 % ignore type casting
@@ -184,8 +184,8 @@ classdef MExpToLusDT
                 end
             elseif strcmp(left_lusDT, 'int') || strcmp(right_lusDT, 'int')
                 lusDT = 'int';
-                if MatlabUtils.contains(left_slxDT, 'int') ...
-                        && MatlabUtils.contains(right_slxDT, 'int')
+                if coco_nasa_utils.MatlabUtils.contains(left_slxDT, 'int') ...
+                        && coco_nasa_utils.MatlabUtils.contains(right_slxDT, 'int')
                     d1 = str2double(regexprep(left_slxDT, '[a-zA-Z]+', ''));
                     d2 = str2double(regexprep(right_slxDT, '[a-zA-Z]+', ''));
                     if d1 > d2
@@ -194,7 +194,7 @@ classdef MExpToLusDT
                         slxDT = right_slxDT;
                     end
                 else
-                    if MatlabUtils.contains(left_slxDT, 'int')
+                    if coco_nasa_utils.MatlabUtils.contains(left_slxDT, 'int')
                         slxDT = left_slxDT;
                     else
                         slxDT = right_slxDT;

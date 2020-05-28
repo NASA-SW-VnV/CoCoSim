@@ -66,7 +66,7 @@ function [code, exp_dt, dim, extra_code] = binaryExpression_To_Lustre(tree, args
         tree.leftExp, args);
     [right, ~, right_dim, right_extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
         tree.rightExp, args);
-    extra_code = MatlabUtils.concat(left_extra_code, right_extra_code);
+    extra_code = coco_nasa_utils.MatlabUtils.concat(left_extra_code, right_extra_code);
 
     % Get Operator
     if strcmp(tree_type, 'plus_minus') % '+' '-'
@@ -85,21 +85,29 @@ function [code, exp_dt, dim, extra_code] = binaryExpression_To_Lustre(tree, args
         op = nasa_toLustre.lustreAst.BinaryExpr.MULTIPLY;
     elseif strcmp(tree_type, 'mrdivide')... % '/' './'
             || strcmp(tree_type, 'rdivide')
-        if isempty(left_dim) || (length(left_dim) >= 1 && prod(left_dim) == 1)
+        if isempty(left_dim) ||  prod(left_dim) == 1
             dim = right_dim;
-        elseif isempty(right_dim) || (length(right_dim) >= 1 && prod(right_dim) == 1)
+        elseif isempty(right_dim) ||  prod(right_dim) == 1
             dim = left_dim;
         elseif length(left_dim) <= 2 && length(right_dim) <= 2
             if strcmp(tree_type, 'mrdivide')
                 dim = [left_dim(1), right_dim(1)];
             else
-                dim = left_dim;
+                ME = MException('COCOSIM:TREE2CODE', ...
+                    'Matrix division in Expression "%s" is not supported.',...
+                    tree.text);
+                throw(ME);
             end
         else
             %TODO support more than 3 dimensions
             dim = left_dim;
         end
-        op = nasa_toLustre.lustreAst.BinaryExpr.DIVIDE;
+        if strcmp(operands_dt, 'int')
+            [code, exp_dt, extra_code] = getIntDivision(tree, args);
+            return;
+        else
+            op = nasa_toLustre.lustreAst.BinaryExpr.DIVIDE;
+        end
     elseif strcmp(tree_type, 'relopGL') % '<' '>' '<=' '>='
         if isempty(left_dim) || (length(left_dim) >= 1 && prod(left_dim) == 1)
             dim = right_dim;
@@ -158,7 +166,7 @@ function [code, exp_dt, dim, extra_code] = getPowerCode(tree, args)
         tree.leftExp, args);
     [right, ~, right_dim, right_extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
         tree.rightExp, args);
-    extra_code = MatlabUtils.concat(left_extra_code, right_extra_code);
+    extra_code = coco_nasa_utils.MatlabUtils.concat(left_extra_code, right_extra_code);
     if numel(left) > 1 && strcmp(tree_type, 'mpower')
         ME = MException('COCOSIM:TREE2CODE', ...
             'Expression "%s" has a power of matrix is not supported.',...
@@ -172,5 +180,32 @@ function [code, exp_dt, dim, extra_code] = getPowerCode(tree, args)
         dim = right_dim;
     end
     code = arrayfun(@(i) nasa_toLustre.lustreAst.NodeCallExpr('pow', {left{i},right{i}}), ...
+        (1:numel(left)), 'UniformOutput', false);
+end
+
+function [code, exp_dt, extra_code] = getIntDivision(tree, args)
+    
+    exp_dt = 'int';
+    tree_type = tree.type;
+    args.blkObj.addExternal_libraries('LustMathLib_int_div_Ceiling');
+    args.expected_lusDT = 'int';
+    [left, ~, left_dim, left_extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
+        tree.leftExp, args);
+    [right, ~, right_dim, right_extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(...
+        tree.rightExp, args);
+    extra_code = coco_nasa_utils.MatlabUtils.concat(left_extra_code, right_extra_code);
+    left_is_scalar = isempty(left_dim) || prod(left_dim) == 1;
+    right_is_scalar = isempty(right_dim) || prod(right_dim) == 1;
+    
+    if ~(left_is_scalar && right_is_scalar) && strcmp(tree_type, 'rdivide')
+        ME = MException('COCOSIM:TREE2CODE', ...
+            'Matrix division in Expression "%s" is not supported.',...
+            tree.text);
+        throw(ME);
+    end
+    if length(right) == 1
+        right = arrayfun(@(x) right{1}, (1:length(left)), 'UniformOutput', false);
+    end
+    code = arrayfun(@(i) nasa_toLustre.lustreAst.NodeCallExpr('int_div_Ceiling', {left{i},right{i}}), ...
         (1:numel(left)), 'UniformOutput', false);
 end

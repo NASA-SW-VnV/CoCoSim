@@ -44,7 +44,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [node, external_nodes, opens, abstractedNodes] = get_real_to_int(lus_backend, varargin)
 
-    if LusBackendType.isKIND2(lus_backend)
+    if coco_nasa_utils.LusBackendType.isKIND2(lus_backend)
                 opens = {};
         abstractedNodes = {};
         external_nodes = {'LustDTLib__Floor', 'LustDTLib__Ceiling'};

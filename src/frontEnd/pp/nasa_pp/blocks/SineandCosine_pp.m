@@ -68,7 +68,7 @@ if not(isempty(SineandCosine_list))
             quarter_block = quarter_blocks{1};
             % disable link for Sine and Cosine
             [status, errors_msg_i] = LinkStatus_pp( SineandCosine_list{i} );
-            errors_msg = MatlabUtils.concat(errors_msg, errors_msg_i);
+            errors_msg = coco_nasa_utils.MatlabUtils.concat(errors_msg, errors_msg_i);
             if status
                 continue;
             end

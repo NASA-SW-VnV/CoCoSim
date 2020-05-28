@@ -45,13 +45,13 @@
 function schema = PreludeMenu(varargin)
     schema = sl_action_schema;
     schema.label = 'Prelude';
-    schema.callback =  @(x) PreludeCompilerCallback(LusBackendType.PRELUDE, x);
+    schema.callback =  @(x) PreludeCompilerCallback(coco_nasa_utils.LusBackendType.PRELUDE, x);
 end
 
 function PreludeCompilerCallback(bckend, ~)
     try
-        mdl_full_path = MenuUtils.get_file_name(gcs);
-        MenuUtils.add_pp_warning(mdl_full_path);
+        mdl_full_path = coco_nasa_utils.MenuUtils.get_file_name(gcs);
+        coco_nasa_utils.MenuUtils.add_pp_warning(mdl_full_path);
         CoCoSimPreferences = cocosim_menu.CoCoSimPreferences.load();
         if strcmp(CoCoSimPreferences.lustreCompiler, 'IOWA') 
             cocoSpecCompiler(mdl_full_path);

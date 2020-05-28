@@ -51,5 +51,5 @@ function code = print_lustrec(obj, backend)
         lines{end+1} = sprintf('%s\n', ...
             obj.states{i}.print(backend));
     end
-    code = MatlabUtils.strjoin(lines, '');
+    code = coco_nasa_utils.MatlabUtils.strjoin(lines, '');
 end

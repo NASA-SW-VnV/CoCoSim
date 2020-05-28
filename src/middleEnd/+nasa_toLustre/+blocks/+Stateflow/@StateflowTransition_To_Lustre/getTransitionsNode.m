@@ -47,11 +47,15 @@
 function [transitionNode, external_libraries] = ...
         getTransitionsNode(T, data_map, parentPath, ...
         isDefaultTrans, ...
-        node_name, comment)
+        node_name, comment, isFlowChartJunction)
     global SF_STATES_NODESAST_MAP CoCoSimPreferences;
     
     transitionNode = {};
     external_libraries = {};
+    
+    if ~exist('isFlowChartJunction', 'var')
+        isFlowChartJunction = false;
+    end
     if isempty(parentPath)
         %main chart
         return;
@@ -68,7 +72,7 @@ function [transitionNode, external_libraries] = ...
         [body, outputs, inputs, variables, external_libraries, ...
             ~, ~, hasJunctionLoop] = ...
             nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.transitions_code(T, data_map, ...
-            isDefaultTrans, parentPath, {}, {}, {}, {}, {});
+            isDefaultTrans, isFlowChartJunction, parentPath, {}, {}, {}, {}, {});
 %     catch me
 %         % Junctions Loop detection
 %         if strcmp(me.identifier, 'COCOSIM:SF:JUNCTIONS_LOOP')
@@ -102,16 +106,40 @@ function [transitionNode, external_libraries] = ...
 
     % creat node
     
-    transitionNode.setBodyEqs(body);
+    
     outputs = nasa_toLustre.lustreAst.LustreVar.uniqueVars(outputs);
     inputs = nasa_toLustre.lustreAst.LustreVar.uniqueVars(inputs);
+    
+    % Handle Termination condition variable
+    termVarName = nasa_toLustre.blocks.Stateflow.StateflowTransition_To_Lustre.getTerminationCondName();
+    if ~isFlowChartJunction
+        % remove Termination condition for Stateflow flow charts
+        if nasa_toLustre.lustreAst.VarIdExpr.ismemberVar(termVarName, outputs)
+            outputs = nasa_toLustre.lustreAst.LustreVar.removeVar(outputs, termVarName);
+            variables{end+1} = nasa_toLustre.lustreAst.LustreVar(termVarName, 'bool');
+        end
+    end
+    if nasa_toLustre.lustreAst.VarIdExpr.ismemberVar(termVarName, inputs)
+        inputs = nasa_toLustre.lustreAst.LustreVar.removeVar(inputs, termVarName);
+        if ~isFlowChartJunction
+            variables{end+1} = nasa_toLustre.lustreAst.LustreVar(termVarName, 'bool');
+        end
+        % add as first equation termCond = False;
+        body = coco_nasa_utils.MatlabUtils.concat(...
+            {nasa_toLustre.lustreAst.LustreEq(...
+            nasa_toLustre.lustreAst.VarIdExpr(termVarName), ...
+            nasa_toLustre.lustreAst.BoolExpr(false))},...
+            body);
+    end
+    
+    variables = nasa_toLustre.lustreAst.LustreVar.uniqueVars(variables);
     if isempty(inputs)
         inputs{1} = ...
             nasa_toLustre.lustreAst.LustreVar(nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.virtualVarStr(), 'bool');
     elseif numel(inputs) > 1
         inputs = nasa_toLustre.lustreAst.LustreVar.removeVar(inputs, nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.virtualVarStr());
     end
-    variables = nasa_toLustre.lustreAst.LustreVar.uniqueVars(variables);
+    transitionNode.setBodyEqs(body);
     transitionNode.setOutputs(outputs);
     transitionNode.setInputs(inputs);
     transitionNode.setLocalVars(variables);

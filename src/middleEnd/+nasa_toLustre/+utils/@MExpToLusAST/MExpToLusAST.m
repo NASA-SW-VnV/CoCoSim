@@ -52,6 +52,7 @@ classdef MExpToLusAST
         % use alphabetic order.
         [code, lusDT, dim, extra_code] = assignment_To_Lustre(tree, args)
         [code, lusDT, dim, extra_code] = binaryExpression_To_Lustre(tree, args)
+        [code, lusDT, dim, extra_code] = clear_exp_To_Lustre(tree, args)
         [code, lusDT, dim, extra_code] = colonExpression_To_Lustre(tree, args)
         [code, lusDT, dim, extra_code] = constant_To_Lustre(tree, args)
         [code, lusDT, dim, extra_code] = end_To_Lustre(tree, args)
@@ -107,7 +108,7 @@ classdef MExpToLusAST
             exp = regexprep(exp, '(\w)\[([^\[\]])+\]', '$1($2)');
             %get exp IR
             try
-                tree = MatlabUtils.getExpTree(exp);
+                tree = coco_nasa_utils.MatlabUtils.getExpTree(exp);
             catch me
                 status = 1;
                 display_msg(sprintf('ParseError for expression "%s" in block %s', ...
@@ -119,7 +120,7 @@ classdef MExpToLusAST
             try
                 
                 [lusCode, ~, ~, extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(tree, args);
-                lusCode = MatlabUtils.concat(lusCode, extra_code);
+                lusCode = coco_nasa_utils.MatlabUtils.concat(lusCode, extra_code);
                 
                 % transform Stateflow Function call with no outputs to an equation
                 if args.isStateFlow && ~isempty(tree)

@@ -54,10 +54,10 @@ function [main_node, external_libraries] = ...
     inputs = {};
     %set state as active
     parentName = fileparts(state.Path);
-    isChart = false;
-    if isempty(parentName)
-        %main chart
-        isChart = true;
+    if isfield(state, 'isChart')
+        isChart =  state.isChart;
+    else
+        isChart = isempty(parentName);
     end
     if ~isChart
         if ~isKey(SF_STATES_PATH_MAP, parentName)
@@ -88,7 +88,7 @@ function [main_node, external_libraries] = ...
                 inputs = [inputs, inputs_i, outputs_i];
                 external_libraries = [external_libraries, external_libraries_i];
                 new_assignements = nasa_toLustre.blocks.Stateflow.utils.SF2LusUtils.addInnerCond(lus_action, isInner, actions{i}, state);
-                body = MatlabUtils.concat(body, new_assignements);
+                body = coco_nasa_utils.MatlabUtils.concat(body, new_assignements);
             catch me
                 if strcmp(me.identifier, 'COCOSIM:STATEFLOW')
                     display_msg(me.message, MsgType.ERROR, 'write_entry_action', '');

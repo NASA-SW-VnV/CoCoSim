@@ -126,7 +126,7 @@ classdef LustreNode < nasa_toLustre.lustreAst.LustreAst
                     && strcmp(inputsClass{1}, 'nasa_toLustre.lustreAst.LustreVar'))
                 ME = MException('COCOSIM:LUSTREAST', ...
                     'LustreNode ERROR: Expected inputs of type LustreVar got types "%s".',...
-                    MatlabUtils.strjoin(inputsClass, ', '));
+                    coco_nasa_utils.MatlabUtils.strjoin(inputsClass, ', '));
                 throw(ME);
             end
         end
@@ -147,7 +147,7 @@ classdef LustreNode < nasa_toLustre.lustreAst.LustreAst
                     && strcmp(outputsClass{1}, 'nasa_toLustre.lustreAst.LustreVar'))
                 ME = MException('COCOSIM:LUSTREAST', ...
                     'LustreNode ERROR: Expected outputs of type LustreVar got types "%s".',...
-                    MatlabUtils.strjoin(outputsClass, ', '));
+                    coco_nasa_utils.MatlabUtils.strjoin(outputsClass, ', '));
                 throw(ME);
             end
         end

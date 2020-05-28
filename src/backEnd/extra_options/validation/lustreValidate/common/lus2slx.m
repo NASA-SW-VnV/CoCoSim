@@ -71,9 +71,9 @@ end
 base_name = regexp(cocospec_name,'\.','split');
 if ~exist('new_model_name', 'var') || isempty(new_model_name)
     if onlyMainNode
-        new_model_name = BUtils.adapt_block_name(strcat(base_name{1}, '_', main_node));
+        new_model_name = coco_nasa_utils.SLXUtils.adapt_block_name(strcat(base_name{1}, '_', main_node));
     else
-        new_model_name = BUtils.adapt_block_name(strcat(base_name{1}, '_emf'));
+        new_model_name = coco_nasa_utils.SLXUtils.adapt_block_name(strcat(base_name{1}, '_emf'));
     end
 end
 
@@ -85,7 +85,7 @@ if nargin < 2
     output_dir = coco_dir;
 end
 
-data = BUtils.read_json(json_path);
+data = coco_nasa_utils.MatlabUtils.read_json(json_path);
 
 if ~exist(output_dir, 'dir')
     mkdir(output_dir);
@@ -99,7 +99,7 @@ json_trace_file_name = fullfile(output_dir, ...
 xml_trace = nasa_toLustre.utils.SLX2Lus_Trace(new_model_path, xml_trace_file_name, json_trace_file_name);
 xml_trace.init();
 if exist(new_model_path,'file')
-    if BUtils.isLastModified(json_path, new_model_path) && ~force
+    if coco_nasa_utils.MatlabUtils.isLastModified(json_path, new_model_path) && ~force
         msg = sprintf('lus2slx file "%s" already generated. It will be used.\n',new_model_path);
         display_msg(msg, MsgType.DEBUG, 'lus2slx', '');
         return;
@@ -121,7 +121,7 @@ y = -50;
 nodes = data.nodes;
 emf_fieldnames = fieldnames(nodes)';
 if onlyMainNode
-%     nodes_names = arrayfun(@(x)  BUtils.adapt_block_name(x{1}),...
+%     nodes_names = arrayfun(@(x)  coco_nasa_utils.SLXUtils.adapt_block_name(x{1}),...
 %         fieldnames(nodes)', 'UniformOutput', false);
     nodes_names = arrayfun(@(x)  nodes.(x{1}).original_name,...
         emf_fieldnames, 'UniformOutput', false);
@@ -137,14 +137,14 @@ if onlyMainNode
     end
     node_idx = ismember(nodes_names, main_node);
     node_name = emf_fieldnames{node_idx};
-    node_block_path = fullfile(new_model_name, BUtils.adapt_block_name(main_node));
+    node_block_path = fullfile(new_model_name, coco_nasa_utils.SLXUtils.adapt_block_name(main_node));
     block_pos = [(x+100) y (x+250) (y+50)];
     Lus2SLXUtils.node_process(new_model_name, nodes, node_name, node_block_path, block_pos, xml_trace);
 else
     for i = 1:length(emf_fieldnames)
         node = emf_fieldnames{i};
         try
-            node_name = BUtils.adapt_block_name(node);
+            node_name = coco_nasa_utils.SLXUtils.adapt_block_name(node);
             display_msg(...
                 sprintf('Processing node "%s" ',node_name),...
                 MsgType.INFO, 'lus2slx', '');

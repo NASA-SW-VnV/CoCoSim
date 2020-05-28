@@ -85,10 +85,10 @@ function [unsupportedOptions, ...
         end
     end
     if ~exist('lus_backend', 'var') || isempty(lus_backend)
-        lus_backend = LusBackendType.LUSTREC;
+        lus_backend = coco_nasa_utils.LusBackendType.LUSTREC;
     end
     if ~exist('coco_backend', 'var') || isempty(coco_backend)
-        coco_backend = CoCoBackendType.COMPATIBILITY;
+        coco_backend = coco_nasa_utils.CoCoBackendType.COMPATIBILITY;
     end
     
     %% initialize result
@@ -114,7 +114,7 @@ function [unsupportedOptions, ...
     PWD = pwd;
     
     %% Run constants
-    SLXUtils.run_constants_files(const_files);
+    coco_nasa_utils.SLXUtils.run_constants_files(const_files);
     
     
     %% Pre-process model
@@ -195,20 +195,20 @@ function [unsupportedOptions, ...
             output_dir = fullfile(model_dir, 'cocosim_output', file_name);
             f_base = strcat(file_name, '_unsupportedOptions.html');
             html_path = fullfile(output_dir, f_base);
-            if ~exist(output_dir, 'dir'); MatlabUtils.mkdir(output_dir); end
-            MenuUtils.createHtmlListUsingHTMLITEM('Unsupported options/blocks', unsupportedOptions, html_path, file_name);
+            if ~exist(output_dir, 'dir'); coco_nasa_utils.MatlabUtils.mkdir(output_dir); end
+            coco_nasa_utils.MenuUtils.createHtmlListUsingHTMLITEM('Unsupported options/blocks', unsupportedOptions, html_path, file_name);
             msg = sprintf('HTML report of Unsupported options/blocks is in : %s', HtmlItem.addOpenFileCmd(html_path, f_base));
             display_msg(msg, MsgType.RESULT, 'ToLustreUnsupportedBlocks', '');
         catch me
             display_msg(me.getReport(), MsgType.DEBUG, 'unsupportedBlocksMenu', '');
             unsupportedOptions_text = cellfun(@(x) x.print_noHTML(), unsupportedOptions, 'UniformOutput', false);
             msg = sprintf('Your model is incompatible with CoCoSim for the following reasons:\n%s', ...
-                MatlabUtils.strjoin(unsupportedOptions_text, '\n\n'));
+                coco_nasa_utils.MatlabUtils.strjoin(unsupportedOptions_text, '\n\n'));
             msgbox(msg, 'Error','error');
         end
     else
         unsupportedOptions_text = cellfun(@(x) x.print_noHTML(), unsupportedOptions, 'UniformOutput', false);
-        display_msg(MatlabUtils.strjoin(unsupportedOptions_text, '\n'), ...
+        display_msg(coco_nasa_utils.MatlabUtils.strjoin(unsupportedOptions_text, '\n'), ...
             MsgType.ERROR, 'ToLustreUnsupportedBlocks', '');
     end
     

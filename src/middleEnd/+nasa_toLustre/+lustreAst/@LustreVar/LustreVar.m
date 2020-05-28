@@ -86,6 +86,9 @@ classdef LustreVar < nasa_toLustre.lustreAst.LustreExpr
             dt = obj.type;
         end
         
+        function setId(obj, id)
+            obj.id = id;
+        end
         
         new_obj = deepCopy(obj)
         

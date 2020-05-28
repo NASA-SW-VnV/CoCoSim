@@ -272,8 +272,8 @@ classdef PreLookup_Test < Block_Test
             for k = 1 : 10
                 s = struct();
                 s.BreakpointsSpecification = obj.BreakpointsSpecification{2};
-                firstPoint = MatlabUtils.construct_random_integers(1, 0, 60, 'int8', 1);
-                lastPoint = MatlabUtils.construct_random_integers(1, firstPoint+3, 127, 'int8',1);
+                firstPoint = coco_nasa_utils.MatlabUtils.construct_random_integers(1, 0, 60, 'int8', 1);
+                lastPoint = coco_nasa_utils.MatlabUtils.construct_random_integers(1, firstPoint+3, 127, 'int8',1);
                 spacing = 3;% should be greater than 1
                 s.BreakpointsFirstPoint = num2str(firstPoint);
                 s.BreakpointsSpacing = num2str(spacing);
@@ -301,8 +301,8 @@ classdef PreLookup_Test < Block_Test
             % Values must be strictly monotonically increasing after conversion to its run-time data type
             % we prefer using even spacing value to make sure casting of values to int
             % will not have the same value
-            firstPoint = MatlabUtils.construct_random_doubles(1, 11, 61, 1);
-            lastPoint = MatlabUtils.construct_random_doubles(1, firstPoint+3, 127, 1);
+            firstPoint = coco_nasa_utils.MatlabUtils.construct_random_doubles(1, 11, 61, 1);
+            lastPoint = coco_nasa_utils.MatlabUtils.construct_random_doubles(1, firstPoint+3, 127, 1);
             if firstPoint > lastPoint
                 tmp = firstPoint;
                 firstPoint = lastPoint;

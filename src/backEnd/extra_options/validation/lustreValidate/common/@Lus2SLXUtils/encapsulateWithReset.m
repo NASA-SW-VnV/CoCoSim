@@ -69,7 +69,7 @@ function status = encapsulateWithReset(resetBlock, actionBlock)
         set_param(resetPortPath, 'ResetTriggerType', 'either');
         isEither = true;
     end
-    inport_path = BUtils.get_unique_block_name(...
+    inport_path = coco_nasa_utils.SLXUtils.makeBlockNameUnique(...
         strcat(actionPortParent,'/','_Reset_Inport'));
     subsystemPosition = get_param(resetSubsysName, 'Position');
     x = subsystemPosition(1) - 60;
@@ -81,7 +81,7 @@ function status = encapsulateWithReset(resetBlock, actionBlock)
 
     if isEither
         if ~bdIsLoaded('pp_lib'); load_system('pp_lib.slx'); end
-        eitherTrigger_path =  BUtils.get_unique_block_name(...
+        eitherTrigger_path =  coco_nasa_utils.SLXUtils.makeBlockNameUnique(...
             strcat(actionPortParent,'/','_reset_Either'));
         add_block('pp_lib/bool_To_eitherTrigger',...
             eitherTrigger_path);
@@ -101,7 +101,7 @@ function status = encapsulateWithReset(resetBlock, actionBlock)
     while(~strcmp(resetBlockParent, actionPortParent))
         % add inport to actionPortParent
         parent = get_param(actionPortParent, 'Parent');
-        inport_path = BUtils.get_unique_block_name(...
+        inport_path = coco_nasa_utils.SLXUtils.makeBlockNameUnique(...
             strcat(parent,'/','_Reset_Inport'));
 
         ActionPortList = find_system(actionPortParent,...
@@ -126,7 +126,7 @@ function status = encapsulateWithReset(resetBlock, actionBlock)
             % time of reset, we need to keep track about that
             % information.
             % add shouldBeReseted SS
-            shouldBeReseted_path =  BUtils.get_unique_block_name(...
+            shouldBeReseted_path =  coco_nasa_utils.SLXUtils.makeBlockNameUnique(...
                 strcat(parent,'/','_shouldBeReseted'));
             add_block('pp_lib/shouldBeReseted',...
                 shouldBeReseted_path, ...
@@ -165,7 +165,7 @@ function status = encapsulateWithReset(resetBlock, actionBlock)
                 expIdx = portNumber - 1; % remove If condition
                 if iscell(elseExp)
                     condition = elseExp{expIdx};
-                elseif MatlabUtils.contains(elseExp, ',')
+                elseif coco_nasa_utils.MatlabUtils.contains(elseExp, ',')
                     elseExp = split(elseExp, ',');
                     condition = elseExp{expIdx};
                 else
@@ -182,7 +182,7 @@ function status = encapsulateWithReset(resetBlock, actionBlock)
                 operator = '==';
                 constant = strrep(condition, 'u1 == ', '');
             end
-            compareToConstantPath =  BUtils.get_unique_block_name(...
+            compareToConstantPath =  coco_nasa_utils.SLXUtils.makeBlockNameUnique(...
                 strcat(parent,'/','_Is_Active'));
             x = subsystemPosition(1) - 60;
             y = subsystemPosition(2) - 60;

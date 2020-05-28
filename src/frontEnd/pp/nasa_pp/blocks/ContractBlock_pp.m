@@ -102,7 +102,7 @@ function ceateSubsystemFromBlk(blkH)
          )
         % if it is not Subsystem, we need to create a Subsystem on top of it
         %display_msg(fullfile(get_param(blkH, 'Parent'), get_param(blkH, 'Name')), MsgType.DEBUG, 'KindContract_pp', '');
-        SLXUtils.createSubsystemFromBlk(blkH);
+        coco_nasa_utils.SLXUtils.createSubsystemFromBlk(blkH);
     end
     
 end

@@ -57,11 +57,11 @@ function [ T ] = lustret_test_mcdc( lus_full_path, node_name, output_dir)
 
     %% generate MC/DC conditions
 
-    mcdc_file = LustrecUtils.generate_MCDCLustreFile(lus_full_path, output_dir);
-    new_mcdc_file = LustrecUtils.adapt_lustre_file(mcdc_file, 'Kind2');
+    mcdc_file = coco_nasa_utils.LustrecUtils.generate_MCDCLustreFile(lus_full_path, output_dir);
+    new_mcdc_file = coco_nasa_utils.LustrecUtils.adapt_lustre_file(mcdc_file, 'Kind2');
 
     %% Use model checker to find mcdc CEX if exists
-    [~, T] = Kind2Utils2.extractKind2CEX(new_mcdc_file, output_dir, node_name, ...
+    [~, T] = coco_nasa_utils.Kind2Utils.extractKind2CEX(new_mcdc_file, output_dir, node_name, ...
         ' --slice_nodes false --check_subproperties true ');
 
 

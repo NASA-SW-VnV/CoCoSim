@@ -54,9 +54,9 @@ function code = listVarsWithDT(vars, backend, forNodeHeader)
         code = '';
         for i=1:5:n
             if n > i+4
-                tmp = MatlabUtils.strjoin(vars_code(i:i+4), ' ');
+                tmp = coco_nasa_utils.MatlabUtils.strjoin(vars_code(i:i+4), ' ');
             else
-                tmp = MatlabUtils.strjoin(vars_code(i:end), ' ');
+                tmp = coco_nasa_utils.MatlabUtils.strjoin(vars_code(i:end), ' ');
             end
             code = sprintf('%s\n\t%s', code, tmp);
         end
@@ -65,8 +65,8 @@ function code = listVarsWithDT(vars, backend, forNodeHeader)
     end
     % no ";" in the end of node inputs/outputs for PRELUDE and JKIND
     if forNodeHeader ...
-            && (LusBackendType.isJKIND(backend) || LusBackendType.isPRELUDE(backend))...
-            && MatlabUtils.endsWith(code, ';')
+            && (coco_nasa_utils.LusBackendType.isJKIND(backend) || coco_nasa_utils.LusBackendType.isPRELUDE(backend))...
+            && coco_nasa_utils.MatlabUtils.endsWith(code, ';')
         code = code(1:end-1);
     end
 end

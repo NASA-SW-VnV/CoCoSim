@@ -61,7 +61,7 @@ function new_model_path = generate_invariants_Zustre(model_path, contract_path, 
         save_system(model_path)
         bdclose('all')
         new_model_path = '';
-        data = BUtils.read_json(contract_path);
+        data = coco_nasa_utils.MatlabUtils.read_json(contract_path);
         
         % we add a Postfix to differentiate it with the original Simulink model
         new_model_name = strcat(base_name,'_with_cocospec');
@@ -123,7 +123,7 @@ function new_model_path = generate_invariants_Zustre(model_path, contract_path, 
             %for having a good order of blocks
             try
                 if isBaseName
-                    position  = BUtils.get_obs_position(new_model_name);
+                    position  = coco_nasa_utils.SLXUtils.get_obs_position(new_model_name);
                 else
                     position  = get_param(simulink_block_name,'Position');
                 end
@@ -147,7 +147,7 @@ function new_model_path = generate_invariants_Zustre(model_path, contract_path, 
                 n = n + 1;
                 y = y+250;
             end
-            node_subsystem = strcat(translated_nodes, '/', BUtils.adapt_block_name(node{1}));
+            node_subsystem = strcat(translated_nodes, '/', coco_nasa_utils.SLXUtils.adapt_block_name(node{1}));
             add_block(node_subsystem,...
                 cocospec_block_path,...
                 'Position',[(x+100) y (x+250) (y+50)]);
@@ -168,7 +168,7 @@ function new_model_path = generate_invariants_Zustre(model_path, contract_path, 
             blk_inputs = nodes.(node{1}).inputs;
             %link inputs to the subsystem.
             for index=1:numel(blk_inputs)
-                var_name = BUtils.adapt_block_name(blk_inputs(index).original_name);
+                var_name = coco_nasa_utils.SLXUtils.adapt_block_name(blk_inputs(index).original_name);
                 input_block_name = get_input_block_name_from_variable(xRoot, original_name, var_name, base_name,new_model_name);
                 link_block_with_its_cocospec(cocospec_block_path,  input_block_name, simulink_block_name, parent_block_name, index, isBaseName);
             end

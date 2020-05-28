@@ -48,5 +48,5 @@ function res = print_noHTML(obj)
     for i=1:numel(obj.subtitles)
         lines{end+1} = obj.subtitles{i}.print_noHTML();
     end
-    res = MatlabUtils.strjoin(lines, '\n');
+    res = coco_nasa_utils.MatlabUtils.strjoin(lines, '\n');
 end

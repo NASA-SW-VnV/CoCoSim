@@ -67,5 +67,5 @@ function code = print_kind2(obj, backend)
         lines = obj.getLustreEq( lines, backend);
         lines{end+1} = 'tel\n';
     end
-    code = sprintf(MatlabUtils.strjoin(lines, ''));
+    code = sprintf(coco_nasa_utils.MatlabUtils.strjoin(lines, ''));
 end

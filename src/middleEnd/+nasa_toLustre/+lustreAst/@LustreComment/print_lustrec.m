@@ -48,7 +48,7 @@ function code = print_lustrec(obj, backend)
     if isempty(obj.text)
         return;
     end
-    if LusBackendType.isPRELUDE(backend)
+    if coco_nasa_utils.LusBackendType.isPRELUDE(backend)
         code = sprintf('--%s\n',...
             strrep(obj.text, newline, '--'));
     else

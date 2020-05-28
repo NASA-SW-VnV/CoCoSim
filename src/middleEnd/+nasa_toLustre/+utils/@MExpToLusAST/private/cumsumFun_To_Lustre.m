@@ -71,7 +71,7 @@ function [code, exp_dt, dim, extra_code] = cumsumFun_To_Lustre(tree, args)
         else
             args.expected_lusDT = 'int';
             [y, ~, ~, extra_code_i] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(2), args);
-            extra_code = MatlabUtils.concat(extra_code, extra_code_i);
+            extra_code = coco_nasa_utils.MatlabUtils.concat(extra_code, extra_code_i);
             dimension = y{1}.value;
         end
     end

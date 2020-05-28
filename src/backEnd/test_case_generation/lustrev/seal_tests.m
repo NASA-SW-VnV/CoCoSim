@@ -55,7 +55,7 @@ function [ new_model_path, status ] = seal_tests(...
         status = 1;
         return;
     end
-    status = BUtils.check_files_exist(LUSTRET, LUSTREV, LUCTREC_INCLUDE_DIR);
+    status = coco_nasa_utils.MatlabUtils.check_files_exist(LUSTRET, LUSTREV, LUCTREC_INCLUDE_DIR);
     if status
         msg = 'LUSTRET or LUSTREV not found, please configure "tools_config" file under tools folder';
         display_msg(msg, MsgType.ERROR, 'seal_tests', '');
@@ -92,13 +92,13 @@ function [ new_model_path, status ] = seal_tests(...
         end
         [lus_full_path, xml_trace, is_unsupported, ~, ~, pp_model_full_path] = ...
             nasa_toLustre.ToLustre(model_full_path, [], ...
-            LusBackendType.LUSTREC, CoCoBackendType.MCDC_TESTS_GEN, options{:});
+            coco_nasa_utils.LusBackendType.LUSTREC, coco_nasa_utils.CoCoBackendType.MCDC_TESTS_GEN, options{:});
         if is_unsupported
             display_msg('Model is not supported', MsgType.ERROR, 'validation', '');
             return;
         end
         [output_dir, lus_file_name, ~] = fileparts(lus_full_path);
-        main_node = MatlabUtils.fileBase(lus_file_name);%remove .LUSTREC/.KIND2 from name.
+        main_node = coco_nasa_utils.MatlabUtils.fileBase(lus_file_name);%remove .LUSTREC/.KIND2 from name.
         [~, slx_file_name, ~] = fileparts(pp_model_full_path);
         load_system(pp_model_full_path);
     catch ME
@@ -110,13 +110,13 @@ function [ new_model_path, status ] = seal_tests(...
     end
     
     % generate seal file
-    [seal_file, status] = LustrecUtils.generateLustrevSealFile(lus_full_path, output_dir, main_node, LUSTREV, LUCTREC_INCLUDE_DIR);
+    [seal_file, status] = coco_nasa_utils.LustrecUtils.generateLustrevSealFile(lus_full_path, output_dir, main_node, LUSTREV, LUCTREC_INCLUDE_DIR);
     if status
         return;
     end
     % Generate MCDC lustre file from Simulink model Lustre file
     try
-        mcdc_file = LustrecUtils.generate_MCDCLustreFile(seal_file, output_dir);
+        mcdc_file = coco_nasa_utils.LustrecUtils.generate_MCDCLustreFile(seal_file, output_dir);
     catch ME
         display_msg(['MCDC generation failed for lustre file ' lus_full_path],...
             MsgType.ERROR, 'mcdcToSimulink', '');
@@ -127,15 +127,15 @@ function [ new_model_path, status ] = seal_tests(...
     
     try
         % generate test cases that covers the MC-DC conditions
-        new_mcdc_file = LustrecUtils.adapt_lustre_file(mcdc_file, LusBackendType.KIND2);
-        [syntax_status, output] = Kind2Utils2.checkSyntaxError(new_mcdc_file, KIND2, Z3);
+        new_mcdc_file = coco_nasa_utils.LustrecUtils.adapt_lustre_file(mcdc_file, coco_nasa_utils.LusBackendType.KIND2);
+        [syntax_status, output] = coco_nasa_utils.Kind2Utils.checkSyntaxError(new_mcdc_file, KIND2, Z3);
         if syntax_status
             display_msg(output, MsgType.DEBUG, 'seal_tests', '');
             display_msg('This model is not compatible for MC-DC generation.', MsgType.RESULT, 'mcdcToSimulink', '');
             status = 1;
             return;
         end
-        [~, T] = Kind2Utils2.extractKind2CEX(new_mcdc_file, output_dir, main_node, ...
+        [~, T] = coco_nasa_utils.Kind2Utils.extractKind2CEX(new_mcdc_file, output_dir, main_node, ...
             ' --slice_nodes false --check_subproperties true ');
         
         if isempty(T)
@@ -186,7 +186,7 @@ function [ new_model_path, status ] = seal_tests(...
     
     % Create harness model
     try
-        new_model_path = SLXUtils.makeharness(T, new_model_name, model_parent_path, '_harness');
+        new_model_path = coco_nasa_utils.SLXUtils.makeharness(T, new_model_name, model_parent_path, '_harness');
         close_system(new_model_name, 0)
         if ~nodisplay
             open(new_model_path);

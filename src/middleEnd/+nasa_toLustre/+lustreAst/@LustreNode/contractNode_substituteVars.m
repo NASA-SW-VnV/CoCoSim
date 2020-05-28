@@ -44,48 +44,82 @@
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function obj = contractNode_substituteVars(obj)
-    if length(obj.bodyEqs) > 500
+    if length(obj.bodyEqs) > 2500
         %Ignore optimization for Big Nodes (Like Lookup Table)
-        display_msg(sprintf('Optimization ignored for node "%d" as the number of equations exceeds 500 Eqs.',...
+        display_msg(sprintf('Optimization ignored for node "%s" as the number of equations exceeds 2500 Eqs.\n',...
             obj.getName()), MsgType.INFO, 'contractNode_substituteVars', '');
         return;
     end
-    new_localVars = obj.localVars;
-    varsDT = cellfun(@(x) x.getDT(), new_localVars, 'un', 0);
-    clockVars = new_localVars(MatlabUtils.contains(varsDT, 'clock'));
+
+    localVars = obj.localVars;
+    if isempty(localVars)
+        return;
+    end
+    varsNames = cellfun(@(x) x.getId(), localVars, 'UniformOutput', false);
+    varsDT = cellfun(@(x) x.getDT(), localVars, 'un', 0);
+    varsMap = containers.Map(varsNames, localVars);
+    
+    
+    % clock variables are ignored in optimization due to lustrec
+    % limitations
+    clockVars = localVars(coco_nasa_utils.MatlabUtils.contains(varsDT, 'clock'));
     clockVarIDs = cellfun(@(x) x.getId(), clockVars, 'UniformOutput', false);
     % include ConcurrentAssignments as normal Eqts
-    new_bodyEqs = {};
+    bodyEqs = {};
     for i=1:numel(obj.bodyEqs)
         if isa(obj.bodyEqs{i}, 'nasa_toLustre.lustreAst.ConcurrentAssignments')
-            new_bodyEqs = MatlabUtils.concat(new_bodyEqs, ...
+            bodyEqs = coco_nasa_utils.MatlabUtils.concat(bodyEqs, ...
                 obj.bodyEqs{i}.getAssignments());
         elseif ~isempty(obj.bodyEqs{i})
-            new_bodyEqs{end+1} = obj.bodyEqs{i};
+            bodyEqs{end+1} = obj.bodyEqs{i};
         end
     end
-    %ignore simplification if there is automaton
     
-    all_body_obj = cellfun(@(x) x.getAllLustreExpr(), new_bodyEqs, 'un',0);
-    all_body_obj = MatlabUtils.concat(all_body_obj{:});
-    all_objClass = cellfun(@(x) class(x), all_body_obj, 'UniformOutput', false);
-    if ismember('nasa_toLustre.lustreAst.LustreAutomaton', all_objClass)
+    % creat a map of variables and equations refering them
+    % The key is the name of the variable, the value is the indices of
+    % equations refering to it in their right hand side.
+    varToEqMap = containers.Map();
+    try
+        for i=1:numel(bodyEqs)
+            if isa(bodyEqs{i}, 'nasa_toLustre.lustreAst.LustreAutomaton')
+                %ignore simplification if there is automaton
+                display_msg(sprintf('Optimization ignored for node "%d". It contains an automaton.',...
+                    obj.getName()), MsgType.INFO, 'contractNode_substituteVars', '');
+                return;
+            end
+            allLusObj = bodyEqs{i}.getAllLustreExpr();
+            allLusObjClass = cellfun(@(x) class(x), allLusObj,...
+                'UniformOutput', false);
+            VarIdExprObjects = allLusObj(strcmp(allLusObjClass,...
+                'nasa_toLustre.lustreAst.VarIdExpr'));
+            varIDs = unique(cellfun(@(x) x.getId(), ...
+                VarIdExprObjects, 'UniformOutput', false));
+            for j = 1:length(varIDs)
+                if isKey(varToEqMap, varIDs{j})
+                    varToEqMap(varIDs{j}) = [varToEqMap(varIDs{j}), i];
+                else
+                    varToEqMap(varIDs{j}) = [i];
+                end
+            end
+        end
+    catch me
+        display_msg(me.getReport(), MsgType.DEBUG, 'contractNode_substituteVars', '');
+        display_msg(sprintf('Optimization ignored for node "%d".',...
+            obj.getName()), MsgType.INFO, 'contractNode_substituteVars', '');
         return;
     end
     
-    %get all VarIdExpr objects
-    VarIdExprObjects = all_body_obj(strcmp(all_objClass, 'nasa_toLustre.lustreAst.VarIdExpr'));
-    varIDs = cellfun(@(x) x.getId(), VarIdExprObjects, 'UniformOutput', false);
+    
     % go over Assignments
-    for i=1:numel(new_bodyEqs)
-        
-        
-        if isa(new_bodyEqs{i}, 'nasa_toLustre.lustreAst.LustreEq')...
-                && isa(new_bodyEqs{i}.getLhs(), 'nasa_toLustre.lustreAst.VarIdExpr')...
-                && nasa_toLustre.lustreAst.VarIdExpr.ismemberVar(new_bodyEqs{i}.getLhs(), new_localVars)
-            var = new_bodyEqs{i}.getLhs();
-            rhs = new_bodyEqs{i}.getRhs();
-            new_var = rhs.deepCopy();
+    for i=1:numel(bodyEqs)
+        if isa(bodyEqs{i}, 'nasa_toLustre.lustreAst.LustreEq')...
+                && isa(bodyEqs{i}.getLhs(), 'nasa_toLustre.lustreAst.VarIdExpr')...
+                && isKey(varsMap, bodyEqs{i}.getLhs().getId()) 
+            
+            var = bodyEqs{i}.getLhs();
+            lhsName = var.getId();
+            rhs = bodyEqs{i}.getRhs();
+            newVar = rhs; %rhs.deepCopy();
             
             % if rhs class is IteExpr, skip it. To help in debugging.
             if isa(rhs, 'nasa_toLustre.lustreAst.IteExpr')
@@ -93,40 +127,72 @@ function obj = contractNode_substituteVars(obj)
             end
             
             % Skip node calls for PRelude. e.g. y = f(x);
+            % for traceability too and code readability.
             if isa(rhs, 'nasa_toLustre.lustreAst.NodeCallExpr')
                 continue;
             end
+            
+            
             
             % if used on its definition, skip it
             %e.g. x = 0 -> pre x + 1;
             if rhs.nbOccuranceVar(var) >= 1
                 continue;
             end
-            % skip var if it is never used or used more than once.
-            % For code readability and CEX debugging.
-            nb_occ = sum(strcmp(var.getId(), varIDs)) - 1;%minus itself
-            if nb_occ ~= 1
+            
+            if ~isKey(varToEqMap, lhsName) || length(varToEqMap(lhsName)) == 1
                 continue;
             end
+            
+            % skip var if it is never used or used more than twice.
+            % For code readability and CEX debugging.
+            %nbOcc = length(varToEqMap(lhsName)) - 1;%minus itself
+            %if ~(nbOcc == 1 || nbOcc == 2)
+            %    continue;
+            %end
             
             % skip var if it is used in EveryExpr/Merge/Activate condition. For Lustrec
             % limitation
-            if ismember(var.getId(), clockVarIDs)
+            if ismember(lhsName, clockVarIDs)
                 continue;
             end
             
             
-            %delete the current Eqts
-            new_bodyEqs{i} = nasa_toLustre.lustreAst.DummyExpr();
-            %remove it from variables
-            new_localVars = nasa_toLustre.lustreAst.LustreVar.removeVar(new_localVars, var);
+                        
             % change var by new_var
-            new_bodyEqs = cellfun(@(x) x.substituteVars(var, new_var), new_bodyEqs, 'UniformOutput', false);
+            newVarLusObj = newVar.getAllLustreExpr();
+            newVarLusObjClass = cellfun(@(x) class(x), newVarLusObj,...
+                'UniformOutput', false);
+            newVarIdExprObjects = newVarLusObj(strcmp(newVarLusObjClass,...
+                'nasa_toLustre.lustreAst.VarIdExpr'));
+            newVarIDs = unique(cellfun(@(x) x.getId(), ...
+                newVarIdExprObjects, 'UniformOutput', false));
+            eqsIndices = unique(varToEqMap(lhsName));
+            for k = eqsIndices
+                if k == i || isa(bodyEqs{k}, 'nasa_toLustre.lustreAst.DummyExpr')
+                    continue
+                end
+                bodyEqs{k} = bodyEqs{k}.substituteVars(var, newVar);
+                for j = 1:length(newVarIDs)
+                    if isKey(varToEqMap, newVarIDs{j})
+                        varToEqMap(newVarIDs{j}) = [varToEqMap(newVarIDs{j}), k];
+                    else
+                        varToEqMap(newVarIDs{j}) = k;
+                    end
+                end
+            end
+            %bodyEqs = cellfun(@(x) x.substituteVars(var, new_var), bodyEqs, 'UniformOutput', false);
+            
+            %delete the current Eqts
+            bodyEqs{i} = nasa_toLustre.lustreAst.DummyExpr();
+            
+            %remove it from variables
+            varsMap.remove(lhsName);
         end
     end
     % remove dummyExpr
-    eqsClass = cellfun(@(x) class(x), new_bodyEqs, 'UniformOutput', false);
-    new_bodyEqs = new_bodyEqs(~strcmp(eqsClass, 'nasa_toLustre.lustreAst.DummyExpr'));
-    obj.setBodyEqs(new_bodyEqs);
-    obj.setLocalVars(new_localVars);
+    eqsClass = cellfun(@(x) class(x), bodyEqs, 'UniformOutput', false);
+    bodyEqs = bodyEqs(~strcmp(eqsClass, 'nasa_toLustre.lustreAst.DummyExpr'));
+    obj.setBodyEqs(bodyEqs);
+    obj.setLocalVars(varsMap.values());
 end

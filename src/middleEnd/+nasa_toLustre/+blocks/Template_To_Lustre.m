@@ -149,11 +149,11 @@ classdef Template_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             %% Step 5: If the backend is Design Error Detection (DED).
             % If the backend is DED, copy this template and adapt it to the
             % block in question
-            if CoCoBackendType.isDED(coco_backend)
+            if coco_nasa_utils.CoCoBackendType.isDED(coco_backend)
                 global  CoCoSimPreferences;% remember to move this line to top-level statement
                 blk_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(blk);
                 
-                if ismember(CoCoBackendType.DED_DIVBYZER, ...
+                if ismember(coco_nasa_utils.CoCoBackendType.DED_DIVBYZER, ...
                         CoCoSimPreferences.dedChecks)
                     % Add properties related to Division by zero, if the
                     % block has no division, ignore this check.
@@ -180,9 +180,9 @@ classdef Template_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     parent_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(parent);
                     xml_trace.add_Property(blk.Origin_path, ...
                         parent_name, propID, 1, ...
-                        CoCoBackendType.DED_DIVBYZER);
+                        coco_nasa_utils.CoCoBackendType.DED_DIVBYZER);
                 end
-                if ismember(CoCoBackendType.DED_INTOVERFLOW, ...
+                if ismember(coco_nasa_utils.CoCoBackendType.DED_INTOVERFLOW, ...
                         CoCoSimPreferences.dedChecks)
                     % Add properties related to Integer Overflow. Ignore
                     % the check if it is not related to the block in
@@ -213,10 +213,10 @@ classdef Template_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                         parent_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(parent);
                         xml_trace.add_Property(blk.Origin_path, ...
                             parent_name, propID, 1, ...
-                            CoCoBackendType.DED_INTOVERFLOW);
+                            coco_nasa_utils.CoCoBackendType.DED_INTOVERFLOW);
                     end
                 end
-                if ismember(CoCoBackendType.DED_OUTOFBOUND, ...
+                if ismember(coco_nasa_utils.CoCoBackendType.DED_OUTOFBOUND, ...
                         CoCoSimPreferences.dedChecks)
                     % Add properties related to Out of bound array access.
                     % Ignore the check if it is not related to the block in
@@ -226,7 +226,7 @@ classdef Template_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                     DEDUtils.OutOfBoundCheckCode(obj, parent, blk, xml_trace, ...
                                 inputs{2}, widths(2), propID, 1);
                 end
-                if ismember(CoCoBackendType.DED_OUTMINMAX, ...
+                if ismember(coco_nasa_utils.CoCoBackendType.DED_OUTMINMAX, ...
                         CoCoSimPreferences.dedChecks)
                     % Add properties related to minimum and maximum values check.
                     % Ignore the check if it is not related to the block in

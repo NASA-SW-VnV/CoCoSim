@@ -59,7 +59,8 @@ function [main_node, external_nodes]  = write_ChartNode(parent, blk, chart, data
         external_nodes{1} = eventNode;
     end
     [outputs, inputs, variable, body] = ...
-        nasa_toLustre.blocks.Stateflow.StateflowState_To_Lustre.write_chart_body(parent, blk, chart, dataAndEvents, inputEvents);
+        nasa_toLustre.blocks.Stateflow.StateflowState_To_Lustre.write_chart_body(...
+        parent, blk, chart, dataAndEvents, inputEvents);
 
     %create the node
     node_name = ...

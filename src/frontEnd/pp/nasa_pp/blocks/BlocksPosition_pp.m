@@ -63,13 +63,18 @@ function [status, errors_msg] = BlocksPosition_pp( model, depth )
     levels_map =  [];
     
     try
-        % Methode 1: call Auto Layout
-        display_msg(...
-            sprintf('organizing block "%s" positions. This process may take few seconds.',model),...
-            MsgType.INFO, 'BlocksPosition_pp', '', 1);
-        external_lib.AutoLayout.AutoLayout(model)
+        try
+            % Method 1: Matlab release >= 2019 Simulink.BlockDiagram.arrangeSystem
+            Simulink.BlockDiagram.arrangeSystem(model);
+        catch
+            % Methode 2: call Auto Layout
+            display_msg(...
+                sprintf('organizing block "%s" positions. This process may take few seconds.',model),...
+                MsgType.INFO, 'BlocksPosition_pp', '', 1);
+            external_lib.AutoLayout.AutoLayout(model);
+        end
     catch
-        % If Method 1 failed: Use my version of Auto Layout.
+        % If Method 1 and 2 failed: Use my version of Auto Layout.
         for i=2:length(allBlocks)
             try
                 DstBlkH = get_param(allBlocks{i}, 'PortHandles');

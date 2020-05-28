@@ -45,10 +45,10 @@
 function code = print(obj, backend)
 
     
-    if LusBackendType.isPRELUDE(backend)
+    if coco_nasa_utils.LusBackendType.isPRELUDE(backend)
         code = obj.print_prelude();
     else
-        if isempty(obj.id) || LusBackendType.isJKIND(backend)
+        if isempty(obj.id) || coco_nasa_utils.LusBackendType.isJKIND(backend)
             %Jkind does not support ID
             code = sprintf('--%%PROPERTY %s;', ...
                 obj.exp.print(backend));

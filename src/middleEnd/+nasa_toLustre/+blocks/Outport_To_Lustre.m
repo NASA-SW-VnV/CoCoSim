@@ -55,7 +55,7 @@ classdef Outport_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             [outputs, ~] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk);
             [inputs] =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk);
             isInsideContract =nasa_toLustre.utils.SLX2LusUtils.isContractBlk(parent);
-            if isInsideContract && LusBackendType.isKIND2(lus_backend)
+            if isInsideContract && coco_nasa_utils.LusBackendType.isKIND2(lus_backend)
                 % ignore output "valid" in contract
                 return;
             end
@@ -81,8 +81,8 @@ classdef Outport_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             obj.addCode( codes);
             
             %% Design Error Detection Backend code:
-            if CoCoBackendType.isDED(coco_backend)
-                if ismember(CoCoBackendType.DED_OUTMINMAX, ...
+            if coco_nasa_utils.CoCoBackendType.isDED(coco_backend)
+                if ismember(coco_nasa_utils.CoCoBackendType.DED_OUTMINMAX, ...
                         CoCoSimPreferences.dedChecks)
                     DEDUtils.OutMinMaxCheckCode(obj, parent, blk, outputs, lus_outputDataType, xml_trace);
                 end
@@ -94,8 +94,8 @@ classdef Outport_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             
             % Outport in root level should not be of type enumeration in
             % case of Validation backend with Lustrec.
-            if CoCoBackendType.isVALIDATION(coco_backend) ...
-                    && LusBackendType.isLUSTREC(lus_backend) ...
+            if coco_nasa_utils.CoCoBackendType.isVALIDATION(coco_backend) ...
+                    && coco_nasa_utils.LusBackendType.isLUSTREC(lus_backend) ...
                     && strcmp(parent.BlockType, 'block_diagram')
                 if isempty(blk.CompiledPortDataTypes)
                     hasEnum = false;

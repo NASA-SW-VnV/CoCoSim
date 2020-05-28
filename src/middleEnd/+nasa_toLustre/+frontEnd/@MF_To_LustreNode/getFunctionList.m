@@ -72,7 +72,7 @@ function [new_function_list, failed] = getFunctionList(blk, script)
             functions(i).statements(strcmp(types, 'function')) = [];
             new_function_list{end+1} = functions(i);
             new_funcs = statements(strcmp(types, 'function'));
-            new_function_list = MatlabUtils.concat(new_function_list, ...
+            new_function_list = coco_nasa_utils.MatlabUtils.concat(new_function_list, ...
                 arrayfun(@(x) {x}, new_funcs));
         else
             types = cellfun(@(x) x.type, statements, 'UniformOutput', 0);
@@ -80,7 +80,7 @@ function [new_function_list, failed] = getFunctionList(blk, script)
             functions(i).statements(strcmp(types, 'function')) = [];
             new_function_list{end+1} = functions(i);
             new_funcs = statements(strcmp(types, 'function'));
-            new_function_list = MatlabUtils.concat(new_function_list, new_funcs);
+            new_function_list = coco_nasa_utils.MatlabUtils.concat(new_function_list, new_funcs);
         end
         
     end

@@ -47,7 +47,7 @@ function [code, exp_dt, dim, extra_code] = sindFun_To_Lustre(tree, args)
     
     x_text = tree.parameters(1).text;
     expr = sprintf("sin((%s)*pi/180)", x_text);
-    new_tree = MatlabUtils.getExpTree(expr);
+    new_tree = coco_nasa_utils.MatlabUtils.getExpTree(expr);
     
     [code, exp_dt, dim, extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(new_tree, args);
     

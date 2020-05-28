@@ -50,7 +50,7 @@ function [code, exp_dt, dim, extra_code] = eyeFun_To_Lustre(tree, args)
     else
         expr = sprintf("zeros(%s, %s)", tree.parameters.text);
     end
-    new_tree = MatlabUtils.getExpTree(expr);
+    new_tree = coco_nasa_utils.MatlabUtils.getExpTree(expr);
     [r_code, exp_dt, dim, extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(new_tree, args);
     if isrow(r_code), r_code = r_code'; end
     if prod(dim) > 1

@@ -73,13 +73,13 @@ classdef Math_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             inputs_trace_cell = {};
             for i=1:nbInputs
                 [inputs{i}, in_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockInputsNames(parent, blk, i);
-                external_node_inputs_dt = MatlabUtils.concat(external_node_inputs_dt, in_dt);
+                external_node_inputs_dt = coco_nasa_utils.MatlabUtils.concat(external_node_inputs_dt, in_dt);
                 in_trace = arrayfun(@(j) struct('VariableName', inputs{i}{j}.getId(),...
                     'OriginPath', fullfile(blk.Origin_path, strcat('u',num2str(i))), ...
                     'IsNotInSimulink', 1, 'PortNumber', i, ...
                     'Width', length(inputs{i}), 'Index', j, 'PortType', 'Inports'), ...
                     (1:length(inputs{i})), 'un', 0);
-                inputs_trace_cell = MatlabUtils.concat(inputs_trace_cell, in_trace);
+                inputs_trace_cell = coco_nasa_utils.MatlabUtils.concat(inputs_trace_cell, in_trace);
                 
                 if numel(inputs{i}) < max_width
                     inputs{i} = arrayfun(@(x) {inputs{i}{1}}, (1:max_width));
@@ -269,8 +269,8 @@ classdef Math_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 obj.addCode(codes);
             end
             %% Design Error Detection Backend code:
-            if CoCoBackendType.isDED(coco_backend)
-                if ismember(CoCoBackendType.DED_OUTMINMAX, ...
+            if coco_nasa_utils.CoCoBackendType.isDED(coco_backend)
+                if ismember(coco_nasa_utils.CoCoBackendType.DED_OUTMINMAX, ...
                         CoCoSimPreferences.dedChecks)
                     lusOutDT =nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(convDataType);
                     DEDUtils.OutMinMaxCheckCode(obj, parent, blk, outputs, lusOutDT, xml_trace);

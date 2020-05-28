@@ -62,7 +62,7 @@ end
 %
 %
 % function createReqCallback(callbackInfo)
-% model_full_path = MenuUtils.get_file_name(gcs);
+% model_full_path = coco_nasa_utils.MenuUtils.get_file_name(gcs);
 % try
 %     createReqGui(model_full_path);
 % catch ME

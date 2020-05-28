@@ -134,7 +134,7 @@ classdef Interpolation_nD_Test < Block_Test
                         % lookup table object
                         dt = 'auto';
                         if isfield(s, 'TableDataTypeStr') ...
-                                && ~MatlabUtils.startsWith(s.TableDataTypeStr, 'Inherit:')
+                                && ~coco_nasa_utils.MatlabUtils.startsWith(s.TableDataTypeStr, 'Inherit:')
                             dt = s.TableDataTypeStr;
                         end
                         obj.addLookupTableObjectToModelWs(mdl_name, s.Table, dt, TableDim)
@@ -292,14 +292,14 @@ classdef Interpolation_nD_Test < Block_Test
                                         s3 = s2;
                                         if i1 == 1
                                             % try dim = [2, 1]
-                                            T = MatlabUtils.construct_random_doubles(1, 0, 127, [3 1]);
+                                            T = coco_nasa_utils.MatlabUtils.construct_random_doubles(1, 0, 127, [3 1]);
                                             s3.Table = mat2str(T);
                                             s3.TableDim = 3;
                                             params{end+1} = s3;
                                         elseif i1 == 2
                                             d1 = 2;
                                             d2 = 5;
-                                            T = MatlabUtils.construct_random_doubles(1, 0, 127, [d1, d2]);
+                                            T = coco_nasa_utils.MatlabUtils.construct_random_doubles(1, 0, 127, [d1, d2]);
                                             s3.Table = mat2str(T);
                                             s3.TableDim = [d1, d2];
                                             params{end+1} = s3;
@@ -348,11 +348,11 @@ classdef Interpolation_nD_Test < Block_Test
                                 s3.LookupTableObject = obj.LookupTableObject;
                                 if i1 == 1
                                     % try dim = [2, 1]
-                                    T = MatlabUtils.construct_random_doubles(1, 0, 127, [3 1]);
+                                    T = coco_nasa_utils.MatlabUtils.construct_random_doubles(1, 0, 127, [3 1]);
                                     s3.Table = mat2str(T);
                                     s3.TableDim = 3;
                                 elseif i1 == 2
-                                    T = MatlabUtils.construct_random_doubles(1, 0, 127, [3, 2]);
+                                    T = coco_nasa_utils.MatlabUtils.construct_random_doubles(1, 0, 127, [3, 2]);
                                     s3.Table = mat2str(T);
                                     s3.TableDim = [3, 2];
                                 elseif i1 == 3

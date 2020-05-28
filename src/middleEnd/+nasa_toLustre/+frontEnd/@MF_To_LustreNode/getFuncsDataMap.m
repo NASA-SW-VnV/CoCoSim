@@ -71,7 +71,7 @@ function [fun_data_map, failed] = getFuncsDataMap(parent, blk, script, ...
     % create function inputs
     min = 1;max = 10;
     args = cellfun(@(x) ...
-        SLXUtils.get_random_values( 1, min, max, ...
+        coco_nasa_utils.SLXUtils.get_random_values( 1, min, max, ...
         str2num(x.CompiledSize), x.CompiledType{1}), Inputs, 'UniformOutput', 0);
     Inputs_names = cellfun(@(x) x.Name, Inputs, 'UniformOutput', 0);
     % add params if exists
@@ -219,7 +219,7 @@ function [func_path, failed] = print_script(funcsList, script)
             % %                     sprintf('function %s\nCoCoVars{%d} = whos;\nend', ...
             % %                     end_codes{1}, i);
             % %             else
-            %                 body = MatlabUtils.strjoin(end_codes, '\nend\n');
+            %                 body = coco_nasa_utils.MatlabUtils.strjoin(end_codes, '\nend\n');
             %                 functions_code{i} = ...
             %                     sprintf('function %s\nCoCoVars{%d} = whos;\nend\n',...
             %                     body, i);
@@ -230,7 +230,7 @@ function [func_path, failed] = print_script(funcsList, script)
                 functions_code{i}, i);
         end
     end
-    fprintf(fid, MatlabUtils.strjoin(functions_code, '\n'));
+    fprintf(fid, coco_nasa_utils.MatlabUtils.strjoin(functions_code, '\n'));
     % the end of the main function under the name blk_name
     fprintf(fid, '\nend');
     fclose(fid);
@@ -255,7 +255,7 @@ function failed = callFunction(fH, args, func_path, blk, loop_flag)
             II = I(cellfun(@(x) isvector(x) && length(x) > 1, args));
             if length(II) >= 1
                 c = arrayfun(@(x) [0 1], (1:length(II)), 'UniformOutput', 0);
-                c2 = MatlabUtils.cartesian(c{:});
+                c2 = coco_nasa_utils.MatlabUtils.cartesian(c{:});
                 [n, ~] = size(c2);
                 for i=1:n
                     III = II(boolean(c2(i, :)));
@@ -275,7 +275,7 @@ function failed = callFunction(fH, args, func_path, blk, loop_flag)
         end
         display_msg(me.getReport(), ...
             MsgType.DEBUG, 'getFuncsDataMap', '');
-        if MatlabUtils.startsWith(me.identifier, 'MATLAB:') ...
+        if coco_nasa_utils.MatlabUtils.startsWith(me.identifier, 'MATLAB:') ...
                 && length(me.stack) >= 1 && isfield(me.stack(1), 'file') ...
                 && strcmp(me.stack(1).file, func_path)
             filetext = fileread(me.stack(1).file);

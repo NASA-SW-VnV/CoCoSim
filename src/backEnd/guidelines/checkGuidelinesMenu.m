@@ -53,11 +53,11 @@ end
 
 function checkGuidelinesCallback(callbackInfo)
     try
-        model_full_path = MenuUtils.get_file_name(gcs);
-        MenuUtils.add_pp_warning(model_full_path);
+        model_full_path = coco_nasa_utils.MenuUtils.get_file_name(gcs);
+        coco_nasa_utils.MenuUtils.add_pp_warning(model_full_path);
         check_guidelines(model_full_path);
         
     catch me
-        MenuUtils.handleExceptionMessage(me, 'Check Guidelines');
+        coco_nasa_utils.MenuUtils.handleExceptionMessage(me, 'Check Guidelines');
     end
 end

@@ -137,7 +137,7 @@ classdef Bias_Test < Block_Test
             inpIsIntCount = 0;
             pBias = 0;
             for pInType = 1 : numel(obj.inputDataType)
-                if MatlabUtils.contains(obj.inputDataType{pInType}, 'int')
+                if coco_nasa_utils.MatlabUtils.contains(obj.inputDataType{pInType}, 'int')
                     inpIsIntCount = inpIsIntCount + 1;
                 end
                 iSaturate = mod(inpIsIntCount, ...

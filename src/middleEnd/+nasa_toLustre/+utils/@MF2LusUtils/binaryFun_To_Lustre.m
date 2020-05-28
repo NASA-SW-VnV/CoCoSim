@@ -48,7 +48,7 @@ function [code, exp_dt, dim, extra_code] = binaryFun_To_Lustre(tree, args, op)
     code = {};
     [x, x_dt, x_dim, extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(1),args);
     [y, ~, ~, extra_code_i] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(2), args);
-    extra_code = MatlabUtils.concat(extra_code, extra_code_i);
+    extra_code = coco_nasa_utils.MatlabUtils.concat(extra_code, extra_code_i);
     
     [x, y] = nasa_toLustre.utils.MExpToLusAST.inlineOperands(x, y, tree);
     

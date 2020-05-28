@@ -46,9 +46,9 @@ function displayMessages(html_path,title, msg_list, msgColor, mode_display)
 %
     if mode_display
         htmlList = cellfun(@(x) HtmlItem(x, {}, 'black', msgColor),msg_list, 'UniformOutput', false);
-        MenuUtils.createHtmlListUsingHTMLITEM(title, htmlList, html_path);
+        coco_nasa_utils.MenuUtils.createHtmlListUsingHTMLITEM(title, htmlList, html_path);
     else
         display_msg(title, MsgType.INFO, 'ToLustre', '');
-        display_msg(MatlabUtils.strjoin(msg_list, '\n'), MsgType.ERROR, 'ToLustre', '');
+        display_msg(coco_nasa_utils.MatlabUtils.strjoin(msg_list, '\n'), MsgType.ERROR, 'ToLustre', '');
     end
 end

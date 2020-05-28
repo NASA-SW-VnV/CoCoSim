@@ -71,14 +71,14 @@ classdef ContractModeExpr < nasa_toLustre.lustreAst.LustreExpr
                     && strcmp(require_class{1}, 'nasa_toLustre.lustreAst.ContractRequireExpr'))
                 ME = MException('COCOSIM:LUSTREAST', ...
                     'ContractModeExpr ERROR: Expected second parameter of type "ContractRequireExpr" Got type "%s".',...
-                    MatlabUtils.strjoin(require_class, ', '));
+                    coco_nasa_utils.MatlabUtils.strjoin(require_class, ', '));
                 throw(ME);
             end
             if ~( length(ensures_class) == 1 ...
                     && strcmp(ensures_class{1}, 'nasa_toLustre.lustreAst.ContractEnsureExpr'))
                 ME = MException('COCOSIM:LUSTREAST', ...
                     'ContractModeExpr ERROR: Expected third parameter of type "ContractEnsureExpr" Got type "%s".',...
-                    MatlabUtils.strjoin(ensures_class, ', '));
+                    coco_nasa_utils.MatlabUtils.strjoin(ensures_class, ', '));
                 throw(ME);
             end
         end

@@ -46,4 +46,5 @@ function sl_customization( cm )
 %sl_customization Register custom menu function.
 cm.addCustomMenuFcn('Simulink:ToolsMenu', @(x) {@cocosim_menu.tools_menu});
 cm.addCustomMenuFcn('Simulink:PreContextMenu',@(x) {@cocosim_menu.precontext_menu});
+cm.LibraryBrowserCustomizer.applyOrder({'CoCoSim Specification Library',-2});
 end

@@ -124,7 +124,7 @@ function OutMinMaxCheckCode(blk2LusObj, parent, blk, outputs, lus_dt, xml_trace,
                 parent_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(parent);
                 xml_trace.add_Property(blk.Origin_path, ...
                     parent_name, propID, 1, ...
-                    CoCoBackendType.DED_OUTMINMAX);
+                    coco_nasa_utils.CoCoBackendType.DED_OUTMINMAX);
             end
         end
     catch me

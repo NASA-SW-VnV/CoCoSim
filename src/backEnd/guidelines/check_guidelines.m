@@ -65,7 +65,7 @@ function [report_path, status] = check_guidelines(model_path, varargin)
     load_system(model_path);
     output_dir = fullfile(model_parent, 'cocosim_output', model_base);
     report_path = fullfile(output_dir, strcat(model_base, '_GUIDELINES.html'));
-    if ~exist(output_dir, 'dir'); MatlabUtils.mkdir(output_dir); end
+    if ~exist(output_dir, 'dir'); coco_nasa_utils.MatlabUtils.mkdir(output_dir); end
 
 
     %% Order functions
@@ -117,7 +117,7 @@ function [report_path, status] = check_guidelines(model_path, varargin)
         items_list{end+1} = HtmlItem('Recommended', priority_map(3));
     end
     title = 'NASA Orion GN&C MATLAB/Simulink Standards';
-    report_path = MenuUtils.createHtmlListUsingHTMLITEM(title, items_list, report_path, model_base);
+    report_path = coco_nasa_utils.MenuUtils.createHtmlListUsingHTMLITEM(title, items_list, report_path, model_base);
     % warning on
     cd(oldDir);
     if mode_display

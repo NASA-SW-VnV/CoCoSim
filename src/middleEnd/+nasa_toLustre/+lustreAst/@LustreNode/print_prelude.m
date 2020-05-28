@@ -44,5 +44,5 @@
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function code = print_prelude(obj)
-    code = obj.print(LusBackendType.PRELUDE);
+    code = obj.print(coco_nasa_utils.LusBackendType.PRELUDE);
 end

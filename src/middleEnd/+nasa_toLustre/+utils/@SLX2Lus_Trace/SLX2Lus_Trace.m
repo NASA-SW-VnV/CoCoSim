@@ -53,6 +53,8 @@ classdef SLX2Lus_Trace < handle
         xml_file_path;
         json_file_path;
         traceRootNode;
+        nodes_map;
+        contracts_map;
         current_node;
         current_inputs;
         current_outputs;
@@ -71,6 +73,9 @@ classdef SLX2Lus_Trace < handle
         end
         
         function init(obj)
+            % Maps
+            obj.nodes_map = containers.Map();
+            obj.contracts_map = containers.Map();
             %XML
             obj.json_struct = {};
             obj.traceRootNode = obj.traceDOM.getDocumentElement;
@@ -100,7 +105,7 @@ classdef SLX2Lus_Trace < handle
             %JSON
             fid= fopen(obj.json_file_path, 'w+');
             if fid~=-1
-                json_model = MatlabUtils.jsonencode(obj.json_struct); 
+                json_model = coco_nasa_utils.MatlabUtils.jsonencode(obj.json_struct); 
                 json_model = strrep(json_model,'\/','/');
                 fprintf(fid, '%s\n', json_model);
             end
@@ -132,6 +137,13 @@ classdef SLX2Lus_Trace < handle
                 s.NodeName = node_name;
             end
             obj.addStructMapping(s);
+            
+            % Maps
+            if isContract
+                obj.contracts_map(node_name) = element;
+            else
+                obj.nodes_map(node_name) = element;
+            end
         end
         %%
         function node = create_abstractNode_Element(obj, OriginPath, ...
@@ -147,13 +159,9 @@ classdef SLX2Lus_Trace < handle
             %JSON
             s = struct();
             s.OriginPath = OriginPath;
-            if isContract
-                s.ContractName = node_name;
-            else
-                s.NodeName = node_name;
-            end
+            s.NodeName = node_name;
             obj.addStructMapping(s);
-            
+                        
             %% inputs
             node_inputs = obj.traceDOM.createElement('InputList');
             node.appendChild(node_inputs);
@@ -198,7 +206,8 @@ classdef SLX2Lus_Trace < handle
                 s.Index = num2str(s.Index);
                 obj.addStructMapping(s);
             end
-            
+            % Maps
+            obj.nodes_map(node_name) = node;
         end
         
         %% Inputs management

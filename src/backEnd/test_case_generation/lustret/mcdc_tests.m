@@ -57,7 +57,7 @@ function [ new_model_path, status ] = mcdc_tests(...
         status = 1;
         return;
     end
-    status = BUtils.check_files_exist(LUSTRET);
+    status = coco_nasa_utils.MatlabUtils.check_files_exist(LUSTRET);
     if status
         msg = 'LUSTRET not found, please configure tools_config file under tools folder';
         errordlg(msg);
@@ -94,13 +94,13 @@ function [ new_model_path, status ] = mcdc_tests(...
         end
         [lus_full_path, xml_trace, is_unsupported, ~, ~, pp_model_full_path] = ...
             nasa_toLustre.ToLustre(model_full_path, [], ...
-            LusBackendType.LUSTREC, [], options{:});
+            coco_nasa_utils.LusBackendType.LUSTREC, [], options{:});
         if is_unsupported
             display_msg('Model is not supported', MsgType.ERROR, 'validation', '');
             return;
         end
         [output_dir, lus_file_name, ~] = fileparts(lus_full_path);
-        main_node = MatlabUtils.fileBase(lus_file_name);%remove .LUSTREC/.KIND2 from name.
+        main_node = coco_nasa_utils.MatlabUtils.fileBase(lus_file_name);%remove .LUSTREC/.KIND2 from name.
         [~, slx_file_name, ~] = fileparts(pp_model_full_path);
         load_system(pp_model_full_path);
     catch ME
@@ -113,7 +113,7 @@ function [ new_model_path, status ] = mcdc_tests(...
     
     % Generate MCDC lustre file from Simulink model Lustre file
     try
-        mcdc_file = LustrecUtils.generate_MCDCLustreFile(lus_full_path, output_dir);
+        mcdc_file = coco_nasa_utils.LustrecUtils.generate_MCDCLustreFile(lus_full_path, output_dir);
     catch ME
         display_msg(['MCDC generation failed for lustre file ' lus_full_path],...
             MsgType.ERROR, 'mcdcToSimulink', '');
@@ -124,15 +124,15 @@ function [ new_model_path, status ] = mcdc_tests(...
     
     try
         % generate test cases that covers the MC-DC conditions
-        new_mcdc_file = LustrecUtils.adapt_lustre_file(mcdc_file, LusBackendType.KIND2);
-        [syntax_status, output] = Kind2Utils2.checkSyntaxError(new_mcdc_file, KIND2, Z3);
+        new_mcdc_file = coco_nasa_utils.LustrecUtils.adapt_lustre_file(mcdc_file, coco_nasa_utils.LusBackendType.KIND2);
+        [syntax_status, output] = coco_nasa_utils.Kind2Utils.checkSyntaxError(new_mcdc_file, KIND2, Z3);
         if syntax_status
             display_msg(output, MsgType.DEBUG, 'mcdc_tests', '');
             display_msg('This model is not compatible for MC-DC generation.', MsgType.RESULT, 'mcdcToSimulink', '');
             status = 1;
             return;
         end
-        [~, T] = Kind2Utils2.extractKind2CEX(new_mcdc_file, output_dir, main_node, ...
+        [~, T] = coco_nasa_utils.Kind2Utils.extractKind2CEX(new_mcdc_file, output_dir, main_node, ...
             ' --slice_nodes false --check_subproperties true ');
         
         if isempty(T)
@@ -186,7 +186,7 @@ function [ new_model_path, status ] = mcdc_tests(...
     save_system(slx_file_name, new_model_path, 'OverwriteIfChangedOnDisk', true);
     load_system(new_model_path);
     % Generate IR of MCDC file
-    [mcdc_IR_path, status] = LustrecUtils.generate_emf(mcdc_file, output_dir);
+    [mcdc_IR_path, status] = coco_nasa_utils.LustrecUtils.generate_emf(mcdc_file, output_dir);
     
     if status
         return;
@@ -227,7 +227,7 @@ function [ new_model_path, status ] = mcdc_tests(...
     
     %% Create harness model
     try
-        new_model_path = SLXUtils.makeharness(T, new_model_name, model_parent_path, '_harness');
+        new_model_path = coco_nasa_utils.SLXUtils.makeharness(T, new_model_name, model_parent_path, '_harness');
         close_system(new_model_name, 0)
         if ~nodisplay
             open(new_model_path);
@@ -266,7 +266,7 @@ function [status] = addMCDCBlocksToSLX(new_model_path, slx_file_name, new_model_
         %for having a good order of blocks
         try
             if isBaseName
-                position  = BUtils.get_obs_position(new_model_name);
+                position  = coco_nasa_utils.SLXUtils.get_obs_position(new_model_name);
             else
                 position  = get_param(simulink_block_name,'Position');
             end
@@ -323,7 +323,7 @@ function [status] = addMCDCBlocksToSLX(new_model_path, slx_file_name, new_model_
                         srcPortHandle = get_param(line, 'SrcPortHandle');
                     end
                     % take too much to compile model for many times
-                    %                     compiledBusType = SLXUtils.getCompiledParam(srcPortHandle, ...
+                    %                     compiledBusType = coco_nasa_utils.SLXUtils.getCompiledParam(srcPortHandle, ...
                     %                         'CompiledBusType');
                     %                     if ~strcmp(compiledBusType,'NOT_BUS')
                     %                         continue;

@@ -58,10 +58,10 @@ classdef CoCoSimPreferences < handle
         lustrecBinary = 'Local';% possible values are {'Docker', 'Local'}
         verificationTimeout = 1200; % In seconds
         lustreCompiler = 'NASA';% possible values are {'NASA', 'IOWA'}
-        lustreBackend = LusBackendType.KIND2; % see LusBackendType for possible values
-        dedChecks = {CoCoBackendType.DED_OUTMINMAX}; 
-        %{CoCoBackendType.DED_DIVBYZER,CoCoBackendType.DED_INTOVERFLOW ,...
-         %   CoCoBackendType.DED_OUTOFBOUND, CoCoBackendType.DED_OUTMINMAX }; % check CoCoBackendType for Design Error Detection values
+        lustreBackend = coco_nasa_utils.LusBackendType.KIND2; % see LusBackendType for possible values
+        dedChecks = {coco_nasa_utils.CoCoBackendType.DED_OUTMINMAX}; 
+        %{coco_nasa_utils.CoCoBackendType.DED_DIVBYZER,coco_nasa_utils.CoCoBackendType.DED_INTOVERFLOW ,...
+         %   coco_nasa_utils.CoCoBackendType.DED_OUTOFBOUND, coco_nasa_utils.CoCoBackendType.DED_OUTMINMAX }; % check CoCoBackendType for Design Error Detection values
         DED_OUTOFBOUND = 'Out of Bound Array Access';
         
         % nasa_toLustre compiler: force typecasting of int to int8, int16, ...

@@ -47,7 +47,7 @@ function [code, exp_dt, dim, extra_code] = permuteFun_To_Lustre(tree, args)
     [X, X_dt, X_dim, extra_code] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(1),args);
     args.expected_lusDT = 'int';
     [Y, ~, ~, extra_code_i] = nasa_toLustre.utils.MExpToLusAST.expression_To_Lustre(tree.parameters(2),args);
-    extra_code = MatlabUtils.concat(extra_code, extra_code_i);
+    extra_code = coco_nasa_utils.MatlabUtils.concat(extra_code, extra_code_i);
     X_reshp = reshape(X, X_dim);
     if isempty(Y) || (~isa(Y{1}, 'nasa_toLustre.lustreAst.RealExpr') ...
             && ~isa(Y{1}, 'nasa_toLustre.lustreAst.IntExpr'))
