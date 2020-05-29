@@ -1,3 +1,20 @@
+CoCoSim version 1.1 release notes
+===================================
+
+Release date
+------------
+
+May 29th, 2020
+
+List of features:
+----------------
+
+* This release contains many bug fixes to v1.0. 
+* Also some improvements on Stateflow compiler. 
+Stateflow flow chart algorithm was modified to speedup the verification time. On one example, we reduced verification time of a Stateflow flow chart from hours to seconds.
+* Add the option to choose which smt solver (Z3 or Yices2) will be used by Kind2.
+* We organized Matlab functions files in packages to avoid any conflicts in function names.
+
 CoCoSim version 1.0 release notes
 ===================================
 

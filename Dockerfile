@@ -1,3 +1,5 @@
+# This Dockerfile is not currently used for CoCoSim.
+# It's work in progress to support docker in the future
 FROM ubuntu:18.04 as builder
 
 
