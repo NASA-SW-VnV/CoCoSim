@@ -149,7 +149,7 @@ function [unsupportedOptions, ...
     [ir_struct, ir_handle_struct_map, ir_json_path] = nasa_toLustre.IR_pp.internalRep_pp(ir_struct, 1, output_dir);
     
     % add enumeration from Stateflow and from IR
-    add_IR_Enum(ir_struct);
+    add_IR_Enum(ir_struct, lus_backend);
     
     %% Unsupported blocks detection
     if skip_unsupportedblocks
@@ -178,17 +178,20 @@ function [unsupportedOptions, ...
     end
     %% display report files
     if isempty(unsupportedOptions)
+        msg = sprintf(['The model does not contain unsupported blocks.\n' ...
+            'Some blocks may be partially supported.\n'...
+            'When running verification or code generation, other errors may appear if some blocks are partially supported.']);
         if mode_display == 1
+            
             if exist('success.png', 'file')
                 [icondata,iconcmap] = imread('success.png');
-                msgbox('Your model is compatible with CoCoSim!','Success','custom',icondata,iconcmap);
+                msgbox(msg,'Success','custom',icondata,iconcmap);
             else
-                msgbox('Your model is compatible with CoCoSim!');
+                msgbox(msg);
             end
         end
         % display it too in command window.
-        display_msg('Your model is compatible with CoCoSim!', ...
-            MsgType.RESULT, 'ToLustreUnsupportedBlocks', '');
+        display_msg(msg, MsgType.RESULT, 'ToLustreUnsupportedBlocks', '');
         
     elseif mode_display == 1
         try
@@ -281,14 +284,18 @@ end
 
 
 %% add enumeration from IR
-function add_IR_Enum(ir)
+function add_IR_Enum(ir, lus_backend)
     global TOLUSTRE_ENUMS_MAP TOLUSTRE_ENUMS_CONV_NODES;
     if isfield(ir, 'meta') && isfield(ir.meta, 'Declarations') ...
             && isfield(ir.meta.Declarations, 'Enumerations')
         enums = ir.meta.Declarations.Enumerations;
         for i=1:numel(enums)
-            % put the type name in LOWER case: Lustrec limitation
-            name = lower(enums{i}.Name);
+            if coco_nasa_utils.LusBackendType.isKIND2(lus_backend)
+                name = enums{i}.Name;
+            else
+                % put the type name in LOWER case: Lustrec limitation
+                name = lower(enums{i}.Name);
+            end
             if isKey(TOLUSTRE_ENUMS_MAP, name)
                 continue;
             end

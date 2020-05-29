@@ -6,7 +6,7 @@ This document covers some common issues with CoCoSim, and how to solve them.
 Contact
 -------
 
-Please contact as at cocosim@lists.nasa.gov with any issue. Or use Github issues reporting system.
+Please contact us at cocosim@lists.nasa.gov with any issue. Or use Github issues reporting system.
 
 Installation issues
 -------------------
@@ -25,8 +25,19 @@ To call the function in Matlab Command Window:
 install_cocosim_lib(true)
 ```
 
+## Install script issues
+### Missing libraries:
 
-**Installing external tools (Kind2, Lustrec, etc ...):**
+**Error: gmb.h Cannot be found**
+
+you need to install libgmp3-dev 
+```
+apt-get install  libgmp3-dev
+```
+
+
+
+### Installing external tools (Kind2, Lustrec, etc ...):
 
 If running the script `cocosim2/scripts/install_cocosim` failed. You can install the tools manually and set their path in `cocosim2/tools/tools_config.m`.
 
@@ -41,4 +52,5 @@ The default paths set by `tools_config` are:
 change `osx` by `linux` if your machine is a linux machine.
 
 See [INSTALL.md](../INSTALL.md) 
+
 

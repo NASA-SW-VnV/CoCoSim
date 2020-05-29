@@ -52,7 +52,7 @@ function html_path = createHtmlListUsingHTMLITEM(title, items_list, html_path, m
     if ~exist(output_dir, 'dir')
         coco_nasa_utils.MatlabUtils.mkdir(output_dir);
     end
-    cocoSim_path = regexprep(mfilename('fullpath'), 'cocosim2/.+', 'cocosim2');
+    cocoSim_path = fileparts(which('start_cocosim'));
     % read template
     html_text = fileread(fullfile(cocoSim_path, 'src', 'backEnd' , 'html_templates' , 'item_list.html'));
     

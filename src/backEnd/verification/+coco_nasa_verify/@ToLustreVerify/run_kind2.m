@@ -103,7 +103,9 @@ function failed = run_kind2(model, nom_lustre_file, xml_trace, ...
             return;
         end
         export_verif_results(model, verificationResults, xml_trace);
-        VerificationMenu.displayHtmlVerificationResultsCallbackCode(model);
+        VerificationMenu.displayHtmlVerificationResultsCallbackCode(model, ...
+            verificationResults, ...
+            fileparts(nom_lustre_file));
     catch me
         display_msg(me.getReport(), MsgType.DEBUG, 'toLustreVerify.run_kind2', '');
         display_msg('Something went wrong in Verification.', MsgType.ERROR, 'toLustreVerify.run_kind2', '');

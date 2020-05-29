@@ -60,14 +60,16 @@ function [ new_ir, status ] = confirm_actions_SFIR_pp( new_ir )
     else
         display_msg(...
             sprintf('To Disable parsing checks of Stateflow State/transition actions, go to: '),...
-            MsgType.WARNING, 'confirm_actions_SFIR_pp', '');
+            MsgType.RESULT, 'confirm_actions_SFIR_pp', '');
         display_msg('tools -> CoCoSim -> Preferences -> NASA Compiler Preferences -> Skip Stateflow parser check. ', ...
-            MsgType.WARNING, 'confirm_actions_SFIR_pp', '');
+            MsgType.RESULT, 'confirm_actions_SFIR_pp', '');
     end
     
     if isfield(new_ir, 'States')
-        new_ir.States = adapt_states(new_ir.States);
-        
+        [new_ir.States, skip] = adapt_states(new_ir.States);
+        if skip
+            return;
+        end
         for i=1:numel(new_ir.States)
             statePath = new_ir.States{i}.Path;
             % default transition
@@ -98,12 +100,12 @@ function [ new_ir, status ] = confirm_actions_SFIR_pp( new_ir )
         end
     end
 end
-function states = adapt_states(states)
+function [states, skip] = adapt_states(states)
     states_keywords = {'en', 'du', 'ex'};
     states_fields = {'Entry', 'During', 'Exit'};
     % 'Bind', 'On', 'OnAfter', ...
     %     'OnBefore', 'OnAt', 'OnEvery'};
-    
+    skip = false;
     for i=1:numel(states)
         statePath = states{i}.Path;
         if isfield(states{i}, 'LabelString')...
@@ -139,9 +141,12 @@ function states = adapt_states(states)
                     fprintf('\n');
                 end
             end
-            prompt = 'Are all the above actions correct? Y/N [Y]: ';
+            prompt = sprintf('Are all the above actions correct?\nY(yes)/N(no)/S(skip all next actions) [Y]: ');
             str = input(prompt,'s');
-            if ~isempty(str) && strcmp(upper(str), 'N')
+            if ~isempty(str) && strcmpi(str, 'S')
+                skip = true;
+                return;
+            elseif ~isempty(str) && strcmpi(str, 'N')
                 for j=1:numel(states_fields)
                     f = states_fields{j};
                     if isfield(states{i}.Actions, f) ...
