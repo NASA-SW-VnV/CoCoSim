@@ -2,7 +2,7 @@
 =====================================================================
 
 [![License](https://img.shields.io/badge/license-NOSA%201.3-blue.svg)](LICENSE.pdf)
-[![Release](https://img.shields.io/badge/release-v1.0-orange.svg)](https://github.com/NASA-SW-VnV/CoCoSim/releases/)
+[![Release](https://img.shields.io/badge/release-v1.1-orange.svg)](https://github.com/NASA-SW-VnV/CoCoSim/releases/)
 
 CoCoSim (Contract based Compositional verification of Simulink models) is used to verify user-supplied requirements. The main objective of CoCoSim is to provide the followings:
 
