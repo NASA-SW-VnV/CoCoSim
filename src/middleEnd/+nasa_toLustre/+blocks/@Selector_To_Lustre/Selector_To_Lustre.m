@@ -77,8 +77,14 @@ classdef Selector_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                         
             % define mapping array ind
             %outputDimsArray = in_matrix_dimension{1};   % assume full selection, will update after below function
-            [isPortIndex,ind,outputDimsArray] = nasa_toLustre.blocks.Assignment_To_Lustre.defineMapInd(obj,parent,blk,inputs,in_matrix_dimension{1},isSelector);                
-            
+            [isPortIndex,ind,outputDimsArray, status] = nasa_toLustre.blocks.Assignment_To_Lustre.defineMapInd(obj,parent,blk,inputs,in_matrix_dimension{1},isSelector);                
+            if status
+                display_msg(...
+                    sprintf('Failed to translate block %s',...
+                    HtmlItem.addOpenCmd(blk.Origin_path)), ...
+                    MsgType.ERROR, 'Assignment_To_Lustre', '');   
+                return;
+            end
             % if index assignment is read in form index port, write mapping
             % code on Lustre side
             if isPortIndex   

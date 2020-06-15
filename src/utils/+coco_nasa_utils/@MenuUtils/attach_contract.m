@@ -42,35 +42,111 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [status] = attach_contract(blk)
+function [maskBlk, status] = attach_contract(blk)
     %ATTACH_CONTRACT attach CoCoSpec Contract to the blk, encapsulate both
     %blk and contract in a masked Subsystem.
     
     %Check if the block is not a Subsyste. Contracts should be attached to subsystems.
     %Create a subsystem from block if needed.
     blkH = get_param(blk, 'Handle');
-    [status, blkH]= encapsulate_block(blkH);
-    if status
-        errordlg('Failed to attach contract to the subsystem %s', blk)
-    end
+%     [status, blkH]= encapsulate_block(blkH);
+%     if status
+%         errordlg('Failed to creat a Subsystem from block %s', blk);
+%         return
+%     end
     %add a masked subsystem encapsulating the block and the contract.
     [status, maskBlk] = coco_nasa_utils.SLXUtils.createSubsystemFromBlk(blkH);
-    if status
+    if status || maskBlk < 0
         errordlg('Failed to attach contract to the subsystem %s', blk)
+        status = 1;
+        return
+    end
+    try
+        % add suffix "_abstracted"
+        set_param(maskBlk, 'Name', ...
+            strcat(get_param(maskBlk, 'Name'), '__abstracted'));
+    catch
     end
     add_abstraction_mask(maskBlk)
     
     
 end
 function add_abstraction_mask(maskBlk)
+    blkPath = fullfile(get_param(maskBlk, 'Parent'), get_param(maskBlk, 'Name'));
     set_param(maskBlk, 'TreatAsAtomicUnit', 'on');
     p = Simulink.Mask.create(maskBlk);
-    p.set('Type', 'CoCoAbstractedSubsystem',...
-        'Display', ...
-        'text(0.5, 0.5, ''{\bf\fontsize{20}Abstracted Subsystem}'', ''hor'', ''center'', ''texmode'',''on'');');
+    display = sprintf(['if useAbstraction\n',...
+        'color(''red'');\ntext(0.5, 0.5, ''Abstracted Subsystem'', ''hor'', ''center'');\n',...
+        'else\ncolor(''green'');\ntext(0.5, 0.5, ''Subsystem with Contract'', ''hor'', ''center'');\nend']);
     p.addParameter('Type','checkbox','Prompt','Use contract as an abstraction (the implementation will not be generated).',...
         'Name','useAbstraction');
+    p.set('Type', 'CoCoAbstractedSubsystem','RunInitForIconRedraw', 'on', ...
+        'IconUnits', 'normalized', 'IconOpaque', 'off', 'Display', display);
     
+    % Add the contract subsystem
+    load_system(which('contractLibs.slx'));
+    cocospec_blockH = add_block('contractLibs/Contract', ...
+        fullfile(blkPath, strcat('Contract_', get_param(maskBlk, 'Name'))),...
+        'MakeNameUnique', 'on');
+    cocoblock_path = fullfile(blkPath, get_param(cocospec_blockH, 'Name'));
+    delete_block(find_system(cocoblock_path, ...
+        'SearchDepth',1,...
+        'LookUnderMasks', 'all', ...
+        'BlockType', 'Inport'));
+    
+    % Connect inports
+    inports = find_system(maskBlk, ...
+        'SearchDepth',1,...
+        'LookUnderMasks', 'all', ...
+        'BlockType', 'Inport');
+    if iscell(inports)
+        inports = get_param(inports, 'Handle');
+    end
+    for i = 1 : length(inports)
+        add_block('simulink/Ports & Subsystems/In1', ...
+            fullfile(cocoblock_path, get_param(inports(i), 'Name')),...
+            'MakeNameUnique', 'on');
+        inPrtHandles = get_param(inports(i), 'PortHandles');
+        cocoPortHandels = get_param(cocospec_blockH, 'PortHandles');
+        add_line(blkPath, ...
+            inPrtHandles.Outport(1), cocoPortHandels.Inport(end),...
+            'autorouting', 'on');
+    end
+    
+    outports = find_system(maskBlk, ...
+        'SearchDepth',1,...   
+        'LookUnderMasks', 'all', ...
+        'BlockType', 'Outport');
+    if iscell(outports)
+        outports = get_param(outports, 'Handle');
+    end
+    for i = 1 : length(outports)
+        add_block('simulink/Ports & Subsystems/In1', ...
+            fullfile(cocoblock_path, get_param(outports(i), 'Name')),...
+            'MakeNameUnique', 'on');
+        outPrtHandles = get_param(outports(i), 'PortHandles');
+        line = get_param(outPrtHandles.Inport(1), 'line');
+        if line == -1, continue; end
+        srcPortHandle = get_param(line, 'SrcPortHandle');
+        cocoPortHandels = get_param(cocospec_blockH, 'PortHandles');
+        add_line(blkPath, ...
+            srcPortHandle, cocoPortHandels.Inport(end),...
+            'autorouting', 'on');
+    end
+    
+    
+    % Auto layout
+    try
+        % Method 1: Matlab release >= 2019 Simulink.BlockDiagram.arrangeSystem
+        Simulink.BlockDiagram.arrangeSystem(maskBlk);
+        Simulink.BlockDiagram.arrangeSystem(cocoblock_path);
+    catch
+        try
+            external_lib.AutoLayout.AutoLayout(maskBlk);
+            external_lib.AutoLayout.AutoLayout(cocoblock_path);
+        catch
+        end
+    end
 end
 function [status, newblk] = encapsulate_block(blkH)
     status = 0;

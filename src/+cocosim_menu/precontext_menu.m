@@ -50,7 +50,8 @@ function schema = precontext_menu(varargin)
     schema.statustip = 'Automated Analysis Framework';
     schema.autoDisableWhen = 'Busy';
     
-    schema.childrenFcns = {@verificationResultPrecontextMenu, ... %         @attachContract,...
+    schema.childrenFcns = {@verificationResultPrecontextMenu, ...
+        @attachContract,...
         @MiscellaneousMenu.replaceInportsWithSignalBuilders, ...
         @getAutoLayoutTool};
     
@@ -79,22 +80,47 @@ function schema = attachContract(varargin)
     schema.statustip = 'Attach Contract to the selected Block/Subsystem';
     schema.autoDisableWhen = 'Busy';
     MyBlocks = find_system(gcs,'Selected','on');
-    if length(MyBlocks)==2 && strcmp(MyBlocks{1}, gcs)
-        MyBlocks = MyBlocks(2);
-    end
-    if length(MyBlocks) > 1 || isempty(MyBlocks) ...
-            || strcmp(get_param(MyBlocks{1}, 'BlockType'), 'Inport') ...
-            || strcmp(get_param(MyBlocks{1}, 'BlockType'), 'Outport')
-        schema.state = 'Disabled';
-    else
-        schema.state = 'Enabled';
-    end
-    
+    schema.state = 'Enabled';
     schema.callback = @(x) attachContractCallback(x, MyBlocks);
 end
 function attachContractCallback(~, MyBlocks)
-    %fprintf('%s was selected\n', MyBlocks{1});
-    coco_nasa_utils.MenuUtils.attach_contract(MyBlocks{1});
+    if ~isempty(MyBlocks)
+        if length(MyBlocks) == 1
+            blk = MyBlocks{1};
+        elseif ismember(gcb, MyBlocks)
+            blk = gcb;
+        elseif length(MyBlocks)==2 && strcmp(MyBlocks{1}, gcs)
+            blk = MyBlocks{2};
+        elseif length(MyBlocks) > 1
+            % Too many selected block
+            errordlg(sprintf('Too many selected blocks:\n%s', ...
+                sprintf(coco_nasa_utils.MatlabUtils.strjoin(MyBlocks, '\n'))));
+            return
+        end
+        if strcmp(get_param(blk, 'BlockType'), 'Inport') ...
+            || strcmp(get_param(blk, 'BlockType'), 'Outport')
+            errordlg('You cannot attach contracts to (In|Out)port block');
+            return
+        end
+        root = bdroot(blk);
+        try
+            % save system before changes
+            save_system(root,'','OverwriteIfChangedOnDisk',true)
+            [blkH, status]  = coco_nasa_utils.MenuUtils.attach_contract(blk);
+            if status == 0
+                open_system(blkH, 'force');
+            end
+        catch me
+            display_msg(me.getReport(), MsgType.DEBUG, 'attachContractCallback', '');
+            status = 1;
+        end
+        if status
+            % restore model
+            fname = get_param(root, 'fileName');
+            close_system(root, 0);
+            open_system(fname);
+        end
+    end
 end
 %%
 function schema = getAutoLayoutTool(callbackinfo)

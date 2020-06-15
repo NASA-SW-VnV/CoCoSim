@@ -45,8 +45,8 @@
 function set_mask_parameters(observer_path)
     
     
-    load_system(which('CoCoSimSpecification.slx'));
-    originla_mask = Simulink.Mask.get(get_param('CoCoSimSpecification/contract', 'Handle'));
+    load_system(which('contractLibs.slx'));
+    originla_mask = Simulink.Mask.get(get_param('contractLibs/Contract', 'Handle'));
     mask = Simulink.Mask.create(observer_path);
     mask.copy(originla_mask);
 end

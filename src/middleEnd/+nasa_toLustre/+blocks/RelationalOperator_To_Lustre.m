@@ -55,7 +55,7 @@ classdef RelationalOperator_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             
             [outputs, outputs_dt] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(parent, blk, [], xml_trace, main_sampleTime);
             
-            
+            op = blk.Operator;
             widths = blk.CompiledPortWidths.Inport;
             max_width = max(widths);
             outputDataType = blk.CompiledPortDataTypes.Outport{1};
@@ -68,6 +68,9 @@ classdef RelationalOperator_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             thewantedDataType = 'int';
             if strcmp(lus_in1_dt, 'real') || strcmp(lus_in2_dt, 'real')
                 thewantedDataType = 'real';
+            elseif strcmp(lus_in1_dt, 'bool') && strcmp(lus_in2_dt, 'bool') ...
+                    && (strcmp(op, '==') || strcmp(op, '~='))
+                thewantedDataType = 'bool';
             end
             inputs = cell(1, numel(widths));
             for i=1:numel(widths)
@@ -89,7 +92,7 @@ classdef RelationalOperator_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
                 end
             end
             
-            op = blk.Operator;
+            
             if strcmp(op, '==')
                 op = nasa_toLustre.lustreAst.BinaryExpr.EQ;
             elseif strcmp(op, '~=')
