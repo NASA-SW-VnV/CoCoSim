@@ -72,9 +72,17 @@ function [ Lustre_type, zero, one, isBus, isEnum, hasEnum] = ...
                 slx_dt = regexprep(slx_dt, 'Enum:\s*', '');
             end
             if isKey(TOLUSTRE_ENUMS_MAP, lower(slx_dt))
+                % Lustrec requires enums to be lower case
                 isEnum = true;
                 hasEnum = true;
                 Lustre_type = lower(slx_dt);
+            elseif isKey(TOLUSTRE_ENUMS_MAP, slx_dt)
+                % Kind2 does not require enums to be lower case
+                % CEX uses enums, therefore the original name should be
+                % respected
+                isEnum = true;
+                hasEnum = true;
+                Lustre_type = slx_dt;
             else 
                 isBus = coco_nasa_utils.SLXUtils.isSimulinkBus(char(slx_dt));
                 if isBus
