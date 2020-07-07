@@ -36,7 +36,7 @@ Model {
       UnitExpr		      "inherit"
     }
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.69"
+    ComputedModelVersion    "1.70"
     NumModelReferences	    0
     NumTestPointedSignals   0
     NumProvidedFunctions    0
@@ -134,9 +134,9 @@ Model {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "hbourbou"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Thu Dec 19 17:12:46 2019"
-  RTWModifiedTimeStamp	  498676366
-  ModelVersionFormat	  "1.%<AutoIncrement:69>"
+  LastModifiedDate	  "Tue Jul 07 21:41:53 2020"
+  RTWModifiedTimeStamp	  516058912
+  ModelVersionFormat	  "1.%<AutoIncrement:70>"
   SampleTimeColors	  off
   SampleTimeAnnotations	  off
   LibraryLinkDisplay	  "none"
