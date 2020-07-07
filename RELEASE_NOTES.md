@@ -1,3 +1,23 @@
+CoCoSim version 1.2 release notes
+===================================
+
+Release date
+------------
+
+July 7th, 2020
+
+List of features:
+----------------
+
+* New way of abstracting Subsystems. The user can attach a contract to a Subsystem 
+and choose if the Subsystem implementation will be generated or to be considered as a 
+black box.
+If the user choose to abstract the Subsystem, the latter code will not be 
+generated, only the contract will be used as an abstraction.
+
+To attach a contract, click right on the Subsystem or block you want to abstract,
+then click on ```CoCoSim -> attach contract to the selected block```.
+
 CoCoSim version 1.1 release notes
 ===================================
 
