@@ -71,7 +71,7 @@ classdef MenuUtils
         metaInfo = getModelInfo(title, model)
         
         %% attach contract
-        [status] = attach_contract(blk)
+        [blkH, status] = attach_contract(blk)
     end
     
 end

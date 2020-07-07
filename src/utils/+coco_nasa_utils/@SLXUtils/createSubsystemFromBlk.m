@@ -52,13 +52,15 @@ function [status, ss_handle] = createSubsystemFromBlk(blk_path)
             % versions of Matlab
             h = get_param(blk_path, 'Handle');
             blkHandles = get_param(h, 'PortHandles');
-            if numel(blkHandles.Outport) > 0
-                l = get_param(blkHandles.Outport(1), 'line');
-                dst_port_Handles = get_param(l, 'DstPortHandle');
-                dstPortHandle = dst_port_Handles(1);
-            else
-                l = -1;
-            end
+%             if numel(blkHandles.Outport) > 0
+%                 l = get_param(blkHandles.Outport(1), 'line');
+%                 if l > 0
+%                     dst_port_Handles = get_param(l, 'DstPortHandle');
+%                     dstPortHandle = dst_port_Handles(1);
+%                 end
+%             else
+%                 l = -1;
+%             end
             orient=get_param(h,'orientation');
             pos=get_param(h,'position');
             obj = get_param( bdroot(blk_path), 'Object');
@@ -66,12 +68,18 @@ function [status, ss_handle] = createSubsystemFromBlk(blk_path)
 
             %change name of Subsystem created to match the original
             %block name
-            if l == -1
-                return;
+%             if l == -1
+%                 return;
+%             end
+%             l = get_param(dstPortHandle, 'line');
+%             srcPortH = get_param(l, 'SrcPortHandle');
+            blkHandles = get_param(h, 'PortHandles');
+            if numel(blkHandles.Outport) > 0
+                blkPath = get_param(blkHandles.Outport(1), 'Parent');
+            else
+                blkPath = get_param(blkHandles.Inport(1), 'Parent');
             end
-            l = get_param(dstPortHandle, 'line');
-            srcPortH = get_param(l, 'SrcPortHandle');
-            subsystemPath = get_param(srcPortH, 'Parent');
+            subsystemPath = get_param(blkPath, 'Parent');
             ss_handle = get_param(subsystemPath, 'Handle');
             set_param(ss_handle, 'Name', blk_name);            
             

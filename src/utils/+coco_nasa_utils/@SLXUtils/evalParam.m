@@ -112,6 +112,23 @@ function [Value, valueDataType, status] = evalParam(modelObj, parent, blk, param
             return;
         catch
             % It is not a Mask workspace variable, continue
+            % check if it's Mask variable of a grand parent block
+            try
+                new_parent = get_param(parent.Handle, 'Parent');
+                if ~isempty(new_parent)
+                    [Value, valueDataType, status] = ...
+                        coco_nasa_utils.SLXUtils.evalParam(...
+                        modelObj, ...
+                        new_parent, ...
+                        parent,...
+                        param);
+                    if status == 0
+                        return
+                    end
+                end
+            catch
+                % continue
+            end
         end
         
         %% case 6: Mask parameter
@@ -136,6 +153,7 @@ function [Value, valueDataType, status] = evalParam(modelObj, parent, blk, param
         catch
             % different way of accessing mask parameter
             try
+                new_parent = get_param(parent.Handle, 'Parent');
                 Value = get_param(parent.Handle, param);
                 [Value, valueDataType, status] = ...
                     coco_nasa_utils.SLXUtils.evalParam(...

@@ -44,7 +44,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function failed = run_kind2(model, nom_lustre_file, xml_trace, ...
         top_node_name, Assertions_list, contractBlocks_list, KIND2)
-    
+    failed = 0;
     if ~isempty(Assertions_list) && ~isempty(contractBlocks_list)
         display_msg('Having both Assertion/Proof blocks and contracts are not supported in KIND2.', MsgType.ERROR, 'toLustreVerify.run_kind2', '');
         return;
@@ -55,6 +55,7 @@ function failed = run_kind2(model, nom_lustre_file, xml_trace, ...
     else
         timeout = 120;
     end
+    OPTS = '';
     if ~isempty(Assertions_list)
         OPTS = ' --slice_nodes false --check_subproperties true ';
         timeout_analysis = timeout / numel(Assertions_list);
@@ -68,6 +69,10 @@ function failed = run_kind2(model, nom_lustre_file, xml_trace, ...
     else
         display_msg('No Property to check.', MsgType.RESULT, 'toLustreVerify.run_kind2', '');
         return;
+    end
+    if isfield(CoCoSimPreferences, 'kind2CheckSatAssume')...
+            && ~CoCoSimPreferences.kind2CheckSatAssume
+        OPTS = [OPTS , ' --check_sat_assume false'];
     end
     tkind2_start = tic;
     [failed, kind2_out] = coco_nasa_utils.Kind2Utils.runKIND2(...

@@ -42,7 +42,7 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [isPortIndex,ind,selectorOutputDimsArray] = ...
+function [isPortIndex,ind,selectorOutputDimsArray, status] = ...
         defineMapInd(~,parent,blk,inputs,U_expanded_dims,isSelector)
   
     
@@ -51,8 +51,14 @@ function [isPortIndex,ind,selectorOutputDimsArray] = ...
     isPortIndex = false;
     IndexMode = blk.IndexMode;
     indPortNumber = zeros(1,numel(blk.IndexOptionArray));
-    [numOutDims, ~, ~] = ...
+    [numOutDims, ~, status] = ...
         nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(parent, blk, blk.NumberOfDimensions);
+    if status
+        display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
+            blk.NumberOfDimensions, HtmlItem.addOpenCmd(blk.Origin_path)), ...
+            MsgType.ERROR, 'Constant_To_Lustre', '');
+        return;
+    end
     selectorOutputDimsArray = ones(1,numOutDims);
     if isSelector
         AssignSelectAll = 'Select all';
@@ -68,8 +74,14 @@ function [isPortIndex,ind,selectorOutputDimsArray] = ...
             ind{i} = (1:U_expanded_dims.dims(i));
             selectorOutputDimsArray(i) = U_expanded_dims.dims(i);
         elseif strcmp(blk.IndexOptionArray{i}, 'Index vector (dialog)')
-            [Idx, ~, ~] = ...
+            [Idx, ~, status] = ...
                 nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(parent, blk, blk.IndexParamArray{i});
+            if status
+                display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
+                    blk.IndexParamArray{i}, HtmlItem.addOpenCmd(blk.Origin_path)), ...
+                    MsgType.ERROR, 'Constant_To_Lustre', '');
+                return;
+            end
             ind{i} = Idx;
             selectorOutputDimsArray(i) = numel(Idx);
         elseif strcmp(blk.IndexOptionArray{i}, 'Index vector (port)')
@@ -89,12 +101,25 @@ function [isPortIndex,ind,selectorOutputDimsArray] = ...
                 end
             end
         elseif strcmp(blk.IndexOptionArray{i}, 'Starting index (dialog)')
-            [Idx, ~, ~] = ...
+            [Idx, ~, status] = ...
                 nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(parent, blk, blk.IndexParamArray{i});
+            if status
+                display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
+                    blk.IndexParamArray{i}, HtmlItem.addOpenCmd(blk.Origin_path)), ...
+                    MsgType.ERROR, 'Constant_To_Lustre', '');
+                return;
+            end
             if isSelector
-                [selectorOutputDimsArray(i), ~, ~] = ...
-                    nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(parent, blk, blk.OutputSizeArray{i});                
-                    ind{i} = (Idx:Idx+selectorOutputDimsArray(i)-1);
+                [selectorOutputDimsArray(i), ~, status] = ...
+                    nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(parent, blk, blk.OutputSizeArray{i});
+                if status
+                    display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
+                        blk.OutputSizeArray{i}, HtmlItem.addOpenCmd(blk.Origin_path)), ...
+                        MsgType.ERROR, 'Constant_To_Lustre', '');
+                    return;
+                end
+                ind{i} = (Idx:Idx+selectorOutputDimsArray(i)-1);
+                
             else
                 % check for scalar or vector
                 if U_expanded_dims.numDs == 1
@@ -114,8 +139,14 @@ function [isPortIndex,ind,selectorOutputDimsArray] = ...
             portNumber = indexPortNumber + portNumberOffset;
             indPortNumber(i) = portNumber;
             if isSelector
-                [selectorOutputDimsArray(i), ~, ~] = ...
+                [selectorOutputDimsArray(i), ~, status] = ...
                     nasa_toLustre.blocks.Constant_To_Lustre.getValueFromParameter(parent, blk, blk.OutputSizeArray{i});
+                if status
+                    display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
+                        blk.OutputSizeArray{i}, HtmlItem.addOpenCmd(blk.Origin_path)), ...
+                        MsgType.ERROR, 'Constant_To_Lustre', '');
+                    return;
+                end
                 for j=1:selectorOutputDimsArray(i)
                     
                     if strcmp(IndexMode, 'Zero-based')

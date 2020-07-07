@@ -73,24 +73,28 @@ function [ new_ir, status ] = confirm_actions_SFIR_pp( new_ir )
         for i=1:numel(new_ir.States)
             statePath = new_ir.States{i}.Path;
             % default transition
-            new_ir.States{i}.Composition.DefaultTransitions= ...
+            [new_ir.States{i}.Composition.DefaultTransitions, skip]= ...
                 adapt_transitions(new_ir.States{i}.Composition.DefaultTransitions, statePath, 'Default');
+            if skip, return;end
             
             %OuterTransitions
-            new_ir.States{i}.OuterTransitions = ...
+            [new_ir.States{i}.OuterTransitions, skip] = ...
                 adapt_transitions(new_ir.States{i}.OuterTransitions, statePath, 'Outer');
+            if skip, return;end
             
             %InnerTransitions
-            new_ir.States{i}.InnerTransitions= ...
+            [new_ir.States{i}.InnerTransitions, skip]= ...
                 adapt_transitions(new_ir.States{i}.InnerTransitions, statePath, 'Inner');
+            if skip, return;end
             
         end
     end
     if isfield(new_ir, 'Junctions')
         for i=1:numel(new_ir.Junctions)
             junctionPath = new_ir.Junctions{i}.Path;
-            new_ir.Junctions{i}.OuterTransitions = ...
+            [new_ir.Junctions{i}.OuterTransitions, skip] = ...
                 adapt_transitions(new_ir.Junctions{i}.OuterTransitions, junctionPath, 'Default');
+            if skip, return;end
         end
     end
     %
@@ -162,8 +166,9 @@ function [states, skip] = adapt_states(states)
         end
     end
 end
-function transitions = adapt_transitions(transitions, statePath, transitionType)
+function [transitions, skip] = adapt_transitions(transitions, statePath, transitionType)
     action_fields = {'Event', 'Condition', 'ConditionAction', 'TransitionAction'};
+    skip = false;
     for i=1:numel(transitions)
         if isfield(transitions{i}, 'LabelString')...
                 && ~isempty(transitions{i}.LabelString) ...
@@ -195,9 +200,12 @@ function transitions = adapt_transitions(transitions, statePath, transitionType)
                     fprintf('\n');
                 end
             end
-            prompt = 'Are all the above parts correct? Y/N [Y]: ';
+            prompt = sprintf('Are all the above actions correct?\nY(yes)/N(no)/S(skip all next actions) [Y]: ');
             str = input(prompt,'s');
-            if ~isempty(str) && strcmp(upper(str), 'N')
+            if ~isempty(str) && strcmpi(str, 'S')
+                skip = true;
+                return;
+            elseif ~isempty(str) && strcmp(upper(str), 'N')
                 for j=1:numel(action_fields)
                     f = action_fields{j};
                     if isfield(transitions{i}, f)

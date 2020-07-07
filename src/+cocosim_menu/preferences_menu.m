@@ -334,7 +334,8 @@ function schema = getKind2Options(callbackInfo)
     schema.childrenFcns = {...
         {@PreferencesMenu.getCompositionalAnalysis, CoCoSimPreferences}, ...
         {@PreferencesMenu.getKind2Binary, CoCoSimPreferences},...
-        {@getKind2Solver, CoCoSimPreferences}
+        {@getKind2Solver, CoCoSimPreferences},...
+        {@getKind2CheckSatAssume, CoCoSimPreferences}...
         };
 end
 
@@ -358,7 +359,7 @@ end
 function schema = kind2SolverCallback(name, CoCoSimPreferences, varargin)
     schema = sl_toggle_schema;
     schema.label = name;
-    schema.label = name;
+
     if strcmp(name, CoCoSimPreferences.kind2SmtSolver)
         schema.checked = 'checked';
     else
@@ -371,6 +372,28 @@ end
 
 function setkind2SolverOption(name, CoCoSimPreferences, varargin)
     CoCoSimPreferences.kind2SmtSolver = name;
+    cocosim_menu.CoCoSimPreferences.save(CoCoSimPreferences);
+end
+
+%
+
+function schema = getKind2CheckSatAssume(callbackInfo)
+    schema = sl_toggle_schema;
+    schema.label = 'Use check-sat-assuming';
+
+    CoCoSimPreferences = callbackInfo.userdata;
+    
+    if CoCoSimPreferences.kind2CheckSatAssume
+        schema.checked = 'checked';
+    else
+        schema.checked = 'unchecked';
+    end
+    
+    schema.callback = @(x) setkind2CheckSatAssume(CoCoSimPreferences, x);
+end
+
+function setkind2CheckSatAssume(CoCoSimPreferences, varargin)
+    CoCoSimPreferences.kind2CheckSatAssume = ~ CoCoSimPreferences.kind2CheckSatAssume;
     cocosim_menu.CoCoSimPreferences.save(CoCoSimPreferences);
 end
 %% Lustrec options

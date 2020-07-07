@@ -54,6 +54,7 @@ classdef CoCoSimPreferences < handle
         compositionalAnalysis = true; %Kind2 compositionalAnalysis
         kind2Binary = 'Local';% possible values are {'Kind2 web service', 'Docker', 'Local'}
         kind2SmtSolver = 'Z3'; % possible values are {'Z3', 'Yices2'};
+        kind2CheckSatAssume = false; % possible values are {'true', 'false'}
         
         lustrecBinary = 'Local';% possible values are {'Docker', 'Local'}
         verificationTimeout = 1200; % In seconds
