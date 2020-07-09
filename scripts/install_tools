@@ -531,10 +531,11 @@ progress_run opam init -y --comp=$ocaml_required_version || error_install opam
 progress_run opam switch -y $ocaml_required_version
 progress_run eval `opam config env` || error_install opam
 progress_run opam update
-progress_run opam install -y  ocamlfind ocamlbuild ocamlgraph fmt logs topkg cmdliner num yojson zarith|| error_install ocaml
+progress_run opam install -y  depext ocamlfind ocamlbuild ocamlgraph fmt logs topkg cmdliner num yojson zarith|| error_install ocaml
 # install z3 for lustreC
 progress_run opam pin add -y z3 4.8.1
 progress_run opam install -y z3
+
 
 # install menhir
 progress_run opam install -y menhir
@@ -839,66 +840,14 @@ fi
 #     fi
 # fi
 #################
-# Install kind2 #
+# Install kind2 using opam
 #################
+progress_run opam pin add -y -n kind2 ${kind2_url}#${kind2_branch}
+progress_run opam depext -y kind2
+progress_run opam install -y kind2
 kind2_failed=0
-if (( menhir_failed )); then
-    error_msg "Skipping Kind2: dependancy menhir installation has failed"
-else
-    chmod +x "$install_dir/bin/kind2" 2>/dev/null || {}
-    if [[ -x "$install_dir/bin/kind2" ]]; then
-        progress "Using already built ${cgreen}kind2"
-    else
-        progress "Installing ${cgreen}kind2${coff}${cbold} from upstream repository"
+cp "$(which kind2)" "$install_dir/bin/kind2"
 
-        git_clone "$kind2_url" "$kind2_branch" "$build_dir/kind2"
-
-        cd "$build_dir/kind2"
-
-        progress_run ./autogen.sh || {
-            error_configure kind2;
-            kind2_failed=1;
-        }
-        if (( ! kind2_failed )); then
-            progress_run ./build.sh --prefix="$install_dir" || {
-                error_make kind2;
-                kind2_failed=1;
-            }
-        fi
-        if (( ! kind2_failed )); then
-            progress_run make install || {
-                error_install kind2;
-                kind2_failed=1;
-            }
-        fi
-    fi
-
-    if (( ! kind2_failed )); then
-        command_exists kind2 || error_msg "kind2 is not properly installed"
-        version=$(kind2_parse_version kind2) || {
-            error_parse_version kind2;
-            kind2_failed=1;
-        }
-        if (( ! kind2_failed )); then
-            success "${cgreen}kind2 $version${coff}${cbold} successfully installed"
-
-            if [[ -f "$build_dir/kind2/examples/two_counters.lus" ]]; then
-                progress "Testing kind2 on a simple example"
-                kind2_output=$(run_log_debug kind2 "$build_dir/kind2/examples/two_counters.lus" 2>&1)
-                (( verbose >= 1 )) && echo "$kind2_output"
-                [[ $kind2_output == *"Success"* ]] || {
-                    error_test kind2;
-                    kind2_failed=1;
-                }
-            fi
-        fi
-	if (( kind2_failed )); then
-	    error_msg "Please remove $install_dir/bin/kind2 and run the script again"
-	fi
-    else
-        error_msg "Skipping Kind2: kind2 installation, failed"
-    fi
-fi
 ##################################
 # Generate the activation script #
 ##################################
