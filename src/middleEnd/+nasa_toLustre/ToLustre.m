@@ -298,10 +298,16 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, ...
     nodes_ast = coco_nasa_utils.MatlabUtils.removeEmpty(nodes_ast);
     contracts_ast = coco_nasa_utils.MatlabUtils.removeEmpty(contracts_ast);
     program =  nasa_toLustre.lustreAst.LustreProgram(open_list, enumsAst, nodes_ast, contracts_ast);
+    display_msg('DONE with code generation.', MsgType.INFO, 'ToLustre', '');
     if cocosim_optim %...
             % && ~(coco_nasa_utils.LusBackendType.isLUSTREC(lus_backend) || coco_nasa_utils.LusBackendType.isZUSTRE(lus_backend))
         % Optimization is not important for Lustrec as the later normalize all expressions. 
-        try program = program.simplify(); catch me, display_msg(me.getReport(), MsgType.DEBUG, 'ToLustre.simplify', ''); end
+        try 
+            program = program.simplify(); 
+            display_msg('DONE with optimization.', MsgType.INFO, 'ToLustre', '');
+        catch me
+            display_msg(me.getReport(), MsgType.DEBUG, 'ToLustre.simplify', '');
+        end
     end
     
     %% writing code

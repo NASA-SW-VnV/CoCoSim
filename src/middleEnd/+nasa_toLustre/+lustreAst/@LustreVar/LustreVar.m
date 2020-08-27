@@ -102,7 +102,7 @@ classdef LustreVar < nasa_toLustre.lustreAst.LustreExpr
         new_obj = substituteVars(obj, varargin)
         %% This function is used in substitute vars in LustreNode
         function all_obj = getAllLustreExpr(obj)
-            all_obj = {};
+            all_obj = {obj};
         end
         %% This functions are used for ForIterator block
         [new_obj, varIds] = changePre2Var(obj)

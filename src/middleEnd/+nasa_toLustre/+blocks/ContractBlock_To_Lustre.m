@@ -89,7 +89,10 @@ classdef ContractBlock_To_Lustre < nasa_toLustre.blocks.SubSystem_To_Lustre
                     cellfun(@(x) isfield(blk.Content.(x),'BlockType'), field_names));
                 for i=1:numel(field_names)
                     child = blk.Content.(field_names{i});
-                    if strcmp(child.BlockType, 'Inport')
+                    if strcmp(child.BlockType, 'Inport') ...
+                            || strcmp(child.BlockType, 'Demux') ...
+                            || strcmp(child.BlockType, 'Mux') ...
+                            || strcmp(child.BlockType, 'UnitDelay') 
                         continue;
                     end
                     [outputs, ~] =nasa_toLustre.utils.SLX2LusUtils.getBlockOutputsNames(blk, child);
