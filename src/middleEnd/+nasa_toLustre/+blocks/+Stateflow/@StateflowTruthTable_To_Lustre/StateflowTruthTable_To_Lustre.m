@@ -84,10 +84,14 @@ classdef StateflowTruthTable_To_Lustre
                 cond = {};
                 for j = 1 : numel(table.Decisions{i}.Conditions)
                     c = table.Decisions{i}.Conditions{j};
+                    % TODO: fix Java parser to support conditions with
+                    % '\n'. Conditions such as "~(\n..." is not supported.
+                    % Current fix: removing '\n' from conditions.
+                    c_Conditions = regexprep(c.Condition, '\n', '');
                     if strcmp(c.ConditionValue, 'T')
-                        cond{end+1} = sprintf('(%s)', c.Condition);
+                        cond{end+1} = sprintf('(%s)', c_Conditions);
                     elseif strcmp(c.ConditionValue, 'F')
-                        cond{end+1} = sprintf('~(%s)', c.Condition);
+                        cond{end+1} = sprintf('~(%s)', c_Conditions);
                     end
                 end
                 cond_str = coco_nasa_utils.MatlabUtils.strjoin(cond, ' && ');
