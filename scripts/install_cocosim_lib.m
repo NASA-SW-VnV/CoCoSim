@@ -67,6 +67,18 @@ function install_cocosim_lib(force)
     [status, ~] = system('ping -c1 -q google.com');
     if status
         %No netwrok connexion
+        fprintf(['No interent connexion. Repository will not be updated and '...
+            '\n External libraries should be manually added.'])
+        return;
+    end
+    [status, ~] = system('git help');
+    if status
+        %Git is not installed
+        fprintf(['Git is not installed or not added to the PATH. '...
+            '\nPleas install Git. To add Git to your MATLAB PATH:\n'...
+            'For example in Windows, if C:\\Program Files\\Git\\cmd is the path to your git binary,\n'...
+            'then type the following in your Matlab Command Window:\n'...
+            'setenv(''PATH'', [getenv(''PATH'') '';C:\\Program Files\\Git\\cmd''])\n'])
         return;
     end
     scripts_path = fileparts(mfilename('fullpath'));
@@ -86,7 +98,14 @@ end
 %% update repo
 function updateRepo(cocosim_path)
     cd(cocosim_path);
-    [status, sys_out] = system('git pull origin $(git rev-parse --abbrev-ref HEAD)', '-echo');
+    [status, branch] = system('git rev-parse --abbrev-ref HEAD');
+    if status
+        fprintf('This is not a Git repository. Updating the code is ignored.\n') ;
+        return;
+    end
+    branch = regexprep(branch, '\n', '');
+    [status, sys_out] = system(...
+        sprintf('git pull origin %s', branch), '-echo');
     if status
         fprintf('Can not update current git repository:\n%s \n', sys_out) ;
         return;
@@ -95,7 +114,7 @@ end
 %% clone and pull
 function isAlreadyUpToDate = cloneOrPull(git_dir, git_url, git_branch)
     isAlreadyUpToDate = false;
-    if exist(git_dir, 'dir')
+    if exist(fullfile(git_dir, '.git'), 'dir')
         cd(git_dir);
         commands = {sprintf('git checkout %s', git_branch), ...
             sprintf('git pull origin %s', git_branch)};
@@ -103,10 +122,16 @@ function isAlreadyUpToDate = cloneOrPull(git_dir, git_url, git_branch)
     else
         coco_nasa_utils.MatlabUtils.mkdir(git_dir);
         cd(git_dir)
-        commands = {' git init; touch .gitconfig; git config --local http.sslverify false', ...
+        if ispc
+            touch_cmd = 'fsutil file createnew .gitconfig 0';
+        else
+            touch_cmd = 'touch .gitconfig';
+        end
+        commands = {'git init',touch_cmd,...
+            'git config --local http.sslverify false', ...
             sprintf('git remote add -f origin %s', git_url), ...
             sprintf('git pull origin %s', git_branch)};
-        pull_idex = 3;
+        pull_idex = 5;
     end
     sys_out = cell(numel(commands), 1);
     for i=1:numel(commands)
@@ -273,11 +298,12 @@ function install_tools(cocosim_path)
         % the user has at least one of the tools.
         return;
     end
-    
-    scripts_path = fullfile(cocosim_path, 'scripts');
-    fprintf('Please run the following commands in your terminal.\n' );
-    fprintf('>> cd %s\n', scripts_path);
-    fprintf('>> ./install_cocosim\n');
+    if ~ispc
+        scripts_path = fullfile(cocosim_path, 'scripts');
+        fprintf('Please run the following commands in your terminal.\n' );
+        fprintf('>> cd %s\n', scripts_path);
+        fprintf('>> ./install_cocosim\n');
+    end
         
 %     if ispc
 %         installation_path = fullfile(cocosim_path, 'doc', 'installation.md');
