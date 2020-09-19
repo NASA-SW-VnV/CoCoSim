@@ -301,7 +301,7 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, ...
     display_msg('DONE with code generation.', MsgType.INFO, 'ToLustre', '');
     if cocosim_optim %...
             % && ~(coco_nasa_utils.LusBackendType.isLUSTREC(lus_backend) || coco_nasa_utils.LusBackendType.isZUSTRE(lus_backend))
-        % Optimization is not important for Lustrec as the later normalize all expressions. 
+        % Optimization is not important for Lustrec as the latter normalize all expressions. 
         try 
             program = program.simplify(); 
             display_msg('DONE with optimization.', MsgType.INFO, 'ToLustre', '');
@@ -411,7 +411,7 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, ...
     ToLustre_datenum_map(model_path) = lustre_file_path;
     
     %% check lustre syntax
-    if ~coco_nasa_utils.LusBackendType.isPRELUDE(lus_backend) 
+    if ~ispc && ~coco_nasa_utils.LusBackendType.isPRELUDE(lus_backend) 
         if coco_nasa_utils.LusBackendType.isKIND2(lus_backend)
             [syntax_status, output] = coco_nasa_utils.Kind2Utils.checkSyntaxError(lustre_file_path, KIND2, Z3);
         elseif coco_nasa_utils.LusBackendType.isLUSTREC(lus_backend)
@@ -458,10 +458,10 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, ...
     %% display report files
     t_finish = toc(t_start);
     
-    msg = sprintf('Lustre File generated:%s', lustre_file_path);
+    msg = sprintf('Lustre File generated:%s', HtmlItem.addOpenFileCmd(lustre_file_path));
     display_msg(msg, MsgType.RESULT, 'ToLustre', '');
     if coco_nasa_utils.LusBackendType.isPRELUDE(lus_backend)
-        msg = sprintf('PRELUDE File generated:%s', plu_path);
+        msg = sprintf('PRELUDE File generated:%s', HtmlItem.addOpenFileCmd(plu_path));
         display_msg(msg, MsgType.RESULT, 'ToLustre', '');
     end
     msg = sprintf('Lustre generation finished in %f seconds', t_finish);

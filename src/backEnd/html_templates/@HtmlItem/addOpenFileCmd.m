@@ -47,6 +47,11 @@ function htmlCmd = addOpenFileCmd(blk, shortName)
     if nargin < 2
         shortName = HtmlItem.removeHtmlKeywords(blk);
     end
+    if ispc && coco_nasa_utils.MatlabUtils.contains(blk, ':\')
+        % for windows printing.
+        blk = strrep(blk, '\', '/');
+        shortName = strrep(shortName, '\', '/');
+    end
     htmlCmd = sprintf('<a href="matlab:open (''%s'')">%s</a>', ...
         regexprep(blk, '\n', ' '), shortName);
 end
