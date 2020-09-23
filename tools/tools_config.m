@@ -88,7 +88,7 @@ else
             Z3Library_path = fullfile(solvers_path,'spacer', 'lib', 'libz3.so');
             LD_LIBRARY_PATH = 'LD_LIBRARY_PATH';
         elseif ispc
-            Z3Library_path = fullfile(cocosim_path, 'tools\verifiers\Z3\bin\libz3.dll');
+            Z3Library_path = fullfile(cocoSim_root, 'tools\verifiers\Z3\bin\libz3.dll');
             LD_LIBRARY_PATH = 'PATH';
         else
             errordlg('OS not supported yet','CoCoSim backend configuration');
