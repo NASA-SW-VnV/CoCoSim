@@ -61,14 +61,21 @@ function install_cocosim_lib(force)
         force = false;
     end
     if install_cocosim_already_run && ~force
+        fprintf('Install CoCoSim external libraries is already run and will be ignored.\nTo force it run "install_cocosim_lib(true)" in your Matlab Command Window.\n')
         return;
     end
     PWD = pwd;
+    scripts_path = fileparts(mfilename('fullpath'));
+    cocosim_path = fileparts(scripts_path);
+    %% install binaries: Zustre, Kind2, Lustrec, Z3 ...
+    install_tools(cocosim_path);
+    
+    %% the following requires internet access.
     [status, ~] = system('ping -c1 -q google.com');
     if status
         %No netwrok connexion
-        fprintf(['No interent connexion. Repository will not be updated and '...
-            '\n External libraries should be manually added.'])
+        fprintf(['No interent connexion. Repository will not be updated.\n'...
+            'If it''s your first run of CoCoSim, external libraries should be manually added if you don''t have access to the internet.\n'])
         return;
     end
     [status, ~] = system('git help');
@@ -81,16 +88,13 @@ function install_cocosim_lib(force)
             'setenv(''PATH'', [getenv(''PATH'') '';C:\\Program Files\\Git\\cmd''])\n'])
         return;
     end
-    scripts_path = fileparts(mfilename('fullpath'));
-    cocosim_path = fileparts(scripts_path);
     %% update cocosim
     updateRepo(cocosim_path)
     %% copy files from cocosim in github
     copyCoCoFiles(force, cocosim_path);
     %% copy file from external libraries : Autolayout, cmd_timeout, html_lib
     copyExternalLibFiles(force, cocosim_path);
-    %% install binaries: Zustre, Kind2, Lustrec, Z3 ...
-    install_tools(cocosim_path);
+    
     
     cd(PWD);
 end
@@ -284,7 +288,7 @@ function copyExternalLibFiles(force, cocosim_path)
 %     catch ME
 %         switch ME.identifier
 %             case 'MATLAB:fileread:cannotOpenFile'
-%                 fprintf('Patch failed: Can''t open file %s', file_path);
+%                 fprintf('Patch failed: Can''t open file %s\n', file_path);
 %             otherwise
 %                 rethrow(ME)
 %         end

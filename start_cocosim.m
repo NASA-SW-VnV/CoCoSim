@@ -52,12 +52,18 @@ function start_cocosim(  )
     disp('... Starting cocoSim configuration')
     [cocoSim_root, ~, ~] = fileparts(mfilename('fullpath'));
     addpath(fullfile(cocoSim_root, 'scripts'));
-    % Enable this to update cocosim repo, or call it directly from workspace
-    display_msg_path = fullfile(cocoSim_root, 'src', 'external', 'cocosim_iowa', 'utils', 'display_msg.m');
-    if ~exist(display_msg_path, 'file')
-        % external libraries are missing
+    
+    % Update CoCoSim Repo
+    %display_msg_path = fullfile(cocoSim_root, 'src', 'external', 'cocosim_iowa', 'utils', 'display_msg.m');
+    %if ~exist(display_msg_path, 'file')
+    % external libraries are missing
+    try
         install_cocosim_lib();
+    catch
+        fprintf('Install CoCoSim external libraries failed. Ignore it if your CoCoSim has all required files.')
     end
+    %end
+    
     cocosim_config;
     warning('off');
     sl_refresh_customizations;

@@ -68,6 +68,7 @@ if isempty(tools_config_already_run)
 end
 if tools_config_already_run && ~isempty(LUSTREC) && ~isempty(KIND2)...
         && ~isempty(Z3) && ~isempty(YICES2)
+    fprintf('Tools config is already run and will be ignored.\nTo force it run "tools_config" in your Matlab Command Window.\n')
     %already run
 else
     [tools_root, ~, ~] = fileparts(which('tools_config')); %fileparts(mfilename('fullpath'));
