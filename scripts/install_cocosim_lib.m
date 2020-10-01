@@ -71,7 +71,14 @@ function install_cocosim_lib(force)
     install_tools(cocosim_path);
     
     %% the following requires internet access.
-    [status, ~] = system('ping -c1 -q google.com');
+    % Ping is blocked by some companies networks
+    %[status, ~] = system('ping -c1 -q google.com');
+    try
+        status = 0;
+        webread('https://www.google.com');
+    catch
+        status = 1;
+    end
     if status
         %No netwrok connexion
         fprintf(['No interent connexion. Repository will not be updated.\n'...
