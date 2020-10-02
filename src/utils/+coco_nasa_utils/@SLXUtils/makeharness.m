@@ -121,7 +121,7 @@ function [new_model_name, status] = makeharness(T, subsys_path, output_dir, post
         
         new_system(newBaseName);
         
-        if coco_nasa_utils.MatlabUtils.contains(subsys_path, filesep)
+        if coco_nasa_utils.MatlabUtils.contains(subsys_path, '/')
             add_block(subsys_path, newSubName);
         else
             add_block('built-in/Subsystem', fullfile(newBaseName, subsys_name));
@@ -193,13 +193,13 @@ function convertSys = addConversionBlock(newBaseName, subsys_name, InportsDTs, s
     
     for i=1:nb_inports
         x = 100; y=100*i;
-        inport_name = strcat(convertSys, filesep, 'In',num2str(i));
+        inport_name = strcat(convertSys, '/', 'In',num2str(i));
         add_block('simulink/Ports & Subsystems/In1',...
             inport_name,...
             'MakeNameUnique', 'on', ...
             'Position',[x y (x+30) (y+20)]);
         if ~strcmp(InportsDTs{i}, 'double')
-            convBlkName = strcat(convertSys, filesep, 'convert', num2str(i));
+            convBlkName = strcat(convertSys, '/', 'convert', num2str(i));
             add_block('simulink/Signal Attributes/Data Type Conversion',convBlkName, ...
                 'Position', [(x + 50) (y - 15) (x + 100) (y+35)],...
                 'OutDataTypeStr', InportsDTs{i});
@@ -208,7 +208,7 @@ function convertSys = addConversionBlock(newBaseName, subsys_name, InportsDTs, s
                 strcat('convert', num2str(i), '/1'), ...
                 'autorouting','on');
         end
-        rateBlkName = strcat(convertSys, filesep, 'rateT', num2str(i));
+        rateBlkName = strcat(convertSys, '/', 'rateT', num2str(i));
         add_block('simulink/Signal Attributes/Rate Transition',rateBlkName, ...
             'Position', [(x + 150) (y - 15) (x + 200) (y+35)],...
             'Integrity', 'off', ...
@@ -226,7 +226,7 @@ function convertSys = addConversionBlock(newBaseName, subsys_name, InportsDTs, s
                 'autorouting','on');
         end
         
-        outport_name = strcat(convertSys, filesep, 'Out',num2str(i));
+        outport_name = strcat(convertSys, '/', 'Out',num2str(i));
         add_block('simulink/Ports & Subsystems/Out1',...
             outport_name,...
             'MakeNameUnique', 'on', ...

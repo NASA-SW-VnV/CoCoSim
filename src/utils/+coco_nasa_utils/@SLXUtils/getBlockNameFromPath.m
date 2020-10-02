@@ -45,6 +45,6 @@
 function out = getBlockNameFromPath(nomsim)
     %% Get the block name from path  
     
-    [a,~]=regexp (nomsim, filesep, 'split');
+    [a,~] = regexp(nomsim, '/', 'split');
     out = a{end};
 end

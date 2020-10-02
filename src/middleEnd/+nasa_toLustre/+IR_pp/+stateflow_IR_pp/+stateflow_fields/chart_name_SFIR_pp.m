@@ -55,7 +55,7 @@ function [new_ir, status] = chart_name_SFIR_pp(new_ir, isSF)
         isSF = 0;
     end
     if isSF
-        new_name = regexp(new_ir.Path, filesep, 'split');
+        new_name = regexp(new_ir.Path, '/', 'split');
         new_name = new_name{end};
     else
         new_name = nasa_toLustre.IR_pp.stateflow_IR_pp.SFIRPPUtils.adapt_root_name(new_ir.Path);

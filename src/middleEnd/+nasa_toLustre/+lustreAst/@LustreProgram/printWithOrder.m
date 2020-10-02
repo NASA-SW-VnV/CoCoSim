@@ -45,9 +45,10 @@
 function [lines, alreadyPrinted] = printWithOrder(obj, ...
         nodesList, nodeName, call_map, alreadyPrinted, lines, backend)
 
-    if isKey(call_map, nodeName)
+    if isKey(call_map, nodeName) && ~ismember(nodeName, alreadyPrinted)
         subNodes = call_map(nodeName);
         for i=1:numel(subNodes)
+            if strcmp(subNodes{i}, nodeName), continue, end
             [lines, alreadyPrinted] = obj.printWithOrder( ...
                 nodesList, subNodes{i}, call_map, alreadyPrinted, lines, backend);
         end

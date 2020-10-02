@@ -47,7 +47,7 @@
 %name.
 function node_name = node_name_format(subsys_struct)
     new_name = strrep(subsys_struct.Name, '/', '_');
-    if isempty(strfind(subsys_struct.Path, filesep))
+    if isempty(strfind(subsys_struct.Path, '/'))
         % main node: should be the same as filename
         node_name = nasa_toLustre.utils.SLX2LusUtils.name_format(new_name);
     else
