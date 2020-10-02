@@ -75,6 +75,7 @@ classdef CoCoSimPreferences < handle
         skip_defected_pp = true;
         skip_pp = false;
         use_more_precise_abstraction = false;
+        abstract_lookuptables = true;
         %gen_pp_verif = false;
         
         cocosim_verbose = 0;

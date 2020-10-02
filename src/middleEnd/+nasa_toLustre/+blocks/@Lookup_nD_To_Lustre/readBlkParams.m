@@ -72,10 +72,13 @@ function blkParams = readBlkParams(~,parent,blk,blkParams)
     end
     
     % tableMin and tableMax may be used for contract
-    %     blkParams.tableMin = min(blkParams.T(:));
-    %     blkParams.tableMax = max(blkParams.T(:));
-    blkParams.tableMin = 0.;
-    blkParams.tableMax = 1.e15;
+    if isfield(blkParams, 'Table') && isnumeric(blkParams.Table)
+        blkParams.tableMin = min(blkParams.Table(:));
+        blkParams.tableMax = max(blkParams.Table(:));
+    else
+        blkParams.tableMin = [];
+        blkParams.tableMax = [];
+    end
     
     
     blkParams.RndMeth = blk.RndMeth;

@@ -55,6 +55,7 @@ function schema = preferences_menu(callbackInfo)
     schema.childrenFcns = {...
         {@getLustreCompiler, CoCoSimPreferences}, ...
         {@getNASACompilerPreferences, CoCoSimPreferences}, ...
+        {@getNASACompilerAbstractions, CoCoSimPreferences}, ...
         {@getLustreBackend, CoCoSimPreferences}, ...
         {@getKind2Options, CoCoSimPreferences}, ...
         {@getLustrecBinary, CoCoSimPreferences}, ...
@@ -108,10 +109,7 @@ function schema = getNASACompilerPreferences(callbackInfo)
     schema.autoDisableWhen = 'Busy';
     CoCoSimPreferences = callbackInfo.userdata;
     schema.childrenFcns = {...
-        {@getForceTypecastingOfInt, CoCoSimPreferences},...
-        {@useMorePreciseAbstraction, CoCoSimPreferences},...
         {@getSkip_unsupportedblocks, CoCoSimPreferences},...
-        {@getAbstract_unsupported_blocks_forverification, CoCoSimPreferences}, ...
         {@getSkip_pp, CoCoSimPreferences},...
         {@getSkip_defected_pp, CoCoSimPreferences},...
         {@getSkip_optim, CoCoSimPreferences},...
@@ -119,40 +117,8 @@ function schema = getNASACompilerPreferences(callbackInfo)
         {@getSkip_sf_actions_check, CoCoSimPreferences}...
         };
 end
-%forceTypeCastingOfInt
-function schema = getForceTypecastingOfInt(callbackInfo)
-    schema = sl_toggle_schema;
-    schema.label = 'Abstract Integer machine types (int8, int16..) by Z ([-oo, +oo]).';
-    CoCoSimPreferences = callbackInfo.userdata;
-    schema.checked = 'checked';
-    if CoCoSimPreferences.forceTypeCastingOfInt
-        schema.checked = 'unchecked';
-    end
-    schema.callback = @forceTypecastingOfInt;
-    schema.userdata = CoCoSimPreferences;
-end
-function forceTypecastingOfInt(callbackInfo)
-    CoCoSimPreferences = callbackInfo.userdata;
-    CoCoSimPreferences.forceTypeCastingOfInt = ~ CoCoSimPreferences.forceTypeCastingOfInt;
-    cocosim_menu.CoCoSimPreferences.save(CoCoSimPreferences);
-end
-%useMorePreciseAbstraction
-function schema = useMorePreciseAbstraction(callbackInfo)
-    schema = sl_toggle_schema;
-    schema.label = 'Use more precise abstraction for mathematical functions (sqrt, cos, ...).';
-    CoCoSimPreferences = callbackInfo.userdata;
-    schema.checked = 'checked';
-    if ~CoCoSimPreferences.use_more_precise_abstraction
-        schema.checked = 'unchecked';
-    end
-    schema.callback = @useMorePreciseAbstractionCallback;
-    schema.userdata = CoCoSimPreferences;
-end
-function useMorePreciseAbstractionCallback(callbackInfo)
-    CoCoSimPreferences = callbackInfo.userdata;
-    CoCoSimPreferences.use_more_precise_abstraction = ~ CoCoSimPreferences.use_more_precise_abstraction;
-    cocosim_menu.CoCoSimPreferences.save(CoCoSimPreferences);
-end
+
+
 % skip_unsupportedblocks
 function schema = getSkip_unsupportedblocks(callbackInfo)
     schema = sl_toggle_schema;
@@ -171,23 +137,7 @@ function skip_unsupportedblocks(callbackInfo)
     cocosim_menu.CoCoSimPreferences.save(CoCoSimPreferences);
 end
 
-%getAbstract_unsupported_blocks_forverification
-function schema = getAbstract_unsupported_blocks_forverification(callbackInfo)
-    schema = sl_toggle_schema;
-    schema.label = 'Abstract unsupported blocks for verification (Kind2).';
-    CoCoSimPreferences = callbackInfo.userdata;
-    schema.checked = 'checked';
-    if ~CoCoSimPreferences.abstract_unsupported_blocks
-        schema.checked = 'unchecked';
-    end
-    schema.callback = @abstract_unsupported_blocks_forverification;
-    schema.userdata = CoCoSimPreferences;
-end
-function abstract_unsupported_blocks_forverification(callbackInfo)
-    CoCoSimPreferences = callbackInfo.userdata;
-    CoCoSimPreferences.abstract_unsupported_blocks = ~ CoCoSimPreferences.abstract_unsupported_blocks;
-    cocosim_menu.CoCoSimPreferences.save(CoCoSimPreferences);
-end
+
 
 
 %getSkip_pp
@@ -279,6 +229,91 @@ function skip_sf_actions_check(callbackInfo)
     cocosim_menu.CoCoSimPreferences.save(CoCoSimPreferences);
 end
 
+%% NASA Compiler abstractions
+function schema = getNASACompilerAbstractions(callbackInfo)
+    schema = sl_container_schema;
+    schema.label = 'NASA compiler abstractions';
+    schema.statustip = 'NASA compiler abstractions';
+    schema.autoDisableWhen = 'Busy';
+    CoCoSimPreferences = callbackInfo.userdata;
+    schema.childrenFcns = {...
+        {@getForceTypecastingOfInt, CoCoSimPreferences},...
+        {@useMorePreciseAbstraction, CoCoSimPreferences},...
+        {@getAbstract_unsupported_blocks_forverification, CoCoSimPreferences}, ...
+        {@getAbstract_lookuptables_forverification, CoCoSimPreferences} ...
+        };
+end
+%forceTypeCastingOfInt
+function schema = getForceTypecastingOfInt(callbackInfo)
+    schema = sl_toggle_schema;
+    schema.label = 'Abstract Integer machine types (int8, int16..) by Z ([-oo, +oo]).';
+    CoCoSimPreferences = callbackInfo.userdata;
+    schema.checked = 'checked';
+    if CoCoSimPreferences.forceTypeCastingOfInt
+        schema.checked = 'unchecked';
+    end
+    schema.callback = @forceTypecastingOfInt;
+    schema.userdata = CoCoSimPreferences;
+end
+function forceTypecastingOfInt(callbackInfo)
+    CoCoSimPreferences = callbackInfo.userdata;
+    CoCoSimPreferences.forceTypeCastingOfInt = ~ CoCoSimPreferences.forceTypeCastingOfInt;
+    cocosim_menu.CoCoSimPreferences.save(CoCoSimPreferences);
+end
+
+%useMorePreciseAbstraction
+function schema = useMorePreciseAbstraction(callbackInfo)
+    schema = sl_toggle_schema;
+    schema.label = 'Use more precise abstraction for mathematical functions (sqrt, cos, ...).';
+    CoCoSimPreferences = callbackInfo.userdata;
+    schema.checked = 'checked';
+    if ~CoCoSimPreferences.use_more_precise_abstraction
+        schema.checked = 'unchecked';
+    end
+    schema.callback = @useMorePreciseAbstractionCallback;
+    schema.userdata = CoCoSimPreferences;
+end
+function useMorePreciseAbstractionCallback(callbackInfo)
+    CoCoSimPreferences = callbackInfo.userdata;
+    CoCoSimPreferences.use_more_precise_abstraction = ~ CoCoSimPreferences.use_more_precise_abstraction;
+    cocosim_menu.CoCoSimPreferences.save(CoCoSimPreferences);
+end
+
+%getAbstract_unsupported_blocks_forverification
+function schema = getAbstract_unsupported_blocks_forverification(callbackInfo)
+    schema = sl_toggle_schema;
+    schema.label = 'Abstract unsupported blocks for verification (Kind2).';
+    CoCoSimPreferences = callbackInfo.userdata;
+    schema.checked = 'checked';
+    if ~CoCoSimPreferences.abstract_unsupported_blocks
+        schema.checked = 'unchecked';
+    end
+    schema.callback = @abstract_unsupported_blocks_forverification;
+    schema.userdata = CoCoSimPreferences;
+end
+function abstract_unsupported_blocks_forverification(callbackInfo)
+    CoCoSimPreferences = callbackInfo.userdata;
+    CoCoSimPreferences.abstract_unsupported_blocks = ~ CoCoSimPreferences.abstract_unsupported_blocks;
+    cocosim_menu.CoCoSimPreferences.save(CoCoSimPreferences);
+end
+
+%getAbstract_lookuptables_forverification
+function schema = getAbstract_lookuptables_forverification(callbackInfo)
+    schema = sl_toggle_schema;
+    schema.label = 'Abstract Lookup Table blocks for verification using breakpoints/table.';
+    CoCoSimPreferences = callbackInfo.userdata;
+    schema.checked = 'checked';
+    if ~CoCoSimPreferences.abstract_lookuptables
+        schema.checked = 'unchecked';
+    end
+    schema.callback = @abstract_lookuptables_forverification;
+    schema.userdata = CoCoSimPreferences;
+end
+function abstract_lookuptables_forverification(callbackInfo)
+    CoCoSimPreferences = callbackInfo.userdata;
+    CoCoSimPreferences.abstract_lookuptables = ~ CoCoSimPreferences.abstract_lookuptables;
+    cocosim_menu.CoCoSimPreferences.save(CoCoSimPreferences);
+end
 
 %% Lustre Backend
 function schema = getLustreBackend(callbackInfo)
