@@ -67,8 +67,7 @@ function install_cocosim_lib(force)
     PWD = pwd;
     scripts_path = fileparts(mfilename('fullpath'));
     cocosim_path = fileparts(scripts_path);
-    %% install binaries: Zustre, Kind2, Lustrec, Z3 ...
-    install_tools(cocosim_path);
+    
     
     %% the following requires internet access.
     % Ping is blocked by some companies networks
@@ -102,6 +101,8 @@ function install_cocosim_lib(force)
     %% copy file from external libraries : Autolayout, cmd_timeout, html_lib
     copyExternalLibFiles(force, cocosim_path);
     
+    %% install binaries: Zustre, Kind2, Lustrec, Z3 ...
+    install_tools(cocosim_path);
     
     cd(PWD);
 end
