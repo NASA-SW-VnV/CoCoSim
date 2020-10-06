@@ -224,8 +224,9 @@ function copyCoCoFiles(force, cocosim_path)
             fprintf('copyfile failed:\n%s \n', MESSAGE);
         end
     end
-    %delete old cocosim_pp
+    %delete redundant files
     delete(fullfile(cocosim_path, 'src', 'frontEnd', 'pp', 'std_pp', 'cocosim_pp.m'));
+    delete(fullfile(cocosim_path, 'libs', 'contract', 'slblocks.m'));
     
     %add path the new folder
     addpath(genpath(cocosim_path));
