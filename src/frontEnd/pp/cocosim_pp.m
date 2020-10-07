@@ -126,6 +126,7 @@ function [new_file_path, failed] = cocosim_pp(model_path, varargin)
     % DO not remove to support as many blocks as possible.
     %BreakUserLinks
     save_system(new_model_base,[],'BreakUserLinks',true)
+    set_param(new_model_base,'SaveWithDisabledLinksMsg', 'none');
     %% Make sure model compile
     failed = CompileModelCheck_pp( new_model_base );
     if failed
