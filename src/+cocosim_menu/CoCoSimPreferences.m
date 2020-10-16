@@ -69,7 +69,7 @@ classdef CoCoSimPreferences < handle
         forceTypeCastingOfInt = true;
         forceCodeGen = false;
         skip_sf_actions_check = false;
-        skip_optim = false;
+        skip_optim = true;
         skip_unsupportedblocks = false;
         abstract_unsupported_blocks = true;
         skip_defected_pp = true;
