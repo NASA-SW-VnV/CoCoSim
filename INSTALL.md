@@ -96,3 +96,8 @@ If you want to customize these paths go to `cocosim/tools/tools_config.m` and ch
 **Quick Start**
 -------------------
 Explanation for each CoCoSim features can be found [here](doc/EXAMPLES.md)
+
+**Notes**
+Ubuntu 20.04 + MATLAB R2020 users : If running the verification example doesn't work (z3 not found error), please make sure that your environment has libstdc installed, then call MATLAB with the following flag:
+LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.28 /path/to/matlab/binary
+
