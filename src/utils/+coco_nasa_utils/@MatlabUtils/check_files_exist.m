@@ -48,7 +48,7 @@ function status = check_files_exist(varargin)
     for i=1:numel(varargin)
         if ~exist(varargin{i}, 'file')
             msg = sprintf('FILE NOT FOUND: %s', varargin{i});
-            display_msg(msg, Constants.ERROR, 'Zustre ', '');
+            display_msg(msg, Constants.ERROR, 'check_files_exist', '');
             status = 1;
             break;
         end

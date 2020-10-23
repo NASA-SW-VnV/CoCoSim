@@ -264,8 +264,13 @@ function [ T, coverage_percentage, status ] = lustret_test_mutation( model_full_
     %% generate random tests
     display_msg('Generating random tests', MsgType.INFO, 'lustret_test_mutation', '');
     nb_test = 0;
-
-    [inports_slx, ~] = coco_nasa_utils.SLXUtils.get_model_inputs_info(model_full_path);
+    try
+        [inports_slx, ~] = coco_nasa_utils.SLXUtils.get_model_inputs_info(model_full_path);
+    catch me
+        display_msg(me.getReport(), MsgType.DEBUG, 'random_tests', '');
+        display_msg(sprintf('Model information of "%s" cannot be obtained.', model_full_path), MsgType.ERROR, 'random_tests', '');
+        return;
+    end
     inports = main_node_struct.inputs;
     %adapt inports_lus DataType
     k=0;

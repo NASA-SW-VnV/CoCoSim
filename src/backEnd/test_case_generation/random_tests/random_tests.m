@@ -45,7 +45,8 @@
 function [ T,  new_model_name] = random_tests( model_full_path, nb_steps, IMIN, IMAX, exportToWs, mkHarnessMdl )
     %RANDOM_TESTS Summary of this function goes here
     %   Detailed explanation goes here
-    
+    T = [];
+    new_model_name = '';
     if ~exist(model_full_path, 'file')
         display_msg(['File not foudn: ' model_full_path],...
             MsgType.ERROR, 'random_tests', '');
@@ -74,9 +75,15 @@ function [ T,  new_model_name] = random_tests( model_full_path, nb_steps, IMIN, 
     addpath(model_path);
     load_system(model_full_path);
     %% Get model inports informations
-    [inports, ~] = coco_nasa_utils.SLXUtils.get_model_inputs_info(model_full_path);
+    try
+        [inports, ~] = coco_nasa_utils.SLXUtils.get_model_inputs_info(model_full_path);
+    catch me
+        display_msg(me.getReport(), MsgType.DEBUG, 'random_tests', '');
+        display_msg(sprintf('Model information of "%s" cannot be obtained.', model_full_path), MsgType.ERROR, 'random_tests', '');
+        return;
+    end
     [T, ~, ~] = coco_nasa_utils.SLXUtils.get_random_test(slx_file_name, inports, nb_steps,IMAX, IMIN);
-    new_model_name = '';
+    
     if exportToWs
         assignin('base', strcat(slx_file_name, '_random_tests'), T);
         display_msg(['Generated test suite is saved in workspace under name: ' strcat(slx_file_name, '_random_tests')],...

@@ -62,7 +62,7 @@ end
 if ~exist('model_checker', 'var')
     model_checker = 'KIND2';
 end
-if ~exist('stop_at_first_cex', 'var')
+if ~exist('deep_CEX', 'var')
     deep_CEX = 0;
 end
 
