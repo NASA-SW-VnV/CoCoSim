@@ -344,7 +344,7 @@ function version_ge() {
 # Version detection #
 #####################
 
-version_regex='[0-9]+(\.[0-9]+)*'
+version_regex='[0-9]+(\.[0-9a-z]+)*'
 
 # Parse and detect the version of cmake, given the command name
 function cmake_parse_version() {

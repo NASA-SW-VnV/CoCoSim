@@ -68,6 +68,7 @@ if isempty(tools_config_already_run)
 end
 if tools_config_already_run && ~isempty(LUSTREC) && ~isempty(KIND2)...
         && ~isempty(Z3) && ~isempty(YICES2)
+    fprintf('Tools config is already run and will be ignored.\nTo force it run "tools_config" in your Matlab Command Window.\n')
     %already run
 else
     [tools_root, ~, ~] = fileparts(which('tools_config')); %fileparts(mfilename('fullpath'));
@@ -88,7 +89,8 @@ else
             Z3Library_path = fullfile(solvers_path,'spacer', 'lib', 'libz3.so');
             LD_LIBRARY_PATH = 'LD_LIBRARY_PATH';
         elseif ispc
-            Z3Library_path = fullfile(cocosim_path, 'tools\verifiers\Z3\bin\libz3.dll');
+            Z3Library_path = fullfile(cocoSim_root, 'tools\verifiers\Z3\bin\libz3.dll');
+            LD_LIBRARY_PATH = 'PATH';
         else
             errordlg('OS not supported yet','CoCoSim backend configuration');
         end

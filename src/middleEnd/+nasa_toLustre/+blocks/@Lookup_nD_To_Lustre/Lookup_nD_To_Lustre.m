@@ -238,9 +238,9 @@ classdef Lookup_nD_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre ...
         %             getBlockInputsNames_convInType2AccType(parent, blk,...
         %             lookupTableType)
         
-        extNode = get_pre_lookup_node(lus_backend,blkParams,inputs)
+        [extNode, new_inputs] =  get_pre_lookup_node(lus_backend,blkParams,inputs)
         
-        extNode = get_interp_using_pre_node(obj, blkParams, inputs)
+        [extNode, new_outputs] = get_interp_using_pre_node(obj, blkParams, inputs)
         
         extNode = get_read_table_node(blkParams, inputs)
         

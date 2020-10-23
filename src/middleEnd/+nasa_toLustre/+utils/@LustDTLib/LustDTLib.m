@@ -110,7 +110,8 @@ classdef LustDTLib
                 node.setName('_floor');
                 node.setInputs(nasa_toLustre.lustreAst.LustreVar('x', 'real'));
                 node.setOutputs(nasa_toLustre.lustreAst.LustreVar('y', 'real'));
-                node.setLocalContract(contract);
+                %TODO: no need for this contract, implementation is enough.
+                %node.setLocalContract(contract);
                 node.setIsMain(false);
                 node.setBodyEqs(nasa_toLustre.lustreAst.LustreEq(nasa_toLustre.lustreAst.VarIdExpr('y'), ...
                     nasa_toLustre.lustreAst.UnaryExpr(nasa_toLustre.lustreAst.UnaryExpr.REAL, ...
@@ -152,7 +153,8 @@ classdef LustDTLib
                 node.setName('_ceil');
                 node.setInputs(nasa_toLustre.lustreAst.LustreVar('x', 'real'));
                 node.setOutputs(nasa_toLustre.lustreAst.LustreVar('y', 'real'));
-                node.setLocalContract(contract);
+                %TODO: no need for this contract, implementation is enough.
+                %node.setLocalContract(contract);
                 node.setIsMain(false);
                 node.setBodyEqs(nasa_toLustre.lustreAst.LustreEq(nasa_toLustre.lustreAst.VarIdExpr('y'), ...
                     nasa_toLustre.lustreAst.UnaryExpr(nasa_toLustre.lustreAst.UnaryExpr.REAL, ...
@@ -172,7 +174,7 @@ classdef LustDTLib
         % returning a real instead of int.
         function [node, external_nodes, opens, abstractedNodes] = get__round(lus_backend, varargin)
             if coco_nasa_utils.LusBackendType.isKIND2(lus_backend)
-                                opens = {};
+                opens = {};
                 abstractedNodes = {};
                 external_nodes = {'LustMathLib_abs_real', 'LustDTLib__Round'};
                 % abs(x - y) < 1.0
@@ -191,7 +193,8 @@ classdef LustDTLib
                 node.setName('_round');
                 node.setInputs(nasa_toLustre.lustreAst.LustreVar('x', 'real'));
                 node.setOutputs(nasa_toLustre.lustreAst.LustreVar('y', 'real'));
-                node.setLocalContract(contract);
+                %TODO: no need for this contract, implementation is enough.
+                %node.setLocalContract(contract);
                 node.setIsMain(false);
                 node.setBodyEqs(nasa_toLustre.lustreAst.LustreEq(nasa_toLustre.lustreAst.VarIdExpr('y'), ...
                     nasa_toLustre.lustreAst.UnaryExpr(nasa_toLustre.lustreAst.UnaryExpr.REAL, ...

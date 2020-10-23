@@ -42,7 +42,7 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function extNode = get_interp_using_pre_node(obj, ...
+function [extNode, new_outputs] = get_interp_using_pre_node(obj, ...
     blkParams, inputs)
 
 %    % This function generate Lustre external node that will return y value
@@ -81,7 +81,7 @@ function extNode = get_interp_using_pre_node(obj, ...
         nasa_toLustre.lustreAst.VarIdExpr('Interp_Using_Pre_Out');
     node_header.outputs{1} = nasa_toLustre.lustreAst.LustreVar(...
         node_header.outputs_name{1}, 'real'); 
-    
+    new_outputs = node_header.outputs_name(1);
     body_all = {};
     vars_all = {};    
     

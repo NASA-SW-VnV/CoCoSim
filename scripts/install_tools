@@ -55,13 +55,20 @@ source bash_utils
 
 progname=$(basename "$0")
 
+####### Machine #############
+unameOut="$(uname -s)"
+case "${unameOut}" in
+    Darwin*)    machine="osx";;
+    *)          machine="linux"
+esac
+
 # Version settings
 cmake_required_version="2.8.11"
 cmake_install_version="3.7.2"
 m4_install_version="1.4.18"
 python_required_version="2.7"
 python_install_version="2.7.13"
-ocaml_required_version="4.06.0"
+ocaml_required_version="4.07.0"
 # ocaml_install_version="4.03.0"
 autoconf_install_version="2.69"
 automake_install_version="1.15"
@@ -161,6 +168,7 @@ init_colors
 
 # Create directories
 mkdir -p "$install_dir" 2>/dev/null || { error "cannot create directory '$install_dir_orig'"; exit 2; }
+mkdir -p "$install_dir/bin" 2>/dev/null || { error "cannot create directory '$install_dir_orig/bin'"; exit 2; }
 mkdir -p "$build_dir" 2>/dev/null || { error "cannot create directory '$build_dir_orig'"; exit 2; }
 mkdir -p "$download_dir" 2>/dev/null || { error "cannot create directory '$download_dir_orig'"; exit 2; }
 touch "$log_file" 2>/dev/null || { error "cannot create '$log_file_orig'"; exit 2; }
@@ -315,7 +323,8 @@ fi
 if (( ${#missing_deps[@]} > 0 )); then
     error "Missing required utilities: $(join ", " "${missing_deps[@]}")"
     error "Please install the previous required utilities before running this script."
-    exit 4
+    # TODO: uncomment the following line to force exit. 
+    #exit 4
 fi
 
 unset utils_deps missing_deps
@@ -333,104 +342,104 @@ export MAKEFLAGS="-j$njobs $MAKEFLAGS"
 # Check cmake #
 ###############
 
-progress "Checking for CMake"
-found_cmake=0
+# progress "Checking for CMake"
+# found_cmake=0
 
-if command_exists cmake; then
-    version=$(cmake_parse_version cmake) || error_parse_version cmake
+# if command_exists cmake; then
+#     version=$(cmake_parse_version cmake) || error_parse_version cmake
 
-    if version_ge "$version" "$cmake_required_version"; then
-        found_cmake=1
-        success "Found CMake $version"
-    else
-        progress "Found CMake $version, version too old, skipped"
-    fi
-fi
+#     if version_ge "$version" "$cmake_required_version"; then
+#         found_cmake=1
+#         success "Found CMake $version"
+#     else
+#         progress "Found CMake $version, version too old, skipped"
+#     fi
+# fi
 
 ##############################
 # Install cmake if necessary #
 ##############################
 
-if (( ! found_cmake )); then
-    progress "Could NOT find CMake >= $cmake_required_version"
+# if (( ! found_cmake )); then
+#     progress "Could NOT find CMake >= $cmake_required_version"
 
-    if [[ -x "$install_dir/cmake-$cmake_install_version/bin/cmake" ]]; then
-        progress "Using already built ${cgreen}cmake $cmake_install_version"
-    else
-        progress "Installing ${cgreen}cmake $cmake_install_version"
+#     if [[ -x "$install_dir/cmake-$cmake_install_version/bin/cmake" ]]; then
+#         progress "Using already built ${cgreen}cmake $cmake_install_version"
+#     else
+#         progress "Installing ${cgreen}cmake $cmake_install_version"
 
-        download_extract "https://cmake.org/files/v${cmake_install_version%.*}/cmake-$cmake_install_version.tar.gz" \
-            "$build_dir/cmake-$cmake_install_version"
+#         download_extract "https://cmake.org/files/v${cmake_install_version%.*}/cmake-$cmake_install_version.tar.gz" \
+#             "$build_dir/cmake-$cmake_install_version"
 
-        cd "$build_dir/cmake-$cmake_install_version"
+#         cd "$build_dir/cmake-$cmake_install_version"
 
-        progress_run ./configure \
-            --prefix="$install_dir/cmake-$cmake_install_version" \
-            --no-system-libs || error_configure cmake
+#         progress_run ./configure \
+#             --prefix="$install_dir/cmake-$cmake_install_version" \
+#             --no-system-libs || error_configure cmake
 
-        progress_run make || error_make cmake
+#         progress_run make || error_make cmake
 
-        progress_run make install || error_install cmake
-    fi
+#         progress_run make install || error_install cmake
+#     fi
 
-    prepend_path "$install_dir/cmake-$cmake_install_version/bin"
+#     prepend_path "$install_dir/cmake-$cmake_install_version/bin"
 
-    (command_exists cmake && version=$(cmake_parse_version cmake) &&
-        [[ "$version" = "$cmake_install_version" ]]) ||
-        assert_failed "cmake is not properly installed"
+#     (command_exists cmake && version=$(cmake_parse_version cmake) &&
+#         [[ "$version" = "$cmake_install_version" ]]) ||
+#         assert_failed "cmake is not properly installed"
 
-    success "${cgreen}cmake $cmake_install_version${coff}${cbold} successfully installed"
-fi
+#     success "${cgreen}cmake $cmake_install_version${coff}${cbold} successfully installed"
+# fi
 
 ############
 # Check m4 #
 ############
 
-progress "Checking for m4"
-found_m4=0
+# progress "Checking for m4"
+# found_m4=0
 
-if command_exists m4; then
-    version=$(m4_parse_version m4) || error_parse_version m4
-    success "Found m4 $version"
-    found_m4=1
-fi
+# if command_exists m4; then
+#     version=$(m4_parse_version m4) || error_parse_version m4
+#     success "Found m4 $version"
+#     found_m4=1
+# fi
 
 ###########################
 # Install m4 if necessary #
 ###########################
 
-if (( ! found_m4 )); then
-    progress "Could NOT find m4"
+# if (( ! found_m4 )); then
+#     progress "Could NOT find m4"
 
-    if [[ -x "$install_dir/m4-$m4_install_version/bin/m4" ]]; then
-        progress "Using already built ${cgreen}m4 $m4_install_version"
-    else
-        progress "Installing ${cgreen}m4 $m4_install_version"
+#     if [[ -x "$install_dir/m4-$m4_install_version/bin/m4" ]]; then
+#         progress "Using already built ${cgreen}m4 $m4_install_version"
+#     else
+#         progress "Installing ${cgreen}m4 $m4_install_version"
 
-        download_extract "https://ftp.gnu.org/gnu/m4/m4-$m4_install_version.tar.xz" \
-            "$build_dir/m4-$m4_install_version"
+#         download_extract "https://ftp.gnu.org/gnu/m4/m4-$m4_install_version.tar.xz" \
+#             "$build_dir/m4-$m4_install_version"
         
-        cd "$build_dir/m4-$m4_install_version"
+#         cd "$build_dir/m4-$m4_install_version"
 
-        progress_run ./configure \
-            --prefix="$install_dir/m4-$m4_install_version" \
-            --disable-dependency-tracking || error_configure m4
+#         progress_run ./configure \
+#             --prefix="$install_dir/m4-$m4_install_version" \
+#             --disable-dependency-tracking || error_configure m4
 
-        progress_run make || error_make m4
+#         progress_run make || error_make m4
 
-        progress_run make install || error_install m4
-    fi
+#         progress_run make install || error_install m4
+#     fi
 
-    prepend_path "$install_dir/m4-$m4_install_version/bin"
-    prepend_manpath "$install_dir/m4-$m4_install_version/share/man"
-    prepend_infopath "$install_dir/m4-$m4_install_version/share/info"
+#     prepend_path "$install_dir/m4-$m4_install_version/bin"
+#     prepend_manpath "$install_dir/m4-$m4_install_version/share/man"
+#     prepend_infopath "$install_dir/m4-$m4_install_version/share/info"
 
-    (command_exists m4 && version=$(m4_parse_version m4) &&
-        [[ "$version" = "$m4_install_version" ]]) ||
-        assert_failed "m4 is not properly installed"
+#     (command_exists m4 && version=$(m4_parse_version m4) &&
+#         [[ "$version" = "$m4_install_version" ]]) ||
+#         assert_failed "m4 is not properly installed"
 
-    success "${cgreen}m4 $m4_install_version${coff}${cbold} successfully installed"
-fi
+#     success "${cgreen}m4 $m4_install_version${coff}${cbold} successfully installed"
+# fi
 
 ################
 # Check python #
@@ -528,13 +537,16 @@ fi
 ####################
 progress "Installing OCaml $ocaml_required_version, ocamlfind, ocamlbuild, cmdliner and ocamlgraph"
 progress_run opam init -y --comp=$ocaml_required_version || error_install opam
-progress_run opam switch -y $ocaml_required_version
+progress_run opam switch -y $ocaml_required_version || {
+    progress_run opam switch create -y $ocaml_required_version
+}
 progress_run eval `opam config env` || error_install opam
 progress_run opam update
-progress_run opam install -y  ocamlfind ocamlbuild ocamlgraph fmt logs topkg cmdliner num yojson zarith|| error_install ocaml
+progress_run opam install -y  depext ocamlfind ocamlbuild ocamlgraph fmt logs topkg cmdliner num yojson zarith|| error_install ocaml
 # install z3 for lustreC
 progress_run opam pin add -y z3 4.8.1
 progress_run opam install -y z3
+
 
 # install menhir
 progress_run opam install -y menhir
@@ -543,59 +555,59 @@ progress_run opam install -y menhir
 # Check menhir #
 ################
 
-progress "Checking for Menhir"
-found_menhir=0
+# progress "Checking for Menhir"
+# found_menhir=0
 
-if command_exists menhir; then
-    version=$(menhir_parse_version menhir) || error_parse_version menhir
-    found_menhir=1
-    success "Found Menhir $version"
-fi
+# if command_exists menhir; then
+#     version=$(menhir_parse_version menhir) || error_parse_version menhir
+#     found_menhir=1
+#     success "Found Menhir $version"
+# fi
 
 ###############################
 # Install menhir if necessary #
 ###############################
-menhir_failed=0
-if (( ! found_menhir )); then
-    progress "Could NOT find Menhir"
+# menhir_failed=0
+# if (( ! found_menhir )); then
+#     progress "Could NOT find Menhir"
 
-    if [[ -x "$install_dir/menhir-$menhir_install_version/bin/menhir" ]]; then
-        progress "Using already built ${cgreen}menhir $menhir_install_version"
-    else
-        progress "Installing ${cgreen}menhir $menhir_install_version"
+#     if [[ -x "$install_dir/menhir-$menhir_install_version/bin/menhir" ]]; then
+#         progress "Using already built ${cgreen}menhir $menhir_install_version"
+#     else
+#         progress "Installing ${cgreen}menhir $menhir_install_version"
 
-        download_extract "http://cristal.inria.fr/~fpottier/menhir/menhir-$menhir_install_version.tar.gz" \
-            "$build_dir/menhir-$menhir_install_version"
+#         download_extract "http://cristal.inria.fr/~fpottier/menhir/menhir-$menhir_install_version.tar.gz" \
+#             "$build_dir/menhir-$menhir_install_version"
 
-        cd "$build_dir/menhir-$menhir_install_version"
+#         cd "$build_dir/menhir-$menhir_install_version"
 
-        progress_run make \
-            PREFIX="$install_dir/menhir-$menhir_install_version" \
-            all -j1 || {
-            error_make menhir;
-            menhir_failed=1;
-        }
-        if (( ! menhir_failed )); then
-            progress_run make \
-                PREFIX="$install_dir/menhir-$menhir_install_version" \
-                install || {
-                error_install menhir;
-                menhir_failed=1;
-            }
-        fi
-    fi
-    if (( ! menhir_failed )); then
-        prepend_path "$install_dir/menhir-$menhir_install_version/bin"
+#         progress_run make \
+#             PREFIX="$install_dir/menhir-$menhir_install_version" \
+#             all -j1 || {
+#             error_make menhir;
+#             menhir_failed=1;
+#         }
+#         if (( ! menhir_failed )); then
+#             progress_run make \
+#                 PREFIX="$install_dir/menhir-$menhir_install_version" \
+#                 install || {
+#                 error_install menhir;
+#                 menhir_failed=1;
+#             }
+#         fi
+#     fi
+#     if (( ! menhir_failed )); then
+#         prepend_path "$install_dir/menhir-$menhir_install_version/bin"
 
-        (command_exists menhir && version=$(menhir_parse_version menhir) &&
-            [[ "$version" = "$menhir_install_version" ]]) ||
-            error_msg "menhir is not properly installed"
+#         (command_exists menhir && version=$(menhir_parse_version menhir) &&
+#             [[ "$version" = "$menhir_install_version" ]]) ||
+#             error_msg "menhir is not properly installed"
 
-        success "${cgreen}menhir $menhir_install_version${coff}${cbold} successfully installed"
-    else
-        error_msg "Skipping menhir: menhir installation, failed"
-    fi
-fi
+#         success "${cgreen}menhir $menhir_install_version${coff}${cbold} successfully installed"
+#     else
+#         error_msg "Skipping menhir: menhir installation, failed"
+#     fi
+# fi
 
 ##################
 # Install spacer for Zustre #
@@ -760,7 +772,7 @@ if (( ! lustrec_failed )); then
     if (( ! lustrec_failed )); then
         success "${cgreen}lustrec $version${coff}${cbold} successfully installed"
     else
-	error_msg "Please remove $install_dir/bin/lustrec and run the script again"
+	    error_msg "Please remove $install_dir/bin/lustrec and run the script again"
     fi
 else
     error_msg "Skipping Lustrec: lustrec installation, failed"
@@ -839,66 +851,44 @@ fi
 #     fi
 # fi
 #################
-# Install kind2 #
+# Install kind2 using opam
 #################
+kind2_download_failed=0
 kind2_failed=0
-if (( menhir_failed )); then
-    error_msg "Skipping Kind2: dependancy menhir installation has failed"
-else
-    chmod +x "$install_dir/bin/kind2" 2>/dev/null || {}
-    if [[ -x "$install_dir/bin/kind2" ]]; then
-        progress "Using already built ${cgreen}kind2"
-    else
-        progress "Installing ${cgreen}kind2${coff}${cbold} from upstream repository"
-
-        git_clone "$kind2_url" "$kind2_branch" "$build_dir/kind2"
-
-        cd "$build_dir/kind2"
-
-        progress_run ./autogen.sh || {
-            error_configure kind2;
-            kind2_failed=1;
-        }
-        if (( ! kind2_failed )); then
-            progress_run ./build.sh --prefix="$install_dir" || {
-                error_make kind2;
-                kind2_failed=1;
-            }
-        fi
-        if (( ! kind2_failed )); then
-            progress_run make install || {
-                error_install kind2;
-                kind2_failed=1;
-            }
-        fi
+# Try first the downloaded version
+if (( machine == "osx" )); then
+    wget https://github.com/kind2-mc/kind2/releases/download/v1.2.0/kind2-v1.2.0-macosx.tar.gz -O - | tar -xz || {
+        kind2_download_failed=1;
+    }
+    if (( ! kind2_download_failed )); then
+        cp "kind2-v1.2.0-macosx" "$install_dir/bin/kind2"
+        chmod +x "$install_dir/bin/kind2"
     fi
-
-    if (( ! kind2_failed )); then
-        command_exists kind2 || error_msg "kind2 is not properly installed"
-        version=$(kind2_parse_version kind2) || {
-            error_parse_version kind2;
-            kind2_failed=1;
-        }
-        if (( ! kind2_failed )); then
-            success "${cgreen}kind2 $version${coff}${cbold} successfully installed"
-
-            if [[ -f "$build_dir/kind2/examples/two_counters.lus" ]]; then
-                progress "Testing kind2 on a simple example"
-                kind2_output=$(run_log_debug kind2 "$build_dir/kind2/examples/two_counters.lus" 2>&1)
-                (( verbose >= 1 )) && echo "$kind2_output"
-                [[ $kind2_output == *"Success"* ]] || {
-                    error_test kind2;
-                    kind2_failed=1;
-                }
-            fi
-        fi
-	if (( kind2_failed )); then
-	    error_msg "Please remove $install_dir/bin/kind2 and run the script again"
-	fi
-    else
-        error_msg "Skipping Kind2: kind2 installation, failed"
+else 
+    wget https://github.com/kind2-mc/kind2/releases/download/v1.2.0/kind2-v1.2.0-linux.tar.gz -O - | tar -xz || {
+        kind2_download_failed=1;
+    }
+    if (( ! kind2_download_failed )); then
+        cp "kind2-v1.2.0-linux" "$install_dir/bin/kind2"
+        chmod +x "$install_dir/bin/kind2"
     fi
 fi
+
+kind2_output=$(run_log_debug "$install_dir/bin/kind2" --help 2>&1) || {
+    kind2_download_failed=1;
+}
+
+
+if (( kind2_download_failed )); then 
+    progress_run opam pin add -y -n kind2 ${kind2_url}#${kind2_branch}
+    progress_run opam depext -y kind2
+    progress_run opam install -y kind2
+    kind2_failed=0
+    cp "$(which kind2)" "$install_dir/bin/kind2"
+else 
+    success "${cgreen}kind2 ${coff}${cbold} successfully installed"
+fi
+
 ##################################
 # Generate the activation script #
 ##################################

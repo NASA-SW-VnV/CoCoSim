@@ -179,22 +179,6 @@ function [ main_node, isContractBlk, external_nodes, external_libraries, abstrac
             %import contract
             contract = nasa_toLustre.lustreAst.LustreContract('', '', {}, {}, {}, ...
                 contractImports, true);
-            %No need for the following code. It will be handled in
-            %ContractBlock_To_Lustre.m
-%         else
-%             % add contracts as local calls. They will be checked as
-%             % subProperties.
-%             for i=1:length(contractImports)
-%                 contract_name = contractImports{i}.name;
-%                 contract_input = coco_nasa_utils.MatlabUtils.concat(contractImports{i}.inputs, ...
-%                     contractImports{i}.outputs);
-%                 varId = nasa_toLustre.lustreAst.VarIdExpr(...
-%                     strcat(contract_name, '_virtual'));
-%                 var = nasa_toLustre.lustreAst.LustreVar(varId, 'bool');
-%                 variables{end+1} = var;
-%                 body{end+1} = nasa_toLustre.lustreAst.LustreEq(varId, ...
-%                     nasa_toLustre.lustreAst.NodeCallExpr(contract_name, contract_input));
-%             end
         end
     end
     % If the Subsystem is VerificationSubsystem, then add virtual
@@ -205,14 +189,19 @@ function [ main_node, isContractBlk, external_nodes, external_libraries, abstrac
         node_outputs{end+1} = nasa_toLustre.lustreAst.LustreVar('VerificationSubsystem_virtual', 'bool');
         body{end+1} = nasa_toLustre.lustreAst.LustreEq(nasa_toLustre.lustreAst.VarIdExpr('VerificationSubsystem_virtual'),  nasa_toLustre.lustreAst.BoolExpr(true));
     end
+    
+    
     % If the Subsystem has VerificationSubsystem, then add virtual
     % variable
-    [hasVerificationSubsystem, hasNoOutputs, vsBlk] = nasa_toLustre.blocks.SubSystem_To_Lustre.hasVerificationSubsystem(ss_ir);
-    if hasVerificationSubsystem && hasNoOutputs
-        vs_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(vsBlk);
-        variables{end+1} = nasa_toLustre.lustreAst.LustreVar(strcat(vs_name, '_virtual'), 'bool');
-    end
-    % Adding lustre comments tracking the original path
+    %% Done in SubSystem_To_Lustre
+    %     [hasVerificationSubsystem, hasNoOutputs, vsBlk] = nasa_toLustre.blocks.SubSystem_To_Lustre.hasVerificationSubsystem(ss_ir);
+    %     if hasVerificationSubsystem && hasNoOutputs
+    %         vs_name =nasa_toLustre.utils.SLX2LusUtils.node_name_format(vsBlk);
+    %         variables{end+1} = nasa_toLustre.lustreAst.LustreVar(strcat(vs_name, '_virtual'), 'bool');
+    %     end
+    
+    
+    %% Adding lustre comments tracking the original path
     comment = nasa_toLustre.lustreAst.LustreComment(...
         sprintf('Original block name: %s', ss_ir.Origin_path), true);
     %main_node = sprintf('%s\n%s\n%s\n%s\nlet\n\t%s\ntel\n',...

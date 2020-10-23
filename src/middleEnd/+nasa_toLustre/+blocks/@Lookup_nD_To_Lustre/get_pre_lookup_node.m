@@ -42,7 +42,7 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function extNode =  get_pre_lookup_node(lus_backend,blkParams,inputs)
+function [extNode, new_inputs] =  get_pre_lookup_node(lus_backend,blkParams,inputs)
 
 %
     % header for external node
@@ -50,7 +50,7 @@ function extNode =  get_pre_lookup_node(lus_backend,blkParams,inputs)
         blkParams.NumberOfTableDimensions;
     node_header.nodeName = sprintf('%s_PreLookup_node',...
         blkParams.blk_name);  
-  
+    new_inputs = inputs;
     % node_header inputs
     if nasa_toLustre.blocks.PreLookup_To_Lustre.bpIsInputPort(blkParams)
         % if breakpointsIsInputPort, inputs{1} is x, inputs{2} is xdat
@@ -59,6 +59,7 @@ function extNode =  get_pre_lookup_node(lus_backend,blkParams,inputs)
         node_header.inputs_name = cell(1, 1+numel(inputs{2}));
         node_header.inputs_name{1} = ...
             nasa_toLustre.lustreAst.VarIdExpr('x_in');
+        new_inputs{1}{1} = node_header.inputs_name{1};
         node_header.inputs{1} = nasa_toLustre.lustreAst.LustreVar(...
             node_header.inputs_name{1}, 'real');
         for i=1:numel(inputs{2})
@@ -75,6 +76,7 @@ function extNode =  get_pre_lookup_node(lus_backend,blkParams,inputs)
         for i=1:NumberOfTableDimensions
             node_header.inputs_name{i} = nasa_toLustre.lustreAst.VarIdExpr(...
                 sprintf('dim%d_coord_in',i));
+            new_inputs{i}{1} = node_header.inputs_name{i};
             node_header.inputs{i} = ...
                 nasa_toLustre.lustreAst.LustreVar(...
                 node_header.inputs_name{i}, 'real');

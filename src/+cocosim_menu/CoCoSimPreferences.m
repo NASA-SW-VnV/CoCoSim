@@ -69,12 +69,13 @@ classdef CoCoSimPreferences < handle
         forceTypeCastingOfInt = true;
         forceCodeGen = false;
         skip_sf_actions_check = false;
-        skip_optim = false;
+        skip_optim = true;
         skip_unsupportedblocks = false;
         abstract_unsupported_blocks = true;
         skip_defected_pp = true;
         skip_pp = false;
         use_more_precise_abstraction = false;
+        abstract_lookuptables = true;
         %gen_pp_verif = false;
         
         cocosim_verbose = 0;

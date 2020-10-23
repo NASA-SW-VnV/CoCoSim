@@ -97,6 +97,9 @@ function [res] = ...
     stopAtPPValidation = ismember(coco_nasa_utils.CoCoBackendType.PP_VALIDATION, options);
     
     addpath(model_path);
+    % add options
+    options{end+1} = nasa_toLustre.utils.ToLustreOptions.SKIP_CODE_OPTIMIZATION;
+    
     %% generate lustre code
     try
         f_msg = sprintf('Compiling model "%s" to Lustre\n',file_name);
