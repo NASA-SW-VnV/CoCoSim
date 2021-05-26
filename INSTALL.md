@@ -99,6 +99,6 @@ Explanation for each CoCoSim features can be found [here](doc/EXAMPLES.md)
 
 **Notes**
 -------------------
-**Ubuntu 20.04 + MATLAB R2020 users :** If running the verification example doesn't work (z3 not found error), please make sure that your environment has libstdc installed, then call MATLAB with the following flag:
-LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.28 /path/to/matlab/binary
+**Ubuntu 20.04 + MATLAB R2020 users :** If running the verification example doesn't work (z3 not found error), please make sure that your environment has libstdc installed, then call MATLAB with the following flag (replace "version" suffix in the LD_PRELOAD path with your installed version, tested on versions 6.0.28 and 6.0.29 so far):
+LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.version /path/to/matlab/binary
 
