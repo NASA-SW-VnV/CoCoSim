@@ -68,7 +68,7 @@ cmake_install_version="3.7.2"
 m4_install_version="1.4.18"
 python_required_version="2.7"
 python_install_version="2.7.13"
-ocaml_required_version="4.07.0"
+ocaml_required_version="4.09.0"
 # ocaml_install_version="4.03.0"
 autoconf_install_version="2.69"
 automake_install_version="1.15"
@@ -83,11 +83,13 @@ build_dir="/tmp/cocosim-build"
 verbose=0
 force=0
 use_colors=1
-if command -v nproc >/dev/null 2>&1; then
-    njobs=$(nproc)
-else
-    njobs=1
-fi
+# akatis: LustreC build fails in some machines when njobs > 1
+# if command -v nproc >/dev/null 2>&1; then
+#     njobs=$(nproc)
+# else
+#     njobs=1
+# fi
+njobs=1
 
 # Zustre is disabled at the moment
 # zustre_url="https://github.com/coco-team/zustre.git"
@@ -724,7 +726,7 @@ fi
 # Install lustrec #
 ###################
 lustrec_failed=0
-chmod +x "$install_dir/bin/lustrec" 2>/dev/null || {}
+chmod +x "$install_dir/bin/lustrec" 2>/dev/null
 if [[ -x "$install_dir/bin/lustrec" ]]; then
     progress "Using already built ${cgreen}lustrec"
 else
@@ -733,6 +735,13 @@ else
     git_clone "$lustrec_url" "$lustrec_branch" "$build_dir/lustrec"
 
     cd "$build_dir/lustrec"
+
+    #akatis: For some reason I had to switch to `ocaml_required_version` again here.
+    #akatis: Otherwise, the script uses the system default.
+    progress_run opam switch -y $ocaml_required_version || {
+        progress_run opam switch create -y $ocaml_required_version
+    }
+    progress_run eval `opam config env` || error_install opam
 
     progress_run autoconf || {
         error_configure lustrec; lustrec_failed=1;
@@ -769,6 +778,15 @@ if (( ! lustrec_failed )); then
         error_msg "lustrec is not properly installed";
         lustrec_failed=1;
     }
+
+    #akatis: Added missing LustreC version parsing.
+    if (( ! lustrec_failed )); then
+        version=$(lustrec_parse_version "$install_dir/bin/lustrec") || {
+            error_parse_version lustrec;
+            lustrec_failed=1;
+        }
+    fi
+
     if (( ! lustrec_failed )); then
         success "${cgreen}lustrec $version${coff}${cbold} successfully installed"
     else
@@ -855,40 +873,61 @@ fi
 #################
 kind2_download_failed=0
 kind2_failed=0
-# Try first the downloaded version
-if (( machine == "osx" )); then
-    wget https://github.com/kind2-mc/kind2/releases/download/v1.2.0/kind2-v1.2.0-macosx.tar.gz -O - | tar -xz || {
+#akatis: Added check for an existing Kind2 binary, similarly to Z3 and LustreC
+chmod +x "$install_dir/bin/kind2" 2>/dev/null
+if [[ -x "$install_dir/bin/kind2" ]]; then
+    progress "Using already built ${cgreen}kind2"
+else
+    # Try first the downloaded version
+    #akatis: Reverted to v1.1.0 because of parsing issues with Kind2 on Lustre translation of Stateflow models.
+    #akatis: Previous OS check didn't work for Linux systems (Ubuntu 20.04)
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        wget https://github.com/kind2-mc/kind2/releases/download/v1.1.0/kind2-v1.1.0-macosx.tar.gz -O - | tar -xz || {
+            kind2_download_failed=1;
+        }
+        if (( ! kind2_download_failed )); then        
+            cp "kind2-v1.1.0-macosx" "$install_dir/bin/kind2"
+            chmod +x "$install_dir/bin/kind2"
+        fi
+    else 
+        wget https://github.com/kind2-mc/kind2/releases/download/v1.1.0/kind2-v1.1.0-linux.tar.gz -O - | tar -xz || {
+            kind2_download_failed=1;
+        }
+        if (( ! kind2_download_failed )); then
+            cp "kind2-v1.1.0-linux" "$install_dir/bin/kind2"
+            chmod +x "$install_dir/bin/kind2"
+        fi
+    fi
+
+    kind2_output=$(run_log_debug "$install_dir/bin/kind2" --help 2>&1) || {
         kind2_download_failed=1;
     }
-    if (( ! kind2_download_failed )); then
-        cp "kind2-v1.2.0-macosx" "$install_dir/bin/kind2"
-        chmod +x "$install_dir/bin/kind2"
+
+
+    if (( kind2_download_failed )); then 
+        #akatis: Commented the two lines below, shouldn't be necessary.
+        # progress_run opam pin add -y -n kind2 ${kind2_url}#${kind2_branch}
+        # progress_run opam depext -y kind2
+        #akatis: Added error handling if Kind2 opam installation fails.
+        progress_run opam install -y kind2 || {
+            error_install kind2; kind2_failed=1;
+        }
+        if (( ! kind2_failed )); then
+            cp "$(which kind2)" "$install_dir/bin/kind2"
+        fi
     fi
-else 
-    wget https://github.com/kind2-mc/kind2/releases/download/v1.2.0/kind2-v1.2.0-linux.tar.gz -O - | tar -xz || {
-        kind2_download_failed=1;
-    }
-    if (( ! kind2_download_failed )); then
-        cp "kind2-v1.2.0-linux" "$install_dir/bin/kind2"
-        chmod +x "$install_dir/bin/kind2"
+
+    if (( !kind2_download_failed && !kind2_failed )); then
+        version=$(kind2_parse_version "$install_dir/bin/kind2") || {
+            error_parse_version kind2;
+            kind2_failed=1;
+        }
+
+        if (( !kind2_failed )); then
+            success "${cgreen}kind2 $version${coff}${cbold} successfully installed"
+        fi
     fi
 fi
-
-kind2_output=$(run_log_debug "$install_dir/bin/kind2" --help 2>&1) || {
-    kind2_download_failed=1;
-}
-
-
-if (( kind2_download_failed )); then 
-    progress_run opam pin add -y -n kind2 ${kind2_url}#${kind2_branch}
-    progress_run opam depext -y kind2
-    progress_run opam install -y kind2
-    kind2_failed=0
-    cp "$(which kind2)" "$install_dir/bin/kind2"
-else 
-    success "${cgreen}kind2 ${coff}${cbold} successfully installed"
-fi
-
 ##################################
 # Generate the activation script #
 ##################################
