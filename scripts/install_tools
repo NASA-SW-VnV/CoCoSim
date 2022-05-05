@@ -544,7 +544,7 @@ progress_run opam switch -y $ocaml_required_version || {
 }
 progress_run eval `opam config env` || error_install opam
 progress_run opam update
-progress_run opam install -y  depext ocamlfind ocamlbuild ocamlgraph fmt logs topkg cmdliner num yojson zarith|| error_install ocaml
+progress_run opam install -y ocamlfind ocamlbuild ocamlgraph fmt logs topkg cmdliner num yojson zarith|| error_install ocaml
 # install z3 for lustreC
 progress_run opam pin add -y z3 4.8.1
 progress_run opam install -y z3
