@@ -23,6 +23,8 @@ CoCoSim uses the following external libraries:
 
 ### **Installation**
 
+Note: The CoCoSim installation script requires `opam`, version `2.1.0` or greater.
+
 #### Using latest stable version 
 
 We recommend this option. You can download the latest stable version of CoCoSim source code from [here](https://github.com/NASA-SW-VnV/CoCoSim/releases).
