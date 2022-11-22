@@ -68,7 +68,7 @@ cmake_install_version="3.7.2"
 m4_install_version="1.4.18"
 python_required_version="2.7"
 python_install_version="2.7.13"
-ocaml_required_version="4.09.0"
+ocaml_required_version="4.10.0"
 # ocaml_install_version="4.03.0"
 autoconf_install_version="2.69"
 automake_install_version="1.15"
@@ -546,7 +546,7 @@ progress_run eval `opam config env` || error_install opam
 progress_run opam update
 progress_run opam install -y ocamlfind ocamlbuild ocamlgraph fmt logs topkg cmdliner num yojson zarith|| error_install ocaml
 # install z3 for lustreC
-progress_run opam pin add -y z3 4.8.1
+progress_run opam pin add -y z3 4.8.14
 progress_run opam install -y z3
 
 
@@ -753,6 +753,7 @@ else
             error_configure lustrec; lustrec_failed=1;
         }
     fi
+
     # There is an error with mkdir of src/_build.
     # The following is to git rid of that error
     #rm -rf src/_build/ || {}
