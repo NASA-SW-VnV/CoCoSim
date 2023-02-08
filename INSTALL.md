@@ -25,6 +25,13 @@ CoCoSim uses the following external libraries:
 
 Note: The CoCoSim installation script requires `opam`, version `2.1.0` or greater.
 
+**Ubuntu 20.04 or greater users:** Make sure that your environment has libstdc installed. MATLAB needs to always be called with the following flag (replace "version" suffix in the LD_PRELOAD path with your installed version, tested on versions 6.0.28 and 6.0.29 so far):
+```
+>LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.version /path/to/matlab/binary
+```
+
+See more details on this [here](https://github.com/NASA-SW-VnV/CoCoSim/issues/5)
+
 #### Using latest stable version 
 
 We recommend this option. You can download the latest stable version of CoCoSim source code from [here](https://github.com/NASA-SW-VnV/CoCoSim/releases).
@@ -98,9 +105,4 @@ If you want to customize these paths go to `cocosim/tools/tools_config.m` and ch
 **Quick Start**
 -------------------
 Explanation for each CoCoSim features can be found [here](doc/EXAMPLES.md)
-
-**Notes**
--------------------
-**Ubuntu 20.04 + MATLAB R2020 users :** If running the verification example doesn't work (z3 not found error), please make sure that your environment has libstdc installed, then call MATLAB with the following flag (replace "version" suffix in the LD_PRELOAD path with your installed version, tested on versions 6.0.28 and 6.0.29 so far):
-LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.version /path/to/matlab/binary
 
