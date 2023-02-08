@@ -42,6 +42,12 @@ Note: The CoCoSim installation script requires `opam`, version `2.1.0` or greate
 >mkdir exclude
 mv libstdc++.so.6* exclude
 ```
+3. If you are encountering issues related to counterexamples now loading in MATLAB's web browser, and you see the message 'Failed to load module "canberra-gtk-module"' in the terminal window from where MATLAB was ran, do the following:
+
+```
+>sudo apt install libcanberra-gtk* libgconf-2-4
+>sudo ln -s /usr/lib/x86_64-linux-gnu/gtk-2.0/modules/libcanberra-gtk-module.so /usr/lib/libcanberra-gtk-module.so
+```
 
 See more details on this [here](https://github.com/NASA-SW-VnV/CoCoSim/issues/5)
 
