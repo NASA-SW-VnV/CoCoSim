@@ -25,9 +25,22 @@ CoCoSim uses the following external libraries:
 
 Note: The CoCoSim installation script requires `opam`, version `2.1.0` or greater.
 
-**Ubuntu 20.04 or greater users:** Make sure that your environment has libstdc installed. MATLAB needs to always be called with the following flag (replace "version" suffix in the LD_PRELOAD path with your installed version, tested on versions 6.0.28 and 6.0.29 so far):
+**Ubuntu 20.04 or greater users:** 
+
+1. Make sure that your environment has libstdc installed. MATLAB needs to always be called with the following flag (replace "version" suffix in the LD_PRELOAD path with your installed version, tested on versions 6.0.28 and 6.0.29 so far):
 ```
 >LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.version /path/to/matlab/binary
+```
+
+2. If you are using MATLAB R2017b, and are encountering issues related to not being able to load 'libmwdastudio.so' when running 'start_cocosim', please do the following:
+
+```
+>cd /path/to/matlab/installation/bin/glnxa64
+>mkdir exclude
+>mv libfreetype* exclude
+>cd ../../sys/os/glnxa64
+>mkdir exclude
+mv libstdc++.so.6* exclude
 ```
 
 See more details on this [here](https://github.com/NASA-SW-VnV/CoCoSim/issues/5)
