@@ -32,7 +32,9 @@ Note: The CoCoSim installation script requires `opam`, version `2.1.0` or greate
 >LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.version /path/to/matlab/binary
 ```
 
-2. If you are using MATLAB R2017b, and are encountering issues related to not being able to load 'libmwdastudio.so' when running 'start_cocosim', please do the following:
+See more details on this [here](https://github.com/NASA-SW-VnV/CoCoSim/issues/5)
+
+2. If you are using MATLAB R2017b, and are encountering issues related to not being able to load `libmwdastudio.so` when running `start_cocosim`, please do the following:
 
 ```
 >cd /path/to/matlab/installation/bin/glnxa64
@@ -48,8 +50,6 @@ mv libstdc++.so.6* exclude
 >sudo apt install libcanberra-gtk* libgconf-2-4
 >sudo ln -s /usr/lib/x86_64-linux-gnu/gtk-2.0/modules/libcanberra-gtk-module.so /usr/lib/libcanberra-gtk-module.so
 ```
-
-See more details on this [here](https://github.com/NASA-SW-VnV/CoCoSim/issues/5)
 
 #### Using latest stable version 
 
