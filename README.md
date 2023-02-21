@@ -24,7 +24,8 @@ CoCoSim has been released under the NASA Open Source Agreement.
 **Contact**
 -------
 
-Please contact cocosim@lists.nasa.gov for further information on CoCoSim. Detailed information can be found at the [CoCoSim manual](doc/cocosim_user_manual.pdf)
+Please contact cocosim@lists.nasa.gov or andreas.katis@nasa.gov for further information on CoCoSim. Detailed information can be found at the [CoCoSim manual](doc/cocosim_user_manual.pdf)
+
 
 **Installation**
 ---------------
@@ -55,13 +56,10 @@ Solution of some common issues with CoCoSim are [here](doc/TROUBLESHOOTING.md)
 ## **Developers**
 
 * Project leader: [Guillaume Brat](https://ti.arc.nasa.gov/profile/brat/) (NASA Ames - USA), [Pierre-Loic Garoche](https://ti.arc.nasa.gov/profile/garoche/) (NASA Ames - USA)
-* Lead Developer: [Hamza Bourbouh](https://ti.arc.nasa.gov/profile/bourbouh/) (NASA Ames - USA)
-
-* Current Contributors: \
-Khanh Trinh (NASA Ames - USA)
+* Lead Developer: [Andreas Katis](https://andreaskatis.github.io/) (KBR Inc at NASA Ames - USA)
 
 * Past Contributors: \
-[Temesghen Kahsai](http://www.lememta.info/), Maxime Arthaud (NASA Ames - USA), Francois Conzelmann (NASA Ames - USA)
+Hamza Bourbouh, Khanh Trinh, [Temesghen Kahsai](http://www.lememta.info/), Maxime Arthaud, Francois Conzelmann
 
 
 **Publications**
