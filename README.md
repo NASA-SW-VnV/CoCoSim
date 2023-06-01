@@ -34,12 +34,12 @@ Platforms
 ---------
 CoCoSim currently supports Mac OS and Linux. Future support is planned for Windows.
 
-Dependancies and Installation instructions can be found [here](INSTALL.md)
+Dependencies and Installation instructions can be found [here](INSTALL.md)
 
 **Quick Start**
 -------------------
 
-Explanation for each CoCoSim features can be found [here](doc/EXAMPLES.md)
+Explanation of each CoCoSim feature can be found [here](doc/EXAMPLES.md)
 
 
 **Release notes and work in progress**
@@ -55,11 +55,11 @@ Solution of some common issues with CoCoSim are [here](doc/TROUBLESHOOTING.md)
 
 ## **Developers**
 
-* Project leader: [Guillaume Brat](https://ti.arc.nasa.gov/profile/brat/) (NASA Ames - USA), [Pierre-Loic Garoche](https://ti.arc.nasa.gov/profile/garoche/) (NASA Ames - USA)
+* Project leader: [Guillaume Brat](https://ti.arc.nasa.gov/profile/brat/) (NASA Ames - USA), [Pierre-Loic Garoche](https://garoche.net/) (ENAC - France)
 * Lead Developer: [Andreas Katis](https://andreaskatis.github.io/) (KBR Inc at NASA Ames - USA)
 
 * Past Contributors: \
-Hamza Bourbouh, Khanh Trinh, [Temesghen Kahsai](http://www.lememta.info/), Maxime Arthaud, Francois Conzelmann
+[Hamza Bourbouh](https://hbourbouh.github.io/), Khanh Trinh, [Temesghen Kahsai](http://www.lememta.info/), Maxime Arthaud, Francois Conzelmann
 
 
 **Publications**
