@@ -1,6 +1,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-% Authors: Hamza Bourbouh <hamza.bourbouh@nasa.gov>, Andreas Katis <andreas.katis@nasa.gov>
+% Author: Andreas Katis <andreas.katis@nasa.gov>
 % Notices:
 %
 % Copyright @ 2020 United States Government as represented by the 
@@ -42,46 +42,21 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function schema = tools_menu(varargin)
-    %tools_menu Define the custom menu function for CoCoSim.
 
-    schema = sl_container_schema;
-    schema.label = 'CoCoSim';
-    schema.statustip = 'Automated Analysis Framework';
-    schema.autoDisableWhen = 'Busy';
-
-    [cocosim_menu_root, ~, ~] = fileparts(mfilename('fullpath'));
-    src_root = fileparts(cocosim_menu_root);
-    backEnd_root = fullfile(src_root, 'backEnd');
-    menu_items = {};
-    menu_items{end + 1} = fullfile(backEnd_root, 'unsupported_blocks','unsupportedBlocksMenu.m');
+function [status] = exportFRETModelInformation(model_path, output_dir)
+    % [status] = exportFRETModelInformation(model_path)
+    % Inputs:
+    % model_path : the path of Simulink model
+    % Outputs:
+    % Model information compatible for FRET in JSON format.
     
-    % TODO: Improve Materialize Html report to not depend on online js
-    % files
-%     menu_items{end + 1} = fullfile(backEnd_root, 'guidelines','checkGuidelinesMenu.m');
-    menu_items{end + 1} = fullfile(backEnd_root, 'verification','verifyMenu.m');
-    menu_items{end + 1} = fullfile(backEnd_root, 'designErrorDetection','dedMenu.m');
-    
-    %TODO: test case generation should be adapted to new compiler and dataset
-    %signals.
-    menu_items{end + 1} = fullfile(backEnd_root, 'test_case_generation','TestCaseGenMenu.m');
-    
-    %TODO: needs Zustre to support contracts
-    %menu_items{end + 1} = fullfile(backEnd_root, 'generate_invariants','generateInvariantsMenu.m');
-    
-    %TODO: add documentation of how to use
-    menu_items{end + 1} = fullfile(backEnd_root, 'importLustreRequirements','importLusReqMenu.m');
-    menu_items{end + 1} = fullfile(backEnd_root, 'exportModelInformation', 'exportModelInformationMenu.m');
-    menu_items{end + 1} = fullfile(backEnd_root, 'generate_code','generateCodeMenu.m');
-    menu_items{end + 1} = fullfile(backEnd_root, 'extra_options','extraOptionsMenu.m');
-    menu_items{end + 1} = @cocosim_menu.preferences_menu;
-
-    iif = coco_nasa_utils.MatlabUtils.iif();
-    obj2Handle = @(x) iif( isa(x, 'function_handle'), @() x, ...
-        true, @() coco_nasa_utils.MenuUtils.funPath2Handle(x));
-    callbacks = cellfun(obj2Handle, menu_items,...
-        'UniformOutput', false);
-    schema.childrenFcns = cellfun(@(x) {@coco_nasa_utils.MenuUtils.addTryCatch, x}, callbacks, 'UniformOutput', false);
-
+    status = 0;
+    try       
+        [ir_struct, json_model] = coco_nasa_utils.ExportModelInformationUtils.fret_IR(model_path, output_dir);
+    catch ME
+        display_msg(ME.message, MsgType.ERROR, 'exportFRETModelInformation','');
+        display_msg(ME.getReport(), MsgType.DEBUG, 'exportFRETModelInformation','');
+        rethrow(ME);
+    end
 end
 
