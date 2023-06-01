@@ -67,7 +67,7 @@ function [ new_model_path, status ] = mcdc_tests(...
     
     if ~exist(model_full_path, 'file')
         display_msg(['File not foudn: ' model_full_path],...
-            MsgType.ERROR, 'mutation_tests', '');
+            MsgType.ERROR, 'mcdc_tests', '');
         return;
     else
         model_full_path = which(model_full_path);
@@ -83,7 +83,7 @@ function [ new_model_path, status ] = mcdc_tests(...
     end
     [model_parent_path, slx_file_name, ~] = fileparts(model_full_path);
     display_msg(['Generating mc-dc coverage Model for : ' slx_file_name],...
-        MsgType.INFO, 'mutation_tests', '');
+        MsgType.INFO, 'mcdc_tests', '');
     
     
     % Compile model
@@ -147,7 +147,7 @@ function [ new_model_path, status ] = mcdc_tests(...
         if exportToWs
             assignin('base', strcat(slx_file_name, '_mcdc_tests'), T);
             display_msg(['Generated test suite is saved in workspace under name: ' strcat(slx_file_name, '_mcdc_tests')],...
-                MsgType.RESULT, 'mutation_tests', '');
+                MsgType.RESULT, 'mcdc_tests', '');
         end
     catch ME
         display_msg(['MCDC coverage generation failed for lustre file ' mcdc_file],...

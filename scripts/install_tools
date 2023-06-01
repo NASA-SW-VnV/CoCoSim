@@ -883,19 +883,25 @@ else
     #akatis: Reverted to v1.1.0 because of parsing issues with Kind2 on Lustre translation of Stateflow models.
     #akatis: Previous OS check didn't work for Linux systems (Ubuntu 20.04)
     if [[ "$OSTYPE" == "darwin"* ]]; then
-        wget https://github.com/kind2-mc/kind2/releases/download/v1.7.0/kind2-v1.7.0-macos-11-x86_64.tar.gz -O - | tar -xz || {
-            kind2_download_failed=1;
-        }
+        arch=$(uname -m)
+        if [[ "$arch" == 'x86_64' ]]; then
+            wget https://github.com/kind2-mc/kind2/releases/download/v1.9.0/kind2-v1.9.0-macos-11-x86_64.tar.gz -O - | tar -xz || {
+            kind2_download_failed=1; }
+        else
+            wget https://github.com/kind2-mc/kind2/releases/download/v1.9.0/kind2-v1.9.0-macos-12-arm64.tar.gz -O - | tar -xz || {
+            kind2_download_failed=1; }
+        fi
+        
         if (( ! kind2_download_failed )); then        
-            cp "kind2-v1.1.0-macosx" "$install_dir/bin/kind2"
+            cp "kind2" "$install_dir/bin/kind2"
             chmod +x "$install_dir/bin/kind2"
         fi
     else 
-        wget https://github.com/kind2-mc/kind2/releases/download/v1.7.0/kind2-v1.7.0-linux-x86_64.tar.gz -O - | tar -xz || {
+        wget https://github.com/kind2-mc/kind2/releases/download/v1.9.0/kind2-v1.9.0-linux-x86_64.tar.gz -O - | tar -xz || {
             kind2_download_failed=1;
         }
         if (( ! kind2_download_failed )); then
-            cp "kind2-v1.1.0-linux" "$install_dir/bin/kind2"
+            cp "kind2" "$install_dir/bin/kind2"
             chmod +x "$install_dir/bin/kind2"
         fi
     fi
