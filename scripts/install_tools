@@ -537,7 +537,7 @@ fi
 ####################
 # Installing OCaml #
 ####################
-progress "Installing OCaml $ocaml_required_version, ocamlfind, ocamlbuild, cmdliner and ocamlgraph"
+progress "Installing OCaml $ocaml_required_version, ocamlfind, ocamlbuild, ocamlgraph, fmt, logs, topkg, cmdliner, num, yojson, zarith."
 progress_run opam init -y --comp=$ocaml_required_version || error_install opam
 progress_run opam switch -y $ocaml_required_version || {
     progress_run opam switch create -y $ocaml_required_version
@@ -546,11 +546,15 @@ progress_run eval `opam config env` || error_install opam
 progress_run opam update
 progress_run opam install -y ocamlfind ocamlbuild ocamlgraph fmt logs topkg cmdliner num yojson zarith|| error_install ocaml
 # install z3 for lustreC
-progress_run opam pin add -y z3 4.8.14
-progress_run opam install -y z3
+# progress_run opam pin add -y z3 4.8.14
+if ! command -v z3; then
+    progress "Installing Z3. This may take several minutes."
+    progress_run opam install -y z3
+fi
 
 
 # install menhir
+progress "Installing menhir."
 progress_run opam install -y menhir
 
 ################
@@ -670,9 +674,12 @@ progress_run opam install -y menhir
 z3_failed=0
 chmod +x "$install_dir/z3/bin/z3" 2>/dev/null || {}
 if [[ -x "$install_dir/z3/bin/z3" ]]; then
-    progress "Using already built ${cgreen}z3"
+    progress "${cgreen}Z3 is already accessible from CoCoSim. Skipping installation."
+elif command -v z3; then
+    progress "Z3 is already installed in this environment. Copying binary to CoCoSim installation."
+    cp "$(command which z3)" "$install_dir/bin/z3"
 else
-    progress "Installing ${cgreen}z3${coff}${cbold} from upstream repository"
+    progress "Installing ${cgreen}z3${coff}${cbold} from github. This may take several minutes."
     git_clone "https://github.com/Z3Prover/z3.git" "master" \
     	"$build_dir/z3"
 
@@ -877,7 +884,10 @@ kind2_failed=0
 #akatis: Added check for an existing Kind2 binary, similarly to Z3 and LustreC
 chmod +x "$install_dir/bin/kind2" 2>/dev/null
 if [[ -x "$install_dir/bin/kind2" ]]; then
-    progress "Using already built ${cgreen}kind2"
+    progress "${cgreen}kind2 is already accessible from CoCoSim. Skipping installation."
+elif command -v kind2; then
+    progress "kind2 is already installed in this environment. Copying to CoCoSim installation."
+    cp "$(command which kind2)" "$install_dir/bin/kind2"
 else
     # Try first the downloaded version
     #akatis: Reverted to v1.1.0 because of parsing issues with Kind2 on Lustre translation of Stateflow models.
@@ -955,10 +965,10 @@ else
     source_cmd="."
 fi
 if [ $lustrec_failed -eq 1 -o $kind2_failed -eq 1 ]; then
-    error_msg "Some of the dependencies has failed, check error messages above."
+    error_msg "Part of the dependencies installation has failed, check error messages above."
 else
-    success "Main cocosim dependencies have been successfully installed"
+    success "Main CoCoSim dependencies have been successfully installed."
 fi
-info "To use cocosim dependencies lustrec, kind2. first run:"
+info "(Optional) If you wish to add CoCoSim dependencies lustrec, kind2 to your environment, run:"
 info "$ $source_cmd $install_dir/activate"
-info "You should consider adding this in your .bashrc"
+info "You should consider adding this in your .bashrc file."
