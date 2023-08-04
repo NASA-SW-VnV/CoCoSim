@@ -4,7 +4,7 @@
 
 * MATLAB(c) and Simulink version **R2017** or newer (CoCoSim has been well tested in R2017b version)
 
-* [Lustrec](https://github.com/coco-team/lustrec) tool is a modular compiler of Lustre code into C and Horn Clauses. CoCoSim uses lustrec in many features: Test case generation, requirements importation... 
+* [Lustrec](https://github.com/Embedded-SW-VnV/lustrec.git) tool is a modular compiler of Lustre code into C and Horn Clauses.
 
 * [Kind2](http://kind2-mc.github.io/kind2/) is a multi-engine, parallel, SMT-based automatic model checker for safety properties of Lustre programs.
 
@@ -51,38 +51,26 @@ mv libstdc++.so.6* exclude
 >sudo ln -s /usr/lib/x86_64-linux-gnu/gtk-2.0/modules/libcanberra-gtk-module.so /usr/lib/libcanberra-gtk-module.so
 ```
 
-#### Using latest stable version 
+#### Using latest release 
 
-We recommend this option. You can download the latest stable version of CoCoSim source code from [here](https://github.com/NASA-SW-VnV/CoCoSim/releases).
-
-CoCoSim is a Matlab Toolbox, in the zip we include the external libraries and binaries for Lustrec and Kind2.
-
-You still need to run the install script to make sure binaries are working on your machine. If not they will be installed from scratch.
-
-In your terminal, go first to `scripts` folder in `cocosim` and run the `install_cocosim` script.
-```
->cd CoCoSim/scripts
->./install_cocosim 
-```
-
-The script may require some dependencies, please install them and run the script again.
+This option is no longer recommended due to compatibility issues with varying machine configurations. Existing releases are kept for reference and may not work on your specific enviornment.
 
 
 #### Using Github source code
 
-1. Clone this cocosim repository in your local machine (develop branch).
+1. Clone this cocosim repository in your local machine (`master` branch).
 
 2. Download External Matlab Libraries:
    
     * Open your Matlab and navigate to `cocosim/scripts` run `install_cocosim_lib(true)` from the Matlab Command window. \
-    Function `cocosim2/scripts/install_cocosim_lib.m` is responsible of copying all required external libraries to the right destination in our repository.
+    Function `install_cocosim_lib.m` is responsible of copying all required external libraries to the right destination in our repository.
     It needs `git` to clones external repositories from github and copy some of their code on the
     right place on CoCoSim.
     In case the function failed for internet connection or `git` issues, Read function `cocosim2/scripts/install_cocosim_lib.m` to know what are the external libraries are copied to cocosim2 to do it manually.
 
-     * Navigate back to `cocosim` then run `start_cocosim` from the Matlab Command window.
+     * Navigate back to `CoCoSim` then run `start_cocosim` from the Matlab Command window.
 
-3. In your terminal, go first to `scripts` folder in `cocosim` and run the `install_cocosim` script.
+3. In your terminal, go first to `scripts` folder in `CoCoSim` and run the `install_cocosim` script.
     ```
     >cd scripts
     >./install_cocosim 
@@ -99,7 +87,7 @@ autoconf, automake, aclocal, pkg-config.
 The script detects the missing dependencies that should be installed by 
 the user.
 
-If the above script failed to install the tools. You may install them in the following paths. If you have linux machin, change `osx` by `linux`.
+If the above script failed to install the tools. You may install them in the following paths. For Linux users, `osx` is replaced with `linux`.
 
 KIND2 binary: `CoCoSim/tools/verfiers/osx/bin/kind2`
 
