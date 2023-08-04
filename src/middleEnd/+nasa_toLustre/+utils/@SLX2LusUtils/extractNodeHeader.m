@@ -76,7 +76,6 @@ function [node_name,  node_inputs_cell, node_outputs_cell,...
     xml_trace.create_Inputs_Element();
     [node_inputs_cell, node_inputs_withoutDT_cell] = ...
         nasa_toLustre.utils.SLX2LusUtils.extract_node_InOutputs_withDT(blk, 'Inport', xml_trace, main_sampleTime);
-
     % add the execution condition if it is a conditionally executed
     % SS
     if isEnableORAction

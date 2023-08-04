@@ -46,7 +46,7 @@
 %% get block outputs names: inlining dimension
 function [names, names_dt] = getBlockOutputsNames(parent, blk, ...
         srcPort, xml_trace, main_sampleTime)
-    % This function return the names of the block
+    % This function returns the names of the block
     % outputs.
     % Example : an Inport In with dimension [2, 3] will be
     % translated as : In_1, In_2, In_3, In_4, In_5, In_6.
@@ -188,7 +188,7 @@ function [names, names_dt] = getBlockOutputsNames(parent, blk, ...
                         nasa_toLustre.utils.SLX2LusUtils.name_format(strcat(blk.Name, '_', num2str(idx), '_BusElem', num2str(k))));
                     names_dt{end+1} = nasa_toLustre.lustreAst.LustreVar(names{end} , lus_dt{k}, rate);
                 end
-            elseif iscell(lus_dt) && numel(lus_dt) == width(portNumber)
+            elseif iscell(lus_dt) && numel(lus_dt) == width(portNumber)                
                 names{end+1} = nasa_toLustre.lustreAst.VarIdExpr(...
                     nasa_toLustre.utils.SLX2LusUtils.name_format(strcat(blk.Name, '_', num2str(idx))));
                 names_dt{end+1} = nasa_toLustre.lustreAst.LustreVar(names{end}, char(lus_dt{i}), rate);

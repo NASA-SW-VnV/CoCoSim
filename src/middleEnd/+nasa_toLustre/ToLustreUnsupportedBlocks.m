@@ -252,7 +252,7 @@ function  [unsupportedOptionsMap, abstractedBlocks]  = blockUnsupportedOptions( 
     end
     abstractedBlocks = {};
     if status || isa(b, 'nasa_toLustre.blocks.AbstractBlock_To_Lustre')
-        if ~isIgnored
+        if ~isIgnored            
             msg = sprintf('Block "%s" with Type "%s" is not supported', ...
                 HtmlItem.addOpenCmd(blk.Origin_path), blkType);
             htmlMsg = HtmlItem(msg, {}, 'black');

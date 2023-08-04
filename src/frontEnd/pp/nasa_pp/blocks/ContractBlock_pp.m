@@ -110,7 +110,7 @@ end
 function [blk, status] = getAssociatedBlk(contract_path)
     contractObj = get_param(contract_path, 'Object');
     blk = [];
-    status = 1;
+    status = 1;    
     for j=1:numel(contractObj.PortConnectivity)
         x = contractObj.PortConnectivity(j);
         if isempty(x.SrcBlock)

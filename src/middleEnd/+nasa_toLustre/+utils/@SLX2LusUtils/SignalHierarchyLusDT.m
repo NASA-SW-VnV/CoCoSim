@@ -48,7 +48,7 @@ function [lus_dt] = SignalHierarchyLusDT(blk, SignalHierarchy)
     lus_dt = {};
     try
         if ~isfield(SignalHierarchy, 'SignalName')
-            display_msg(sprintf('Bock %s has an auto dataType and is not supported',...
+            display_msg(sprintf('Block %s has an auto dataType and is not supported',...
             blk.Origin_path), MsgType.ERROR, '', '');
             lus_dt = 'real';
             return;
@@ -62,7 +62,7 @@ function [lus_dt] = SignalHierarchyLusDT(blk, SignalHierarchy)
             if  ~isfield(SignalHierarchy, 'Children') ...
                     || isempty(SignalHierarchy.Children)
                 lus_dt = 'real';
-                display_msg(sprintf('Bock %s has an auto dataType and is not supported',...
+                display_msg(sprintf('Block %s has an auto dataType and is not supported',...
                     blk.Origin_path), MsgType.ERROR, '', '');
                 return;
             else
@@ -89,6 +89,7 @@ function [lus_dt] = SignalHierarchyLusDT(blk, SignalHierarchy)
                 'PortType', 'outport', ...
                 'SignalNameFromLabel', SignalName );
             BusCreatorFound = false;
+
             for i=1:numel(p)
                 p_parent=  get_param(p(i), 'Parent');
                 p_parentObj = get_param(p_parent, 'Object');
@@ -97,6 +98,7 @@ function [lus_dt] = SignalHierarchyLusDT(blk, SignalHierarchy)
                     break;
                 end
             end
+            
             if BusCreatorFound
                 global model_struct
                 parent = get_struct(model_struct, ...

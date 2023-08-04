@@ -75,7 +75,7 @@ function obj = contractNode_substituteVars(obj)
         end
     end
     
-    % creat a map of variables and equations refering them
+    % create a map of variables and equations refering them
     % The key is the name of the variable, the value is the indices of
     % equations refering to it in their right hand side.
     varToEqMap = containers.Map();

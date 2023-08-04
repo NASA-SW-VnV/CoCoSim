@@ -79,6 +79,7 @@ function [names, names_withNoDT] = extract_node_InOutputs_withDT(subsys, type, x
                 block.Origin_path, 1, width, index, isInsideContract, IsNotInSimulink);
         end
     end
+    
     if strcmp(type, 'Inport')
         % add enable port to the node inputs, if ShowOutputPort is
         % on
@@ -121,5 +122,4 @@ function [names, names_withNoDT] = extract_node_InOutputs_withDT(subsys, type, x
             end
         end
     end
-
 end

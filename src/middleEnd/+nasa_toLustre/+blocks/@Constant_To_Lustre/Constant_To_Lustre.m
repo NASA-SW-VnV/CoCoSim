@@ -60,7 +60,7 @@ classdef Constant_To_Lustre < nasa_toLustre.frontEnd.Block_To_Lustre
             if status
                 display_msg(sprintf('Variable %s in block %s not found neither in Matlab workspace or in Model workspace',...
                     blk.Value, HtmlItem.addOpenCmd(blk.Origin_path)), ...
-                    MsgType.ERROR, 'Constant_To_Lustr', '');
+                    MsgType.ERROR, 'Constant_To_Lustre', '');
                 return;
             end
             %inline value

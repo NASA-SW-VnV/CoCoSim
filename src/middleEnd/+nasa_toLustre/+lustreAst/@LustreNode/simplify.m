@@ -45,7 +45,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function new_obj = simplify(obj)
     %TODO change it to object function. no need for new_obj
-    new_obj = obj.substituteVars();
+    new_obj = obj.substituteVars();    
     if ~isempty(obj.localContract)
         new_obj.setLocalContract(new_obj.localContract.simplify());
     end

@@ -66,7 +66,7 @@ classdef ContractBlock_To_Lustre < nasa_toLustre.blocks.SubSystem_To_Lustre
         end
         
         function options = getUnsupportedOptions(obj,parent, blk, lus_backend, varargin)
-            % add your unsuported options list here
+            % add your unsuported options list here            
             associatedBlkHandle = blk.AssociatedBlkHandle;
             associatedBlk = get_struct(parent, associatedBlkHandle);
             if ~(isempty(associatedBlk.CompiledPortWidths.Enable) ...
