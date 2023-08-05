@@ -204,11 +204,16 @@ function [new_model_path, status] = importLustreSpec(...
             SrcBlkH = get_param(cocospec_block_path, 'PortHandles');
             DstBlkH = get_param(scopeHandle, 'PortHandles');
             add_line(parent_block_name, SrcBlkH.Outport(1), DstBlkH.Inport(1), 'autorouting', 'on');
+
             if use_traceability && ~skip_linking
-                try
+                try                    
                     node_inputs = node_struct.inputs;
                     mapping_inputs = mapping_json.(original_name).Inputs;
-                    mapping_inputs_names = arrayfun(@(x) x.variable_name, mapping_inputs, 'UniformOutput', 0);
+
+                    bundleContractPortsToVector(cocospec_block_path, node_inputs, mapping_inputs);
+
+                    mapping_inputs_names = arrayfun(@(x) x.variable_name, mapping_inputs, 'UniformOutput', 0);      
+
                     %link inputs to the subsystem.
                     for node_idx=1:numel(node_inputs)
                         json_index = find(strcmp(node_inputs(node_idx).original_name, mapping_inputs_names), 1);
@@ -221,9 +226,14 @@ function [new_model_path, status] = importLustreSpec(...
                             input_block_name, simulink_block_name, ...
                             parent_block_name, node_idx, isBdRoot);
                     end
-                    mapping_outputs = mapping_json.(original_name).Outputs;
-                    mapping_outputs_names = arrayfun(@(x) x.variable_name, mapping_outputs, 'UniformOutput', 0);
+
                     node_outputs = node_struct.outputs;
+                    mapping_outputs = mapping_json.(original_name).Outputs;
+
+                    bundleContractPortsToVector(cocospec_block_path, node_outputs, mapping_outputs);
+
+                    mapping_outputs_names = arrayfun(@(x) x.variable_name, mapping_outputs, 'UniformOutput', 0);
+                    
                     %link outputs to the subsystem.
                     for node_idx=1:numel(mapping_outputs)
                         try
@@ -272,6 +282,51 @@ function new_blockPath = renamePath(blkPath, oldModelName, NewModelName)
         new_blockPath = regexprep(blkPath, strcat('^',oldModelName,'/(\w)'),strcat(NewModelName,'/$1'));
     else
         new_blockPath = NewModelName;
+    end
+end
+
+function [] = bundleContractPortsToVector(contractBlockPath, nodeSignals, mappingSignals)
+
+    contractInports = find_system(contractBlockPath,'LookUnderMasks','on','SearchDepth',1,'BlockType','Inport');    
+
+    for j = 1:numel(mappingSignals)
+        [~, mappingSignalName, ~] = fileparts(mappingSignals(j).variable_path);
+        if isfield(mappingSignals(j),'dimensions')                    
+            newDemux = strcat(char(contractBlockPath),'/',mappingSignalName,'_Demux');
+            if getSimulinkBlockHandle(newDemux) == -1
+                add_block('simulink/Commonly Used Blocks/Demux',newDemux,'Outputs',string(prod(mappingSignals(j).dimensions, "all")));
+            end
+            
+            for k = 1:numel(nodeSignals)
+                if strcmp(nodeSignals(k).original_name,mappingSignals(j).variable_name)
+                    contractInport = contractInports{k};
+                    inportHandle = get_param(contractInport,'PortHandles');
+                    inportLineHandle = get_param(contractInport,'LineHandles');
+                    inportLine = get_param(inportHandle.Outport,'Line');
+                    inportLineDstHandles = get_param(inportLine,'Dstporthandle');
+                    delete_line(inportLineHandle.Outport);
+
+                    demuxHandles = get_param(newDemux,'PortHandles');                    
+                    
+                    %If this is the first signal processed from this vector, replace
+                    % its inport name with the appropriate inport name,
+                    % position demux close to it, and connect to demux's inport.
+                    if getSimulinkBlockHandle(strcat(char(contractBlockPath),'/',mappingSignalName)) == -1                        
+                        inportPos = get_param(contractInport,'Position');
+                        set_param(newDemux,'Position', inportPos + [100 0 60 -5]);                        
+                        add_line(contractBlockPath, inportHandle.Outport,demuxHandles.Inport,'autorouting','on');
+                        set_param(contractInport, 'Name', mappingSignalName);
+                    else
+                        delete_block(contractInport);
+                    end
+
+                    demuxOutputPort=mappingSignals(j).index;
+                    for handle=1:numel(inportLineDstHandles)
+                        add_line(contractBlockPath,demuxHandles.Outport(demuxOutputPort),inportLineDstHandles(handle),'autorouting','on');
+                    end
+                end
+            end                    
+        end
     end
 end
 
