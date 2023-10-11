@@ -133,7 +133,7 @@ function [ new_model_path, status ] = mcdc_tests(...
             return;
         end
         [~, T] = coco_nasa_utils.Kind2Utils.extractKind2CEX(new_mcdc_file, output_dir, main_node, ...
-            ' --slice_nodes false --check_subproperties true ');
+            ' --slice_nodes false --modular true ');
         
         if isempty(T)
             display_msg('No MCDC conditions were generated', MsgType.RESULT, 'mcdcToSimulink', '');

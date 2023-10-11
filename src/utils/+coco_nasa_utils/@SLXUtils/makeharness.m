@@ -278,10 +278,10 @@ function stopTime = add_signal_builder(newBaseName, T, TisDataSet, sampleTime, c
         ds = T(1);
         nbSignals = length(ds.getElementNames);
         signalbuilder(signalBuilderName, 'create', ds{1}.Values.Time,...
-            arrayfun(@(j) {double(ds{j}.Values.Data)}, (1:nbSignals))');
+            arrayfun(@(j) {double(ds{j}.Values.Data)}, (1:nbSignals))', arrayfun(@(j) {double(ds{j}.Name)}, (1:nbSignals))');
     else
         signalbuilder(signalBuilderName, 'create', T(1).time,...
-            arrayfun(@(x) {double(x.values)}, T(1).signals)');
+            arrayfun(@(x) {double(x.values)}, T(1).signals)', arrayfun(@(x) {x.name}, T(1).signals)');
     end
     if TisDataSet
         % we assume all signals in the same dataset have the same Time.

@@ -103,8 +103,8 @@ function contractBody = getContractBody(blkParams,inputs,outputs)
     if blkParams.NumberOfTableDimensions == 1
         for i=1:numel(blkParams.BreakpointsForDimension{1})-1
             curTable = [];
-            curTable(1) = blkParams.Table(1,i);
-            curTable(2) = blkParams.Table(1,i+1);
+            curTable(1) = blkParams.Table(i);
+            curTable(2) = blkParams.Table(i+1);
             P = nasa_toLustre.lustreAst.BinaryExpr(...
                 nasa_toLustre.lustreAst.BinaryExpr.AND,...
                 nasa_toLustre.lustreAst.BinaryExpr(...

@@ -113,8 +113,10 @@ function [choice] = chooseSubsystem(file_name)
     promptList="\n\nList of Subsystems:\n------------------------\n\n";
     numOfSubSystems = numel(content);
     count=1;
+    filteredContent = {};
     for i=1:numOfSubSystems
         if isempty(Simulink.Mask.get(content{i}))
+            filteredContent = [filteredContent, content{i}];
             promptList = strcat(promptList, int2str(count), ': ', content{i}, '\n');
             count = count+1;
         end
@@ -128,7 +130,7 @@ function [choice] = chooseSubsystem(file_name)
         indexChoice = input('Incorrect value entered. Please provide an option from the list using the corresponding integer index value [default: 1]: ');
     end
 
-    choice = content{indexChoice};
+    choice = filteredContent{indexChoice};
 end
 
 function ir_struct = fret_subsystems_struct( block_path, ir_struct )
@@ -149,8 +151,8 @@ function ir_struct = fret_subsystems_struct( block_path, ir_struct )
     %     content = find_system(block_path, 'LookUnderMasks', 'all', 'FollowLinks', 'on');
     % else
     
-    content = find_system(block_path, 'SearchDepth', 1, 'LookUnderMasks', 'all');
-
+    content = find_system(block_path, 'SearchDepth', 1, 'LookUnderMasks', 'all','FollowLinks','on');
+    
     % IR of all blocks contained in the subsystem or block_diagram
     for i=1:numel(content)
         try
@@ -230,6 +232,22 @@ function [declarations] = buildDeclarationsStruct(file_name)
     for i = 1 : length(enumTypeNames)
         declarations.Enumerations {i} = buildEnumStruct(enumTypeNames{i});
     end
+
+    typesWorkspaceIndex = strcmp({usedTypesVars.SourceType}, 'base workspace');
+    typesWorkspaceNames = {usedTypesVars(typesWorkspaceIndex).Name}';
+    typesWorkspaceTypes = {};
+    for i = 1 : length(typesWorkspaceNames)
+        typesWorkspaceTypes = [typesWorkspaceTypes, class(evalin('base',typesWorkspaceNames{i}))];
+    end
+    
+    busWorkspaceIndex = strcmp(typesWorkspaceTypes,'Simulink.Bus');
+    busWorkspaceNames = typesWorkspaceNames(busWorkspaceIndex)';
+
+    
+    for i = 1 : length(busWorkspaceNames)
+        declarations.BusObjects {i} = buildBusObjectStruct(busWorkspaceNames{i});
+    end
+
 end
 
 function enumStruct = buildEnumStruct(enumTypeName)
@@ -256,4 +274,19 @@ function enumStruct = buildEnumStruct(enumTypeName)
         cmd = ['int32(' enumTypeName '.' enumStruct.Members{i}.Name ')'];
         enumStruct.Members{i}.Value = eval(cmd);
     end
+end
+
+function busStruct = buildBusObjectStruct(busWorkspaceName)
+    busStruct.Name = busWorkspaceName;
+    busEval = evalin('base',busWorkspaceName);
+    busStruct.Dimensions = size(busEval.Elements);
+    busStruct.Elements = {};
+    for i = 1 : numel(busEval.Elements)
+        elementStruct = struct();
+        elementStruct.variable_name = busEval.Elements(i).Name;
+        elementStruct.dataType = busEval.Elements(i).DataType;
+        elementStruct.dimensions = busEval.Elements(i).Dimensions;
+        busStruct.Elements{end+1} = elementStruct;
+    end
+    assignin('base','testBus',busStruct)
 end

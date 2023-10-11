@@ -109,8 +109,19 @@ function [ failed ] = run(model_full_path,  const_files, lus_backend, varargin)
         'LookUnderMasks', 'all',  'MaskType', 'ContractBlock');
     
     if coco_nasa_utils.LusBackendType.isKIND2(lus_backend)
-        failed = coco_nasa_verify.ToLustreVerify.run_kind2(model, nom_lustre_file, xml_trace, ...
+        rbt = 0;
+        for i=1:numel(varargin)
+            if strcmp(varargin{i}, 'RBT')
+                rbt = 1;        
+            end
+        end
+        if(rbt)
+            failed = rbt_utils.run_kind2_RBT(model, nom_lustre_file, xml_trace, ...
             top_node_name, Assertions_list, contractBlocks_list, KIND2);
+        else
+            failed = coco_nasa_verify.ToLustreVerify.run_kind2(model, nom_lustre_file, xml_trace, ...
+            top_node_name, Assertions_list, contractBlocks_list, KIND2);
+        end
     else
         if ~isempty(Assertions_list)
             display_msg('Verification of Assertion blocks is only supported by KIND2 model checker.', MsgType.ERROR, 'toLustreVerify.run', '');

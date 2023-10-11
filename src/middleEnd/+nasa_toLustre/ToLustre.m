@@ -310,7 +310,7 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, ...
         end
     end
     
-    %% writing code
+    %% writing code    
     lus_fid = fopen(lustre_file_path, 'a');
     if lus_fid==-1
         msg = sprintf('Opening file "%s" is not possible', lustre_file_path);
@@ -328,13 +328,17 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, ...
         end
     end
     try
+        display_msg('Writing generated Lustre code to file...', MsgType.INFO, 'ToLustre', '');
         [lustrecode, preludeCode, ext_lib] = program.print(lus_backend);
         open_list = coco_nasa_utils.MatlabUtils.concat(open_list, ext_lib);
         fprintf(lus_fid, '%s', lustrecode);
         fclose(lus_fid);
+        display_msg('Writing complete.', MsgType.INFO, 'ToLustre', '');
         if coco_nasa_utils.LusBackendType.isPRELUDE(lus_backend)
+            display_msg('Writing generated Prelude code to file...', MsgType.INFO, 'ToLustre', '');
             fprintf(plu_fid, '%s', preludeCode);
             fclose(plu_fid);
+            display_msg('Writing complete.', MsgType.INFO, 'ToLustre', '');
         end
         if COCOSIM_DEV_DEBUG
             display_msg(strrep(lustrecode, '%', '%%'), MsgType.DEBUG, ...
@@ -345,7 +349,7 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, ...
                 display_msg(strrep(preludeCode, '%', '%%'), MsgType.DEBUG, ...
                     'ToLustre', '', 3);
             end
-        end
+        end        
     catch me
         display_msg('Printing Lustre AST to file failed',...
             MsgType.ERROR, 'write_body', '');
@@ -404,13 +408,19 @@ function [lustre_file_path, xml_trace, failed, unsupportedOptions, ...
 %         end
     end
     %% writing traceability
+    display_msg('Writing traceability XML file...', MsgType.INFO, 'ToLustre', '');
     xml_trace.write();
-    
+    display_msg('Writing traceability XML file complete.', MsgType.INFO, 'ToLustre', '');
+
+    %Andreas: This seems to be taking a long time to complete for larger models. TODO: Revisit and perhaps add option for it in settings. 
     %% save results in mat file.
-    save(mat_file, 'xml_trace', 'failed', 'unsupportedOptions', 'abstractedBlocks', 'pp_model_full_path', 'ir_json_path');
-    ToLustre_datenum_map(model_path) = lustre_file_path;
+    %display_msg('Saving results to mat file...', MsgType.INFO, 'ToLustre', '');
+    %save(mat_file, 'xml_trace', 'failed', 'unsupportedOptions', 'abstractedBlocks', 'pp_model_full_path', 'ir_json_path');
+    %ToLustre_datenum_map(model_path) = lustre_file_path;
+    %display_msg('Saving results to mat file complete.', MsgType.INFO, 'ToLustre', '');
     
     %% check lustre syntax
+    display_msg('Checking generated Lustre syntax...', MsgType.INFO, 'ToLustre', '');
     if ~ispc && ~coco_nasa_utils.LusBackendType.isPRELUDE(lus_backend) 
         if coco_nasa_utils.LusBackendType.isKIND2(lus_backend)
             [syntax_status, output] = coco_nasa_utils.Kind2Utils.checkSyntaxError(lustre_file_path, KIND2, Z3);

@@ -82,7 +82,8 @@ end
 
 function lustreReqCallback(callbackInfo)    
     try
-        importLusReqFig('gcs', gcs);
+%         importLusReqFig('gcs', gcs);
+        importLusReqFig_App_exported('gcs', gcs);
     catch ME
         display_msg(ME.getReport(),Constants.DEBUG,'importLusReqMenu','');
         msg = sprintf('Failed to import Requirements for %s', model_name);

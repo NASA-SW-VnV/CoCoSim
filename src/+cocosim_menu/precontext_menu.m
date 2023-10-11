@@ -53,6 +53,7 @@ function schema = precontext_menu(varargin)
     schema.childrenFcns = {@verificationResultPrecontextMenu, ...
         @attachContract,...
         @MiscellaneousMenu.replaceInportsWithSignalBuilders, ...
+        @generateRequirementsBasedTests,...
         @getAutoLayoutTool};
     
 end
@@ -119,6 +120,65 @@ function attachContractCallback(~, MyBlocks)
             fname = get_param(root, 'fileName');
             close_system(root, 0);
             open_system(fname);
+        end
+    end
+end
+%%
+function schema = generateRequirementsBasedTests(varargin)
+    schema = sl_action_schema;
+    schema.label = 'Generate Requirements-Based Tests';
+    schema.statustip = 'Generate Requirements-Based Tests for selected Subsystem';
+    schema.autoDisableWhen = 'Busy';
+    MyBlocks = find_system(gcs,'Selected','on');
+    schema.state = 'Enabled';
+    schema.callback = @(x) RequirementsBasedTestsCallback(x, MyBlocks);
+end
+
+function RequirementsBasedTestsCallback(~, MyBlocks)
+    if ~isempty(MyBlocks)
+        if length(MyBlocks) == 1
+            blk = MyBlocks{1};
+        elseif ismember(gcb, MyBlocks)
+            blk = gcb;
+        elseif length(MyBlocks)==2 && strcmp(MyBlocks{1}, gcs)
+            blk = MyBlocks{2};
+        elseif length(MyBlocks) > 1
+            % Too many selected block
+            errordlg(sprintf('Too many selected blocks:\n%s', ...
+                sprintf(coco_nasa_utils.MatlabUtils.strjoin(MyBlocks, '\n'))));
+            return
+        end
+        if ~strcmp(get_param(blk, 'BlockType'), 'SubSystem')
+            errordlg('This action can only be performed on SubSystem blocks.');
+            return
+        end
+        if ~strcmp(get_param(blk, 'TreatAsAtomicUnit'),'on')
+            errordlg('This action can only be performed on SubSystem blocks with the "Treat as atomic unit" parameter enabled.');
+            return
+        end
+        try
+            newModel = slvnvextract(blk,true);
+            set_param(newModel,'SaveFormat','StructureWithTime')
+            model_full_path = coco_nasa_utils.MenuUtils.get_file_name(newModel);
+            [ CoCoSimPreferences ] = cocosim_menu.CoCoSimPreferences.load();
+            warning('off')
+            coco_nasa_utils.MenuUtils.add_pp_warning(model_full_path);
+            if strcmp(CoCoSimPreferences.lustreCompiler, 'NASA')
+                coco_nasa_verify.ToLustreVerify.run(model_full_path, [], CoCoSimPreferences.lustreBackend, 'RBT')                
+            else
+                if coco_nasa_utils.LusBackendType.isKIND2(CoCoSimPreferences.lustreBackend)
+                    assignin('base', 'SOLVER', 'K');
+                elseif coco_nasa_utils.LusBackendType.isJKIND(CoCoSimPreferences.lustreBackend)
+                    assignin('base', 'SOLVER', 'J');
+                elseif coco_nasa_utils.LusBackendType.isZUSTRE(CoCoSimPreferences.lustreBackend)
+                    assignin('base', 'SOLVER', 'Z');
+                end
+                VerificationMenu.runCoCoSim;
+            end
+            warning('on')        
+        catch me
+            %coco_nasa_utils.MenuUtils.handleExceptionMessage(me, 'Test-case generation');
+            display_msg(me.getReport(), MsgType.DEBUG, 'RequirementsBasedTestsCallback', '');
         end
     end
 end

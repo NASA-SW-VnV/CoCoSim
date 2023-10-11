@@ -70,7 +70,7 @@ function schema = tools_menu(varargin)
     %menu_items{end + 1} = fullfile(backEnd_root, 'generate_invariants','generateInvariantsMenu.m');
     
     %TODO: add documentation of how to use
-    menu_items{end + 1} = fullfile(backEnd_root, 'importLustreRequirements','importLusReqMenu.m');
+    menu_items{end + 1} = fullfile(backEnd_root, 'import','importMenu.m');    
     menu_items{end + 1} = fullfile(backEnd_root, 'exportModelInformation', 'exportModelInformationMenu.m');
     menu_items{end + 1} = fullfile(backEnd_root, 'generate_code','generateCodeMenu.m');
     menu_items{end + 1} = fullfile(backEnd_root, 'extra_options','extraOptionsMenu.m');

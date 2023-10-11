@@ -112,8 +112,8 @@ end
 
 function process_assumeGuarantee(node_block_path, gPath, gStruct, vHandle, vPortNumber, node_name)
     % add inport outport inside
-    createInportOutport(gPath);
-    
+    createInportOutport(gPath);      
+
     % add outside connection
     rhs_name = coco_nasa_utils.SLXUtils.adapt_block_name(gStruct.qfexpr.value, node_name);
     rhs_path = coco_nasa_utils.SLXUtils.makeBlockNameUnique(strcat(gPath,'_rhs'));
@@ -123,6 +123,38 @@ function process_assumeGuarantee(node_block_path, gPath, gStruct, vHandle, vPort
         'TagVisibility', 'local');
     SrcBlkH = get_param(rhs_path,'PortHandles');
     DstBlkH = get_param(gPath, 'PortHandles');
+
+    % Andreas: The code in comments below was experimental only. This is temporarily adding a stepsElapsed logic, both when importing reqs and obligations.
+    
+    %     impliesPath = coco_nasa_utils.SLXUtils.makeBlockNameUnique(fullfile(node_block_path, 'implies'))
+    %     add_block('sldvlib/Verification Utilities/Implies', impliesPath, 'MakeNameUnique', 'on')
+    %     impliesBlkH = get_param(impliesPath,'PortHandles')
+    %     add_line(node_block_path, SrcBlkH.Outport(1), impliesBlkH.Inport(2), 'autorouting', 'on')
+    %     add_line(node_block_path, impliesBlkH.Outport(1), DstBlkH.Inport(1), 'autorouting', 'on')
+    %     
+    %     comparePath = coco_nasa_utils.SLXUtils.makeBlockNameUnique(fullfile(node_block_path, 'compare'))
+    %     add_block('simulink/Logic and Bit Operations/Compare To Constant', comparePath, 'MakeNameUnique', 'on')  
+    % 
+    %     set_param(comparePath, 'const', '5', 'relop', '==')
+    %     compareBlkH = get_param(comparePath, 'PortHandles')
+    %     add_line(node_block_path, compareBlkH.Outport(1), impliesBlkH.Inport(1), 'autorouting', 'on')
+    %     
+    %     sumPath = coco_nasa_utils.SLXUtils.makeBlockNameUnique(fullfile(node_block_path, 'sum'))
+    %     add_block('simulink/Math Operations/Sum', sumPath, 'MakeNameUnique', 'on')
+    %     sumBlkH = get_param(sumPath, 'PortHandles')
+    %     add_line(node_block_path, sumBlkH.Outport(1), compareBlkH.Inport(1), 'autorouting', 'on')
+    % 
+    %     delayPath = coco_nasa_utils.SLXUtils.makeBlockNameUnique(fullfile(node_block_path, 'delay'))
+    %     add_block('simulink/Commonly Used Blocks/Delay', delayPath, 'MakeNameUnique', 'on')
+    %     delayBlkH = get_param(delayPath, 'PortHandles')
+    %     add_line(node_block_path, sumBlkH.Outport(1), delayBlkH.Inport(1), 'autorouting', 'on')
+    %     add_line(node_block_path, delayBlkH.Outport(1), sumBlkH.Inport(2), 'autorouting', 'on')
+    % 
+    %     constantPath = coco_nasa_utils.SLXUtils.makeBlockNameUnique(fullfile(node_block_path, 'constant'))
+    %     add_block('simulink/Commonly Used Blocks/Constant', constantPath, 'MakeNameUnique', 'on')
+    %     constantBlkH = get_param(constantPath, 'PortHandles')
+    %     add_line(node_block_path, constantBlkH.Outport(1), sumBlkH.Inport(1), 'autorouting', 'on')    
+    
     add_line(node_block_path, SrcBlkH.Outport(1), DstBlkH.Inport(1), 'autorouting', 'on');
     
     %     add link to validator block

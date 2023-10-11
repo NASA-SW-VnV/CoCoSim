@@ -42,7 +42,7 @@
 % Simply stated, the results of CoCoSim are only as good as
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function new_model_path = importLusReq(current_openedSS, lusFilePath, mappingPath, createNewFile)
+function new_model_path = importLusReq(current_openedSS, lusFilePath, mappingPath, createNewFile, createSeparateFiles)
     %IMPORTLUSREQ takes a Simulink model and Lustre file to import it as
     %requirement attached to the simulink model
     global LUSTREC;
@@ -66,9 +66,13 @@ function new_model_path = importLusReq(current_openedSS, lusFilePath, mappingPat
     elseif nargin < 3
         mappingPath = '';
     end
-    
+
     if nargin < 4 
         createNewFile = true;
+    end
+
+    if nargin < 5
+        createSeparateFiles = false;
     end
     
     
@@ -98,7 +102,8 @@ function new_model_path = importLusReq(current_openedSS, lusFilePath, mappingPat
         current_openedSS,...
         lus_IR_path,...
         mappingPath, ...
-        createNewFile);
+        createNewFile, ...
+        createSeparateFiles);
     if status
         return;
     end

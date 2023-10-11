@@ -65,7 +65,8 @@ classdef ImportLusUtils
                 model_path,...
                 lus_json_path,...
                 cocosim_trace_file, ...
-                createNewFile)     
+                createNewFile, ...
+                createSeparateFiles)     
         %%
         input_block_name = get_input_block_name_from_variable(xRoot, node, var_name, Sim_file_name,new_model_name)
                
@@ -81,6 +82,15 @@ classdef ImportLusUtils
 
         %% Retrieve the Callback parameter value
         [call] = get_obs_callback()
+
+        %lustreFilePaths = createLustreFilePerGuarantee(lustreFilePath)
+        % Inputs:
+        % lustreFilePath: Full path of input lustre file in CoCoSpec.
+        % output_dir: Target directory to store new Lustre files.
+        % format.
+        % Outputs:
+        % lustreFilePaths: Full paths of generated lustre files, each one containing a single guarantee.
+        lustreFilePaths = createLustreFilePerGuarantee(lustreFilePath, output_dir)
 
     end
 end

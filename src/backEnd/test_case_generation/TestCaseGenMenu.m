@@ -48,7 +48,7 @@ function schema = TestCaseGenMenu(varargin)
     schema.statustip = 'Generate Lustre code';
     schema.autoDisableWhen = 'Busy';
 
-    schema.childrenFcns = {@MCDC,@Mutation , @Random};
+    schema.childrenFcns = {@MCDC,@Mutation , @Random, @RBT};
 end
 
 %%
@@ -62,7 +62,8 @@ function RandomCallback(varargin)
     try
         model_full_path = coco_nasa_utils.MenuUtils.get_file_name(gcs);
         coco_nasa_utils.MenuUtils.add_pp_warning(model_full_path);
-        randomTestGui('model_full_path',model_full_path);
+%         randomTestGui('model_full_path',model_full_path);
+        randomTestGui_App_exported('model_full_path',model_full_path);
     catch ME
         coco_nasa_utils.MenuUtils.handleExceptionMessage(ME, 'Test-case generation');
     end
@@ -80,7 +81,8 @@ function MutationCallback(varargin)
     try
         model_full_path = coco_nasa_utils.MenuUtils.get_file_name(gcs);
         coco_nasa_utils.MenuUtils.add_pp_warning(model_full_path);
-        mutation_test_gui('model_full_path',model_full_path);
+%         mutation_test_gui('model_full_path',model_full_path);
+        mutation_test_gui_App_exported('model_full_path',model_full_path);
     catch ME
         coco_nasa_utils.MenuUtils.handleExceptionMessage(ME, 'Test-case generation');
     end
@@ -98,7 +100,42 @@ function MCDCCallback(varargin)
     try
         model_full_path = coco_nasa_utils.MenuUtils.get_file_name(gcs);
         coco_nasa_utils.MenuUtils.add_pp_warning(model_full_path);
-        mcdc_test_gui('model_full_path',model_full_path);
+%         mcdc_test_gui('model_full_path',model_full_path);
+        mcdc_test_gui_App_exported('model_full_path',model_full_path);
+    catch ME
+        coco_nasa_utils.MenuUtils.handleExceptionMessage(ME, 'Test-case generation');
+    end
+end
+
+%Andreas: This option  could be useful in the future if there is a need/desire to
+%enable RBT of a system contract and its subcontracts.
+%Requirements-based test gen
+% function schema = RBT(varargin)
+%     schema = sl_action_schema;
+%     schema.label = 'Requirements coverage';
+%     schema.callback = @RBTCallback;
+% end
+
+function RBTCallback(varargin)
+    try
+        model_full_path = coco_nasa_utils.MenuUtils.get_file_name(gcs);
+        [ CoCoSimPreferences ] = cocosim_menu.CoCoSimPreferences.load();
+        warning('off')
+        coco_nasa_utils.MenuUtils.add_pp_warning(model_full_path);
+        if strcmp(CoCoSimPreferences.lustreCompiler, 'NASA')
+            coco_nasa_verify.ToLustreVerify.run(model_full_path, [], CoCoSimPreferences.lustreBackend);
+            MiscellaneousMenu.replaceInportsWithSignalBuilders
+        else
+            if coco_nasa_utils.LusBackendType.isKIND2(CoCoSimPreferences.lustreBackend)
+                assignin('base', 'SOLVER', 'K');
+            elseif coco_nasa_utils.LusBackendType.isJKIND(CoCoSimPreferences.lustreBackend)
+                assignin('base', 'SOLVER', 'J');
+            elseif coco_nasa_utils.LusBackendType.isZUSTRE(CoCoSimPreferences.lustreBackend)
+                assignin('base', 'SOLVER', 'Z');
+            end
+            VerificationMenu.runCoCoSim;
+        end
+        warning('on')        
     catch ME
         coco_nasa_utils.MenuUtils.handleExceptionMessage(ME, 'Test-case generation');
     end

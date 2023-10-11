@@ -47,6 +47,7 @@ function [new_model_path, status] = importLustreSpec(...
         lus_json_path,...
         fret_trace_file, ...
         createNewFile, ...
+        createSeparateFiles, ...
         organize_blocks)
     %new_model_path = importLustreSpec(model_path, contract_path)
     % Inputs:
@@ -57,20 +58,26 @@ function [new_model_path, status] = importLustreSpec(...
     % new_model_path: the path of the new Simulink model that has the
     % Spec of the associated model.
     
-    narginchk(3,4);
+    narginchk(4,5);
     status = 0;
-    [coco_dir, ~, ~] = fileparts(lus_json_path);
+    [coco_dir, ~, ~] = fileparts(lus_json_path);    
     model_path = get_param(bdroot(current_openedSS), 'FileName');
     [model_dir, base_name, ~] = fileparts(model_path);
-    
+
     use_traceability = true;
     if nargin < 3 || isempty(fret_trace_file)
         fret_trace_file = '';
         use_traceability = false;
     end
+    
     if nargin < 4
-        createNewFile = 0;
+        createNewFile = 0;        
     end
+
+    if (nargin < 5 || ~exist('createSeparateFiles','var') || isempty(createSeparateFiles))
+        createSeparateFiles = 0;
+    end
+    
     if ~exist('organize_blocks', 'var') || isempty(organize_blocks)
         organize_blocks = true;
     end
@@ -78,13 +85,15 @@ function [new_model_path, status] = importLustreSpec(...
         if bdIsLoaded(base_name)
             save_system(model_path)
         end
-        bdclose('all')
+        if ~createSeparateFiles
+            bdclose('all');
+        end
         new_model_path = '';
         data = coco_nasa_utils.MatlabUtils.read_json(lus_json_path);
         
         
         
-        if createNewFile
+        if createNewFile || createSeparateFiles
             % we add a Postfix to differentiate it with the original Simulink model
             new_model_name = strcat(base_name,'_with_contracts');
             new_name = fullfile(model_dir,strcat(new_model_name,'.slx'));
@@ -112,8 +121,7 @@ function [new_model_path, status] = importLustreSpec(...
         if use_traceability
             mapping_json = coco_nasa_utils.MatlabUtils.read_json(fret_trace_file);
         end
-        nb_coco = 0;
-        
+        nb_coco = 0;       
         
         [status, translated_nodes_path, ~]  = lus2slx(lus_json_path, coco_dir, [], [], organize_blocks);
         if status
@@ -206,51 +214,82 @@ function [new_model_path, status] = importLustreSpec(...
             add_line(parent_block_name, SrcBlkH.Outport(1), DstBlkH.Inport(1), 'autorouting', 'on');
 
             if use_traceability && ~skip_linking
-                try                    
-                    node_inputs = node_struct.inputs;
-                    mapping_inputs = mapping_json.(original_name).Inputs;
+                try               
+                    %Gather the inputs and outputs, in the order they
+                    %appear in the traceability file
+                    mappingInputs = mapping_json.(original_name).Inputs;                 
+                    mappingOutputs = mapping_json.(original_name).Outputs;
 
-                    bundleContractPortsToVector(cocospec_block_path, node_inputs, mapping_inputs);
-
-                    mapping_inputs_names = arrayfun(@(x) x.variable_name, mapping_inputs, 'UniformOutput', 0);      
-
-                    %link inputs to the subsystem.
-                    for node_idx=1:numel(node_inputs)
-                        json_index = find(strcmp(node_inputs(node_idx).original_name, mapping_inputs_names), 1);
-                        if isempty(json_index)
-                            continue;
-                        end
-                        input_block_name = mapping_inputs(json_index).variable_path;
-                        input_block_name = renamePath(input_block_name, base_name, new_model_name);
-                        coco_nasa_utils.ImportLusUtils.link_block_with_its_cocospec(cocospec_block_path, ...
-                            input_block_name, simulink_block_name, ...
-                            parent_block_name, node_idx, isBdRoot);
-                    end
-
-                    node_outputs = node_struct.outputs;
-                    mapping_outputs = mapping_json.(original_name).Outputs;
-
-                    bundleContractPortsToVector(cocospec_block_path, node_outputs, mapping_outputs);
-
-                    mapping_outputs_names = arrayfun(@(x) x.variable_name, mapping_outputs, 'UniformOutput', 0);
+                    %assignin('base','mapInOrig',mappingInputs)
+                    %assignin('base','mapOutOrig',mappingOutputs)
+                    %mappingInputs and mappingOutputs contain structs,
+                    %each struct being different in what fields it may
+                    %have.
+                    %The line below collects all these structs into a
+                    %single cell array.
                     
-                    %link outputs to the subsystem.
-                    for node_idx=1:numel(mapping_outputs)
-                        try
-                            json_index = find(strcmp(node_outputs(node_idx).original_name, mapping_outputs_names), 1);
-                            if isempty(json_index)
-                                continue;
+                    node_inputs = node_struct.inputs;
+                    node_outputs = node_struct.outputs;
+
+                    filteredInputs = {};
+                    for i=1:numel(node_inputs)
+                        for j=1:numel(mappingInputs)
+                            if (strcmp(node_inputs(i).original_name,mappingInputs(j).variable_name))
+                                filteredInputs(end+1,:) = {mappingInputs(j)};
                             end
-                            output_block_name = renamePath(...
-                                mapping_outputs(json_index).variable_path,...
-                                base_name, new_model_name);
-                            coco_nasa_utils.ImportLusUtils.link_block_with_its_cocospec(cocospec_block_path, ...
-                                output_block_name, simulink_block_name, ...
-                                parent_block_name, node_idx + length(node_inputs), isBdRoot);
-                        catch
-                            % ignore linking if something wrong happened.
                         end
                     end
+
+                    %assignin('base','mapIn',filteredInputs)
+                    filteredOutputs = {};
+                    for i=1:numel(node_outputs)
+                        for j=1:numel(mappingOutputs)
+                            if (strcmp(node_outputs(i).original_name,mappingOutputs(j).variable_name))
+                                filteredOutputs(end+1,:) = {mappingOutputs(j)};
+                            end
+                        end
+                    end
+                    %assignin('base','mapOut',filteredOutputs)                    
+%                     mappingInputsAndOutputs = [arrayfun(@(x) x,mappingInputs,'UniformOutput',false); arrayfun(@(x) x,mappingOutputs,'UniformOutput',false)]
+                    mappingInputsAndOutputs = [filteredInputs; filteredOutputs];
+                    contractMapping = getContractMapping(cocospec_block_path, mappingInputsAndOutputs)
+                    createNewContractInports(contractMapping)
+                    contractMappingKeys = keys(contractMapping);
+
+                    for i=1:length(contractMappingKeys)
+                        %rename signal paths to account for the case where
+                        %a new Simulink file is created during the import
+                        contractMapping(contractMappingKeys{i}) = renamePath(contractMapping(contractMappingKeys{i}), base_name, new_model_name);
+                        contractMapping(contractMappingKeys{i})
+                    end
+                    %assignin('base','conMap',values(contractMapping));
+
+                    %Link updated contract to Simulink model.
+                    updatedContractInports = find_system(cocospec_block_path,'LookUnderMasks','on','SearchDepth',1,'BlockType','Inport')
+%                     try
+%                         for inportIndex=1:numel(updatedContractInports)
+%                             [~, updatedInportName, ~] = fileparts(updatedContractInports{inportIndex});  
+%                             coco_nasa_utils.ImportLusUtils.link_block_with_its_cocospec(cocospec_block_path, contractMapping(updatedInportName), simulink_block_name, parent_block_name, inportIndex, isBdRoot);
+%                         end
+%                     catch
+%                         % ignore linking if something wrong happened.
+%                     end
+                    try
+                        for inportIndex=1:numel(updatedContractInports)
+                            updatedContractInports{inportIndex}
+                            isKey(contractMapping, updatedContractInports{inportIndex})
+                            if isKey(contractMapping, updatedContractInports{inportIndex})                                
+                                coco_nasa_utils.ImportLusUtils.link_block_with_its_cocospec(cocospec_block_path, contractMapping(updatedContractInports{inportIndex}), simulink_block_name, parent_block_name, inportIndex, isBdRoot)
+%                                 newPortHandles = get_param(updatedContractInports{inportIndex}, 'PortHandles')
+%                                 newOutportHierarchy = get_param(newPortHandles.Outport,'SignalHierarchy')
+%                                 newOutportHierarchy.Children
+%                                 newOutportHierarchy.Children(1).SignalName
+                            end
+                        end                        
+                    catch
+                        % ignore linking if something wrong happened.
+                    end
+                    bundleContractPortsToVectorsAndBusSelectors(cocospec_block_path, mappingInputsAndOutputs);
                 catch me
                     % linking failed.
                     display_msg(me.getReport(), MsgType.DEBUG, 'importLustreSpec', '');
@@ -259,16 +298,19 @@ function [new_model_path, status] = importLustreSpec(...
                         original_name, cocospec_block_path), MsgType.WARNING, 'importLustreSpec', '');
                 end
             end
-        end
-        
+        end       
+
         if nb_coco == 0
             warndlg('No cocospec contracts were generated','CoCoSim: Warning');
             return;
         end
+
         save_system(new_name);
         new_model_path = new_name;
+
         open(new_name);
         save_system(new_name,[],'OverwriteIfChangedOnDisk',true);
+
         close_system(translated_nodes,0)
     catch ME
         display_msg(ME.message, MsgType.ERROR, 'importLustreSpec', '');
@@ -285,52 +327,208 @@ function new_blockPath = renamePath(blkPath, oldModelName, NewModelName)
     end
 end
 
-function [] = bundleContractPortsToVector(contractBlockPath, nodeSignals, mappingSignals)
-
-    contractInports = find_system(contractBlockPath,'LookUnderMasks','on','SearchDepth',1,'BlockType','Inport');    
-
-    for j = 1:numel(mappingSignals)
-        [~, mappingSignalName, ~] = fileparts(mappingSignals(j).variable_path);
-        if isfield(mappingSignals(j),'dimensions')                    
-            newDemux = strcat(char(contractBlockPath),'/',mappingSignalName,'_Demux');
-            if getSimulinkBlockHandle(newDemux) == -1
-                add_block('simulink/Commonly Used Blocks/Demux',newDemux,'Outputs',string(prod(mappingSignals(j).dimensions, "all")));
-            end
-            
-            for k = 1:numel(nodeSignals)
-                if strcmp(nodeSignals(k).original_name,mappingSignals(j).variable_name)
-                    contractInport = contractInports{k};
-                    inportHandle = get_param(contractInport,'PortHandles');
-                    inportLineHandle = get_param(contractInport,'LineHandles');
-                    inportLine = get_param(inportHandle.Outport,'Line');
-                    inportLineDstHandles = get_param(inportLine,'DstportHandle');
-                    delete_line(inportLineHandle.Outport);
-
-                    demuxHandles = get_param(newDemux,'PortHandles');                    
-                    
-                    %If this is the first signal processed from this vector, replace
-                    % its inport name with the appropriate inport name,
-                    % position demux close to it, and connect to demux's inport.
-                    if getSimulinkBlockHandle(strcat(char(contractBlockPath),'/',mappingSignalName)) == -1                        
-                        inportPos = get_param(contractInport,'Position');
-                        set_param(newDemux,'Position', inportPos + [100 0 60 -5]);                        
-                        add_line(contractBlockPath, inportHandle.Outport,demuxHandles.Inport,'autorouting','on');
-                        set_param(contractInport, 'Name', mappingSignalName);
-                    else
-                        delete_block(contractInport);
-                    end
-
-                    demuxOutputPort=mappingSignals(j).index;
-                    for handle=1:numel(inportLineDstHandles)
-                        %The if-then below addresses a bug during requirments importing, regarding ghost lines
-                        %that are not linked to a destination block.
-                        if (inportLineDstHandles(handle) ~= -1)
-                            add_line(contractBlockPath,demuxHandles.Outport(demuxOutputPort),inportLineDstHandles(handle),'autorouting','on');
-                        end
-                    end
-                end
-            end                    
+function [M] = getContractMapping(contractBlockPath, mappingSignals)
+    M = containers.Map('KeyType','char','ValueType','char');
+    
+    for j=1:numel(mappingSignals)
+        [~, mappingSignalName, ~] = fileparts(mappingSignals{j}.variable_path)
+        contractSignalName = strcat(char(contractBlockPath),'/',mappingSignalName)
+        if ~isKey(M, contractSignalName)
+            M(contractSignalName) = mappingSignals{j}.variable_path;
         end
     end
 end
+
+function [] = createNewContractInports(contractMapping)
+    contractMappingKeys = keys(contractMapping)
+    for i=1:length(contractMappingKeys)
+        if getSimulinkBlockHandle(contractMapping(contractMappingKeys{i})) == -1
+            add_block('simulink/Commonly Used Blocks/In1', contractMappingKeys{i})
+        end
+    end
+end
+
+%This function bundles together contract inputs that correspond to elements of the
+%same vector/bus signal in the Simulink model. It returns an updated mapping
+%from the updated contract inputs (bundled + non-bundled), to the Simulink
+%model signals that they are supposed to be linked to.
+%If an input is not a vector or bus element, it
+%contractBlockPath = full path of contract block
+%mappingSignals = the imported input (output) signals
+function [M] = bundleContractPortsToVectorsAndBusSelectors(contractBlockPath, mappingSignals)
+
+    contractInports = find_system(contractBlockPath,'LookUnderMasks','on','SearchDepth',1,'BlockType','Inport')    
+    M = containers.Map('KeyType','char','ValueType','char');
+    
+    for j = 1:numel(mappingSignals)        
+        [~, mappingSignalName, ~] = fileparts(mappingSignals{j}.variable_path)
+
+        %Create full name of current signal related to the introduced contract.
+        contractSignalName = strcat(char(contractBlockPath),'/',mappingSignalName)
+
+        isBusElement = isfield(mappingSignals{j}, 'busDimensions')
+        isVectorElement = isfield(mappingSignals{j},'dimensions')
+
+        %We can use j here because the order of signals in
+        %mappingSignals is the same as in contractInports
+        contractInport = contractInports{j};
+
+        %The current contract inport will be replaced with a new one.
+        %Store line handle attached to current contract inport, as it
+        %will be linked to the new inport. Finally, delete link between old
+        %inport and line.
+        inportHandle = get_param(contractInport,'PortHandles');
+        inportLineHandle = get_param(contractInport,'LineHandles');
+        inportLine = get_param(inportHandle.Outport,'Line');
+        inportLineDstHandles = get_param(inportLine,'DstportHandle');
+        delete_line(inportLineHandle.Outport);
+
+        if isBusElement
+            %The current FRET signal is an element of a Bus signal
+
+            %Since this is a bus element, we need to create a Bus Selector
+            %block.
+            newBusSelector = strcat(contractSignalName,'_BusSelector')
+            if getSimulinkBlockHandle(newBusSelector) == -1
+%                 add_block('simulink/Commonly Used Blocks/Bus Selector', newBusSelector, 'OutputSignals', busOutputSignalsArg)
+                add_block('simulink/Commonly Used Blocks/Bus Selector', newBusSelector)
+                busSelectorHandles = get_param(newBusSelector,'PortHandles')
+                %contractInport contains as many inports as the number of input and output variables in the traceability file,
+                %plus the newly introduced inports that are meant to bundle the former signals together.
+                %If this is the first contract inport processed from the original Bus signal, delete it, position Bus Selector
+                %close to its replacement inport, and connect the Bus Selector with the new inport.
+                
+                %before deleting, use the same position for the new inport
+                inportPos = get_param(contractInport,'Position')
+                set_param(contractSignalName,'Position',inportPos);
+                delete_block(contractInport)
+                
+
+                set_param(newBusSelector,'Position', inportPos + [100 0 60 -5]);
+                newInportHandles = get_param(contractSignalName,'PortHandles');
+                add_line(contractBlockPath, newInportHandles.Outport,busSelectorHandles.Inport,'autorouting','on');
+
+                %Create OutputSignals input for the new Bus Selector
+                %block.
+                busSignalHierarchy = get_param(newInportHandles.Outport,'SignalHierarchy')                
+                busDimensions = numel(busSignalHierarchy.Children)
+                busOutputSignalsArg = '';
+                for i=1:busDimensions
+                    if i < busDimensions
+                        busOutputSignalsArg = strcat(busOutputSignalsArg, busSignalHierarchy.Children(i).SignalName,',');
+                    else
+                        busOutputSignalsArg = strcat(busOutputSignalsArg, busSignalHierarchy.Children(i).SignalName)
+                    end
+                end
+                set_param(newBusSelector,'OutputSignals',busOutputSignalsArg)
+            else
+                delete_block(contractInport)
+            end
+            
+            busSelectorOutputPortIndex=mappingSignals{j}.busElementIndex
+
+            busSelectorHandles = get_param(newBusSelector,'PortHandles')
+            busSelectorOutputSignalHierarchy = get_param(busSelectorHandles.Outport,'SignalHierarchy')
+            busSelectorOutputSignalNames = cellfun(@(x) x.SignalName, busSelectorOutputSignalHierarchy, 'UniformOutput', false)
+            
+            if isVectorElement
+                %The current FRET signal is an element of a vector
+                %signal, with the vector signal being an element of a
+                %Bus signal.                    
+                
+                %Adjust name of newly created demux block
+                newDemux = strcat(newBusSelector, '_', busSelectorOutputSignalNames{busSelectorOutputPortIndex}, '_Demux')
+                    
+                if getSimulinkBlockHandle(newDemux) == -1
+                    add_block('simulink/Commonly Used Blocks/Demux',newDemux,'Outputs',string(prod(mappingSignals{j}.dimensions,'all')));
+                    busSelectorPos = get_param(newBusSelector,'Position')
+                    set_param(newDemux,'Position', busSelectorPos + [50 0 60 -5])
+
+                    %Link Bus Selector outport to demux
+                    demuxHandles = get_param(newDemux,'PortHandles')
+                    add_line(contractBlockPath, busSelectorHandles.Outport(busSelectorOutputPortIndex), demuxHandles.Inport, 'autorouting', 'on')
+                end
+
+                demuxHandles = get_param(newDemux,'PortHandles')                
+
+                %Link Demux outport to destination
+                demuxOutputPort = mappingSignals{j}.index
+                for handle=1:numel(inportLineDstHandles)
+                    %The if below addresses a bug during requirments importing, regarding ghost lines
+                    %that are not linked to a destination block.
+                    if (inportLineDstHandles(handle) ~= -1)
+                        add_line(contractBlockPath,demuxHandles.Outport(demuxOutputPort),inportLineDstHandles(handle),'autorouting','on')
+                    end
+                end
+            else
+                %Link Bus Selector outport to destination
+                for handle=1:numel(inportLineDstHandles)
+                    %The if below addresses a bug during requirments importing, regarding ghost lines
+                    %that are not linked to a destination block.
+                    if (inportLineDstHandles(handle) ~= -1)
+                        add_line(contractBlockPath,busSelectorHandles.Outport(busSelectorOutputPortIndex),inportLineDstHandles(handle),'autorouting','on')
+                    end
+                end
+            end
+
+            M(mappingSignalName) = mappingSignals{j}.variable_path               
+        elseif (isVectorElement && prod(mappingSignals{j}.dimensions, "all") > 1)
+            %second conjunct in condition above might not be necessary anymore,
+            %after addressing how mappingSignals is created
+            newDemux = strcat(contractSignalName,'_Demux')
+            if getSimulinkBlockHandle(newDemux) == -1
+                add_block('simulink/Commonly Used Blocks/Demux',newDemux,'Outputs',string(prod(mappingSignals{j}.dimensions, "all")))
+                                        
+                %contractInport contains as many inports as the number of input
+                %and output variables in the FRET mapping file.
+                %If this is the first signal processed from the original vector signal, replace
+                % its inport name with the appropriate inport name (variable_path from FRET mapping file),
+                % position demux close to it, and connect to demux's inport.
+                inportPos = get_param(contractInport,'Position')
+                set_param(contractSignalName,'Position',inportPos)
+
+                newInportHandles = get_param(contractSignalName, 'PortHandles')                
+                set_param(newDemux,'Position', inportPos + [100 0 60 -5])
+                demuxHandles = get_param(newDemux,'PortHandles')
+                add_line(contractBlockPath, newInportHandles.Outport,demuxHandles.Inport,'autorouting','on')
+                delete_block(contractInport)
+            else
+                delete_block(contractInport)
+            end
+
+            demuxHandles = get_param(newDemux,'PortHandles')
+            demuxOutputPort=mappingSignals{j}.index
+            
+            for handle=1:numel(inportLineDstHandles)
+                %The if below addresses a bug during requirments importing, regarding ghost lines
+                %that are not linked to a destination block.
+                if (inportLineDstHandles(handle) ~= -1)
+                    add_line(contractBlockPath,demuxHandles.Outport(demuxOutputPort),inportLineDstHandles(handle),'autorouting','on')
+                end
+            end
+            M(mappingSignalName) = mappingSignals{j}.variable_path
+        else
+            %probably not necessary anymore.
+            %before deleting, use the same position for the new inport
+            inportPos = get_param(contractInport,'Position')
+            set_param(contractSignalName,'Position',inportPos)
+            delete_block(contractInport)
+
+            %Link new inport to destination of old inport (i.e. the line to
+            %which it was attached).
+            newInportHandles = get_param(contractSignalName,'PortHandles')
+            for handle=1:numel(inportLineDstHandles)
+                %The if below addresses a bug during requirments importing, regarding ghost lines
+                %that are not linked to a destination block.
+                if (inportLineDstHandles(handle) ~= -1)
+                    add_line(contractBlockPath,newInportHandles.Outport,inportLineDstHandles(handle),'autorouting','on')
+                end
+            end
+            M(mappingSignalName) = mappingSignals{j}.variable_path
+        end        
+    end
+    
+end
+
+
 

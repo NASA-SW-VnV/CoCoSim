@@ -44,13 +44,12 @@
 % the inputs given to CoCoSim.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [lus_dt] = SignalHierarchyLusDT(blk, SignalHierarchy)
-    %isBus = false;
     lus_dt = {};
+
     try
         if ~isfield(SignalHierarchy, 'SignalName')
             display_msg(sprintf('Block %s has an auto dataType and is not supported',...
             blk.Origin_path), MsgType.ERROR, '', '');
-            lus_dt = 'real';
             return;
         end
         SignalName = SignalHierarchy.SignalName;
@@ -61,19 +60,15 @@ function [lus_dt] = SignalHierarchyLusDT(blk, SignalHierarchy)
         if isempty(SignalName)
             if  ~isfield(SignalHierarchy, 'Children') ...
                     || isempty(SignalHierarchy.Children)
-                lus_dt = 'real';
                 display_msg(sprintf('Block %s has an auto dataType and is not supported',...
                     blk.Origin_path), MsgType.ERROR, '', '');
                 return;
-            else
-                for i=1:numel(SignalHierarchy.Children)
-                    [lus_dt_i] = ...
-                        nasa_toLustre.utils.SLX2LusUtils.SignalHierarchyLusDT(blk, SignalHierarchy.Children(i));
-                    if iscell(lus_dt_i)
-                        lus_dt = [lus_dt, lus_dt_i];
-                    else
-                        lus_dt{end+1} = lus_dt_i;
-                    end
+            else                
+                [lus_dt_i] = nasa_toLustre.utils.SLX2LusUtils.ResolveSignalHierarchyChildrenDataTypes(blk);
+                if iscell(lus_dt_i)
+                    lus_dt = [lus_dt, lus_dt_i];
+                else
+                    lus_dt{end+1} = lus_dt_i;
                 end
                 return;
             end
@@ -108,10 +103,17 @@ function [lus_dt] = SignalHierarchyLusDT(blk, SignalHierarchy)
                     parent, ...
                     srcBk, ...
                     get_param(p(i), 'PortNumber'));
-            elseif numel(p) >= 1
+            else
+                %Andreas Katis: There is a wrong assumption here, that the
+                %first element of p is the correct type.
+                %For example, take signal 'x' of type double through a data type
+                %conversion block to uint8. The call below will return
+                %double as the type of the signal, where uint8 might
+                %actually be what is needed.
                 compiledDT = coco_nasa_utils.SLXUtils.getCompiledParam(p(1), 'CompiledPortDataType');
                 [lus_dt, ~, ~, ~] = ...
                     nasa_toLustre.utils.SLX2LusUtils.get_lustre_dt(compiledDT);
+
                 CompiledPortWidth = coco_nasa_utils.SLXUtils.getCompiledParam(p(1), 'CompiledPortWidth');
                 if iscell(lus_dt) && numel(lus_dt) < CompiledPortWidth
                     lus_dt = arrayfun(@(x) lus_dt{1}, (1:CompiledPortWidth), ...
@@ -120,12 +122,10 @@ function [lus_dt] = SignalHierarchyLusDT(blk, SignalHierarchy)
                     lus_dt = arrayfun(@(x) lus_dt, (1:CompiledPortWidth), ...
                         'UniformOutput', 0);
                 end
-            else
-                lus_dt = 'real';
             end
         end
     catch me
-        display_msg(me.getReport(), MsgType.DEBUG, 'getBlockOutputsNames', '');
-        lus_dt = 'real';
+        display_msg(me.getReport(), MsgType.DEBUG, 'getBlockOutputsNames', '');        
+        display_msg(me.message, MsgType.ERROR, 'getBlockOutputsNames', '');        
     end
 end

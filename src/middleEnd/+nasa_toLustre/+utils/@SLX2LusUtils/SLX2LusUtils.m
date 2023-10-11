@@ -92,6 +92,7 @@ classdef SLX2LusUtils
                 %
 
         [lus_dt] = SignalHierarchyLusDT(blk, SignalHierarchy)
+        [lus_dt] = ResolveSignalHierarchyChildrenDataTypes(blk)
 
         %% get block inputs names. E.g subsystem taking input signals from differents blocks.
         % We need to go over all linked blocks and get their output names
