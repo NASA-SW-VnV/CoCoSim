@@ -303,7 +303,7 @@ function [] = bundleContractPortsToVector(contractBlockPath, nodeSignals, mappin
                     inportHandle = get_param(contractInport,'PortHandles');
                     inportLineHandle = get_param(contractInport,'LineHandles');
                     inportLine = get_param(inportHandle.Outport,'Line');
-                    inportLineDstHandles = get_param(inportLine,'Dstporthandle');
+                    inportLineDstHandles = get_param(inportLine,'DstportHandle');
                     delete_line(inportLineHandle.Outport);
 
                     demuxHandles = get_param(newDemux,'PortHandles');                    
@@ -322,7 +322,11 @@ function [] = bundleContractPortsToVector(contractBlockPath, nodeSignals, mappin
 
                     demuxOutputPort=mappingSignals(j).index;
                     for handle=1:numel(inportLineDstHandles)
-                        add_line(contractBlockPath,demuxHandles.Outport(demuxOutputPort),inportLineDstHandles(handle),'autorouting','on');
+                        %The if-then below addresses a bug during requirments importing, regarding ghost lines
+                        %that are not linked to a destination block.
+                        if (inportLineDstHandles(handle) ~= -1)
+                            add_line(contractBlockPath,demuxHandles.Outport(demuxOutputPort),inportLineDstHandles(handle),'autorouting','on');
+                        end
                     end
                 end
             end                    
