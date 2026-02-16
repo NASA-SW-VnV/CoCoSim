@@ -66,8 +66,8 @@ esac
 cmake_required_version="2.8.11"
 cmake_install_version="3.7.2"
 m4_install_version="1.4.18"
-python_required_version="2.7"
-python_install_version="2.7.13"
+python_required_version="3.8.10"
+python_install_version="3.8.10"
 ocaml_required_version="4.10.0"
 # ocaml_install_version="4.03.0"
 autoconf_install_version="2.69"
@@ -350,6 +350,7 @@ export MAKEFLAGS="-j$njobs $MAKEFLAGS"
 # if command_exists cmake; then
 #     version=$(cmake_parse_version cmake) || error_parse_version cmake
 
+        #version_ge deprecated: Check python_satisfies_requirements in bash_utils to see a way to do version checking if it is needed for cmake.
 #     if version_ge "$version" "$cmake_required_version"; then
 #         found_cmake=1
 #         success "Found CMake $version"
